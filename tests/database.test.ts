@@ -1,26 +1,51 @@
+/*******************************************************************************
+
+    Test for sqlite3 module.
+    The following functions are tested.
+    Create database, Add Records, Read All Records, Read Some Records, Close
+
+    Copyright:
+        Copyright (c) 2020 BOS Platform Foundation Korea
+        All rights reserved.
+
+    License:
+        MIT License. See LICENSE for details.
+
+*******************************************************************************/
+
 import * as sqlite from 'sqlite3';
 const sqlite3 = sqlite.verbose();
+import * as assert from 'assert';
 
+/**
+ * Database object of sqlite
+ */
 let db: sqlite.Database;
 
-// TODO Using assert function
-
+/**
+ * Create memory database for test
+ */
 function createDb ()
 {
-    console.log("createDb");
-    db = new sqlite3.Database(':memory:', sqlite3. OPEN_CREATE | sqlite3.OPEN_READWRITE | sqlite3.OPEN_SHAREDCACHE, createTable);
+    db = new sqlite3.Database(':memory:',
+        sqlite3.OPEN_CREATE | sqlite3.OPEN_READWRITE |
+        sqlite3.OPEN_SHAREDCACHE, createTable);
     db.configure("busyTimeout", 1000);
 }
 
+/**
+ * Create table for test
+ */
 function createTable ()
 {
-    console.log("createTable transaction");
     db.run("CREATE TABLE IF NOT EXISTS transactions (info TEXT)", insertRows);
 }
 
+/**
+ * Insert sample data for test
+ */
 function insertRows ()
 {
-    console.log("insert rows hash i");
     const stmt = db.prepare("INSERT INTO transactions VALUES (?)");
 
     for (let i = 0; i < 10; i++)
@@ -31,41 +56,55 @@ function insertRows ()
     stmt.finalize(readAllRows);
 }
 
+/**
+ * Read all data for test
+ */
 function readAllRows ()
 {
-    console.log("readAllRows transaction");
     db.all("SELECT rowid AS id, info FROM transactions", (err, rows) =>
     {
-        rows.forEach(row =>
+        assert.equal(rows.length, 10);
+        rows.forEach((row : any, idx : number) =>
         {
-            console.log(`${row.id}: ${row.info}`);
+            assert.equal(row.id, idx + 1);
+            assert.equal(row.info, 'hash ' + idx);
         });
         readSomeRows();
     });
 }
 
+/**
+ * Read some data for test
+ */
 function readSomeRows ()
 {
-    console.log("readAllRows transaction");
+    let idx = 0;
     db.each("SELECT rowid AS id, info FROM transactions WHERE rowid < ? ", 5, (err, row) =>
     {
-        console.log(`${row.id}: ${row.info}`);
+        assert.equal(row.id, idx + 1);
+        assert.equal(row.info, 'hash ' + idx);
+        idx++;
     }, closeDb);
 }
 
+/**
+ * Close database
+ */
 function closeDb ()
 {
-    console.log("closeDb");
     db.close();
 }
 
-function runChainExample ()
+/**
+ *  Start test
+ */
+function runDatabaseSampleTest ()
 {
     createDb();
 }
 
 describe('Database', () => {
     it('Ensures that basic functionalities work', () => {
-        runChainExample();
+        runDatabaseSampleTest();
     });
   });
