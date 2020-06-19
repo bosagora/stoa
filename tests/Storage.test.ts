@@ -296,15 +296,15 @@ var block_storage : BlockStorage.default;
 /**
  * Creates BlockStorage
  */
-function create ()
+function createBlockStorage ()
 {
-    block_storage = new BlockStorage.default(':memory:', putAllData);
+    block_storage = new BlockStorage.default(':memory:', putAllBlockData);
 }
 
 /**
  * Puts all data
  */
-function putAllData ()
+function putAllBlockData ()
 {
     var idx = 0;
     var doPut = () =>
@@ -318,7 +318,7 @@ function putAllData ()
             }
             else
             {
-                getData(1);
+              getBlockData(1);
                 return;
             }
         });
@@ -327,9 +327,9 @@ function putAllData ()
 }
 
 /**
- * Gets one data
+ * Gets one block data
  */
-function getData (height : number)
+function getBlockData (height : number)
 {
     var res = block_storage.get(height, (err:any, rows:any) =>
     {
@@ -346,7 +346,7 @@ function getData (height : number)
  */
 function runBlockStorageTest ()
 {
-    create();
+  createBlockStorage();
 }
 
 describe('BlockStorage', () =>
