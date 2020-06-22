@@ -149,7 +149,7 @@ CREATE TABLE "tx_outputs" (
 
 | Column            | Data Type | PK | Not NULL | Default  |Description|
 |:----------------- |:--------- |:--:|:--------:| -------- | --------- |
-|  enrolled_at      | INTEGER   |    | Y        |          | The height this validator enrolled at |
+|  enrolled_at      | INTEGER   | Y  | Y        |          | The height this validator enrolled at |
 |  utxo_key         | TEXT      | Y  | Y        |          | The hash of the UTXO|
 |  address          | TEXT(56)  |    | Y        |          | The public key that can redeem this UTXO|
 |  stake            | NUMERIC   |    | Y        |          | The amount of the UTXO|
@@ -160,13 +160,12 @@ CREATE TABLE "tx_outputs" (
 
 ```sql
 CREATE TABLE "validators" (
-	"block_height"	INTEGER NOT NULL,
-	"utxo_key"	TEXT NOT NULL,
 	"enrolled_at"	INTEGER NOT NULL,
+	"utxo_key"	TEXT NOT NULL,
 	"address"	TEXT(56) NOT NULL,
 	"stake"	NUMERIC NOT NULL,
 	"preimage_distance"	INTEGER NOT NULL,
 	"preimage_hash"	TEXT NOT NULL,
-	PRIMARY KEY("block_height","utxo_key")
+	PRIMARY KEY("enrolled_at","utxo_key")
 )
 ```
