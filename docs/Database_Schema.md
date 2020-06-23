@@ -38,7 +38,7 @@ CREATE TABLE "blocks" (
 | Column            | Data Type | PK | Not NULL | Default  |Description|
 |:----------------- |:--------- |:--:|:--------:| -------- | --------- |
 | block_height      | INTEGER   | Y  | Y        |          | The height of the block|
-| enrollment_index  | INTEGER   | Y  | Y        |          | The sequence of enrollment in the block.|
+| enrollment_index  | INTEGER   | Y  | Y        |          | The index of enrollment in the block.|
 | utxo_key          | TEXT      |    | Y        |          | K: UTXO hash, A hash of a frozen UTXO|
 | random_seed       | TEXT      |    | Y        |          | X: Random seed, The nth image of random value|
 | cycle_length      | INTEGER   |    | Y        |          | n: the number of rounds a validator will participate in |
@@ -66,9 +66,9 @@ CREATE TABLE "enrollments" (
 | Column            | Data Type | PK | Not NULL | Default  |Description|
 |:----------------- |:--------- |:--:|:--------:| -------- | --------- |
 | block_height      | INTEGER   | Y  | Y        |          | The height of the block|
-| tx_index          | INTEGER   | Y  | Y        |          | The sequence of transaction in the block |
-| tx_hash           | TEXT      |    | Y        |          | The hash of transation |
-| type              | INTEGER   |    | Y        |          | The type of transation |
+| tx_index          | INTEGER   | Y  | Y        |          | The index of transaction in the block |
+| tx_hash           | TEXT      |    | Y        |          | The hash of transaction |
+| type              | INTEGER   |    | Y        |          | The type of transaction |
 | inputs_count      | INTEGER   |    | Y        |          | The number of inputs in the transaction |
 | outputs_count     | INTEGER   |    | Y        |          | The number of outputs in the transaction |
 
@@ -120,9 +120,9 @@ CREATE TABLE "tx_inputs" (
 | Column            | Data Type | PK | Not NULL | Default  |Description|
 |:----------------- |:--------- |:--:|:--------:| -------- | --------- |
 |  block_height     | INTEGER   | Y  | Y        |          | The height of the block|
-|  tx_index         | INTEGER   | Y  | Y        |          | The sequence of transaction in the block.|
-|  output_index     | INTEGER   | Y  | Y        |          | The sequence of output in the outputs.|
-|  tx_hash          | TEXT      |    | Y        |          | The hash of transation |
+|  tx_index         | INTEGER   | Y  | Y        |          | The index of transaction in the block.|
+|  output_index     | INTEGER   | Y  | Y        |          | The index of output in the outputs.|
+|  tx_hash          | TEXT      |    | Y        |          | The hash of transaction |
 |  utxo_key         | TEXT      |    | Y        |          | The hash of the UTXO|
 |  amount           | NUMERIC   |    | Y        |          | The monetary value of this output, in 1/10^7|
 |  address          | TEXT(56)  |    | Y        |          | The public key that can redeem this output|
@@ -135,9 +135,11 @@ CREATE TABLE "tx_outputs" (
     "block_height"    INTEGER NOT NULL,
     "tx_index"    INTEGER NOT NULL,
     "output_index"    INTEGER NOT NULL,
+    "tx_hash"    TEXT NOT NULL,
     "utxo_key"    TEXT NOT NULL,
     "amount"    NUMERIC NOT NULL,
     "address"    TEXT(56) NOT NULL,
+    "used"    TEXT(1) NOT NULL,
     PRIMARY KEY("block_height","tx_index","output_index")
 )
 ```
