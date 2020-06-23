@@ -18,7 +18,7 @@ import * as sqlite from 'sqlite3';
 export class Storages
 {
     /**
-     *  The instance of sqlite3
+     *  The instance of sqlite
      */
     protected db: sqlite.Database;
 
@@ -27,21 +27,35 @@ export class Storages
      * @param filename Valid values are filenames,
      * ":memory:" for an anonymous in-memory database and
      * an empty string for an anonymous disk-based database
-     * @param callback : If provided, this function will be called when
-     * the database was opened successfully or when an error occurred.
-     * The first argument is an error object.
      */
-    constructor (callback?: any)
+    constructor (filename: string, callback?: any)
     {
-        let filename: string = ".cache";
         this.db = new sqlite.Database(filename,
             sqlite.OPEN_CREATE | sqlite.OPEN_READWRITE |
             sqlite.OPEN_SHAREDCACHE, (err: any) =>
             {
-                if (callback != undefined)
-                    console.error(err);
+                if (err != null)
+                {
+                    if (callback != undefined)
+                        callback(err);
+                }
+
+                this.db.configure("busyTimeout", 1000);
+                this.createTable((err: any) => {
+                    if (callback != undefined)
+                        callback(err);
+                });
             });
-        this.db.configure("busyTimeout", 1000);
+    }
+
+    /**
+     * Creates a table.
+     * @param callback If provided, this function will be called when
+     * the database was finished successfully or when an error occurred.
+     * The first argument is an error object.
+     */
+    public createTable (callback?: any)
+    {
     }
 
     /**

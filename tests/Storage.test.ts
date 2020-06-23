@@ -296,7 +296,8 @@ var sample_data =
  */
 function createBlockStorage ()
 {
-    var blockStorage: BlockStorage = new BlockStorage();
+    var blockStorage: BlockStorage = new BlockStorage(":memory:");
+    blockStorage.open();
     blockStorage.createTable();
     putAllBlockData(blockStorage);
 }

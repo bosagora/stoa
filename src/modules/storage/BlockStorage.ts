@@ -22,17 +22,6 @@ import { Storages } from './Storages';
 export class BlockStorage extends Storages
 {
     /**
-     * Constructor
-     * @param callback : If provided, this function will be called when
-     * the database was opened successfully or when an error occurred.
-     * The first argument is an error object.
-     */
-    constructor (callback?: any)
-    {
-        super(callback);
-    }
-
-    /**
      * Creates a table. table name is `block`.
      * @param callback If provided, this function will be called when
      * the database was finished successfully or when an error occurred.
