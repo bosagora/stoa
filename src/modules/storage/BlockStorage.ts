@@ -32,11 +32,14 @@ export class BlockStorage extends Storages
         var sql =
         `CREATE TABLE IF NOT EXISTS blocks
         (
-            height INTEGER PRIMARY KEY,
-            prev_block TEXT,
-            validators TEXT,
-            merkle_root TEXT,
-            signature TEXT
+            "height"    INTEGER NOT NULL,
+            "prev_block"    TEXT NOT NULL,
+            "validators"    TEXT NOT NULL,
+            "merkle_root"    TEXT NOT NULL,
+            "signature"    TEXT NOT NULL,
+            "tx_count"    INTEGER NOT NULL,
+            "enrollment_count"    INTEGER NOT NULL DEFAULT 0,
+            PRIMARY KEY("height")
         )`;
         this.db.run(sql, (err: any) =>
         {
@@ -63,7 +66,9 @@ export class BlockStorage extends Storages
                 (data.header.validators == undefined) ||
                 (data.header.validators._storage == undefined) ||
                 (data.header.merkle_root == undefined) ||
-                (data.header.signature == undefined)
+                (data.header.signature == undefined) ||
+                (data.header.enrollments == undefined) ||
+                (data.txs == undefined)
         ) {
             if (callback != undefined)
                 callback("Parameter validation failed.");
@@ -71,23 +76,20 @@ export class BlockStorage extends Storages
         }
 
         var sql =
-        `INSERT INTO blocks
-            (height, prev_block, validators, merkle_root, signature)
+        `INSERT OR REPLACE INTO blocks
+            (height, prev_block, validators, merkle_root, signature, tx_count, enrollment_count)
         VALUES
-            (?, ?, ?, ?, ?)
-        ON CONFLICT(height) DO UPDATE SET
-            prev_block = prev_block,
-            validators = validators,
-            merkle_root = merkle_root,
-            signature = signature`;
+            (?, ?, ?, ?, ?, ?, ?)`;
         this.db.run(sql,
             [
                 data.header.height.value,
                 data.header.prev_block,
                 JSON.stringify(data.header.validators._storage),
                 data.header.merkle_root,
-                data.header.signature
-            ], (err: any) =>
+                data.header.signature,
+                data.txs.length,
+                data.header.enrollments.length
+            ], (err : any) =>
         {
             if (callback != undefined)
                 callback(err);
