@@ -35,7 +35,7 @@ export class BlockStorage
      * the database was opened successfully or when an error occurred.
      * The first argument is an error object.
      */
-    constructor (filename : string, callback : any = null)
+    constructor (filename: string, callback?: any)
     {
         this.db = new sqlite.Database(filename,
             sqlite.OPEN_CREATE | sqlite.OPEN_READWRITE |
@@ -50,7 +50,7 @@ export class BlockStorage
      * the database was finished successfully or when an error occurred.
      * The first argument is an error object.
      */
-    public createTable (callback : any = null)
+    public createTable (callback?: any)
     {
         var sql =
         `CREATE TABLE IF NOT EXISTS blocks
@@ -61,9 +61,9 @@ export class BlockStorage
             merkle_root TEXT,
             signature TEXT
         )`;
-        this.db.run(sql, (err : any) =>
+        this.db.run(sql, (err: any) =>
         {
-            if (callback != null)
+            if (callback != undefined)
                 callback(err);
         });
     }
@@ -75,7 +75,7 @@ export class BlockStorage
      * the database was finished successfully or when an error occurred.
      * The first argument is an error object.
      */
-    public put (data : any, callback : any = null)
+    public put (data: any, callback?: any)
     {
         if (
                 (data == null) ||
@@ -88,7 +88,7 @@ export class BlockStorage
                 (data.header.merkle_root == undefined) ||
                 (data.header.signature == undefined)
         ) {
-            if (callback != null)
+            if (callback != undefined)
                 callback("Parameter validation failed.");
             return;
         }
@@ -110,9 +110,9 @@ export class BlockStorage
                 JSON.stringify(data.header.validators._storage),
                 data.header.merkle_root,
                 data.header.signature
-            ], (err : any) =>
+            ], (err: any) =>
         {
-            if (callback != null)
+            if (callback != undefined)
                 callback(err);
         });
     }
@@ -125,7 +125,7 @@ export class BlockStorage
      * The first argument is an error object.
      * The second argument is result set.
      */
-    public get (height : number, callback : any = null)
+    public get (height: any, callback?: any)
     {
         var sql =
         `SELECT
@@ -133,10 +133,12 @@ export class BlockStorage
         FROM
             blocks
         WHERE height = ?`;
-        this.db.all(sql, [height], (err : any, rows : any) =>
+        this.db.all(sql, [height], (err: any, rows: any) =>
         {
-            if (callback != null)
+            if (callback != undefined)
                 callback(err, rows);
+            else
+                console.log(callback);
         });
     }
 

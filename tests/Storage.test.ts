@@ -329,8 +329,9 @@ function putAllBlockData ()
 /**
  * Gets one block data
  */
-function getBlockData (height : number)
+function getBlockData (height: any)
 {
+    block_storage.get(height);
     var res = block_storage.get(height, (err:any, rows:any) =>
     {
         assert.equal(rows.length, 1);
@@ -351,7 +352,7 @@ function runBlockStorageTest ()
 
 describe('BlockStorage', () =>
 {
-    it('BlockStorage', () =>
+    it('Test block storage and inquiry function.', () =>
     {
         runBlockStorageTest();
     });
