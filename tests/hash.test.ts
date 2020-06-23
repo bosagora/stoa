@@ -12,8 +12,7 @@
 *******************************************************************************/
 
 import * as assert from 'assert';
-import * as hm from '../src/modules/common/Hash'
-const hms = hm.default;
+import { Hash }  from '../src/modules/common/Hash'
 
 describe('Hash', () => {
     // Buffer has the same content. However, when printed with hex strings,
@@ -22,7 +21,7 @@ describe('Hash', () => {
     it('Test of reading and writing hex string', () => {
         // Read from hex string
         let h =
-            new hms.Hash('0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd223671' +
+            new Hash('0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd223671' +
                     '3dc369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73');
 
         // Check
@@ -33,7 +32,7 @@ describe('Hash', () => {
 
     it('Test of hash', () => {
         // Create Hash class
-        let h = new hms.Hash();
+        let h = new Hash();
 
         // Hash
         h.hash(Buffer.from("abc"));
@@ -47,15 +46,15 @@ describe('Hash', () => {
     // https://github.com/bpfkorea/agora/blob/2d758a693f9df376f9b873f7c7897c0787b582f1/source/agora/common/Hash.d#L260-L265
     it('Test of multi hash', () => {
         // Source 1 : "foo"
-        let foo = new hms.Hash();
+        let foo = new Hash();
         foo.hash(Buffer.from("foo"));
 
         // Source 2 : "bar"
-        let bar = new hms.Hash();
+        let bar = new Hash();
         bar.hash(Buffer.from("bar"));
 
         // Hash Multi
-        let h = new hms.Hash();
+        let h = new Hash();
         h.hashMulti(foo.buffer, bar.buffer);
 
         // Check
@@ -65,7 +64,7 @@ describe('Hash', () => {
     });
 
     it('Test of utxo key, using makeUTXOKey', () => {
-        let hash = new hms.Hash();
+        let hash = new Hash();
         hash.makeUTXOKey('0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd223671' +
         '3dc369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73', BigInt(1));
 
