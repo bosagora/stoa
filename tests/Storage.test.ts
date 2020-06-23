@@ -13,6 +13,7 @@
 
 import * as assert from 'assert';
 import { BlockStorage } from '../src/modules/storage/BlockStorage';
+import { EnrollmentsStorage } from '../src/modules/storage/EnrollmentsStorage';
 
 var sample_data =
 [
@@ -360,6 +361,29 @@ function getBlockData (block_storage: BlockStorage, height: any, callback?: any)
     });
 }
 
+function runEnrollmentStoragesTest ()
+{
+    var enrollmentsStorage: EnrollmentsStorage = new EnrollmentsStorage(":memory:", (err1: any) =>
+    {
+        assert.ok(!err1, err1);
+        var height: number = 0;
+        enrollmentsStorage.putAllEnrollments(sample_data[0].header, (err2: any) =>
+        {
+            assert.ok(!err2, err2);
+            enrollmentsStorage.get(height, (err3: any, rows: any) =>
+            {
+                assert.ok(!err3, err3);
+                assert.equal(rows.length, 3);
+                assert.equal(rows[0].block_height, height);
+                assert.equal(rows[0].utxo_key,
+                  '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad1cc3b' +
+                  'fc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
+                enrollmentsStorage.close();
+            });
+        });
+    });
+}
+
 /**
  *  Start test
  */
@@ -373,5 +397,10 @@ describe('BlockStorage', () =>
     it('Test block storage and inquiry function.', () =>
     {
         runBlockStorageTest();
+    });
+
+    it('Test enrollment storage and inquiry function.', () =>
+    {
+        runEnrollmentStoragesTest();
     });
 });
