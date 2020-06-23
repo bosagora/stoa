@@ -18,12 +18,12 @@
 import * as sodium from 'sodium-native'
 
 //  Byte of Hash
-const HashSize: number = 64;
+export const HashSize: number = 64;
 
 /**
  * The Class for creating hash
  */
-class Hash
+export class Hash
 {
     /**
      * Buffer containing calculated hash values
@@ -100,7 +100,7 @@ class Hash
  * @param hex Hex string
  * @param target Buffer to output
  */
-function readFromHexString (hex: string, target?: Buffer)
+export function readFromHexString (hex: string, target?: Buffer)
 {
     let temp = Buffer.from((hex.substr(0, 2) == '0x') ? hex.substr(2) : hex, 'hex');
 
@@ -117,16 +117,10 @@ function readFromHexString (hex: string, target?: Buffer)
  * Write to hex string
  * @param source Buffer to input
  */
-function writeToHexString (source: Buffer)
+export function writeToHexString (source: Buffer)
 {
     let temp = Buffer.alloc(HashSize);
     for (let idx = 0; idx < source.length; idx++)
         temp.writeUInt8(source.readUInt8(idx), HashSize - idx - 1);
     return '0x' + temp.toString("hex");
 }
-
-export default {
-    Hash: Hash,
-    readFromHexString: readFromHexString,
-    writeToHexString: writeToHexString
-};

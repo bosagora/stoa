@@ -12,7 +12,7 @@
 *******************************************************************************/
 
 import * as assert from 'assert';
-import * as BlockStorage from '../src/modules/storage/BlockStorage';
+import { BlockStorage } from '../src/modules/storage/BlockStorage';
 
 var sample_data =
 [
@@ -291,14 +291,14 @@ var sample_data =
     }
   ];
 
-var block_storage : BlockStorage.default;
+var block_storage : BlockStorage;
 
 /**
  * Creates BlockStorage
  */
 function createBlockStorage ()
 {
-    block_storage = new BlockStorage.default(':memory:', putAllBlockData);
+    block_storage = new BlockStorage(':memory:', putAllBlockData);
 }
 
 /**

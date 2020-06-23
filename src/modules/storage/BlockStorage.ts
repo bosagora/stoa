@@ -19,7 +19,7 @@ import * as sqlite from 'sqlite3';
 /**
  * The class that insert and read the block into the database.
  */
-class BlockStorage
+export class BlockStorage
 {
     /**
      *  The instance of sqlite3
@@ -148,5 +148,3 @@ class BlockStorage
         this.db.close();
     }
 }
-
-export default BlockStorage;
