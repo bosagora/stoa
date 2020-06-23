@@ -105,3 +105,6 @@ dist
 
 # webpack build ouputs
 .dist
+
+# database
+database
