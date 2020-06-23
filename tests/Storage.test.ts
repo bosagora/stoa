@@ -296,37 +296,48 @@ var sample_data =
  */
 function createBlockStorage ()
 {
-    var blockStorage: BlockStorage = new BlockStorage(":memory:");
-    blockStorage.open();
-    blockStorage.createTable();
-    putAllBlockData(blockStorage);
+    var blockStorage: BlockStorage = new BlockStorage(":memory:", (err1: any) =>
+    {
+        assert.ok(!err1, err1);
+
+        putAllBlockData(blockStorage, (err2: any) =>
+        {
+            assert.ok(!err2, err2);
+
+            getBlockData(blockStorage, 1, (err3: any) =>
+            {
+                assert.ok(!err3, err3);
+
+                blockStorage.close();
+              });
+        });
+    });
 }
 
 /**
  * Puts all data
  */
-function putAllBlockData (block_storage: BlockStorage)
+function putAllBlockData (block_storage: BlockStorage, callback?: any)
 {
     var idx = 0;
     var doPut = () =>
     {
         if (idx >= sample_data.length)
         {
-            getBlockData(block_storage, 1);
+            if (callback != undefined) callback(null);
             return;
         }
 
-        block_storage.put(sample_data[idx], () =>
+        block_storage.put(sample_data[idx], (err: any) =>
         {
-            idx++;
-            if (idx < sample_data.length)
+            if (!err)
             {
+                idx++;
                 doPut();
             }
             else
             {
-                getBlockData(block_storage, 1);
-                return;
+                if (callback != undefined) callback(err);
             }
         });
     }
@@ -336,16 +347,16 @@ function putAllBlockData (block_storage: BlockStorage)
 /**
  * Gets one block data
  */
-function getBlockData (block_storage: BlockStorage, height: any)
+function getBlockData (block_storage: BlockStorage, height: any, callback?: any)
 {
-    block_storage.get(height);
     var res = block_storage.get(height, (err:any, rows:any) =>
     {
         assert.equal(rows.length, 1);
         assert.equal(rows[0].height, 1);
         assert.equal(rows[0].merkle_root,
-          '0x9c4a20550ac796274f64e93872466ebb551ba2cd3f2f051533d07a478d2402b' +
-          '59e5b0f0a2a14e818b88007ec61d4a82dc9128851f43799d6c1dc0609fca1537d');
+            '0x9c4a20550ac796274f64e93872466ebb551ba2cd3f2f051533d07a478d2402b' +
+            '59e5b0f0a2a14e818b88007ec61d4a82dc9128851f43799d6c1dc0609fca1537d');
+        if (callback != undefined) callback(err, rows);
     });
 }
 
@@ -354,7 +365,7 @@ function getBlockData (block_storage: BlockStorage, height: any)
  */
 function runBlockStorageTest ()
 {
-  createBlockStorage();
+    createBlockStorage();
 }
 
 describe('BlockStorage', () =>
