@@ -14,34 +14,22 @@
 
 *******************************************************************************/
 
-import * as sqlite from 'sqlite3';
+import { Storages } from './Storages';
 
 /**
  * The class that insert and read the block into the database.
  */
-export class BlockStorage
+export class BlockStorage extends Storages
 {
     /**
-     *  The instance of sqlite3
-     */
-    private db: sqlite.Database;
-
-    /**
      * Constructor
-     * @param filename Valid values are filenames,
-     * ":memory:" for an anonymous in-memory database and
-     * an empty string for an anonymous disk-based database
      * @param callback : If provided, this function will be called when
      * the database was opened successfully or when an error occurred.
      * The first argument is an error object.
      */
-    constructor (filename: string, callback?: any)
+    constructor (callback?: any)
     {
-        this.db = new sqlite.Database(filename,
-            sqlite.OPEN_CREATE | sqlite.OPEN_READWRITE |
-            sqlite.OPEN_SHAREDCACHE);
-        this.db.configure("busyTimeout", 1000);
-        this.createTable(callback);
+        super(callback);
     }
 
     /**
@@ -142,11 +130,4 @@ export class BlockStorage
         });
     }
 
-    /**
-     * Closes database
-     */
-    public close ()
-    {
-        this.db.close();
-    }
 }

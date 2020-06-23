@@ -291,27 +291,27 @@ var sample_data =
     }
   ];
 
-var block_storage : BlockStorage;
-
 /**
  * Creates BlockStorage
  */
 function createBlockStorage ()
 {
-    block_storage = new BlockStorage(':memory:', putAllBlockData);
+    var blockStorage: BlockStorage = new BlockStorage();
+    blockStorage.createTable();
+    putAllBlockData(blockStorage);
 }
 
 /**
  * Puts all data
  */
-function putAllBlockData ()
+function putAllBlockData (block_storage: BlockStorage)
 {
     var idx = 0;
     var doPut = () =>
     {
         if (idx >= sample_data.length)
         {
-            getBlockData(1);
+            getBlockData(block_storage, 1);
             return;
         }
 
@@ -322,6 +322,11 @@ function putAllBlockData ()
             {
                 doPut();
             }
+            else
+            {
+                getBlockData(block_storage, 1);
+                return;
+            }
         });
     }
     doPut();
@@ -330,7 +335,7 @@ function putAllBlockData ()
 /**
  * Gets one block data
  */
-function getBlockData (height: any)
+function getBlockData (block_storage: BlockStorage, height: any)
 {
     block_storage.get(height);
     var res = block_storage.get(height, (err:any, rows:any) =>
