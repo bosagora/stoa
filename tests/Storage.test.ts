@@ -12,7 +12,7 @@
 *******************************************************************************/
 
 import * as assert from 'assert';
-import { BlockStorage } from '../src/modules/storage/BlockStorage';
+import { LedgerStorage } from '../src/modules/storage/LedgerStorage';
 import { EnrollmentsStorage } from '../src/modules/storage/EnrollmentsStorage';
 
 var sample_data =
@@ -293,23 +293,23 @@ var sample_data =
   ];
 
 /**
- * Creates BlockStorage
+ * Creates createLedgerStorage
  */
-function createBlockStorage ()
+function createLedgerStorage ()
 {
-    var blockStorage: BlockStorage = new BlockStorage(":memory:", (err1: any) =>
+    var ledger_storage: LedgerStorage = new LedgerStorage(":memory:", (err1: any) =>
     {
         assert.ok(!err1, err1);
 
-        putAllBlockData(blockStorage, (err2: any) =>
+        putAllBlockData(ledger_storage, (err2: any) =>
         {
             assert.ok(!err2, err2);
 
-            getBlockData(blockStorage, 1, (err3: any) =>
+            getBlockData(ledger_storage, 1, (err3: any) =>
             {
                 assert.ok(!err3, err3);
 
-                blockStorage.close();
+                ledger_storage.close();
               });
         });
     });
@@ -318,7 +318,7 @@ function createBlockStorage ()
 /**
  * Puts all data
  */
-function putAllBlockData (block_storage: BlockStorage, callback?: any)
+function putAllBlockData (ledger_storage: LedgerStorage, callback?: any)
 {
     var idx = 0;
     var doPut = () =>
@@ -329,7 +329,7 @@ function putAllBlockData (block_storage: BlockStorage, callback?: any)
             return;
         }
 
-        block_storage.put(sample_data[idx], (err: any) =>
+        ledger_storage.putBlocks(sample_data[idx], (err: any) =>
         {
             if (!err)
             {
@@ -348,9 +348,9 @@ function putAllBlockData (block_storage: BlockStorage, callback?: any)
 /**
  * Gets one block data
  */
-function getBlockData (block_storage: BlockStorage, height: any, callback?: any)
+function getBlockData (ledger_storage: LedgerStorage, height: any, callback?: any)
 {
-    var res = block_storage.get(height, (err:any, rows:any) =>
+    var res = ledger_storage.getBlocks(height, (err:any, rows:any) =>
     {
         assert.equal(rows.length, 1);
         assert.equal(rows[0].height, 1);
@@ -389,10 +389,10 @@ function runEnrollmentStoragesTest ()
  */
 function runBlockStorageTest ()
 {
-    createBlockStorage();
+    createLedgerStorage();
 }
 
-describe('BlockStorage', () =>
+describe('LedgerStorage', () =>
 {
     it('Test block storage and inquiry function.', () =>
     {

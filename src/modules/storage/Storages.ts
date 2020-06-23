@@ -28,33 +28,30 @@ export class Storages
      * ":memory:" for an anonymous in-memory database and
      * an empty string for an anonymous disk-based database
      */
-    constructor (filename: string, callback?: any)
+    constructor (filename: string, callback: (err: Error | null) => void)
     {
         this.db = new sqlite.Database(filename,
             sqlite.OPEN_CREATE | sqlite.OPEN_READWRITE |
-            sqlite.OPEN_SHAREDCACHE, (err: any) =>
+            sqlite.OPEN_SHAREDCACHE, (err: Error | null) =>
             {
                 if (err != null)
-                {
-                    if (callback != undefined)
-                        callback(err);
-                }
+                    callback(err);
 
                 this.db.configure("busyTimeout", 1000);
-                this.createTable((err: any) => {
-                    if (callback != undefined)
+                this.createTables((err: Error | null) => {
+                    if (callback != null)
                         callback(err);
                 });
             });
     }
 
     /**
-     * Creates a table.
+     * Creates tables.
      * @param callback If provided, this function will be called when
      * the database was finished successfully or when an error occurred.
      * The first argument is an error object.
      */
-    public createTable (callback?: any)
+    public createTables (callback: (err: Error | null) => void)
     {
     }
 
