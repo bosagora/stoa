@@ -309,17 +309,18 @@ function putAllBlockData ()
     var idx = 0;
     var doPut = () =>
     {
+        if (idx >= sample_data.length)
+        {
+            getBlockData(1);
+            return;
+        }
+
         block_storage.put(sample_data[idx], () =>
         {
             idx++;
             if (idx < sample_data.length)
             {
                 doPut();
-            }
-            else
-            {
-              getBlockData(1);
-                return;
             }
         });
     }
