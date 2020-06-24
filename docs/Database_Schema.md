@@ -97,7 +97,7 @@ CREATE TABLE "transactions" (
 | tx_index          | INTEGER   | Y  | Y        |          | The index of this transaction in the block's transactions array|
 | in_index          | INTEGER   | Y  | Y        |          | The index of this input in the Transaction's inputs array|
 | previous          | TEXT      |    | Y        |          | The hash of a previous transaction containing the output to spend |
-| index             | INTEGER   |    | Y        |          | The index of the output in the previous transaction|
+| out_index         | INTEGER   |    | Y        |          | The index of the output in the previous transaction|
 
 ### _Create Script_
 
@@ -107,7 +107,7 @@ CREATE TABLE "tx_inputs" (
     "tx_index"    INTEGER NOT NULL,
     "in_index"    INTEGER NOT NULL,
     "previous"    TEXT NOT NULL,
-    "index"    INTEGER NOT NULL,
+    "out_index"    INTEGER NOT NULL,
     PRIMARY KEY("block_height","tx_index","in_index")
 )
 ```
