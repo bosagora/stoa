@@ -13,7 +13,6 @@
 
 import * as assert from 'assert';
 import { LedgerStorage } from '../src/modules/storage/LedgerStorage';
-import { EnrollmentsStorage } from '../src/modules/storage/EnrollmentsStorage';
 
 var sample_data =
 [
@@ -361,24 +360,24 @@ function getBlockData (ledger_storage: LedgerStorage, height: any, callback?: an
     });
 }
 
-function runEnrollmentStoragesTest ()
+function runEnrollmentTest ()
 {
-    var enrollmentsStorage: EnrollmentsStorage = new EnrollmentsStorage(":memory:", (err1: any) =>
+    var ledger_storage: LedgerStorage = new LedgerStorage(":memory:", (err1: Error | null) =>
     {
-        assert.ok(!err1, err1);
+        assert.ok(!err1, err1?.message);
         var height: number = 0;
-        enrollmentsStorage.putAllEnrollments(sample_data[0].header, (err2: any) =>
+        ledger_storage.putAllEnrollments(sample_data[0].header, (err2: Error | null) =>
         {
-            assert.ok(!err2, err2);
-            enrollmentsStorage.get(height, (err3: any, rows: any) =>
+            assert.ok(!err2, err2?.message);
+            ledger_storage.getEnrollments(height, (err3: Error | null, rows: any) =>
             {
-                assert.ok(!err3, err3);
+                assert.ok(!err3, err3?.message);
                 assert.equal(rows.length, 3);
                 assert.equal(rows[0].block_height, height);
                 assert.equal(rows[0].utxo_key,
                   '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad1cc3b' +
                   'fc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
-                enrollmentsStorage.close();
+                ledger_storage.close();
             });
         });
     });
@@ -401,6 +400,6 @@ describe('LedgerStorage', () =>
 
     it('Test enrollment storage and inquiry function.', () =>
     {
-        runEnrollmentStoragesTest();
+        runEnrollmentTest();
     });
 });
