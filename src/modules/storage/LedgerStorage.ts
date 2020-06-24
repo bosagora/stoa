@@ -51,7 +51,7 @@ export class LedgerStorage extends Storages
             enroll_sig TEXT NOT NULL,
             PRIMARY KEY("block_height","enrollment_index")
         );`;
-        this.db.run(sql, (err: Error | null) =>
+        this.db.each(sql, (err: Error | null) =>
         {
             if (callback != null)
                 callback(err);
@@ -65,7 +65,7 @@ export class LedgerStorage extends Storages
      * the database was finished successfully or when an error occurred.
      * The first argument is an error object.
      */
-    public putBlocks (data: any, callback: (err: Error | null) => void)
+    public putBlocks (data: any, callback?: (err: Error | null) => void)
     {
         if (
                 (data == null) ||
@@ -79,7 +79,7 @@ export class LedgerStorage extends Storages
                 (data.header.signature == undefined) ||
                 (data.txs == undefined)
         ) {
-            if (callback != null)
+            if (callback != undefined)
                 callback(new Error("Parameter validation failed."));
             return;
         }
@@ -103,7 +103,7 @@ export class LedgerStorage extends Storages
                 enrollment_count
             ], (err: Error | null) =>
         {
-            if (callback != null)
+            if (callback != undefined)
                 callback(err);
         });
     }
@@ -137,7 +137,7 @@ export class LedgerStorage extends Storages
      * the database was finished successfully or when an error occurred.
      * The first argument is an error object.
      */
-    public putEnrollment (data: any, callback: (err: Error | null) => void)
+    public putEnrollment (data: any, callback?: (err: Error | null) => void)
     {
         if (
                 (data == null) ||
@@ -168,7 +168,7 @@ export class LedgerStorage extends Storages
                 data.enroll_sig
             ], (err: Error | null) =>
         {
-            if (callback != null)
+            if (callback != undefined)
                 callback(err);
         });
     }
@@ -179,13 +179,15 @@ export class LedgerStorage extends Storages
      * @param Callback If provided, this function will be called when
      * the database was finished successfully or when an error occurred.
      */
-    public putAllEnrollments (header: any, callback: (err: Error | null) => void)
+    public putAllEnrollments (header: any, callback?: (err: Error | null) => void)
     {
         var idx: number = 0;
         var doPut = () =>
         {
             if (idx >= header.enrollments.length)
             {
+                if (callback != undefined)
+                    callback(null);
                 return;
             }
 
@@ -202,7 +204,7 @@ export class LedgerStorage extends Storages
                 }
                 else
                 {
-                    if (callback != null)
+                    if (callback != undefined)
                         callback(err);
                     else
                         return;
