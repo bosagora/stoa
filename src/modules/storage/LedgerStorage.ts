@@ -752,4 +752,47 @@ export class LedgerStorage extends Storages
             callback(err, rows);
         });
     }
+
+    /**
+     * Get validators
+     * @param height: The height parameter is optional.
+     * validators based on the block height if there is a height.
+     * if height null the most up to date state is expected.
+     * if the height is null then current valid validators.
+     * @param Callback If provided, this function will be called when
+     * the database was finished successfully or when an error occurred.
+     */
+    public getValidatorsAPI (height: number, address: string | null,
+        callback: (err: Error | null, rows: any[]) => void)
+    {
+        var cur_height: string;
+
+        if (!Number.isNaN(height))
+            cur_height = height.toString();
+        else
+            cur_height = `(SELECT MAX(height) as height FROM blocks)`;
+
+        var sql =
+        `SELECT tx_outputs.address,
+                enrollments.block_height as enrolled_at,
+                enrollments.utxo_key as stake,
+                (` + cur_height + ` - (enrollments.block_height + 1)) as distance,
+                enrollments.random_seed,
+                (SELECT MAX(height) as height FROM blocks) as height,
+                ((SELECT MAX(height) as height FROM blocks) - (enrollments.block_height + 1)) as test
+        FROM enrollments
+            LEFT JOIN tx_outputs ON enrollments.utxo_key = tx_outputs.utxo_key
+        WHERE
+            enrollments.block_height >= (` + cur_height + ` - enrollments.cycle_length)
+            AND enrollments.block_height <= ` + cur_height + `
+        `;
+
+        if (address != null)
+            sql += ` AND tx_outputs.address = '` + address + `'`;
+
+        this.db.all(sql, [], (err: Error | null, rows: any[]) =>
+        {
+            callback(err, rows);
+        });
+    }
 }

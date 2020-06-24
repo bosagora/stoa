@@ -306,7 +306,10 @@ function runLedgerStorageTest ()
             {
                 runEnrollmentsTest(ledger_storage, () =>
                 {
-                    ledger_storage.close();
+                    runValidatorsAPITest(ledger_storage, () =>
+                    {
+                        ledger_storage.close();
+                    });
                 });
             });
         });
@@ -450,6 +453,38 @@ function runTransactionsTest (ledger_storage: LedgerStorage, callback: () => voi
     });
 }
 
+
+/**
+ * Run Validators API tests
+ */
+function runValidatorsAPITest (ledger_storage: LedgerStorage, callback: () => void)
+{
+  var address: string = 'GA3DMXTREDC4AIUTHRFIXCKWKF7BDIXRWM2KLV74OPK2OKDM2VJ235GN';
+  var res = ledger_storage.getValidatorsAPI(1, null, (err1: Error | null, rows: any[]) =>
+  {
+      assert.ok(!err1, err1?.message);
+      assert.equal(rows[0].address, address);
+      assert.equal(rows[0].enrolled_at, 0);
+      assert.equal(rows[0].distance, 0);
+
+      var res1 = ledger_storage.getValidatorsAPI(1, address, (err2: Error | null, rows: any[]) =>
+      {
+          assert.ok(!err2, err2?.message);
+          assert.equal(rows.length, 1);
+          assert.equal(rows[0].address, address);
+          assert.equal(rows[0].stake, '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad'+
+          '1cc3bfc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
+
+          var res2 = ledger_storage.getValidatorsAPI(Number.NaN, null, (err3: Error | null, rows: any[]) =>
+          {
+              assert.ok(!err3, err3?.message);
+              assert.equal(rows.length, 3);
+              assert.equal(rows[0].distance, 0);
+              callback();
+          });
+      });
+  });
+}
 
 describe('LedgerStorage', () =>
 {

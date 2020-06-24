@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { LedgerStorage } from "./modules/storage/LedgerStorage";
+import { ValidatorData, IPreimage, IValidator } from "./modules/data/ValidatorData";
 
 class Stoa {
     public stoa: express.Application;
@@ -23,14 +24,98 @@ class Stoa {
             }
         });
 
+        /**
+         * Called when a request is received through the `/validators` handler
+         *
+         * Returns a set of Validators based on the block height if there is a height.
+         * If height was not provided the latest validator set is returned.
+         */
         this.stoa.get("/validators",
             (req: express.Request, res: express.Response, next: express.NextFunction) => {
-            res.send(req.query.height);
+
+            var height: number = Number(req.query.height);
+
+            if (!Number.isNaN(height) && (!Number.isInteger(height) || height < 0))
+            {
+                res.status(400).send("The Height value is not valid.");
+                return;
+            }
+
+            this.ledger_storage.getValidatorsAPI(height, null, (err: Error | null, rows: any[]) =>
+            {
+                if (err != null)
+                {
+                    console.error("Failed to data lookup to the DB: " + err);
+                    res.status(500).send("Failed to data lookup");
+                    return;
+                }
+
+                if (rows.length)
+                {
+                    let out_put:Array<ValidatorData> = new Array<ValidatorData>();
+
+                    for (const row of rows)
+                    {
+                        let preimage: IPreimage = {distance: row.distance, hash: '0'} as IPreimage;
+                        var validator: ValidatorData =
+                            new ValidatorData(row.address, row.enrolled_at, row.stake, preimage);
+                        out_put.push(validator);
+                    }
+                    res.status(200).send(JSON.stringify(out_put));
+                }
+                else
+                {
+                    res.status(204).send();
+                }
+            });
         });
 
+        /**
+         * Called when a request is received through the `/validators/:address` handler
+         *
+         * Returns a set of Validators based on the block height if there is a height.
+         * If height was not provided the latest validator set is returned.
+         * If an address was provided, return the validator data of the address if it exists.
+         */
         this.stoa.get("/validator/:address",
             (req: express.Request, res: express.Response, next: express.NextFunction) => {
-            res.send(req.params.address + ':' + req.query.height);
+
+            var height: number = Number(req.query.height);
+            var address: string = String(req.params.address);
+            
+            if (!Number.isNaN(height) && (!Number.isInteger(height) || height < 0))
+            {
+                res.status(400).send("The Height value is not valid.");
+                return;
+            }
+
+            this.ledger_storage.getValidatorsAPI(height, address, (err: Error | null, rows: any[]) =>
+            {
+                if (err != null)
+                {
+                    console.error("Failed to data lookup to the DB: " + err);
+                    res.status(500).send("Failed to data lookup");
+                    return;
+                }
+
+                if (rows.length)
+                {
+                    let out_put:Array<ValidatorData> = new Array<ValidatorData>();
+
+                    for (const row of rows)
+                    {
+                        let preimage: IPreimage = {distance: row.distance, hash: '0'} as IPreimage;
+                        var validator: ValidatorData | null =
+                            new ValidatorData(row.address, row.enrolled_at, row.stake, preimage);
+                        out_put.push(validator);
+                    }
+                    res.status(200).send(JSON.stringify(out_put));
+                }
+                else
+                {
+                    res.status(204).send();
+                }
+            });
         });
 
         /**
