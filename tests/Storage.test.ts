@@ -368,7 +368,7 @@ function putAllBlockData (ledger_storage: LedgerStorage,
 function getBlockData (ledger_storage: LedgerStorage, height: number,
     callback?: (err: Error | null, rows: any[]) => void)
 {
-    var res = ledger_storage.getBlocks(height, (err: Error | null, rows: any[]) =>
+    ledger_storage.getBlocks(height, (err: Error | null, rows: any[]) =>
     {
         assert.equal(rows.length, 1);
         assert.equal(rows[0].height, 1);
@@ -384,64 +384,29 @@ function getBlockData (ledger_storage: LedgerStorage, height: number,
  */
 function runEnrollmentsTest (ledger_storage: LedgerStorage, callback: () => void)
 {
-    putAllEnrollmentData(ledger_storage, (err2: Error | null) =>
+    var height: number = 0;
+    ledger_storage.getEnrollments(height, (err3: Error | null, rows: any[]) =>
     {
-        assert.ok(!err2, err2?.message);
-        var height: number = 0;
-        ledger_storage.getEnrollments(height, (err3: Error | null, rows: any[]) =>
+        assert.ok(!err3, err3?.message);
+        assert.equal(rows.length, 3);
+        assert.equal(rows[0].block_height, height);
+        assert.equal(rows[0].utxo_key,
+          '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad1cc3b' +
+          'fc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
+
+        ledger_storage.getValidators(height, (err4: Error | null, rows: any[]) =>
         {
-            assert.ok(!err3, err3?.message);
+            assert.ok(!err4, err4?.message);
             assert.equal(rows.length, 3);
-            assert.equal(rows[0].block_height, height);
+            assert.equal(rows[0].enrolled_at, height);
             assert.equal(rows[0].utxo_key,
               '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad1cc3b' +
               'fc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
-
-            ledger_storage.getValidators(height, (err4: Error | null, rows: any[]) =>
-            {
-                assert.ok(!err4, err4?.message);
-                assert.equal(rows.length, 3);
-                assert.equal(rows[0].enrolled_at, height);
-                assert.equal(rows[0].utxo_key,
-                  '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad1cc3b' +
-                  'fc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
-                assert.equal(rows[0].address,
-                  'GA3DMXTREDC4AIUTHRFIXCKWKF7BDIXRWM2KLV74OPK2OKDM2VJ235GN');
-                callback();
-            });
+            assert.equal(rows[0].address,
+              'GA3DMXTREDC4AIUTHRFIXCKWKF7BDIXRWM2KLV74OPK2OKDM2VJ235GN');
+            callback();
         });
     });
-}
-
-/**
- * Puts all transactions data
- */
-function putAllEnrollmentData (ledger_storage: LedgerStorage,
-    callback: (err: Error | null) => void)
-{
-    var idx = 0;
-    var doPut = () =>
-    {
-        if (idx >= sample_data.length)
-        {
-            callback(null);
-            return;
-        }
-
-        ledger_storage.putAllEnrollments(sample_data[idx].header, (err: Error | null) =>
-        {
-            if (!err)
-            {
-                idx++;
-                doPut();
-            }
-            else
-            {
-                callback(err);
-            }
-        });
-    }
-    doPut();
 }
 
 
@@ -450,75 +415,41 @@ function putAllEnrollmentData (ledger_storage: LedgerStorage,
  */
 function runTransactionsTest (ledger_storage: LedgerStorage, callback: () => void)
 {
-    putAllTransactionData(ledger_storage, (err2: Error | null) =>
+    ledger_storage.getTransactions(0, (err3: Error | null, rows3: any[]) =>
     {
-        assert.ok(!err2);
-        ledger_storage.getTransactions(0, (err3: Error | null, rows3: any[]) =>
+        assert.ok(!err3);
+        assert.equal(rows3.length, 4);
+        assert.equal(rows3[0].tx_hash,
+            '0x3a245017fee266f2aeacaa0ca11171b5825d34814bf1e33fae76cca50751e5c' +
+            'fb010896f009971a8748a1d3720e33404f5a999ae224b54f5d5c1ffa345c046f7');
+
+        ledger_storage.getTxInputs(1, 0, (err4: Error | null, rows4: any[]) =>
         {
-            assert.ok(!err3);
-            assert.equal(rows3.length, 4);
-            assert.equal(rows3[0].tx_hash,
-                '0x3a245017fee266f2aeacaa0ca11171b5825d34814bf1e33fae76cca50751e5c' +
-                'fb010896f009971a8748a1d3720e33404f5a999ae224b54f5d5c1ffa345c046f7');
+            assert.ok(!err4);
+            assert.equal(rows4.length, 1);
+            assert.equal(rows4[0].previous,
+                '0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd223671' +
+                '3dc369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73');
 
-            ledger_storage.getTxInputs(1, 0, (err4: Error | null, rows4: any[]) =>
+            ledger_storage.getTxOutputs(0, 1, (err5: Error | null, rows5: any[]) =>
             {
-                assert.ok(!err4);
-                assert.equal(rows4.length, 1);
-                assert.equal(rows4[0].previous,
-                    '0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd223671' +
-                    '3dc369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73');
+                assert.ok(!err5);
+                assert.equal(rows5.length, 8);
+                assert.equal(rows5[0].utxo_key,
+                    '0xef81352c7436a19d376acf1eb8f832a28c6229885aaa4e3bd8c11d5d072e160' +
+                    '798a4ff3a7565b66ca2d0ff755f8cc0f1f97e049ca23b615c85f77fb97d7919b4');
+                assert.equal(rows5[0].tx_hash,
+                  '0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd223671' +
+                  '3dc369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73');
+                assert.equal(rows5[0].address, 'GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ');
+                assert.equal(rows5[0].used, 1);
 
-                ledger_storage.getTxOutputs(0, 1, (err5: Error | null, rows5: any[]) =>
-                {
-                    assert.ok(!err5);
-                    assert.equal(rows5.length, 8);
-                    assert.equal(rows5[0].utxo_key,
-                        '0xef81352c7436a19d376acf1eb8f832a28c6229885aaa4e3bd8c11d5d072e160' +
-                        '798a4ff3a7565b66ca2d0ff755f8cc0f1f97e049ca23b615c85f77fb97d7919b4');
-                    assert.equal(rows5[0].tx_hash,
-                      '0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd223671' +
-                      '3dc369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73');
-                    assert.equal(rows5[0].address, 'GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ');
-                    assert.equal(rows5[0].used, 1);
-
-                    callback();
-                });
+                callback();
             });
         });
     });
 }
 
-/**
- * Puts all transactions data
- */
-function putAllTransactionData (ledger_storage: LedgerStorage,
-    callback: (err: Error | null) => void)
-{
-    var idx = 0;
-    var doPut = () =>
-    {
-        if (idx >= sample_data.length)
-        {
-            callback(null);
-            return;
-        }
-
-        ledger_storage.putTransactions(sample_data[idx], (err: Error | null) =>
-        {
-            if (!err)
-            {
-                idx++;
-                doPut();
-            }
-            else
-            {
-                callback(err);
-            }
-        });
-    }
-    doPut();
-}
 
 describe('LedgerStorage', () =>
 {

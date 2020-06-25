@@ -159,8 +159,17 @@ export class LedgerStorage extends Storages
                 enrollment_count
             ], (err: Error | null) =>
         {
-            if (callback != undefined)
-                callback(err);
+            this.putTransactions(data, (err1: Error | null) =>
+            {
+                if (err1)
+                {
+                    if (callback != undefined)
+                        callback(err1);
+                    return;
+                }
+
+                this.putAllEnrollments(data.header, callback);
+            });
         });
     }
 
