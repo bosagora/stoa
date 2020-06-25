@@ -292,26 +292,22 @@ var sample_data =
   ];
 
 /**
- * Creates createLedgerStorage
+ * Run LedgerStorageTest
  */
-function createLedgerStorage ()
+function runLedgerStorageTest ()
 {
-    var ledger_storage: LedgerStorage = new LedgerStorage(":memory:", (err1: any) =>
+    var ledger_storage: LedgerStorage = new LedgerStorage(":memory:", (err1: Error | null) =>
     {
-        assert.ok(!err1, err1);
+        assert.ok(!err1, err1?.message);
 
-        putAllBlockData(ledger_storage, (err2: any) =>
+        runBlockTest(ledger_storage, () =>
         {
-            assert.ok(!err2, err2);
-
-            getBlockData(ledger_storage, 1, (err3: any) =>
+            runEnrollmentsTest(ledger_storage, () =>
             {
-                assert.ok(!err3, err3);
-
-                runTransactionsStorageTest(ledger_storage, () =>
+                runTransactionsTest(ledger_storage, () =>
                 {
                     ledger_storage.close();
-                })
+                });
             });
         });
     });
@@ -320,18 +316,37 @@ function createLedgerStorage ()
 /**
  * Puts all data
  */
-function putAllBlockData (ledger_storage: LedgerStorage, callback?: any)
+function runBlockTest (ledger_storage: LedgerStorage, callback: () => void)
+{
+    putAllBlockData(ledger_storage, (err2: Error | null) =>
+    {
+        assert.ok(!err2, err2?.message);
+
+        getBlockData(ledger_storage, 1, (err3: Error | null) =>
+        {
+            assert.ok(!err3, err3?.message);
+
+            callback();
+        });
+    });
+}
+
+/**
+ * Puts all data
+ */
+function putAllBlockData (ledger_storage: LedgerStorage,
+    callback: (err: Error | null) => void)
 {
     var idx = 0;
     var doPut = () =>
     {
         if (idx >= sample_data.length)
         {
-            if (callback != undefined) callback(null);
+            callback(null);
             return;
         }
 
-        ledger_storage.putBlocks(sample_data[idx], (err: any) =>
+        ledger_storage.putBlocks(sample_data[idx], (err: Error | null) =>
         {
             if (!err)
             {
@@ -340,7 +355,7 @@ function putAllBlockData (ledger_storage: LedgerStorage, callback?: any)
             }
             else
             {
-                if (callback != undefined) callback(err);
+                callback(err);
             }
         });
     }
@@ -350,9 +365,10 @@ function putAllBlockData (ledger_storage: LedgerStorage, callback?: any)
 /**
  * Gets one block data
  */
-function getBlockData (ledger_storage: LedgerStorage, height: any, callback?: any)
+function getBlockData (ledger_storage: LedgerStorage, height: number,
+    callback?: (err: Error | null, rows: any[]) => void)
 {
-    var res = ledger_storage.getBlocks(height, (err:any, rows:any) =>
+    var res = ledger_storage.getBlocks(height, (err: Error | null, rows: any[]) =>
     {
         assert.equal(rows.length, 1);
         assert.equal(rows[0].height, 1);
@@ -363,41 +379,64 @@ function getBlockData (ledger_storage: LedgerStorage, height: any, callback?: an
     });
 }
 
-function runEnrollmentTest ()
+/**
+ *  Run the test of the Enrollments
+ */
+function runEnrollmentsTest (ledger_storage: LedgerStorage, callback: () => void)
 {
-    var ledger_storage: LedgerStorage = new LedgerStorage(":memory:", (err1: Error | null) =>
+    putAllEnrollmentData(ledger_storage, (err2: Error | null) =>
     {
-        assert.ok(!err1, err1?.message);
+        assert.ok(!err2, err2?.message);
         var height: number = 0;
-        ledger_storage.putAllEnrollments(sample_data[0].header, (err2: Error | null) =>
+        ledger_storage.getEnrollments(height, (err3: Error | null, rows: any[]) =>
         {
-            assert.ok(!err2, err2?.message);
-            ledger_storage.getEnrollments(height, (err3: Error | null, rows: any) =>
-            {
-                assert.ok(!err3, err3?.message);
-                assert.equal(rows.length, 3);
-                assert.equal(rows[0].block_height, height);
-                assert.equal(rows[0].utxo_key,
-                  '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad1cc3b' +
-                  'fc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
-                ledger_storage.close();
-            });
+            assert.ok(!err3, err3?.message);
+            assert.equal(rows.length, 3);
+            assert.equal(rows[0].block_height, height);
+            assert.equal(rows[0].utxo_key,
+              '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad1cc3b' +
+              'fc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
+            callback();
         });
     });
 }
 
 /**
- *  Start test
+ * Puts all transactions data
  */
-function runBlockStorageTest ()
+function putAllEnrollmentData (ledger_storage: LedgerStorage,
+    callback: (err: Error | null) => void)
 {
-    createLedgerStorage();
+    var idx = 0;
+    var doPut = () =>
+    {
+        if (idx >= sample_data.length)
+        {
+            callback(null);
+            return;
+        }
+
+        ledger_storage.putAllEnrollments(sample_data[idx].header, (err: Error | null) =>
+        {
+            if (!err)
+            {
+                idx++;
+                doPut();
+            }
+            else
+            {
+                callback(err);
+            }
+        });
+    }
+    doPut();
 }
+
 
 /**
  * Run the test of the Transactions
  */
-function runTransactionsStorageTest (ledger_storage: LedgerStorage, callback: () => void)
+function runTransactionsTest (ledger_storage: LedgerStorage, callback: () => void)
 {
     putAllTransactionData(ledger_storage, (err2: Error | null) =>
     {
@@ -441,7 +480,8 @@ function runTransactionsStorageTest (ledger_storage: LedgerStorage, callback: ()
 /**
  * Puts all transactions data
  */
-function putAllTransactionData (ledger_storage: LedgerStorage, callback: (err: Error | null) => void)
+function putAllTransactionData (ledger_storage: LedgerStorage,
+    callback: (err: Error | null) => void)
 {
     var idx = 0;
     var doPut = () =>
@@ -470,13 +510,8 @@ function putAllTransactionData (ledger_storage: LedgerStorage, callback: (err: E
 
 describe('LedgerStorage', () =>
 {
-    it('Test block storage and inquiry function.', () =>
+    it('Test ledger storage and inquiry function.', () =>
     {
-        runBlockStorageTest();
-    });
-
-    it('Test enrollment storage and inquiry function.', () =>
-    {
-        runEnrollmentTest();
+        runLedgerStorageTest();
     });
 });
