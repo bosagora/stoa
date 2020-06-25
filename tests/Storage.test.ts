@@ -308,8 +308,11 @@ function createLedgerStorage ()
             {
                 assert.ok(!err3, err3);
 
-                ledger_storage.close();
-              });
+                runTransactionsStorageTest(ledger_storage, () =>
+                {
+                    ledger_storage.close();
+                })
+            });
         });
     });
 }
@@ -389,6 +392,80 @@ function runEnrollmentTest ()
 function runBlockStorageTest ()
 {
     createLedgerStorage();
+}
+
+/**
+ * Run the test of the Transactions
+ */
+function runTransactionsStorageTest (ledger_storage: LedgerStorage, callback: () => void)
+{
+    putAllTransactionData(ledger_storage, (err2: Error | null) =>
+    {
+        assert.ok(!err2);
+        ledger_storage.getTransactions(0, (err3: Error | null, rows3: any[]) =>
+        {
+            assert.ok(!err3);
+            assert.equal(rows3.length, 4);
+            assert.equal(rows3[0].tx_hash,
+                '0x3a245017fee266f2aeacaa0ca11171b5825d34814bf1e33fae76cca50751e5c' +
+                'fb010896f009971a8748a1d3720e33404f5a999ae224b54f5d5c1ffa345c046f7');
+
+            ledger_storage.getTxInputs(1, 0, (err4: Error | null, rows4: any[]) =>
+            {
+                assert.ok(!err4);
+                assert.equal(rows4.length, 1);
+                assert.equal(rows4[0].previous,
+                    '0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd223671' +
+                    '3dc369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73');
+
+                ledger_storage.getTxOutputs(0, 1, (err5: Error | null, rows5: any[]) =>
+                {
+                    assert.ok(!err5);
+                    assert.equal(rows5.length, 8);
+                    assert.equal(rows5[0].utxo_key,
+                        '0xef81352c7436a19d376acf1eb8f832a28c6229885aaa4e3bd8c11d5d072e160' +
+                        '798a4ff3a7565b66ca2d0ff755f8cc0f1f97e049ca23b615c85f77fb97d7919b4');
+                    assert.equal(rows5[0].tx_hash,
+                      '0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd223671' +
+                      '3dc369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73');
+                    assert.equal(rows5[0].address, 'GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ');
+                    assert.equal(rows5[0].used, 1);
+
+                    callback();
+                });
+            });
+        });
+    });
+}
+
+/**
+ * Puts all transactions data
+ */
+function putAllTransactionData (ledger_storage: LedgerStorage, callback: (err: Error | null) => void)
+{
+    var idx = 0;
+    var doPut = () =>
+    {
+        if (idx >= sample_data.length)
+        {
+            callback(null);
+            return;
+        }
+
+        ledger_storage.putTransactions(sample_data[idx], (err: Error | null) =>
+        {
+            if (!err)
+            {
+                idx++;
+                doPut();
+            }
+            else
+            {
+                callback(err);
+            }
+        });
+    }
+    doPut();
 }
 
 describe('LedgerStorage', () =>

@@ -14,6 +14,8 @@
 
 *******************************************************************************/
 
+import * as sqlite from 'sqlite3';
+import { Hash }  from '../common/Hash'
 import { Storages } from './Storages';
 
 /**
@@ -21,6 +23,14 @@ import { Storages } from './Storages';
  */
 export class LedgerStorage extends Storages
 {
+    private hash: Hash;
+
+    constructor (filename: string, callback: (err: Error | null) => void)
+    {
+        super(filename, callback);
+        this.hash = new Hash();
+    }
+
     /**
      * Creates tables related to the ledger.
      * @param callback If provided, this function will be called when
@@ -29,7 +39,7 @@ export class LedgerStorage extends Storages
      */
     public createTables (callback: (err: Error | null) => void)
     {
-        var sql =
+        var sql: string =
         `CREATE TABLE IF NOT EXISTS blocks
         (
             height INTEGER NOT NULL PRIMARY KEY,
@@ -50,11 +60,46 @@ export class LedgerStorage extends Storages
             cycle_length INTEGER NOT NULL,
             enroll_sig TEXT NOT NULL,
             PRIMARY KEY("block_height","enrollment_index")
-        );`;
-        this.db.each(sql, (err: Error | null) =>
+        );
+
+        CREATE TABLE IF NOT EXISTS "transactions"
+        (
+            "block_height"      INTEGER NOT NULL,
+            "tx_index"          INTEGER NOT NULL,
+            "tx_hash"           TEXT NOT NULL,
+            "type"              INTEGER NOT NULL,
+            "inputs_count"      INTEGER NOT NULL,
+            "outputs_count"     INTEGER NOT NULL,
+            PRIMARY KEY("block_height", "tx_index")
+        );
+
+        CREATE TABLE IF NOT EXISTS "tx_inputs"
+        (
+            "block_height"      INTEGER NOT NULL,
+            "tx_index"          INTEGER NOT NULL,
+            "in_index"          INTEGER NOT NULL,
+            "previous"          TEXT NOT NULL,
+            "out_index"         INTEGER NOT NULL,
+            PRIMARY KEY("block_height", "tx_index", "in_index")
+        );
+
+        CREATE TABLE IF NOT EXISTS "tx_outputs"
+        (
+            "block_height"  INTEGER NOT NULL,
+            "tx_index"      INTEGER NOT NULL,
+            "output_index"  INTEGER NOT NULL,
+            "tx_hash"       TEXT NOT NULL,
+            "utxo_key"      TEXT NOT NULL,
+            "amount"        NUMERIC NOT NULL,
+            "address"       TEXT NOT NULL,
+            "used"          INTEGER NOT NULL DEFAULT 0,
+            PRIMARY KEY("block_height", "tx_index", "output_index")
+        );
+        `;
+
+        this.db.exec(sql, (err: Error | null) =>
         {
-            if (callback != null)
-                callback(err);
+            callback(err);
         });
     }
 
@@ -197,7 +242,7 @@ export class LedgerStorage extends Storages
 
             this.putEnrollment(enrollment, (err: Error | null) =>
             {
-                if (err != null)
+                if (!err)
                 {
                     idx++;
                     doPut();
@@ -231,6 +276,383 @@ export class LedgerStorage extends Storages
             enrollments
         WHERE block_height = ?`;
         this.db.all(sql, [height], (err: Error | null, rows: any[]) =>
+        {
+            callback(err, rows);
+        });
+    }
+
+    /**
+     * Put a transaction to database
+     * @param data a transaction data
+     * @param callback If provided, this function will be called when
+     * the database was finished successfully or when an error occurred.
+     * The first argument is an error object.
+     */
+    private putTransaction (block_height: number, tx: any, tx_index: number,
+        tx_hash: string, callback?: (err: Error | null) => void)
+    {
+        if (tx == undefined) {
+            if (callback != undefined)
+                callback(new Error("Parameter validation failed."));
+            return;
+        }
+
+        let sql: string =
+        `INSERT INTO transactions
+            (block_height, tx_index, tx_hash, type, inputs_count, outputs_count)
+        VALUES
+            (?, ?, ?, ?, ?, ?)`;
+        this.db.run(sql,
+            [
+                block_height,
+                tx_index,
+                tx_hash,
+                tx.type,
+                tx.inputs.length,
+                tx.outputs.length
+            ], (err: Error | null) =>
+        {
+            if (err)
+            {
+                if (callback != undefined)
+                    callback(err);
+                return;
+            }
+
+            this.putInputs(block_height, tx, tx_index, tx_hash, (err2: Error | null) =>
+            {
+                if (err2)
+                {
+                    if (callback != undefined)
+                        callback(err2);
+                    return;
+                }
+
+                this.putOutputs(block_height, tx, tx_index, tx_hash, (err3: Error | null) =>
+                {
+                    if (callback != undefined)
+                        callback(err3);
+                });
+            })
+        });
+    }
+
+    /**
+     * Puts all transactions
+     * @param block: block Json data
+     * @param callback If provided, this function will be called when
+     * the database was finished successfully or when an error occurred.
+     * The first argument is an error object.
+     */
+    public putTransactions (block: any, callback?: (err: Error | null) => void)
+    {
+        let idx: number = 0;
+        let doPut = () =>
+        {
+            if (idx >= block.txs.length)
+            {
+                if (callback != undefined)
+                    callback(null);
+                return;
+            }
+
+            this.putTransaction(block.header.height.value, block.txs[idx],
+                idx, block.merkle_tree[idx], (err: Error | null) =>
+                {
+                    if (!err)
+                    {
+                        idx++;
+                        doPut();
+                    }
+                    else
+                    {
+                        if (callback != undefined)
+                            callback(err);
+                        else
+                            return;
+                    }
+                }
+            );
+        }
+        doPut();
+    }
+
+    /**
+     * Store the inputs of the transaction.
+     * @param block_height The height of the block
+     * @param tx a transaction
+     * @param tx_index The index of transaction in the block
+     * @param tx_hash The hash of transaction
+     * @param callback
+     */
+    public putInputs (block_height: number, tx: any, tx_index: number, tx_hash: string, callback?: (err: Error | null) => void)
+    {
+        let putInput = function (
+            db: sqlite.Database,
+            block_height: any,
+            tx_index: number,
+            in_index: number,
+            input: any,
+            cb?: (err: Error | null) => void)
+        {
+            if (
+                (input == undefined) ||
+                (input.previous == undefined) ||
+                (input.index == undefined)
+            ) {
+                if (cb != undefined)
+                    cb(new Error("Parameter validation failed."));
+                return;
+            }
+
+            let sql: string =
+            `INSERT INTO tx_inputs
+                (block_height, tx_index, in_index, previous, out_index)
+            VALUES
+                (?, ?, ?, ?, ?)`;
+            db.run(sql,
+                [
+                    block_height,
+                    tx_index,
+                    in_index,
+                    input.previous,
+                    input.index
+                ], (err: Error | null) =>
+            {
+                if (cb != undefined)
+                    cb(err);
+            });
+        }
+
+        let idx = 0;
+        let checking_idx = 0;
+        let doPut = () =>
+        {
+            if (idx >= tx.inputs.length)
+            {
+                doCheck();
+                return;
+            }
+
+            putInput(this.db, block_height, tx_index, idx, tx.inputs[idx], (err: Error | null) =>
+                {
+                    if (!err)
+                    {
+                        idx++;
+                        doPut();
+                    }
+                    else
+                    {
+                        if (callback != undefined)
+                            callback(err);
+                        return;
+                    }
+                }
+            );
+        }
+
+
+        let check = function (
+            db: sqlite.Database,
+            input: any,
+            cb?: (err: Error | null) => void)
+        {
+            if (
+                (input == undefined) ||
+                (input.previous == undefined) ||
+                (input.index == undefined)
+            ) {
+                if (cb != undefined)
+                    cb(new Error("Parameter validation failed."));
+                return;
+            }
+
+            let sql: string = `UPDATE tx_outputs SET used = 1 WHERE tx_hash = ? and output_index = ?`;
+            db.run(sql, [input.previous, input.index], (err: Error | null) =>
+            {
+                if (cb != undefined)
+                    cb(err);
+            });
+        }
+
+        let doCheck = () =>
+        {
+            if (checking_idx >= tx.inputs.length)
+            {
+                if (callback != undefined)
+                    callback(null);
+                return;
+            }
+
+            check(this.db, tx.inputs[checking_idx], (err: Error | null) =>
+                {
+                    if (!err)
+                    {
+                        checking_idx++;
+                        doCheck();
+                    }
+                    else
+                    {
+                        if (callback != undefined)
+                            callback(err);
+                        else
+                            return;
+                    }
+                }
+            );
+        }
+
+        doPut();
+    }
+
+    /**
+     * Store the outputs of the transaction.
+     * @param block_height The height of the block
+     * @param tx a transaction
+     * @param tx_index The index of transaction in the block
+     * @param tx_hash The hash of transaction
+     * @param callback
+     */
+    public putOutputs (block_height: number, tx: any, tx_index: number, tx_hash: string, callback?: (err: Error | null) => void)
+    {
+        let putOutput = function (
+            db: sqlite.Database,
+            hash: Hash,
+            block_height: number,
+            tx_index: number,
+            out_index: number,
+            output: any,
+            cb?: (err: Error | null) => void)
+        {
+            if (
+                (output == undefined) ||
+                (output.address == undefined)||
+                (output.value == undefined)
+            ) {
+                if (cb != undefined)
+                    cb(new Error("Parameter validation failed."));
+                return;
+            }
+
+            hash.makeUTXOKey(tx_hash, BigInt(out_index));
+
+            let sql: string =
+            `INSERT INTO tx_outputs
+                (block_height, tx_index, output_index, tx_hash, utxo_key, address, amount)
+            VALUES
+                (?, ?, ?, ?, ?, ?, ?)`;
+            db.run(sql,
+                [
+                    block_height,
+                    tx_index,
+                    out_index,
+                    tx_hash,
+                    hash.toHexString(),
+                    output.address,
+                    output.value
+                ], (err: Error | null) =>
+            {
+                if (cb != undefined)
+                    cb(err);
+            });
+        }
+
+        let idx = 0;
+        let doPut = () =>
+        {
+            if (idx >= tx.outputs.length)
+            {
+                if (callback != undefined)
+                    callback(null);
+                return;
+            }
+
+            putOutput(this.db, this.hash, block_height, tx_index, idx, tx.outputs[idx], (err: Error | null) =>
+                {
+                    if (!err)
+                    {
+                        idx++;
+                        doPut();
+                    }
+                    else
+                    {
+                        if (callback != undefined)
+                            callback(err);
+                        else
+                            return;
+                    }
+                }
+            );
+        }
+        doPut();
+    }
+
+    /**
+     * Gets a transaction data
+     * @param height the height of the block to get
+     * @param callback If provided, this function will be called when
+     * the database was finished successfully or when an error occurred.
+     * The first argument is an error object.
+     * The second argument is result set.
+     */
+    public getTransactions (height: number,
+        callback: (err: Error | null, rows: any[]) => void)
+    {
+        var sql: string =
+        `SELECT
+            block_height, tx_index, tx_hash, type, inputs_count, outputs_count
+        FROM
+            transactions
+        WHERE block_height = ?`;
+        this.db.all(sql, [height], (err: Error | null, rows: any[]) =>
+        {
+            callback(err, rows);
+        });
+    }
+
+    /**
+     * Gets a transaction inputs data
+     * @param height The height of the block to get
+     * @param tx_index The index of the transaction in the block
+     * @param callback If provided, this function will be called when
+     * the database was finished successfully or when an error occurred.
+     * The first argument is an error object.
+     * The second argument is result set.
+     */
+    public getTxInputs (height: number, tx_index: number,
+        callback: (err: Error | null, rows: any[]) => void)
+    {
+        var sql: string =
+        `SELECT
+            block_height, tx_index, in_index, previous, "out_index"
+        FROM
+            tx_inputs
+        WHERE block_height = ? AND tx_index = ?`;
+        this.db.all(sql, [height, tx_index], (err: Error | null, rows: any[]) =>
+        {
+            callback(err, rows);
+        });
+    }
+
+    /**
+     * Gets a transaction outputs data
+     * @param height The height of the block to get
+     * @param tx_index The index of the transaction in the block
+     * @param callback If provided, this function will be called when
+     * the database was finished successfully or when an error occurred.
+     * The first argument is an error object.
+     * The second argument is result set.
+     */
+    public getTxOutputs (height: number, tx_index: number,
+        callback: (err: Error | null, rows: any[]) => void)
+    {
+        var sql: string =
+        `SELECT
+            block_height, tx_index, output_index, tx_hash, utxo_key, address, amount, used
+        FROM
+            tx_outputs
+        WHERE block_height = ? AND tx_index = ?`;
+        this.db.all(sql, [height, tx_index], (err: Error | null, rows: any[]) =>
         {
             callback(err, rows);
         });
