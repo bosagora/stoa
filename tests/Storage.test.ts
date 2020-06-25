@@ -302,9 +302,9 @@ function runLedgerStorageTest ()
 
         runBlockTest(ledger_storage, () =>
         {
-            runEnrollmentsTest(ledger_storage, () =>
+            runTransactionsTest(ledger_storage, () =>
             {
-                runTransactionsTest(ledger_storage, () =>
+                runEnrollmentsTest(ledger_storage, () =>
                 {
                     ledger_storage.close();
                 });
@@ -396,7 +396,19 @@ function runEnrollmentsTest (ledger_storage: LedgerStorage, callback: () => void
             assert.equal(rows[0].utxo_key,
               '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad1cc3b' +
               'fc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
-            callback();
+
+            ledger_storage.getValidators(height, (err4: Error | null, rows: any[]) =>
+            {
+                assert.ok(!err4, err4?.message);
+                assert.equal(rows.length, 3);
+                assert.equal(rows[0].enrolled_at, height);
+                assert.equal(rows[0].utxo_key,
+                  '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad1cc3b' +
+                  'fc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
+                assert.equal(rows[0].address,
+                  'GA3DMXTREDC4AIUTHRFIXCKWKF7BDIXRWM2KLV74OPK2OKDM2VJ235GN');
+                callback();
+            });
         });
     });
 }
