@@ -95,6 +95,17 @@ export class LedgerStorage extends Storages
             "used"          INTEGER NOT NULL DEFAULT 0,
             PRIMARY KEY("block_height", "tx_index", "output_index")
         );
+
+        CREATE TABLE IF NOT EXISTS "validators"
+        (
+            "enrolled_at"  INTEGER NOT NULL,
+            "utxo_key"  TEXT NOT NULL,
+            "address"  TEXT(56) NOT NULL,
+            "amount"  NUMERIC NOT NULL,
+            "preimage_distance"  INTEGER NOT NULL,
+            "preimage_hash"  TEXT NOT NULL,
+            PRIMARY KEY("enrolled_at","utxo_key")
+        );
         `;
 
         this.db.exec(sql, (err: Error | null) =>
@@ -219,6 +230,45 @@ export class LedgerStorage extends Storages
     }
 
     /**
+     * Put a validator to database
+     * @param data a enrollment data
+     * @param callback If provided, this function will be called when
+     * the database was finished successfully or when an error occurred.
+     * The first argument is an error object.
+     */
+    public putValidator (data: any, callback?: (err: Error | null) => void)
+    {
+        if (
+            (data == null) ||
+            (data.block_height == undefined) ||
+            (data.utxo_key == undefined)
+        ) {
+            if (callback != null)
+                callback(new Error("Parameter validation failed."));
+            return;
+        }
+
+        var sql: string =
+        `INSERT INTO validators
+            (enrolled_at, utxo_key, address, amount, preimage_distance, preimage_hash)
+        SELECT ?, utxo_key, address, amount, ?, ?
+            FROM tx_outputs
+        WHERE
+            tx_outputs.utxo_key = ?`;
+        this.db.run(sql,
+            [
+                data.block_height,
+                0,
+                '0x0000000000000000',
+                data.utxo_key
+            ], (err: Error | null) =>
+        {
+            if (callback != undefined)
+                callback(err);
+        });
+    }
+
+    /**
      * Puts all enrollments
      * @param data: block header JSON object
      * @param Callback If provided, this function will be called when
@@ -244,8 +294,22 @@ export class LedgerStorage extends Storages
             {
                 if (!err)
                 {
-                    idx++;
-                    doPut();
+                    this.putValidator(enrollment, (err2: Error | null) =>
+                    {
+                        if (err2 == null)
+                        {
+                            idx++;
+                            doPut();
+                        }
+                        else
+                        {
+                            if (callback != undefined)
+                                callback(err);
+                            else
+                                return;
+
+                        }
+                    });
                 }
                 else
                 {
@@ -275,6 +339,28 @@ export class LedgerStorage extends Storages
         FROM
             enrollments
         WHERE block_height = ?`;
+        this.db.all(sql, [height], (err: Error | null, rows: any[]) =>
+        {
+            callback(err, rows);
+        });
+    }
+
+    /**
+     * Get validators
+     * @param height block height of enrollments
+     * @param callback If provided, this function will be called when
+     * the database was finished successfully or when an error occurred.
+     * The first argument is an error object.
+     * The second argument is result set.
+     */
+    public getValidators (height: number, callback: (err: Error | null, rows: any[]) => void)
+    {
+        var sql: string =
+        `SELECT
+            enrolled_at, utxo_key, address, amount, preimage_distance, preimage_hash
+        FROM
+            validators
+        WHERE enrolled_at = ?`;
         this.db.all(sql, [height], (err: Error | null, rows: any[]) =>
         {
             callback(err, rows);
