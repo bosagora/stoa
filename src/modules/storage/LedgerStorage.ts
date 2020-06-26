@@ -123,54 +123,47 @@ export class LedgerStorage extends Storages
      */
     public putBlocks (data: any, callback?: (err: Error | null) => void)
     {
-        if (
-                (data == null) ||
-                (data.header == undefined) ||
-                (data.header.height == undefined) ||
-                (data.header.height.value == undefined) ||
-                (data.header.prev_block == undefined) ||
-                (data.header.validators == undefined) ||
-                (data.header.validators._storage == undefined) ||
-                (data.header.merkle_root == undefined) ||
-                (data.header.signature == undefined) ||
-                (data.txs == undefined)
-        ) {
+        let block: Block;
+        try
+        {
+            block = new Block(data);
+
+
+            var sql =
+                `INSERT INTO blocks
+                    (height, prev_block, validators, merkle_root, signature, tx_count, enrollment_count)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?)`;
+            this.db.run(sql,
+                [
+                    block.header.height.value,
+                    block.header.prev_block,
+                    JSON.stringify(block.header.validators._storage),
+                    block.header.merkle_root,
+                    block.header.signature,
+                    block.txs.length,
+                    block.header.enrollments.length
+                ], (err: Error | null) =>
+            {
+                this.putTransactions(block, (err1: Error | null) =>
+                {
+                    if (err1)
+                    {
+                        if (callback != undefined)
+                            callback(err1);
+                        return;
+                    }
+
+                    this.putAllEnrollments(block.header, callback);
+                });
+            });
+        }
+        catch (error)
+        {
             if (callback != undefined)
-                callback(new Error("Parameter validation failed."));
+                callback(error);
             return;
         }
-
-        var tx_count: number = data.txs.length;
-        var enrollment_count: number = data.enrollments? data.enrollments.length: 0;
-
-        var sql =
-            `INSERT INTO blocks
-                (height, prev_block, validators, merkle_root, signature, tx_count, enrollment_count)
-            VALUES
-                (?, ?, ?, ?, ?, ?, ?)`;
-        this.db.run(sql,
-            [
-                data.header.height.value,
-                data.header.prev_block,
-                JSON.stringify(data.header.validators._storage),
-                data.header.merkle_root,
-                data.header.signature,
-                tx_count,
-                enrollment_count
-            ], (err: Error | null) =>
-        {
-            this.putTransactions(data, (err1: Error | null) =>
-            {
-                if (err1)
-                {
-                    if (callback != undefined)
-                        callback(err1);
-                    return;
-                }
-
-                this.putAllEnrollments(data.header, callback);
-            });
-        });
     }
 
     /**
@@ -181,7 +174,8 @@ export class LedgerStorage extends Storages
      * The first argument is an error object.
      * The second argument is result set.
      */
-    public getBlocks (height: any, callback: (err: Error | null, rows: any[]) => void)
+    public getBlocks (height: number,
+        callback: (err: Error | null, rows: any[]) => void)
     {
         var sql =
         `SELECT
@@ -198,26 +192,15 @@ export class LedgerStorage extends Storages
     /**
      * Put a enrollment to database
      * @param data a enrollment data
+     * @param height The height of the block
+     * @param enrollment_index The index of the enrollment
      * @param callback If provided, this function will be called when
      * the database was finished successfully or when an error occurred.
      * The first argument is an error object.
      */
-    public putEnrollment (data: any, callback?: (err: Error | null) => void)
+    public putEnrollment (data: Enrollment, height: Height, enrollment_index: number,
+        callback?: (err: Error | null) => void)
     {
-        if (
-                (data == null) ||
-                (data.block_height == undefined) ||
-                (data.enrollment_index == undefined) ||
-                (data.utxo_key == undefined) ||
-                (data.random_seed == undefined) ||
-                (data.cycle_length == undefined) ||
-                (data.enroll_sig == undefined)
-        ) {
-            if (callback != null)
-                callback(new Error("Parameter validation failed."));
-            return;
-        }
-
         var sql =
         `INSERT INTO enrollments
             (block_height, enrollment_index, utxo_key, random_seed, cycle_length, enroll_sig)
@@ -225,8 +208,8 @@ export class LedgerStorage extends Storages
             (?, ?, ?, ?, ?, ?)`;
         this.db.run(sql,
             [
-                data.block_height,
-                data.enrollment_index,
+                height.value,
+                enrollment_index,
                 data.utxo_key,
                 data.random_seed,
                 data.cycle_length,
@@ -240,23 +223,15 @@ export class LedgerStorage extends Storages
 
     /**
      * Put a validator to database
-     * @param data a enrollment data
+     * @param enrollment The enrollment data
+     * @param height The height of the block
      * @param callback If provided, this function will be called when
      * the database was finished successfully or when an error occurred.
      * The first argument is an error object.
      */
-    public putValidator (data: any, callback?: (err: Error | null) => void)
+    public putValidator (enrollment: Enrollment, height: Height,
+        callback?: (err: Error | null) => void)
     {
-        if (
-            (data == null) ||
-            (data.block_height == undefined) ||
-            (data.utxo_key == undefined)
-        ) {
-            if (callback != null)
-                callback(new Error("Parameter validation failed."));
-            return;
-        }
-
         var sql: string =
         `INSERT INTO validators
             (enrolled_at, utxo_key, address, amount, preimage_distance, preimage_hash)
@@ -266,10 +241,10 @@ export class LedgerStorage extends Storages
             tx_outputs.utxo_key = ?`;
         this.db.run(sql,
             [
-                data.block_height,
+                height.value,
                 0,
                 '0x0000000000000000',
-                data.utxo_key
+                enrollment.utxo_key
             ], (err: Error | null) =>
         {
             if (callback != undefined)
@@ -279,11 +254,11 @@ export class LedgerStorage extends Storages
 
     /**
      * Puts all enrollments
-     * @param data: block header JSON object
+     * @param header: The instance of the `BlockHeader`
      * @param Callback If provided, this function will be called when
      * the database was finished successfully or when an error occurred.
      */
-    public putAllEnrollments (header: any, callback?: (err: Error | null) => void)
+    public putAllEnrollments (header: BlockHeader, callback?: (err: Error | null) => void)
     {
         var idx: number = 0;
         var doPut = () =>
@@ -295,15 +270,11 @@ export class LedgerStorage extends Storages
                 return;
             }
 
-            let enrollment: any = header.enrollments[idx];
-            enrollment.block_height = header.height.value;
-            enrollment.enrollment_index = idx;
-
-            this.putEnrollment(enrollment, (err: Error | null) =>
+            this.putEnrollment(header.enrollments[idx], header.height, idx, (err: Error | null) =>
             {
                 if (!err)
                 {
-                    this.putValidator(enrollment, (err2: Error | null) =>
+                    this.putValidator(header.enrollments[idx], header.height, (err2: Error | null) =>
                     {
                         if (err2 == null)
                         {
@@ -340,7 +311,7 @@ export class LedgerStorage extends Storages
      * The first argument is an error object.
      * The second argument is result set.
      */
-    public getEnrollments (height: any, callback: (err: Error | null, rows: any[]) => void)
+    public getEnrollments (height: number, callback: (err: Error | null, rows: any[]) => void)
     {
         var sql =
         `SELECT
@@ -378,20 +349,16 @@ export class LedgerStorage extends Storages
 
     /**
      * Put a transaction to database
-     * @param data a transaction data
+     * @param height  The height of the block
+     * @param tx The transaction
+     * @param tx_index The index of the transaction in the block
+     * @param tx_hash The hash of the transaction
      * @param callback If provided, this function will be called when
      * the database was finished successfully or when an error occurred.
-     * The first argument is an error object.
      */
-    private putTransaction (block_height: number, tx: any, tx_index: number,
+    private putTransaction (height: Height, tx: Transaction, tx_index: number,
         tx_hash: string, callback?: (err: Error | null) => void)
     {
-        if (tx == undefined) {
-            if (callback != undefined)
-                callback(new Error("Parameter validation failed."));
-            return;
-        }
-
         let sql: string =
         `INSERT INTO transactions
             (block_height, tx_index, tx_hash, type, inputs_count, outputs_count)
@@ -399,7 +366,7 @@ export class LedgerStorage extends Storages
             (?, ?, ?, ?, ?, ?)`;
         this.db.run(sql,
             [
-                block_height,
+                height.value,
                 tx_index,
                 tx_hash,
                 tx.type,
@@ -414,7 +381,7 @@ export class LedgerStorage extends Storages
                 return;
             }
 
-            this.putInputs(block_height, tx, tx_index, tx_hash, (err2: Error | null) =>
+            this.putInputs(height, tx, tx_index, tx_hash, (err2: Error | null) =>
             {
                 if (err2)
                 {
@@ -423,7 +390,7 @@ export class LedgerStorage extends Storages
                     return;
                 }
 
-                this.putOutputs(block_height, tx, tx_index, tx_hash, (err3: Error | null) =>
+                this.putOutputs(height, tx, tx_index, tx_hash, (err3: Error | null) =>
                 {
                     if (callback != undefined)
                         callback(err3);
@@ -434,12 +401,11 @@ export class LedgerStorage extends Storages
 
     /**
      * Puts all transactions
-     * @param block: block Json data
+     * @param block: The instance of the `Block`
      * @param callback If provided, this function will be called when
      * the database was finished successfully or when an error occurred.
-     * The first argument is an error object.
      */
-    public putTransactions (block: any, callback?: (err: Error | null) => void)
+    public putTransactions (block: Block, callback?: (err: Error | null) => void)
     {
         let idx: number = 0;
         let doPut = () =>
@@ -451,7 +417,7 @@ export class LedgerStorage extends Storages
                 return;
             }
 
-            this.putTransaction(block.header.height.value, block.txs[idx],
+            this.putTransaction(block.header.height, block.txs[idx],
                 idx, block.merkle_tree[idx], (err: Error | null) =>
                 {
                     if (!err)
@@ -474,32 +440,24 @@ export class LedgerStorage extends Storages
 
     /**
      * Store the inputs of the transaction.
-     * @param block_height The height of the block
-     * @param tx a transaction
+     * @param height The height of the block
+     * @param tx The transaction
      * @param tx_index The index of transaction in the block
      * @param tx_hash The hash of transaction
-     * @param callback
+     * @param callback If provided, this function will be called when
+     * the database was finished successfully or when an error occurred.
      */
-    public putInputs (block_height: number, tx: any, tx_index: number, tx_hash: string, callback?: (err: Error | null) => void)
+    public putInputs (height: Height, tx: Transaction, tx_index: number,
+        tx_hash: string, callback?: (err: Error | null) => void)
     {
         let putInput = function (
             db: sqlite.Database,
-            block_height: any,
+            height: Height,
             tx_index: number,
             in_index: number,
-            input: any,
+            input: TxInputs,
             cb?: (err: Error | null) => void)
         {
-            if (
-                (input == undefined) ||
-                (input.previous == undefined) ||
-                (input.index == undefined)
-            ) {
-                if (cb != undefined)
-                    cb(new Error("Parameter validation failed."));
-                return;
-            }
-
             let sql: string =
             `INSERT INTO tx_inputs
                 (block_height, tx_index, in_index, previous, out_index)
@@ -507,7 +465,7 @@ export class LedgerStorage extends Storages
                 (?, ?, ?, ?, ?)`;
             db.run(sql,
                 [
-                    block_height,
+                    height.value,
                     tx_index,
                     in_index,
                     input.previous,
@@ -529,7 +487,7 @@ export class LedgerStorage extends Storages
                 return;
             }
 
-            putInput(this.db, block_height, tx_index, idx, tx.inputs[idx], (err: Error | null) =>
+            putInput(this.db, height, tx_index, idx, tx.inputs[idx], (err: Error | null) =>
                 {
                     if (!err)
                     {
@@ -549,19 +507,9 @@ export class LedgerStorage extends Storages
 
         let check = function (
             db: sqlite.Database,
-            input: any,
+            input: TxInputs,
             cb?: (err: Error | null) => void)
         {
-            if (
-                (input == undefined) ||
-                (input.previous == undefined) ||
-                (input.index == undefined)
-            ) {
-                if (cb != undefined)
-                    cb(new Error("Parameter validation failed."));
-                return;
-            }
-
             let sql: string = `UPDATE tx_outputs SET used = 1 WHERE tx_hash = ? and output_index = ?`;
             db.run(sql, [input.previous, input.index], (err: Error | null) =>
             {
@@ -602,33 +550,25 @@ export class LedgerStorage extends Storages
 
     /**
      * Store the outputs of the transaction.
-     * @param block_height The height of the block
-     * @param tx a transaction
-     * @param tx_index The index of transaction in the block
-     * @param tx_hash The hash of transaction
-     * @param callback
+     * @param height The height of the block
+     * @param tx The transaction
+     * @param tx_index The index of the transaction in the block
+     * @param tx_hash The hash of the transaction
+     * @param callback If provided, this function will be called when
+     * the database was finished successfully or when an error occurred.
      */
-    public putOutputs (block_height: number, tx: any, tx_index: number, tx_hash: string, callback?: (err: Error | null) => void)
+    public putOutputs (height: Height, tx: Transaction, tx_index: number,
+        tx_hash: string, callback?: (err: Error | null) => void)
     {
         let putOutput = function (
             db: sqlite.Database,
             hash: Hash,
-            block_height: number,
+            height: Height,
             tx_index: number,
             out_index: number,
-            output: any,
+            output: TxOutputs,
             cb?: (err: Error | null) => void)
         {
-            if (
-                (output == undefined) ||
-                (output.address == undefined)||
-                (output.value == undefined)
-            ) {
-                if (cb != undefined)
-                    cb(new Error("Parameter validation failed."));
-                return;
-            }
-
             hash.makeUTXOKey(tx_hash, BigInt(out_index));
 
             let sql: string =
@@ -638,7 +578,7 @@ export class LedgerStorage extends Storages
                 (?, ?, ?, ?, ?, ?, ?)`;
             db.run(sql,
                 [
-                    block_height,
+                    height.value,
                     tx_index,
                     out_index,
                     tx_hash,
@@ -662,7 +602,7 @@ export class LedgerStorage extends Storages
                 return;
             }
 
-            putOutput(this.db, this.hash, block_height, tx_index, idx, tx.outputs[idx], (err: Error | null) =>
+            putOutput(this.db, this.hash, height, tx_index, idx, tx.outputs[idx], (err: Error | null) =>
                 {
                     if (!err)
                     {
@@ -684,7 +624,7 @@ export class LedgerStorage extends Storages
 
     /**
      * Gets a transaction data
-     * @param height the height of the block to get
+     * @param height The height of the block to get
      * @param callback If provided, this function will be called when
      * the database was finished successfully or when an error occurred.
      * The first argument is an error object.
@@ -751,5 +691,355 @@ export class LedgerStorage extends Storages
         {
             callback(err, rows);
         });
+    }
+}
+
+/**
+ * Class that stores the height of a block.
+ * Convert JSON object to TypeScript's instance.
+ * An exception occurs if the required property are not present.
+ */
+export class Height
+{
+    value: number;
+
+    constructor (json: any)
+    {
+        if (json.hasOwnProperty('value'))
+        {
+            this.value = json['value'];
+        }
+        else
+        {
+            throw new Error("Parse error: Height.value");
+        }
+    }
+}
+
+/**
+ * Class that stores the BitField of a block.
+ * Convert JSON object to TypeScript's instance.
+ * An exception occurs if the required property are not present.
+ */
+export class BitField
+{
+    _storage: number[];
+
+    constructor (json: any)
+    {
+        if (json.hasOwnProperty('_storage'))
+        {
+            this._storage = [];
+            for (let idx = 0; idx < json._storage.length; idx++)
+            {
+                this._storage.push(Number(json._storage[idx]));
+            }
+        }
+        else
+        {
+            throw new Error("Parse error: BitField._storage");
+        }
+    }
+}
+
+/**
+ * The class that stores the header of a block.
+ * Convert JSON object to TypeScript's instance.
+ * An exception occurs if the required property is not present.
+ */
+export class BlockHeader
+{
+    prev_block: string;
+    height: Height;
+    merkle_root: string;
+    validators: BitField;
+    signature: string;
+    enrollments: Enrollment[]
+
+    constructor (json: any)
+    {
+        if (json.hasOwnProperty('prev_block'))
+        {
+            this.prev_block = json.prev_block;
+        }
+        else
+        {
+            throw new Error("Parse error: BlockHeader.prev_block");
+        }
+
+        if (json.hasOwnProperty('height'))
+        {
+            this.height = new Height(json.height);
+        }
+        else
+        {
+            throw new Error("Parse error: BlockHeader.height");
+        }
+
+        if (json.hasOwnProperty('merkle_root'))
+        {
+            this.merkle_root = json.merkle_root;
+        }
+        else
+        {
+            throw new Error("Parse error: BlockHeader.merkle_root");
+        }
+
+        if (json.hasOwnProperty('validators'))
+        {
+            this.validators = new BitField(json.validators);
+        }
+        else
+        {
+            throw new Error("Parse error: BlockHeader.validators");
+        }
+
+        if (json.hasOwnProperty('signature'))
+        {
+            this.signature = json.signature;
+        }
+        else
+        {
+            throw new Error("Parse error: BlockHeader.signature");
+        }
+
+        if (json.hasOwnProperty('enrollments'))
+        {
+            this.enrollments = [];
+            for (let idx = 0; idx < json.enrollments.length; idx++)
+            {
+                this.enrollments.push(new Enrollment(json.enrollments[idx]));
+            }
+        }
+        else
+        {
+            throw new Error("Parse error: BlockHeader.enrollments");
+        }
+    }
+}
+
+/**
+ * The class that stores the enrollment of a block.
+ * Convert JSON object to TypeScript's instance.
+ * An exception occurs if the required property is not present.
+ */
+export class Enrollment
+{
+    utxo_key: string;
+    random_seed: string;
+    cycle_length: number;
+    enroll_sig: string;
+
+    constructor (json: any)
+    {
+        if (json.hasOwnProperty('utxo_key'))
+        {
+            this.utxo_key = json.utxo_key;
+        }
+        else
+        {
+            throw new Error("Parse error: Enrollment.utxo_key");
+        }
+
+        if (json.hasOwnProperty('random_seed'))
+        {
+            this.random_seed = json.random_seed;
+        }
+        else
+        {
+            throw new Error("Parse error: Enrollment.random_seed");
+        }
+
+        if (json.hasOwnProperty('cycle_length'))
+        {
+            this.cycle_length = json.cycle_length;
+        }
+        else
+        {
+            throw new Error("Parse error: Enrollment.cycle_length");
+        }
+
+        if (json.hasOwnProperty('enroll_sig'))
+        {
+            this.enroll_sig = json.enroll_sig;
+        }
+        else
+        {
+            throw new Error("Parse error: Enrollment.enroll_sig");
+        }
+    }
+}
+
+/**
+ * The class that stores the transaction of a block.
+ * Convert JSON object to TypeScript's instance.
+ * An exception occurs if the required property is not present.
+ */
+export class Transaction
+{
+    type: number;
+    inputs: TxInputs[];
+    outputs: TxOutputs[];
+
+    constructor (json: any)
+    {
+        if (json.hasOwnProperty('type'))
+        {
+            this.type = json.type;
+        }
+        else
+        {
+            throw new Error("Parse error: Transaction.type");
+        }
+
+        if (json.hasOwnProperty('inputs'))
+        {
+            this.inputs = [];
+            for (let idx = 0; idx < json.inputs.length; idx++)
+            {
+                this.inputs.push(new TxInputs(json.inputs[idx]));
+            }
+        }
+        else
+        {
+            throw new Error("Parse error: Transaction.inputs");
+        }
+
+        if (json.hasOwnProperty('outputs'))
+        {
+            this.outputs = [];
+            for (let idx = 0; idx < json.outputs.length; idx++)
+            {
+                this.outputs.push(new TxOutputs(json.outputs[idx]));
+            }
+        }
+        else
+        {
+            throw new Error("Parse error: Transaction.inputs");
+        }
+    }
+}
+
+/**
+ * The class that stores the transaction's inputs of a block.
+ * Convert JSON object to TypeScript's instance.
+ * An exception occurs if the required property is not present.
+ */
+export class TxInputs
+{
+    previous: string;
+    index: number;
+    signature: string;
+
+    constructor (json: any)
+    {
+        if (json.hasOwnProperty('previous'))
+        {
+            this.previous = json.previous;
+        }
+        else
+        {
+            throw new Error("Parse error: TxInputs.previous");
+        }
+
+        if (json.hasOwnProperty('index'))
+        {
+            this.index = json.index;
+        }
+        else
+        {
+            throw new Error("Parse error: TxInputs.index");
+        }
+
+        if (json.hasOwnProperty('signature'))
+        {
+            this.signature = json.signature;
+        }
+        else
+        {
+            throw new Error("Parse error: TxInputs.signature");
+        }
+    }
+}
+
+/**
+ * The class that stores the transaction's outputs of a block.
+ * Convert JSON object to TypeScript's instance.
+ * An exception occurs if the required property is not present.
+ */
+export class TxOutputs
+{
+    value: number;
+    address: string;
+
+    constructor (json: any)
+    {
+        if (json.hasOwnProperty('value'))
+        {
+            this.value = json.value;
+        }
+        else
+        {
+            throw new Error("Parse error: TxOutputs.value");
+        }
+
+        if (json.hasOwnProperty('address'))
+        {
+            this.address = json.address;
+        }
+        else
+        {
+            throw new Error("Parse error: TxOutputs.address");
+        }
+    }
+}
+
+/**
+ * The class that stores the block.
+ * Convert JSON object to TypeScript's instance.
+ * An exception occurs if the required property is not present.
+ */
+export class Block
+{
+    header: BlockHeader;
+    txs: Transaction[];
+    merkle_tree: string[];
+
+    constructor (json: any)
+    {
+        if (json.hasOwnProperty('header'))
+        {
+            this.header = new BlockHeader(json.header);
+        }
+        else
+        {
+            throw new Error("Parse error: Block.header");
+        }
+
+        if (json.hasOwnProperty('txs'))
+        {
+            this.txs = [];
+            for (let idx = 0; idx < json.txs.length; idx++)
+            {
+                this.txs.push(new Transaction(json.txs[idx]));
+            }
+        }
+        else
+        {
+            throw new Error("Parse error: Block.txs");
+        }
+
+        if (json.hasOwnProperty('merkle_tree'))
+        {
+            this.merkle_tree = [];
+            for (let idx = 0; idx < json.merkle_tree.length; idx++)
+            {
+                this.merkle_tree.push(json.merkle_tree[idx]);
+            }
+        }
+        else
+        {
+            throw new Error("Parse error: Block.merkle_tree");
+        }
     }
 }
