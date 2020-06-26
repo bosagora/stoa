@@ -14,7 +14,6 @@
 
 *******************************************************************************/
 
-import * as sqlite from 'sqlite3';
 import { Hash }  from '../common/Hash'
 import { Storages } from './Storages';
 
@@ -154,7 +153,7 @@ export class LedgerStorage extends Storages
                         return;
                     }
 
-                    this.putAllEnrollments(block.header, callback);
+                    this.putEnrollments(block, callback);
                 });
             });
         }
@@ -190,117 +189,62 @@ export class LedgerStorage extends Storages
     }
 
     /**
-     * Put a enrollment to database
-     * @param data a enrollment data
-     * @param height The height of the block
-     * @param enrollment_index The index of the enrollment
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
-     * The first argument is an error object.
-     */
-    public putEnrollment (data: Enrollment, height: Height, enrollment_index: number,
-        callback?: (err: Error | null) => void)
-    {
-        var sql =
-        `INSERT INTO enrollments
-            (block_height, enrollment_index, utxo_key, random_seed, cycle_length, enroll_sig)
-        VALUES
-            (?, ?, ?, ?, ?, ?)`;
-        this.db.run(sql,
-            [
-                height.value,
-                enrollment_index,
-                data.utxo_key,
-                data.random_seed,
-                data.cycle_length,
-                data.enroll_sig
-            ], (err: Error | null) =>
-        {
-            if (callback != undefined)
-                callback(err);
-        });
-    }
-
-    /**
-     * Put a validator to database
-     * @param enrollment The enrollment data
-     * @param height The height of the block
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
-     * The first argument is an error object.
-     */
-    public putValidator (enrollment: Enrollment, height: Height,
-        callback?: (err: Error | null) => void)
-    {
-        var sql: string =
-        `INSERT INTO validators
-            (enrolled_at, utxo_key, address, amount, preimage_distance, preimage_hash)
-        SELECT ?, utxo_key, address, amount, ?, ?
-            FROM tx_outputs
-        WHERE
-            tx_outputs.utxo_key = ?`;
-        this.db.run(sql,
-            [
-                height.value,
-                0,
-                '0x0000000000000000',
-                enrollment.utxo_key
-            ], (err: Error | null) =>
-        {
-            if (callback != undefined)
-                callback(err);
-        });
-    }
-
-    /**
      * Puts all enrollments
      * @param header: The instance of the `BlockHeader`
      * @param Callback If provided, this function will be called when
      * the database was finished successfully or when an error occurred.
      */
-    public putAllEnrollments (header: BlockHeader, callback?: (err: Error | null) => void)
+    public putEnrollments (block: Block, callback?: (err: Error | null) => void)
     {
-        var idx: number = 0;
-        var doPut = () =>
+        const enroll_stmt = this.db.prepare(
+            `INSERT INTO enrollments
+                (block_height, enrollment_index, utxo_key, random_seed, cycle_length, enroll_sig)
+            VALUES
+                (?, ?, ?, ?, ?, ?)`
+        );
+
+        const validator_stmt = this.db.prepare(
+            `INSERT INTO validators
+                (enrolled_at, utxo_key, address, amount, preimage_distance, preimage_hash)
+            SELECT ?, utxo_key, address, amount, ?, ?
+                FROM tx_outputs
+            WHERE
+                tx_outputs.utxo_key = ?`
+        );
+
+        block.header.enrollments.forEach((enroll: Enrollment, enroll_idx: number) =>
         {
-            if (idx >= header.enrollments.length)
+            enroll_stmt.run([
+                block.header.height.value,
+                enroll_idx,
+                enroll.utxo_key,
+                enroll.random_seed,
+                enroll.cycle_length,
+                enroll.enroll_sig
+            ]);
+            validator_stmt.run([
+                block.header.height.value,
+                0,
+                '0x0000000000000000',
+                enroll.utxo_key
+            ]);
+        });
+
+        enroll_stmt.finalize((err1: Error | null) =>
+        {
+            if (err1)
             {
                 if (callback != undefined)
-                    callback(null);
+                    callback(err1);
                 return;
             }
 
-            this.putEnrollment(header.enrollments[idx], header.height, idx, (err: Error | null) =>
+            validator_stmt.finalize((err2: Error | null) =>
             {
-                if (!err)
-                {
-                    this.putValidator(header.enrollments[idx], header.height, (err2: Error | null) =>
-                    {
-                        if (err2 == null)
-                        {
-                            idx++;
-                            doPut();
-                        }
-                        else
-                        {
-                            if (callback != undefined)
-                                callback(err);
-                            else
-                                return;
-
-                        }
-                    });
-                }
-                else
-                {
-                    if (callback != undefined)
-                        callback(err);
-                    else
-                        return;
-                }
+                if (callback != undefined)
+                    callback(err2);
             });
-        }
-        doPut();
+        });
     }
 
     /**
@@ -348,40 +292,79 @@ export class LedgerStorage extends Storages
     }
 
     /**
-     * Put a transaction to database
-     * @param height  The height of the block
-     * @param tx The transaction
-     * @param tx_index The index of the transaction in the block
-     * @param tx_hash The hash of the transaction
+     * Puts all transactions
+     * @param block: The instance of the `Block`
      * @param callback If provided, this function will be called when
      * the database was finished successfully or when an error occurred.
      */
-    private putTransaction (height: Height, tx: Transaction, tx_index: number,
-        tx_hash: string, callback?: (err: Error | null) => void)
+    public putTransactions (block: Block, callback?: (err: Error | null) => void)
     {
-        let sql: string =
-        `INSERT INTO transactions
-            (block_height, tx_index, tx_hash, type, inputs_count, outputs_count)
-        VALUES
-            (?, ?, ?, ?, ?, ?)`;
-        this.db.run(sql,
-            [
-                height.value,
-                tx_index,
-                tx_hash,
+        const tx_stmt = this.db.prepare(
+            `INSERT INTO transactions
+                (block_height, tx_index, tx_hash, type, inputs_count, outputs_count)
+            VALUES
+                (?, ?, ?, ?, ?, ?)`
+        );
+
+        const inputs_stmt = this.db.prepare(
+            `INSERT INTO tx_inputs
+                (block_height, tx_index, in_index, previous, out_index)
+            VALUES
+                (?, ?, ?, ?, ?)`
+        );
+
+        const outputs_stmt = this.db.prepare(
+            `INSERT INTO tx_outputs
+                (block_height, tx_index, output_index, tx_hash, utxo_key, address, amount)
+            VALUES
+                (?, ?, ?, ?, ?, ?, ?)`
+        );
+
+        const update_used_stmt = this.db.prepare(
+            `UPDATE tx_outputs SET used = 1 WHERE tx_hash = ? and output_index = ?`
+        );
+
+        block.txs.forEach((tx: Transaction, tx_idx: number) => {
+            tx_stmt.run([
+                block.header.height.value,
+                tx_idx,
+                block.merkle_tree[tx_idx],
                 tx.type,
                 tx.inputs.length,
                 tx.outputs.length
-            ], (err: Error | null) =>
+            ]);
+            tx.inputs.forEach((input: TxInputs, in_idx: number)  => {
+                inputs_stmt.run([
+                    block.header.height.value,
+                    tx_idx,
+                    in_idx,
+                    input.previous,
+                    input.index]);
+                update_used_stmt.run([input.previous, input.index]);
+            });
+            tx.outputs.forEach((output: TxOutputs, out_idx: number)  => {
+                this.hash.makeUTXOKey(block.merkle_tree[tx_idx], BigInt(out_idx));
+                outputs_stmt.run([
+                    block.header.height.value,
+                    tx_idx,
+                    out_idx,
+                    block.merkle_tree[tx_idx],
+                    this.hash.toHexString(),
+                    output.address,
+                    output.value]);
+            });
+        });
+
+        tx_stmt.finalize((err1: Error | null) =>
         {
-            if (err)
+            if (err1)
             {
                 if (callback != undefined)
-                    callback(err);
+                    callback(err1);
                 return;
             }
 
-            this.putInputs(height, tx, tx_index, tx_hash, (err2: Error | null) =>
+            inputs_stmt.finalize((err2: Error | null) =>
             {
                 if (err2)
                 {
@@ -390,236 +373,23 @@ export class LedgerStorage extends Storages
                     return;
                 }
 
-                this.putOutputs(height, tx, tx_index, tx_hash, (err3: Error | null) =>
+                outputs_stmt.finalize((err3: Error | null) =>
                 {
-                    if (callback != undefined)
-                        callback(err3);
-                });
-            })
-        });
-    }
-
-    /**
-     * Puts all transactions
-     * @param block: The instance of the `Block`
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
-     */
-    public putTransactions (block: Block, callback?: (err: Error | null) => void)
-    {
-        let idx: number = 0;
-        let doPut = () =>
-        {
-            if (idx >= block.txs.length)
-            {
-                if (callback != undefined)
-                    callback(null);
-                return;
-            }
-
-            this.putTransaction(block.header.height, block.txs[idx],
-                idx, block.merkle_tree[idx], (err: Error | null) =>
-                {
-                    if (!err)
-                    {
-                        idx++;
-                        doPut();
-                    }
-                    else
+                    if (err3)
                     {
                         if (callback != undefined)
-                            callback(err);
-                        else
-                            return;
-                    }
-                }
-            );
-        }
-        doPut();
-    }
-
-    /**
-     * Store the inputs of the transaction.
-     * @param height The height of the block
-     * @param tx The transaction
-     * @param tx_index The index of transaction in the block
-     * @param tx_hash The hash of transaction
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
-     */
-    public putInputs (height: Height, tx: Transaction, tx_index: number,
-        tx_hash: string, callback?: (err: Error | null) => void)
-    {
-        let putInput = function (
-            db: sqlite.Database,
-            height: Height,
-            tx_index: number,
-            in_index: number,
-            input: TxInputs,
-            cb?: (err: Error | null) => void)
-        {
-            let sql: string =
-            `INSERT INTO tx_inputs
-                (block_height, tx_index, in_index, previous, out_index)
-            VALUES
-                (?, ?, ?, ?, ?)`;
-            db.run(sql,
-                [
-                    height.value,
-                    tx_index,
-                    in_index,
-                    input.previous,
-                    input.index
-                ], (err: Error | null) =>
-            {
-                if (cb != undefined)
-                    cb(err);
-            });
-        }
-
-        let idx = 0;
-        let checking_idx = 0;
-        let doPut = () =>
-        {
-            if (idx >= tx.inputs.length)
-            {
-                doCheck();
-                return;
-            }
-
-            putInput(this.db, height, tx_index, idx, tx.inputs[idx], (err: Error | null) =>
-                {
-                    if (!err)
-                    {
-                        idx++;
-                        doPut();
-                    }
-                    else
-                    {
-                        if (callback != undefined)
-                            callback(err);
+                            callback(err3);
                         return;
                     }
-                }
-            );
-        }
 
-
-        let check = function (
-            db: sqlite.Database,
-            input: TxInputs,
-            cb?: (err: Error | null) => void)
-        {
-            let sql: string = `UPDATE tx_outputs SET used = 1 WHERE tx_hash = ? and output_index = ?`;
-            db.run(sql, [input.previous, input.index], (err: Error | null) =>
-            {
-                if (cb != undefined)
-                    cb(err);
-            });
-        }
-
-        let doCheck = () =>
-        {
-            if (checking_idx >= tx.inputs.length)
-            {
-                if (callback != undefined)
-                    callback(null);
-                return;
-            }
-
-            check(this.db, tx.inputs[checking_idx], (err: Error | null) =>
-                {
-                    if (!err)
-                    {
-                        checking_idx++;
-                        doCheck();
-                    }
-                    else
+                    update_used_stmt.finalize((err4: Error | null) =>
                     {
                         if (callback != undefined)
-                            callback(err);
-                        else
-                            return;
-                    }
-                }
-            );
-        }
-
-        doPut();
-    }
-
-    /**
-     * Store the outputs of the transaction.
-     * @param height The height of the block
-     * @param tx The transaction
-     * @param tx_index The index of the transaction in the block
-     * @param tx_hash The hash of the transaction
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
-     */
-    public putOutputs (height: Height, tx: Transaction, tx_index: number,
-        tx_hash: string, callback?: (err: Error | null) => void)
-    {
-        let putOutput = function (
-            db: sqlite.Database,
-            hash: Hash,
-            height: Height,
-            tx_index: number,
-            out_index: number,
-            output: TxOutputs,
-            cb?: (err: Error | null) => void)
-        {
-            hash.makeUTXOKey(tx_hash, BigInt(out_index));
-
-            let sql: string =
-            `INSERT INTO tx_outputs
-                (block_height, tx_index, output_index, tx_hash, utxo_key, address, amount)
-            VALUES
-                (?, ?, ?, ?, ?, ?, ?)`;
-            db.run(sql,
-                [
-                    height.value,
-                    tx_index,
-                    out_index,
-                    tx_hash,
-                    hash.toHexString(),
-                    output.address,
-                    output.value
-                ], (err: Error | null) =>
-            {
-                if (cb != undefined)
-                    cb(err);
+                            callback(err4);
+                    });
+                });
             });
-        }
-
-        let idx = 0;
-        let doPut = () =>
-        {
-            if (idx >= tx.outputs.length)
-            {
-                if (callback != undefined)
-                    callback(null);
-                return;
-            }
-
-            putOutput(this.db, this.hash, height, tx_index, idx, tx.outputs[idx], (err: Error | null) =>
-                {
-                    if (!err)
-                    {
-                        idx++;
-                        doPut();
-                    }
-                    else
-                    {
-                        if (callback != undefined)
-                            callback(err);
-                        else
-                            return;
-                    }
-                }
-            );
-        }
-        doPut();
+        });
     }
 
     /**
