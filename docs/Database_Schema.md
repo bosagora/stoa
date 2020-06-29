@@ -125,8 +125,8 @@ CREATE TABLE "tx_inputs" (
 |  tx_hash          | TEXT      |    | Y        |          | The hash of transaction |
 |  utxo_key         | TEXT      |    | Y        |          | The hash of the UTXO|
 |  amount           | NUMERIC   |    | Y        |          | The monetary value of this output, in 1/10^7|
-|  address          | TEXT(56)  |    | Y        |          | The public key that can redeem this output|
-|  used             | TEXT(1)   |    | Y        | `N`      | Whether this output was used or not('Y': used, 'N' : not used)|
+|  address          | TEXT      |    | Y        |          | The public key that can redeem this output|
+|  used             | INTEGER   |    | Y        | 0        | Whether this output was used or not(1: used, 0: not used)|
 
 ### _Create Script_
 
@@ -138,8 +138,8 @@ CREATE TABLE "tx_outputs" (
     "tx_hash"    TEXT NOT NULL,
     "utxo_key"    TEXT NOT NULL,
     "amount"    NUMERIC NOT NULL,
-    "address"    TEXT(56) NOT NULL,
-    "used"    TEXT(1) NOT NULL,
+    "address"    TEXT NOT NULL,
+    "used"    INTEGER NOT NULL,
     PRIMARY KEY("block_height","tx_index","output_index")
 )
 ```
@@ -164,7 +164,7 @@ CREATE TABLE "tx_outputs" (
 CREATE TABLE "validators" (
 	"enrolled_at"	INTEGER NOT NULL,
 	"utxo_key"	TEXT NOT NULL,
-	"address"	TEXT(56) NOT NULL,
+	"address"	TEXT NOT NULL,
 	"stake"	NUMERIC NOT NULL,
 	"preimage_distance"	INTEGER NOT NULL,
 	"preimage_hash"	TEXT NOT NULL,

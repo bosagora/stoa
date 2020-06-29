@@ -100,7 +100,7 @@ export class LedgerStorage extends Storages
         (
             "enrolled_at"  INTEGER NOT NULL,
             "utxo_key"  TEXT NOT NULL,
-            "address"  TEXT(56) NOT NULL,
+            "address"  TEXT NOT NULL,
             "amount"  NUMERIC NOT NULL,
             "preimage_distance"  INTEGER NOT NULL,
             "preimage_hash"  TEXT NOT NULL,
