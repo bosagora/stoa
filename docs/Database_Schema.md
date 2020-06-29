@@ -126,7 +126,7 @@ CREATE TABLE "tx_inputs" (
 |  utxo_key         | TEXT      |    | Y        |          | The hash of the UTXO|
 |  amount           | NUMERIC   |    | Y        |          | The monetary value of this output, in 1/10^7|
 |  address          | TEXT      |    | Y        |          | The public key that can redeem this output|
-|  used             | INTEGER   |    | Y        | 0        | Whether this output was used or not(1: used, 0: not used)|
+|  used             | INTEGER   |    | Y        |          | Whether this output was used or not(1: used, 0: not used)|
 
 ### _Create Script_
 
