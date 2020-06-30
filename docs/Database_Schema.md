@@ -13,7 +13,7 @@
 | merkle_root       | TEXT      |    | Y        |          | The hash of the merkle root of the transactions|
 | signature         | TEXT      |    | Y        |          | Schnorr multisig of all validators which signed this block |
 | tx_count          | INTEGER   |    | Y        |          | The number of transactions in the block|
-| enrollment_count  | INTEGER   |    | Y        |   0      | The number of enrollments in the block|
+| enrollment_count  | INTEGER   |    | Y        |          | The number of enrollments in the block|
 
 ### _Create Script_
 
@@ -25,7 +25,7 @@ CREATE TABLE "blocks" (
     "merkle_root"    TEXT NOT NULL,
     "signature"    TEXT NOT NULL,
     "tx_count"    INTEGER NOT NULL,
-    "enrollment_count"    INTEGER NOT NULL DEFAULT 0,
+    "enrollment_count"    INTEGER NOT NULL,
     PRIMARY KEY("height")
 )
 ```
@@ -126,7 +126,7 @@ CREATE TABLE "tx_inputs" (
 |  utxo_key         | TEXT      |    | Y        |          | The hash of the UTXO|
 |  amount           | NUMERIC   |    | Y        |          | The monetary value of this output, in 1/10^7|
 |  address          | TEXT      |    | Y        |          | The public key that can redeem this output|
-|  used             | INTEGER   |    | Y        |          | Whether this output was used or not(1: used, 0: not used)|
+|  used             | INTEGER   |    | Y        | 0        | Whether this output was used or not(1: used, 0: not used)|
 
 ### _Create Script_
 
@@ -139,7 +139,7 @@ CREATE TABLE "tx_outputs" (
     "utxo_key"    TEXT NOT NULL,
     "amount"    NUMERIC NOT NULL,
     "address"    TEXT NOT NULL,
-    "used"    INTEGER NOT NULL,
+    "used"    INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY("block_height","tx_index","output_index")
 )
 ```
