@@ -41,34 +41,36 @@ class Stoa {
                 return;
             }
 
-            this.ledger_storage.getValidatorsAPI(height, null, (err: Error | null, rows: any[]) =>
-            {
-                if (err != null)
+            this.ledger_storage.getValidatorsAPI(height, null,
+                (rows: any[]) =>
+                {
+                    let out_put:Array<ValidatorData> = new Array<ValidatorData>();
+                    if (rows.length)
+                    {
+                        let out_put:Array<ValidatorData> = new Array<ValidatorData>();
+
+                        for (const row of rows)
+                        {
+                            let preimage: IPreimage = {distance: row.distance,
+                                hash: (row.distance == 0 ? row.random_seed : '')} as IPreimage;
+                            var validator: ValidatorData =
+                                new ValidatorData(row.address, row.enrolled_at, row.stake, preimage);
+                            out_put.push(validator);
+                        }
+                        res.status(200).send(JSON.stringify(out_put));
+                    }
+                    else
+                    {
+                        res.status(204).send();
+                    }
+                },
+                (err: Error) =>
                 {
                     console.error("Failed to data lookup to the DB: " + err);
                     res.status(500).send("Failed to data lookup");
                     return;
                 }
-
-                if (rows.length)
-                {
-                    let out_put:Array<ValidatorData> = new Array<ValidatorData>();
-
-                    for (const row of rows)
-                    {
-                        let preimage: IPreimage = {distance: row.distance,
-                            hash: (row.distance == 0 ? row.random_seed : '')} as IPreimage;
-                        var validator: ValidatorData =
-                            new ValidatorData(row.address, row.enrolled_at, row.stake, preimage);
-                        out_put.push(validator);
-                    }
-                    res.status(200).send(JSON.stringify(out_put));
-                }
-                else
-                {
-                    res.status(204).send();
-                }
-            });
+            );
         });
 
         /**
@@ -90,34 +92,35 @@ class Stoa {
                 return;
             }
 
-            this.ledger_storage.getValidatorsAPI(height, address, (err: Error | null, rows: any[]) =>
-            {
-                if (err != null)
+            this.ledger_storage.getValidatorsAPI(height, address,
+                (rows: any[]) =>
+                {
+                    if (rows.length)
+                    {
+                        let out_put:Array<ValidatorData> = new Array<ValidatorData>();
+
+                        for (const row of rows)
+                        {
+                            let preimage: IPreimage = {distance: row.distance,
+                                hash: (row.distance == 0 ? row.random_seed : '')} as IPreimage;
+                            var validator: ValidatorData =
+                                new ValidatorData(row.address, row.enrolled_at, row.stake, preimage);
+                            out_put.push(validator);
+                        }
+                        res.status(200).send(JSON.stringify(out_put));
+                    }
+                    else
+                    {
+                        res.status(204).send();
+                    }
+                },
+                (err: Error) =>
                 {
                     console.error("Failed to data lookup to the DB: " + err);
                     res.status(500).send("Failed to data lookup");
                     return;
                 }
-
-                if (rows.length)
-                {
-                    let out_put:Array<ValidatorData> = new Array<ValidatorData>();
-
-                    for (const row of rows)
-                    {
-                        let preimage: IPreimage = {distance: row.distance,
-                            hash: (row.distance == 0 ? row.random_seed : '')} as IPreimage;
-                        var validator: ValidatorData =
-                            new ValidatorData(row.address, row.enrolled_at, row.stake, preimage);
-                        out_put.push(validator);
-                    }
-                    res.status(200).send(JSON.stringify(out_put));
-                }
-                else
-                {
-                    res.status(204).send();
-                }
-            });
+            );
         });
 
         /**
@@ -143,20 +146,19 @@ class Stoa {
 
             console.log(block);
 
-            this.ledger_storage.putBlocks(block, (err: any) =>
-            {
-                if (err != null)
+            this.ledger_storage.putBlocks(block,
+                () =>
+                {
+                    res.status(200).send();
+                    return;
+                },
+                (err: Error) =>
                 {
                     console.error("Failed to store the payload of a push to the DB: " + err);
                     res.status(500).send("An error occurred while saving");
                     return;
                 }
-                else
-                {
-                    res.status(200).send();
-                    return;
-                }
-            });
+            );
         });
     }
 }
