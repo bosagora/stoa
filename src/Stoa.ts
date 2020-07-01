@@ -82,7 +82,7 @@ class Stoa {
 
             var height: number = Number(req.query.height);
             var address: string = String(req.params.address);
-            
+
             if (!Number.isNaN(height) && (!Number.isInteger(height) || height < 0))
             {
                 res.status(400).send("The Height value is not valid.");
@@ -98,18 +98,12 @@ class Stoa {
                     return;
                 }
 
-                if (rows.length)
+                if (rows.length == 1)
                 {
-                    let out_put:Array<ValidatorData> = new Array<ValidatorData>();
-
-                    for (const row of rows)
-                    {
-                        let preimage: IPreimage = {distance: row.distance, hash: '0'} as IPreimage;
-                        var validator: ValidatorData | null =
-                            new ValidatorData(row.address, row.enrolled_at, row.stake, preimage);
-                        out_put.push(validator);
-                    }
-                    res.status(200).send(JSON.stringify(out_put));
+                    let preimage: IPreimage = {distance: rows[0].distance, hash: '0'} as IPreimage;
+                    let validator: ValidatorData | null =
+                        new ValidatorData(rows[0].address, rows[0].enrolled_at, rows[0].stake, preimage);
+                    res.status(200).send(JSON.stringify(validator));
                 }
                 else
                 {
