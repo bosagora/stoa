@@ -326,13 +326,22 @@ function runBlockTest (ledger_storage: LedgerStorage, callback: () => void)
     {
         assert.ok(!err2, err2?.message);
 
-        getBlockData(ledger_storage, 1, (err3: Error | null) =>
-        {
-            assert.ok(!err3, err3?.message);
-
-            callback();
+        ledger_storage.getBlocks(1,
+            (rows: any[]) =>
+            {
+                assert.equal(rows.length, 1);
+                assert.equal(rows[0].height, 1);
+                assert.equal(rows[0].merkle_root,
+                    '0x9c4a20550ac796274f64e93872466ebb551ba2cd3f2f051533d07a478d2402b' +
+                    '59e5b0f0a2a14e818b88007ec61d4a82dc9128851f43799d6c1dc0609fca1537d');
+                    callback();
+            },
+            (err: Error) =>
+            {
+                assert.ok(!err, err?.message);
+                callback();
+            });
         });
-    });
 }
 
 /**
@@ -350,141 +359,164 @@ function putAllBlockData (ledger_storage: LedgerStorage,
             return;
         }
 
-        ledger_storage.putBlocks(sample_data[idx], (err: Error | null) =>
-        {
-            if (!err)
+        ledger_storage.putBlocks(sample_data[idx],
+            () =>
             {
                 idx++;
                 doPut();
-            }
-            else
+            },
+            (err: Error) =>
             {
                 callback(err);
             }
-        });
+        );
     }
     doPut();
 }
 
 /**
- * Gets one block data
- */
-function getBlockData (ledger_storage: LedgerStorage, height: number,
-    callback?: (err: Error | null, rows: any[]) => void)
-{
-    ledger_storage.getBlocks(height, (err: Error | null, rows: any[]) =>
-    {
-        assert.equal(rows.length, 1);
-        assert.equal(rows[0].height, 1);
-        assert.equal(rows[0].merkle_root,
-            '0x9c4a20550ac796274f64e93872466ebb551ba2cd3f2f051533d07a478d2402b' +
-            '59e5b0f0a2a14e818b88007ec61d4a82dc9128851f43799d6c1dc0609fca1537d');
-        if (callback != undefined) callback(err, rows);
-    });
-}
-
-/**
  *  Run the test of the Enrollments
  */
-function runEnrollmentsTest (ledger_storage: LedgerStorage, callback: () => void)
+function runEnrollmentsTest (ledger_storage: LedgerStorage, onDone: () => void)
 {
     var height: number = 0;
-    ledger_storage.getEnrollments(height, (err3: Error | null, rows: any[]) =>
-    {
-        assert.ok(!err3, err3?.message);
-        assert.equal(rows.length, 3);
-        assert.equal(rows[0].block_height, height);
-        assert.equal(rows[0].utxo_key,
-          '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad1cc3b' +
-          'fc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
-
-        ledger_storage.getValidators(height, (err4: Error | null, rows: any[]) =>
+    ledger_storage.getEnrollments(height,
+        (rows: any[]) =>
         {
-            assert.ok(!err4, err4?.message);
             assert.equal(rows.length, 3);
-            assert.equal(rows[0].enrolled_at, height);
+            assert.equal(rows[0].block_height, height);
             assert.equal(rows[0].utxo_key,
               '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad1cc3b' +
               'fc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
-            assert.equal(rows[0].address,
-              'GA3DMXTREDC4AIUTHRFIXCKWKF7BDIXRWM2KLV74OPK2OKDM2VJ235GN');
-            callback();
-        });
-    });
-}
 
+            ledger_storage.getValidators(height,
+                (rows: any[]) =>
+                {
+                    assert.equal(rows.length, 3);
+                    assert.equal(rows[0].enrolled_at, height);
+                    assert.equal(rows[0].utxo_key,
+                      '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad1cc3b' +
+                      'fc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
+                    assert.equal(rows[0].address,
+                      'GA3DMXTREDC4AIUTHRFIXCKWKF7BDIXRWM2KLV74OPK2OKDM2VJ235GN');
+                      onDone();
+                },
+                (err4: Error) =>
+                {
+                    assert.ok(!err4, err4?.message);
+                    onDone();
+                });
+        },
+        (err3: Error) =>
+        {
+            assert.ok(!err3, err3?.message);
+            onDone();
+        });
+}
 
 /**
  * Run the test of the Transactions
  */
-function runTransactionsTest (ledger_storage: LedgerStorage, callback: () => void)
+function runTransactionsTest (ledger_storage: LedgerStorage, onDone: () => void)
 {
-    ledger_storage.getTransactions(0, (err3: Error | null, rows3: any[]) =>
-    {
-        assert.ok(!err3);
-        assert.equal(rows3.length, 4);
-        assert.equal(rows3[0].tx_hash,
-            '0x3a245017fee266f2aeacaa0ca11171b5825d34814bf1e33fae76cca50751e5c' +
-            'fb010896f009971a8748a1d3720e33404f5a999ae224b54f5d5c1ffa345c046f7');
+  ledger_storage.getTransactions(0,
+      (rows3: any[]) =>
+      {
+          assert.equal(rows3.length, 4);
+          assert.equal(rows3[0].tx_hash,
+              '0x3a245017fee266f2aeacaa0ca11171b5825d34814bf1e33fae76cca50751e5c' +
+              'fb010896f009971a8748a1d3720e33404f5a999ae224b54f5d5c1ffa345c046f7');
 
-        ledger_storage.getTxInputs(1, 0, (err4: Error | null, rows4: any[]) =>
-        {
-            assert.ok(!err4);
-            assert.equal(rows4.length, 1);
-            assert.equal(rows4[0].previous,
-                '0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd223671' +
-                '3dc369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73');
+          ledger_storage.getTxInputs(1, 0,
+              (rows4: any[]) =>
+              {
+                  assert.equal(rows4.length, 1);
+                  assert.equal(rows4[0].previous,
+                      '0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd223671' +
+                      '3dc369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73');
 
-            ledger_storage.getTxOutputs(0, 1, (err5: Error | null, rows5: any[]) =>
-            {
-                assert.ok(!err5);
-                assert.equal(rows5.length, 8);
-                assert.equal(rows5[0].utxo_key,
-                    '0xef81352c7436a19d376acf1eb8f832a28c6229885aaa4e3bd8c11d5d072e160' +
-                    '798a4ff3a7565b66ca2d0ff755f8cc0f1f97e049ca23b615c85f77fb97d7919b4');
-                assert.equal(rows5[0].tx_hash,
-                  '0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd223671' +
-                  '3dc369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73');
-                assert.equal(rows5[0].address, 'GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ');
-                assert.equal(rows5[0].used, 1);
-
-                callback();
-            });
-        });
-    });
+                  ledger_storage.getTxOutputs(0, 1,
+                      (rows5: any[]) =>
+                      {
+                          assert.equal(rows5.length, 8);
+                          assert.equal(rows5[0].utxo_key,
+                              '0xef81352c7436a19d376acf1eb8f832a28c6229885aaa4e3bd8c11d5d072e160' +
+                              '798a4ff3a7565b66ca2d0ff755f8cc0f1f97e049ca23b615c85f77fb97d7919b4');
+                          assert.equal(rows5[0].tx_hash,
+                            '0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd223671' +
+                            '3dc369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73');
+                          assert.equal(rows5[0].address, 'GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ');
+                          assert.equal(rows5[0].used, 1);
+                          onDone();
+                      },
+                      (err5: Error) =>
+                      {
+                          assert.ok(!err5, err5?.message);
+                          onDone();
+                      });
+              },
+              (err4: Error) =>
+              {
+                  assert.ok(!err4, err4?.message);
+                  onDone();
+              });
+      },
+      (err3: Error) =>
+      {
+          assert.ok(!err3, err3?.message);
+          onDone();
+      });
 }
 
 
 /**
- * Run Validators API tests
- */
-function runValidatorsAPITest (ledger_storage: LedgerStorage, callback: () => void)
+* Run Validators API tests
+*/
+function runValidatorsAPITest (ledger_storage: LedgerStorage, onDone: () => void)
 {
-  var address: string = 'GA3DMXTREDC4AIUTHRFIXCKWKF7BDIXRWM2KLV74OPK2OKDM2VJ235GN';
-  var res = ledger_storage.getValidatorsAPI(1, null, (err1: Error | null, rows: any[]) =>
-  {
-      assert.ok(!err1, err1?.message);
-      assert.equal(rows[0].address, address);
-      assert.equal(rows[0].enrolled_at, 0);
-      assert.equal(rows[0].distance, 1);
+    var address: string = 'GA3DMXTREDC4AIUTHRFIXCKWKF7BDIXRWM2KLV74OPK2OKDM2VJ235GN';
+    var res = ledger_storage.getValidatorsAPI(1, null,
+        (rows: any[]) =>
+        {
+            assert.equal(rows[0].address, address);
+            assert.equal(rows[0].enrolled_at, 0);
+            assert.equal(rows[0].distance, 1);
 
-      var res1 = ledger_storage.getValidatorsAPI(1, address, (err2: Error | null, rows: any[]) =>
-      {
-          assert.ok(!err2, err2?.message);
-          assert.equal(rows.length, 1);
-          assert.equal(rows[0].address, address);
-          assert.equal(rows[0].stake, '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad'+
-          '1cc3bfc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
+            var res1 = ledger_storage.getValidatorsAPI(1, address,
+                (rows: any[]) =>
+                {
+                    assert.equal(rows.length, 1);
+                    assert.equal(rows[0].address, address);
+                    assert.equal(rows[0].stake, '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad'+
+                    '1cc3bfc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
 
-          var res2 = ledger_storage.getValidatorsAPI(Number.NaN, null, (err3: Error | null, rows: any[]) =>
+                    var res2 = ledger_storage.getValidatorsAPI(Number.NaN, null,
+                        (rows: any[]) =>
+                        {
+                            assert.equal(rows.length, 3);
+                            assert.equal(rows[0].distance, 1);
+                            onDone();
+                        },
+                        (err3: Error) =>
+                        {
+                            assert.ok(!err3, err3?.message);
+                            onDone();
+                        }
+                    );
+                },
+                (err2: Error) =>
+                {
+                    assert.ok(!err2, err2?.message);
+                    onDone();
+                }
+            );
+          },
+          (err1: Error) =>
           {
-              assert.ok(!err3, err3?.message);
-              assert.equal(rows.length, 3);
-              assert.equal(rows[0].distance, 1);
-              callback();
-          });
-      });
-  });
+              assert.ok(!err1, err1?.message);
+              onDone();
+          }
+      );
 }
 
 describe('LedgerStorage', () =>

@@ -11,7 +11,6 @@
 
 *******************************************************************************/
 
-import * as sqlite from 'sqlite3';
 import { Hash }  from '../common/Hash'
 import { Storages } from './Storages';
 import { Block, Enrollment, BlockHeader, Transaction,
@@ -116,11 +115,13 @@ export class LedgerStorage extends Storages
     /**
      * Puts a block to database
      * @param data a block data
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
-     * The first argument is an error object.
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
      */
-    public putBlocks (data: any, callback?: (err: Error | null) => void)
+    public putBlocks (data: any,
+        onSuccess: () => void, onError: (err: Error) => void)
     {
         let block: Block = new Block();
         try
@@ -129,8 +130,7 @@ export class LedgerStorage extends Storages
         }
         catch (error)
         {
-            if (callback != undefined)
-                callback(error);
+            onError(error);
             return;
         }
 
@@ -150,30 +150,25 @@ export class LedgerStorage extends Storages
                 block.header.enrollments.length
             ], (err: Error | null) =>
         {
-            this.putTransactions(block, (err1: Error | null) =>
+            this.putTransactions(block,
+            () =>
             {
-                if (err1)
-                {
-                    if (callback != undefined)
-                        callback(err1);
-                    return;
-                }
-
-                this.putAllEnrollments(block.header, callback);
-            });
+                this.putAllEnrollments(block, onSuccess, onError);
+            },
+            onError);
         });
     }
 
     /**
      * Gets a block data
      * @param height the height of the block to get
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
-     * The first argument is an error object.
-     * The second argument is result set.
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
      */
     public getBlocks (height: number,
-        callback: (err: Error | null, rows: any[]) => void)
+        onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
     {
         var sql =
         `SELECT
@@ -181,30 +176,28 @@ export class LedgerStorage extends Storages
         FROM
             blocks
         WHERE height = ?`;
-        this.db.all(sql, [height], (err: Error | null, rows: any[]) =>
-        {
-            callback(err, rows);
-        });
+        this.query(sql, [height], onSuccess, onError);
     }
 
     /**
      * Put a enrollment to database
-     * @param data a enrollment data
+     * @param data The enrollment data
      * @param height The height of the block
      * @param enrollment_index The index of the enrollment
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
-     * The first argument is an error object.
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
      */
     public putEnrollment (data: Enrollment, height: number, enrollment_index: number,
-        callback?: (err: Error | null) => void)
+        onSuccess: () => void, onError: (err: Error) => void)
     {
         var sql =
         `INSERT INTO enrollments
             (block_height, enrollment_index, utxo_key, random_seed, cycle_length, enroll_sig)
         VALUES
             (?, ?, ?, ?, ?, ?)`;
-        this.db.run(sql,
+        this.query(sql,
             [
                 height,
                 enrollment_index,
@@ -212,23 +205,20 @@ export class LedgerStorage extends Storages
                 data.random_seed,
                 data.cycle_length,
                 data.enroll_sig
-            ], (err: Error | null) =>
-        {
-            if (callback != undefined)
-                callback(err);
-        });
+            ], onSuccess, onError);
     }
 
     /**
      * Put a validator to database
      * @param enrollment The enrollment data
      * @param height The height of the block
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
-     * The first argument is an error object.
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
      */
     public putValidator (enrollment: Enrollment, height: number,
-        callback?: (err: Error | null) => void)
+        onSuccess: () => void, onError: (err: Error) => void)
     {
         var sql: string =
         `INSERT INTO validators
@@ -237,79 +227,71 @@ export class LedgerStorage extends Storages
             FROM tx_outputs
         WHERE
             tx_outputs.utxo_key = ?`;
-        this.db.run(sql,
+        this.query(sql,
             [
                 height,
                 0,
                 '0x0000000000000000',
                 enrollment.utxo_key
-            ], (err: Error | null) =>
-        {
-            if (callback != undefined)
-                callback(err);
-        });
+            ], onSuccess, onError);
     }
 
     /**
      * Puts all enrollments
-     * @param header: The instance of the `BlockHeader`
-     * @param Callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
+     * @param block: The instance of the `Block`
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
      */
-    public putAllEnrollments (header: BlockHeader, callback?: (err: Error | null) => void)
+    public putAllEnrollments (block: Block,
+        onSuccess: () => void, onError: (err: Error) => void)
     {
         var idx: number = 0;
         var doPut = () =>
         {
-            if (idx >= header.enrollments.length)
+            if (idx >= block.header.enrollments.length)
             {
-                if (callback != undefined)
-                    callback(null);
+                onSuccess();
                 return;
             }
 
-            this.putEnrollment(header.enrollments[idx], header.height, idx, (err: Error | null) =>
-            {
-                if (!err)
+            this.putEnrollment(block.header.enrollments[idx], block.header.height, idx,
+                () =>
                 {
-                    this.putValidator(header.enrollments[idx], header.height, (err2: Error | null) =>
-                    {
-                        if (err2 == null)
+                    this.putValidator(block.header.enrollments[idx], block.header.height,
+                        () =>
                         {
                             idx++;
                             doPut();
-                        }
-                        else
+                        },
+                        (err2: Error) =>
                         {
-                            if (callback != undefined)
-                                callback(err);
-                            else
-                                return;
-
+                            onError(err2);
+                            return;
                         }
-                    });
-                }
-                else
+                    );
+                },
+                (err1: Error) =>
                 {
-                    if (callback != undefined)
-                        callback(err);
-                    else
-                        return;
+                    onError(err1);
+                    return;
                 }
-            });
+            );
         }
         doPut();
     }
 
     /**
      * Get enrollments
-     * @param Corresponding block height of enrollments
-     * @param Callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
-     * The first argument is an error object.
-     * The second argument is result set.
+     * @param height The height of the block
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
      */
-    public getEnrollments (height: number, callback: (err: Error | null, rows: any[]) => void)
+    public getEnrollments (height: number,
+        onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
     {
         var sql =
         `SELECT
@@ -317,21 +299,19 @@ export class LedgerStorage extends Storages
         FROM
             enrollments
         WHERE block_height = ?`;
-        this.db.all(sql, [height], (err: Error | null, rows: any[]) =>
-        {
-            callback(err, rows);
-        });
+        this.query(sql, [height], onSuccess, onError);
     }
 
     /**
      * Get validators
-     * @param height block height of enrollments
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
-     * The first argument is an error object.
-     * The second argument is result set.
+     * @param height The height of the block
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
      */
-    public getValidators (height: number, callback: (err: Error | null, rows: any[]) => void)
+    public getValidators (height: number,
+        onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
     {
         var sql: string =
         `SELECT
@@ -339,10 +319,7 @@ export class LedgerStorage extends Storages
         FROM
             validators
         WHERE enrolled_at = ?`;
-        this.db.all(sql, [height], (err: Error | null, rows: any[]) =>
-        {
-            callback(err, rows);
-        });
+        this.query(sql, [height], onSuccess, onError);
     }
 
     /**
@@ -351,18 +328,20 @@ export class LedgerStorage extends Storages
      * @param tx The transaction
      * @param tx_index The index of the transaction in the block
      * @param tx_hash The hash of the transaction
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
      */
-    private putTransaction (height: number, tx: Transaction, tx_index: number,
-        tx_hash: string, callback?: (err: Error | null) => void)
+    private putTransaction (height: number, tx: Transaction, tx_index: number, tx_hash: string,
+        onSuccess: () => void, onError: (err: Error) => void)
     {
         let sql: string =
         `INSERT INTO transactions
             (block_height, tx_index, tx_hash, type, inputs_count, outputs_count)
         VALUES
             (?, ?, ?, ?, ?, ?)`;
-        this.db.run(sql,
+        this.query(sql,
             [
                 height,
                 tx_index,
@@ -370,66 +349,53 @@ export class LedgerStorage extends Storages
                 tx.type,
                 tx.inputs.length,
                 tx.outputs.length
-            ], (err: Error | null) =>
-        {
-            if (err)
+            ],
+            () =>
             {
-                if (callback != undefined)
-                    callback(err);
-                return;
-            }
-
-            this.putInputs(height, tx, tx_index, tx_hash, (err2: Error | null) =>
-            {
-                if (err2)
-                {
-                    if (callback != undefined)
-                        callback(err2);
-                    return;
-                }
-
-                this.putOutputs(height, tx, tx_index, tx_hash, (err3: Error | null) =>
-                {
-                    if (callback != undefined)
-                        callback(err3);
-                });
-            })
-        });
+                this.putInputs(height, tx, tx_index, tx_hash,
+                    () =>
+                    {
+                        this.putOutputs(height, tx, tx_index, tx_hash,
+                            onSuccess, onError);
+                    },
+                    onError
+                );
+            },
+            onError
+        );
     }
 
     /**
      * Puts all transactions
      * @param block: The instance of the `Block`
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
      */
-    public putTransactions (block: Block, callback?: (err: Error | null) => void)
+    public putTransactions (block: Block,
+        onSuccess: () => void, onError: (err: Error) => void)
     {
         let idx: number = 0;
         let doPut = () =>
         {
             if (idx >= block.txs.length)
             {
-                if (callback != undefined)
-                    callback(null);
+                onSuccess();
                 return;
             }
 
             this.putTransaction(block.header.height, block.txs[idx],
-                idx, block.merkle_tree[idx], (err: Error | null) =>
+                idx, block.merkle_tree[idx],
+                () =>
                 {
-                    if (!err)
-                    {
-                        idx++;
-                        doPut();
-                    }
-                    else
-                    {
-                        if (callback != undefined)
-                            callback(err);
-                        else
-                            return;
-                    }
+                    idx++;
+                    doPut();
+                },
+                (err: Error) =>
+                {
+                    onError(err);
+                    return;
                 }
             );
         }
@@ -442,37 +408,36 @@ export class LedgerStorage extends Storages
      * @param tx The transaction
      * @param tx_index The index of transaction in the block
      * @param tx_hash The hash of transaction
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
      */
-    public putInputs (height: number, tx: Transaction, tx_index: number,
-        tx_hash: string, callback?: (err: Error | null) => void)
+    public putInputs (height: number, tx: Transaction, tx_index: number, tx_hash: string,
+        onSuccess: () => void, onError: (err: Error) => void)
     {
         let putInput = function (
-            db: sqlite.Database,
+            storage: LedgerStorage,
             height: number,
             tx_index: number,
             in_index: number,
             input: TxInputs,
-            cb?: (err: Error | null) => void)
+            onSuccess: () => void,
+            onError: (err: Error) => void)
         {
             let sql: string =
             `INSERT INTO tx_inputs
                 (block_height, tx_index, in_index, previous, out_index)
             VALUES
                 (?, ?, ?, ?, ?)`;
-            db.run(sql,
+            storage.query(sql,
                 [
                     height,
                     tx_index,
                     in_index,
                     input.previous,
                     input.index
-                ], (err: Error | null) =>
-            {
-                if (cb != undefined)
-                    cb(err);
-            });
+                ], onSuccess, onError);
         }
 
         let idx = 0;
@@ -485,60 +450,49 @@ export class LedgerStorage extends Storages
                 return;
             }
 
-            putInput(this.db, height, tx_index, idx, tx.inputs[idx], (err: Error | null) =>
+            putInput(this, height, tx_index, idx, tx.inputs[idx],
+                () =>
                 {
-                    if (!err)
-                    {
-                        idx++;
-                        doPut();
-                    }
-                    else
-                    {
-                        if (callback != undefined)
-                            callback(err);
-                        return;
-                    }
+                    idx++;
+                    doPut();
+                },
+                (err: Error) =>
+                {
+                    onError(err);
+                    return;
                 }
             );
         }
 
 
         let check = function (
-            db: sqlite.Database,
+            storage: LedgerStorage,
             input: TxInputs,
-            cb?: (err: Error | null) => void)
+            onSuccess: () => void,
+            onError: (err: Error) => void)
         {
             let sql: string = `UPDATE tx_outputs SET used = 1 WHERE tx_hash = ? and output_index = ?`;
-            db.run(sql, [input.previous, input.index], (err: Error | null) =>
-            {
-                if (cb != undefined)
-                    cb(err);
-            });
+            storage.query(sql, [input.previous, input.index], onSuccess, onError);
         }
 
         let doCheck = () =>
         {
             if (checking_idx >= tx.inputs.length)
             {
-                if (callback != undefined)
-                    callback(null);
+                onSuccess();
                 return;
             }
 
-            check(this.db, tx.inputs[checking_idx], (err: Error | null) =>
+            check(this, tx.inputs[checking_idx],
+                () =>
                 {
-                    if (!err)
-                    {
-                        checking_idx++;
-                        doCheck();
-                    }
-                    else
-                    {
-                        if (callback != undefined)
-                            callback(err);
-                        else
-                            return;
-                    }
+                    checking_idx++;
+                    doCheck();
+                },
+                (err: Error) =>
+                {
+                    onError(err);
+                    return;
                 }
             );
         }
@@ -552,20 +506,23 @@ export class LedgerStorage extends Storages
      * @param tx The transaction
      * @param tx_index The index of the transaction in the block
      * @param tx_hash The hash of the transaction
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
      */
-    public putOutputs (height: number, tx: Transaction, tx_index: number,
-        tx_hash: string, callback?: (err: Error | null) => void)
+    public putOutputs (height: number, tx: Transaction, tx_index: number, tx_hash: string,
+        onSuccess: () => void, onError: (err: Error) => void)
     {
         let putOutput = function (
-            db: sqlite.Database,
+            storage: LedgerStorage,
             hash: Hash,
             height: number,
             tx_index: number,
             out_index: number,
             output: TxOutputs,
-            cb?: (err: Error | null) => void)
+            onSuccess: () => void,
+            onError: (err: Error) => void)
         {
             hash.makeUTXOKey(tx_hash, BigInt(out_index));
 
@@ -574,7 +531,7 @@ export class LedgerStorage extends Storages
                 (block_height, tx_index, output_index, tx_hash, utxo_key, address, amount)
             VALUES
                 (?, ?, ?, ?, ?, ?, ?)`;
-            db.run(sql,
+            storage.query(sql,
                 [
                     height,
                     tx_index,
@@ -583,11 +540,7 @@ export class LedgerStorage extends Storages
                     hash.toHexString(),
                     output.address,
                     output.value
-                ], (err: Error | null) =>
-            {
-                if (cb != undefined)
-                    cb(err);
-            });
+                ], onSuccess, onError);
         }
 
         let idx = 0;
@@ -595,25 +548,20 @@ export class LedgerStorage extends Storages
         {
             if (idx >= tx.outputs.length)
             {
-                if (callback != undefined)
-                    callback(null);
+                onSuccess();
                 return;
             }
 
-            putOutput(this.db, this.hash, height, tx_index, idx, tx.outputs[idx], (err: Error | null) =>
+            putOutput(this, this.hash, height, tx_index, idx, tx.outputs[idx],
+                () =>
                 {
-                    if (!err)
-                    {
-                        idx++;
-                        doPut();
-                    }
-                    else
-                    {
-                        if (callback != undefined)
-                            callback(err);
-                        else
-                            return;
-                    }
+                    idx++;
+                    doPut();
+                },
+                (err: Error) =>
+                {
+                    onError(err);
+                    return;
                 }
             );
         }
@@ -623,13 +571,13 @@ export class LedgerStorage extends Storages
     /**
      * Gets a transaction data
      * @param height The height of the block to get
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
-     * The first argument is an error object.
-     * The second argument is result set.
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
      */
     public getTransactions (height: number,
-        callback: (err: Error | null, rows: any[]) => void)
+        onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
     {
         var sql: string =
         `SELECT
@@ -637,23 +585,20 @@ export class LedgerStorage extends Storages
         FROM
             transactions
         WHERE block_height = ?`;
-        this.db.all(sql, [height], (err: Error | null, rows: any[]) =>
-        {
-            callback(err, rows);
-        });
+        this.query(sql, [height], onSuccess, onError);
     }
 
     /**
      * Gets a transaction inputs data
      * @param height The height of the block to get
      * @param tx_index The index of the transaction in the block
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
-     * The first argument is an error object.
-     * The second argument is result set.
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
      */
     public getTxInputs (height: number, tx_index: number,
-        callback: (err: Error | null, rows: any[]) => void)
+        onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
     {
         var sql: string =
         `SELECT
@@ -661,23 +606,20 @@ export class LedgerStorage extends Storages
         FROM
             tx_inputs
         WHERE block_height = ? AND tx_index = ?`;
-        this.db.all(sql, [height, tx_index], (err: Error | null, rows: any[]) =>
-        {
-            callback(err, rows);
-        });
+        this.query(sql, [height, tx_index], onSuccess, onError);
     }
 
     /**
      * Gets a transaction outputs data
      * @param height The height of the block to get
      * @param tx_index The index of the transaction in the block
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
-     * The first argument is an error object.
-     * The second argument is result set.
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
      */
     public getTxOutputs (height: number, tx_index: number,
-        callback: (err: Error | null, rows: any[]) => void)
+        onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
     {
         var sql: string =
         `SELECT
@@ -685,9 +627,29 @@ export class LedgerStorage extends Storages
         FROM
             tx_outputs
         WHERE block_height = ? AND tx_index = ?`;
-        this.db.all(sql, [height, tx_index], (err: Error | null, rows: any[]) =>
+        this.query(sql, [height, tx_index], onSuccess, onError);
+    }
+
+    /**
+     * Runs the SQL query with the specified parameters and
+     * calls the callback onSuccess and onError afterwards
+     * @param sql The SQL query to run.
+     * @param params When the SQL statement contains placeholders,
+     * you can pass them in here.
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
+     */
+    private query (sql: string, params: any,
+        onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
+    {
+        this.db.all(sql, params, (err: Error | null, rows: any[]) =>
         {
-            callback(err, rows);
+            if (!err)
+                onSuccess(rows);
+            else
+                onError(err);
         });
     }
 
@@ -697,11 +659,13 @@ export class LedgerStorage extends Storages
      * validators based on the block height if there is a height.
      * if height null the most up to date state is expected.
      * if the height is null then current valid validators.
-     * @param Callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
      */
     public getValidatorsAPI (height: number, address: string | null,
-        callback: (err: Error | null, rows: any[]) => void)
+        onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
     {
         var cur_height: string;
 
@@ -730,9 +694,6 @@ export class LedgerStorage extends Storages
 
         sql += ` ORDER BY enrollments.block_height ASC, enrollments.utxo_key ASC;`;
 
-        this.db.all(sql, [], (err: Error | null, rows: any[]) =>
-        {
-            callback(err, rows);
-        });
+        this.query(sql, [], onSuccess, onError);
     }
 }
