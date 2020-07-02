@@ -714,7 +714,7 @@ export class LedgerStorage extends Storages
         `SELECT tx_outputs.address,
                 enrollments.block_height as enrolled_at,
                 enrollments.utxo_key as stake,
-                (` + cur_height + ` - (enrollments.block_height + 1)) as distance,
+                (` + cur_height + ` - enrollments.block_height) as distance,
                 enrollments.random_seed,
                 (SELECT MAX(height) as height FROM blocks) as height,
                 ((SELECT MAX(height) as height FROM blocks) - (enrollments.block_height + 1)) as test
@@ -727,6 +727,8 @@ export class LedgerStorage extends Storages
 
         if (address != null)
             sql += ` AND tx_outputs.address = '` + address + `'`;
+
+        sql += ` ORDER BY enrollments.block_height ASC, enrollments.utxo_key ASC;`;
 
         this.db.all(sql, [], (err: Error | null, rows: any[]) =>
         {

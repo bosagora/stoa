@@ -56,7 +56,8 @@ class Stoa {
 
                     for (const row of rows)
                     {
-                        let preimage: IPreimage = {distance: row.distance, hash: '0'} as IPreimage;
+                        let preimage: IPreimage = {distance: row.distance,
+                            hash: (row.distance == 0 ? row.random_seed : '')} as IPreimage;
                         var validator: ValidatorData =
                             new ValidatorData(row.address, row.enrolled_at, row.stake, preimage);
                         out_put.push(validator);
@@ -98,12 +99,19 @@ class Stoa {
                     return;
                 }
 
-                if (rows.length == 1)
+                if (rows.length)
                 {
-                    let preimage: IPreimage = {distance: rows[0].distance, hash: '0'} as IPreimage;
-                    let validator: ValidatorData | null =
-                        new ValidatorData(rows[0].address, rows[0].enrolled_at, rows[0].stake, preimage);
-                    res.status(200).send(JSON.stringify(validator));
+                    let out_put:Array<ValidatorData> = new Array<ValidatorData>();
+
+                    for (const row of rows)
+                    {
+                        let preimage: IPreimage = {distance: row.distance,
+                            hash: (row.distance == 0 ? row.random_seed : '')} as IPreimage;
+                        var validator: ValidatorData =
+                            new ValidatorData(row.address, row.enrolled_at, row.stake, preimage);
+                        out_put.push(validator);
+                    }
+                    res.status(200).send(JSON.stringify(out_put));
                 }
                 else
                 {
