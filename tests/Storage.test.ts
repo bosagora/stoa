@@ -466,7 +466,7 @@ function runValidatorsAPITest (ledger_storage: LedgerStorage, callback: () => vo
       assert.ok(!err1, err1?.message);
       assert.equal(rows[0].address, address);
       assert.equal(rows[0].enrolled_at, 0);
-      assert.equal(rows[0].distance, 0);
+      assert.equal(rows[0].distance, 1);
 
       var res1 = ledger_storage.getValidatorsAPI(1, address, (err2: Error | null, rows: any[]) =>
       {
@@ -480,7 +480,7 @@ function runValidatorsAPITest (ledger_storage: LedgerStorage, callback: () => vo
           {
               assert.ok(!err3, err3?.message);
               assert.equal(rows.length, 3);
-              assert.equal(rows[0].distance, 0);
+              assert.equal(rows[0].distance, 1);
               callback();
           });
       });
