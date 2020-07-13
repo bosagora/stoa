@@ -25,7 +25,7 @@ describe('Hash', () => {
                     '3dc369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73');
 
         // Check
-        assert.equal(h.toHexString(),
+        assert.strictEqual(h.toHexString(),
             '0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd2236713d' +
             'c369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73');
     });
@@ -38,7 +38,7 @@ describe('Hash', () => {
         h.hash(Buffer.from("abc"));
 
         // Check
-        assert.equal(h.toHexString(),
+        assert.strictEqual(h.toHexString(),
             '0x239900d4ed8623b95a92f1dba88ad31895cc3345ded552c22d79ab2a39c5877' +
             'dd1a2ffdb6fbb124bb7c45a68142f214ce9f6129fb697276a0d4d1c983fa580ba');
     });
@@ -58,7 +58,7 @@ describe('Hash', () => {
         h.hashMulti(foo.buffer, bar.buffer);
 
         // Check
-        assert.equal(h.toHexString(),
+        assert.strictEqual(h.toHexString(),
             '0xe0343d063b14c52630563ec81b0f91a84ddb05f2cf05a2e4330ddc79bd3a06e57' +
             'c2e756f276c112342ff1d6f1e74d05bdb9bf880abd74a2e512654e12d171a74');
     });
@@ -68,7 +68,7 @@ describe('Hash', () => {
         hash.makeUTXOKey('0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd223671' +
         '3dc369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73', BigInt(1));
 
-        assert.equal(hash.toHexString(),
+        assert.strictEqual(hash.toHexString(),
             '0x7c95c29b184e47fbd32e58e5abd42c6e22e8bd5a7e934ab049d21df545e09c2' +
             'e33bb2b89df2e59ee01eb2519b1508284b577f66a76d42546b65a6813e592bb84');
     });
