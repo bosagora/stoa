@@ -278,7 +278,7 @@ export class LedgerStorage extends Storages
                     return;
                 }
             );
-        }
+        };
         doPut();
     }
 
@@ -398,7 +398,7 @@ export class LedgerStorage extends Storages
                     return;
                 }
             );
-        }
+        };
         doPut();
     }
 
@@ -438,7 +438,7 @@ export class LedgerStorage extends Storages
                     input.previous,
                     input.index
                 ], onSuccess, onError);
-        }
+        };
 
         let idx = 0;
         let checking_idx = 0;
@@ -462,7 +462,7 @@ export class LedgerStorage extends Storages
                     return;
                 }
             );
-        }
+        };
 
 
         let check = function (
@@ -495,7 +495,7 @@ export class LedgerStorage extends Storages
                     return;
                 }
             );
-        }
+        };
 
         doPut();
     }
@@ -541,7 +541,7 @@ export class LedgerStorage extends Storages
                     output.address,
                     output.value
                 ], onSuccess, onError);
-        }
+        };
 
         let idx = 0;
         let doPut = () =>
@@ -564,7 +564,7 @@ export class LedgerStorage extends Storages
                     return;
                 }
             );
-        }
+        };
         doPut();
     }
 
