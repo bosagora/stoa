@@ -37,7 +37,7 @@ export class LedgerStorage extends Storages
      */
     public createTables (callback: (err: Error | null) => void)
     {
-        var sql: string =
+        let sql: string =
         `CREATE TABLE IF NOT EXISTS blocks
         (
             height INTEGER NOT NULL PRIMARY KEY,
@@ -134,7 +134,7 @@ export class LedgerStorage extends Storages
             return;
         }
 
-        var sql =
+        let sql =
             `INSERT INTO blocks
                 (height, prev_block, validators, merkle_root, signature, tx_count, enrollment_count)
             VALUES
@@ -170,7 +170,7 @@ export class LedgerStorage extends Storages
     public getBlocks (height: number,
         onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
     {
-        var sql =
+        let sql =
         `SELECT
             height, prev_block, validators, merkle_root, signature, tx_count, enrollment_count
         FROM
@@ -192,7 +192,7 @@ export class LedgerStorage extends Storages
     public putEnrollment (data: Enrollment, height: number, enrollment_index: number,
         onSuccess: () => void, onError: (err: Error) => void)
     {
-        var sql =
+        let sql =
         `INSERT INTO enrollments
             (block_height, enrollment_index, utxo_key, random_seed, cycle_length, enroll_sig)
         VALUES
@@ -220,7 +220,7 @@ export class LedgerStorage extends Storages
     public putValidator (enrollment: Enrollment, height: number,
         onSuccess: () => void, onError: (err: Error) => void)
     {
-        var sql: string =
+        let sql: string =
         `INSERT INTO validators
             (enrolled_at, utxo_key, address, amount, preimage_distance, preimage_hash)
         SELECT ?, utxo_key, address, amount, ?, ?
@@ -247,8 +247,8 @@ export class LedgerStorage extends Storages
     public putAllEnrollments (block: Block,
         onSuccess: () => void, onError: (err: Error) => void)
     {
-        var idx: number = 0;
-        var doPut = () =>
+        let idx: number = 0;
+        let doPut = () =>
         {
             if (idx >= block.header.enrollments.length)
             {
@@ -293,7 +293,7 @@ export class LedgerStorage extends Storages
     public getEnrollments (height: number,
         onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
     {
-        var sql =
+        let sql =
         `SELECT
             block_height, enrollment_index, utxo_key, random_seed, cycle_length, enroll_sig
         FROM
@@ -313,7 +313,7 @@ export class LedgerStorage extends Storages
     public getValidators (height: number,
         onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
     {
-        var sql: string =
+        let sql: string =
         `SELECT
             enrolled_at, utxo_key, address, amount, preimage_distance, preimage_hash
         FROM
@@ -579,7 +579,7 @@ export class LedgerStorage extends Storages
     public getTransactions (height: number,
         onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
     {
-        var sql: string =
+        let sql: string =
         `SELECT
             block_height, tx_index, tx_hash, type, inputs_count, outputs_count
         FROM
@@ -600,7 +600,7 @@ export class LedgerStorage extends Storages
     public getTxInputs (height: number, tx_index: number,
         onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
     {
-        var sql: string =
+        let sql: string =
         `SELECT
             block_height, tx_index, in_index, previous, "out_index"
         FROM
@@ -621,7 +621,7 @@ export class LedgerStorage extends Storages
     public getTxOutputs (height: number, tx_index: number,
         onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
     {
-        var sql: string =
+        let sql: string =
         `SELECT
             block_height, tx_index, output_index, tx_hash, utxo_key, address, amount, used
         FROM
@@ -667,14 +667,14 @@ export class LedgerStorage extends Storages
     public getValidatorsAPI (height: number, address: string | null,
         onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
     {
-        var cur_height: string;
+        let cur_height: string;
 
         if (!Number.isNaN(height))
             cur_height = height.toString();
         else
             cur_height = `(SELECT MAX(height) as height FROM blocks)`;
 
-        var sql =
+        let sql =
         `SELECT tx_outputs.address,
                 enrollments.block_height as enrolled_at,
                 enrollments.utxo_key as stake,
