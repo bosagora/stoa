@@ -13,7 +13,7 @@ class Stoa {
         // parse application/x-www-form-urlencoded
         this.stoa.use(bodyParser.urlencoded({ extended: false }))
         // parse application/json
-        this.stoa.use(bodyParser.json())
+        this.stoa.use(bodyParser.json());
         // create blockStorage
         this.ledger_storage = new LedgerStorage(file_name, (err: Error | null) =>
         {
