@@ -33,7 +33,7 @@ class Stoa {
         this.stoa.get("/validators",
             (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-            var height: number = Number(req.query.height);
+            let height: number = Number(req.query.height);
 
             if (!Number.isNaN(height) && (!Number.isInteger(height) || height < 0))
             {
@@ -83,8 +83,8 @@ class Stoa {
         this.stoa.get("/validator/:address",
             (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-            var height: number = Number(req.query.height);
-            var address: string = String(req.params.address);
+            let height: number = Number(req.query.height);
+            let address: string = String(req.params.address);
 
             if (!Number.isNaN(height) && (!Number.isInteger(height) || height < 0))
             {
@@ -103,7 +103,7 @@ class Stoa {
                         {
                             let preimage: IPreimage = {distance: row.distance,
                                 hash: (row.distance == 0 ? row.random_seed : '')} as IPreimage;
-                            var validator: ValidatorData =
+                            let validator: ValidatorData =
                                 new ValidatorData(row.address, row.enrolled_at, row.stake, preimage);
                             out_put.push(validator);
                         }
@@ -130,7 +130,7 @@ class Stoa {
         this.stoa.post("/push",
             (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-            var block: any;
+            let block: any;
             if (req.body.block == undefined)
             {
                 res.status(400).send("Missing 'block' object in body");
