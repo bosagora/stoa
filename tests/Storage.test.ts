@@ -295,7 +295,7 @@ const sample_data =
 /**
  * Run LedgerStorageTest
  */
-function runLedgerStorageTest ()
+function runLedgerStorageTest (doneIt: () => void)
 {
     let ledger_storage: LedgerStorage = new LedgerStorage(":memory:", (err1: Error | null) =>
     {
@@ -310,6 +310,7 @@ function runLedgerStorageTest ()
                     runValidatorsAPITest(ledger_storage, () =>
                     {
                         ledger_storage.close();
+                        doneIt();
                     });
                 });
             });
@@ -521,18 +522,18 @@ function runValidatorsAPITest (ledger_storage: LedgerStorage, onDone: () => void
 
 describe('LedgerStorage', () =>
 {
-    it('Test ledger storage and inquiry function.', () =>
+    it('Test ledger storage and inquiry function.', (doneIt: () => void) =>
     {
-        runLedgerStorageTest();
+        runLedgerStorageTest(doneIt);
     });
-    it ('Test validation of JSON data', () =>
+    it ('Test validation of JSON data', (doneIt: () => void) =>
     {
-        TestOfValidation();
+        TestOfValidation(doneIt);
     });
 });
 
 
-function TestOfValidation()
+function TestOfValidation(doneIt: () => void)
 {
     let enrollment: Enrollment;
 
@@ -574,4 +575,5 @@ function TestOfValidation()
     }
     assert.ok(error);
     assert.strictEqual(error.message, 'Parse error: Enrollment.utxo_key');
+    doneIt();
 }
