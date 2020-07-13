@@ -63,11 +63,11 @@ function readAllRows ()
 {
     db.all("SELECT rowid AS id, info FROM transactions", (err, rows) =>
     {
-        assert.equal(rows.length, 10);
+        assert.strictEqual(rows.length, 10);
         rows.forEach((row : any, idx : number) =>
         {
-            assert.equal(row.id, idx + 1);
-            assert.equal(row.info, 'hash ' + idx);
+            assert.strictEqual(row.id, idx + 1);
+            assert.strictEqual(row.info, 'hash ' + idx);
         });
         readSomeRows();
     });
@@ -81,8 +81,8 @@ function readSomeRows ()
     let idx = 0;
     db.each("SELECT rowid AS id, info FROM transactions WHERE rowid < ? ", 5, (err, row) =>
     {
-        assert.equal(row.id, idx + 1);
-        assert.equal(row.info, 'hash ' + idx);
+        assert.strictEqual(row.id, idx + 1);
+        assert.strictEqual(row.info, 'hash ' + idx);
         idx++;
     }, closeDb);
 }
