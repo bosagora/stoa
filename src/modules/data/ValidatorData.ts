@@ -3,12 +3,12 @@ export interface IValidator {
     enrolled_at: number;
     stake: string;
     preimage?: IPreimage;
-};
+}
 
 export interface IPreimage {
     distance?: number;
     hash?: string;
-};
+}
 
 export class ValidatorData implements IValidator {
     address: string;
