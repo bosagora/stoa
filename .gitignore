@@ -108,3 +108,6 @@ dist
 
 # database
 database
+
+# WebStorm
+.idea
