@@ -153,7 +153,7 @@ export class LedgerStorage extends Storages
             this.putTransactionsUseStatement(block,
             () =>
             {
-                this.putAllEnrollments(block, onSuccess, onError);
+                this.putEnrollmentsUseStatement(block, onSuccess, onError);
             },
             onError);
         });
@@ -280,6 +280,70 @@ export class LedgerStorage extends Storages
             );
         };
         doPut();
+    }
+
+
+    /**
+     * Puts all enrollments
+     * @param block: The instance of the `Block`
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
+     */
+    public putEnrollmentsUseStatement (block: Block,
+        onSuccess: () => void, onError: (err: Error) => void)
+    {
+        const enroll_stmt = this.db.prepare(
+            `INSERT INTO enrollments
+                (block_height, enrollment_index, utxo_key, random_seed, cycle_length, enroll_sig)
+            VALUES
+                (?, ?, ?, ?, ?, ?)`
+        );
+
+        const validator_stmt = this.db.prepare(
+            `INSERT INTO validators
+                (enrolled_at, utxo_key, address, amount, preimage_distance, preimage_hash)
+            SELECT ?, utxo_key, address, amount, ?, ?
+                FROM tx_outputs
+            WHERE
+                tx_outputs.utxo_key = ?`
+        );
+
+        block.header.enrollments.forEach((enroll: Enrollment, enroll_idx: number) =>
+        {
+            enroll_stmt.run([
+                block.header.height,
+                enroll_idx,
+                enroll.utxo_key,
+                enroll.random_seed,
+                enroll.cycle_length,
+                enroll.enroll_sig
+            ]);
+            validator_stmt.run([
+                block.header.height,
+                0,
+                '0x0000000000000000',
+                enroll.utxo_key
+            ]);
+        });
+
+        enroll_stmt.finalize((err1: Error | null) =>
+        {
+            if (err1)
+            {
+                onError(err1);
+                return;
+            }
+
+            validator_stmt.finalize((err2: Error | null) =>
+            {
+                if (err2)
+                    onError(err2);
+                else
+                    onSuccess();
+            });
+        });
     }
 
     /**
