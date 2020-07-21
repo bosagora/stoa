@@ -150,7 +150,7 @@ export class LedgerStorage extends Storages
                 block.header.enrollments.length
             ], (err: Error | null) =>
         {
-            this.putTransactions(block,
+            this.putTransactionsUseStatement(block,
             () =>
             {
                 this.putAllEnrollments(block, onSuccess, onError);
@@ -566,6 +566,109 @@ export class LedgerStorage extends Storages
             );
         };
         doPut();
+    }
+
+    /**
+     * Puts all transactions
+     * @param block: The instance of the `Block`
+     * @param onSuccess This function will be called when
+     * the database was finished successfully
+     * @param onError This function will be called when
+     * an error occurred.
+     */
+    public putTransactionsUseStatement (block: Block,
+        onSuccess: () => void, onError: (err: Error) => void)
+    {
+        const tx_stmt = this.db.prepare(
+            `INSERT INTO transactions
+                (block_height, tx_index, tx_hash, type, inputs_count, outputs_count)
+            VALUES
+                (?, ?, ?, ?, ?, ?)`
+        );
+
+        const inputs_stmt = this.db.prepare(
+            `INSERT INTO tx_inputs
+                (block_height, tx_index, in_index, previous, out_index)
+            VALUES
+                (?, ?, ?, ?, ?)`
+        );
+
+        const outputs_stmt = this.db.prepare(
+            `INSERT INTO tx_outputs
+                (block_height, tx_index, output_index, tx_hash, utxo_key, address, amount)
+            VALUES
+                (?, ?, ?, ?, ?, ?, ?)`
+        );
+
+        const update_used_stmt = this.db.prepare(
+            `UPDATE tx_outputs SET used = 1 WHERE tx_hash = ? and output_index = ?`
+        );
+
+        block.txs.forEach((tx: Transaction, tx_idx: number) => {
+            tx_stmt.run([
+                block.header.height,
+                tx_idx,
+                block.merkle_tree[tx_idx],
+                tx.type,
+                tx.inputs.length,
+                tx.outputs.length
+            ]);
+            tx.inputs.forEach((input: TxInputs, in_idx: number)  => {
+                inputs_stmt.run([
+                    block.header.height,
+                    tx_idx,
+                    in_idx,
+                    input.previous,
+                    input.index]);
+                update_used_stmt.run([input.previous, input.index]);
+            });
+            tx.outputs.forEach((output: TxOutputs, out_idx: number)  => {
+                this.hash.makeUTXOKey(block.merkle_tree[tx_idx], BigInt(out_idx));
+                outputs_stmt.run([
+                    block.header.height,
+                    tx_idx,
+                    out_idx,
+                    block.merkle_tree[tx_idx],
+                    this.hash.toHexString(),
+                    output.address,
+                    output.value]);
+            });
+        });
+
+        tx_stmt.finalize((err1: Error | null) =>
+        {
+            if (err1)
+            {
+                onError(err1);
+                return;
+            }
+
+            inputs_stmt.finalize((err2: Error | null) =>
+            {
+                if (err2)
+                {
+                    onError(err2);
+                    return;
+                }
+
+                outputs_stmt.finalize((err3: Error | null) =>
+                {
+                    if (err3)
+                    {
+                        onError(err3);
+                        return;
+                    }
+
+                    update_used_stmt.finalize((err4: Error | null) =>
+                    {
+                        if (err4)
+                            onError(err4);
+                        else
+                            onSuccess();
+                    });
+                });
+            });
+        });
     }
 
     /**
