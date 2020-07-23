@@ -13,7 +13,7 @@
 
 import { Hash }  from '../common/Hash'
 import { Storages } from './Storages';
-import { Block, Enrollment, BlockHeader, Transaction,
+import { Block, Enrollment, Transaction,
     TxInputs, TxOutputs } from '../data';
 
 /**
