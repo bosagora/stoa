@@ -200,14 +200,14 @@ function runTransactionsTest (ledger_storage: LedgerStorage, onDone: () => void)
 function runValidatorsAPITest (ledger_storage: LedgerStorage, onDone: () => void)
 {
     let address: string = 'GA3DMXTREDC4AIUTHRFIXCKWKF7BDIXRWM2KLV74OPK2OKDM2VJ235GN';
-    let res = ledger_storage.getValidatorsAPI(1, null,
+    ledger_storage.getValidatorsAPI(1, null,
         (rows: any[]) =>
         {
             assert.strictEqual(rows[0].address, address);
             assert.strictEqual(rows[0].enrolled_at, 0);
             assert.strictEqual(rows[0].distance, 1);
 
-            let res1 = ledger_storage.getValidatorsAPI(1, address,
+            ledger_storage.getValidatorsAPI(1, address,
                 (rows: any[]) =>
                 {
                     assert.strictEqual(rows.length, 1);
@@ -215,7 +215,7 @@ function runValidatorsAPITest (ledger_storage: LedgerStorage, onDone: () => void
                     assert.strictEqual(rows[0].stake, '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad'+
                     '1cc3bfc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
 
-                    let res2 = ledger_storage.getValidatorsAPI(Number.NaN, null,
+                    ledger_storage.getValidatorsAPI(Number.NaN, null,
                         (rows: any[]) =>
                         {
                             assert.strictEqual(rows.length, 3);
