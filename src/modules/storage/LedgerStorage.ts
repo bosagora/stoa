@@ -57,52 +57,52 @@ export class LedgerStorage extends Storages
             random_seed TEXT NOT NULL,
             cycle_length INTEGER NOT NULL,
             enroll_sig TEXT NOT NULL,
-            PRIMARY KEY("block_height","enrollment_index")
+            PRIMARY KEY(block_height,enrollment_index)
         );
 
-        CREATE TABLE IF NOT EXISTS "transactions"
+        CREATE TABLE IF NOT EXISTS transactions
         (
-            "block_height"      INTEGER NOT NULL,
-            "tx_index"          INTEGER NOT NULL,
-            "tx_hash"           TEXT NOT NULL,
-            "type"              INTEGER NOT NULL,
-            "inputs_count"      INTEGER NOT NULL,
-            "outputs_count"     INTEGER NOT NULL,
-            PRIMARY KEY("block_height", "tx_index")
+            block_height      INTEGER NOT NULL,
+            tx_index          INTEGER NOT NULL,
+            tx_hash           TEXT NOT NULL,
+            type              INTEGER NOT NULL,
+            inputs_count      INTEGER NOT NULL,
+            outputs_count     INTEGER NOT NULL,
+            PRIMARY KEY(block_height, tx_index)
         );
 
-        CREATE TABLE IF NOT EXISTS "tx_inputs"
+        CREATE TABLE IF NOT EXISTS tx_inputs
         (
-            "block_height"      INTEGER NOT NULL,
-            "tx_index"          INTEGER NOT NULL,
-            "in_index"          INTEGER NOT NULL,
-            "previous"          TEXT NOT NULL,
-            "out_index"         INTEGER NOT NULL,
-            PRIMARY KEY("block_height", "tx_index", "in_index")
+            block_height      INTEGER NOT NULL,
+            tx_index          INTEGER NOT NULL,
+            in_index          INTEGER NOT NULL,
+            previous          TEXT NOT NULL,
+            out_index         INTEGER NOT NULL,
+            PRIMARY KEY(block_height, tx_index, in_index)
         );
 
-        CREATE TABLE IF NOT EXISTS "tx_outputs"
+        CREATE TABLE IF NOT EXISTS tx_outputs
         (
-            "block_height"  INTEGER NOT NULL,
-            "tx_index"      INTEGER NOT NULL,
-            "output_index"  INTEGER NOT NULL,
-            "tx_hash"       TEXT NOT NULL,
-            "utxo_key"      TEXT NOT NULL,
-            "amount"        NUMERIC NOT NULL,
-            "address"       TEXT NOT NULL,
-            "used"          INTEGER NOT NULL DEFAULT 0,
-            PRIMARY KEY("block_height", "tx_index", "output_index")
+            block_height  INTEGER NOT NULL,
+            tx_index      INTEGER NOT NULL,
+            output_index  INTEGER NOT NULL,
+            tx_hash       TEXT NOT NULL,
+            utxo_key      TEXT NOT NULL,
+            amount        NUMERIC NOT NULL,
+            address       TEXT NOT NULL,
+            used          INTEGER NOT NULL DEFAULT 0,
+            PRIMARY KEY(block_height, tx_index, output_index)
         );
 
-        CREATE TABLE IF NOT EXISTS "validators"
+        CREATE TABLE IF NOT EXISTS validators
         (
-            "enrolled_at"  INTEGER NOT NULL,
-            "utxo_key"  TEXT NOT NULL,
-            "address"  TEXT NOT NULL,
-            "amount"  NUMERIC NOT NULL,
-            "preimage_distance"  INTEGER NOT NULL,
-            "preimage_hash"  TEXT NOT NULL,
-            PRIMARY KEY("enrolled_at","utxo_key")
+            enrolled_at  INTEGER NOT NULL,
+            utxo_key  TEXT NOT NULL,
+            address  TEXT NOT NULL,
+            amount  NUMERIC NOT NULL,
+            preimage_distance  INTEGER NOT NULL,
+            preimage_hash  TEXT NOT NULL,
+            PRIMARY KEY(enrolled_at,utxo_key)
         );
         `;
 
@@ -419,7 +419,7 @@ export class LedgerStorage extends Storages
     {
         let sql: string =
         `SELECT
-            block_height, tx_index, in_index, previous, "out_index"
+            block_height, tx_index, in_index, previous, out_index
         FROM
             tx_inputs
         WHERE block_height = ? AND tx_index = ?`;
