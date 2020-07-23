@@ -1,4 +1,0 @@
-describe('Calculator', () => {
-    it('nothing', () => {
-    });
-  });
