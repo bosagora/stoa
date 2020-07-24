@@ -67,17 +67,17 @@ describe ('Test of Stoa API Server', () =>
             .finally(doneIt);
     });
 
-    it ('Test of the path /push', (doneIt: () => void) =>
+    it ('Test of the path /block_externalized', (doneIt: () => void) =>
     {
         let uri = URI(host)
             .port(port)
-            .directory("push");
+            .directory("block_externalized");
 
         let url = uri.toString();
         assert.doesNotThrow(async () =>
         {
-            await client.post(url, {block: JSON.stringify(sample_data[0])});
-            await client.post(url, {block: JSON.stringify(sample_data[1])});
+            await client.post(url, {block: sample_data[0]});
+            await client.post(url, {block: sample_data[1]});
             doneIt();
         });
     });

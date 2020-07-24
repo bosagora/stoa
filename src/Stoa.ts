@@ -127,7 +127,7 @@ class Stoa {
          * When a request is received through the `/push` handler
          * JSON block data is parsed and stored on each storage.
          */
-        this.stoa.post("/push",
+        this.stoa.post("/block_externalized",
             (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
             let block: any;
@@ -138,7 +138,10 @@ class Stoa {
             }
 
             try {
-                block = JSON.parse(req.body.block);
+                if (typeof req.body.block === "string")
+                    block = JSON.parse(req.body.block);
+                else
+                    block = req.body.block;
             } catch(e) {
                 res.status(400).send("Not a valid JSON format");
                 return;
