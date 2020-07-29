@@ -162,12 +162,12 @@ CREATE TABLE "tx_outputs" (
 
 ```sql
 CREATE TABLE "validators" (
-	"enrolled_at"	INTEGER NOT NULL,
-	"utxo_key"	TEXT NOT NULL,
-	"address"	TEXT NOT NULL,
-	"stake"	NUMERIC NOT NULL,
-	"preimage_distance"	INTEGER NOT NULL,
-	"preimage_hash"	TEXT NOT NULL,
-	PRIMARY KEY("enrolled_at","utxo_key")
+    "enrolled_at"    INTEGER NOT NULL,
+    "utxo_key"    TEXT NOT NULL,
+    "address"    TEXT NOT NULL,
+    "stake"    NUMERIC NOT NULL,
+    "preimage_distance"    INTEGER NOT NULL,
+    "preimage_hash"    TEXT NOT NULL,
+    PRIMARY KEY("enrolled_at","utxo_key")
 )
 ```
