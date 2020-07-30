@@ -52,16 +52,42 @@ class Stoa {
             this.ledger_storage.getValidatorsAPI(height, null,
                 (rows: any[]) =>
                 {
-                    let out_put:Array<ValidatorData> = new Array<ValidatorData>();
                     if (rows.length)
                     {
                         let out_put:Array<ValidatorData> = new Array<ValidatorData>();
 
                         for (const row of rows)
                         {
-                            let preimage: IPreimage = {distance: row.distance,
-                                hash: (row.distance == 0 ? row.random_seed : '')} as IPreimage;
-                            var validator: ValidatorData =
+                            let preimage_hash: string = row.preimage_hash;
+                            let preimage_distance: number = row.preimage_distance;
+                            let target_height: number = row.height;
+                            let result_preimage_hash = new Hash();
+                            let start_index: number = row.enrolled_at + 1;
+
+                            // Hashing preImage
+                            if ((target_height >= start_index) &&
+                                (start_index + row.preimage_distance) >= target_height)
+                            {
+                                result_preimage_hash.fromHexString(preimage_hash);
+                                for (let i = 0; i < start_index + row.preimage_distance - target_height; i++)
+                                {
+                                    result_preimage_hash.hash(result_preimage_hash.buffer.slice());
+                                    preimage_distance--;
+                                }
+                            }
+                            else
+                            {
+                                preimage_distance = NaN;
+                                result_preimage_hash.fromHexString(Hash.NULL);
+                            }
+
+                            let preimage: IPreimage =
+                                {
+                                    distance: preimage_distance,
+                                    hash: result_preimage_hash.toHexString()
+                                } as IPreimage;
+
+                            let validator: ValidatorData =
                                 new ValidatorData(row.address, row.enrolled_at, row.stake, preimage);
                             out_put.push(validator);
                         }
@@ -109,8 +135,35 @@ class Stoa {
 
                         for (const row of rows)
                         {
-                            let preimage: IPreimage = {distance: row.distance,
-                                hash: (row.distance == 0 ? row.random_seed : '')} as IPreimage;
+                            let preimage_hash: string = row.preimage_hash;
+                            let preimage_distance: number = row.preimage_distance;
+                            let target_height: number = row.height;
+                            let result_preimage_hash = new Hash();
+                            let start_index: number = row.enrolled_at + 1;
+
+                            // Hashing preImage
+                            if ((target_height >= start_index) &&
+                                (start_index + row.preimage_distance) >= target_height)
+                            {
+                                result_preimage_hash.fromHexString(preimage_hash);
+                                for (let i = 0; i < start_index + row.preimage_distance - target_height; i++)
+                                {
+                                    result_preimage_hash.hash(result_preimage_hash.buffer.slice());
+                                    preimage_distance--;
+                                }
+                            }
+                            else
+                            {
+                                preimage_distance = NaN;
+                                result_preimage_hash.fromHexString(Hash.NULL);
+                            }
+
+                            let preimage: IPreimage =
+                                {
+                                    distance: preimage_distance,
+                                    hash: result_preimage_hash.toHexString()
+                                } as IPreimage;
+
                             let validator: ValidatorData =
                                 new ValidatorData(row.address, row.enrolled_at, row.stake, preimage);
                             out_put.push(validator);

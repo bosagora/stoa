@@ -248,7 +248,7 @@ export class LedgerStorage extends Storages
                     [
                         block.header.height.value,
                         0,
-                        '0x0000000000000000',
+                        enroll.random_seed,
                         enroll.utxo_key
                     ],
                     () => {
@@ -624,23 +624,36 @@ export class LedgerStorage extends Storages
 
         let sql =
         `SELECT tx_outputs.address,
-                enrollments.block_height as enrolled_at,
+                enrollments.enrolled_at,
                 enrollments.utxo_key as stake,
-                (` + cur_height + ` - enrollments.block_height) as distance,
                 enrollments.random_seed,
-                (SELECT MAX(height) as height FROM blocks) as height,
-                ((SELECT MAX(height) as height FROM blocks) - (enrollments.block_height + 1)) as test
-        FROM enrollments
-            LEFT JOIN tx_outputs ON enrollments.utxo_key = tx_outputs.utxo_key
-        WHERE
-            enrollments.block_height >= (` + cur_height + ` - enrollments.cycle_length)
-            AND enrollments.block_height <= ` + cur_height + `
+                ` + cur_height + ` as height,
+                validators.preimage_distance,
+                validators.preimage_hash,
+                (` + cur_height + ` - (enrollments.enrolled_at + 1)) as test
+        FROM (SELECT MAX(block_height) as enrolled_at,
+                enrollment_index,
+                utxo_key,
+                random_seed,
+                cycle_length,
+                enroll_sig
+             FROM enrollments
+             WHERE (block_height + 1) <= ` + cur_height + `
+               AND ` + cur_height + ` <= (block_height + cycle_length)
+             GROUP BY utxo_key) as enrollments
+        INNER JOIN tx_outputs
+            ON enrollments.utxo_key = tx_outputs.utxo_key
+            AND tx_outputs.used = 0
+        LEFT JOIN validators
+            ON enrollments.enrolled_at = validators.enrolled_at
+            AND enrollments.utxo_key = validators.utxo_key
+        WHERE 1 = 1
         `;
 
         if (address != null)
             sql += ` AND tx_outputs.address = '` + address + `'`;
 
-        sql += ` ORDER BY enrollments.block_height ASC, enrollments.utxo_key ASC;`;
+        sql += ` ORDER BY enrollments.enrolled_at ASC, enrollments.utxo_key ASC;`;
 
         this.query(sql, [], onSuccess, onError);
     }

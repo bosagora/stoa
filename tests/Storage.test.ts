@@ -198,7 +198,7 @@ function runValidatorsAPITest (ledger_storage: LedgerStorage, onDone: () => void
         {
             assert.strictEqual(rows[0].address, address);
             assert.strictEqual(rows[0].enrolled_at, 0);
-            assert.strictEqual(rows[0].distance, 1);
+            assert.strictEqual(rows[0].distance, undefined);
 
             ledger_storage.getValidatorsAPI(1, address,
                 (rows: any[]) =>
@@ -212,7 +212,7 @@ function runValidatorsAPITest (ledger_storage: LedgerStorage, onDone: () => void
                         (rows: any[]) =>
                         {
                             assert.strictEqual(rows.length, 3);
-                            assert.strictEqual(rows[0].distance, 1);
+                            assert.strictEqual(rows[0].distance, undefined);
                             onDone();
                         },
                         (err3: Error) =>
@@ -379,7 +379,7 @@ function updatePreImageTest (allDoneIt: () => void)
                             ledger_storage.getValidators(height,
                                 (rows: any[]) =>
                                 {
-                                    assert.strictEqual(rows[0].preimage_distance, 6);
+                                    assert.strictEqual(rows[0].preimage_distance, sample_preImageInfo.distance);
                                     assert.strictEqual(rows[0].preimage_hash, sample_preImageInfo.hash);
                                 },
                                 (err1: Error) =>
@@ -419,7 +419,7 @@ function updatePreImageTest (allDoneIt: () => void)
                         });
                     });
 
-                    it ('Preimage distance Greater Than ValidatorCycle Test', (doneIt: () => void) =>
+                    it ('Fail tests that sending a pre-image with a distance of 1008 works', (doneIt: () => void) =>
                     {
                         // Distance test out of cycle_length range Test
                         sample_preImageInfo.distance = 1008;

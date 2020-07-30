@@ -30,6 +30,12 @@ export class Hash
      */
     public buffer: Buffer;
 
+    public static NULL: string =
+        "0x0000000000000000000000000000000000000" +
+        "000000000000000000000000000000000000000" +
+        "000000000000000000000000000000000000000" +
+        "0000000000000";
+
     /**
      * Constructor
      * @param hex Hex string of hash
