@@ -3,6 +3,8 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import { LedgerStorage } from "./modules/storage/LedgerStorage";
 import { ValidatorData, IPreimage, IValidator } from "./modules/data/ValidatorData";
+import { Hash } from "./modules/common/Hash";
+import { PreImageInfo } from "./modules/data";
 import { cors_options } from "./cors";
 
 class Stoa {
@@ -163,6 +165,42 @@ class Stoa {
             .catch((err) => {
                 console.error("Failed to store the payload of a push to the DB: " + err);
                 res.status(500).send("An error occurred while saving");
+            });
+        });
+
+        /**
+         * When a request is received through the `/preimage_received` handler
+         * JSON preImage data is parsed and stored on each storage.
+         */
+        this.stoa.post("/preimage_received",
+            (req: express.Request, res: express.Response, next: express.NextFunction) => {
+
+            let pre_image: PreImageInfo = new PreImageInfo();
+            if (req.body.pre_image == undefined)
+            {
+                res.status(400).send("Missing 'preImage' object in body");
+            }
+
+            try
+            {
+                pre_image.parseJSON(req.body.pre_image);
+            }
+            catch(e)
+            {
+                res.status(400).send("Not a valid JSON format");
+                return;
+            }
+
+            console.log(pre_image);
+
+            this.ledger_storage.updatePreImage(pre_image)
+            .then(() => {
+                res.status(200).send();
+                return;
+            })
+            .catch((err) => {
+                console.error("Failed to store the payload of a update to the DB: " + err);
+                res.status(500).send("An error occurred while update");
             });
         });
     }

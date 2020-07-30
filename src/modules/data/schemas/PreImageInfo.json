@@ -1,0 +1,17 @@
+{
+  "title": "IPreImageInfo",
+  "type": "object",
+  "properties": {
+    "enroll_key": {
+      "type": "string"
+    },
+    "hash": {
+      "type": "string"
+    },
+    "distance": {
+      "type": "integer"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["enroll_key", "hash", "distance"]
+}

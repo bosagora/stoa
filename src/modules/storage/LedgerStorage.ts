@@ -15,7 +15,7 @@ import { Hash }  from '../common/Hash'
 import { Storages } from './Storages';
 import {
     Block, Enrollment, Height, Transaction,
-    TxInputs, TxOutputs
+    TxInputs, TxOutputs, PreImageInfo
 } from '../data';
 
 /**
@@ -282,6 +282,52 @@ export class LedgerStorage extends Storages
                 }
                 resolve();
             })();
+        });
+    }
+
+    /**
+     * Update a preImage to database
+     */
+    public updatePreImage (pre_image: PreImageInfo): Promise<void>
+    {
+        return new Promise<void>((resolve, reject) =>
+        {
+            this.query(
+                `UPDATE validators
+                    SET preimage_distance = ?,
+                        preimage_hash = ?
+                    WHERE
+                    EXISTS
+                        (SELECT 1
+                        FROM enrollments
+                        WHERE enrollments.utxo_key = ?
+                        ORDER BY block_height DESC
+                        LIMIT 1)
+                    AND validators.utxo_key = ?
+                    AND validators.enrolled_at =
+                        (SELECT block_height
+                        FROM enrollments
+                        WHERE enrollments.utxo_key = ?
+                            AND ? < enrollments.cycle_length
+                        ORDER BY block_height DESC
+                        LIMIT 1)
+                    AND ? > validators.preimage_distance`,
+                [
+                    pre_image.distance,
+                    pre_image.hash,
+                    pre_image.enroll_key,
+                    pre_image.enroll_key,
+                    pre_image.enroll_key,
+                    pre_image.distance,
+                    pre_image.distance
+                ],
+                () => {
+                    resolve();
+                },
+                (err: Error) => {
+                    reject(err);
+                }
+            );
         });
     }
 
