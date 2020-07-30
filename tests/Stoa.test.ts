@@ -17,7 +17,7 @@ import express from "express";
 import axios from "axios";
 import * as http from "http";
 import URI from "urijs";
-import {sample_data} from "./SampleData.test";
+import {sample_data, sample_preImageInfo} from "./SampleData.test";
 
 /**
  * This is an API server for testing and inherited from Stoa.
@@ -125,5 +125,22 @@ describe ('Test of Stoa API Server', () =>
                 assert.ok(!error, error);
             })
             .finally(doneIt);
+    });
+
+    it ('Test of the path /preimage_received', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("preimage_received");
+
+        await client.post (uri.toString(), {pre_image: sample_preImageInfo})
+        .then((response) =>
+        {
+            assert.strictEqual(response.status, 200);
+        })
+        .catch((error) =>
+        {
+            assert.fail(error);
+        });
     });
 });

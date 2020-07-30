@@ -20,6 +20,7 @@ export { IHeight } from '../types/Height';
 export { ITransaction } from '../types/Transaction';
 export { ITxInputs } from '../types/TxInputs';
 export { ITxOutputs } from '../types/TxOutputs';
+export { IPreImageInfo } from '../types/PreImageInfo';
 
 const ajv = new Ajv();
 

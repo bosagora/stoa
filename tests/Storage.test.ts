@@ -14,7 +14,8 @@
 import * as assert from 'assert';
 import { LedgerStorage } from '../src/modules/storage/LedgerStorage';
 import { Block } from '../src/modules/data';
-import {sample_data} from "./SampleData.test";
+import { PreImageInfo } from '../src/modules/data';
+import { sample_data, sample_preImageInfo } from "./SampleData.test";
 
 /**
  * Run LedgerStorageTest
@@ -345,4 +346,111 @@ describe('LedgerStorage', () =>
             assert.strictEqual(rows1.length, 4);
         });
     });
+
+    it('Tests that sending a pre-image', (doneIt: () => void) =>
+    {
+        updatePreImageTest(doneIt);
+    });
 });
+
+/**
+ *  Run the test of the update preImage
+ */
+function updatePreImageTest (allDoneIt: () => void)
+{
+    let ledger_storage: LedgerStorage = new LedgerStorage(":memory:", (err1: Error | null) =>
+    {
+        assert.ok(!err1, err1?.message);
+
+        putAllBlockData(ledger_storage, (err2: Error | null) =>
+        {
+            assert.ok(!err2, err2?.message);
+
+            let height: number = 0;
+            ledger_storage.getEnrollments(height,
+                () =>
+                {
+                    it ('Tests that sending a pre-image with a distance of 6 works', (doneIt: () => void) =>
+                    {
+                        let pre_image: PreImageInfo = new PreImageInfo();
+                        pre_image.parseJSON(sample_preImageInfo);
+                        ledger_storage.updatePreImage(pre_image)
+                        .then(() => {
+                            ledger_storage.getValidators(height,
+                                (rows: any[]) =>
+                                {
+                                    assert.strictEqual(rows[0].preimage_distance, 6);
+                                    assert.strictEqual(rows[0].preimage_hash, sample_preImageInfo.hash);
+                                },
+                                (err1: Error) =>
+                                {
+                                    assert.ok(!err1, err1?.message);
+                                    doneIt();
+                                });
+                        })
+                        .catch((err2) => {
+                            assert.ok(!err2, err2);
+                            doneIt();
+                        });
+                    });
+
+                    it ('Fail tests that sending a pre-image with a distance of 5 works', (doneIt: () => void) =>
+                    {
+                        sample_preImageInfo.distance = 5;
+                        let pre_image: PreImageInfo = new PreImageInfo();
+                        pre_image.parseJSON(sample_preImageInfo);
+                        ledger_storage.updatePreImage(pre_image)
+                        .then(() => {
+                            ledger_storage.getValidators(height,
+                                (rows: any[]) =>
+                                {
+                                    assert.strictEqual(rows[0].preimage_distance, 6);
+                                    assert.strictEqual(rows[0].preimage_hash, sample_preImageInfo.hash);
+                                },
+                                (err1: Error) =>
+                                {
+                                    assert.ok(!err1, err1?.message);
+                                    doneIt();
+                                });
+                        })
+                        .catch((err2) => {
+                            assert.ok(!err2, err2);
+                            doneIt();
+                        });
+                    });
+
+                    it ('Preimage distance Greater Than ValidatorCycle Test', (doneIt: () => void) =>
+                    {
+                        // Distance test out of cycle_length range Test
+                        sample_preImageInfo.distance = 1008;
+                        let pre_image: PreImageInfo = new PreImageInfo();
+                        pre_image.parseJSON(sample_preImageInfo);
+                        ledger_storage.updatePreImage(pre_image)
+                        .then(() => {
+                            ledger_storage.getValidators(height,
+                                (rows: any[]) =>
+                                {
+                                    assert.strictEqual(rows[0].preimage_distance, 6);
+                                    assert.strictEqual(rows[0].preimage_hash, sample_preImageInfo.hash);
+                                },
+                                (err1: Error) =>
+                                {
+                                    assert.ok(!err1, err1?.message);
+                                    doneIt();
+                                });
+                        })
+                        .catch((err2) => {
+                            assert.ok(!err2, err2);
+                            doneIt();
+                        });
+                    });
+                },
+                (err3: Error) =>
+                {
+                    assert.ok(!err3, err3);
+                    allDoneIt();
+                });
+        });
+    });
+    allDoneIt();
+}
