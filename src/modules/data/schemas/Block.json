@@ -1,0 +1,23 @@
+{
+  "title": "IBlock",
+  "type": "object",
+  "properties": {
+    "header": {
+      "type": "object"
+    },
+    "txs": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "merkle_tree": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["header", "txs", "merkle_tree"]
+}

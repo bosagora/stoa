@@ -1,0 +1,20 @@
+{
+  "title": "IEnrollment",
+  "type": "object",
+  "properties": {
+    "utxo_key": {
+      "type": "string"
+    },
+    "random_seed": {
+      "type": "string"
+    },
+    "cycle_length": {
+      "type": "integer"
+    },
+    "enroll_sig": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["utxo_key", "random_seed", "cycle_length", "enroll_sig"]
+}
