@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { validateJSON } from '../utils';
+import { Validator, ITxOutputs } from "./validator";
 
 /**
  * The class that defines and parses the transaction's outputs of a block.
@@ -29,7 +29,7 @@ export class TxOutputs
      */
     public parseJSON (json: any)
     {
-        validateJSON(this, json);
+        Validator.isValidOtherwiseThrow<ITxOutputs>('TxOutputs', json);
 
         this.value = json.value;
 

@@ -298,6 +298,6 @@ function TestOfValidation(doneIt: () => void)
       error = err;
     }
     assert.ok(error);
-    assert.strictEqual(error.message, 'Parse error: Enrollment.utxo_key');
+    assert.strictEqual(error.message, "Validation failed: Enrollment - should have required property 'utxo_key'");
     doneIt();
 }

@@ -4,9 +4,10 @@
   "description": "API server for Agora",
   "main": "src/main.js",
   "scripts": {
-    "test": "mocha -r ts-node/register tests/**/*.test.ts",
-    "start": "nodemon --watch src --delay 1 --exec 'ts-node' src/main.ts",
-    "build": "webpack --config webpack.config.js",
+    "json2ts": "./node_modules/.bin/json2ts -i src/modules/data/schemas/ -o src/modules/data/types/",
+    "test": "npm run json2ts & mocha -r ts-node/register tests/**/*.test.ts",
+    "start": "npm run json2ts & nodemon --watch src --delay 1 --exec 'ts-node' src/main.ts",
+    "build": "npm run json2ts & webpack --config webpack.config.js",
     "tsc": "tsc"
   },
   "repository": {
@@ -22,9 +23,11 @@
   "dependencies": {
     "@types/sodium-native": "^2.3.5",
     "@types/sqlite3": "^3.1.6",
+    "ajv": "^6.12.3",
     "assert": "^2.0.0",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
+    "json-schema-to-typescript": "^9.1.1",
     "sodium-native": "^3.2.0",
     "source-map-support": "^0.5.19",
     "sqlite3": "^4.2.0"

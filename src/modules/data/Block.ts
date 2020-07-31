@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { validateJSON } from '../utils';
+import { Validator, IBlock } from "./validator";
 import { BlockHeader } from './BlockHeader';
 import { Transaction } from './Transaction';
 
@@ -32,7 +32,7 @@ export class Block
      */
     public parseJSON (json: any)
     {
-        validateJSON(this, json);
+        Validator.isValidOtherwiseThrow<IBlock>('Block', json);
 
         this.header.parseJSON(json.header);
 
