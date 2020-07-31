@@ -150,6 +150,11 @@ export class LedgerStorage extends Storages
                 block.header.enrollments.length
             ], (err: Error | null) =>
         {
+            if (err != null)
+            {
+                onError(err);
+                return;
+            }
             this.putTransactionsUseStatement(block,
             () =>
             {
