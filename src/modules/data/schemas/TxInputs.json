@@ -1,0 +1,17 @@
+{
+  "title": "ITxInputs",
+  "type": "object",
+  "properties": {
+    "previous": {
+      "type": "string"
+    },
+    "index": {
+      "type": "integer"
+    },
+    "signature": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["previous", "index", "signature"]
+}

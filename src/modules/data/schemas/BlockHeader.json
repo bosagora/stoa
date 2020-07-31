@@ -1,0 +1,36 @@
+{
+  "title": "IBlockHeader",
+  "type": "object",
+  "properties": {
+    "prev_block": {
+      "type": "string"
+    },
+    "height": {
+      "type": "object"
+    },
+    "merkle_root": {
+      "type": "string"
+    },
+    "validators": {
+      "type": "object"
+    },
+    "signature": {
+      "type": "string"
+    },
+    "enrollments": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "prev_block",
+    "height",
+    "merkle_root",
+    "validators",
+    "signature",
+    "enrollments"
+  ]
+}

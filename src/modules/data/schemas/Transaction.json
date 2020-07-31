@@ -1,0 +1,23 @@
+{
+  "title": "ITransaction",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "integer"
+    },
+    "inputs": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "outputs": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["type", "inputs", "outputs"]
+}

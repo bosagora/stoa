@@ -1,0 +1,14 @@
+{
+  "title": "ITxOutputs",
+  "type": "object",
+  "properties": {
+    "value": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["value", "address"]
+}
