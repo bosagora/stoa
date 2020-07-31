@@ -14,6 +14,7 @@
 import { validateJSON } from '../utils';
 import { BitField } from './BitField';
 import { Enrollment } from './Enrollment';
+import { Height } from './Height';
 
 /**
  * The class that defines and parses the header of a block.
@@ -23,7 +24,7 @@ import { Enrollment } from './Enrollment';
 export class BlockHeader
 {
     prev_block: string = "";
-    height: number = 0;
+    height: Height = new Height();
     merkle_root: string = "";
     validators: BitField = new BitField();
     signature: string = "";
@@ -39,10 +40,7 @@ export class BlockHeader
 
         this.prev_block = json.prev_block;
 
-        if (json.height.value !== undefined)
-            this.height = json.height.value;
-        else
-            throw new Error('Parse error: BlockHeader.height');
+        this.height.parseJSON(json.height);
 
         this.merkle_root = json.merkle_root;
 

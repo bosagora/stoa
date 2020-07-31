@@ -141,7 +141,7 @@ export class LedgerStorage extends Storages
                 (?, ?, ?, ?, ?, ?, ?)`;
         this.db.run(sql,
             [
-                block.header.height,
+                block.header.height.value,
                 block.header.prev_block,
                 JSON.stringify(block.header.validators._storage),
                 block.header.merkle_root,
@@ -209,7 +209,7 @@ export class LedgerStorage extends Storages
         block.header.enrollments.forEach((enroll: Enrollment, enroll_idx: number) =>
         {
             enroll_stmt.run([
-                block.header.height,
+                block.header.height.value,
                 enroll_idx,
                 enroll.utxo_key,
                 enroll.random_seed,
@@ -217,7 +217,7 @@ export class LedgerStorage extends Storages
                 enroll.enroll_sig
             ]);
             validator_stmt.run([
-                block.header.height,
+                block.header.height.value,
                 0,
                 '0x0000000000000000',
                 enroll.utxo_key
@@ -320,7 +320,7 @@ export class LedgerStorage extends Storages
 
         block.txs.forEach((tx: Transaction, tx_idx: number) => {
             tx_stmt.run([
-                block.header.height,
+                block.header.height.value,
                 tx_idx,
                 block.merkle_tree[tx_idx],
                 tx.type,
@@ -329,7 +329,7 @@ export class LedgerStorage extends Storages
             ]);
             tx.inputs.forEach((input: TxInputs, in_idx: number)  => {
                 inputs_stmt.run([
-                    block.header.height,
+                    block.header.height.value,
                     tx_idx,
                     in_idx,
                     input.previous,
@@ -339,7 +339,7 @@ export class LedgerStorage extends Storages
             tx.outputs.forEach((output: TxOutputs, out_idx: number)  => {
                 this.hash.makeUTXOKey(block.merkle_tree[tx_idx], BigInt(out_idx));
                 outputs_stmt.run([
-                    block.header.height,
+                    block.header.height.value,
                     tx_idx,
                     out_idx,
                     block.merkle_tree[tx_idx],
