@@ -18,6 +18,7 @@ import { TxOutputs } from './TxOutputs';
 import { Transaction } from './Transaction';
 import { BlockHeader } from './BlockHeader';
 import { Block } from './Block';
+import { Height } from './Height';
 
 export
 {
@@ -28,4 +29,5 @@ export
     Transaction,
     BlockHeader,
     Block,
+    Height,
 }
