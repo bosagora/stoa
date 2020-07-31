@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { validateJSON } from '../utils';
+import { Validator, IBlockHeader } from "./validator";
 import { BitField } from './BitField';
 import { Enrollment } from './Enrollment';
 import { Height } from './Height';
@@ -36,7 +36,7 @@ export class BlockHeader
      */
     public parseJSON (json: any)
     {
-        validateJSON(this, json);
+        Validator.isValidOtherwiseThrow<IBlockHeader>('BlockHeader', json);
 
         this.prev_block = json.prev_block;
 

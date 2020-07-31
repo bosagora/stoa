@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { validateJSON } from '../utils';
+import { Validator, IBitField } from "./validator";
 
 /**
  * The class that defines and parses the BitField of a block.
@@ -28,7 +28,7 @@ export class BitField
      */
     public parseJSON (json: any)
     {
-        validateJSON(this, json);
+        Validator.isValidOtherwiseThrow<IBitField>('BitField', json);
 
         for (let idx = 0; idx < json._storage.length; idx++)
             this._storage.push(Number(json._storage[idx]));

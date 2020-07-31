@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { validateJSON } from '../utils';
+import { Validator, IEnrollment } from "./validator";
 
 /**
  * The class that defines and parses the enrollment of a block.
@@ -31,7 +31,7 @@ export class Enrollment
      */
     public parseJSON (json: any)
     {
-        validateJSON(this, json);
+        Validator.isValidOtherwiseThrow<IEnrollment>('Enrollment', json);
 
         this.utxo_key = json.utxo_key;
         this.random_seed = json.random_seed;

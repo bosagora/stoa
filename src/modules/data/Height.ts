@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { validateJSON } from '../utils';
+import { Validator, IHeight } from "./validator";
 
 /**
  * The class that defines the Height.
@@ -26,7 +26,7 @@ export class Height
      */
     public parseJSON (json: any)
     {
-        validateJSON(this, json);
+        Validator.isValidOtherwiseThrow<IHeight>('Height', json);
 
         this.value = Number(json.value);
     }

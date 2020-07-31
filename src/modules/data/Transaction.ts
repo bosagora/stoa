@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { validateJSON } from '../utils';
+import { Validator, ITransaction } from './validator'
 import { TxInputs } from './TxInputs';
 import { TxOutputs } from './TxOutputs';
 
@@ -32,7 +32,7 @@ export class Transaction
      */
     public parseJSON (json: any)
     {
-        validateJSON(this, json);
+        Validator.isValidOtherwiseThrow<ITransaction>('Transaction', json);
 
         this.type = json.type;
 
