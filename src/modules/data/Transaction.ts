@@ -12,9 +12,8 @@
 *******************************************************************************/
 
 import { Validator, ITransaction } from './validator'
-import { TxInputs } from './TxInputs';
-import { TxOutputs } from './TxOutputs';
-
+import { TxIn } from './TxIn';
+import { TxOut } from './TxOut';
 
 /**
  * The transaction type constant
@@ -40,12 +39,12 @@ export class Transaction
     /**
      * The array of references to the unspent output of the previous transaction
      */
-    public inputs: TxInputs[];
+    public inputs: TxIn[];
 
     /**
      * The array of newly created outputs
      */
-    public outputs: TxOutputs[];
+    public outputs: TxOut[];
 
     /**
      * Constructor
@@ -53,7 +52,7 @@ export class Transaction
      * @param inputs - The array of references to the unspent output of the previous transaction
      * @param outputs - The array of newly created outputs
      */
-    constructor (type?: number, inputs?: TxInputs[], outputs?: TxOutputs[])
+    constructor (type?: number, inputs?: TxIn[], outputs?: TxOut[])
     {
         if (type != undefined)
             this.type = type;
@@ -83,14 +82,14 @@ export class Transaction
 
         for (let elem of json.inputs)
         {
-            let input = new TxInputs();
+            let input = new TxIn();
             input.fromJSON(elem);
             this.inputs.push(input);
         }
 
         for (let elem of json.outputs)
         {
-            let output = new TxOutputs();
+            let output = new TxOut();
             output.fromJSON(elem);
             this.outputs.push(output);
         }

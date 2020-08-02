@@ -13,7 +13,7 @@
 
 import { Storages } from './Storages';
 import { Block, Enrollment, Transaction,
-    TxInputs, TxOutputs, makeUTXOKey } from '../data';
+    TxIn, TxOut, makeUTXOKey } from '../data';
 
 /**
  * The class that insert and read the ledger into the database.
@@ -328,7 +328,7 @@ export class LedgerStorage extends Storages
                 tx.inputs.length,
                 tx.outputs.length
             ]);
-            tx.inputs.forEach((input: TxInputs, in_idx: number)  => {
+            tx.inputs.forEach((input: TxIn, in_idx: number)  => {
                 inputs_stmt.run([
                     block.header.height.value.toString(),
                     tx_idx,
@@ -337,7 +337,7 @@ export class LedgerStorage extends Storages
                     input.index]);
                 update_used_stmt.run([input.previous.toString(), input.index]);
             });
-            tx.outputs.forEach((output: TxOutputs, out_idx: number)  => {
+            tx.outputs.forEach((output: TxOut, out_idx: number)  => {
                 let hash = makeUTXOKey(block.merkle_tree[tx_idx], BigInt(out_idx));
                 outputs_stmt.run([
                     block.header.height.value.toString(),

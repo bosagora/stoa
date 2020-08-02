@@ -20,7 +20,7 @@ import { Signature } from "./Signature";
  * Convert JSON object to TypeScript's instance.
  * An exception occurs if the required property is not present.
  */
-export class TxInputs
+export class TxIn
 {
     /**
      * The hash of the previous transaction containing the output to spend

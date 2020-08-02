@@ -13,8 +13,8 @@
 
 export { BitField } from './BitField';
 export { Enrollment } from './Enrollment';
-export { TxInputs } from './TxInputs';
-export { TxOutputs } from './TxOutputs';
+export { TxIn } from './TxIn';
+export { TxOut } from './TxOut';
 export { Transaction } from './Transaction';
 export { BlockHeader } from './BlockHeader';
 export { Block } from './Block';

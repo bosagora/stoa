@@ -19,7 +19,7 @@ import { PublicKey } from "./PublicKey";
  * Convert JSON object to TypeScript's instance.
  * An exception occurs if the required property is not present.
  */
-export class TxOutputs
+export class TxOut
 {
     /**
      * The monetary value of this output, in 1/10^7
