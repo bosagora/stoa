@@ -11,23 +11,12 @@
 
 *******************************************************************************/
 
-import { BitField } from './BitField';
-import { Enrollment } from './Enrollment';
-import { TxInputs } from './TxInputs';
-import { TxOutputs } from './TxOutputs';
-import { Transaction } from './Transaction';
-import { BlockHeader } from './BlockHeader';
-import { Block } from './Block';
-import { Height } from './Height';
-
-export
-{
-    BitField,
-    Enrollment,
-    TxInputs,
-    TxOutputs,
-    Transaction,
-    BlockHeader,
-    Block,
-    Height,
-}
+export { BitField } from './BitField';
+export { Enrollment } from './Enrollment';
+export { TxInputs } from './TxInputs';
+export { TxOutputs } from './TxOutputs';
+export { Transaction } from './Transaction';
+export { BlockHeader } from './BlockHeader';
+export { Block } from './Block';
+export { Height } from './Height';
+export { Hash, hash, hashMulti, makeUTXOKey } from './Hash';

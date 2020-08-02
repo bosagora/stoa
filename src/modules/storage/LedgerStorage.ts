@@ -11,10 +11,9 @@
 
 *******************************************************************************/
 
-import { Hash }  from '../common/Hash'
 import { Storages } from './Storages';
 import { Block, Enrollment, Transaction,
-    TxInputs, TxOutputs } from '../data';
+    TxInputs, TxOutputs, Hash, makeUTXOKey } from '../data';
 
 /**
  * The class that insert and read the ledger into the database.
@@ -342,13 +341,13 @@ export class LedgerStorage extends Storages
                 update_used_stmt.run([input.previous, input.index]);
             });
             tx.outputs.forEach((output: TxOutputs, out_idx: number)  => {
-                this.hash.makeUTXOKey(block.merkle_tree[tx_idx], BigInt(out_idx));
+                this.hash = makeUTXOKey(Hash.createFromString(block.merkle_tree[tx_idx]), BigInt(out_idx));
                 outputs_stmt.run([
                     block.header.height.value,
                     tx_idx,
                     out_idx,
                     block.merkle_tree[tx_idx],
-                    this.hash.toHexString(),
+                    this.hash.toString(),
                     output.address,
                     output.value]);
             });
