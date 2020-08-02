@@ -13,19 +13,16 @@
 
 import { Storages } from './Storages';
 import { Block, Enrollment, Transaction,
-    TxInputs, TxOutputs, Hash, makeUTXOKey } from '../data';
+    TxInputs, TxOutputs, makeUTXOKey } from '../data';
 
 /**
  * The class that insert and read the ledger into the database.
  */
 export class LedgerStorage extends Storages
 {
-    private hash: Hash;
-
     constructor (filename: string, callback: (err: Error | null) => void)
     {
         super(filename, callback);
-        this.hash = new Hash();
     }
 
     /**
@@ -125,7 +122,7 @@ export class LedgerStorage extends Storages
         let block: Block = new Block();
         try
         {
-            block.parseJSON(data);
+            block.fromJSON(data);
         }
         catch (error)
         {
@@ -140,11 +137,11 @@ export class LedgerStorage extends Storages
                 (?, ?, ?, ?, ?, ?, ?)`;
         this.db.run(sql,
             [
-                block.header.height.value,
-                block.header.prev_block,
+                block.header.height.value.toString(),
+                block.header.prev_block.toString(),
                 JSON.stringify(block.header.validators._storage),
-                block.header.merkle_root,
-                block.header.signature,
+                block.header.merkle_root.toString(),
+                block.header.signature.toString(),
                 block.txs.length,
                 block.header.enrollments.length
             ], (err: Error | null) =>
@@ -213,18 +210,18 @@ export class LedgerStorage extends Storages
         block.header.enrollments.forEach((enroll: Enrollment, enroll_idx: number) =>
         {
             enroll_stmt.run([
-                block.header.height.value,
+                block.header.height.value.toString(),
                 enroll_idx,
-                enroll.utxo_key,
-                enroll.random_seed,
+                enroll.utxo_key.toString(),
+                enroll.random_seed.toString(),
                 enroll.cycle_length,
-                enroll.enroll_sig
+                enroll.enroll_sig.toString()
             ]);
             validator_stmt.run([
-                block.header.height.value,
+                block.header.height.value.toString(),
                 0,
                 '0x0000000000000000',
-                enroll.utxo_key
+                enroll.utxo_key.toString()
             ]);
         });
 
@@ -324,32 +321,32 @@ export class LedgerStorage extends Storages
 
         block.txs.forEach((tx: Transaction, tx_idx: number) => {
             tx_stmt.run([
-                block.header.height.value,
+                block.header.height.value.toString(),
                 tx_idx,
-                block.merkle_tree[tx_idx],
+                block.merkle_tree[tx_idx].toString(),
                 tx.type,
                 tx.inputs.length,
                 tx.outputs.length
             ]);
             tx.inputs.forEach((input: TxInputs, in_idx: number)  => {
                 inputs_stmt.run([
-                    block.header.height.value,
+                    block.header.height.value.toString(),
                     tx_idx,
                     in_idx,
-                    input.previous,
+                    input.previous.toString(),
                     input.index]);
-                update_used_stmt.run([input.previous, input.index]);
+                update_used_stmt.run([input.previous.toString(), input.index]);
             });
             tx.outputs.forEach((output: TxOutputs, out_idx: number)  => {
-                this.hash = makeUTXOKey(Hash.createFromString(block.merkle_tree[tx_idx]), BigInt(out_idx));
+                let hash = makeUTXOKey(block.merkle_tree[tx_idx], BigInt(out_idx));
                 outputs_stmt.run([
-                    block.header.height.value,
+                    block.header.height.value.toString(),
                     tx_idx,
                     out_idx,
-                    block.merkle_tree[tx_idx],
-                    this.hash.toString(),
-                    output.address,
-                    output.value]);
+                    block.merkle_tree[tx_idx].toString(),
+                    hash.toString(),
+                    output.address.toString(),
+                    output.value.toString()]);
             });
         });
 

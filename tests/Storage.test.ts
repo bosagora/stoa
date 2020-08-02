@@ -13,7 +13,6 @@
 
 import * as assert from 'assert';
 import { LedgerStorage } from '../src/modules/storage/LedgerStorage';
-import { Enrollment } from '../src/modules/data';
 import {sample_data} from "./SampleData.test";
 
 /**

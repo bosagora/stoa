@@ -12,7 +12,7 @@
 *******************************************************************************/
 
 import * as sodium from 'sodium-native'
-import {readFromString, writeToString} from "../utils/buffer"
+import { readFromString, writeToString } from "../utils/buffer"
 
 /**
  * The Class for creating hash

@@ -18,16 +18,31 @@ import { Validator, IHeight } from "./validator";
  */
 export class Height
 {
-    public value: number = 0;
+    /**
+     * the block height
+     */
+    public value: bigint;
+
+    /**
+     * Construct
+     * @param value - The block height
+     */
+    constructor (value?: bigint)
+    {
+        if (value != undefined)
+            this.value = value;
+        else
+            this.value = BigInt(0);
+    }
 
     /**
      * This parses JSON.
      * @param json The object of the JSON
      */
-    public parseJSON (json: any)
+    public fromJSON (json: any)
     {
         Validator.isValidOtherwiseThrow<IHeight>('Height', json);
 
-        this.value = Number(json.value);
+        this.value = BigInt(json.value);
     }
 }
