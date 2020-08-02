@@ -20,3 +20,5 @@ export { BlockHeader } from './BlockHeader';
 export { Block } from './Block';
 export { Height } from './Height';
 export { Hash, hash, hashMulti, makeUTXOKey } from './Hash';
+export { PublicKey } from './PublicKey';
+export { Signature } from './Signature';
