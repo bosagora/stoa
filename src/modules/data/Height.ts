@@ -12,6 +12,7 @@
 *******************************************************************************/
 
 import { Validator, IHeight } from "./validator";
+import { SmartBuffer } from "smart-buffer";
 
 /**
  * The class that defines the Height.
@@ -44,5 +45,23 @@ export class Height
         Validator.isValidOtherwiseThrow<IHeight>('Height', json);
 
         this.value = BigInt(json.value);
+    }
+
+    /**
+     * Serialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public serialize (buffer: SmartBuffer)
+    {
+        buffer.writeBigUInt64LE(BigInt(this.value));
+    }
+
+    /**
+     * Deserialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public deserialize (buffer: SmartBuffer)
+    {
+        this.value = buffer.readBigUInt64LE();
     }
 }

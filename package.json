@@ -30,6 +30,7 @@
     "crc": "^3.8.0",
     "express": "^4.17.1",
     "json-schema-to-typescript": "^9.1.1",
+    "smart-buffer": "^4.1.0",
     "sodium-native": "^3.2.0",
     "source-map-support": "^0.5.19",
     "sqlite3": "^4.2.0"

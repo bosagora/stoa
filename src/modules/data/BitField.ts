@@ -12,6 +12,7 @@
 *******************************************************************************/
 
 import { Validator, IBitField } from "./validator";
+import { SmartBuffer } from "smart-buffer";
 
 /**
  * The class that defines the BitField of a block.
@@ -46,5 +47,30 @@ export class BitField
         Validator.isValidOtherwiseThrow<IBitField>('BitField', json);
 
         this._storage = json._storage.slice();
+    }
+
+    /**
+     * Serialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public serialize (buffer: SmartBuffer)
+    {
+        buffer.writeBigUInt64LE(BigInt(this._storage.length));
+        for (let elem of this._storage)
+            buffer.writeUInt32LE(elem);
+    }
+
+    /**
+     * Deserialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public deserialize (buffer: SmartBuffer)
+    {
+        let length = Number(buffer.readBigUInt64LE());
+        for (let idx = 0; idx < length; idx++)
+        {
+            let elem = buffer.readUInt32LE();
+            this._storage.push(elem);
+        }
     }
 }

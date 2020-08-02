@@ -15,6 +15,7 @@ import { Validator, IBlock } from "./validator";
 import { BlockHeader } from './BlockHeader';
 import { Transaction } from './Transaction';
 import { Hash } from "./Hash";
+import { SmartBuffer } from "smart-buffer";
 
 /**
  * The class that defines the block.
@@ -82,6 +83,48 @@ export class Block
         for (let elem of json.merkle_tree)
         {
             this.merkle_tree.push(Hash.createFromString(elem));
+        }
+    }
+
+    /**
+     * Serialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public serialize (buffer: SmartBuffer)
+    {
+        this.header.serialize(buffer);
+
+        buffer.writeBigUInt64LE(BigInt(this.txs.length));
+        for (let tx of this.txs)
+            tx.serialize(buffer);
+
+        buffer.writeBigUInt64LE(BigInt(this.merkle_tree.length));
+        for (let h of this.merkle_tree)
+            h.serialize(buffer);
+    }
+
+    /**
+     * Deserialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public deserialize (buffer: SmartBuffer)
+    {
+        this.header.deserialize(buffer);
+
+        let length = Number(buffer.readBigUInt64LE());
+        for (let idx = 0; idx < length; idx++)
+        {
+            let elem = new Transaction();
+            elem.deserialize(buffer);
+            this.txs.push(elem);
+        }
+
+        length = Number(buffer.readBigUInt64LE());
+        for (let idx = 0; idx < length; idx++)
+        {
+            let elem = new Hash();
+            elem.deserialize(buffer);
+            this.merkle_tree.push(elem);
         }
     }
 }

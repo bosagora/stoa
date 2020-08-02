@@ -14,6 +14,7 @@
 import { Validator, ITransaction } from './validator'
 import { TxIn } from './TxIn';
 import { TxOut } from './TxOut';
+import { SmartBuffer } from "smart-buffer";
 
 /**
  * The transaction type constant
@@ -92,6 +93,47 @@ export class Transaction
             let output = new TxOut();
             output.fromJSON(elem);
             this.outputs.push(output);
+        }
+    }
+
+    /**
+     * Serialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public serialize (buffer: SmartBuffer)
+    {
+        buffer.writeUInt8(this.type);
+        buffer.writeBigUInt64LE(BigInt(this.inputs.length));
+        for (let elem of this.inputs)
+            elem.serialize(buffer);
+
+        buffer.writeBigUInt64LE(BigInt(this.outputs.length));
+        for (let elem of this.outputs)
+            elem.serialize(buffer);
+    }
+
+    /**
+     * Deserialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public deserialize (buffer: SmartBuffer)
+    {
+        this.type = buffer.readUInt8();
+
+        let length = Number(buffer.readBigUInt64LE());
+        for (let idx = 0; idx < length; idx++)
+        {
+            let elem = new TxIn();
+            elem.deserialize(buffer);
+            this.inputs.push(elem);
+        }
+
+        length = Number(buffer.readBigUInt64LE());
+        for (let idx = 0; idx < length; idx++)
+        {
+            let elem = new TxOut();
+            elem.deserialize(buffer);
+            this.outputs.push(elem);
         }
     }
 }

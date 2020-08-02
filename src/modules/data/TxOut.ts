@@ -13,6 +13,7 @@
 
 import { Validator, ITxOutputs } from "./validator";
 import { PublicKey } from "./PublicKey";
+import { SmartBuffer } from "smart-buffer";
 
 /**
  * The class that defines the transaction's outputs of a block.
@@ -59,5 +60,25 @@ export class TxOut
 
         this.value = BigInt(json.value);
         this.address.fromString(json.address);
+    }
+
+    /**
+     * Serialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public serialize (buffer: SmartBuffer)
+    {
+        buffer.writeBigUInt64LE(this.value);
+        this.address.serialize(buffer);
+    }
+
+    /**
+     * Deserialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public deserialize (buffer: SmartBuffer)
+    {
+        this.value = buffer.readBigUInt64LE();
+        this.address.deserialize(buffer);
     }
 }

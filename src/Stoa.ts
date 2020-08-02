@@ -147,7 +147,7 @@ class Stoa {
                 return;
             }
 
-            console.log(block);
+            //console.log(block);
 
             this.ledger_storage.putBlocks(block,
                 () =>
