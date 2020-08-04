@@ -171,3 +171,29 @@ CREATE TABLE "validators" (
     PRIMARY KEY("enrolled_at","utxo_key")
 )
 ```
+
+----
+
+## 6. Table **information**
+
+It can store information that is required for operation.
+The following data is recorded when the most recently recorded block height is 100.
+
+{"key": "height", "value": "100"}
+
+### _Schema_
+
+| Column            | Data Type | PK | Not NULL | Default  |Description|
+|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
+|  key              | TEXT      | Y  | Y        |          | The key   |
+|  value            | TEXT      |    | Y        |          | The value |
+
+### _Create Script_
+
+```sql
+CREATE TABLE informations (
+    key         TEXT NOT NULL,
+    value       TEXT,
+    PRIMARY KEY(key)
+)
+```
