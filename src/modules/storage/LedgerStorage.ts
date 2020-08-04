@@ -13,8 +13,10 @@
 
 import { Hash }  from '../common/Hash'
 import { Storages } from './Storages';
-import { Block, Enrollment, Transaction,
-    TxInputs, TxOutputs } from '../data';
+import {
+    Block, Enrollment, Height, Transaction,
+    TxInputs, TxOutputs
+} from '../data';
 
 /**
  * The class that insert and read the ledger into the database.
@@ -104,6 +106,13 @@ export class LedgerStorage extends Storages
             preimage_hash  TEXT NOT NULL,
             PRIMARY KEY(enrolled_at,utxo_key)
         );
+
+        CREATE TABLE information
+        (
+            key     TEXT NOT NULL,
+            value   TEXT,
+            PRIMARY KEY(key)
+        )
         `;
 
         this.db.exec(sql, (err: Error | null) =>
@@ -157,6 +166,7 @@ export class LedgerStorage extends Storages
                     await saveBlock(this, block);
                     await this.putTransactions(block);
                     await this.putEnrollments(block);
+                    await this.putBlockHeight(block.header.height);
                     await this.commit();
                 }
                 catch (error)
@@ -587,5 +597,51 @@ export class LedgerStorage extends Storages
         sql += ` ORDER BY enrollments.block_height ASC, enrollments.utxo_key ASC;`;
 
         this.query(sql, [], onSuccess, onError);
+    }
+
+    /**
+     * Puts the height of the block to database
+     * @param height The height of the block
+     */
+    public putBlockHeight (height: Height): Promise<void>
+    {
+        return new Promise<void>((resolve, reject) =>
+        {
+            let sql = `INSERT OR REPLACE INTO information (key, value) VALUES (?, ?);`;
+            this.db.run(sql, ["height", height.value], (err: Error | null) =>
+            {
+                if (err == null)
+                    resolve();
+                else
+                    reject(err);
+            });
+        });
+    }
+
+    /**
+     * Returns the height of the block to be added next
+     */
+    public getExpectedBlockHeight(): Promise<number>
+    {
+        return new Promise<number>((resolve, reject) =>
+        {
+            let sql = `SELECT value FROM information WHERE key = 'height';`;
+            this.query(sql, [], (rows: any[]) =>
+            {
+                if ((rows.length > 0) && (rows[0].value !== undefined) &&
+                    !Number.isNaN(rows[0].value))
+                {
+                    resolve(Number(rows[0].value) + 1);
+                }
+                else
+                {
+                    resolve(0);
+                }
+            },
+            (err: Error) =>
+            {
+                reject(err);
+            });
+        });
     }
 }
