@@ -153,12 +153,15 @@ export class LedgerStorage extends Storages
                 {
                     let block: Block = new Block();
                     block.parseJSON(data);
+                    await this.begin();
                     await saveBlock(this, block);
                     await this.putTransactions(block);
                     await this.putEnrollments(block);
+                    await this.commit();
                 }
                 catch (error)
                 {
+                    await this.rollback();
                     reject(error);
                     return;
                 }

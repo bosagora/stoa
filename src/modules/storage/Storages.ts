@@ -62,4 +62,62 @@ export class Storages
     {
         this.db.close();
     }
+
+    /**
+     * SQLite transaction statement
+     * To start a transaction explicitly,
+     * Open a transaction by issuing the begin function
+     * the transaction is open until it is explicitly
+     * committed or rolled back.
+     */
+    protected begin (): Promise<void>
+    {
+        return new Promise<void>((resolve, reject) =>
+        {
+            this.db.run('BEGIN', (err: Error | null) =>
+            {
+                if (err == null)
+                    resolve();
+                else
+                    reject(err);
+            });
+        });
+    }
+    
+    /**
+     * SQLite transaction statement
+     * Commit the changes to the database by using this.
+     */
+    protected commit (): Promise<void>
+    {
+        return new Promise<void>((resolve, reject) =>
+        {
+            this.db.run('COMMIT', (err: Error | null) =>
+            {
+                if (err == null)
+                    resolve();
+                else
+                    reject(err);
+            });
+        });
+    }
+
+    /**
+     * SQLite transaction statement
+     * If it do not want to save the changes,
+     * it can roll back using this.
+     */
+    protected rollback (): Promise<void>
+    {
+        return new Promise<void>((resolve, reject) =>
+        {
+            this.db.run('ROLLBACK', (err: Error | null) =>
+            {
+                if (err == null)
+                    resolve();
+                else
+                    reject(err);
+            });
+        });
+    }
 }
