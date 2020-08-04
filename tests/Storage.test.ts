@@ -293,4 +293,56 @@ describe('LedgerStorage', () =>
                 });
         });
     });
+
+    it('DB transaction test when writing a block', () =>
+    {
+        let ledger_storage = new LedgerStorage(":memory:", async (err1: Error | null) =>
+        {
+            assert.ok(!err1, err1?.message);
+
+            let block = new Block();
+            block.parseJSON(sample_data[0]);
+
+            await ledger_storage.putEnrollments(block);
+            await assert.rejects(ledger_storage.putBlocks(sample_data[0]),
+                {
+                    message: "SQLITE_CONSTRAINT: UNIQUE constraint failed:" +
+                        " enrollments.block_height, enrollments.enrollment_index"
+                });
+
+            // Make sure that the block is not stored because it has been rolled back.
+            let getBlock = ((height: number): Promise<any[]> =>
+                {
+                    return new Promise<any[]>((resolve, reject) =>
+                    {
+                        ledger_storage.getBlocks(height,
+                            (rows: any[]) => {
+                                resolve(rows);
+                            },
+                            (err: Error) => {
+                                reject(err);
+                            });
+                    });
+                });
+            let rows0 = await getBlock(0);
+            assert.strictEqual(rows0.length, 0);
+
+            await ledger_storage.putTransactions(block);
+                let getTransaction = ((height: number): Promise<any[]> =>
+                {
+                    return new Promise<any[]>((resolve, reject) =>
+                    {
+                        ledger_storage.getTransactions(height,
+                            (rows: any[]) => {
+                                resolve(rows);
+                            },
+                            (err: Error) => {
+                                reject(err);
+                            });
+                    });
+                });
+            let rows1 = await getTransaction(0);
+            assert.strictEqual(rows1.length, 4);
+        });
+    });
 });
