@@ -149,19 +149,15 @@ class Stoa {
 
             console.log(block);
 
-            this.ledger_storage.putBlocks(block,
-                () =>
-                {
-                    res.status(200).send();
-                    return;
-                },
-                (err: Error) =>
-                {
-                    console.error("Failed to store the payload of a push to the DB: " + err);
-                    res.status(500).send("An error occurred while saving");
-                    return;
-                }
-            );
+            this.ledger_storage.putBlocks(block)
+            .then(() => {
+                res.status(200).send();
+                return;
+            })
+            .catch((err) => {
+                console.error("Failed to store the payload of a push to the DB: " + err);
+                res.status(500).send("An error occurred while saving");
+            });
         });
     }
 }

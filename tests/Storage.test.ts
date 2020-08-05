@@ -75,28 +75,20 @@ function runBlockTest (ledger_storage: LedgerStorage, callback: () => void)
 function putAllBlockData (ledger_storage: LedgerStorage,
     callback: (err: Error | null) => void)
 {
-    let idx = 0;
-    let doPut = () =>
+    (async () =>
     {
-        if (idx >= sample_data.length)
+        try
         {
-            callback(null);
+            for (let block of sample_data)
+                await ledger_storage.putBlocks(block);
+        }
+        catch (error)
+        {
+            callback(error);
             return;
         }
-
-        ledger_storage.putBlocks(sample_data[idx],
-            () =>
-            {
-                idx++;
-                doPut();
-            },
-            (err: Error) =>
-            {
-                callback(err);
-            }
-        );
-    };
-    doPut();
+        callback(null);
+    })();
 }
 
 /**
@@ -253,20 +245,6 @@ describe('LedgerStorage', () =>
 
     it('Error-handling test when writing a transaction.', () =>
     {
-        function save_transaction (storage: LedgerStorage, block: Block): Promise<void>
-        {
-            return new Promise<void>((resolve, reject) =>
-            {
-                storage.putTransactions(block,
-                    () => {
-                        resolve();
-                    },
-                    (err) => {
-                        reject(err);
-                    });
-            });
-        }
-
         let ledger_storage = new LedgerStorage(":memory:", async (err1: Error | null) =>
         {
             assert.ok(!err1, err1?.message);
@@ -274,8 +252,8 @@ describe('LedgerStorage', () =>
             let block = new Block();
             block.parseJSON(sample_data[0]);
 
-            await save_transaction(ledger_storage, block);
-            assert.rejects(save_transaction(ledger_storage, block),
+            await ledger_storage.putTransactions(block);
+            assert.rejects(ledger_storage.putTransactions(block),
                 {
                     message: "SQLITE_CONSTRAINT: UNIQUE constraint failed:" +
                         " transactions.block_height, transactions.tx_index"
@@ -286,20 +264,6 @@ describe('LedgerStorage', () =>
 
     it('Error-handling test when writing a enrollment.', () =>
     {
-        function save_enrollment (storage: LedgerStorage, block: Block): Promise<void>
-        {
-            return new Promise<void>((resolve, reject) =>
-            {
-                storage.putEnrollments(block,
-                    () => {
-                        resolve();
-                    },
-                    (err) => {
-                        reject(err);
-                    });
-            });
-        }
-
         let ledger_storage = new LedgerStorage(":memory:", async (err1: Error | null) =>
         {
             assert.ok(!err1, err1?.message);
@@ -307,8 +271,8 @@ describe('LedgerStorage', () =>
             let block = new Block();
             block.parseJSON(sample_data[0]);
 
-            await save_enrollment(ledger_storage, block);
-            assert.rejects(save_enrollment(ledger_storage, block),
+            await ledger_storage.putEnrollments(block);
+            assert.rejects(ledger_storage.putEnrollments(block),
                 {
                     message: "SQLITE_CONSTRAINT: UNIQUE constraint failed:" +
                         " enrollments.block_height, enrollments.enrollment_index"
@@ -318,26 +282,12 @@ describe('LedgerStorage', () =>
 
     it('Error-handling test when writing a block.', () =>
     {
-        function save_block (storage: LedgerStorage, block: any): Promise<void>
-        {
-            return new Promise<void>((resolve, reject) =>
-            {
-                storage.putBlocks(block,
-                    () => {
-                        resolve();
-                    },
-                    (err) => {
-                        reject(err);
-                    });
-            });
-        }
-
         let ledger_storage = new LedgerStorage(":memory:", async (err1: Error | null) =>
         {
             assert.ok(!err1, err1?.message);
 
-            await save_block(ledger_storage, sample_data[0]);
-            assert.rejects(save_block(ledger_storage, sample_data[0]),
+            await ledger_storage.putBlocks(sample_data[0]);
+            assert.rejects(ledger_storage.putBlocks(sample_data[0]),
                 {
                     message: "SQLITE_CONSTRAINT: UNIQUE constraint failed: blocks.height"
                 });
