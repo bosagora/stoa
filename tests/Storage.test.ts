@@ -13,7 +13,7 @@
 
 import * as assert from 'assert';
 import { LedgerStorage } from '../src/modules/storage/LedgerStorage';
-import { Enrollment } from '../src/modules/data';
+import { Block } from '../src/modules/data';
 import {sample_data} from "./SampleData.test";
 
 /**
@@ -249,5 +249,98 @@ describe('LedgerStorage', () =>
     it('Test ledger storage and inquiry function.', (doneIt: () => void) =>
     {
         runLedgerStorageTest(doneIt);
+    });
+
+    it('Error-handling test when writing a transaction.', () =>
+    {
+        function save_transaction (storage: LedgerStorage, block: Block): Promise<void>
+        {
+            return new Promise<void>((resolve, reject) =>
+            {
+                storage.putTransactions(block,
+                    () => {
+                        resolve();
+                    },
+                    (err) => {
+                        reject(err);
+                    });
+            });
+        }
+
+        let ledger_storage = new LedgerStorage(":memory:", async (err1: Error | null) =>
+        {
+            assert.ok(!err1, err1?.message);
+
+            let block = new Block();
+            block.parseJSON(sample_data[0]);
+
+            await save_transaction(ledger_storage, block);
+            assert.rejects(save_transaction(ledger_storage, block),
+                {
+                    message: "SQLITE_CONSTRAINT: UNIQUE constraint failed:" +
+                        " transactions.block_height, transactions.tx_index"
+                });
+
+        });
+    });
+
+    it('Error-handling test when writing a enrollment.', () =>
+    {
+        function save_enrollment (storage: LedgerStorage, block: Block): Promise<void>
+        {
+            return new Promise<void>((resolve, reject) =>
+            {
+                storage.putEnrollments(block,
+                    () => {
+                        resolve();
+                    },
+                    (err) => {
+                        reject(err);
+                    });
+            });
+        }
+
+        let ledger_storage = new LedgerStorage(":memory:", async (err1: Error | null) =>
+        {
+            assert.ok(!err1, err1?.message);
+
+            let block = new Block();
+            block.parseJSON(sample_data[0]);
+
+            await save_enrollment(ledger_storage, block);
+            assert.rejects(save_enrollment(ledger_storage, block),
+                {
+                    message: "SQLITE_CONSTRAINT: UNIQUE constraint failed:" +
+                        " enrollments.block_height, enrollments.enrollment_index"
+                });
+        });
+    });
+
+    it('Error-handling test when writing a block.', () =>
+    {
+        function save_block (storage: LedgerStorage, block: any): Promise<void>
+        {
+            return new Promise<void>((resolve, reject) =>
+            {
+                storage.putBlocks(block,
+                    () => {
+                        resolve();
+                    },
+                    (err) => {
+                        reject(err);
+                    });
+            });
+        }
+
+        let ledger_storage = new LedgerStorage(":memory:", async (err1: Error | null) =>
+        {
+            assert.ok(!err1, err1?.message);
+
+            await save_block(ledger_storage, sample_data[0]);
+            assert.rejects(save_block(ledger_storage, sample_data[0]),
+                {
+                    message: "SQLITE_CONSTRAINT: UNIQUE constraint failed: blocks.height"
+                });
+        });
     });
 });

@@ -155,10 +155,10 @@ export class LedgerStorage extends Storages
                 onError(err);
                 return;
             }
-            this.putTransactionsUseStatement(block,
+            this.putTransactions(block,
             () =>
             {
-                this.putEnrollmentsUseStatement(block, onSuccess, onError);
+                this.putEnrollments(block, onSuccess, onError);
             },
             onError);
         });
@@ -192,59 +192,81 @@ export class LedgerStorage extends Storages
      * @param onError This function will be called when
      * an error occurred.
      */
-    public putEnrollmentsUseStatement (block: Block,
+    public async putEnrollments (block: Block,
         onSuccess: () => void, onError: (err: Error) => void)
     {
-        const enroll_stmt = this.db.prepare(
-            `INSERT INTO enrollments
-                (block_height, enrollment_index, utxo_key, random_seed, cycle_length, enroll_sig)
-            VALUES
-                (?, ?, ?, ?, ?, ?)`
-        );
-
-        const validator_stmt = this.db.prepare(
-            `INSERT INTO validators
-                (enrolled_at, utxo_key, address, amount, preimage_distance, preimage_hash)
-            SELECT ?, utxo_key, address, amount, ?, ?
-                FROM tx_outputs
-            WHERE
-                tx_outputs.utxo_key = ?`
-        );
-
-        block.header.enrollments.forEach((enroll: Enrollment, enroll_idx: number) =>
+        function save_enrollment (storage: LedgerStorage, height: number,
+            enroll_idx: number, enroll: Enrollment): Promise<void>
         {
-            enroll_stmt.run([
-                block.header.height.value,
-                enroll_idx,
-                enroll.utxo_key,
-                enroll.random_seed,
-                enroll.cycle_length,
-                enroll.enroll_sig
-            ]);
-            validator_stmt.run([
-                block.header.height.value,
-                0,
-                '0x0000000000000000',
-                enroll.utxo_key
-            ]);
-        });
-
-        enroll_stmt.finalize((err1: Error | null) =>
-        {
-            if (err1)
+            return new Promise<void>((resolve, reject) =>
             {
-                onError(err1);
+                storage.query(
+                    `INSERT INTO enrollments
+                        (block_height, enrollment_index, utxo_key, random_seed, cycle_length, enroll_sig)
+                    VALUES
+                        (?, ?, ?, ?, ?, ?)`,
+                    [
+                        block.header.height.value,
+                        enroll_idx,
+                        enroll.utxo_key,
+                        enroll.random_seed,
+                        enroll.cycle_length,
+                        enroll.enroll_sig
+                    ],
+                    () => {
+                        resolve();
+                    },
+                    (err) => {
+                        reject(err);
+                    }
+                );
+            });
+        }
+
+        function save_validator (storage: LedgerStorage, height: number, enroll: Enrollment): Promise<void>
+        {
+            return new Promise<void>((resolve, reject) =>
+            {
+                storage.query(
+                    `INSERT INTO validators
+                        (enrolled_at, utxo_key, address, amount, preimage_distance, preimage_hash)
+                    SELECT ?, utxo_key, address, amount, ?, ?
+                        FROM tx_outputs
+                    WHERE
+                        tx_outputs.utxo_key = ?`,
+                    [
+                        block.header.height.value,
+                        0,
+                        '0x0000000000000000',
+                        enroll.utxo_key
+                    ],
+                    () => {
+                        resolve();
+                    },
+                    (err) => {
+                        reject(err);
+                    }
+                );
+            });
+        }
+
+        for (let enroll_idx = 0; enroll_idx < block.header.enrollments.length; enroll_idx++)
+        {
+            try
+            {
+                await save_enrollment(this, block.header.height.value, enroll_idx,
+                    block.header.enrollments[enroll_idx]);
+                await save_validator(this, block.header.height.value,
+                    block.header.enrollments[enroll_idx]);
+            }
+            catch (err)
+            {
+                onError(err);
                 return;
             }
+        }
 
-            validator_stmt.finalize((err2: Error | null) =>
-            {
-                if (err2)
-                    onError(err2);
-                else
-                    onSuccess();
-            });
-        });
+        onSuccess();
     }
 
     /**
@@ -295,99 +317,141 @@ export class LedgerStorage extends Storages
      * @param onError This function will be called when
      * an error occurred.
      */
-    public putTransactionsUseStatement (block: Block,
+    public async putTransactions (block: Block,
         onSuccess: () => void, onError: (err: Error) => void)
     {
-        const tx_stmt = this.db.prepare(
-            `INSERT INTO transactions
-                (block_height, tx_index, tx_hash, type, inputs_count, outputs_count)
-            VALUES
-                (?, ?, ?, ?, ?, ?)`
-        );
-
-        const inputs_stmt = this.db.prepare(
-            `INSERT INTO tx_inputs
-                (block_height, tx_index, in_index, previous, out_index)
-            VALUES
-                (?, ?, ?, ?, ?)`
-        );
-
-        const outputs_stmt = this.db.prepare(
-            `INSERT INTO tx_outputs
-                (block_height, tx_index, output_index, tx_hash, utxo_key, address, amount)
-            VALUES
-                (?, ?, ?, ?, ?, ?, ?)`
-        );
-
-        const update_used_stmt = this.db.prepare(
-            `UPDATE tx_outputs SET used = 1 WHERE tx_hash = ? and output_index = ?`
-        );
-
-        block.txs.forEach((tx: Transaction, tx_idx: number) => {
-            tx_stmt.run([
-                block.header.height.value,
-                tx_idx,
-                block.merkle_tree[tx_idx],
-                tx.type,
-                tx.inputs.length,
-                tx.outputs.length
-            ]);
-            tx.inputs.forEach((input: TxInputs, in_idx: number)  => {
-                inputs_stmt.run([
-                    block.header.height.value,
-                    tx_idx,
-                    in_idx,
-                    input.previous,
-                    input.index]);
-                update_used_stmt.run([input.previous, input.index]);
-            });
-            tx.outputs.forEach((output: TxOutputs, out_idx: number)  => {
-                this.hash.makeUTXOKey(block.merkle_tree[tx_idx], BigInt(out_idx));
-                outputs_stmt.run([
-                    block.header.height.value,
-                    tx_idx,
-                    out_idx,
-                    block.merkle_tree[tx_idx],
-                    this.hash.toHexString(),
-                    output.address,
-                    output.value]);
-            });
-        });
-
-        tx_stmt.finalize((err1: Error | null) =>
+        function save_transaction (storage: LedgerStorage, height: number, tx_idx:
+            number, hash: string, tx: Transaction): Promise<void>
         {
-            if (err1)
+            return new Promise<void>((resolve, reject) =>
             {
-                onError(err1);
-                return;
-            }
+                storage.query(
+                    `INSERT INTO transactions
+                        (block_height, tx_index, tx_hash, type, inputs_count, outputs_count)
+                    VALUES
+                        (?, ?, ?, ?, ?, ?)`,
+                    [
+                        height,
+                        tx_idx,
+                        hash,
+                        tx.type,
+                        tx.inputs.length,
+                        tx.outputs.length
+                    ],
+                    () => {
+                        resolve();
+                    },
+                    (err) => {
+                        reject(err);
+                    }
+                );
+            });
+        }
 
-            inputs_stmt.finalize((err2: Error | null) =>
+        function save_input (storage: LedgerStorage, height: number, tx_idx: number,
+            in_idx: number, input: TxInputs): Promise<void>
+        {
+            return new Promise<void>((resolve, reject) =>
             {
-                if (err2)
+                storage.query(
+                    `INSERT INTO tx_inputs
+                        (block_height, tx_index, in_index, previous, out_index)
+                    VALUES
+                        (?, ?, ?, ?, ?)`,
+                    [
+                        height,
+                        tx_idx,
+                        in_idx,
+                        input.previous,
+                        input.index
+                    ],
+                    () => {
+                        resolve();
+                    },
+                    (err) => {
+                        reject(err);
+                    }
+                );
+            });
+        }
+
+        function update_spend_output (storage: LedgerStorage,
+            input: TxInputs): Promise<void>
+        {
+            return new Promise<void>((resolve, reject) =>
+            {
+                storage.query(
+                    `UPDATE tx_outputs SET used = 1 WHERE tx_hash = ? and output_index = ?`,
+                    [
+                        input.previous, input.index
+                    ],
+                    () => {
+                        resolve();
+                    },
+                    (err) => {
+                        reject(err);
+                    }
+                );
+            });
+        }
+
+        function save_output (storage: LedgerStorage, height: number, tx_idx: number,
+            out_idx: number, hash: string, utxo_key: string,
+            output: TxOutputs): Promise<void>
+        {
+            return new Promise<void>((resolve, reject) =>
+            {
+                storage.query(
+                    `INSERT INTO tx_outputs
+                        (block_height, tx_index, output_index, tx_hash, utxo_key, address, amount)
+                    VALUES
+                        (?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        height,
+                        tx_idx,
+                        out_idx,
+                        hash,
+                        utxo_key,
+                        output.address,
+                        output.value
+                    ],
+                    () => {
+                        resolve();
+                    },
+                    (err) => {
+                        reject(err);
+                    }
+                );
+            });
+        }
+
+        try
+        {
+            for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++)
+            {
+                await save_transaction(this, block.header.height.value, tx_idx, block.merkle_tree[tx_idx], block.txs[tx_idx]);
+
+                for (let in_idx = 0; in_idx < block.txs[tx_idx].inputs.length; in_idx++)
                 {
-                    onError(err2);
-                    return;
+                    await save_input(this, block.header.height.value, tx_idx, in_idx, block.txs[tx_idx].inputs[in_idx]);
+                    await update_spend_output(this, block.txs[tx_idx].inputs[in_idx]);
                 }
 
-                outputs_stmt.finalize((err3: Error | null) =>
+                for (let out_idx = 0; out_idx < block.txs[tx_idx].outputs.length; out_idx++)
                 {
-                    if (err3)
-                    {
-                        onError(err3);
-                        return;
-                    }
+                    this.hash.makeUTXOKey(block.merkle_tree[tx_idx], BigInt(out_idx));
+                    await save_output(this, block.header.height.value, tx_idx, out_idx,
+                        block.merkle_tree[tx_idx], this.hash.toHexString(), block.txs[tx_idx].outputs[out_idx]);
+                }
+            }
+        }
+        catch (err)
+        {
+            onError(err);
+            return;
+        }
 
-                    update_used_stmt.finalize((err4: Error | null) =>
-                    {
-                        if (err4)
-                            onError(err4);
-                        else
-                            onSuccess();
-                    });
-                });
-            });
-        });
+        onSuccess();
     }
 
     /**
