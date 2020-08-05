@@ -115,52 +115,55 @@ export class LedgerStorage extends Storages
     /**
      * Puts a block to database
      * @param data a block data
-     * @param onSuccess This function will be called when
-     * the database was finished successfully
-     * @param onError This function will be called when
-     * an error occurred.
      */
-    public putBlocks (data: any,
-        onSuccess: () => void, onError: (err: Error) => void)
+    public putBlocks (data: any): Promise<void>
     {
-        let block: Block = new Block();
-        try
+        function saveBlock (storage: LedgerStorage, block: Block): Promise<void>
         {
-            block.parseJSON(data);
-        }
-        catch (error)
-        {
-            onError(error);
-            return;
+            return new Promise<void>((resolve, reject) =>
+            {
+                storage.query(
+                    `INSERT INTO blocks
+                        (height, prev_block, validators, merkle_root, signature, tx_count, enrollment_count)
+                    VALUES
+                        (?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        block.header.height.value,
+                        block.header.prev_block,
+                        JSON.stringify(block.header.validators._storage),
+                        block.header.merkle_root,
+                        block.header.signature,
+                        block.txs.length,
+                        block.header.enrollments.length
+                    ],
+                    () => {
+                        resolve();
+                    },
+                    (err) => {
+                        reject(err);
+                    }
+                );
+            });
         }
 
-        let sql =
-            `INSERT INTO blocks
-                (height, prev_block, validators, merkle_root, signature, tx_count, enrollment_count)
-            VALUES
-                (?, ?, ?, ?, ?, ?, ?)`;
-        this.db.run(sql,
-            [
-                block.header.height.value,
-                block.header.prev_block,
-                JSON.stringify(block.header.validators._storage),
-                block.header.merkle_root,
-                block.header.signature,
-                block.txs.length,
-                block.header.enrollments.length
-            ], (err: Error | null) =>
+        return new Promise<void>((resolve, reject) =>
         {
-            if (err != null)
-            {
-                onError(err);
-                return;
-            }
-            this.putTransactions(block,
-            () =>
-            {
-                this.putEnrollments(block, onSuccess, onError);
-            },
-            onError);
+            (async () =>{
+                try
+                {
+                    let block: Block = new Block();
+                    block.parseJSON(data);
+                    await saveBlock(this, block);
+                    await this.putTransactions(block);
+                    await this.putEnrollments(block);
+                }
+                catch (error)
+                {
+                    reject(error);
+                    return;
+                }
+                resolve();
+            })();
         });
     }
 
@@ -187,13 +190,8 @@ export class LedgerStorage extends Storages
     /**
      * Puts all enrollments
      * @param block: The instance of the `Block`
-     * @param onSuccess This function will be called when
-     * the database was finished successfully
-     * @param onError This function will be called when
-     * an error occurred.
      */
-    public async putEnrollments (block: Block,
-        onSuccess: () => void, onError: (err: Error) => void)
+    public putEnrollments (block: Block): Promise<void>
     {
         function save_enrollment (storage: LedgerStorage, height: number,
             enroll_idx: number, enroll: Enrollment): Promise<void>
@@ -250,23 +248,28 @@ export class LedgerStorage extends Storages
             });
         }
 
-        for (let enroll_idx = 0; enroll_idx < block.header.enrollments.length; enroll_idx++)
+        return new Promise<void>((resolve, reject) =>
         {
-            try
+            (async () =>
             {
-                await save_enrollment(this, block.header.height.value, enroll_idx,
-                    block.header.enrollments[enroll_idx]);
-                await save_validator(this, block.header.height.value,
-                    block.header.enrollments[enroll_idx]);
-            }
-            catch (err)
-            {
-                onError(err);
-                return;
-            }
-        }
-
-        onSuccess();
+                for (let enroll_idx = 0; enroll_idx < block.header.enrollments.length; enroll_idx++)
+                {
+                    try
+                    {
+                        await save_enrollment(this, block.header.height.value, enroll_idx,
+                            block.header.enrollments[enroll_idx]);
+                        await save_validator(this, block.header.height.value,
+                            block.header.enrollments[enroll_idx]);
+                    }
+                    catch (err)
+                    {
+                        reject(err);
+                        return;
+                    }
+                }
+                resolve();
+            })();
+        });
     }
 
     /**
@@ -312,13 +315,8 @@ export class LedgerStorage extends Storages
     /**
      * Puts all transactions
      * @param block: The instance of the `Block`
-     * @param onSuccess This function will be called when
-     * the database was finished successfully
-     * @param onError This function will be called when
-     * an error occurred.
      */
-    public async putTransactions (block: Block,
-        onSuccess: () => void, onError: (err: Error) => void)
+    public putTransactions (block: Block): Promise<void>
     {
         function save_transaction (storage: LedgerStorage, height: number, tx_idx:
             number, hash: string, tx: Transaction): Promise<void>
@@ -425,33 +423,38 @@ export class LedgerStorage extends Storages
             });
         }
 
-        try
+        return new Promise<void>((resolve, reject) =>
         {
-            for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++)
+            (async () =>
             {
-                await save_transaction(this, block.header.height.value, tx_idx, block.merkle_tree[tx_idx], block.txs[tx_idx]);
-
-                for (let in_idx = 0; in_idx < block.txs[tx_idx].inputs.length; in_idx++)
+                try
                 {
-                    await save_input(this, block.header.height.value, tx_idx, in_idx, block.txs[tx_idx].inputs[in_idx]);
-                    await update_spend_output(this, block.txs[tx_idx].inputs[in_idx]);
-                }
+                    for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++)
+                    {
+                        await save_transaction(this, block.header.height.value, tx_idx, block.merkle_tree[tx_idx], block.txs[tx_idx]);
 
-                for (let out_idx = 0; out_idx < block.txs[tx_idx].outputs.length; out_idx++)
+                        for (let in_idx = 0; in_idx < block.txs[tx_idx].inputs.length; in_idx++)
+                        {
+                            await save_input(this, block.header.height.value, tx_idx, in_idx, block.txs[tx_idx].inputs[in_idx]);
+                            await update_spend_output(this, block.txs[tx_idx].inputs[in_idx]);
+                        }
+
+                        for (let out_idx = 0; out_idx < block.txs[tx_idx].outputs.length; out_idx++)
+                        {
+                            this.hash.makeUTXOKey(block.merkle_tree[tx_idx], BigInt(out_idx));
+                            await save_output(this, block.header.height.value, tx_idx, out_idx,
+                                block.merkle_tree[tx_idx], this.hash.toHexString(), block.txs[tx_idx].outputs[out_idx]);
+                        }
+                    }
+                }
+                catch (err)
                 {
-                    this.hash.makeUTXOKey(block.merkle_tree[tx_idx], BigInt(out_idx));
-                    await save_output(this, block.header.height.value, tx_idx, out_idx,
-                        block.merkle_tree[tx_idx], this.hash.toHexString(), block.txs[tx_idx].outputs[out_idx]);
+                    reject(err);
+                    return;
                 }
-            }
-        }
-        catch (err)
-        {
-            onError(err);
-            return;
-        }
-
-        onSuccess();
+                resolve();
+            })();
+        });
     }
 
     /**
