@@ -107,7 +107,7 @@ export class LedgerStorage extends Storages
             PRIMARY KEY(enrolled_at,utxo_key)
         );
 
-        CREATE TABLE information
+        CREATE TABLE IF NOT EXISTS information
         (
             key     TEXT NOT NULL,
             value   TEXT,
