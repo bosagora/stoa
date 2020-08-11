@@ -6,20 +6,54 @@ import { ValidatorData, IPreimage, IValidator } from "./modules/data/ValidatorDa
 import { Hash } from "./modules/common/Hash";
 import { PreImageInfo } from "./modules/data";
 import { cors_options } from "./cors";
+import { AgoraClient } from "./modules/agora/AgoraClient";
+import { TaskManager } from "./modules/task/TaskManager";
 
 class Stoa {
     public stoa: express.Application;
 
     public ledger_storage: LedgerStorage;
 
-    constructor (file_name: string) {
+    /**
+     * The network host to connect to Agora
+     */
+    private readonly agora_host: string;
+
+    /**
+     * The network port to connect to Agora
+     */
+    private readonly agora_port: string;
+
+    /**
+     * The temporary storage of the data received from Agora
+     */
+    protected pool: Array<IPooledData>;
+
+    /**
+     * The task manager that periodically executes registered a task function
+     */
+    protected task_manager: TaskManager;
+
+    /**
+     * Constructor
+     * @param database_filename sqlite3 database file name
+     * @param agora_host The network host to connect to Agora
+     * @param agora_port The network port to connect to Agora
+     */
+    constructor (database_filename: string, agora_host: string, agora_port: string)
+    {
+        this.agora_host = agora_host;
+        this.agora_port = agora_port;
+
+        this.pool = [];
+
         this.stoa = express();
         // parse application/x-www-form-urlencoded
-        this.stoa.use(bodyParser.urlencoded({ extended: false }))
+        this.stoa.use(bodyParser.urlencoded({ extended: false }));
         // parse application/json
         this.stoa.use(bodyParser.json());
         // create blockStorage
-        this.ledger_storage = new LedgerStorage(file_name, (err: Error | null) =>
+        this.ledger_storage = new LedgerStorage(database_filename, (err: Error | null) =>
         {
             if (err != null)
             {
@@ -31,6 +65,12 @@ class Stoa {
         this.stoa.use(cors(cors_options));
         // enable pre-flight
         this.stoa.options('*', cors(cors_options));
+
+        // create task manager, delay time is 10 milliseconds
+        this.task_manager = new TaskManager(() =>
+        {
+            return this.task();
+        }, 10);
 
         /**
          * Called when a request is received through the `/validators` handler
@@ -186,39 +226,25 @@ class Stoa {
 
         /**
          * When a request is received through the `/push` handler
-         * JSON block data is parsed and stored on each storage.
+         * The block data received is stored in the pool
+         * and immediately sends a response to Agora
          */
         this.stoa.post("/block_externalized",
             (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-            let block: any;
-            if (req.body.block == undefined)
+            if (req.body.block === undefined)
             {
                 res.status(400).send("Missing 'block' object in body");
                 return;
             }
 
-            try {
-                if (typeof req.body.block === "string")
-                    block = JSON.parse(req.body.block);
-                else
-                    block = req.body.block;
-            } catch(e) {
-                res.status(400).send("Not a valid JSON format");
-                return;
-            }
+            // To do
+            // For a more stable operating environment,
+            // it would be necessary to consider organizing the pool
+            // using the database instead of the array.
+            this.pool.push({type: "block", data: req.body.block});
 
-            console.log(block);
-
-            this.ledger_storage.putBlocks(block)
-            .then(() => {
-                res.status(200).send();
-                return;
-            })
-            .catch((err) => {
-                console.error("Failed to store the payload of a push to the DB: " + err);
-                res.status(500).send("An error occurred while saving");
-            });
+            res.status(200).send();
         });
 
         /**
@@ -228,34 +254,186 @@ class Stoa {
         this.stoa.post("/preimage_received",
             (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-            let pre_image: PreImageInfo = new PreImageInfo();
-            if (req.body.pre_image == undefined)
+            if (req.body.pre_image === undefined)
             {
                 res.status(400).send("Missing 'preImage' object in body");
-            }
-
-            try
-            {
-                pre_image.parseJSON(req.body.pre_image);
-            }
-            catch(e)
-            {
-                res.status(400).send("Not a valid JSON format");
                 return;
             }
 
-            console.log(pre_image);
+            // To do
+            // For a more stable operating environment,
+            // it would be necessary to consider organizing the pool
+            // using the database instead of the array.
+            this.pool.push({type: "pre_image", data: req.body.pre_image});
 
-            this.ledger_storage.updatePreImage(pre_image)
-            .then(() => {
-                res.status(200).send();
+            res.status(200).send();
+        });
+    }
+
+    /**
+     * Extract the block height from JSON.
+     * @param block
+     */
+    private static getBlockHeight(block: any): number
+    {
+        if  (
+            (block.header === undefined) ||
+            (block.header.height === undefined) ||
+            (block.header.height.value === undefined)
+        )
+        {
+            throw Error("Not found block height in JSON Block");
+        }
+
+        return Number(block.header.height.value);
+    };
+
+    /**
+     * Restores blocks from expected_height to height - 1 and saves recently received block.
+     * @param block The recently received block data
+     * @param height The height of the recently received block data
+     * @param expected_height The height of the block to save
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    private recoverBlock (block: any, height: number, expected_height: number): Promise<void>
+    {
+        return new Promise<void>((resolve, reject) =>
+        {
+            (async () => {
+                try
+                {
+                    let block_height = expected_height;
+                    let max_blocks = height - expected_height;
+                    let response_result = [];
+
+                    if (max_blocks > 0)
+                    {
+                        let agora_client = new AgoraClient(this.agora_host, this.agora_port);
+                        let blocks = await agora_client.requestBlocks(block_height, max_blocks);
+
+                        let element_height: number;
+
+                        // Save previous block
+                        for (let elem of blocks)
+                        {
+                            element_height = Stoa.getBlockHeight(elem);
+                            if (element_height == expected_height)
+                            {
+                                await this.ledger_storage.putBlocks(elem);
+                                expected_height++;
+                                response_result.push(`recover ${element_height}`);
+                                console.log(`Recovered a block with block height of ${element_height}`);
+                            }
+                            else
+                            {
+                                resolve();
+                                return;
+                            }
+                        }
+                    }
+
+                    // Save a block just received
+                    if (height == expected_height)
+                    {
+                        await this.ledger_storage.putBlocks(block);
+                        response_result.push(`save ${height}`);
+                        console.log(`Saved a block with block height of ${height}`);
+                    }
+
+                    resolve();
+                }
+                catch (err)
+                {
+                    reject(err);
+                }
+            })();
+        });
+    }
+
+    /**
+     * The task function to process data received from Agora one by one
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called and if an error occurs the `.catch`
+     * is called with an error.
+     */
+    private task (): Promise<void>
+    {
+        return new Promise<void>(async (resolve, reject) =>
+        {
+            let stored_data = this.pool.shift();
+
+            if (stored_data === undefined)
+            {
+                resolve();
                 return;
-            })
-            .catch((err) => {
-                console.error("Failed to store the payload of a update to the DB: " + err);
-                res.status(500).send("An error occurred while update");
-            });
+            }
+
+            if (stored_data.type === "block")
+            {
+                let block = stored_data.data;
+
+                try
+                {
+                    let height = Stoa.getBlockHeight(block);
+                    let expected_height = await this.ledger_storage.getExpectedBlockHeight();
+
+                    if (height == expected_height)
+                    {
+                        // The normal case
+                        // Save a block just received
+                        await this.ledger_storage.putBlocks(block);
+                        console.log(`Saved a block with block height of ${height}`);
+                    }
+                    else if (height > expected_height)
+                    {
+                        // Recovery is required for blocks that are not received.
+                        await this.recoverBlock(block, height, expected_height);
+                    }
+                    else
+                    {
+                        // Do not save because it is already a saved block.
+                        console.log(`Ignored a block with block height of ${height}`);
+                    }
+                    resolve();
+                }
+                catch (err)
+                {
+                    console.error("Failed to store the payload of a push to the DB: " + err);
+                    reject(err);
+                }
+            }
+            else if (stored_data.type === "pre_image")
+            {
+                let pre_image: PreImageInfo = new PreImageInfo();
+
+                try
+                {
+                    pre_image.parseJSON(stored_data.data);
+
+                    await this.ledger_storage.updatePreImage(pre_image);
+                    console.log(`Saved a pre-image enroll_key : ${pre_image.enroll_key.substr(0, 18)}, ` +
+                        `hash : ${pre_image.hash.substr(0, 18)}, distance : ${pre_image.distance}`);
+                    resolve();
+                }
+                catch(err)
+                {
+                    console.error("Failed to store the payload of a update to the DB: " + err);
+                    reject(err);
+                }
+            }
         });
     }
 }
+
+/**
+ * The interface of the data that are temporarily stored in the pool
+ */
+interface IPooledData
+{
+    type: string;
+    data: any;
+}
+
 export default Stoa;
