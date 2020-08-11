@@ -23,6 +23,7 @@ import {sample_data,
        } from "./SampleData.test";
 import { Hash } from '../src/modules/common/Hash';
 import { Block, Enrollment, Height } from '../src/modules/data';
+import { TaskManager } from "../src/modules/task/TaskManager";
 
 /**
  * This is an API server for testing and inherited from Stoa.
@@ -259,5 +260,36 @@ describe ('Test of Stoa API Server', () =>
         assert.strictEqual(response.data.length, 1);
         assert.strictEqual(response.data[0].preimage.distance, 6);
         assert.strictEqual(response.data[0].preimage.hash, sample_reEnroll_preImageInfo.hash);
+    });
+});
+
+describe ('Test of TaskManager', () =>
+{
+    // If the task is not finished, it does not restart.
+    it ('Test that only the expected number of times is running', (doneIt: () => void) =>
+    {
+        let storage: number[] = [];
+        let idx = 0;
+
+        function task (): Promise<void>
+        {
+            return new Promise<void>((resolve, reject) =>
+            {
+                setTimeout(() =>
+                {
+                    storage.push(idx++);
+                    resolve();
+                }, 50);
+            });
+        }
+
+        let task_manager = new TaskManager(task, 10);
+
+        setTimeout(() =>
+        {
+            task_manager.terminate();
+            assert.deepStrictEqual(storage, [0, 1]);
+            doneIt();
+        }, 150);
     });
 });
