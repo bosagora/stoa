@@ -1,7 +1,9 @@
 import express from "express";
 import bodyParser from "body-parser";
+import cors from "cors";
 import { LedgerStorage } from "./modules/storage/LedgerStorage";
 import { ValidatorData, IPreimage, IValidator } from "./modules/data/ValidatorData";
+import { cors_options } from "./cors";
 
 class Stoa {
     public stoa: express.Application;
@@ -23,6 +25,10 @@ class Stoa {
                 throw new Error(err.message);
             }
         });
+
+        this.stoa.use(cors(cors_options));
+        // enable pre-flight
+        this.stoa.options('*', cors(cors_options));
 
         /**
          * Called when a request is received through the `/validators` handler
