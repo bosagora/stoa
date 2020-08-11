@@ -13,12 +13,16 @@
  *******************************************************************************/
 
 import * as assert from 'assert';
+import Stoa from "../src/Stoa";
 import { Block } from "../src/modules/data";
+import { LedgerStorage } from "../src/modules/storage/LedgerStorage";
 import { AgoraClient } from "../src/modules/agora/AgoraClient";
 import { recovery_sample_data } from "./RecoveryData.test";
 
 import express from "express";
 import * as http from "http";
+import URI from "urijs";
+import axios from "axios";
 
 /**
  * This is an Agora node for testing.
@@ -29,6 +33,9 @@ class TestAgora
     public server: http.Server;
 
     public agora: express.Application;
+
+    // Add latency to induce new blocks to arrive during write of the previous block.
+    public delay: number = 0;
 
     constructor (port: string, done: () => void)
     {
@@ -59,7 +66,17 @@ class TestAgora
                 Math.min(block_height + max_blocks, recovery_sample_data.length)
             );
 
-            res.status(200).send(JSON.stringify(data));
+            if (this.delay > 0)
+            {
+                setTimeout(() =>
+                {
+                    res.status(200).send(JSON.stringify(data));
+                }, this.delay);
+            }
+            else
+            {
+                res.status(200).send(JSON.stringify(data));
+            }
         });
 
         // Shut down
@@ -83,23 +100,117 @@ class TestAgora
     }
 }
 
+/**
+ * This is an API server for testing and inherited from Stoa.
+ * The test code allows the API server to be started and shut down.
+ */
+class TestStoa extends Stoa
+{
+    public server: http.Server;
+
+    constructor (file_name: string, agora_address: string, agora_port: string, port: string, done: () => void)
+    {
+        super(file_name, agora_address, agora_port);
+
+        // Shut down
+        this.stoa.get("/stop", (req: express.Request, res: express.Response) =>
+        {
+            res.send("The test server is stopped.");
+            this.server.close();
+        });
+
+        this.stoa.get("/block",
+            async (req: express.Request, res: express.Response) =>
+            {
+                if  (
+                    (req.query.block_height === undefined) ||
+                    Number.isNaN(req.query.block_height)
+                )
+                {
+                    res.status(204).send();
+                    return;
+                }
+
+                let block_height = Math.max(Number(req.query.block_height), 0);
+
+                let getBlock = (storage: LedgerStorage, height: number):Promise<any[]> => {
+                    return new Promise<any[]>((resolve, reject) => {
+                        storage.getBlocks(height, (rows: any[])=>{resolve(rows);}, (error)=>{reject(error);});
+                    });
+                };
+
+                try
+                {
+                    let rows = await getBlock(this.ledger_storage, block_height);
+                    if (rows.length > 0)
+                        res.status(200).send(rows[0]);
+                    else
+                        res.status(400).send();
+                }
+                catch (error)
+                {
+                    res.status(500).send();
+                }
+            });
+
+        // Start to listen
+        this.server = this.stoa.listen(port, () =>
+        {
+            done();
+        });
+    }
+
+    public stop (callback?: (err?: Error) => void)
+    {
+        this.task_manager.terminate();
+        this.server.close(callback);
+    }
+}
+
 describe ('Test of Recovery', () =>
 {
     let agora_host: string = 'http://localhost';
     let agora_port: string = '2820';
     let agora_node: TestAgora;
 
+    let stoa_host: string = 'http://localhost';
+    let stoa_port: string = '3837';
+    let stoa_server : TestStoa;
+
+    let client = axios.create();
+
     before ('Start TestAgora', (doneIt: () => void) =>
     {
-        agora_node = new TestAgora(agora_port, doneIt);
+        agora_node = new TestAgora(agora_port, () =>
+        {
+            stoa_server = new TestStoa(":memory:", agora_host, agora_port, stoa_port, () =>
+            {
+                doneIt();
+            });
+        });
     });
 
     after ('Stop TestAgora', (doneIt: () => void) =>
     {
-        agora_node.stop(() => {
-            doneIt();
+        stoa_server.stop(() =>
+        {
+            agora_node.stop(() =>
+            {
+                doneIt();
+            });
         });
     });
+
+    function restartStoa (doneIt: () => void)
+    {
+        stoa_server.stop(() =>
+        {
+            stoa_server = new TestStoa(":memory:", agora_host, agora_port, stoa_port, () =>
+            {
+                doneIt();
+            });
+        });
+    }
 
     it ('Test a function requestBlocks', async () =>
     {
@@ -150,5 +261,163 @@ describe ('Test of Recovery', () =>
             }
             doneIt();
         });
+    });
+
+    it ('Test for continuous write', (doneIt: () => void) =>
+    {
+        (async () =>
+        {
+
+            let uri = URI(stoa_host)
+                .port(stoa_port)
+                .directory("block_externalized");
+
+            let url = uri.toString();
+
+            await client.post(url, {block: recovery_sample_data[0]});
+            await client.post(url, {block: recovery_sample_data[1]});
+            await client.post(url, {block: recovery_sample_data[2]});
+            await client.post(url, {block: recovery_sample_data[3]});
+            await client.post(url, {block: recovery_sample_data[4]});
+
+            setTimeout(async () =>
+            {
+                // Verifies that all sent blocks are wrote
+                for (let idx = 0; idx <= 4; idx++)
+                {
+                    let uri = URI(stoa_host)
+                        .port(stoa_port)
+                        .directory("block")
+                        .addSearch("block_height", idx);
+
+                    let response = await client.get(uri.toString());
+                    assert.strictEqual(response.status, 200);
+                    assert.strictEqual(response.data.height, idx);
+                }
+
+                doneIt();
+
+            }, 300);
+        })();
+    });
+
+    it ('Restart Stoa', (doneIt: () => void) =>
+    {
+        restartStoa(doneIt);
+    });
+
+    it ('Test for continuous recovery and write', (doneIt: () => void) =>
+    {
+        (async () =>
+        {
+            let uri = URI(stoa_host)
+                .port(stoa_port)
+                .directory("block_externalized");
+
+            let url = uri.toString();
+
+            await client.post(url, {block: recovery_sample_data[2]});
+
+            setTimeout(() =>
+            {
+                client.post(url, {block: recovery_sample_data[4]});
+            }, 15);
+
+            setTimeout(() =>
+            {
+                client.post(url, {block: recovery_sample_data[6]});
+            }, 30);
+
+            setTimeout(() =>
+            {
+                client.post(url, {block: recovery_sample_data[8]});
+            }, 45);
+
+            setTimeout(async () =>
+            {
+                // Verifies that all sent blocks are wrote
+                for (let idx = 0; idx <= 8; idx++)
+                {
+                    let uri = URI(stoa_host)
+                        .port(stoa_port)
+                        .directory("block")
+                        .addSearch("block_height", idx);
+
+                    let response = await client.get(uri.toString());
+                    assert.strictEqual(response.status, 200);
+                    assert.strictEqual(response.data.height, idx);
+                }
+
+                doneIt();
+
+            }, 800);
+        })();
+    });
+
+    it ('Restart Stoa', (doneIt: () => void) =>
+    {
+        restartStoa(doneIt);
+    });
+
+    it ('Test for ignoring already wrote block data', (doneIt: () => void) =>
+    {
+        (async () =>
+        {
+            agora_node.delay = 100;
+
+            let uri = URI(stoa_host)
+                .port(stoa_port)
+                .directory("block_externalized");
+
+            let url = uri.toString();
+
+            await client.post(url, {block: recovery_sample_data[0]});
+
+            // Delay to wait for data added to the pool to be processed.
+            setTimeout(() =>
+            {
+                client.post(url, {block: recovery_sample_data[1]});
+            }, 15);
+
+            // Blocks 2 is recovered, Block 3 is saved
+            setTimeout(() =>
+            {
+                client.post(url, {block: recovery_sample_data[3]});
+            }, 30);
+
+            // Make sure Block 4 arrives during the saving of Block 2, and 3.
+            // 100ms - 30ms < 100ms(agora_node.delay)
+            setTimeout(() =>
+            {
+                client.post(url, {block: recovery_sample_data[4]});
+            }, 100);
+
+            // Block 3 is ignored.
+            // If Block 3 was not ignored and attempted to write
+            // to the database, an error would occur.
+            setTimeout(() =>
+            {
+                client.post(url, {block: recovery_sample_data[3]});
+            }, 130);
+
+            setTimeout(async () =>
+            {
+                // Verifies that all sent blocks are wrote
+                for (let idx = 0; idx <= 4; idx++)
+                {
+                    let uri = URI(stoa_host)
+                        .port(stoa_port)
+                        .directory("block")
+                        .addSearch("block_height", idx);
+
+                    let response = await client.get(uri.toString());
+                    assert.strictEqual(response.status, 200);
+                    assert.strictEqual(response.data.height, idx);
+                }
+
+                doneIt();
+
+            }, 300);
+        })();
     });
 });
