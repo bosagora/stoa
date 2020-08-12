@@ -8,9 +8,10 @@
     "_test": "mocha -r ts-node/register tests/**/*.test.ts",
     "_build": "webpack --config webpack.config.js",
     "_start": "nodemon --watch src --delay 1 --exec 'ts-node' src/main.ts",
-    "test": "npm-run-all --serial json2ts _test",
+    "test": "NODE_ENV=test npm-run-all --serial json2ts _test",
+    "debug": "NODE_ENV=development npm-run-all --serial json2ts _test",
     "build": "npm-run-all --serial json2ts _build",
-    "start": "npm-run-all --serial json2ts _start",
+    "start": "NODE_ENV=production npm-run-all --serial json2ts _start",
     "tsc": "tsc"
   },
   "repository": {
@@ -25,10 +26,12 @@
   "homepage": "https://github.com/bpfkorea/stoa#readme",
   "dependencies": {
     "@ctrl/ts-base32": "^1.2.3",
+    "@types/app-root-path": "^1.2.4",
     "@types/cors": "^2.8.7",
     "@types/sodium-native": "^2.3.5",
     "@types/sqlite3": "^3.1.6",
     "ajv": "^6.12.3",
+    "app-root-path": "^3.0.0",
     "assert": "^2.0.0",
     "axios": "^0.19.2",
     "body-parser": "^1.19.0",
@@ -39,7 +42,8 @@
     "sodium-native": "^3.2.0",
     "source-map-support": "^0.5.19",
     "sqlite3": "^4.2.0",
-    "urijs": "^1.19.2"
+    "urijs": "^1.19.2",
+    "winston": "^3.3.3"
   },
   "devDependencies": {
     "@types/chai": "^4.2.12",
