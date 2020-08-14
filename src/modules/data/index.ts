@@ -22,3 +22,4 @@ export { Height } from './Height';
 export { PreImageInfo } from './PreImageInfo';
 export { PublicKey } from './PublicKey';
 export { Signature } from './Signature';
+export { Hash, hash, hashMulti, makeUTXOKey } from './Hash';

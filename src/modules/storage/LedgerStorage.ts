@@ -11,11 +11,10 @@
 
 *******************************************************************************/
 
-import { Hash }  from '../common/Hash'
 import { Storages } from './Storages';
 import {
     Block, Enrollment, Height, Transaction,
-    TxInputs, TxOutputs, PreImageInfo
+    TxInputs, TxOutputs, PreImageInfo, Hash, makeUTXOKey
 } from '../data';
 
 /**
@@ -23,12 +22,9 @@ import {
  */
 export class LedgerStorage extends Storages
 {
-    private hash: Hash;
-
     constructor (filename: string, callback: (err: Error | null) => void)
     {
         super(filename, callback);
-        this.hash = new Hash();
     }
 
     /**
@@ -501,9 +497,9 @@ export class LedgerStorage extends Storages
 
                         for (let out_idx = 0; out_idx < block.txs[tx_idx].outputs.length; out_idx++)
                         {
-                            this.hash.makeUTXOKey(block.merkle_tree[tx_idx], BigInt(out_idx));
+                            let utxo_key = makeUTXOKey(Hash.createFromString(block.merkle_tree[tx_idx]), BigInt(out_idx));
                             await save_output(this, block.header.height.value, tx_idx, out_idx,
-                                block.merkle_tree[tx_idx], this.hash.toHexString(), block.txs[tx_idx].outputs[out_idx]);
+                                block.merkle_tree[tx_idx], utxo_key.toString(), block.txs[tx_idx].outputs[out_idx]);
                         }
                     }
                 }
