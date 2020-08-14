@@ -11,25 +11,14 @@
 
 *******************************************************************************/
 
-import { BitField } from './BitField';
-import { Enrollment } from './Enrollment';
-import { TxInputs } from './TxInputs';
-import { TxOutputs } from './TxOutputs';
-import { Transaction } from './Transaction';
-import { BlockHeader } from './BlockHeader';
-import { Block } from './Block';
-import { Height } from './Height';
-import { PreImageInfo } from './PreImageInfo';
-
-export
-{
-    BitField,
-    Enrollment,
-    TxInputs,
-    TxOutputs,
-    Transaction,
-    BlockHeader,
-    Block,
-    Height,
-    PreImageInfo
-}
+export { BitField } from './BitField';
+export { Enrollment } from './Enrollment';
+export { TxInputs } from './TxInputs';
+export { TxOutputs } from './TxOutputs';
+export { Transaction } from './Transaction';
+export { BlockHeader } from './BlockHeader';
+export { Block } from './Block';
+export { Height } from './Height';
+export { PreImageInfo } from './PreImageInfo';
+export { PublicKey } from './PublicKey';
+export { Signature } from './Signature';
