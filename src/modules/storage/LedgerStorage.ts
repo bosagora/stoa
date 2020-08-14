@@ -111,7 +111,7 @@ export class LedgerStorage extends Storages
         CREATE TABLE IF NOT EXISTS information
         (
             key                 TEXT    NOT NULL,
-            value               TEXT,
+            value               TEXT    NOT NULL,
             PRIMARY KEY(key)
         )
         `;

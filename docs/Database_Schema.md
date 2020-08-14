@@ -193,7 +193,7 @@ The following data is recorded when the most recently recorded block height is 1
 ```sql
 CREATE TABLE IF NOT EXISTS information (
     key                     TEXT    NOT NULL,
-    value                   TEXT,
+    value                   TEXT    NOT NULL,
     PRIMARY KEY(key)
 )
 ```
