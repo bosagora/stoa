@@ -21,9 +21,8 @@ import {sample_data,
         sample_preImageInfo,
         sample_reEnroll_preImageInfo
        } from "./SampleData.test";
-import { Hash } from '../src/modules/common/Hash';
-import { Block, Enrollment, Height } from '../src/modules/data';
 import { TaskManager } from "../src/modules/task/TaskManager";
+import { Block, Enrollment, Height, Hash } from '../src/modules/data';
 
 /**
  * This is an API server for testing and inherited from Stoa.

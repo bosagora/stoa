@@ -3,8 +3,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import { LedgerStorage } from "./modules/storage/LedgerStorage";
 import { ValidatorData, IPreimage, IValidator } from "./modules/data/ValidatorData";
-import { Hash } from "./modules/common/Hash";
-import { PreImageInfo } from "./modules/data";
+import { PreImageInfo, Hash, hash } from "./modules/data";
 import { cors_options } from "./cors";
 import { AgoraClient } from "./modules/agora/AgoraClient";
 import { TaskManager } from "./modules/task/TaskManager";
@@ -108,23 +107,23 @@ class Stoa {
                             if ((target_height >= start_index) &&
                                 (start_index + row.preimage_distance) >= target_height)
                             {
-                                result_preimage_hash.fromHexString(preimage_hash);
+                                result_preimage_hash.fromString(preimage_hash);
                                 for (let i = 0; i < start_index + row.preimage_distance - target_height; i++)
                                 {
-                                    result_preimage_hash.hash(result_preimage_hash.buffer.slice());
+                                    result_preimage_hash = hash(result_preimage_hash.data);
                                     preimage_distance--;
                                 }
                             }
                             else
                             {
                                 preimage_distance = NaN;
-                                result_preimage_hash.fromHexString(Hash.NULL);
+                                result_preimage_hash.fromString(Hash.NULL);
                             }
 
                             let preimage: IPreimage =
                                 {
                                     distance: preimage_distance,
-                                    hash: result_preimage_hash.toHexString()
+                                    hash: result_preimage_hash.toString()
                                 } as IPreimage;
 
                             let validator: ValidatorData =
@@ -185,23 +184,23 @@ class Stoa {
                             if ((target_height >= start_index) &&
                                 (start_index + row.preimage_distance) >= target_height)
                             {
-                                result_preimage_hash.fromHexString(preimage_hash);
+                                result_preimage_hash.fromString(preimage_hash);
                                 for (let i = 0; i < start_index + row.preimage_distance - target_height; i++)
                                 {
-                                    result_preimage_hash.hash(result_preimage_hash.buffer.slice());
+                                    result_preimage_hash = hash(result_preimage_hash.data);
                                     preimage_distance--;
                                 }
                             }
                             else
                             {
                                 preimage_distance = NaN;
-                                result_preimage_hash.fromHexString(Hash.NULL);
+                                result_preimage_hash.fromString(Hash.NULL);
                             }
 
                             let preimage: IPreimage =
                                 {
                                     distance: preimage_distance,
-                                    hash: result_preimage_hash.toHexString()
+                                    hash: result_preimage_hash.toString()
                                 } as IPreimage;
 
                             let validator: ValidatorData =
