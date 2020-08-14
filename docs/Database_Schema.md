@@ -18,14 +18,14 @@
 ### _Create Script_
 
 ```sql
-CREATE TABLE "blocks" (
-    "height"    INTEGER NOT NULL,
-    "prev_block"    TEXT NOT NULL,
-    "validators"    TEXT NOT NULL,
-    "merkle_root"    TEXT NOT NULL,
-    "signature"    TEXT NOT NULL,
-    "tx_count"    INTEGER NOT NULL,
-    "enrollment_count"    INTEGER NOT NULL,
+CREATE TABLE IF NOT EXISTS "blocks" (
+    "height"                INTEGER NOT NULL,
+    "prev_block"            TEXT    NOT NULL,
+    "validators"            TEXT    NOT NULL,
+    "merkle_root"           TEXT    NOT NULL,
+    "signature"             TEXT    NOT NULL,
+    "tx_count"              INTEGER NOT NULL,
+    "enrollment_count"      INTEGER NOT NULL,
     PRIMARY KEY("height")
 )
 ```
@@ -47,13 +47,13 @@ CREATE TABLE "blocks" (
 ### _Create Script_
 
 ```sql
-CREATE TABLE "enrollments" (
-    "block_height"    INTEGER NOT NULL,
-    "enrollment_index"    INTEGER NOT NULL,
-    "utxo_key"    TEXT NOT NULL,
-    "random_seed"    TEXT NOT NULL,
-    "cycle_length"    INTEGER NOT NULL,
-    "enroll_sig"    TEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS "enrollments" (
+    "block_height"          INTEGER NOT NULL,
+    "enrollment_index"      INTEGER NOT NULL,
+    "utxo_key"              TEXT    NOT NULL,
+    "random_seed"           TEXT    NOT NULL,
+    "cycle_length"          INTEGER NOT NULL,
+    "enroll_sig"            TEXT    NOT NULL,
     PRIMARY KEY("block_height","enrollment_index")
 )
 ```
@@ -75,13 +75,13 @@ CREATE TABLE "enrollments" (
 ### _Create Script_
 
 ```sql
-CREATE TABLE "transactions" (
-    "block_height"    INTEGER NOT NULL,
-    "tx_index"    INTEGER NOT NULL,
-    "tx_hash"    TEXT NOT NULL,
-    "type"    INTEGER NOT NULL,
-    "inputs_count"    INTEGER NOT NULL,
-    "outputs_count"    INTEGER NOT NULL,
+CREATE TABLE IF NOT EXISTS "transactions" (
+    "block_height"          INTEGER NOT NULL,
+    "tx_index"              INTEGER NOT NULL,
+    "tx_hash"               TEXT    NOT NULL,
+    "type"                  INTEGER NOT NULL,
+    "inputs_count"          INTEGER NOT NULL,
+    "outputs_count"         INTEGER NOT NULL,
     PRIMARY KEY("block_height","tx_index")
 )
 ```
@@ -102,12 +102,12 @@ CREATE TABLE "transactions" (
 ### _Create Script_
 
 ```sql
-CREATE TABLE "tx_inputs" (
-    "block_height"    INTEGER NOT NULL,
-    "tx_index"    INTEGER NOT NULL,
-    "in_index"    INTEGER NOT NULL,
-    "previous"    TEXT NOT NULL,
-    "out_index"    INTEGER NOT NULL,
+CREATE TABLE IF NOT EXISTS "tx_inputs" (
+    "block_height"          INTEGER NOT NULL,
+    "tx_index"              INTEGER NOT NULL,
+    "in_index"              INTEGER NOT NULL,
+    "previous"              TEXT    NOT NULL,
+    "out_index"             INTEGER NOT NULL,
     PRIMARY KEY("block_height","tx_index","in_index")
 )
 ```
@@ -131,15 +131,15 @@ CREATE TABLE "tx_inputs" (
 ### _Create Script_
 
 ```sql
-CREATE TABLE "tx_outputs" (
-    "block_height"    INTEGER NOT NULL,
-    "tx_index"    INTEGER NOT NULL,
-    "output_index"    INTEGER NOT NULL,
-    "tx_hash"    TEXT NOT NULL,
-    "utxo_key"    TEXT NOT NULL,
-    "amount"    NUMERIC NOT NULL,
-    "address"    TEXT NOT NULL,
-    "used"    INTEGER NOT NULL DEFAULT 0,
+CREATE TABLE IF NOT EXISTS "tx_outputs" (
+    "block_height"          INTEGER NOT NULL,
+    "tx_index"              INTEGER NOT NULL,
+    "output_index"          INTEGER NOT NULL,
+    "tx_hash"               TEXT    NOT NULL,
+    "utxo_key"              TEXT    NOT NULL,
+    "amount"                NUMERIC NOT NULL,
+    "address"               TEXT    NOT NULL,
+    "used"                  INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY("block_height","tx_index","output_index")
 )
 ```
@@ -161,13 +161,13 @@ CREATE TABLE "tx_outputs" (
 ### _Create Script_
 
 ```sql
-CREATE TABLE "validators" (
-    "enrolled_at"    INTEGER NOT NULL,
-    "utxo_key"    TEXT NOT NULL,
-    "address"    TEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS "validators" (
+    "enrolled_at"           INTEGER NOT NULL,
+    "utxo_key"              TEXT    NOT NULL,
+    "address"               TEXT    NOT NULL,
     "stake"    NUMERIC NOT NULL,
-    "preimage_distance"    INTEGER NOT NULL,
-    "preimage_hash"    TEXT NOT NULL,
+    "preimage_distance"     INTEGER NOT NULL,
+    "preimage_hash"         TEXT    NOT NULL,
     PRIMARY KEY("enrolled_at","utxo_key")
 )
 ```
@@ -191,9 +191,9 @@ The following data is recorded when the most recently recorded block height is 1
 ### _Create Script_
 
 ```sql
-CREATE TABLE informations (
-    key         TEXT NOT NULL,
-    value       TEXT,
+CREATE TABLE IF NOT EXISTS information (
+    key                     TEXT    NOT NULL,
+    value                   TEXT,
     PRIMARY KEY(key)
 )
 ```
