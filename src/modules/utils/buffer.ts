@@ -23,13 +23,14 @@
  */
 export function readFromString (hex: string, target?: Buffer): Buffer
 {
-    let temp = Buffer.from((hex.substr(0, 2) == '0x') ? hex.substr(2) : hex, 'hex');
+    let start = (hex.substr(0, 2) == '0x') ? 2 : 0;
+    let length = (hex.length - start) >> 1;
 
     if (target == undefined)
-        target = Buffer.alloc(temp.length);
+        target = Buffer.alloc(length);
 
-    for (let idx = 0; idx < temp.length; idx++)
-        target.writeUInt8(temp.readUInt8(idx), temp.length - idx - 1);
+    for (let pos = 0, idx = start; idx < length * 2 + start; idx += 2, pos++)
+        target[length - pos - 1] = parseInt(hex.substr(idx, 2), 16);
 
     return target;
 }
@@ -41,8 +42,11 @@ export function readFromString (hex: string, target?: Buffer): Buffer
  */
 export function writeToString (source: Buffer): string
 {
-    let temp = Buffer.alloc(source.length);
-    for (let idx = 0; idx < source.length; idx++)
-        temp.writeUInt8(source.readUInt8(idx), source.length - idx - 1);
-    return '0x' + temp.toString("hex");
+    let hex = [];
+    for (let idx = source.length-1; idx >= 0; idx--)
+    {
+        hex.push((source[idx] >>> 4).toString(16));
+        hex.push((source[idx] & 0xF).toString(16));
+    }
+    return '0x' + hex.join("");
 }
