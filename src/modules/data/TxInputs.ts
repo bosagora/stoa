@@ -14,6 +14,8 @@
 import { Validator, ITxInputs } from "./validator";
 import { Hash } from "./Hash";
 import { Signature } from "./Signature";
+import { SmartBuffer } from "smart-buffer";
+import { NumberWriter } from '../utils/NumberWriter';
 
 /**
  * The class that defines the transaction's inputs of a block.
@@ -77,5 +79,27 @@ export class TxInputs
         this.signature.fromString(json.signature);
 
         return this;
+    }
+
+    /**
+     * Serialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public serialize (buffer: SmartBuffer)
+    {
+        this.previous.serialize(buffer);
+        NumberWriter.serialize(this.index, buffer);
+        this.signature.serialize(buffer);
+    }
+
+    /**
+     * Deserialize as binary data.
+     * @param buffer - The buffer to be deserialized
+     */
+    public deserialize (buffer: SmartBuffer)
+    {
+        this.previous.deserialize(buffer);
+        this.index = NumberWriter.deserialize(buffer);
+        this.signature.deserialize(buffer);
     }
 }

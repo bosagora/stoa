@@ -17,6 +17,8 @@ import { Enrollment } from './Enrollment';
 import { Height } from './Height';
 import { Hash } from "./Hash";
 import { Signature } from "./Signature";
+import { SmartBuffer } from "smart-buffer";
+import { NumberWriter } from '../utils/NumberWriter';
 
 /**
  * The class that defines the header of a block.
@@ -119,5 +121,41 @@ export class BlockHeader
             this.enrollments.push((new Enrollment()).parseJSON(elem));
 
         return this;
+    }
+
+    /**
+     * Serialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public serialize (buffer: SmartBuffer)
+    {
+        this.prev_block.serialize(buffer);
+        this.height.serialize(buffer);
+        this.merkle_root.serialize(buffer);
+        this.validators.serialize(buffer);
+        this.signature.serialize(buffer);
+        NumberWriter.serialize(this.enrollments.length, buffer);
+        for (let elem of this.enrollments)
+            elem.serialize(buffer);
+    }
+
+    /**
+     * Deserialize as binary data.
+     * @param buffer - The buffer to be deserialized
+     */
+    public deserialize (buffer: SmartBuffer)
+    {
+        this.prev_block.deserialize(buffer);
+        this.height.deserialize(buffer);
+        this.merkle_root.deserialize(buffer);
+        this.validators.deserialize(buffer);
+        this.signature.deserialize(buffer);
+        let length = NumberWriter.deserialize(buffer);
+        for (let idx = 0; idx < length; idx++)
+        {
+            let elem = new Enrollment();
+            elem.deserialize(buffer);
+            this.enrollments.push(elem);
+        }
     }
 }

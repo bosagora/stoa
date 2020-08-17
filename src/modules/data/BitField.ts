@@ -12,6 +12,8 @@
 *******************************************************************************/
 
 import { Validator, IBitField } from "./validator";
+import { SmartBuffer } from "smart-buffer";
+import { NumberWriter } from "../utils/NumberWriter";
 
 /**
  * The class that defines the BitField of a block.
@@ -49,5 +51,30 @@ export class BitField
         this._storage = json._storage.slice();
 
         return this;
+    }
+
+    /**
+     * Serialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public serialize (buffer: SmartBuffer)
+    {
+        NumberWriter.serialize(this._storage.length, buffer);
+        for (let elem of this._storage)
+            NumberWriter.serialize(elem, buffer);
+    }
+
+    /**
+     * Deserialize as binary data.
+     * @param buffer - The buffer to be deserialized
+     */
+    public deserialize (buffer: SmartBuffer)
+    {
+        let length = NumberWriter.deserialize(buffer);
+        for (let idx = 0; idx < length; idx++)
+        {
+            let elem = NumberWriter.deserialize(buffer);
+            this._storage.push(elem);
+        }
     }
 }

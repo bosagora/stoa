@@ -13,6 +13,7 @@
 
 import * as sodium from 'sodium-native'
 import { readFromString, writeToString } from "../utils/buffer"
+import { SmartBuffer } from "smart-buffer";
 
 /**
  * The Class for creating hash
@@ -74,6 +75,24 @@ export class Hash
     public static createFromString (hex: string): Hash
     {
         return (new Hash()).fromString(hex);
+    }
+
+    /**
+     * Serialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public serialize (buffer: SmartBuffer)
+    {
+        buffer.writeBuffer(this.data);
+    }
+
+    /**
+     * Deserialize as binary data.
+     * @param buffer - The buffer to be deserialized
+     */
+    public deserialize (buffer: SmartBuffer)
+    {
+        buffer.readBuffer(Hash.Width).copy(this.data);
     }
 }
 

@@ -14,6 +14,8 @@
 import { Validator, IEnrollment } from "./validator";
 import { Hash } from "./Hash";
 import { Signature } from "./Signature";
+import { SmartBuffer } from "smart-buffer";
+import { NumberWriter } from '../utils/NumberWriter';
 
 /**
  * The class that defines the enrollment of a block.
@@ -87,5 +89,29 @@ export class Enrollment
         this.enroll_sig.fromString(json.enroll_sig);
 
         return this;
+    }
+
+    /**
+     * Serialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public serialize (buffer: SmartBuffer)
+    {
+        this.utxo_key.serialize(buffer);
+        this.random_seed.serialize(buffer);
+        NumberWriter.serialize(this.cycle_length, buffer);
+        this.enroll_sig.serialize(buffer);
+    }
+
+    /**
+     * Deserialize as binary data.
+     * @param buffer - The buffer to be deserialized
+     */
+    public deserialize (buffer: SmartBuffer)
+    {
+        this.utxo_key.deserialize(buffer);
+        this.random_seed.deserialize(buffer);
+        this.cycle_length = NumberWriter.deserialize(buffer);
+        this.enroll_sig.deserialize(buffer);
     }
 }

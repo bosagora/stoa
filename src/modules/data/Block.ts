@@ -15,6 +15,8 @@ import { Validator, IBlock } from "./validator";
 import { BlockHeader } from './BlockHeader';
 import { Transaction } from './Transaction';
 import { Hash } from "./Hash";
+import { SmartBuffer } from "smart-buffer";
+import { NumberWriter } from '../utils/NumberWriter';
 
 /**
  * The class that defines the block.
@@ -80,5 +82,47 @@ export class Block
             this.merkle_tree.push(Hash.createFromString(elem));
 
         return this;
+    }
+
+    /**
+     * Serialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public serialize (buffer: SmartBuffer)
+    {
+        this.header.serialize(buffer);
+
+        NumberWriter.serialize(this.txs.length, buffer);
+        for (let tx of this.txs)
+            tx.serialize(buffer);
+
+        NumberWriter.serialize(this.merkle_tree.length, buffer);
+        for (let h of this.merkle_tree)
+            h.serialize(buffer);
+    }
+
+    /**
+     * Deserialize as binary data.
+     * @param buffer - The buffer to be deserialized
+     */
+    public deserialize (buffer: SmartBuffer)
+    {
+        this.header.deserialize(buffer);
+
+        let length = NumberWriter.deserialize(buffer);
+        for (let idx = 0; idx < length; idx++)
+        {
+            let elem = new Transaction();
+            elem.deserialize(buffer);
+            this.txs.push(elem);
+        }
+
+        length = NumberWriter.deserialize(buffer);
+        for (let idx = 0; idx < length; idx++)
+        {
+            let elem = new Hash();
+            elem.deserialize(buffer);
+            this.merkle_tree.push(elem);
+        }
     }
 }

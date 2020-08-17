@@ -13,6 +13,8 @@
 
 import { Validator, ITxOutputs } from "./validator";
 import { PublicKey } from "./PublicKey";
+import { SmartBuffer } from "smart-buffer";
+import { NumberWriter } from '../utils/NumberWriter';
 
 /**
  * The class that defines the transaction's outputs of a block.
@@ -62,5 +64,25 @@ export class TxOutputs
         this.address.fromString(json.address);
 
         return this;
+    }
+
+    /**
+     * Serialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public serialize (buffer: SmartBuffer)
+    {
+        NumberWriter.serialize(this.value, buffer);
+        this.address.serialize(buffer);
+    }
+
+    /**
+     * Deserialize as binary data.
+     * @param buffer - The buffer to be deserialized
+     */
+    public deserialize (buffer: SmartBuffer)
+    {
+        this.value = NumberWriter.deserialize(buffer);
+        this.address.deserialize(buffer);
     }
 }

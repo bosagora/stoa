@@ -13,6 +13,7 @@
 
 import { readFromString, writeToString } from "../utils/buffer"
 import * as assert from "assert";
+import { SmartBuffer } from "smart-buffer";
 
 /**
  * Define the signature
@@ -71,5 +72,23 @@ export class Signature
     public static createFromString (hex: string): Signature
     {
         return (new Signature()).fromString(hex);
+    }
+
+    /**
+     * Serialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public serialize (buffer: SmartBuffer)
+    {
+        buffer.writeBuffer(this.data);
+    }
+
+    /**
+     * Deserialize as binary data.
+     * @param buffer - The buffer to be deserialized
+     */
+    public deserialize (buffer: SmartBuffer)
+    {
+        buffer.readBuffer(Signature.Width).copy(this.data);
     }
 }

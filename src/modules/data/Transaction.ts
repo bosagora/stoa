@@ -14,6 +14,8 @@
 import { Validator, ITransaction } from './validator'
 import { TxInputs } from './TxInputs';
 import { TxOutputs } from './TxOutputs';
+import { SmartBuffer } from "smart-buffer";
+import { NumberWriter } from '../utils/NumberWriter';
 
 /**
  * The transaction type constant
@@ -88,5 +90,45 @@ export class Transaction
             this.outputs.push((new TxOutputs()).parseJSON(elem));
 
         return this;
+    }
+
+    /**
+     * Serialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public serialize (buffer: SmartBuffer)
+    {
+        NumberWriter.serialize(this.type, buffer);
+        NumberWriter.serialize(this.inputs.length, buffer);
+        for (let elem of this.inputs)
+            elem.serialize(buffer);
+
+        NumberWriter.serialize(this.outputs.length, buffer);
+        for (let elem of this.outputs)
+            elem.serialize(buffer);
+    }
+
+    /**
+     * Deserialize as binary data.
+     * @param buffer - The buffer to be deserialized
+     */
+    public deserialize (buffer: SmartBuffer)
+    {
+        this.type = NumberWriter.deserialize(buffer);
+        let length = NumberWriter.deserialize(buffer);
+        for (let idx = 0; idx < length; idx++)
+        {
+            let elem = new TxInputs();
+            elem.deserialize(buffer);
+            this.inputs.push(elem);
+        }
+
+        length = NumberWriter.deserialize(buffer);
+        for (let idx = 0; idx < length; idx++)
+        {
+            let elem = new TxOutputs();
+            elem.deserialize(buffer);
+            this.outputs.push(elem);
+        }
     }
 }

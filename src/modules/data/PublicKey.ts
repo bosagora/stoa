@@ -19,6 +19,7 @@ import { Signature } from './Signature';
 import * as sodium from 'sodium-native';
 import * as assert from 'assert';
 import { base32Encode, base32Decode } from '@ctrl/ts-base32';
+import { SmartBuffer } from "smart-buffer";
 
 /**
  * Define the public key / address
@@ -103,6 +104,24 @@ export class PublicKey
     public verify (signature: Signature, msg: Buffer): boolean
     {
         return sodium.crypto_sign_verify_detached(signature.data, msg, this.data);
+    }
+
+    /**
+     * Serialize as binary data.
+     * @param buffer - The buffer where serialized data is stored
+     */
+    public serialize (buffer: SmartBuffer)
+    {
+        buffer.writeBuffer(this.data);
+    }
+
+    /**
+     * Deserialize as binary data.
+     * @param buffer - The buffer to be deserialized
+     */
+    public deserialize (buffer: SmartBuffer)
+    {
+        buffer.readBuffer(PublicKey.Width).copy(this.data);
     }
 }
 
