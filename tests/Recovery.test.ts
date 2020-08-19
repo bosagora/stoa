@@ -133,15 +133,9 @@ class TestStoa extends Stoa
 
                 let block_height = Math.max(Number(req.query.block_height), 0);
 
-                let getBlock = (storage: LedgerStorage, height: number):Promise<any[]> => {
-                    return new Promise<any[]>((resolve, reject) => {
-                        storage.getBlocks(height, (rows: any[])=>{resolve(rows);}, (error)=>{reject(error);});
-                    });
-                };
-
                 try
                 {
-                    let rows = await getBlock(this.ledger_storage, block_height);
+                    let rows = await this.ledger_storage.getBlocks(block_height);
                     if (rows.length > 0)
                         res.status(200).send(rows[0]);
                     else

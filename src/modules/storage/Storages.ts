@@ -38,21 +38,31 @@ export class Storages
                     callback(err);
 
                 this.db.configure("busyTimeout", 1000);
-                this.createTables((err: Error | null) => {
-                    if (callback != null)
-                        callback(err);
-                });
+                this.createTables()
+                    .then(() =>
+                    {
+                        if (callback != null)
+                            callback(null);
+                    })
+                    .catch((err) => {
+                        if (callback != null)
+                            callback(err);
+                    });
             });
     }
 
     /**
      * Creates tables.
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
-     * The first argument is an error object.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called and if an error occurs the `.catch`
+     * is called with an error.
      */
-    public createTables (callback: (err: Error | null) => void)
+    public createTables (): Promise<void>
     {
+        return new Promise<void>((resolve, reject) =>
+        {
+            resolve();
+        });
     }
 
     /**
@@ -64,11 +74,81 @@ export class Storages
     }
 
     /**
+     * Execute SQL to query the database for data.
+     * @param sql The SQL query to run.
+     * @param params When the SQL statement contains placeholders,
+     * you can pass them in here.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    protected query (sql: string, params: any): Promise<any[]>
+    {
+        return new Promise<any[]>((resolve, reject) =>
+        {
+            this.db.all(sql, params, (err: Error | null, rows: any[]) =>
+            {
+                if (!err)
+                    resolve(rows);
+                else
+                    reject(err);
+            });
+        });
+    }
+
+    /**
+     * Execute SQL to enter data into the database.
+     * @param sql The SQL query to run.
+     * @param params When the SQL statement contains placeholders,
+     * you can pass them in here.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the result
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    protected run (sql: string, params: any): Promise<sqlite.RunResult>
+    {
+        return new Promise<sqlite.RunResult>((resolve, reject) =>
+        {
+            this.db.run(sql, params, (err: Error | null, result: sqlite.RunResult) =>
+            {
+                if (!err)
+                    resolve(result);
+                else
+                    reject(err);
+            });
+        });
+    }
+
+    /**
+     * Executes the SQL query
+     * @param sql The SQL query to run.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called and if an error occurs the `.catch`
+     * is called with an error.
+     */
+    protected exec (sql: string): Promise<void>
+    {
+        return new Promise<void>((resolve, reject) =>
+        {
+            this.db.exec(sql, (err: Error | null) =>
+            {
+                if (!err)
+                    resolve();
+                else
+                    reject(err);
+            });
+        });
+    }
+
+    /**
      * SQLite transaction statement
      * To start a transaction explicitly,
      * Open a transaction by issuing the begin function
      * the transaction is open until it is explicitly
      * committed or rolled back.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called and if an error occurs the `.catch`
+     * is called with an error.
      */
     protected begin (): Promise<void>
     {
@@ -83,10 +163,13 @@ export class Storages
             });
         });
     }
-    
+
     /**
      * SQLite transaction statement
      * Commit the changes to the database by using this.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called and if an error occurs the `.catch`
+     * is called with an error.
      */
     protected commit (): Promise<void>
     {
@@ -106,6 +189,9 @@ export class Storages
      * SQLite transaction statement
      * If it do not want to save the changes,
      * it can roll back using this.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called and if an error occurs the `.catch`
+     * is called with an error.
      */
     protected rollback (): Promise<void>
     {

@@ -29,11 +29,11 @@ export class LedgerStorage extends Storages
 
     /**
      * Creates tables related to the ledger.
-     * @param callback If provided, this function will be called when
-     * the database was finished successfully or when an error occurred.
-     * The first argument is an error object.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called and if an error occurs the `.catch`
+     * is called with an error.
      */
-    public createTables (callback: (err: Error | null) => void)
+    public createTables (): Promise<void>
     {
         let sql =
         `CREATE TABLE IF NOT EXISTS blocks
@@ -109,18 +109,18 @@ export class LedgerStorage extends Storages
             key                 TEXT    NOT NULL,
             value               TEXT    NOT NULL,
             PRIMARY KEY(key)
-        )
+        );
         `;
 
-        this.db.exec(sql, (err: Error | null) =>
-        {
-            callback(err);
-        });
+        return this.exec(sql);
     }
 
     /**
      * Puts a block to database
      * @param data a block data
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called and if an error occurs the `.catch`
+     * is called with an error.
      */
     public putBlocks (data: any): Promise<void>
     {
@@ -141,20 +141,22 @@ export class LedgerStorage extends Storages
                         block.header.signature,
                         block.txs.length,
                         block.header.enrollments.length
-                    ],
-                    () => {
+                    ]
+                )
+                    .then(() =>
+                    {
                         resolve();
-                    },
-                    (err) => {
+                    })
+                    .catch((err) =>
+                    {
                         reject(err);
-                    }
-                );
+                    });
             });
         }
 
         return new Promise<void>((resolve, reject) =>
         {
-            (async () =>{
+            (async () => {
                 try
                 {
                     let block: Block = new Block();
@@ -180,13 +182,11 @@ export class LedgerStorage extends Storages
     /**
      * Gets a block data
      * @param height the height of the block to get
-     * @param onSuccess This function will be called when
-     * the database was finished successfully
-     * @param onError This function will be called when
-     * an error occurred.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
      */
-    public getBlocks (height: number,
-        onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
+    public getBlocks (height: number): Promise<any[]>
     {
         let sql =
         `SELECT
@@ -194,7 +194,7 @@ export class LedgerStorage extends Storages
         FROM
             blocks
         WHERE height = ?`;
-        this.query(sql, [height], onSuccess, onError);
+        return this.query(sql, [height]);
     }
 
     /**
@@ -220,14 +220,16 @@ export class LedgerStorage extends Storages
                         enroll.random_seed,
                         enroll.cycle_length,
                         enroll.enroll_sig
-                    ],
-                    () => {
+                    ]
+                )
+                    .then(() =>
+                    {
                         resolve();
-                    },
-                    (err) => {
+                    })
+                    .catch((err) =>
+                    {
                         reject(err);
-                    }
-                );
+                    });
             });
         }
 
@@ -235,7 +237,7 @@ export class LedgerStorage extends Storages
         {
             return new Promise<void>((resolve, reject) =>
             {
-                storage.query(
+                storage.run(
                     `INSERT INTO validators
                         (enrolled_at, utxo_key, address, amount, preimage_distance, preimage_hash)
                     SELECT ?, utxo_key, address, amount, ?, ?
@@ -247,14 +249,16 @@ export class LedgerStorage extends Storages
                         0,
                         enroll.random_seed,
                         enroll.utxo_key
-                    ],
-                    () => {
+                    ]
+                )
+                    .then(() =>
+                    {
                         resolve();
-                    },
-                    (err) => {
+                    })
+                    .catch((err) =>
+                    {
                         reject(err);
-                    }
-                );
+                    });
             });
         }
 
@@ -289,7 +293,7 @@ export class LedgerStorage extends Storages
     {
         return new Promise<void>((resolve, reject) =>
         {
-            this.query(
+            this.run(
                 `UPDATE validators
                     SET preimage_distance = ?,
                         preimage_hash = ?
@@ -317,27 +321,26 @@ export class LedgerStorage extends Storages
                     pre_image.enroll_key,
                     pre_image.distance,
                     pre_image.distance
-                ],
-                () => {
+                ])
+                .then(() =>
+                {
                     resolve();
-                },
-                (err: Error) => {
+                })
+                .catch((err) =>
+                {
                     reject(err);
-                }
-            );
+                });
         });
     }
 
     /**
      * Get enrollments
      * @param height The height of the block
-     * @param onSuccess This function will be called when
-     * the database was finished successfully
-     * @param onError This function will be called when
-     * an error occurred.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
      */
-    public getEnrollments (height: number,
-        onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
+    public getEnrollments (height: number): Promise<any[]>
     {
         let sql =
         `SELECT
@@ -345,41 +348,42 @@ export class LedgerStorage extends Storages
         FROM
             enrollments
         WHERE block_height = ?`;
-        this.query(sql, [height], onSuccess, onError);
+        return this.query(sql, [height]);
     }
 
     /**
      * Get validators
      * @param height The height of the block
-     * @param onSuccess This function will be called when
-     * the database was finished successfully
-     * @param onError This function will be called when
-     * an error occurred.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
      */
-    public getValidators (height: number,
-        onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
+    public getValidators (height: number): Promise<any[]>
     {
-        let sql: string =
+        let sql =
         `SELECT
             enrolled_at, utxo_key, address, amount, preimage_distance, preimage_hash
         FROM
             validators
         WHERE enrolled_at = ?`;
-        this.query(sql, [height], onSuccess, onError);
+        return this.query(sql, [height]);
     }
 
     /**
      * Puts all transactions
      * @param block: The instance of the `Block`
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called and if an error occurs the `.catch`
+     * is called with an error.
      */
     public putTransactions (block: Block): Promise<void>
     {
-        function save_transaction (storage: LedgerStorage, height: number, tx_idx:
-            number, hash: string, tx: Transaction): Promise<void>
+        function save_transaction (storage: LedgerStorage, height: number,
+            tx_idx: number, hash: string, tx: Transaction): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
             {
-                storage.query(
+                storage.run(
                     `INSERT INTO transactions
                         (block_height, tx_index, tx_hash, type, inputs_count, outputs_count)
                     VALUES
@@ -391,14 +395,16 @@ export class LedgerStorage extends Storages
                         tx.type,
                         tx.inputs.length,
                         tx.outputs.length
-                    ],
-                    () => {
+                    ]
+                )
+                    .then(() =>
+                    {
                         resolve();
-                    },
-                    (err) => {
+                    })
+                    .catch((err) =>
+                    {
                         reject(err);
-                    }
-                );
+                    })
             });
         }
 
@@ -407,7 +413,7 @@ export class LedgerStorage extends Storages
         {
             return new Promise<void>((resolve, reject) =>
             {
-                storage.query(
+                storage.run(
                     `INSERT INTO tx_inputs
                         (block_height, tx_index, in_index, previous, out_index)
                     VALUES
@@ -418,14 +424,16 @@ export class LedgerStorage extends Storages
                         in_idx,
                         input.previous,
                         input.index
-                    ],
-                    () => {
+                    ]
+                )
+                    .then(() =>
+                    {
                         resolve();
-                    },
-                    (err) => {
+                    })
+                    .catch((err) =>
+                    {
                         reject(err);
-                    }
-                );
+                    })
             });
         }
 
@@ -434,18 +442,20 @@ export class LedgerStorage extends Storages
         {
             return new Promise<void>((resolve, reject) =>
             {
-                storage.query(
+                storage.run(
                     `UPDATE tx_outputs SET used = 1 WHERE tx_hash = ? and output_index = ?`,
                     [
                         input.previous, input.index
-                    ],
-                    () => {
+                    ]
+                )
+                    .then(() =>
+                    {
                         resolve();
-                    },
-                    (err) => {
+                    })
+                    .catch((err) =>
+                    {
                         reject(err);
-                    }
-                );
+                    })
             });
         }
 
@@ -455,7 +465,7 @@ export class LedgerStorage extends Storages
         {
             return new Promise<void>((resolve, reject) =>
             {
-                storage.query(
+                storage.run(
                     `INSERT INTO tx_outputs
                         (block_height, tx_index, output_index, tx_hash, utxo_key, address, amount)
                     VALUES
@@ -468,14 +478,16 @@ export class LedgerStorage extends Storages
                         utxo_key,
                         output.address,
                         output.value
-                    ],
-                    () => {
+                    ]
+                )
+                    .then(() =>
+                    {
                         resolve();
-                    },
-                    (err) => {
+                    })
+                    .catch((err) =>
+                    {
                         reject(err);
-                    }
-                );
+                    })
             });
         }
 
@@ -516,101 +528,66 @@ export class LedgerStorage extends Storages
     /**
      * Gets a transaction data
      * @param height The height of the block to get
-     * @param onSuccess This function will be called when
-     * the database was finished successfully
-     * @param onError This function will be called when
-     * an error occurred.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
      */
-    public getTransactions (height: number,
-        onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
+    public getTransactions (height: number): Promise<any[]>
     {
-        let sql: string =
+        let sql =
         `SELECT
             block_height, tx_index, tx_hash, type, inputs_count, outputs_count
         FROM
             transactions
         WHERE block_height = ?`;
-        this.query(sql, [height], onSuccess, onError);
+        return this.query(sql, [height]);
     }
 
     /**
      * Gets a transaction inputs data
      * @param height The height of the block to get
      * @param tx_index The index of the transaction in the block
-     * @param onSuccess This function will be called when
-     * the database was finished successfully
-     * @param onError This function will be called when
-     * an error occurred.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
      */
-    public getTxInputs (height: number, tx_index: number,
-        onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
+    public getTxInputs (height: number, tx_index: number): Promise<any[]>
     {
-        let sql: string =
+        let sql =
         `SELECT
             block_height, tx_index, in_index, previous, out_index
         FROM
             tx_inputs
         WHERE block_height = ? AND tx_index = ?`;
-        this.query(sql, [height, tx_index], onSuccess, onError);
+        return this.query(sql, [height, tx_index]);
     }
 
     /**
      * Gets a transaction outputs data
      * @param height The height of the block to get
      * @param tx_index The index of the transaction in the block
-     * @param onSuccess This function will be called when
-     * the database was finished successfully
-     * @param onError This function will be called when
-     * an error occurred.
      */
-    public getTxOutputs (height: number, tx_index: number,
-        onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
+    public getTxOutputs (height: number, tx_index: number): Promise<any[]>
     {
-        let sql: string =
+        let sql =
         `SELECT
             block_height, tx_index, output_index, tx_hash, utxo_key, address, amount, used
         FROM
             tx_outputs
         WHERE block_height = ? AND tx_index = ?`;
-        this.query(sql, [height, tx_index], onSuccess, onError);
+        return this.query(sql, [height, tx_index]);
     }
-
-    /**
-     * Runs the SQL query with the specified parameters and
-     * calls the callback onSuccess and onError afterwards
-     * @param sql The SQL query to run.
-     * @param params When the SQL statement contains placeholders,
-     * you can pass them in here.
-     * @param onSuccess This function will be called when
-     * the database was finished successfully
-     * @param onError This function will be called when
-     * an error occurred.
-     */
-    private query (sql: string, params: any,
-        onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
-    {
-        this.db.all(sql, params, (err: Error | null, rows: any[]) =>
-        {
-            if (!err)
-                onSuccess(rows);
-            else
-                onError(err);
-        });
-    }
-
     /**
      * Get validators
      * @param height: The height parameter is optional.
      * validators based on the block height if there is a height.
      * if height null the most up to date state is expected.
      * if the height is null then current valid validators.
-     * @param onSuccess This function will be called when
-     * the database was finished successfully
-     * @param onError This function will be called when
-     * an error occurred.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
      */
-    public getValidatorsAPI (height: number, address: string | null,
-        onSuccess: (rows: any[]) => void, onError: (err: Error) => void)
+    public getValidatorsAPI (height: number, address: string | null): Promise<any[]>
     {
         let cur_height: string;
 
@@ -652,52 +629,61 @@ export class LedgerStorage extends Storages
 
         sql += ` ORDER BY enrollments.enrolled_at ASC, enrollments.utxo_key ASC;`;
 
-        this.query(sql, [], onSuccess, onError);
+        return this.query(sql, []);
     }
 
     /**
      * Puts the height of the block to database
      * @param height The height of the block
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called and if an error occurs the `.catch`
+     * is called with an error.
      */
     public putBlockHeight (height: Height): Promise<void>
     {
         return new Promise<void>((resolve, reject) =>
         {
             let sql = `INSERT OR REPLACE INTO information (key, value) VALUES (?, ?);`;
-            this.db.run(sql, ["height", height.value], (err: Error | null) =>
-            {
-                if (err == null)
+            this.run(sql, ["height", height.value])
+                .then(() =>
+                {
                     resolve();
-                else
+                })
+                .catch((err) =>
+                {
                     reject(err);
-            });
+                });
         });
     }
 
     /**
      * Returns the height of the block to be added next
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the block height
+     * and if an error occurs the `.catch` is called with an error.
      */
     public getExpectedBlockHeight(): Promise<number>
     {
         return new Promise<number>((resolve, reject) =>
         {
             let sql = `SELECT value FROM information WHERE key = 'height';`;
-            this.query(sql, [], (rows: any[]) =>
-            {
-                if ((rows.length > 0) && (rows[0].value !== undefined) &&
-                    !Number.isNaN(rows[0].value))
+            this.query(sql, [])
+                .then((rows: any[]) =>
                 {
-                    resolve(Number(rows[0].value) + 1);
-                }
-                else
+                    if ((rows.length > 0) && (rows[0].value !== undefined) &&
+                        !Number.isNaN(rows[0].value))
+                    {
+                        resolve(Number(rows[0].value) + 1);
+                    }
+                    else
+                    {
+                        resolve(0);
+                    }
+                })
+                .catch((err) =>
                 {
-                    resolve(0);
-                }
-            },
-            (err: Error) =>
-            {
-                reject(err);
-            });
+                    reject(err);
+                });
         });
     }
 }

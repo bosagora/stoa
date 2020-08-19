@@ -88,8 +88,8 @@ class Stoa {
                 return;
             }
 
-            this.ledger_storage.getValidatorsAPI(height, null,
-                (rows: any[]) =>
+            this.ledger_storage.getValidatorsAPI(height, null)
+                .then((rows: any[]) =>
                 {
                     if (rows.length)
                     {
@@ -136,12 +136,11 @@ class Stoa {
                     {
                         res.status(204).send();
                     }
-                },
-                (err: Error) =>
+                })
+                .catch((err) =>
                 {
                     console.error("Failed to data lookup to the DB: " + err);
                     res.status(500).send("Failed to data lookup");
-                    return;
                 }
             );
         });
@@ -165,8 +164,8 @@ class Stoa {
                 return;
             }
 
-            this.ledger_storage.getValidatorsAPI(height, address,
-                (rows: any[]) =>
+            this.ledger_storage.getValidatorsAPI(height, address)
+                .then((rows: any[]) =>
                 {
                     if (rows.length)
                     {
@@ -213,12 +212,11 @@ class Stoa {
                     {
                         res.status(204).send();
                     }
-                },
-                (err: Error) =>
+                })
+                .catch((err) =>
                 {
                     console.error("Failed to data lookup to the DB: " + err);
                     res.status(500).send("Failed to data lookup");
-                    return;
                 }
             );
         });
