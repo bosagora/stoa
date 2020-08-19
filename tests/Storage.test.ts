@@ -52,8 +52,8 @@ function runBlockTest (ledger_storage: LedgerStorage, callback: () => void)
     {
         assert.ok(!err2, err2?.message);
 
-        ledger_storage.getBlocks(1,
-            (rows: any[]) =>
+        ledger_storage.getBlocks(1)
+            .then((rows: any[]) =>
             {
                 assert.strictEqual(rows.length, 1);
                 assert.strictEqual(rows[0].height, 1);
@@ -61,8 +61,8 @@ function runBlockTest (ledger_storage: LedgerStorage, callback: () => void)
                     '0x9c4a20550ac796274f64e93872466ebb551ba2cd3f2f051533d07a478d2402b' +
                     '59e5b0f0a2a14e818b88007ec61d4a82dc9128851f43799d6c1dc0609fca1537d');
                     callback();
-            },
-            (err: Error) =>
+            })
+            .catch((err) =>
             {
                 assert.ok(!err, err?.message);
                 callback();
@@ -98,8 +98,8 @@ function putAllBlockData (ledger_storage: LedgerStorage,
 function runEnrollmentsTest (ledger_storage: LedgerStorage, onDone: () => void)
 {
     let height: number = 0;
-    ledger_storage.getEnrollments(height,
-        (rows: any[]) =>
+    ledger_storage.getEnrollments(height)
+        .then((rows: any[]) =>
         {
             assert.strictEqual(rows.length, 3);
             assert.strictEqual(rows[0].block_height, height);
@@ -107,8 +107,8 @@ function runEnrollmentsTest (ledger_storage: LedgerStorage, onDone: () => void)
               '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad1cc3b' +
               'fc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
 
-            ledger_storage.getValidators(height,
-                (rows: any[]) =>
+            ledger_storage.getValidators(height)
+                .then((rows: any[]) =>
                 {
                     assert.strictEqual(rows.length, 3);
                     assert.strictEqual(rows[0].enrolled_at, height);
@@ -118,14 +118,14 @@ function runEnrollmentsTest (ledger_storage: LedgerStorage, onDone: () => void)
                     assert.strictEqual(rows[0].address,
                       'GA3DMXTREDC4AIUTHRFIXCKWKF7BDIXRWM2KLV74OPK2OKDM2VJ235GN');
                       onDone();
-                },
-                (err4: Error) =>
+                })
+                .catch((err4) =>
                 {
                     assert.ok(!err4, err4?.message);
                     onDone();
                 });
-        },
-        (err3: Error) =>
+        })
+        .catch((err3) =>
         {
             assert.ok(!err3, err3?.message);
             onDone();
@@ -137,24 +137,24 @@ function runEnrollmentsTest (ledger_storage: LedgerStorage, onDone: () => void)
  */
 function runTransactionsTest (ledger_storage: LedgerStorage, onDone: () => void)
 {
-  ledger_storage.getTransactions(0,
-      (rows3: any[]) =>
+  ledger_storage.getTransactions(0)
+      .then((rows3: any[]) =>
       {
           assert.strictEqual(rows3.length, 4);
           assert.strictEqual(rows3[0].tx_hash,
               '0x3a245017fee266f2aeacaa0ca11171b5825d34814bf1e33fae76cca50751e5c' +
               'fb010896f009971a8748a1d3720e33404f5a999ae224b54f5d5c1ffa345c046f7');
 
-          ledger_storage.getTxInputs(1, 0,
-              (rows4: any[]) =>
+          ledger_storage.getTxInputs(1, 0)
+              .then((rows4: any[]) =>
               {
                   assert.strictEqual(rows4.length, 1);
                   assert.strictEqual(rows4[0].previous,
                       '0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd223671' +
                       '3dc369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73');
 
-                  ledger_storage.getTxOutputs(0, 1,
-                      (rows5: any[]) =>
+                  ledger_storage.getTxOutputs(0, 1)
+                      .then((rows5: any[]) =>
                       {
                           assert.strictEqual(rows5.length, 8);
                           assert.strictEqual(rows5[0].utxo_key,
@@ -166,20 +166,20 @@ function runTransactionsTest (ledger_storage: LedgerStorage, onDone: () => void)
                           assert.strictEqual(rows5[0].address, 'GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ');
                           assert.strictEqual(rows5[0].used, 1);
                           onDone();
-                      },
-                      (err5: Error) =>
+                      })
+                      .catch((err5) =>
                       {
                           assert.ok(!err5, err5?.message);
                           onDone();
                       });
-              },
-              (err4: Error) =>
+              })
+              .catch((err4) =>
               {
                   assert.ok(!err4, err4?.message);
                   onDone();
               });
-      },
-      (err3: Error) =>
+      })
+      .catch((err3) =>
       {
           assert.ok(!err3, err3?.message);
           onDone();
@@ -193,48 +193,45 @@ function runTransactionsTest (ledger_storage: LedgerStorage, onDone: () => void)
 function runValidatorsAPITest (ledger_storage: LedgerStorage, onDone: () => void)
 {
     let address: string = 'GA3DMXTREDC4AIUTHRFIXCKWKF7BDIXRWM2KLV74OPK2OKDM2VJ235GN';
-    ledger_storage.getValidatorsAPI(1, null,
-        (rows: any[]) =>
+    ledger_storage.getValidatorsAPI(1, null)
+        .then((rows: any[]) =>
         {
             assert.strictEqual(rows[0].address, address);
             assert.strictEqual(rows[0].enrolled_at, 0);
             assert.strictEqual(rows[0].distance, undefined);
 
-            ledger_storage.getValidatorsAPI(1, address,
-                (rows: any[]) =>
+            ledger_storage.getValidatorsAPI(1, address)
+                .then((rows: any[]) =>
                 {
                     assert.strictEqual(rows.length, 1);
                     assert.strictEqual(rows[0].address, address);
                     assert.strictEqual(rows[0].stake, '0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad'+
                     '1cc3bfc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a');
 
-                    ledger_storage.getValidatorsAPI(Number.NaN, null,
-                        (rows: any[]) =>
+                    ledger_storage.getValidatorsAPI(Number.NaN, null)
+                        .then((rows: any[]) =>
                         {
                             assert.strictEqual(rows.length, 3);
                             assert.strictEqual(rows[0].distance, undefined);
                             onDone();
-                        },
-                        (err3: Error) =>
+                        })
+                        .catch((err3) =>
                         {
                             assert.ok(!err3, err3?.message);
                             onDone();
-                        }
-                    );
-                },
-                (err2: Error) =>
+                        });
+                })
+                .catch((err2) =>
                 {
                     assert.ok(!err2, err2?.message);
                     onDone();
-                }
-            );
-          },
-          (err1: Error) =>
-          {
-              assert.ok(!err1, err1?.message);
-              onDone();
-          }
-      );
+                });
+        })
+        .catch((err1) =>
+        {
+            assert.ok(!err1, err1?.message);
+            onDone();
+        });
 }
 
 describe('LedgerStorage', () =>
@@ -311,146 +308,126 @@ describe('LedgerStorage', () =>
                         " enrollments.block_height, enrollments.enrollment_index"
                 });
 
-            // Make sure that the block is not stored because it has been rolled back.
-            let getBlock = ((height: number): Promise<any[]> =>
-                {
-                    return new Promise<any[]>((resolve, reject) =>
-                    {
-                        ledger_storage.getBlocks(height,
-                            (rows: any[]) => {
-                                resolve(rows);
-                            },
-                            (err: Error) => {
-                                reject(err);
-                            });
-                    });
-                });
-            let rows0 = await getBlock(0);
+            let rows0: any[] = await ledger_storage.getBlocks(0);
             assert.strictEqual(rows0.length, 0);
 
             await ledger_storage.putTransactions(block);
-                let getTransaction = ((height: number): Promise<any[]> =>
-                {
-                    return new Promise<any[]>((resolve, reject) =>
-                    {
-                        ledger_storage.getTransactions(height,
-                            (rows: any[]) => {
-                                resolve(rows);
-                            },
-                            (err: Error) => {
-                                reject(err);
-                            });
-                    });
-                });
-            let rows1 = await getTransaction(0);
+            let rows1:any[] = await ledger_storage.getTransactions(0);
             assert.strictEqual(rows1.length, 4);
         });
     });
-
-    it('Tests that sending a pre-image', (doneIt: () => void) =>
-    {
-        updatePreImageTest(doneIt);
-    });
 });
 
-/**
- *  Run the test of the update preImage
- */
-function updatePreImageTest (allDoneIt: () => void)
+describe('Tests that sending a pre-image', () =>
 {
-    let ledger_storage: LedgerStorage = new LedgerStorage(":memory:", (err1: Error | null) =>
+    let ledger_storage: LedgerStorage;
+    let height: number = 0;
+
+    before ('Start sending a pre-image', (doneIt: () => void) =>
     {
-        assert.ok(!err1, err1?.message);
-
-        putAllBlockData(ledger_storage, (err2: Error | null) =>
+        ledger_storage = new LedgerStorage(":memory:", (err1: Error | null) =>
         {
-            assert.ok(!err2, err2?.message);
+            assert.ok(!err1, err1?.message);
 
-            let height: number = 0;
-            ledger_storage.getEnrollments(height,
-                () =>
-                {
-                    it ('Tests that sending a pre-image with a distance of 6 works', (doneIt: () => void) =>
-                    {
-                        let pre_image: PreImageInfo = new PreImageInfo();
-                        pre_image.parseJSON(sample_preImageInfo);
-                        ledger_storage.updatePreImage(pre_image)
-                        .then(() => {
-                            ledger_storage.getValidators(height,
-                                (rows: any[]) =>
-                                {
-                                    assert.strictEqual(rows[0].preimage_distance, sample_preImageInfo.distance);
-                                    assert.strictEqual(rows[0].preimage_hash, sample_preImageInfo.hash);
-                                },
-                                (err1: Error) =>
-                                {
-                                    assert.ok(!err1, err1?.message);
-                                    doneIt();
-                                });
-                        })
-                        .catch((err2) => {
-                            assert.ok(!err2, err2);
-                            doneIt();
-                        });
-                    });
+            putAllBlockData(ledger_storage, (err2: Error | null) =>
+            {
+                assert.ok(!err2, err2?.message);
 
-                    it ('Fail tests that sending a pre-image with a distance of 5 works', (doneIt: () => void) =>
+                ledger_storage.getEnrollments(height)
+                    .then(() =>
                     {
-                        sample_preImageInfo.distance = 5;
-                        let pre_image: PreImageInfo = new PreImageInfo();
-                        pre_image.parseJSON(sample_preImageInfo);
-                        ledger_storage.updatePreImage(pre_image)
-                        .then(() => {
-                            ledger_storage.getValidators(height,
-                                (rows: any[]) =>
-                                {
-                                    assert.strictEqual(rows[0].preimage_distance, 6);
-                                    assert.strictEqual(rows[0].preimage_hash, sample_preImageInfo.hash);
-                                },
-                                (err1: Error) =>
-                                {
-                                    assert.ok(!err1, err1?.message);
-                                    doneIt();
-                                });
-                        })
-                        .catch((err2) => {
-                            assert.ok(!err2, err2);
-                            doneIt();
-                        });
-                    });
-
-                    it ('Fail tests that sending a pre-image with a distance of 1008 works', (doneIt: () => void) =>
+                        doneIt();
+                    })
+                    .catch((err) =>
                     {
-                        // Distance test out of cycle_length range Test
-                        sample_preImageInfo.distance = 1008;
-                        let pre_image: PreImageInfo = new PreImageInfo();
-                        pre_image.parseJSON(sample_preImageInfo);
-                        ledger_storage.updatePreImage(pre_image)
-                        .then(() => {
-                            ledger_storage.getValidators(height,
-                                (rows: any[]) =>
-                                {
-                                    assert.strictEqual(rows[0].preimage_distance, 6);
-                                    assert.strictEqual(rows[0].preimage_hash, sample_preImageInfo.hash);
-                                },
-                                (err1: Error) =>
-                                {
-                                    assert.ok(!err1, err1?.message);
-                                    doneIt();
-                                });
-                        })
-                        .catch((err2) => {
-                            assert.ok(!err2, err2);
-                            doneIt();
-                        });
+                        assert.ok(!err, err);
+                        doneIt();
                     });
-                },
-                (err3: Error) =>
-                {
-                    assert.ok(!err3, err3);
-                    allDoneIt();
-                });
-        });
+            });
+        })
     });
-    allDoneIt();
-}
+
+    it ('Tests that sending a pre-image with a distance of 6 works', (doneIt: () => void) =>
+    {
+        let pre_image: PreImageInfo = new PreImageInfo();
+        pre_image.parseJSON(sample_preImageInfo);
+        ledger_storage.updatePreImage(pre_image)
+            .then(() =>
+            {
+                ledger_storage.getValidators(height)
+                    .then((rows: any[]) =>
+                    {
+                        assert.strictEqual(rows[0].preimage_distance, sample_preImageInfo.distance);
+                        assert.strictEqual(rows[0].preimage_hash, sample_preImageInfo.hash);
+                        doneIt();
+                    })
+                    .catch((err) =>
+                    {
+                        assert.ok(!err, err);
+                        doneIt();
+                    });
+            })
+            .catch((err) =>
+            {
+                assert.ok(!err, err);
+                doneIt();
+            });
+    });
+
+    it ('Fail tests that sending a pre-image with a distance of 5 works', (doneIt: () => void) =>
+    {
+        sample_preImageInfo.distance = 5;
+        let pre_image: PreImageInfo = new PreImageInfo();
+        pre_image.parseJSON(sample_preImageInfo);
+        ledger_storage.updatePreImage(pre_image)
+            .then(() =>
+            {
+                ledger_storage.getValidators(height)
+                    .then((rows: any[]) =>
+                    {
+                        assert.strictEqual(rows[0].preimage_distance, 6);
+                        assert.strictEqual(rows[0].preimage_hash, sample_preImageInfo.hash);
+                        doneIt();
+                    })
+                    .catch((err) =>
+                    {
+                        assert.ok(!err, err);
+                        doneIt();
+                    });
+            })
+            .catch((err) =>
+            {
+                assert.ok(!err, err);
+                doneIt();
+            });
+    });
+
+    it ('Fail tests that sending a pre-image with a distance of 1008 works', (doneIt: () => void) =>
+    {
+        // Distance test out of cycle_length range Test
+        sample_preImageInfo.distance = 1008;
+        let pre_image: PreImageInfo = new PreImageInfo();
+        pre_image.parseJSON(sample_preImageInfo);
+        ledger_storage.updatePreImage(pre_image)
+            .then(() =>
+            {
+                ledger_storage.getValidators(height)
+                    .then((rows: any[]) =>
+                    {
+                        assert.strictEqual(rows[0].preimage_distance, 6);
+                        assert.strictEqual(rows[0].preimage_hash, sample_preImageInfo.hash);
+                        doneIt();
+                    })
+                    .catch((err) =>
+                    {
+                        assert.ok(!err, err);
+                        doneIt();
+                    });
+            })
+            .catch((err) =>
+            {
+                assert.ok(!err, err);
+                doneIt();
+            });
+    });
+});
