@@ -11,6 +11,7 @@
         MIT License. See LICENSE for details.
 
  *******************************************************************************/
+import { logger } from "../../modules/common/Logger";
 
 /**
  * The class that defines the TaskManager.
@@ -103,7 +104,7 @@ export class TaskManager
             }
             catch(err)
             {
-                console.error(err);
+                logger.error(err);
             }
             finally
             {
