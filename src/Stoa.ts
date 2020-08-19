@@ -7,6 +7,7 @@ import { PreImageInfo, Hash, hash } from "./modules/data";
 import { cors_options } from "./cors";
 import { AgoraClient } from "./modules/agora/AgoraClient";
 import { TaskManager } from "./modules/task/TaskManager";
+import { logger } from "./modules/common/Logger";
 
 class Stoa {
     public stoa: express.Application;
@@ -56,7 +57,7 @@ class Stoa {
         {
             if (err != null)
             {
-                console.error(err);
+                logger.error(err);
                 throw new Error(err.message);
             }
         });
@@ -139,7 +140,7 @@ class Stoa {
                 })
                 .catch((err) =>
                 {
-                    console.error("Failed to data lookup to the DB: " + err);
+                    logger.error("Failed to data lookup to the DB: " + err);
                     res.status(500).send("Failed to data lookup");
                 }
             );
@@ -215,7 +216,7 @@ class Stoa {
                 })
                 .catch((err) =>
                 {
-                    console.error("Failed to data lookup to the DB: " + err);
+                    logger.error("Failed to data lookup to the DB: " + err);
                     res.status(500).send("Failed to data lookup");
                 }
             );
@@ -321,7 +322,7 @@ class Stoa {
                                 await this.ledger_storage.putBlocks(elem);
                                 expected_height++;
                                 response_result.push(`recover ${element_height}`);
-                                console.log(`Recovered a block with block height of ${element_height}`);
+                                logger.info(`Recovered a block with block height of ${element_height}`);
                             }
                             else
                             {
@@ -336,7 +337,7 @@ class Stoa {
                     {
                         await this.ledger_storage.putBlocks(block);
                         response_result.push(`save ${height}`);
-                        console.log(`Saved a block with block height of ${height}`);
+                        logger.info(`Saved a block with block height of ${height}`);
                     }
 
                     resolve();
@@ -381,7 +382,7 @@ class Stoa {
                         // The normal case
                         // Save a block just received
                         await this.ledger_storage.putBlocks(block);
-                        console.log(`Saved a block with block height of ${height}`);
+                        logger.info(`Saved a block with block height of ${height}`);
                     }
                     else if (height > expected_height)
                     {
@@ -391,13 +392,13 @@ class Stoa {
                     else
                     {
                         // Do not save because it is already a saved block.
-                        console.log(`Ignored a block with block height of ${height}`);
+                        logger.info(`Ignored a block with block height of ${height}`);
                     }
                     resolve();
                 }
                 catch (err)
                 {
-                    console.error("Failed to store the payload of a push to the DB: " + err);
+                    logger.error("Failed to store the payload of a push to the DB: " + err);
                     reject(err);
                 }
             }
@@ -410,13 +411,13 @@ class Stoa {
                     pre_image.parseJSON(stored_data.data);
 
                     await this.ledger_storage.updatePreImage(pre_image);
-                    console.log(`Saved a pre-image enroll_key : ${pre_image.enroll_key.substr(0, 18)}, ` +
+                    logger.info(`Saved a pre-image enroll_key : ${pre_image.enroll_key.substr(0, 18)}, ` +
                         `hash : ${pre_image.hash.substr(0, 18)}, distance : ${pre_image.distance}`);
                     resolve();
                 }
                 catch(err)
                 {
-                    console.error("Failed to store the payload of a update to the DB: " + err);
+                    logger.error("Failed to store the payload of a update to the DB: " + err);
                     reject(err);
                 }
             }
