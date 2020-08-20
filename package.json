@@ -36,6 +36,7 @@
     "cors": "^2.8.5",
     "crc": "^3.8.0",
     "express": "^4.17.1",
+    "express-ipfilter": "^1.1.2",
     "json-schema-to-typescript": "^9.1.1",
     "sodium-native": "^3.2.0",
     "source-map-support": "^0.5.19",
