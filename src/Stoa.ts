@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
+import { IpFilter, IpList } from "express-ipfilter";
 import { LedgerStorage } from "./modules/storage/LedgerStorage";
 import { ValidatorData, IPreimage, IValidator } from "./modules/data/ValidatorData";
 import { PreImageInfo, Hash, hash } from "./modules/data";
@@ -71,6 +72,9 @@ class Stoa {
         {
             return this.task();
         }, 10);
+
+        // List that allows access only to those IPs
+        const white_ip_list: IpList = ['::ffff:127.0.0.1'];
 
         /**
          * Called when a request is received through the `/validators` handler
@@ -228,6 +232,7 @@ class Stoa {
          * and immediately sends a response to Agora
          */
         this.stoa.post("/block_externalized",
+            IpFilter(white_ip_list, { mode: 'allow', log: false }),
             (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
             if (req.body.block === undefined)
@@ -250,6 +255,7 @@ class Stoa {
          * JSON preImage data is parsed and stored on each storage.
          */
         this.stoa.post("/preimage_received",
+            IpFilter(white_ip_list, { mode: 'allow', log: false }),
             (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
             if (req.body.pre_image === undefined)
