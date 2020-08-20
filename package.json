@@ -6,11 +6,9 @@
   "scripts": {
     "json2ts": "./node_modules/.bin/json2ts -i src/modules/data/schemas/ -o src/modules/data/types/",
     "_test": "mocha -r ts-node/register tests/**/*.test.ts",
-    "_build": "webpack --config webpack.config.js",
     "_start": "nodemon --watch src --delay 1 --exec 'ts-node' src/main.ts",
     "test": "NODE_ENV=test npm-run-all --serial json2ts _test",
     "debug": "NODE_ENV=development npm-run-all --serial json2ts _test",
-    "build": "npm-run-all --serial json2ts _build",
     "start": "NODE_ENV=production npm-run-all --serial json2ts _start",
     "tsc": "tsc"
   },
@@ -57,9 +55,6 @@
     "npm-run-all": "^4.1.5",
     "ts-loader": "^7.0.5",
     "ts-node": "^8.10.2",
-    "typescript": "^3.9.7",
-    "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12",
-    "webpack-node-externals": "^1.7.2"
+    "typescript": "^3.9.7"
   }
 }
