@@ -35,6 +35,11 @@ class Stoa {
     protected task_manager: TaskManager;
 
     /**
+     * The maximum number of blocks that can be recovered at one time
+     */
+    private _max_count_on_recovery: number = 64;
+
+    /**
      * Constructor
      * @param database_filename sqlite3 database file name
      * @param agora_host The network host to connect to Agora
@@ -295,16 +300,18 @@ class Stoa {
      * of the returned Promise is called
      * and if an error occurs the `.catch` is called with an error.
      */
-    private recoverBlock (block: any, height: number, expected_height: number): Promise<void>
+    private recoverBlock (block: any, height: number, expected_height: number): Promise<boolean>
     {
-        return new Promise<void>((resolve, reject) =>
+        return new Promise<boolean>((resolve, reject) =>
         {
             (async () => {
                 try
                 {
                     let block_height = expected_height;
                     let max_blocks = height - expected_height;
-                    let response_result = [];
+
+                    if (max_blocks > this._max_count_on_recovery)
+                        max_blocks = this._max_count_on_recovery;
 
                     if (max_blocks > 0)
                     {
@@ -321,26 +328,28 @@ class Stoa {
                             {
                                 await this.ledger_storage.putBlocks(elem);
                                 expected_height++;
-                                response_result.push(`recover ${element_height}`);
                                 logger.info(`Recovered a block with block height of ${element_height}`);
                             }
                             else
                             {
-                                resolve();
+                                resolve(false);
                                 return;
                             }
                         }
                     }
 
                     // Save a block just received
-                    if (height == expected_height)
+                    if (height <= expected_height)
                     {
                         await this.ledger_storage.putBlocks(block);
-                        response_result.push(`save ${height}`);
                         logger.info(`Saved a block with block height of ${height}`);
+                        resolve(true);
                     }
-
-                    resolve();
+                    else
+                    {
+                        logger.info(`Save of block ${height} postponed to`);
+                        resolve(false);
+                    }
                 }
                 catch (err)
                 {
@@ -387,7 +396,11 @@ class Stoa {
                     else if (height > expected_height)
                     {
                         // Recovery is required for blocks that are not received.
-                        await this.recoverBlock(block, height, expected_height);
+                        let success: boolean = await this.recoverBlock(block, height, expected_height);
+                        if (!success)
+                        {
+                            this.pool.unshift(stored_data);
+                        }
                     }
                     else
                     {
@@ -422,6 +435,22 @@ class Stoa {
                 }
             }
         });
+    }
+
+    /**
+     * Get the maximum number of blocks that can be recovered at one time
+     */
+    get max_count_on_recovery (): number
+    {
+        return this._max_count_on_recovery;
+    }
+
+    /**
+     * Set the maximum number of blocks that can be recovered at one time
+     */
+    set max_count_on_recovery (value: number)
+    {
+        this._max_count_on_recovery = value;
     }
 }
 

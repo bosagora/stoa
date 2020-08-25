@@ -414,4 +414,46 @@ describe ('Test of Recovery', () =>
             }, 300);
         })();
     });
+
+    it ('Restart Stoa', (doneIt: () => void) =>
+    {
+        restartStoa(doneIt);
+    });
+
+    it ('Test recovery of more blocks than the maximum number of blocks that can be recovered at a time', (doneIt: () => void) =>
+    {
+        (async () =>
+        {
+            stoa_server.max_count_on_recovery = 2;
+            agora_node.delay = 0;
+
+            let uri = URI(stoa_host)
+                .port(stoa_port)
+                .directory("block_externalized");
+
+            let url = uri.toString();
+
+            await client.post(url, {block: recovery_sample_data[0]});
+            await client.post(url, {block: recovery_sample_data[9]});
+
+            setTimeout(async () =>
+            {
+                // Verifies that all sent blocks are wrote
+                for (let idx = 0; idx <= 9; idx++)
+                {
+                    let uri = URI(stoa_host)
+                        .port(stoa_port)
+                        .directory("block")
+                        .addSearch("block_height", idx);
+
+                    let response = await client.get(uri.toString());
+                    assert.strictEqual(response.status, 200);
+                    assert.strictEqual(response.data.height, idx);
+                }
+
+                doneIt();
+
+            }, 300);
+        })();
+    });
 });
