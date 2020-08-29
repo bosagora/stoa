@@ -13,6 +13,7 @@
 
 import * as sodium from 'sodium-native'
 import { readFromString, writeToString } from "../utils/buffer"
+import { SmartBuffer } from "smart-buffer";
 
 /**
  * The Class for creating hash
@@ -78,6 +79,15 @@ export class Hash
     {
         return (new Hash()).fromString(hex);
     }
+
+    /**
+     * Collects data to create a hash.
+     * @param buffer - The buffer where collected data is stored
+     */
+    public computeHash (buffer: SmartBuffer)
+    {
+        buffer.writeBuffer(this.data);
+    }
 }
 
 /**
@@ -123,4 +133,57 @@ export function makeUTXOKey (h: Hash, index: bigint): Hash
     idx.writeBigUInt64LE(index);
 
     return hashMulti(h.data, idx);
+}
+
+/**
+ * Serializes all internal objects that the instance contains in a buffer.
+ * Calculates the hash of the buffer.
+ * @param record The object to serialize for the hash for creation.
+ * The object has a method named `computeHash`.
+ * @returns The instance of the hash
+ */
+export function hashFull (record: any): Hash
+{
+    if ((record === null) || (record === undefined))
+        return new Hash();
+
+    let buffer = new SmartBuffer();
+    hashPart(record, buffer);
+    return hash(buffer.readBuffer());
+}
+
+/**
+ * Serializes all internal objects that the instance contains in the buffer.
+ * @param record The object to serialize for the hash for creation
+ * @param buffer The storage of serialized data for creating the hash
+ */
+export function hashPart (record: any, buffer: SmartBuffer)
+{
+    if ((record === null) || (record === undefined))
+        return;
+
+    // If the record has a method called `computeHash`,
+    if (typeof record["computeHash"] == "function")
+    {
+        record.computeHash(buffer);
+        return;
+    }
+
+    if (Array.isArray(record))
+    {
+        for (let elem of record)
+        {
+            hashPart(elem, buffer);
+        }
+    }
+    else
+    {
+        for (let key in record)
+        {
+            if (record.hasOwnProperty(key))
+            {
+                hashPart(record[key], buffer);
+            }
+        }
+    }
 }

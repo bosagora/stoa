@@ -14,6 +14,7 @@
 import { Validator, IEnrollment } from "./validator";
 import { Hash } from "./Hash";
 import { Signature } from "./Signature";
+import { SmartBuffer } from "smart-buffer";
 
 /**
  * The class that defines the enrollment of a block.
@@ -87,5 +88,16 @@ export class Enrollment
         this.enroll_sig.fromString(json.enroll_sig);
 
         return this;
+    }
+
+    /**
+     * Collects data to create a hash.
+     * @param buffer - The buffer where collected data is stored
+     */
+    public computeHash (buffer: SmartBuffer)
+    {
+        this.utxo_key.computeHash(buffer);
+        this.random_seed.computeHash(buffer);
+        buffer.writeUInt32LE(this.cycle_length);
     }
 }

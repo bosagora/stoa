@@ -12,7 +12,8 @@
 *******************************************************************************/
 
 import * as assert from 'assert';
-import { Hash, hash, hashMulti, makeUTXOKey  }  from '../src/modules/data'
+import { Block, Hash, hash, hashMulti, makeUTXOKey, hashFull } from '../src/modules/data'
+import { recovery_sample_data } from "./RecoveryData.test";
 
 describe('Hash', () => {
     // Buffer has the same content. However, when printed with hex strings,
@@ -70,4 +71,28 @@ describe('Hash', () => {
             'c2e33bb2b89df2e59ee01eb2519b1508284b577f66a76d42546b65a6813e592' +
             'bb84');
     });
-  });
+});
+
+describe ('Test for hash value of block data', () =>
+{
+    let blocks: Array<Block> = [];
+
+    before ('Prepare test for block data hash', () =>
+    {
+        blocks.push((new Block()).parseJSON(recovery_sample_data[0]));
+        blocks.push((new Block()).parseJSON(recovery_sample_data[1]));
+    });
+
+    it ('Test that hash of block header', () =>
+    {
+        assert.deepStrictEqual(blocks[1].header.prev_block, hashFull(blocks[0].header));
+    });
+
+    it ('Test that hash of transactions', () =>
+    {
+        for (let idx = 0; idx < blocks[0].txs.length; idx++)
+        {
+            assert.deepStrictEqual(blocks[0].merkle_tree[idx], hashFull(blocks[0].txs[idx]));
+        }
+    });
+});

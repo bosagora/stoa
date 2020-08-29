@@ -12,6 +12,7 @@
 *******************************************************************************/
 
 import { Validator, IHeight } from "./validator";
+import { SmartBuffer } from "smart-buffer";
 
 /**
  * The class that defines the Height.
@@ -47,5 +48,14 @@ export class Height
         this.value = Number(json.value);
 
         return this;
+    }
+
+    /**
+     * Collects data to create a hash.
+     * @param buffer - The buffer where collected data is stored
+     */
+    public computeHash (buffer: SmartBuffer)
+    {
+        buffer.writeBigUInt64LE(BigInt(this.value));
     }
 }
