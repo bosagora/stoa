@@ -14,7 +14,7 @@
 import { Storages } from './Storages';
 import {
     Block, Enrollment, Height, Transaction,
-    TxInputs, TxOutputs, PreImageInfo, Hash, makeUTXOKey
+    TxInputs, TxOutputs, PreImageInfo, Hash, makeUTXOKey, hashFull
 } from '../data';
 
 /**
@@ -39,6 +39,7 @@ export class LedgerStorage extends Storages
         `CREATE TABLE IF NOT EXISTS blocks
         (
             height              INTEGER NOT NULL,
+            hash                TEXT    NOT NULL,
             prev_block          TEXT    NOT NULL,
             validators          TEXT    NOT NULL,
             merkle_root         TEXT    NOT NULL,
@@ -128,13 +129,15 @@ export class LedgerStorage extends Storages
         {
             return new Promise<void>((resolve, reject) =>
             {
+                let block_hash = hashFull(block.header);
                 storage.query(
                     `INSERT INTO blocks
-                        (height, prev_block, validators, merkle_root, signature, tx_count, enrollment_count)
+                        (height, hash, prev_block, validators, merkle_root, signature, tx_count, enrollment_count)
                     VALUES
-                        (?, ?, ?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         block.header.height.value,
+                        block_hash.toString(),
                         block.header.prev_block.toString(),
                         JSON.stringify(block.header.validators._storage),
                         block.header.merkle_root.toString(),
@@ -190,7 +193,7 @@ export class LedgerStorage extends Storages
     {
         let sql =
         `SELECT
-            height, prev_block, validators, merkle_root, signature, tx_count, enrollment_count
+            height, hash, prev_block, validators, merkle_root, signature, tx_count, enrollment_count
         FROM
             blocks
         WHERE height = ?`;
