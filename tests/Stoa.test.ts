@@ -23,6 +23,7 @@ import {sample_data,
        } from "./SampleData.test";
 import { TaskManager } from "../src/modules/task/TaskManager";
 import { Block, Enrollment, Height, Hash, Signature } from '../src/modules/data';
+import { Endian } from "../src/modules/utils/buffer";
 
 /**
  * This is an API server for testing and inherited from Stoa.
