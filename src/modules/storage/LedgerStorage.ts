@@ -16,6 +16,7 @@ import {
     Block, Enrollment, Height, Transaction,
     TxInputs, TxOutputs, PreImageInfo, Hash, makeUTXOKey, hashFull
 } from '../data';
+import { Endian } from "../utils/buffer";
 
 /**
  * The class that insert and read the ledger into the database.
@@ -39,11 +40,11 @@ export class LedgerStorage extends Storages
         `CREATE TABLE IF NOT EXISTS blocks
         (
             height              INTEGER NOT NULL,
-            hash                TEXT    NOT NULL,
-            prev_block          TEXT    NOT NULL,
+            hash                BLOB    NOT NULL,
+            prev_block          BLOB    NOT NULL,
             validators          TEXT    NOT NULL,
-            merkle_root         TEXT    NOT NULL,
-            signature           TEXT,
+            merkle_root         BLOB    NOT NULL,
+            signature           BLOB    NOT NULL,
             tx_count            INTEGER NOT NULL,
             enrollment_count    INTEGER NOT NULL,
             PRIMARY KEY(height)
@@ -53,10 +54,10 @@ export class LedgerStorage extends Storages
         (
             block_height        INTEGER NOT NULL,
             enrollment_index    INTEGER NOT NULL,
-            utxo_key            TEXT    NOT NULL,
-            random_seed         TEXT    NOT NULL,
+            utxo_key            BLOB    NOT NULL,
+            random_seed         BLOB    NOT NULL,
             cycle_length        INTEGER NOT NULL,
-            enroll_sig          TEXT    NOT NULL,
+            enroll_sig          BLOB    NOT NULL,
             PRIMARY KEY(block_height, enrollment_index)
         );
 
@@ -64,7 +65,7 @@ export class LedgerStorage extends Storages
         (
             block_height        INTEGER NOT NULL,
             tx_index            INTEGER NOT NULL,
-            tx_hash             TEXT    NOT NULL,
+            tx_hash             BLOB    NOT NULL,
             type                INTEGER NOT NULL,
             inputs_count        INTEGER NOT NULL,
             outputs_count       INTEGER NOT NULL,
@@ -76,7 +77,7 @@ export class LedgerStorage extends Storages
             block_height        INTEGER NOT NULL,
             tx_index            INTEGER NOT NULL,
             in_index            INTEGER NOT NULL,
-            previous            TEXT    NOT NULL,
+            previous            BLOB    NOT NULL,
             out_index           INTEGER NOT NULL,
             PRIMARY KEY(block_height, tx_index, in_index)
         );
@@ -86,8 +87,8 @@ export class LedgerStorage extends Storages
             block_height        INTEGER NOT NULL,
             tx_index            INTEGER NOT NULL,
             output_index        INTEGER NOT NULL,
-            tx_hash             TEXT    NOT NULL,
-            utxo_key            TEXT    NOT NULL,
+            tx_hash             BLOB    NOT NULL,
+            utxo_key            BLOB    NOT NULL,
             amount              NUMERIC NOT NULL,
             address             TEXT    NOT NULL,
             used                INTEGER NOT NULL DEFAULT 0,
@@ -97,11 +98,11 @@ export class LedgerStorage extends Storages
         CREATE TABLE IF NOT EXISTS validators
         (
             enrolled_at         INTEGER NOT NULL,
-            utxo_key            TEXT    NOT NULL,
+            utxo_key            BLOB    NOT NULL,
             address             TEXT    NOT NULL,
             amount              NUMERIC NOT NULL,
             preimage_distance   INTEGER NOT NULL,
-            preimage_hash       TEXT    NOT NULL,
+            preimage_hash       BLOB    NOT NULL,
             PRIMARY KEY(enrolled_at, utxo_key)
         );
 
@@ -137,11 +138,11 @@ export class LedgerStorage extends Storages
                         (?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         block.header.height.value,
-                        block_hash.toString(),
-                        block.header.prev_block.toString(),
+                        block_hash.toBinary(Endian.Little),
+                        block.header.prev_block.toBinary(Endian.Little),
                         JSON.stringify(block.header.validators._storage),
-                        block.header.merkle_root.toString(),
-                        block.header.signature.toString(),
+                        block.header.merkle_root.toBinary(Endian.Little),
+                        block.header.signature.toBinary(Endian.Little),
                         block.txs.length,
                         block.header.enrollments.length
                     ]
@@ -219,10 +220,10 @@ export class LedgerStorage extends Storages
                     [
                         block.header.height.value,
                         enroll_idx,
-                        enroll.utxo_key.toString(),
-                        enroll.random_seed.toString(),
+                        enroll.utxo_key.toBinary(Endian.Little),
+                        enroll.random_seed.toBinary(Endian.Little),
                         enroll.cycle_length,
-                        enroll.enroll_sig.toString()
+                        enroll.enroll_sig.toBinary(Endian.Little)
                     ])
                     .then(() => {
                         resolve();
@@ -248,8 +249,8 @@ export class LedgerStorage extends Storages
                     [
                         block.header.height.value,
                         0,
-                        enroll.random_seed.toString(),
-                        enroll.utxo_key.toString()
+                        enroll.random_seed.toBinary(Endian.Little),
+                        enroll.utxo_key.toBinary(Endian.Little)
                     ])
                     .then(() =>
                     {
@@ -291,7 +292,7 @@ export class LedgerStorage extends Storages
      */
     public updatePreImage (pre_image: PreImageInfo): Promise<void>
     {
-        let enroll_key = pre_image.enroll_key.toString();
+        let enroll_key = pre_image.enroll_key.toBinary(Endian.Little);
         return new Promise<void>((resolve, reject) =>
         {
             this.run(
@@ -316,7 +317,7 @@ export class LedgerStorage extends Storages
                     AND ? > validators.preimage_distance`,
                 [
                     pre_image.distance,
-                    pre_image.hash.toString(),
+                    pre_image.hash.toBinary(Endian.Little),
                     enroll_key,
                     enroll_key,
                     enroll_key,
@@ -392,7 +393,7 @@ export class LedgerStorage extends Storages
                     [
                         height,
                         tx_idx,
-                        hash.toString(),
+                        hash.toBinary(Endian.Little),
                         tx.type,
                         tx.inputs.length,
                         tx.outputs.length
@@ -423,7 +424,7 @@ export class LedgerStorage extends Storages
                         height,
                         tx_idx,
                         in_idx,
-                        input.previous.toString(),
+                        input.previous.toBinary(Endian.Little),
                         input.index
                     ]
                 )
@@ -446,7 +447,7 @@ export class LedgerStorage extends Storages
                 storage.run(
                     `UPDATE tx_outputs SET used = 1 WHERE tx_hash = ? and output_index = ?`,
                     [
-                        input.previous.toString(), input.index
+                        input.previous.toBinary(Endian.Little), input.index
                     ])
                     .then(() => {
                         resolve();
@@ -473,8 +474,8 @@ export class LedgerStorage extends Storages
                         height,
                         tx_idx,
                         out_idx,
-                        hash.toString(),
-                        utxo_key.toString(),
+                        hash.toBinary(Endian.Little),
+                        utxo_key.toBinary(Endian.Little),
                         output.address.toString(),
                         output.value
                     ]

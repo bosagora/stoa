@@ -5,6 +5,7 @@ import { IpFilter, IpList } from "express-ipfilter";
 import { LedgerStorage } from "./modules/storage/LedgerStorage";
 import { ValidatorData, IPreimage, IValidator } from "./modules/data/ValidatorData";
 import { PreImageInfo, Hash, hash } from "./modules/data";
+import { Endian } from "./modules/utils/buffer"
 import { cors_options } from "./cors";
 import { AgoraClient } from "./modules/agora/AgoraClient";
 import { TaskManager } from "./modules/task/TaskManager";
@@ -107,7 +108,7 @@ class Stoa {
 
                         for (const row of rows)
                         {
-                            let preimage_hash: string = row.preimage_hash;
+                            let preimage_hash: Buffer = row.preimage_hash;
                             let preimage_distance: number = row.preimage_distance;
                             let target_height: number = row.height;
                             let result_preimage_hash = new Hash();
@@ -117,7 +118,7 @@ class Stoa {
                             if ((target_height >= start_index) &&
                                 (start_index + row.preimage_distance) >= target_height)
                             {
-                                result_preimage_hash.fromString(preimage_hash);
+                                result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
                                 for (let i = 0; i < start_index + row.preimage_distance - target_height; i++)
                                 {
                                     result_preimage_hash = hash(result_preimage_hash.data);
@@ -137,7 +138,8 @@ class Stoa {
                                 } as IPreimage;
 
                             let validator: ValidatorData =
-                                new ValidatorData(row.address, row.enrolled_at, row.stake, preimage);
+                            new ValidatorData(row.address, row.enrolled_at,
+                                Hash.createFromBinary(row.stake, Endian.Little).toString(), preimage);
                             out_put.push(validator);
                         }
                         res.status(200).send(JSON.stringify(out_put));
@@ -183,7 +185,7 @@ class Stoa {
 
                         for (const row of rows)
                         {
-                            let preimage_hash: string = row.preimage_hash;
+                            let preimage_hash: Buffer = row.preimage_hash;
                             let preimage_distance: number = row.preimage_distance;
                             let target_height: number = row.height;
                             let result_preimage_hash = new Hash();
@@ -193,7 +195,7 @@ class Stoa {
                             if ((target_height >= start_index) &&
                                 (start_index + row.preimage_distance) >= target_height)
                             {
-                                result_preimage_hash.fromString(preimage_hash);
+                                result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
                                 for (let i = 0; i < start_index + row.preimage_distance - target_height; i++)
                                 {
                                     result_preimage_hash = hash(result_preimage_hash.data);
@@ -213,7 +215,8 @@ class Stoa {
                                 } as IPreimage;
 
                             let validator: ValidatorData =
-                                new ValidatorData(row.address, row.enrolled_at, row.stake, preimage);
+                                new ValidatorData(row.address, row.enrolled_at,
+                                    Hash.createFromBinary(row.stake, Endian.Little).toString(), preimage);
                             out_put.push(validator);
                         }
                         res.status(200).send(JSON.stringify(out_put));

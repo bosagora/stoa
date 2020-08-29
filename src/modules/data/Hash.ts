@@ -11,8 +11,9 @@
 
 *******************************************************************************/
 
-import * as sodium from 'sodium-native'
-import { readFromString, writeToString } from "../utils/buffer"
+import * as sodium from 'sodium-native';
+import { readFromString, writeToString, Endian, reverse } from "../utils/buffer";
+import * as assert from "assert";
 import { SmartBuffer } from "smart-buffer";
 
 /**
@@ -43,41 +44,98 @@ export class Hash
      * Constructor
      * @param bin The binary data of the hash
      */
-    constructor (bin?: Buffer)
+    constructor (bin?: Buffer, endian?: Endian)
     {
         this.data = Buffer.alloc(Hash.Width);
         if (bin != undefined)
-            bin.copy(this.data);
+            this.fromBinary(bin, endian);
     }
 
     /**
      * Reads from the hex string
      * @param hex The hex string
+     * @param endian The byte order
      * @returns The instance of Hash
      */
-    public fromString (hex: string): Hash
+    public fromString (hex: string, endian?: Endian): Hash
     {
-        readFromString(hex, this.data);
+        if (endian === undefined)
+            endian = Endian.Little;
+
+        readFromString(hex, this.data, endian);
         return this;
     }
 
     /**
      * Writes to the hex string
+     * @param endian The byte order
      * @returns The hex string
      */
-    public toString (): string
+    public toString (endian?: Endian): string
     {
-        return writeToString(this.data);
+        if (endian === undefined)
+            endian = Endian.Little;
+
+        return writeToString(this.data, endian);
+    }
+
+    /**
+     * Set binary data
+     * @param bin The binary data of the hash
+     * @param endian The byte order
+     * @returns The instance of Hash
+     */
+    public fromBinary (bin: Buffer, endian?: Endian): Hash
+    {
+        assert.strictEqual(bin.length, Hash.Width);
+
+        if (endian === undefined)
+            endian = Endian.Big;
+
+        if (endian === Endian.Little)
+            reverse(bin, this.data);
+        else
+            bin.copy(this.data);
+
+        return this;
+    }
+
+    /**
+     * Get binary data
+     * @param endian The byte order
+     * @returns The binary data of the hash
+     */
+    public toBinary (endian?: Endian): Buffer
+    {
+        if (endian === undefined)
+            endian = Endian.Big;
+
+        if (endian === Endian.Little)
+            return reverse(this.data);
+        else
+            return this.data;
     }
 
     /**
      * Creates from the hex string
      * @param hex The hex string
+     * @param endian The byte order
      * @returns The instance of Hash
      */
-    public static createFromString (hex: string): Hash
+    public static createFromString (hex: string, endian?: Endian): Hash
     {
-        return (new Hash()).fromString(hex);
+        return (new Hash()).fromString(hex, endian);
+    }
+
+    /**
+     * Creates from Buffer
+     * @param bin The binary data of the hash
+     * @param endian The byte order
+     * @returns The instance of Hash
+     */
+    public static createFromBinary (bin: Buffer, endian?: Endian): Hash
+    {
+        return new Hash(bin, endian);
     }
 
     /**
