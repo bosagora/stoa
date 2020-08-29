@@ -29,11 +29,14 @@ export class Hash
      */
     public static Width: number = 64;
 
-    public static NULL: string =
-        "0x0000000000000000000000000000000000000" +
-        "000000000000000000000000000000000000000" +
-        "000000000000000000000000000000000000000" +
-        "0000000000000";
+    /**
+     * The hash consisting of zero values for all bytes.
+     * @returns The instance of Hash
+     */
+    static get NULL(): Hash
+    {
+        return new Hash();
+    }
 
     /**
      * Constructor
