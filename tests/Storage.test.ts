@@ -16,6 +16,7 @@ import { LedgerStorage } from '../src/modules/storage/LedgerStorage';
 import { Block } from '../src/modules/data';
 import { PreImageInfo } from '../src/modules/data';
 import { sample_data, sample_preImageInfo } from "./SampleData.test";
+import { recovery_sample_data } from "./RecoveryData.test";
 
 /**
  * Run LedgerStorageTest
@@ -324,6 +325,26 @@ describe('LedgerStorage', () =>
             await ledger_storage.putTransactions(block);
             let rows1:any[] = await ledger_storage.getTransactions(0);
             assert.strictEqual(rows1.length, 4);
+        });
+    });
+
+    it ('Test for writing the block hash', () =>
+    {
+        let ledger_storage: LedgerStorage = new LedgerStorage(":memory:", async (err1: Error | null) =>
+        {
+            assert.ok(!err1, err1?.message);
+
+            // Write the Genesis block.
+            await ledger_storage.putBlocks(recovery_sample_data[0]);
+
+            // The block is read from the database.
+            let rows = await ledger_storage.getBlocks(0);
+            if (rows.length > 0)
+            {
+                // Check that the `prev_block` of block1 is the same as the hash value of the database.
+                let block1 = (new Block()).parseJSON(recovery_sample_data[1]);
+                assert.deepStrictEqual(block1.header.prev_block.toString(), rows[0].hash);
+            }
         });
     });
 });

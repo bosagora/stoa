@@ -8,6 +8,7 @@
 | Column            | Data Type | PK | Not NULL | Default  |Description|
 |:----------------- |:--------- |:--:|:--------:| -------- | --------- |
 | height            | INTEGER   | Y  | Y        |          | The height of the block |
+| hash              | TEXT      |    | Y        |          | The hash of the current block |
 | prev_block        | TEXT      |    | Y        |          | The hash of the previous block |
 | validators        | TEXT      |    | Y        |          | Bitfield containing the validators' key indices which signed the block |
 | merkle_root       | TEXT      |    | Y        |          | The hash of the merkle root of the transactions|
@@ -20,6 +21,7 @@
 ```sql
 CREATE TABLE IF NOT EXISTS "blocks" (
     "height"                INTEGER NOT NULL,
+    "hash"                  TEXT    NOT NULL,
     "prev_block"            TEXT    NOT NULL,
     "validators"            TEXT    NOT NULL,
     "merkle_root"           TEXT    NOT NULL,
