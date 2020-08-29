@@ -14,6 +14,7 @@
 import { Validator, ITxInputs } from "./validator";
 import { Hash } from "./Hash";
 import { Signature } from "./Signature";
+import { SmartBuffer } from "smart-buffer";
 
 /**
  * The class that defines the transaction's inputs of a block.
@@ -77,5 +78,15 @@ export class TxInputs
         this.signature.fromString(json.signature);
 
         return this;
+    }
+
+    /**
+     * Collects data to create a hash.
+     * @param buffer - The buffer where collected data is stored
+     */
+    public computeHash (buffer: SmartBuffer)
+    {
+        this.previous.computeHash(buffer);
+        buffer.writeUInt32LE(this.index);
     }
 }

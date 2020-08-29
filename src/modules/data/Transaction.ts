@@ -14,6 +14,7 @@
 import { Validator, ITransaction } from './validator'
 import { TxInputs } from './TxInputs';
 import { TxOutputs } from './TxOutputs';
+import { SmartBuffer } from "smart-buffer";
 
 /**
  * The transaction type constant
@@ -88,5 +89,18 @@ export class Transaction
             this.outputs.push((new TxOutputs()).parseJSON(elem));
 
         return this;
+    }
+
+    /**
+     * Collects data to create a hash.
+     * @param buffer - The buffer where collected data is stored
+     */
+    public computeHash (buffer: SmartBuffer)
+    {
+        buffer.writeUInt8(this.type);
+        for (let elem of this.inputs)
+            elem.computeHash(buffer);
+        for (let elem of this.outputs)
+            elem.computeHash(buffer);
     }
 }

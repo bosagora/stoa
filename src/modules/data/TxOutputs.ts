@@ -13,6 +13,7 @@
 
 import { Validator, ITxOutputs } from "./validator";
 import { PublicKey } from "./PublicKey";
+import { SmartBuffer } from "smart-buffer";
 
 /**
  * The class that defines the transaction's outputs of a block.
@@ -62,5 +63,15 @@ export class TxOutputs
         this.address.fromString(json.address);
 
         return this;
+    }
+
+    /**
+     * Collects data to create a hash.
+     * @param buffer - The buffer where collected data is stored
+     */
+    public computeHash (buffer: SmartBuffer)
+    {
+        buffer.writeBigUInt64LE(BigInt(this.value));
+        this.address.computeHash(buffer);
     }
 }

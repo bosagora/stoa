@@ -17,6 +17,7 @@ import { Enrollment } from './Enrollment';
 import { Height } from './Height';
 import { Hash } from "./Hash";
 import { Signature } from "./Signature";
+import { SmartBuffer } from "smart-buffer";
 
 /**
  * The class that defines the header of a block.
@@ -119,5 +120,18 @@ export class BlockHeader
             this.enrollments.push((new Enrollment()).parseJSON(elem));
 
         return this;
+    }
+
+    /**
+     * Collects data to create a hash.
+     * @param buffer - The buffer where collected data is stored
+     */
+    public computeHash (buffer: SmartBuffer)
+    {
+        this.prev_block.computeHash(buffer);
+        this.height.computeHash(buffer);
+        this.merkle_root.computeHash(buffer);
+        for (let elem of this.enrollments)
+            elem.computeHash(buffer);
     }
 }
