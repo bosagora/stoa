@@ -185,7 +185,7 @@ describe ('Test of Stoa API Server', () =>
             response = await client.get (uri4.toString());
             assert.strictEqual(response.data.length, 1);
             assert.strictEqual(response.data[0].preimage.distance, null);
-            assert.strictEqual(response.data[0].preimage.hash, Hash.NULL);
+            assert.strictEqual(response.data[0].preimage.hash, Hash.NULL.toString());
 
             let uri5 = URI(host)
                 .port(port)

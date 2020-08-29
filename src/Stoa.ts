@@ -127,7 +127,7 @@ class Stoa {
                             else
                             {
                                 preimage_distance = NaN;
-                                result_preimage_hash.fromString(Hash.NULL);
+                                result_preimage_hash = Hash.NULL;
                             }
 
                             let preimage: IPreimage =
@@ -203,7 +203,7 @@ class Stoa {
                             else
                             {
                                 preimage_distance = NaN;
-                                result_preimage_hash.fromString(Hash.NULL);
+                                result_preimage_hash = Hash.NULL;
                             }
 
                             let preimage: IPreimage =
