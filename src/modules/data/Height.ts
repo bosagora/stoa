@@ -18,16 +18,34 @@ import { Validator, IHeight } from "./validator";
  */
 export class Height
 {
-    public value: number = 0;
+    /**
+     * the block height
+     */
+    public value: number;
+
+    /**
+     * Construct
+     * @param value - The block height
+     */
+    constructor (value?: number)
+    {
+        if (value !== undefined)
+            this.value = value;
+        else
+            this.value = 0;
+    }
 
     /**
      * This parses JSON.
      * @param json The object of the JSON
+     * @returns The instance of Height
      */
-    public parseJSON (json: any)
+    public parseJSON (json: any): Height
     {
         Validator.isValidOtherwiseThrow<IHeight>('Height', json);
 
         this.value = Number(json.value);
+
+        return this;
     }
 }

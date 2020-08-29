@@ -15,7 +15,7 @@ export { BitField } from './BitField';
 export { Enrollment } from './Enrollment';
 export { TxInputs } from './TxInputs';
 export { TxOutputs } from './TxOutputs';
-export { Transaction } from './Transaction';
+export { Transaction, TxType } from './Transaction';
 export { BlockHeader } from './BlockHeader';
 export { Block } from './Block';
 export { Height } from './Height';

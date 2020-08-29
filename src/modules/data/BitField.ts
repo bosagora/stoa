@@ -1,6 +1,6 @@
 /*******************************************************************************
 
-    The class that defines and parses the BitField of a block.
+    The class that defines the BitField of a block.
 
     Copyright:
         Copyright (c) 2020 BOS Platform Foundation Korea
@@ -14,23 +14,40 @@
 import { Validator, IBitField } from "./validator";
 
 /**
- * The class that defines and parses the BitField of a block.
+ * The class that defines the BitField of a block.
  * Convert JSON object to TypeScript's instance.
  * An exception occurs if the required property are not present.
  */
 export class BitField
 {
-    _storage: number[] = [];
+    /**
+     * The storage with bit data
+     */
+    public _storage: number[];
+
+    /**
+     * Constructor
+     * @param storage - The source storage with bit data
+     */
+    constructor (storage?: number[])
+    {
+        if (storage !== undefined)
+            this._storage = storage;
+        else
+            this._storage = [];
+    }
 
     /**
      * This parses JSON.
-     * @param json The object of the JSON
+     * @param json - The JSON data
+     * @returns The instance of BitField
      */
-    public parseJSON (json: any)
+    public parseJSON (json: any): BitField
     {
         Validator.isValidOtherwiseThrow<IBitField>('BitField', json);
 
-        for (let idx = 0; idx < json._storage.length; idx++)
-            this._storage.push(Number(json._storage[idx]));
+        this._storage = json._storage.slice();
+
+        return this;
     }
 }
