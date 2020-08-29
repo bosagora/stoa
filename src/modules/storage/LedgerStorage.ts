@@ -135,10 +135,10 @@ export class LedgerStorage extends Storages
                         (?, ?, ?, ?, ?, ?, ?)`,
                     [
                         block.header.height.value,
-                        block.header.prev_block,
+                        block.header.prev_block.toString(),
                         JSON.stringify(block.header.validators._storage),
-                        block.header.merkle_root,
-                        block.header.signature,
+                        block.header.merkle_root.toString(),
+                        block.header.signature.toString(),
                         block.txs.length,
                         block.header.enrollments.length
                     ]
@@ -216,14 +216,12 @@ export class LedgerStorage extends Storages
                     [
                         block.header.height.value,
                         enroll_idx,
-                        enroll.utxo_key,
-                        enroll.random_seed,
+                        enroll.utxo_key.toString(),
+                        enroll.random_seed.toString(),
                         enroll.cycle_length,
-                        enroll.enroll_sig
-                    ]
-                )
-                    .then(() =>
-                    {
+                        enroll.enroll_sig.toString()
+                    ])
+                    .then(() => {
                         resolve();
                     })
                     .catch((err) =>
@@ -247,10 +245,9 @@ export class LedgerStorage extends Storages
                     [
                         block.header.height.value,
                         0,
-                        enroll.random_seed,
-                        enroll.utxo_key
-                    ]
-                )
+                        enroll.random_seed.toString(),
+                        enroll.utxo_key.toString()
+                    ])
                     .then(() =>
                     {
                         resolve();
@@ -291,6 +288,7 @@ export class LedgerStorage extends Storages
      */
     public updatePreImage (pre_image: PreImageInfo): Promise<void>
     {
+        let enroll_key = pre_image.enroll_key.toString();
         return new Promise<void>((resolve, reject) =>
         {
             this.run(
@@ -315,10 +313,10 @@ export class LedgerStorage extends Storages
                     AND ? > validators.preimage_distance`,
                 [
                     pre_image.distance,
-                    pre_image.hash,
-                    pre_image.enroll_key,
-                    pre_image.enroll_key,
-                    pre_image.enroll_key,
+                    pre_image.hash.toString(),
+                    enroll_key,
+                    enroll_key,
+                    enroll_key,
                     pre_image.distance,
                     pre_image.distance
                 ])
@@ -378,8 +376,8 @@ export class LedgerStorage extends Storages
      */
     public putTransactions (block: Block): Promise<void>
     {
-        function save_transaction (storage: LedgerStorage, height: number,
-            tx_idx: number, hash: string, tx: Transaction): Promise<void>
+        function save_transaction (storage: LedgerStorage, height: number, tx_idx:
+            number, hash: Hash, tx: Transaction): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
             {
@@ -391,7 +389,7 @@ export class LedgerStorage extends Storages
                     [
                         height,
                         tx_idx,
-                        hash,
+                        hash.toString(),
                         tx.type,
                         tx.inputs.length,
                         tx.outputs.length
@@ -422,7 +420,7 @@ export class LedgerStorage extends Storages
                         height,
                         tx_idx,
                         in_idx,
-                        input.previous,
+                        input.previous.toString(),
                         input.index
                     ]
                 )
@@ -445,11 +443,9 @@ export class LedgerStorage extends Storages
                 storage.run(
                     `UPDATE tx_outputs SET used = 1 WHERE tx_hash = ? and output_index = ?`,
                     [
-                        input.previous, input.index
-                    ]
-                )
-                    .then(() =>
-                    {
+                        input.previous.toString(), input.index
+                    ])
+                    .then(() => {
                         resolve();
                     })
                     .catch((err) =>
@@ -460,7 +456,7 @@ export class LedgerStorage extends Storages
         }
 
         function save_output (storage: LedgerStorage, height: number, tx_idx: number,
-            out_idx: number, hash: string, utxo_key: string,
+            out_idx: number, hash: Hash, utxo_key: Hash,
             output: TxOutputs): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
@@ -474,9 +470,9 @@ export class LedgerStorage extends Storages
                         height,
                         tx_idx,
                         out_idx,
-                        hash,
-                        utxo_key,
-                        output.address,
+                        hash.toString(),
+                        utxo_key.toString(),
+                        output.address.toString(),
                         output.value
                     ]
                 )
@@ -509,9 +505,9 @@ export class LedgerStorage extends Storages
 
                         for (let out_idx = 0; out_idx < block.txs[tx_idx].outputs.length; out_idx++)
                         {
-                            let utxo_key = makeUTXOKey(Hash.createFromString(block.merkle_tree[tx_idx]), BigInt(out_idx));
+                            let utxo_key = makeUTXOKey(block.merkle_tree[tx_idx], BigInt(out_idx));
                             await save_output(this, block.header.height.value, tx_idx, out_idx,
-                                block.merkle_tree[tx_idx], utxo_key.toString(), block.txs[tx_idx].outputs[out_idx]);
+                                block.merkle_tree[tx_idx], utxo_key, block.txs[tx_idx].outputs[out_idx]);
                         }
                     }
                 }
