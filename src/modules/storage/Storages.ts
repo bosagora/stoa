@@ -27,6 +27,9 @@ export class Storages
      * @param filename Valid values are filenames,
      * ":memory:" for an anonymous in-memory database and
      * an empty string for an anonymous disk-based database
+     * @param callback If provided, this function will be called when
+     * the database was opened successfully or when an error occurred.
+     * The first argument is an error object. If there is no error, this value is null.
      */
     constructor (filename: string, callback: (err: Error | null) => void)
     {

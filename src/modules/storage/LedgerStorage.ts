@@ -579,10 +579,11 @@ export class LedgerStorage extends Storages
     }
     /**
      * Get validators
-     * @param height: The height parameter is optional.
-     * validators based on the block height if there is a height.
-     * if height null the most up to date state is expected.
-     * if the height is null then current valid validators.
+     * @param height If present, the height at which the returned list of
+     * validators will apply. If absent, the highest height this stoa
+     * instance is aware of is assumed.
+     * @param address If present, only returns a single validator (or none if not enrolled).
+     * If null, all available validators are returned.
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.

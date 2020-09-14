@@ -43,6 +43,7 @@ export class Hash
     /**
      * Constructor
      * @param bin The binary data of the hash
+     * @param endian The byte order
      */
     constructor (bin?: Buffer, endian?: Endian)
     {
