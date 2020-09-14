@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import { IpFilter, IpList } from "express-ipfilter";
 import { LedgerStorage } from "./modules/storage/LedgerStorage";
-import { ValidatorData, IPreimage, IValidator } from "./modules/data/ValidatorData";
+import { ValidatorData, IPreimage } from "./modules/data/ValidatorData";
 import { PreImageInfo, Hash, hash } from "./modules/data";
 import { Endian } from "./modules/utils/buffer"
 import { cors_options } from "./cors";

@@ -15,7 +15,6 @@
 import * as assert from 'assert';
 import Stoa from "../src/Stoa";
 import { Block } from "../src/modules/data";
-import { LedgerStorage } from "../src/modules/storage/LedgerStorage";
 import { AgoraClient } from "../src/modules/agora/AgoraClient";
 import { recovery_sample_data } from "./RecoveryData.test";
 

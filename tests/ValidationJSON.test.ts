@@ -13,7 +13,6 @@
 
 import * as assert from 'assert';
 import { Validator, ITransaction, IEnrollment } from '../src/modules/data/validator';
-import { Enrollment } from "../src/modules/data";
 
 describe ('Test that validation with JSON schema', () =>
 {
