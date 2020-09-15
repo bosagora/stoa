@@ -11,18 +11,20 @@
 
 *******************************************************************************/
 
-import * as assert from 'assert';
-import Stoa from '../src/Stoa';
-import express from "express";
-import axios from "axios";
-import * as http from "http";
-import URI from "urijs";
-import {sample_data,
-        sample_preImageInfo,
-        sample_reEnroll_preImageInfo
-       } from "./SampleData.test";
-import { TaskManager } from "../src/modules/task/TaskManager";
 import { Block, Enrollment, Height, Hash, Signature } from '../src/modules/data';
+import {
+    sample_data,
+    sample_preImageInfo,
+    sample_reEnroll_preImageInfo
+} from './SampleData.test';
+import Stoa from '../src/Stoa';
+import { TaskManager } from '../src/modules/task/TaskManager';
+
+import * as assert from 'assert';
+import axios from 'axios';
+import express from 'express';
+import * as http from 'http';
+import URI from 'urijs';
 
 /**
  * This is an API server for testing and inherited from Stoa.

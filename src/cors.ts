@@ -10,7 +10,8 @@
         MIT License. See LICENSE for details.
 
 *******************************************************************************/
-import cors from "cors";
+
+import cors from 'cors';
 
 // CORS policy for stoa
 export const cors_options: cors.CorsOptions = {

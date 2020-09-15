@@ -11,10 +11,11 @@
 
 *******************************************************************************/
 
+import { readFromString, writeToString, Endian, reverse } from '../utils/buffer';
+
+import * as assert from 'assert';
+import { SmartBuffer } from 'smart-buffer';
 import * as sodium from 'sodium-native';
-import { readFromString, writeToString, Endian, reverse } from "../utils/buffer";
-import * as assert from "assert";
-import { SmartBuffer } from "smart-buffer";
 
 /**
  * The Class for creating hash

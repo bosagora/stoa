@@ -15,7 +15,7 @@
 
 *******************************************************************************/
 
-import * as assert from "assert";
+import * as assert from 'assert';
 
 /**
  * The byte order

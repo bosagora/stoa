@@ -11,10 +11,11 @@
 
 *******************************************************************************/
 
-import { Validator, ITransaction } from './validator'
 import { TxInputs } from './TxInputs';
 import { TxOutputs } from './TxOutputs';
-import { SmartBuffer } from "smart-buffer";
+import { Validator, ITransaction } from './validator'
+
+import { SmartBuffer } from 'smart-buffer';
 
 /**
  * The transaction type constant

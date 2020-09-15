@@ -12,14 +12,14 @@
 *******************************************************************************/
 
 export { BitField } from './BitField';
-export { Enrollment } from './Enrollment';
-export { TxInputs } from './TxInputs';
-export { TxOutputs } from './TxOutputs';
-export { Transaction, TxType } from './Transaction';
-export { BlockHeader } from './BlockHeader';
 export { Block } from './Block';
+export { BlockHeader } from './BlockHeader';
+export { Enrollment } from './Enrollment';
+export { Hash, hash, hashMulti, makeUTXOKey, hashFull } from './Hash';
 export { Height } from './Height';
 export { PreImageInfo } from './PreImageInfo';
 export { PublicKey } from './PublicKey';
 export { Signature } from './Signature';
-export { Hash, hash, hashMulti, makeUTXOKey, hashFull } from './Hash';
+export { Transaction, TxType } from './Transaction';
+export { TxInputs } from './TxInputs';
+export { TxOutputs } from './TxOutputs';

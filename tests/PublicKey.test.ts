@@ -12,6 +12,7 @@
 *******************************************************************************/
 
 import { PublicKey, Signature }  from '../src/modules/data'
+
 import * as assert from 'assert';
 
 describe ('PublicKey', () =>

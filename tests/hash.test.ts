@@ -11,9 +11,10 @@
 
 *******************************************************************************/
 
+import { Block, Hash, hash, hashFull, hashMulti, makeUTXOKey } from '../src/modules/data'
+import { recovery_sample_data } from './RecoveryData.test';
+
 import * as assert from 'assert';
-import { Block, Hash, hash, hashMulti, makeUTXOKey, hashFull } from '../src/modules/data'
-import { recovery_sample_data } from "./RecoveryData.test";
 
 describe('Hash', () => {
     // Buffer has the same content. However, when printed with hex strings,

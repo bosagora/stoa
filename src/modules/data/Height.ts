@@ -12,7 +12,8 @@
 *******************************************************************************/
 
 import { Validator, IHeight } from "./validator";
-import { SmartBuffer } from "smart-buffer";
+
+import { SmartBuffer } from 'smart-buffer';
 
 /**
  * The class that defines the Height.

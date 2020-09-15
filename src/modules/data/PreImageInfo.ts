@@ -11,8 +11,8 @@
 
 *******************************************************************************/
 
+import { Hash } from './Hash';
 import { Validator, IPreImageInfo } from './validator'
-import { Hash } from "./Hash";
 
 /**
  * The class that defines the preImageInfo.

@@ -11,13 +11,14 @@
 
 *******************************************************************************/
 
-import { Validator, IBlockHeader } from "./validator";
 import { BitField } from './BitField';
 import { Enrollment } from './Enrollment';
-import { Height } from './Height';
 import { Hash } from "./Hash";
-import { Signature } from "./Signature";
-import { SmartBuffer } from "smart-buffer";
+import { Height } from './Height';
+import { Signature } from './Signature';
+import { Validator, IBlockHeader } from './validator';
+
+import { SmartBuffer } from 'smart-buffer';
 
 /**
  * The class that defines the header of a block.

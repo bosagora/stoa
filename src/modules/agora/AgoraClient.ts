@@ -12,7 +12,7 @@
 *******************************************************************************/
 
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
-import URI from "urijs";
+import URI from 'urijs';
 
 /**
  * The class that recovers data

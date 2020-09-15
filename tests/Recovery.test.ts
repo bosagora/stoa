@@ -12,16 +12,16 @@
 
 *******************************************************************************/
 
-import * as assert from 'assert';
-import Stoa from "../src/Stoa";
-import { Block } from "../src/modules/data";
-import { AgoraClient } from "../src/modules/agora/AgoraClient";
-import { recovery_sample_data } from "./RecoveryData.test";
+import { AgoraClient } from '../src/modules/agora/AgoraClient';
+import { Block } from '../src/modules/data';
+import { recovery_sample_data } from './RecoveryData.test';
+import Stoa from '../src/Stoa';
 
-import express from "express";
-import * as http from "http";
-import URI from "urijs";
-import axios from "axios";
+import * as assert from 'assert';
+import axios from 'axios';
+import express from 'express';
+import * as http from 'http';
+import URI from 'urijs';
 
 /**
  * This is an Agora node for testing.

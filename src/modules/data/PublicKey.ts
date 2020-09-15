@@ -13,13 +13,13 @@
 
 *******************************************************************************/
 
-import * as utils from '../utils/CRC16';
 import { Signature } from './Signature';
+import * as utils from '../utils/CRC16';
 
-import * as sodium from 'sodium-native';
 import * as assert from 'assert';
 import { base32Encode, base32Decode } from '@ctrl/ts-base32';
-import { SmartBuffer } from "smart-buffer";
+import { SmartBuffer } from 'smart-buffer';
+import * as sodium from 'sodium-native';
 
 /**
  * Define the public key / address
