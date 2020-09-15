@@ -1,15 +1,15 @@
 /*******************************************************************************
 
- The sample block data for the test.
+    The sample block data for the test.
 
- Copyright:
- Copyright (c) 2020 BOS Platform Foundation Korea
- All rights reserved.
+    Copyright:
+        Copyright (c) 2020 BOS Platform Foundation Korea
+        All rights reserved.
 
- License:
- MIT License. See LICENSE for details.
+    License:
+        MIT License. See LICENSE for details.
 
- *******************************************************************************/
+*******************************************************************************/
 
 export const recovery_sample_data =
     [

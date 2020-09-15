@@ -10,7 +10,7 @@
     License:
         MIT License. See LICENSE for details.
 
- *******************************************************************************/
+*******************************************************************************/
 
 import * as assert from 'assert';
 import Stoa from "../src/Stoa";
