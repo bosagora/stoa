@@ -11,8 +11,9 @@
 
 *******************************************************************************/
 
-import * as assert from 'assert';
 import { Validator, ITransaction, IEnrollment } from '../src/modules/data/validator';
+
+import * as assert from 'assert';
 
 describe ('Test that validation with JSON schema', () =>
 {

@@ -11,10 +11,10 @@
 
 *******************************************************************************/
 
-import { Validator, IBlock } from "./validator";
 import { BlockHeader } from './BlockHeader';
+import { Hash } from './Hash';
 import { Transaction } from './Transaction';
-import { Hash } from "./Hash";
+import { Validator, IBlock } from './validator';
 
 /**
  * The class that defines the block.

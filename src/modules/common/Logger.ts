@@ -14,11 +14,10 @@
 
 *******************************************************************************/
 
-import winston from "winston";
-import { format } from "winston";
-import appRoot from "app-root-path";
+import appRoot from 'app-root-path';
+import winston from 'winston';
 
-const { combine, timestamp, label, printf } = format;
+const { combine, timestamp, label, printf } = winston.format;
 const logFormat = printf(({ level, message, label, timestamp }) => {
   return `[${label}] ${timestamp} ${level} ${message}`;
 });

@@ -11,8 +11,9 @@
 
 *******************************************************************************/
 
-import { readFromString, writeToString, Endian, reverse } from "../utils/buffer";
-import * as assert from "assert";
+import { readFromString, writeToString, Endian, reverse } from '../utils/buffer';
+
+import * as assert from 'assert';
 
 /**
  * Define the signature

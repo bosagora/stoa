@@ -11,10 +11,11 @@
 
 *******************************************************************************/
 
-import { Validator, ITxInputs } from "./validator";
-import { Hash } from "./Hash";
-import { Signature } from "./Signature";
-import { SmartBuffer } from "smart-buffer";
+import { Hash } from './Hash';
+import { Signature } from './Signature';
+import { Validator, ITxInputs } from './validator';
+
+import { SmartBuffer } from 'smart-buffer';
 
 /**
  * The class that defines the transaction's inputs of a block.

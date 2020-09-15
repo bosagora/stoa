@@ -11,7 +11,8 @@
         MIT License. See LICENSE for details.
 
 *******************************************************************************/
-import { logger } from "../../modules/common/Logger";
+
+import { logger } from '../common/Logger';
 
 /**
  * The class that defines the TaskManager.

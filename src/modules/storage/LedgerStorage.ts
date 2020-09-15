@@ -11,12 +11,12 @@
 
 *******************************************************************************/
 
-import { Storages } from './Storages';
 import {
-    Block, Enrollment, Height, Transaction,
-    TxInputs, TxOutputs, PreImageInfo, Hash, makeUTXOKey, hashFull
+    Block, Enrollment, Hash, Height, PreImageInfo, Transaction,
+    TxInputs, TxOutputs, makeUTXOKey, hashFull
 } from '../data';
-import { Endian } from "../utils/buffer";
+import { Endian } from '../utils/buffer';
+import { Storages } from './Storages';
 
 /**
  * The class that insert and read the ledger into the database.

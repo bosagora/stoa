@@ -1,15 +1,16 @@
-import express from "express";
-import bodyParser from "body-parser";
-import cors from "cors";
-import { IpFilter, IpList } from "express-ipfilter";
-import { LedgerStorage } from "./modules/storage/LedgerStorage";
-import { ValidatorData, IPreimage } from "./modules/data/ValidatorData";
-import { PreImageInfo, Hash, hash } from "./modules/data";
-import { Endian } from "./modules/utils/buffer"
-import { cors_options } from "./cors";
-import { AgoraClient } from "./modules/agora/AgoraClient";
-import { TaskManager } from "./modules/task/TaskManager";
-import { logger } from "./modules/common/Logger";
+import { AgoraClient } from './modules/agora/AgoraClient';
+import { cors_options } from './cors';
+import { Endian } from './modules/utils/buffer';
+import { LedgerStorage } from './modules/storage/LedgerStorage';
+import { logger } from './modules/common/Logger';
+import { PreImageInfo, Hash, hash } from './modules/data';
+import { TaskManager } from './modules/task/TaskManager';
+import { ValidatorData, IPreimage } from './modules/data/ValidatorData';
+
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import express from 'express';
+import { IpFilter, IpList } from 'express-ipfilter';
 
 class Stoa {
     public stoa: express.Application;

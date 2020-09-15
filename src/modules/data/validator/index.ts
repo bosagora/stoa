@@ -11,16 +11,17 @@
 
 *******************************************************************************/
 
-import Ajv from 'ajv';
 export { IBitField } from '../types/BitField';
 export { IBlock } from '../types/Block';
 export { IBlockHeader } from '../types/BlockHeader';
 export { IEnrollment } from '../types/Enrollment';
 export { IHeight } from '../types/Height';
+export { IPreImageInfo } from '../types/PreImageInfo';
 export { ITransaction } from '../types/Transaction';
 export { ITxInputs } from '../types/TxInputs';
 export { ITxOutputs } from '../types/TxOutputs';
-export { IPreImageInfo } from '../types/PreImageInfo';
+
+import Ajv from 'ajv';
 
 const ajv = new Ajv();
 

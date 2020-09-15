@@ -11,9 +11,10 @@
 
 *******************************************************************************/
 
-import { Validator, ITxOutputs } from "./validator";
-import { PublicKey } from "./PublicKey";
-import { SmartBuffer } from "smart-buffer";
+import { PublicKey } from './PublicKey';
+import { Validator, ITxOutputs } from './validator';
+
+import { SmartBuffer } from 'smart-buffer';
 
 /**
  * The class that defines the transaction's outputs of a block.

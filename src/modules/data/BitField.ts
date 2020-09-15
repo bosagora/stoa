@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { Validator, IBitField } from "./validator";
+import { Validator, IBitField } from './validator';
 
 /**
  * The class that defines the BitField of a block.

@@ -23,8 +23,8 @@
 
 *******************************************************************************/
 
-import crc from 'crc';
 import * as assert from 'assert';
+import crc from 'crc';
 
 /**
  * Checksum returns the 2-byte checksum for the provided data
