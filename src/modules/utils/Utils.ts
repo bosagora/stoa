@@ -67,4 +67,47 @@ export class Utils
         }
         return str;
     }
+
+    /**
+     * It is a function that outputs an object with BigInt as JSON.
+     * @param data - Object to be converted to a JSON string
+     * @returns - If the data type is UInt64 then it converts
+     * it to a string and returns a JSON string with " removed.
+     */
+    public static toJson(data: object): string
+    {
+        if (data === undefined)
+            return "";
+
+        let uint64_to_string = 0;
+
+        // If the data type is UInt64,
+        // it converts it into a string and adds '#uint64' after that.
+        const json = JSON.stringify(data, (_, value) =>
+        {
+            if (value instanceof UInt64)
+            {
+                uint64_to_string++;
+                return `${Utils.UInt64ToString(value)}#uint64`;
+            }
+            return value;
+        });
+
+
+        let remove_quotation = 0;
+
+        // Remove " and #uint64 from the pattern "NUBER#uint64" in JSON.
+        const res = json.replace(/"(-?\d+)#uint64"/g, (_, value) =>
+        {
+            remove_quotation++;
+            return value;
+        });
+
+        if (remove_quotation > uint64_to_string)
+        {
+            throw new Error(`UInt64 serialization pattern conflict with a string value.`);
+        }
+
+        return res;
+    }
 }
