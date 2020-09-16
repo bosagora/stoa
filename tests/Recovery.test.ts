@@ -16,6 +16,7 @@ import { AgoraClient } from '../src/modules/agora/AgoraClient';
 import { Block } from '../src/modules/data';
 import { recovery_sample_data } from './RecoveryData.test';
 import Stoa from '../src/Stoa';
+import { Utils } from '../src/modules/utils/Utils';
 
 import * as assert from 'assert';
 import axios from 'axios';
@@ -222,7 +223,7 @@ describe ('Test of Recovery', () =>
                         let block = new Block();
                         block.parseJSON(elem);
                         // Make sure that the received block height is equal to the expected value.
-                        assert.strictEqual(block.header.height.value, expected_height);
+                        assert.strictEqual(Utils.UInt64ToString(block.header.height.value), expected_height.toString());
                         expected_height++;
                     }
                 })
@@ -249,7 +250,7 @@ describe ('Test of Recovery', () =>
                 let block = new Block();
                 block.parseJSON(elem);
                 // Make sure that the received block height is equal to the expected value.
-                assert.strictEqual(block.header.height.value, expected_height);
+                assert.strictEqual(Utils.UInt64ToString(block.header.height.value), expected_height.toString());
                 expected_height++;
             }
             doneIt();

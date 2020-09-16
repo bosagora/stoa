@@ -11,9 +11,11 @@
 
 *******************************************************************************/
 
-import { Validator, IHeight } from "./validator";
+import { Utils } from '../utils/Utils';
+import { Validator, IHeight } from './validator';
 
 import { SmartBuffer } from 'smart-buffer';
+import { UInt64 } from 'spu-integer-math';
 
 /**
  * The class that defines the Height.
@@ -23,18 +25,18 @@ export class Height
     /**
      * the block height
      */
-    public value: number;
+    public value: UInt64;
 
     /**
      * Construct
      * @param value - The block height
      */
-    constructor (value?: number)
+    constructor (value?: UInt64)
     {
         if (value !== undefined)
-            this.value = value;
+            this.value = new UInt64(value);
         else
-            this.value = 0;
+            this.value = UInt64.fromNumber(0);
     }
 
     /**
@@ -45,8 +47,7 @@ export class Height
     public parseJSON (json: any): Height
     {
         Validator.isValidOtherwiseThrow<IHeight>('Height', json);
-
-        this.value = Number(json.value);
+        this.value = UInt64.fromNumber(json.value);
 
         return this;
     }
@@ -57,6 +58,15 @@ export class Height
      */
     public computeHash (buffer: SmartBuffer)
     {
-        buffer.writeBigUInt64LE(BigInt(this.value));
+        buffer.writeInt32LE(this.value.lo);
+        buffer.writeInt32LE(this.value.hi);
+    }
+
+    /**
+     * Writes to the string
+     */
+    public toString ()
+    {
+        return Utils.UInt64ToString(this.value);
     }
 }

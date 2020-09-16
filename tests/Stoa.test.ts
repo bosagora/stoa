@@ -24,6 +24,7 @@ import * as assert from 'assert';
 import axios from 'axios';
 import express from 'express';
 import * as http from 'http';
+import { UInt64 } from 'spu-integer-math';
 import URI from 'urijs';
 
 /**
@@ -201,7 +202,7 @@ describe ('Test of Stoa API Server', () =>
             let block = new Block();
             let height = new Height();
             let enrollment = new Enrollment();
-            height.value = 1008;
+            height.value = UInt64.fromNumber(1008);
             block.header.height = height;
 
             // re-enrollment
