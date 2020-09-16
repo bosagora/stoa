@@ -3,14 +3,16 @@ import { cors_options } from './cors';
 import { Endian } from './modules/utils/buffer';
 import { LedgerStorage } from './modules/storage/LedgerStorage';
 import { logger } from './modules/common/Logger';
-import { PreImageInfo, Hash, hash } from './modules/data';
+import { Height, PreImageInfo, Hash, hash } from './modules/data';
 import { TaskManager } from './modules/task/TaskManager';
+import { Utils } from './modules/utils/Utils';
 import { ValidatorData, IPreimage } from './modules/data/ValidatorData';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
 import { IpFilter, IpList } from 'express-ipfilter';
+import { UInt64 } from 'spu-integer-math';
 
 class Stoa {
     public stoa: express.Application;
@@ -90,15 +92,20 @@ class Stoa {
          * If height was not provided the latest validator set is returned.
          */
         this.stoa.get("/validators",
-            (req: express.Request, res: express.Response, next: express.NextFunction) => {
-
-            let height: number = Number(req.query.height);
-
-            if (!Number.isNaN(height) && (!Number.isInteger(height) || height < 0))
+            (req: express.Request, res: express.Response, next: express.NextFunction) =>
+        {
+            if  (
+                    (req.query.height !== undefined) &&
+                    !Utils.isPositiveInteger(req.query.height.toString())
+                )
             {
                 res.status(400).send("The Height value is not valid.");
                 return;
             }
+
+            let height = (req.query.height !== undefined)
+                ? new Height(UInt64.fromString(req.query.height.toString()))
+                : null;
 
             this.ledger_storage.getValidatorsAPI(height, null)
                 .then((rows: any[]) =>
@@ -166,16 +173,22 @@ class Stoa {
          * If an address was provided, return the validator data of the address if it exists.
          */
         this.stoa.get("/validator/:address",
-            (req: express.Request, res: express.Response, next: express.NextFunction) => {
-
-            let height: number = Number(req.query.height);
-            let address: string = String(req.params.address);
-
-            if (!Number.isNaN(height) && (!Number.isInteger(height) || height < 0))
+            (req: express.Request, res: express.Response, next: express.NextFunction) =>
+        {
+            if  (
+                (req.query.height !== undefined) &&
+                !Utils.isPositiveInteger(req.query.height.toString())
+            )
             {
                 res.status(400).send("The Height value is not valid.");
                 return;
             }
+
+            let height = (req.query.height !== undefined)
+                ? new Height(UInt64.fromString(req.query.height.toString()))
+                : null;
+
+            let address: string = String(req.params.address);
 
             this.ledger_storage.getValidatorsAPI(height, address)
                 .then((rows: any[]) =>
