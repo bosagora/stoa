@@ -140,7 +140,7 @@ export class LedgerStorage extends Storages
                     VALUES
                         (?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
-                        Utils.UInt64ToString(block.header.height.value),
+                        block.header.height.toString(),
                         block_hash.toBinary(Endian.Little),
                         block.header.prev_block.toBinary(Endian.Little),
                         JSON.stringify(block.header.validators._storage),
@@ -193,7 +193,7 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getBlocks (height: number): Promise<any[]>
+    public getBlocks (height: Height): Promise<any[]>
     {
         let sql =
         `SELECT
@@ -201,7 +201,7 @@ export class LedgerStorage extends Storages
         FROM
             blocks
         WHERE height = ?`;
-        return this.query(sql, [height]);
+        return this.query(sql, [height.toString()]);
     }
 
     /**
@@ -210,7 +210,7 @@ export class LedgerStorage extends Storages
      */
     public putEnrollments (block: Block): Promise<void>
     {
-        function save_enrollment (storage: LedgerStorage, height: UInt64,
+        function save_enrollment (storage: LedgerStorage, height: Height,
             enroll_idx: number, enroll: Enrollment): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
@@ -221,7 +221,7 @@ export class LedgerStorage extends Storages
                     VALUES
                         (?, ?, ?, ?, ?, ?)`,
                     [
-                        Utils.UInt64ToString(height),
+                        height.toString(),
                         enroll_idx,
                         enroll.utxo_key.toBinary(Endian.Little),
                         enroll.random_seed.toBinary(Endian.Little),
@@ -238,7 +238,7 @@ export class LedgerStorage extends Storages
             });
         }
 
-        function save_validator (storage: LedgerStorage, height: UInt64, enroll: Enrollment): Promise<void>
+        function save_validator (storage: LedgerStorage, height: Height, enroll: Enrollment): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
             {
@@ -250,7 +250,7 @@ export class LedgerStorage extends Storages
                     WHERE
                         tx_outputs.utxo_key = ?`,
                     [
-                        Utils.UInt64ToString(height),
+                        height.toString(),
                         0,
                         enroll.random_seed.toBinary(Endian.Little),
                         enroll.utxo_key.toBinary(Endian.Little)
@@ -274,9 +274,9 @@ export class LedgerStorage extends Storages
                 {
                     try
                     {
-                        await save_enrollment(this, block.header.height.value, enroll_idx,
+                        await save_enrollment(this, block.header.height, enroll_idx,
                             block.header.enrollments[enroll_idx]);
-                        await save_validator(this, block.header.height.value,
+                        await save_validator(this, block.header.height,
                             block.header.enrollments[enroll_idx]);
                     }
                     catch (err)
@@ -345,7 +345,7 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getEnrollments (height: number): Promise<any[]>
+    public getEnrollments (height: Height): Promise<any[]>
     {
         let sql =
         `SELECT
@@ -353,7 +353,7 @@ export class LedgerStorage extends Storages
         FROM
             enrollments
         WHERE block_height = ?`;
-        return this.query(sql, [height]);
+        return this.query(sql, [height.toString()]);
     }
 
     /**
@@ -363,7 +363,7 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getValidators (height: number): Promise<any[]>
+    public getValidators (height: Height): Promise<any[]>
     {
         let sql =
         `SELECT
@@ -371,7 +371,7 @@ export class LedgerStorage extends Storages
         FROM
             validators
         WHERE enrolled_at = ?`;
-        return this.query(sql, [height]);
+        return this.query(sql, [height.toString()]);
     }
 
     /**
@@ -383,7 +383,7 @@ export class LedgerStorage extends Storages
      */
     public putTransactions (block: Block): Promise<void>
     {
-        function save_transaction (storage: LedgerStorage, height: UInt64, tx_idx:
+        function save_transaction (storage: LedgerStorage, height: Height, tx_idx:
             number, hash: Hash, tx: Transaction): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
@@ -394,7 +394,7 @@ export class LedgerStorage extends Storages
                     VALUES
                         (?, ?, ?, ?, ?, ?)`,
                     [
-                        Utils.UInt64ToString(height),
+                        height.toString(),
                         tx_idx,
                         hash.toBinary(Endian.Little),
                         tx.type,
@@ -413,7 +413,7 @@ export class LedgerStorage extends Storages
             });
         }
 
-        function save_input (storage: LedgerStorage, height: UInt64, tx_idx: number,
+        function save_input (storage: LedgerStorage, height: Height, tx_idx: number,
             in_idx: number, input: TxInputs): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
@@ -424,7 +424,7 @@ export class LedgerStorage extends Storages
                     VALUES
                         (?, ?, ?, ?, ?)`,
                     [
-                        Utils.UInt64ToString(height),
+                        height.toString(),
                         tx_idx,
                         in_idx,
                         input.previous.toBinary(Endian.Little),
@@ -462,7 +462,7 @@ export class LedgerStorage extends Storages
             });
         }
 
-        function save_output (storage: LedgerStorage, height: UInt64, tx_idx: number,
+        function save_output (storage: LedgerStorage, height: Height, tx_idx: number,
             out_idx: number, hash: Hash, utxo_key: Hash,
             output: TxOutputs): Promise<void>
         {
@@ -474,7 +474,7 @@ export class LedgerStorage extends Storages
                     VALUES
                         (?, ?, ?, ?, ?, ?, ?)`,
                     [
-                        Utils.UInt64ToString(height),
+                        height.toString(),
                         tx_idx,
                         out_idx,
                         hash.toBinary(Endian.Little),
@@ -502,18 +502,18 @@ export class LedgerStorage extends Storages
                 {
                     for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++)
                     {
-                        await save_transaction(this, block.header.height.value, tx_idx, block.merkle_tree[tx_idx], block.txs[tx_idx]);
+                        await save_transaction(this, block.header.height, tx_idx, block.merkle_tree[tx_idx], block.txs[tx_idx]);
 
                         for (let in_idx = 0; in_idx < block.txs[tx_idx].inputs.length; in_idx++)
                         {
-                            await save_input(this, block.header.height.value, tx_idx, in_idx, block.txs[tx_idx].inputs[in_idx]);
+                            await save_input(this, block.header.height, tx_idx, in_idx, block.txs[tx_idx].inputs[in_idx]);
                             await update_spend_output(this, block.txs[tx_idx].inputs[in_idx]);
                         }
 
                         for (let out_idx = 0; out_idx < block.txs[tx_idx].outputs.length; out_idx++)
                         {
                             let utxo_key = makeUTXOKey(block.merkle_tree[tx_idx], BigInt(out_idx));
-                            await save_output(this, block.header.height.value, tx_idx, out_idx,
+                            await save_output(this, block.header.height, tx_idx, out_idx,
                                 block.merkle_tree[tx_idx], utxo_key, block.txs[tx_idx].outputs[out_idx]);
                         }
                     }
@@ -535,7 +535,7 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getTransactions (height: number): Promise<any[]>
+    public getTransactions (height: Height): Promise<any[]>
     {
         let sql =
         `SELECT
@@ -543,7 +543,7 @@ export class LedgerStorage extends Storages
         FROM
             transactions
         WHERE block_height = ?`;
-        return this.query(sql, [height]);
+        return this.query(sql, [height.toString()]);
     }
 
     /**
@@ -554,7 +554,7 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getTxInputs (height: number, tx_index: number): Promise<any[]>
+    public getTxInputs (height: Height, tx_index: number): Promise<any[]>
     {
         let sql =
         `SELECT
@@ -562,7 +562,7 @@ export class LedgerStorage extends Storages
         FROM
             tx_inputs
         WHERE block_height = ? AND tx_index = ?`;
-        return this.query(sql, [height, tx_index]);
+        return this.query(sql, [height.toString(), tx_index]);
     }
 
     /**
@@ -570,7 +570,7 @@ export class LedgerStorage extends Storages
      * @param height The height of the block to get
      * @param tx_index The index of the transaction in the block
      */
-    public getTxOutputs (height: number, tx_index: number): Promise<any[]>
+    public getTxOutputs (height: Height, tx_index: number): Promise<any[]>
     {
         let sql =
         `SELECT
@@ -578,8 +578,9 @@ export class LedgerStorage extends Storages
         FROM
             tx_outputs
         WHERE block_height = ? AND tx_index = ?`;
-        return this.query(sql, [height, tx_index]);
+        return this.query(sql, [height.toString(), tx_index]);
     }
+
     /**
      * Get validators
      * @param height If present, the height at which the returned list of
@@ -591,11 +592,11 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getValidatorsAPI (height: number, address: string | null): Promise<any[]>
+    public getValidatorsAPI (height: Height | null, address: string | null): Promise<any[]>
     {
         let cur_height: string;
 
-        if (!Number.isNaN(height))
+        if (height !== null)
             cur_height = height.toString();
         else
             cur_height = `(SELECT MAX(height) as height FROM blocks)`;
@@ -648,7 +649,7 @@ export class LedgerStorage extends Storages
         return new Promise<void>((resolve, reject) =>
         {
             let sql = `INSERT OR REPLACE INTO information (key, value) VALUES (?, ?);`;
-            this.run(sql, ["height", Utils.UInt64ToString(height.value)])
+            this.run(sql, ["height", height.toString()])
                 .then(() =>
                 {
                     resolve();

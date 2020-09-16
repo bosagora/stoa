@@ -13,7 +13,7 @@
 *******************************************************************************/
 
 import { AgoraClient } from '../src/modules/agora/AgoraClient';
-import { Block } from '../src/modules/data';
+import { Block, Height } from '../src/modules/data';
 import { recovery_sample_data } from './RecoveryData.test';
 import Stoa from '../src/Stoa';
 import { Utils } from '../src/modules/utils/Utils';
@@ -22,6 +22,7 @@ import * as assert from 'assert';
 import axios from 'axios';
 import express from 'express';
 import * as http from 'http';
+import { UInt64 } from 'spu-integer-math';
 import URI from 'urijs';
 
 /**
@@ -124,14 +125,14 @@ class TestStoa extends Stoa
             {
                 if  (
                     (req.query.block_height === undefined) ||
-                    Number.isNaN(req.query.block_height)
+                    !Utils.isPositiveInteger(req.query.block_height.toString())
                 )
                 {
                     res.status(204).send();
                     return;
                 }
 
-                let block_height = Math.max(Number(req.query.block_height), 0);
+                let block_height = new Height(UInt64.fromString(req.query.block_height.toString()));
 
                 try
                 {
