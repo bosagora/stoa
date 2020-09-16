@@ -300,7 +300,7 @@ class Stoa {
      * Extract the block height from JSON.
      * @param block
      */
-    private static getBlockHeight(block: any): number
+    private static getBlockHeight(block: any): Height
     {
         if  (
             (block.header === undefined) ||
@@ -311,7 +311,10 @@ class Stoa {
             throw Error("Not found block height in JSON Block");
         }
 
-        return Number(block.header.height.value);
+        if (typeof block.header.height.value == "string")
+            return new Height(UInt64.fromString(block.header.height.value));
+        else
+            return new Height(UInt64.fromString(block.header.height.value.toString()));
     };
 
     /**
@@ -323,35 +326,32 @@ class Stoa {
      * of the returned Promise is called
      * and if an error occurs the `.catch` is called with an error.
      */
-    private recoverBlock (block: any, height: number, expected_height: number): Promise<boolean>
+    private recoverBlock (block: any, height: Height, expected_height: Height): Promise<boolean>
     {
         return new Promise<boolean>((resolve, reject) =>
         {
             (async () => {
                 try
                 {
-                    let block_height = expected_height;
-                    let max_blocks = height - expected_height;
+                    let max_blocks = Number(UInt64.sub(height.value, expected_height.value).toString());
 
-                    if (max_blocks > this._max_count_on_recovery)
+                    if (UInt64.compare(max_blocks, this._max_count_on_recovery) > 0)
                         max_blocks = this._max_count_on_recovery;
 
                     if (max_blocks > 0)
                     {
                         let agora_client = new AgoraClient(this.agora_host, this.agora_port);
-                        let blocks = await agora_client.requestBlocks(block_height, max_blocks);
-
-                        let element_height: number;
+                        let blocks = await agora_client.requestBlocks(expected_height, max_blocks);
 
                         // Save previous block
                         for (let elem of blocks)
                         {
-                            element_height = Stoa.getBlockHeight(elem);
-                            if (element_height == expected_height)
+                            let element_height = Stoa.getBlockHeight(elem);
+                            if (UInt64.compare(element_height.value, expected_height.value) == 0)
                             {
                                 await this.ledger_storage.putBlocks(elem);
-                                expected_height++;
-                                logger.info(`Recovered a block with block height of ${element_height}`);
+                                expected_height.value = UInt64.add(expected_height.value, 1);
+                                logger.info(`Recovered a block with block height of ${element_height.toString()}`);
                             }
                             else
                             {
@@ -362,15 +362,15 @@ class Stoa {
                     }
 
                     // Save a block just received
-                    if (height <= expected_height)
+                    if (UInt64.compare(height.value, expected_height.value) <= 0)
                     {
                         await this.ledger_storage.putBlocks(block);
-                        logger.info(`Saved a block with block height of ${height}`);
+                        logger.info(`Saved a block with block height of ${height.toString()}`);
                         resolve(true);
                     }
                     else
                     {
-                        logger.info(`Save of block ${height} postponed to`);
+                        logger.info(`Save of block ${height.toString()} postponed to`);
                         resolve(false);
                     }
                 }
@@ -409,14 +409,14 @@ class Stoa {
                     let height = Stoa.getBlockHeight(block);
                     let expected_height = await this.ledger_storage.getExpectedBlockHeight();
 
-                    if (height == expected_height)
+                    if (UInt64.compare(height.value, expected_height.value) == 0)
                     {
                         // The normal case
                         // Save a block just received
                         await this.ledger_storage.putBlocks(block);
-                        logger.info(`Saved a block with block height of ${height}`);
+                        logger.info(`Saved a block with block height of ${height.toString()}`);
                     }
-                    else if (height > expected_height)
+                    else if (UInt64.compare(height.value, expected_height.value) > 0)
                     {
                         // Recovery is required for blocks that are not received.
                         let success: boolean = await this.recoverBlock(block, height, expected_height);
@@ -428,7 +428,7 @@ class Stoa {
                     else
                     {
                         // Do not save because it is already a saved block.
-                        logger.info(`Ignored a block with block height of ${height}`);
+                        logger.info(`Ignored a block with block height of ${height.toString()}`);
                     }
                     resolve();
                 }

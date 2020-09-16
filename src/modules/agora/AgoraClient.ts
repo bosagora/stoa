@@ -11,6 +11,8 @@
 
 *******************************************************************************/
 
+import { Height } from '../data/';
+
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import URI from 'urijs';
 
@@ -52,14 +54,14 @@ export class AgoraClient
      * @param block_height - The height of the block
      * @param max_blocks - The maximum number of block to request
      */
-    public requestBlocks (block_height: number, max_blocks: number): Promise<Array<any>>
+    public requestBlocks (block_height: Height, max_blocks: number): Promise<Array<any>>
     {
         return new Promise<Array<any>>((resolve, reject) =>
         {
             let uri = URI(this.host)
                 .port(this.port)
                 .directory("blocks_from")
-                .addSearch("block_height", block_height)
+                .addSearch("block_height", block_height.toString())
                 .addSearch("max_blocks", max_blocks);
 
             this.client.get(uri.toString())
