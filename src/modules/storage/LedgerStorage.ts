@@ -17,6 +17,9 @@ import {
 } from '../data';
 import { Endian } from '../utils/buffer';
 import { Storages } from './Storages';
+import { Utils } from '../utils/Utils';
+
+import { UInt64 } from 'spu-integer-math';
 
 /**
  * The class that insert and read the ledger into the database.
@@ -137,7 +140,7 @@ export class LedgerStorage extends Storages
                     VALUES
                         (?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
-                        block.header.height.value,
+                        Utils.UInt64ToString(block.header.height.value),
                         block_hash.toBinary(Endian.Little),
                         block.header.prev_block.toBinary(Endian.Little),
                         JSON.stringify(block.header.validators._storage),
@@ -207,7 +210,7 @@ export class LedgerStorage extends Storages
      */
     public putEnrollments (block: Block): Promise<void>
     {
-        function save_enrollment (storage: LedgerStorage, height: number,
+        function save_enrollment (storage: LedgerStorage, height: UInt64,
             enroll_idx: number, enroll: Enrollment): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
@@ -218,7 +221,7 @@ export class LedgerStorage extends Storages
                     VALUES
                         (?, ?, ?, ?, ?, ?)`,
                     [
-                        block.header.height.value,
+                        Utils.UInt64ToString(height),
                         enroll_idx,
                         enroll.utxo_key.toBinary(Endian.Little),
                         enroll.random_seed.toBinary(Endian.Little),
@@ -235,7 +238,7 @@ export class LedgerStorage extends Storages
             });
         }
 
-        function save_validator (storage: LedgerStorage, height: number, enroll: Enrollment): Promise<void>
+        function save_validator (storage: LedgerStorage, height: UInt64, enroll: Enrollment): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
             {
@@ -247,7 +250,7 @@ export class LedgerStorage extends Storages
                     WHERE
                         tx_outputs.utxo_key = ?`,
                     [
-                        block.header.height.value,
+                        Utils.UInt64ToString(height),
                         0,
                         enroll.random_seed.toBinary(Endian.Little),
                         enroll.utxo_key.toBinary(Endian.Little)
@@ -380,7 +383,7 @@ export class LedgerStorage extends Storages
      */
     public putTransactions (block: Block): Promise<void>
     {
-        function save_transaction (storage: LedgerStorage, height: number, tx_idx:
+        function save_transaction (storage: LedgerStorage, height: UInt64, tx_idx:
             number, hash: Hash, tx: Transaction): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
@@ -391,7 +394,7 @@ export class LedgerStorage extends Storages
                     VALUES
                         (?, ?, ?, ?, ?, ?)`,
                     [
-                        height,
+                        Utils.UInt64ToString(height),
                         tx_idx,
                         hash.toBinary(Endian.Little),
                         tx.type,
@@ -410,7 +413,7 @@ export class LedgerStorage extends Storages
             });
         }
 
-        function save_input (storage: LedgerStorage, height: number, tx_idx: number,
+        function save_input (storage: LedgerStorage, height: UInt64, tx_idx: number,
             in_idx: number, input: TxInputs): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
@@ -421,7 +424,7 @@ export class LedgerStorage extends Storages
                     VALUES
                         (?, ?, ?, ?, ?)`,
                     [
-                        height,
+                        Utils.UInt64ToString(height),
                         tx_idx,
                         in_idx,
                         input.previous.toBinary(Endian.Little),
@@ -459,7 +462,7 @@ export class LedgerStorage extends Storages
             });
         }
 
-        function save_output (storage: LedgerStorage, height: number, tx_idx: number,
+        function save_output (storage: LedgerStorage, height: UInt64, tx_idx: number,
             out_idx: number, hash: Hash, utxo_key: Hash,
             output: TxOutputs): Promise<void>
         {
@@ -471,7 +474,7 @@ export class LedgerStorage extends Storages
                     VALUES
                         (?, ?, ?, ?, ?, ?, ?)`,
                     [
-                        height,
+                        Utils.UInt64ToString(height),
                         tx_idx,
                         out_idx,
                         hash.toBinary(Endian.Little),
@@ -645,7 +648,7 @@ export class LedgerStorage extends Storages
         return new Promise<void>((resolve, reject) =>
         {
             let sql = `INSERT OR REPLACE INTO information (key, value) VALUES (?, ?);`;
-            this.run(sql, ["height", height.value])
+            this.run(sql, ["height", Utils.UInt64ToString(height.value)])
                 .then(() =>
                 {
                     resolve();
