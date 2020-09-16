@@ -118,16 +118,19 @@ class Stoa {
                         {
                             let preimage_hash: Buffer = row.preimage_hash;
                             let preimage_distance: number = row.preimage_distance;
-                            let target_height: number = row.height;
+                            let target_height: UInt64 = UInt64.fromNumber(row.height);
                             let result_preimage_hash = new Hash();
-                            let start_index: number = row.enrolled_at + 1;
+                            let start_index: UInt64 = UInt64.add(UInt64.fromNumber(row.enrolled_at), 1);
 
                             // Hashing preImage
-                            if ((target_height >= start_index) &&
-                                (start_index + row.preimage_distance) >= target_height)
+                            if (
+                                (UInt64.compare(target_height, start_index) >= 0) &&
+                                (UInt64.compare(UInt64.add(start_index, row.preimage_distance), target_height) >= 0)
+                            )
                             {
                                 result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                                for (let i = 0; i < start_index + row.preimage_distance - target_height; i++)
+                                let count = Number(Utils.UInt64ToString(UInt64.sub(UInt64.add(start_index, row.preimage_distance), target_height)));
+                                for (let i = 0; i < count; i++)
                                 {
                                     result_preimage_hash = hash(result_preimage_hash.data);
                                     preimage_distance--;
@@ -146,11 +149,11 @@ class Stoa {
                                 } as IPreimage;
 
                             let validator: ValidatorData =
-                            new ValidatorData(row.address, row.enrolled_at,
-                                Hash.createFromBinary(row.stake, Endian.Little).toString(), preimage);
+                                new ValidatorData(row.address, UInt64.fromNumber(row.enrolled_at),
+                                    Hash.createFromBinary(row.stake, Endian.Little).toString(), preimage);
                             out_put.push(validator);
                         }
-                        res.status(200).send(JSON.stringify(out_put));
+                        res.status(200).send(Utils.toJson(out_put));
                     }
                     else
                     {
@@ -201,16 +204,19 @@ class Stoa {
                         {
                             let preimage_hash: Buffer = row.preimage_hash;
                             let preimage_distance: number = row.preimage_distance;
-                            let target_height: number = row.height;
+                            let target_height: UInt64 = UInt64.fromNumber(row.height);
                             let result_preimage_hash = new Hash();
-                            let start_index: number = row.enrolled_at + 1;
+                            let start_index: UInt64 = UInt64.add(UInt64.fromNumber(row.enrolled_at), 1);
 
                             // Hashing preImage
-                            if ((target_height >= start_index) &&
-                                (start_index + row.preimage_distance) >= target_height)
+                            if (
+                                (UInt64.compare(target_height, start_index) >= 0) &&
+                                (UInt64.compare(UInt64.add(start_index, row.preimage_distance), target_height) >= 0)
+                            )
                             {
                                 result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                                for (let i = 0; i < start_index + row.preimage_distance - target_height; i++)
+                                let count = Number(Utils.UInt64ToString(UInt64.sub(UInt64.add(start_index, row.preimage_distance), target_height)));
+                                for (let i = 0; i < count; i++)
                                 {
                                     result_preimage_hash = hash(result_preimage_hash.data);
                                     preimage_distance--;
@@ -229,11 +235,11 @@ class Stoa {
                                 } as IPreimage;
 
                             let validator: ValidatorData =
-                                new ValidatorData(row.address, row.enrolled_at,
+                                new ValidatorData(row.address, UInt64.fromNumber(row.enrolled_at),
                                     Hash.createFromBinary(row.stake, Endian.Little).toString(), preimage);
                             out_put.push(validator);
                         }
-                        res.status(200).send(JSON.stringify(out_put));
+                        res.status(200).send(Utils.toJson(out_put));
                     }
                     else
                     {
