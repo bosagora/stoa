@@ -667,22 +667,22 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the block height
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getExpectedBlockHeight(): Promise<number>
+    public getExpectedBlockHeight(): Promise<Height>
     {
-        return new Promise<number>((resolve, reject) =>
+        return new Promise<Height>((resolve, reject) =>
         {
             let sql = `SELECT value FROM information WHERE key = 'height';`;
             this.query(sql, [])
                 .then((rows: any[]) =>
                 {
                     if ((rows.length > 0) && (rows[0].value !== undefined) &&
-                        !Number.isNaN(rows[0].value))
+                        Utils.isPositiveInteger(rows[0].value))
                     {
-                        resolve(Number(rows[0].value) + 1);
+                        resolve(new Height(UInt64.add(UInt64.fromString(rows[0].value), 1)));
                     }
                     else
                     {
-                        resolve(0);
+                        resolve(new Height(UInt64.fromNumber(0)));
                     }
                 })
                 .catch((err) =>

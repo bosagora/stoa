@@ -213,19 +213,19 @@ describe ('Test of Recovery', () =>
 
         await assert.doesNotReject(async () =>
         {
-            await agora_client.requestBlocks(1, 3)
+            await agora_client.requestBlocks(new Height(UInt64.fromNumber(1)), 3)
                 .then((response) =>
                 {
                     // The number of blocks is three.
                     assert.strictEqual(response.length, 3);
-                    let expected_height = 1;
+                    let expected_height = UInt64.fromNumber(1);
                     for (let elem of response)
                     {
                         let block = new Block();
                         block.parseJSON(elem);
                         // Make sure that the received block height is equal to the expected value.
-                        assert.strictEqual(Utils.UInt64ToString(block.header.height.value), expected_height.toString());
-                        expected_height++;
+                        assert.ok(UInt64.compare(block.header.height.value, expected_height) == 0);
+                        expected_height = UInt64.add(expected_height, 1);
                     }
                 })
                 .catch((error) =>
@@ -241,18 +241,18 @@ describe ('Test of Recovery', () =>
 
         assert.doesNotThrow(async () =>
         {
-            let response = await agora_client.requestBlocks(8, 3);
+            let response = await agora_client.requestBlocks(new Height(UInt64.fromNumber(8)), 3);
             // The number of blocks is two.
             // Because the total number is 10. The last block height is 9.
             assert.strictEqual(response.length, 2);
-            let expected_height = 8;
+            let expected_height = UInt64.fromNumber(8);
             for (let elem of response)
             {
                 let block = new Block();
                 block.parseJSON(elem);
                 // Make sure that the received block height is equal to the expected value.
-                assert.strictEqual(Utils.UInt64ToString(block.header.height.value), expected_height.toString());
-                expected_height++;
+                assert.ok(UInt64.compare(block.header.height.value, expected_height) == 0);
+                expected_height = UInt64.add(expected_height, 1);
             }
             doneIt();
         });
