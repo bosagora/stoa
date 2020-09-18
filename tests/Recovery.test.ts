@@ -174,7 +174,7 @@ describe ('Test of Recovery', () =>
 
     let client = axios.create();
 
-    before ('Start TestAgora', (doneIt: () => void) =>
+    beforeEach ('Start TestAgora', (doneIt: () => void) =>
     {
         agora_node = new TestAgora(agora_port, () =>
         {
@@ -185,7 +185,7 @@ describe ('Test of Recovery', () =>
         });
     });
 
-    after ('Stop TestAgora', (doneIt: () => void) =>
+    afterEach ('Stop TestAgora', (doneIt: () => void) =>
     {
         stoa_server.stop(() =>
         {
@@ -195,17 +195,6 @@ describe ('Test of Recovery', () =>
             });
         });
     });
-
-    function restartStoa (doneIt: () => void)
-    {
-        stoa_server.stop(() =>
-        {
-            stoa_server = new TestStoa(":memory:", agora_host, agora_port, stoa_port, () =>
-            {
-                doneIt();
-            });
-        });
-    }
 
     it ('Test a function requestBlocks', async () =>
     {
@@ -296,11 +285,6 @@ describe ('Test of Recovery', () =>
         })();
     });
 
-    it ('Restart Stoa', (doneIt: () => void) =>
-    {
-        restartStoa(doneIt);
-    });
-
     it ('Test for continuous recovery and write', (doneIt: () => void) =>
     {
         (async () =>
@@ -347,11 +331,6 @@ describe ('Test of Recovery', () =>
 
             }, 800);
         })();
-    });
-
-    it ('Restart Stoa', (doneIt: () => void) =>
-    {
-        restartStoa(doneIt);
     });
 
     it ('Test for ignoring already wrote block data', (doneIt: () => void) =>
@@ -414,11 +393,6 @@ describe ('Test of Recovery', () =>
 
             }, 300);
         })();
-    });
-
-    it ('Restart Stoa', (doneIt: () => void) =>
-    {
-        restartStoa(doneIt);
     });
 
     it ('Test recovery of more blocks than the maximum number of blocks that can be recovered at a time', (doneIt: () => void) =>
