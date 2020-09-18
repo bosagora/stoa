@@ -20,27 +20,6 @@ import { Endian } from "../src/modules/utils/buffer";
 import { UInt64 } from "spu-integer-math";
 
 /**
- * Run LedgerStorageTest
- */
-function runLedgerStorageTest (doneIt: () => void)
-{
-    let ledger_storage: LedgerStorage = new LedgerStorage(":memory:", (err1: Error | null) =>
-    {
-        assert.ok(!err1, err1?.message);
-
-        assert.doesNotThrow(async () =>
-        {
-            await runBlockTest(ledger_storage);
-            await runTransactionsTest(ledger_storage);
-            await runEnrollmentsTest(ledger_storage);
-            await runValidatorsAPITest(ledger_storage);
-            ledger_storage.close();
-            doneIt();
-        });
-    });
-}
-
-/**
  * Puts all data
  */
 function runBlockTest (ledger_storage: LedgerStorage): Promise<void>
@@ -252,119 +231,112 @@ function runValidatorsAPITest (ledger_storage: LedgerStorage): Promise<void>
     });
 }
 
-describe('LedgerStorage', () =>
+describe ('Test for storing block data in the database', () =>
 {
-    it('Test ledger storage and inquiry function.', (doneIt: () => void) =>
-    {
-        runLedgerStorageTest(doneIt);
-    });
+    let ledger_storage: LedgerStorage;
 
-    it('Error-handling test when writing a transaction.', () =>
+    beforeEach ('Prepare Storage', (doneIt: () => void) =>
     {
-        let ledger_storage = new LedgerStorage(":memory:", async (err1: Error | null) =>
+        ledger_storage = new LedgerStorage(":memory:", (err: Error | null) =>
         {
-            assert.ok(!err1, err1?.message);
-
-            let block = new Block();
-            let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
-            block.parseJSON(sample_data0);
-
-            await ledger_storage.putTransactions(block);
-            assert.rejects(ledger_storage.putTransactions(block),
-                {
-                    message: "SQLITE_CONSTRAINT: UNIQUE constraint failed:" +
-                        " transactions.block_height, transactions.tx_index"
-                });
-
+            assert.ok(!err, err?.message);
+            doneIt();
         });
     });
 
-    it('Error-handling test when writing a enrollment.', () =>
+    afterEach ('Close Storage', () =>
     {
-        let ledger_storage = new LedgerStorage(":memory:", async (err1: Error | null) =>
-        {
-            assert.ok(!err1, err1?.message);
-
-            let block = new Block();
-            let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
-            block.parseJSON(sample_data0);
-
-            await ledger_storage.putEnrollments(block);
-            assert.rejects(ledger_storage.putEnrollments(block),
-                {
-                    message: "SQLITE_CONSTRAINT: UNIQUE constraint failed:" +
-                        " enrollments.block_height, enrollments.enrollment_index"
-                });
-        });
+        ledger_storage.close();
     });
 
-    it('Error-handling test when writing a block.', () =>
+    it('Test ledger storage and inquiry function.', async () =>
     {
-        let ledger_storage = new LedgerStorage(":memory:", async (err1: Error | null) =>
-        {
-            assert.ok(!err1, err1?.message);
-
-            let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
-            await ledger_storage.putBlocks(sample_data0);
-            assert.rejects(ledger_storage.putBlocks(sample_data0),
-                {
-                    message: "SQLITE_CONSTRAINT: UNIQUE constraint failed: blocks.height"
-                });
-        });
+        await runBlockTest(ledger_storage);
+        await runTransactionsTest(ledger_storage);
+        await runEnrollmentsTest(ledger_storage);
+        await runValidatorsAPITest(ledger_storage);
     });
 
-    it('DB transaction test when writing a block', () =>
+    it ('Error-handling test when writing a transaction.', async () =>
     {
-        let ledger_storage = new LedgerStorage(":memory:", async (err1: Error | null) =>
-        {
-            assert.ok(!err1, err1?.message);
+        let block = new Block();
+        let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+        block.parseJSON(sample_data0);
 
-            let block = new Block();
-            let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
-            block.parseJSON(sample_data0);
-
-            await ledger_storage.putEnrollments(block);
-            await assert.rejects(ledger_storage.putBlocks(sample_data0),
-                {
-                    message: "SQLITE_CONSTRAINT: UNIQUE constraint failed:" +
-                        " enrollments.block_height, enrollments.enrollment_index"
-                });
-
-            let rows0: any[] = await ledger_storage.getBlocks(new Height(UInt64.fromNumber(0)));
-            assert.strictEqual(rows0.length, 0);
-
-            await ledger_storage.putTransactions(block);
-            let rows1:any[] = await ledger_storage.getTransactions(new Height(UInt64.fromNumber(0)));
-            assert.strictEqual(rows1.length, 4);
-        });
-    });
-
-    it ('Test for writing the block hash', () =>
-    {
-        let ledger_storage: LedgerStorage = new LedgerStorage(":memory:", async (err1: Error | null) =>
-        {
-            assert.ok(!err1, err1?.message);
-
-            let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
-            let sample_data1 = JSON.parse(sample_data_raw[1].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
-
-            // Write the Genesis block.
-            await ledger_storage.putBlocks(sample_data0);
-
-            // The block is read from the database.
-            let rows = await ledger_storage.getBlocks(new Height(UInt64.fromNumber(0)));
-            if (rows.length > 0)
+        await ledger_storage.putTransactions(block);
+        assert.rejects(ledger_storage.putTransactions(block),
             {
-                // Check that the `prev_block` of block1 is the same as the hash value of the database.
-                let block1 = (new Block()).parseJSON(sample_data1);
+                message: "SQLITE_CONSTRAINT: UNIQUE constraint failed:" +
+                    " transactions.block_height, transactions.tx_index"
+            });
+    });
 
-                assert.deepStrictEqual(block1.header.prev_block, Hash.createFromBinary(rows[0].hash, Endian.Little));
-            }
-        });
+    it ('Error-handling test when writing a enrollment.', async () =>
+    {
+        let block = new Block();
+        let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+        block.parseJSON(sample_data0);
+
+        await ledger_storage.putEnrollments(block);
+        assert.rejects(ledger_storage.putEnrollments(block),
+            {
+                message: "SQLITE_CONSTRAINT: UNIQUE constraint failed:" +
+                    " enrollments.block_height, enrollments.enrollment_index"
+            });
+    });
+
+    it ('Error-handling test when writing a block.', async () =>
+    {
+        let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+        await ledger_storage.putBlocks(sample_data0);
+        assert.rejects(ledger_storage.putBlocks(sample_data0),
+            {
+                message: "SQLITE_CONSTRAINT: UNIQUE constraint failed: blocks.height"
+            });
+    });
+
+    it ('DB transaction test when writing a block', async () =>
+    {
+        let block = new Block();
+        let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+        block.parseJSON(sample_data0);
+
+        await ledger_storage.putEnrollments(block);
+        await assert.rejects(ledger_storage.putBlocks(sample_data0),
+            {
+                message: "SQLITE_CONSTRAINT: UNIQUE constraint failed:" +
+                    " enrollments.block_height, enrollments.enrollment_index"
+            });
+
+        let rows0: any[] = await ledger_storage.getBlocks(new Height(UInt64.fromNumber(0)));
+        assert.strictEqual(rows0.length, 0);
+
+        await ledger_storage.putTransactions(block);
+        let rows1:any[] = await ledger_storage.getTransactions(new Height(UInt64.fromNumber(0)));
+        assert.strictEqual(rows1.length, 4);
+    });
+
+    it ('Test for writing the block hash', async () =>
+    {
+        let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+        let sample_data1 = JSON.parse(sample_data_raw[1].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+
+        // Write the Genesis block.
+        await ledger_storage.putBlocks(sample_data0);
+
+        // The block is read from the database.
+        let rows = await ledger_storage.getBlocks(new Height(UInt64.fromNumber(0)));
+        if (rows.length > 0)
+        {
+            // Check that the `prev_block` of block1 is the same as the hash value of the database.
+            let block1 = (new Block()).parseJSON(sample_data1);
+
+            assert.deepStrictEqual(block1.header.prev_block, Hash.createFromBinary(rows[0].hash, Endian.Little));
+        }
     });
 });
 
-describe('Tests that sending a pre-image', () =>
+describe ('Tests that sending a pre-image', () =>
 {
     let ledger_storage: LedgerStorage;
     let height = new Height(UInt64.fromNumber(0));
