@@ -6,7 +6,7 @@
       "type": "string"
     },
     "height": {
-      "type": "object"
+      "type": "string"
     },
     "merkle_root": {
       "type": "string"

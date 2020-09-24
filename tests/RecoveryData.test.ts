@@ -16,9 +16,7 @@ export const recovery_sample_data =
         {
             "header": {
                 "prev_block": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-                "height": {
-                    "value": 0
-                },
+                "height": "0",
                 "merkle_root": "0x747e1080925af0fda8e8116eaa9f91d047bfa768d71433848ea869258cbecafa7dcaae0d8ceb63cf7d47ca293fa6314c6fd9055ab633c966628234fa13ec16a6",
                 "validators": {
                     "_storage": []
@@ -182,9 +180,7 @@ export const recovery_sample_data =
         {
             "header": {
                 "prev_block": "0xd844b27b7131c6fc84bcb54ee4aa290f696c83c61ad9044f8c844fe38bd83da59ecccc435eef5af538d6d96b09e9891282772fca8ce6140746fceb1aef19db08",
-                "height": {
-                    "value": 1
-                },
+                "height": "1",
                 "merkle_root": "0xc671b8dee0cabb87737643cd5df5d386fd06d840cb995a4661e1340daceb7fb7e4b47f070e9fdca398317cdfa6547a6b2b2551169f56cac8bb677da4d9f4435a",
                 "validators": {
                     "_storage": []
@@ -343,9 +339,7 @@ export const recovery_sample_data =
         {
             "header": {
                 "prev_block": "0x280a7f0a30c2e6c216fe81cef69b7a8af01fbbb7f7cdc2a41971dd5fb71e52fcc0d3cdacb22ef8f78c0890df25e2284321b970255ad5e8fdb87c4428de598342",
-                "height": {
-                    "value": 2
-                },
+                "height": "2",
                 "merkle_root": "0x3ed989d7a3f0e85c268168f467866d1a86ee4a10547913d7d9f571dd117578649d034773f313fddd50072fe97f5d41d0de35c664f71993726532782b3d147789",
                 "validators": {
                     "_storage": []
@@ -504,9 +498,7 @@ export const recovery_sample_data =
         {
             "header": {
                 "prev_block": "0xe26bd8cf9a9fbcc081d2160896cbfc7607a607eb3b4d35b587cd3b335f0249ab6327706bc871f18763d19be323a497790fe53eca6c895834224b3db55c55f8ea",
-                "height": {
-                    "value": 3
-                },
+                "height": "3",
                 "merkle_root": "0x450e8f241802c5f286b5519d669249397bc0c2fa1466c2af5cd85e120540d6eb7692940499cfa22212a57f7152f10d13893623594b788b85e25e099549a714f1",
                 "validators": {
                     "_storage": []
@@ -665,9 +657,7 @@ export const recovery_sample_data =
         {
             "header": {
                 "prev_block": "0xf96d399da3cae55e18f5591d82c8f745f636c81f396f0f7cd50165084361434715189ef8dce924cd0d825cc2750b2ffbff50683f708d5164cea30d22e0125ce2",
-                "height": {
-                    "value": 4
-                },
+                "height": "4",
                 "merkle_root": "0x651abf186f7ad7c425eab2be9e2ad103dfb4c29d04f55daa5b071a792e03d153ea7bcaa68876661744ed9fe2e696b86233a61aca7c87865fe7873a5afeac5096",
                 "validators": {
                     "_storage": []
@@ -826,9 +816,7 @@ export const recovery_sample_data =
         {
             "header": {
                 "prev_block": "0x3497334a04355fe0195cb446d65b5a1fac9737f4a441785e6c3fbd7cb02496828941be301123545ebaa59da5cd97168149ff2989764317cb83aeff42ad0a27ce",
-                "height": {
-                    "value": 5
-                },
+                "height": "5",
                 "merkle_root": "0x1a7933f67bade7af680ec4291499b08a30bdc2160ebca5f8901e54503add4d6fb9bebf36cca5ba4e621326496faf42a42f4adf4828fbc850ffc0be163f3570d7",
                 "validators": {
                     "_storage": []
@@ -987,9 +975,7 @@ export const recovery_sample_data =
         {
             "header": {
                 "prev_block": "0x63ecc662c75d462e8be031180f24ff873e708f0a3b9dac21a34e370a540dea9eef2216a7c0e38c48d6206c7b25b4325dcf4bff3e5cc34770031a3e6cd03f9f06",
-                "height": {
-                    "value": 6
-                },
+                "height": "6",
                 "merkle_root": "0x568ec0b8a2357f7472d4bc2a1e57badbaa30466f70737af1ae19dd6582cdbbeee45f9175fddc49f5700006acdef9c58b884e7f8ddc9fb76348ea84152cfdd134",
                 "validators": {
                     "_storage": []
@@ -1148,9 +1134,7 @@ export const recovery_sample_data =
         {
             "header": {
                 "prev_block": "0x3014e7bc647b55cb28fbeebd535e471e77ea0838635cb62042280839047aee5241b5ccc0032d14a42eeec74282c0ede7aec31a2f00e2dbabc9f95cb7aabd6b36",
-                "height": {
-                    "value": 7
-                },
+                "height": "7",
                 "merkle_root": "0xfcf5a44e05b3fd44b8dcf305994492867eff85c2dc82115f3b6a56245c7ccf9fb1ee9ac1a0628b02ee751f1d80c4e236caf513951e63d23ebe452d322c10701e",
                 "validators": {
                     "_storage": []
@@ -1309,9 +1293,7 @@ export const recovery_sample_data =
         {
             "header": {
                 "prev_block": "0x9163d961291a052d0588503ec033f3eff13e0fe8245d9704944c08e34a6ab94b821496e1990b14364265e779e54ddae8159f5128c01ce633c9ad96c859b8c10a",
-                "height": {
-                    "value": 8
-                },
+                "height": "8",
                 "merkle_root": "0xc46ab8dd51816731d496a7708a34e203d287b875d24932ee45e4982cbba67a3ab417159e10008884c1b1f94ea7c784fee280cb38633992351072d26dd4629da5",
                 "validators": {
                     "_storage": []
@@ -1470,9 +1452,7 @@ export const recovery_sample_data =
         {
             "header": {
                 "prev_block": "0x462c9c4340255207e7b9dd8848e7cd8b52d74e8f1664cbc791bc78b0055084fb4b9c737f4c76064b0165434d73a8e02fb25f52e367058eb4bb7013ca827a5d3c",
-                "height": {
-                    "value": 9
-                },
+                "height": "9",
                 "merkle_root": "0x91479a38d2ab541b7fc4f8f7a24a6f8adf64256023371c92a9bf867b94bc4d0ab1dd0de955c35ca502d2afac89bbe7e3db323c1626ca1c728b4519d4c8b365cf",
                 "validators": {
                     "_storage": []

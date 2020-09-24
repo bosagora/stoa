@@ -310,17 +310,13 @@ class Stoa {
     {
         if  (
             (block.header === undefined) ||
-            (block.header.height === undefined) ||
-            (block.header.height.value === undefined)
+            (block.header.height === undefined)
         )
         {
             throw Error("Not found block height in JSON Block");
         }
 
-        if (typeof block.header.height.value == "string")
-            return new Height(UInt64.fromString(block.header.height.value));
-        else
-            return new Height(UInt64.fromString(block.header.height.value.toString()));
+        return new Height(UInt64.fromString(block.header.height));
     };
 
     /**

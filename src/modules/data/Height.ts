@@ -12,7 +12,6 @@
 *******************************************************************************/
 
 import { Utils } from '../utils/Utils';
-import { Validator, IHeight } from './validator';
 
 import { SmartBuffer } from 'smart-buffer';
 import { UInt64 } from 'spu-integer-math';
@@ -40,19 +39,6 @@ export class Height
     }
 
     /**
-     * This parses JSON.
-     * @param json The object of the JSON
-     * @returns The instance of Height
-     */
-    public parseJSON (json: any): Height
-    {
-        Validator.isValidOtherwiseThrow<IHeight>('Height', json);
-        this.value = UInt64.fromNumber(json.value);
-
-        return this;
-    }
-
-    /**
      * Collects data to create a hash.
      * @param buffer - The buffer where collected data is stored
      */
@@ -60,6 +46,15 @@ export class Height
     {
         buffer.writeInt32LE(this.value.lo);
         buffer.writeInt32LE(this.value.hi);
+    }
+
+    /**
+     * Writes to the string
+     * @param value - The height of the block
+     */
+    public fromString (value: string)
+    {
+        this.value = UInt64.fromString(value);
     }
 
     /**
