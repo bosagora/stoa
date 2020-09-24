@@ -1,10 +1,10 @@
 # From Agora Runner
-FROM bpfk/agora:latest
+FROM alpine:3.12
 RUN apk add --no-cache curl git python3 py-pip alpine-sdk \
-    bash autoconf libtool automake nodejs npm supervisor
+    bash autoconf libtool automake nodejs npm
 ADD . /stoa/
 WORKDIR /stoa/
 RUN npm ci
 EXPOSE 3836
-# Use the supervisord to run agora and stoa multiprocessor.
-ENTRYPOINT [ "supervisord", "-c", "/stoa/config/service_script.conf" ]
+# Starts a node process, which compiles TS and watches `src` for changes
+ENTRYPOINT [ "npm", "start" ]
