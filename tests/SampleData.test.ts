@@ -16,9 +16,7 @@ export const sample_data =
         {
             "header": {
                 "prev_block": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-                "height": {
-                    "value": 0
-                },
+                "height": "0",
                 "merkle_root": "0xc650b573ab70777363924a0eb2c84cbc76005ba8083c5c77dd57a09f4b6e14f98136ba0d84661109d0b7619877b814cf950cd7fe7b14eaa46bef254352791951",
                 "validators": {
                     "_storage": [2818572288, 2818572288]
@@ -128,9 +126,7 @@ export const sample_data =
         {
             "header": {
                 "prev_block": "0xa104f83d40950d35589ce608cbf0b0b77b21bd70c5ee2b893dfa6b6fdc76bd191be7b64ce7e54179f4c243e6a3741bfd3e63cb455a1cc297d0b3c44885e7db98",
-                "height": {
-                    "value": 1
-                },
+                "height": "1",
                 "merkle_root": "0x9c4a20550ac796274f64e93872466ebb551ba2cd3f2f051533d07a478d2402b59e5b0f0a2a14e818b88007ec61d4a82dc9128851f43799d6c1dc0609fca1537d",
                 "validators": {
                     "_storage": [2818572288, 2818572288]

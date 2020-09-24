@@ -111,7 +111,7 @@ export class BlockHeader
 
         this.prev_block.fromString(json.prev_block);
 
-        this.height.parseJSON(json.height);
+        this.height.fromString(json.height);
 
         this.merkle_root.fromString(json.merkle_root);
         this.validators.parseJSON(json.validators);
