@@ -6,7 +6,7 @@
       "type": "string"
     },
     "index": {
-      "type": "integer"
+      "type": "string"
     },
     "signature": {
       "type": "string"

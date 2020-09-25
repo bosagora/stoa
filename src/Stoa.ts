@@ -264,7 +264,8 @@ class Stoa {
             (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
             // Change the number to a string to preserve the precision of UInt64
-            let body = JSON.parse(req.body.toString());
+            let text = req.body.toString().replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3");
+            let body = JSON.parse(text);
             if (body.block === undefined)
             {
                 res.status(400).send("Missing 'block' object in body");

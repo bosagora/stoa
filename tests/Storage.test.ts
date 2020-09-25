@@ -15,7 +15,7 @@ import * as assert from 'assert';
 import { LedgerStorage } from '../src/modules/storage/LedgerStorage';
 import { Block, Hash, Height } from '../src/modules/data';
 import { PreImageInfo } from '../src/modules/data';
-import { sample_data, sample_preImageInfo } from "./SampleData.test";
+import { sample_data_raw, sample_preImageInfo } from "./SampleData.test";
 import { Endian } from "../src/modules/utils/buffer";
 import { UInt64 } from "spu-integer-math";
 
@@ -84,8 +84,11 @@ function putAllBlockData (ledger_storage: LedgerStorage): Promise<void>
     {
         try
         {
-            for (let block of sample_data)
-                await ledger_storage.putBlocks(block);
+            for (let elem of sample_data_raw)
+            {
+                let sample_data_item = JSON.parse(elem.replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+                await ledger_storage.putBlocks(sample_data_item);
+            }
         }
         catch (error)
         {
@@ -263,7 +266,8 @@ describe('LedgerStorage', () =>
             assert.ok(!err1, err1?.message);
 
             let block = new Block();
-            block.parseJSON(sample_data[0]);
+            let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+            block.parseJSON(sample_data0);
 
             await ledger_storage.putTransactions(block);
             assert.rejects(ledger_storage.putTransactions(block),
@@ -282,7 +286,8 @@ describe('LedgerStorage', () =>
             assert.ok(!err1, err1?.message);
 
             let block = new Block();
-            block.parseJSON(sample_data[0]);
+            let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+            block.parseJSON(sample_data0);
 
             await ledger_storage.putEnrollments(block);
             assert.rejects(ledger_storage.putEnrollments(block),
@@ -299,8 +304,9 @@ describe('LedgerStorage', () =>
         {
             assert.ok(!err1, err1?.message);
 
-            await ledger_storage.putBlocks(sample_data[0]);
-            assert.rejects(ledger_storage.putBlocks(sample_data[0]),
+            let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+            await ledger_storage.putBlocks(sample_data0);
+            assert.rejects(ledger_storage.putBlocks(sample_data0),
                 {
                     message: "SQLITE_CONSTRAINT: UNIQUE constraint failed: blocks.height"
                 });
@@ -314,10 +320,11 @@ describe('LedgerStorage', () =>
             assert.ok(!err1, err1?.message);
 
             let block = new Block();
-            block.parseJSON(sample_data[0]);
+            let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+            block.parseJSON(sample_data0);
 
             await ledger_storage.putEnrollments(block);
-            await assert.rejects(ledger_storage.putBlocks(sample_data[0]),
+            await assert.rejects(ledger_storage.putBlocks(sample_data0),
                 {
                     message: "SQLITE_CONSTRAINT: UNIQUE constraint failed:" +
                         " enrollments.block_height, enrollments.enrollment_index"
@@ -338,15 +345,18 @@ describe('LedgerStorage', () =>
         {
             assert.ok(!err1, err1?.message);
 
+            let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+            let sample_data1 = JSON.parse(sample_data_raw[1].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+
             // Write the Genesis block.
-            await ledger_storage.putBlocks(sample_data[0]);
+            await ledger_storage.putBlocks(sample_data0);
 
             // The block is read from the database.
             let rows = await ledger_storage.getBlocks(new Height(UInt64.fromNumber(0)));
             if (rows.length > 0)
             {
                 // Check that the `prev_block` of block1 is the same as the hash value of the database.
-                let block1 = (new Block()).parseJSON(sample_data[1]);
+                let block1 = (new Block()).parseJSON(sample_data1);
 
                 assert.deepStrictEqual(block1.header.prev_block, Hash.createFromBinary(rows[0].hash, Endian.Little));
             }
