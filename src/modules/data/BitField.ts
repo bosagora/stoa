@@ -46,7 +46,8 @@ export class BitField
     {
         Validator.isValidOtherwiseThrow<IBitField>('BitField', json);
 
-        this._storage = json._storage.slice();
+        for (let elem of json._storage)
+            this._storage.push(Number(elem));
 
         return this;
     }
