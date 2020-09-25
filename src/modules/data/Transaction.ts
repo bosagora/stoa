@@ -81,7 +81,7 @@ export class Transaction
     {
         Validator.isValidOtherwiseThrow<ITransaction>('Transaction', json);
 
-        this.type = json.type;
+        this.type = Number(json.type);
 
         for (let elem of json.inputs)
             this.inputs.push((new TxInputs()).parseJSON(elem));
