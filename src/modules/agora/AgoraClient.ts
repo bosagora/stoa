@@ -64,12 +64,14 @@ export class AgoraClient
                 .addSearch("block_height", block_height.toString())
                 .addSearch("max_blocks", max_blocks);
 
-            this.client.get(uri.toString())
+            this.client.get(uri.toString(), { transformResponse: (r) => r })
                 .then((response: AxiosResponse) =>
                 {
                     if (response.status == 200)
                     {
-                        resolve(response.data);
+                        // Change the number to a string to preserve the precision of UInt64
+                        let text = response.data.replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3");
+                        resolve(JSON.parse(text));
                     }
                     else
                     {
