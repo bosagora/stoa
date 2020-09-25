@@ -15,10 +15,9 @@ import * as assert from 'assert';
 import { LedgerStorage } from '../src/modules/storage/LedgerStorage';
 import { Block, Hash, Height } from '../src/modules/data';
 import { PreImageInfo } from '../src/modules/data';
-import { sample_data, sample_preImageInfo } from './SampleData.test';
-import { recovery_sample_data } from './RecoveryData.test';
-import { Endian } from '../src/modules/utils/buffer';
-import { UInt64 } from 'spu-integer-math';
+import { sample_data, sample_preImageInfo } from "./SampleData.test";
+import { Endian } from "../src/modules/utils/buffer";
+import { UInt64 } from "spu-integer-math";
 
 /**
  * Run LedgerStorageTest
@@ -340,14 +339,14 @@ describe('LedgerStorage', () =>
             assert.ok(!err1, err1?.message);
 
             // Write the Genesis block.
-            await ledger_storage.putBlocks(recovery_sample_data[0]);
+            await ledger_storage.putBlocks(sample_data[0]);
 
             // The block is read from the database.
             let rows = await ledger_storage.getBlocks(new Height(UInt64.fromNumber(0)));
             if (rows.length > 0)
             {
                 // Check that the `prev_block` of block1 is the same as the hash value of the database.
-                let block1 = (new Block()).parseJSON(recovery_sample_data[1]);
+                let block1 = (new Block()).parseJSON(sample_data[1]);
 
                 assert.deepStrictEqual(block1.header.prev_block, Hash.createFromBinary(rows[0].hash, Endian.Little));
             }
