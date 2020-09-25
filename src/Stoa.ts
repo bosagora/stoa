@@ -60,8 +60,8 @@ class Stoa {
         this.stoa = express();
         // parse application/x-www-form-urlencoded
         this.stoa.use(bodyParser.urlencoded({ extended: false }));
-        // parse application/json
-        this.stoa.use(bodyParser.json());
+
+        this.stoa.use(bodyParser.raw({ type: "*/*" }));
         // create blockStorage
         this.ledger_storage = new LedgerStorage(database_filename, (err: Error | null) =>
         {
@@ -263,7 +263,9 @@ class Stoa {
             IpFilter(white_ip_list, { mode: 'allow', log: false }),
             (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-            if (req.body.block === undefined)
+            // Change the number to a string to preserve the precision of UInt64
+            let body = JSON.parse(req.body.toString());
+            if (body.block === undefined)
             {
                 res.status(400).send("Missing 'block' object in body");
                 return;
@@ -273,7 +275,7 @@ class Stoa {
             // For a more stable operating environment,
             // it would be necessary to consider organizing the pool
             // using the database instead of the array.
-            this.pool.push({type: "block", data: req.body.block});
+            this.pool.push({type: "block", data: body.block});
 
             res.status(200).send();
         });
@@ -286,7 +288,8 @@ class Stoa {
             IpFilter(white_ip_list, { mode: 'allow', log: false }),
             (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-            if (req.body.pre_image === undefined)
+            let body = JSON.parse(req.body.toString());
+            if (body.pre_image === undefined)
             {
                 res.status(400).send("Missing 'preImage' object in body");
                 return;
@@ -296,7 +299,7 @@ class Stoa {
             // For a more stable operating environment,
             // it would be necessary to consider organizing the pool
             // using the database instead of the array.
-            this.pool.push({type: "pre_image", data: req.body.pre_image});
+            this.pool.push({type: "pre_image", data: body.pre_image});
 
             res.status(200).send();
         });
