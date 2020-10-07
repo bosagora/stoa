@@ -83,7 +83,7 @@ class Stoa {
         }, 10);
 
         // List that allows access only to those IPs
-        const white_ip_list: IpList = ['::ffff:127.0.0.1'];
+        const white_ip_list: IpList = ['::ffff:127.0.0.1','::ffff:172.17.0.0/16'];
 
         /**
          * Called when a request is received through the `/validators` handler
