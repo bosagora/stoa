@@ -6,10 +6,10 @@
   "scripts": {
     "json2ts": "./node_modules/.bin/json2ts -i src/modules/data/schemas/ -o src/modules/data/types/",
     "_test": "mocha -r ts-node/register tests/**/*.test.ts",
-    "_start": "nodemon --watch src --delay 1 --exec 'ts-node' src/main.ts",
     "test": "NODE_ENV=test npm-run-all --serial json2ts _test",
     "debug": "NODE_ENV=development npm-run-all --serial json2ts _test",
-    "start": "NODE_ENV=production npm-run-all --serial json2ts _start",
+    "prestart": "npm run json2ts",
+    "start": "NODE_ENV=production nodemon -w src -d 1 -x ts-node src/main.ts",
     "tsc": "tsc"
   },
   "repository": {
