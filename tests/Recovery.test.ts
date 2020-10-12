@@ -112,14 +112,6 @@ class TestStoa extends Stoa
     {
         super(file_name, agora_endpoint, port);
 
-        // Shut down
-        this.app.get("/stop", (req: express.Request, res: express.Response) =>
-        {
-            res.send("The test server is stopped.");
-            if (this.server != null)
-                this.server.close();
-        });
-
         this.app.get("/block",
             async (req: express.Request, res: express.Response) =>
             {
