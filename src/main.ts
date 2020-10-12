@@ -3,7 +3,6 @@ import { logger } from './modules/common/Logger';
 import Stoa from './Stoa';
 
 import { ArgumentParser } from "argparse";
-import express from 'express';
 import { URL } from 'url';
 
 // Parse the arguments
@@ -22,7 +21,6 @@ logger.info(`Using Agora located at: ${agora_address}`);
 logger.info(`The address to which we bind to Stoa: ${address}`);
 logger.info(`The port to which we bind to Stoa: ${port}`);
 logger.info(`The file name of sqlite3 database: ${database_filename}`);
-const stoa: express.Application = new Stoa(database_filename, agora_address).stoa;
 
-stoa.listen(port, address, () => logger.info(`Listening to requests on: ${address}:${port}`))
-.on('error', err => logger.error(err));
+const stoa: Stoa = new Stoa("database", agora_address, port, address);
+stoa.start();

@@ -34,30 +34,26 @@ import { URL } from 'url';
  */
 class TestStoa extends Stoa
 {
-    public server: http.Server;
-
-    constructor (file_name: string, agora_endpoint: URL, port: string, done: () => void)
+    constructor (file_name: string, agora_endpoint: URL, port: string)
     {
-        super(file_name, agora_endpoint);
+        super(file_name, agora_endpoint, port);
 
         // Shut down
-        this.stoa.get("/stop", (req: express.Request, res: express.Response) =>
+        this.app.get("/stop", (req: express.Request, res: express.Response) =>
         {
             res.send("The test server is stopped.");
-            this.server.close();
-        });
-
-        // Start to listen
-        this.server = this.stoa.listen(port, () =>
-        {
-            done();
+            if (this.server != null)
+                this.server.close();
         });
     }
 
     public stop (callback?: (err?: Error) => void)
     {
         this.task_manager.terminate();
-        this.server.close(callback);
+        if (this.server != null)
+            this.server.close(callback);
+        else if (callback !== undefined)
+            callback();
     }
 }
 
@@ -70,15 +66,13 @@ describe ('Test of Stoa API Server', () =>
 
     before ('Start Stoa API Server', (doneIt: () => void) =>
     {
-        stoa_server = new TestStoa(":memory:", new URL("http://127.0.0.1:2826"), port, doneIt);
+        stoa_server = new TestStoa(":memory:", new URL("http://127.0.0.1:2826"), port);
+        stoa_server.start(doneIt);
     });
 
     after ('Stop Stoa API Server', (doneIt: () => void) =>
     {
-        stoa_server.stop(() =>
-        {
-            doneIt();
-        });
+        stoa_server.stop(doneIt);
     });
 
     it ('Test of the path /block_externalized', (doneIt: () => void) =>
