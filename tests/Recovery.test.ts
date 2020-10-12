@@ -163,24 +163,26 @@ describe ('Test of Recovery', () =>
 
     let client = axios.create();
 
-    beforeEach ('Start TestAgora', (doneIt: () => void) =>
+    // Changed test agora to run only once.
+    before ('Start TestAgora', (doneIt: () => void) =>
     {
-        agora_node = new TestAgora(agora_port, () =>
-        {
-            stoa_server = new TestStoa(":memory:", agora_endpoint, stoa_port);
-            stoa_server.start(doneIt);
-        });
+        agora_node = new TestAgora(agora_port, doneIt);
     });
 
-    afterEach ('Stop TestAgora', (doneIt: () => void) =>
+    after ('Stop TestAgora', (doneIt: () => void) =>
     {
-        stoa_server.stop(() =>
-        {
-            agora_node.stop(() =>
-            {
-                doneIt();
-            });
-        });
+        agora_node.stop(doneIt);
+    });
+
+    beforeEach ('Start TestStoa', (doneIt: () => void) =>
+    {
+        stoa_server = new TestStoa(":memory:", agora_endpoint, stoa_port);
+        stoa_server.start(doneIt);
+    });
+
+    afterEach ('Stop TestStoa', (doneIt: () => void) =>
+    {
+        stoa_server.stop(doneIt);
     });
 
     it ('Test a function requestBlocks', async () =>
