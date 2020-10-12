@@ -98,15 +98,32 @@ class Stoa extends WebService
 
     private prepareRoutes ()
     {
-        /**
-         * Called when a request is received through the `/validators` handler
-         *
-         * Returns a set of Validators based on the block height if there is a height.
-         * If height was not provided the latest validator set is returned.
-         */
-        this.app.get("/validators",
-            (req: express.Request, res: express.Response, next: express.NextFunction) =>
-        {
+        // GET /validators
+        this.app.get("/validators", this.getValidators.bind(this));
+
+        // GET /validator/:address
+        this.app.get("/validator/:address", this.getValidator.bind(this));
+
+        // POST /block_externalized
+        this.app.post("/block_externalized",
+            IpFilter(this.white_ip_list, { mode: 'allow', log: false }), this.putBlock.bind(this));
+
+        // POST /preimage_received
+        this.app.post("/preimage_received",
+            IpFilter(this.white_ip_list, { mode: 'allow', log: false }), this.putPreImage.bind(this));
+    }
+
+    /**
+     * GET /validators
+     *
+     * Called when a request is received through the `/validators` handler
+     *
+     * Returns a set of Validators based on the block height if there is a height.
+     * If height was not provided the latest validator set is returned.
+     */
+    private getValidators (req: express.Request, res: express.Response)
+    {
+        // TODO: No indentation was made to reduce change. Fix this next time.
             if  (
                     (req.query.height !== undefined) &&
                     !Utils.isPositiveInteger(req.query.height.toString())
@@ -179,18 +196,20 @@ class Stoa extends WebService
                     res.status(500).send("Failed to data lookup");
                 }
             );
-        });
+    }
 
-        /**
-         * Called when a request is received through the `/validators/:address` handler
-         *
-         * Returns a set of Validators based on the block height if there is a height.
-         * If height was not provided the latest validator set is returned.
-         * If an address was provided, return the validator data of the address if it exists.
-         */
-        this.app.get("/validator/:address",
-            (req: express.Request, res: express.Response, next: express.NextFunction) =>
-        {
+    /**
+     * GET /validator/:address
+     *
+     * Called when a request is received through the `/validators/:address` handler
+     *
+     * Returns a set of Validators based on the block height if there is a height.
+     * If height was not provided the latest validator set is returned.
+     * If an address was provided, return the validator data of the address if it exists.
+     */
+    private getValidator (req: express.Request, res: express.Response)
+    {
+        // TODO: No indentation was made to reduce change. Fix this next time.
             if  (
                 (req.query.height !== undefined) &&
                 !Utils.isPositiveInteger(req.query.height.toString())
@@ -265,17 +284,18 @@ class Stoa extends WebService
                     res.status(500).send("Failed to data lookup");
                 }
             );
-        });
+    }
 
-        /**
-         * When a request is received through the `/push` handler
-         * The block data received is stored in the pool
-         * and immediately sends a response to Agora
-         */
-        this.app.post("/block_externalized",
-            IpFilter(this.white_ip_list, { mode: 'allow', log: false }),
-            (req: express.Request, res: express.Response, next: express.NextFunction) => {
-
+    /**
+     * POST /block_externalized
+     *
+     * When a request is received through the `/push` handler
+     * The block data received is stored in the pool
+     * and immediately sends a response to Agora
+     */
+    private putBlock (req: express.Request, res: express.Response)
+    {
+        // TODO: No indentation was made to reduce change. Fix this next time.
             // Change the number to a string to preserve the precision of UInt64
             let text = req.body.toString().replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3");
             let body = JSON.parse(text);
@@ -292,16 +312,17 @@ class Stoa extends WebService
             this.pool.push({type: "block", data: body.block});
 
             res.status(200).send();
-        });
+    }
 
-        /**
-         * When a request is received through the `/preimage_received` handler
-         * JSON preImage data is parsed and stored on each storage.
-         */
-        this.app.post("/preimage_received",
-            IpFilter(this.white_ip_list, { mode: 'allow', log: false }),
-            (req: express.Request, res: express.Response, next: express.NextFunction) => {
-
+    /**
+     * POST /preimage_received
+     *
+     * When a request is received through the `/preimage_received` handler
+     * JSON preImage data is parsed and stored on each storage.
+     */
+    private putPreImage (req: express.Request, res: express.Response)
+    {
+        // TODO: No indentation was made to reduce change. Fix this next time.
             let body = JSON.parse(req.body.toString());
             if (body.pre_image === undefined)
             {
@@ -316,7 +337,6 @@ class Stoa extends WebService
             this.pool.push({type: "pre_image", data: body.pre_image});
 
             res.status(200).send();
-        });
     }
 
     /**
