@@ -22,8 +22,6 @@ import { TaskManager } from '../src/modules/task/TaskManager';
 
 import * as assert from 'assert';
 import axios from 'axios';
-import express from 'express';
-import * as http from 'http';
 import { UInt64 } from 'spu-integer-math';
 import URI from 'urijs';
 import { URL } from 'url';
@@ -34,19 +32,6 @@ import { URL } from 'url';
  */
 class TestStoa extends Stoa
 {
-    constructor (file_name: string, agora_endpoint: URL, port: string)
-    {
-        super(file_name, agora_endpoint, port);
-
-        // Shut down
-        this.app.get("/stop", (req: express.Request, res: express.Response) =>
-        {
-            res.send("The test server is stopped.");
-            if (this.server != null)
-                this.server.close();
-        });
-    }
-
     public stop (callback?: (err?: Error) => void)
     {
         this.task_manager.terminate();
