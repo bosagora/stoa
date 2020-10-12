@@ -7,6 +7,7 @@ import { Height, PreImageInfo, Hash, hash } from './modules/data';
 import { TaskManager } from './modules/task/TaskManager';
 import { Utils } from './modules/utils/Utils';
 import { ValidatorData, IPreimage } from './modules/data/ValidatorData';
+import { WebService } from './modules/service/WebService';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -15,9 +16,8 @@ import { IpFilter, IpList } from 'express-ipfilter';
 import { UInt64 } from 'spu-integer-math';
 import { URL } from 'url';
 
-class Stoa {
-    public stoa: express.Application;
-
+class Stoa extends WebService
+{
     public ledger_storage: LedgerStorage;
 
     /**
@@ -41,21 +41,25 @@ class Stoa {
     private _max_count_on_recovery: number = 64;
 
     /**
+     * List that allows access only to those IPs
+     */
+    private readonly white_ip_list: IpList;
+
+    /**
      * Constructor
      * @param database_filename sqlite3 database file name
      * @param agora_endpoint The network endpoint to connect to Agora
+     * @param port The network port of Stoa
+     * @param address The network address of Stoa
      */
-    constructor (database_filename: string, agora_endpoint: URL)
+    constructor (database_filename: string, agora_endpoint: URL, port: number | string, address?: string)
     {
+        super(port, address);
+
         this.agora_endpoint = agora_endpoint;
 
         this.pool = [];
 
-        this.stoa = express();
-        // parse application/x-www-form-urlencoded
-        this.stoa.use(bodyParser.urlencoded({ extended: false }));
-
-        this.stoa.use(bodyParser.raw({ type: "*/*" }));
         // create blockStorage
         this.ledger_storage = new LedgerStorage(database_filename, (err: Error | null) =>
         {
@@ -66,10 +70,6 @@ class Stoa {
             }
         });
 
-        this.stoa.use(cors(cors_options));
-        // enable pre-flight
-        this.stoa.options('*', cors(cors_options));
-
         // create task manager, delay time is 10 milliseconds
         this.task_manager = new TaskManager(() =>
         {
@@ -77,15 +77,34 @@ class Stoa {
         }, 10);
 
         // List that allows access only to those IPs
-        const white_ip_list: IpList = ['::ffff:127.0.0.1'];
+        this.white_ip_list = ['::ffff:127.0.0.1'];
 
+        this.prepareMiddleware();
+        this.prepareRoutes();
+    }
+
+    private prepareMiddleware ()
+    {
+        // parse application/x-www-form-urlencoded
+        this.app.use(bodyParser.urlencoded({extended: false}));
+
+        this.app.use(bodyParser.raw({type: "*/*"}));
+
+        this.app.use(cors(cors_options));
+
+        // enable pre-flight
+        this.app.options('*', cors(cors_options));
+    }
+
+    private prepareRoutes ()
+    {
         /**
          * Called when a request is received through the `/validators` handler
          *
          * Returns a set of Validators based on the block height if there is a height.
          * If height was not provided the latest validator set is returned.
          */
-        this.stoa.get("/validators",
+        this.app.get("/validators",
             (req: express.Request, res: express.Response, next: express.NextFunction) =>
         {
             if  (
@@ -169,7 +188,7 @@ class Stoa {
          * If height was not provided the latest validator set is returned.
          * If an address was provided, return the validator data of the address if it exists.
          */
-        this.stoa.get("/validator/:address",
+        this.app.get("/validator/:address",
             (req: express.Request, res: express.Response, next: express.NextFunction) =>
         {
             if  (
@@ -253,8 +272,8 @@ class Stoa {
          * The block data received is stored in the pool
          * and immediately sends a response to Agora
          */
-        this.stoa.post("/block_externalized",
-            IpFilter(white_ip_list, { mode: 'allow', log: false }),
+        this.app.post("/block_externalized",
+            IpFilter(this.white_ip_list, { mode: 'allow', log: false }),
             (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
             // Change the number to a string to preserve the precision of UInt64
@@ -279,8 +298,8 @@ class Stoa {
          * When a request is received through the `/preimage_received` handler
          * JSON preImage data is parsed and stored on each storage.
          */
-        this.stoa.post("/preimage_received",
-            IpFilter(white_ip_list, { mode: 'allow', log: false }),
+        this.app.post("/preimage_received",
+            IpFilter(this.white_ip_list, { mode: 'allow', log: false }),
             (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
             let body = JSON.parse(req.body.toString());

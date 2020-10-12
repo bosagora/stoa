@@ -108,20 +108,19 @@ class TestAgora
  */
 class TestStoa extends Stoa
 {
-    public server: http.Server;
-
-    constructor (file_name: string, agora_endpoint: URL, port: string, done: () => void)
+    constructor (file_name: string, agora_endpoint: URL, port: string)
     {
-        super(file_name, agora_endpoint);
+        super(file_name, agora_endpoint, port);
 
         // Shut down
-        this.stoa.get("/stop", (req: express.Request, res: express.Response) =>
+        this.app.get("/stop", (req: express.Request, res: express.Response) =>
         {
             res.send("The test server is stopped.");
-            this.server.close();
+            if (this.server != null)
+                this.server.close();
         });
 
-        this.stoa.get("/block",
+        this.app.get("/block",
             async (req: express.Request, res: express.Response) =>
             {
                 if  (
@@ -148,18 +147,15 @@ class TestStoa extends Stoa
                     res.status(500).send();
                 }
             });
-
-        // Start to listen
-        this.server = this.stoa.listen(port, () =>
-        {
-            done();
-        });
     }
 
     public stop (callback?: (err?: Error) => void)
     {
         this.task_manager.terminate();
-        this.server.close(callback);
+        if (this.server != null)
+            this.server.close(callback);
+        else if (callback !== undefined)
+            callback();
     }
 }
 
@@ -179,10 +175,8 @@ describe ('Test of Recovery', () =>
     {
         agora_node = new TestAgora(agora_port, () =>
         {
-            stoa_server = new TestStoa(":memory:", agora_endpoint, stoa_port, () =>
-            {
-                doneIt();
-            });
+            stoa_server = new TestStoa(":memory:", agora_endpoint, stoa_port);
+            stoa_server.start(doneIt);
         });
     });
 
