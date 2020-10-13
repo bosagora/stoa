@@ -26,6 +26,7 @@ import express from 'express';
 import * as http from 'http';
 import { UInt64 } from 'spu-integer-math';
 import URI from 'urijs';
+import { URL } from 'url';
 
 /**
  * This is an API server for testing and inherited from Stoa.
@@ -35,9 +36,9 @@ class TestStoa extends Stoa
 {
     public server: http.Server;
 
-    constructor (file_name: string, agora_address: string, agora_port: string, port: string, done: () => void)
+    constructor (file_name: string, agora_endpoint: URL, port: string, done: () => void)
     {
-        super(file_name, agora_address, agora_port);
+        super(file_name, agora_endpoint);
 
         // Shut down
         this.stoa.get("/stop", (req: express.Request, res: express.Response) =>
@@ -69,7 +70,7 @@ describe ('Test of Stoa API Server', () =>
 
     before ('Start Stoa API Server', (doneIt: () => void) =>
     {
-        stoa_server = new TestStoa(":memory:", "127.0.0.1", "2826", port, doneIt);
+        stoa_server = new TestStoa(":memory:", new URL("http://127.0.0.1:2826"), port, doneIt);
     });
 
     after ('Stop Stoa API Server', (doneIt: () => void) =>

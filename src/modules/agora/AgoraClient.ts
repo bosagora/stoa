@@ -15,6 +15,7 @@ import { Height } from '../data/';
 
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import URI from 'urijs';
+import { URL } from 'url';
 
 /**
  * The class that recovers data
@@ -22,14 +23,9 @@ import URI from 'urijs';
 export class AgoraClient
 {
     /**
-     * The network address to connect to Agora
+     * The network endpoint to connect to Agora
      */
-    private host: string;
-
-    /**
-     * The network port to connect to Agora
-     */
-    private port: string;
+    private endpoint: URL;
 
     /**
      * The instance of the axios
@@ -38,13 +34,11 @@ export class AgoraClient
 
     /**
      * Constructor
-     * @param host - The network address to connect to Agora
-     * @param port - The network port to connect to Agora
+     * @param endpoint - The network endpoint to connect to Agora
      */
-    constructor (host: string, port: string)
+    constructor (endpoint: URL)
     {
-        this.host = host;
-        this.port = port;
+        this.endpoint = endpoint;
         this.client = axios.create();
         this.client.defaults.timeout = 10000;
     }
@@ -58,8 +52,7 @@ export class AgoraClient
     {
         return new Promise<Array<any>>((resolve, reject) =>
         {
-            let uri = URI(this.host)
-                .port(this.port)
+            let uri = URI(this.endpoint)
                 .directory("blocks_from")
                 .addSearch("block_height", block_height.toString())
                 .addSearch("max_blocks", max_blocks);

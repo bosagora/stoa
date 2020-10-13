@@ -24,6 +24,7 @@ import express from 'express';
 import * as http from 'http';
 import { UInt64 } from 'spu-integer-math';
 import URI from 'urijs';
+import { URL } from 'url';
 
 /**
  * This is an Agora node for testing.
@@ -109,9 +110,9 @@ class TestStoa extends Stoa
 {
     public server: http.Server;
 
-    constructor (file_name: string, agora_address: string, agora_port: string, port: string, done: () => void)
+    constructor (file_name: string, agora_endpoint: URL, port: string, done: () => void)
     {
-        super(file_name, agora_address, agora_port);
+        super(file_name, agora_endpoint);
 
         // Shut down
         this.stoa.get("/stop", (req: express.Request, res: express.Response) =>
@@ -164,7 +165,7 @@ class TestStoa extends Stoa
 
 describe ('Test of Recovery', () =>
 {
-    let agora_host: string = 'http://localhost';
+    let agora_endpoint: URL = new URL('http://localhost:2820');
     let agora_port: string = '2820';
     let agora_node: TestAgora;
 
@@ -178,7 +179,7 @@ describe ('Test of Recovery', () =>
     {
         agora_node = new TestAgora(agora_port, () =>
         {
-            stoa_server = new TestStoa(":memory:", agora_host, agora_port, stoa_port, () =>
+            stoa_server = new TestStoa(":memory:", agora_endpoint, stoa_port, () =>
             {
                 doneIt();
             });
@@ -198,7 +199,7 @@ describe ('Test of Recovery', () =>
 
     it ('Test a function requestBlocks', async () =>
     {
-        let agora_client = new AgoraClient(agora_host, agora_port);
+        let agora_client = new AgoraClient(agora_endpoint);
 
         await assert.doesNotReject(async () =>
         {
@@ -226,7 +227,7 @@ describe ('Test of Recovery', () =>
 
     it ('Test a function requestBlocks using async, await', (doneIt: () => void) =>
     {
-        let agora_client = new AgoraClient(agora_host, agora_port);
+        let agora_client = new AgoraClient(agora_endpoint);
 
         assert.doesNotThrow(async () =>
         {

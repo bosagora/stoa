@@ -18,11 +18,11 @@ const address: string = args.address || "0.0.0.0";
 const port: number = Number(args.port || "3836");
 const agora_address: URL = new URL(args.agora || "http://127.0.0.1:2826");
 const database_filename: string = args.database || "database";
-logger.info(`Using Agora located at: ${agora_address.hostname}: ${agora_address.port}`);
+logger.info(`Using Agora located at: ${agora_address}`);
 logger.info(`The address to which we bind to Stoa: ${address}`);
 logger.info(`The port to which we bind to Stoa: ${port}`);
 logger.info(`The file name of sqlite3 database: ${database_filename}`);
-const stoa: express.Application = new Stoa(database_filename, agora_address.hostname, agora_address.port).stoa;
+const stoa: express.Application = new Stoa(database_filename, agora_address).stoa;
 
 stoa.listen(port, address, () => logger.info(`Listening to requests on: ${address}:${port}`))
 .on('error', err => logger.error(err));

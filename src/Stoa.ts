@@ -13,6 +13,7 @@ import cors from 'cors';
 import express from 'express';
 import { IpFilter, IpList } from 'express-ipfilter';
 import { UInt64 } from 'spu-integer-math';
+import { URL } from 'url';
 
 class Stoa {
     public stoa: express.Application;
@@ -20,14 +21,9 @@ class Stoa {
     public ledger_storage: LedgerStorage;
 
     /**
-     * The network host to connect to Agora
+     * The network endpoint to connect to Agora
      */
-    private readonly agora_host: string;
-
-    /**
-     * The network port to connect to Agora
-     */
-    private readonly agora_port: string;
+    private readonly agora_endpoint: URL;
 
     /**
      * The temporary storage of the data received from Agora
@@ -47,13 +43,11 @@ class Stoa {
     /**
      * Constructor
      * @param database_filename sqlite3 database file name
-     * @param agora_host The network host to connect to Agora
-     * @param agora_port The network port to connect to Agora
+     * @param agora_endpoint The network endpoint to connect to Agora
      */
-    constructor (database_filename: string, agora_host: string, agora_port: string)
+    constructor (database_filename: string, agora_endpoint: URL)
     {
-        this.agora_host = agora_host;
-        this.agora_port = agora_port;
+        this.agora_endpoint = agora_endpoint;
 
         this.pool = [];
 
@@ -346,7 +340,7 @@ class Stoa {
 
                     if (max_blocks > 0)
                     {
-                        let agora_client = new AgoraClient(this.agora_host, this.agora_port);
+                        let agora_client = new AgoraClient(this.agora_endpoint);
                         let blocks = await agora_client.requestBlocks(expected_height, max_blocks);
 
                         // Save previous block
