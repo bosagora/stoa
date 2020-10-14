@@ -52,7 +52,7 @@ class Stoa extends WebService
      * @param port The network port of Stoa
      * @param address The network address of Stoa
      */
-    constructor (database_filename: string, agora_endpoint: URL, port: number | string, address?: string)
+    constructor (database_filename: string, agora_endpoint: URL, port: number | string, address?: string, white_ip_list?: Array<string>)
     {
         super(port, address);
 
@@ -77,7 +77,10 @@ class Stoa extends WebService
         }, 10);
 
         // List that allows access only to those IPs
-        this.white_ip_list = ['::ffff:127.0.0.1'];
+        if (white_ip_list !== undefined)
+            this.white_ip_list = white_ip_list;
+        else
+            this.white_ip_list = ['::ffff:127.0.0.1'];
 
         this.prepareMiddleware();
         this.prepareRoutes();
