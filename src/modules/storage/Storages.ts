@@ -13,6 +13,8 @@
 
 *******************************************************************************/
 
+import mkdirp from 'mkdirp';
+import path from 'path';
 import * as sqlite from 'sqlite3';
 
 export class Storages
@@ -33,6 +35,8 @@ export class Storages
      */
     constructor (filename: string, callback: (err: Error | null) => void)
     {
+        if (filename !== ":memory:")
+            mkdirp.sync(path.dirname(filename));
         this.db = new sqlite.Database(filename,
             sqlite.OPEN_CREATE | sqlite.OPEN_READWRITE |
             sqlite.OPEN_SHAREDCACHE, (err: Error | null) =>
