@@ -2,13 +2,16 @@
 .git/
 .github/
 docs/
-logs/
 
 # Dependency build files, It is installed when creating a docker image.
 node_modules/
 
-# Database file
-database
+# Database files
+stoa/data/
+
+# Logging files
+stoa/logs/
+
 
 # Visual Studio Code
 .vscode/
