@@ -12,6 +12,7 @@
 *******************************************************************************/
 
 import appRootPath from 'app-root-path';
+import {ArgumentParser} from 'argparse';
 import extend from 'extend';
 import fs from "fs";
 import path from 'path';
@@ -98,6 +99,36 @@ export class Config implements IConfig
             if ((this.args.database !== undefined) && (this.args.database !== ""))
                 this.database.filename = path.resolve(appRootPath.toString(), this.args.database);
         }
+    }
+
+    /**
+     * Parses the command line arguments, Reads from the configuration file
+     */
+    public static createWithArgument (): Config
+    {
+        // Parse the arguments
+        const parser = new ArgumentParser();
+        parser.add_argument('-a', '--agora', { help: "The endpoint of Agora" });
+        parser.add_argument('--address', { help: "The address to which we bind to Stoa" });
+        parser.add_argument('-p', '--port', { help: "The port on which we bind to Stoa" });
+        parser.add_argument('-d', '--database', { help: "The file name of sqlite3 database" });
+        parser.add_argument('-c', '--config', { help: "The filename of config" });
+        let args =  parser.parse_args();
+
+        let cfg = new Config(args);
+        if (args.config !== undefined)
+        {
+            try
+            {
+                cfg.readFromFile(args.config);
+            }
+            catch (error)
+            {
+                // Logging setup has not been completed and is output to the console.
+                console.error(error.message);
+            }
+        }
+        return cfg;
     }
 }
 
