@@ -1,0 +1,32 @@
+
+################################################################################
+##                             Network interface                              ##
+################################################################################
+server:
+  # Address to which we bind
+  address: ""      # default value
+  # Port on which we bind
+  port:    3836    # default value
+
+  # Endpoint of Agora
+  agora_endpoint: http://127.0.0.1:2826
+
+  # White IP list for IP-filtering ('\block_externalized', '\preimage_received')
+  white_ip_list:
+    - ::ffff:127.0.0.1
+    - ::ffff:172.17.0.0/16
+
+################################################################################
+##                               Database options                             ##
+################################################################################
+database:
+  filename: stoa/data/database
+
+################################################################################
+##                               Logging options                              ##
+################################################################################
+logging:
+  # The name of the folder where the logs are stored.
+  folder: stoa/logs/
+  # Values: error, warn, info, http, verbose, debug, silly
+  level: info
