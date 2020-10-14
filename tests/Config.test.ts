@@ -34,7 +34,7 @@ describe('Test of Config', () => {
                 "   folder: /stoa/logs/",
                 "   level: debug",
             ].join("\n");
-        let config: Config = new Config();
+        let config: Config = new Config(null);
         config.readFromString(config_content);
         assert.strictEqual(config.server.address, "127.0.0.1");
         assert.strictEqual(config.server.port.toString(), "3838");
@@ -48,7 +48,7 @@ describe('Test of Config', () => {
     });
 
     it ('Test parsing the settings of a file', () => {
-        let config: Config = new Config();
+        let config: Config = new Config(null);
         config.readFromFile(path.resolve(appRootPath.toString(), "tests/config.example.yaml"));
         assert.strictEqual(config.server.address, "");
         assert.strictEqual(config.server.port.toString(), "3836");
@@ -59,5 +59,20 @@ describe('Test of Config', () => {
 
         assert.strictEqual(config.logging.folder, path.resolve(appRootPath.toString(), "stoa/logs/"));
         assert.strictEqual(config.logging.level, "info");
+    });
+
+    it ('Test config with argument', () => {
+        let argument = {
+            agora: "http://127.0.0.1:4000/",
+            address: "127.0.0.1",
+            port: "5000",
+            database: "argument-db"
+        };
+        let config: Config = new Config(argument);
+        config.readFromFile(path.resolve(appRootPath.toString(), "tests/config.example.yaml"));
+        assert.strictEqual(config.server.address, "127.0.0.1");
+        assert.strictEqual(config.server.port.toString(), "5000");
+        assert.strictEqual(config.server.agora_endpoint.toString(), "http://127.0.0.1:4000/");
+        assert.strictEqual(config.database.filename, path.resolve(appRootPath.toString(), "argument-db"));
     });
 });
