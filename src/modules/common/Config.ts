@@ -153,25 +153,18 @@ export class ServerConfig implements IServerConfig
     public agora_endpoint: URL;
 
     /**
-     * The white IP list for IP-filtering
-     */
-    public white_ip_list: Array<string>;
-
-    /**
      * Constructor
      * @param address The address to which we bind
      * @param port The port on which we bind
      * @param agora_endpoint The endpoint of Agora
-     * @param white_ip_list The white IP list for IP-filtering
      */
-    constructor (address?: string, port?: number, agora_endpoint?: string, white_ip_list?: Array<string>)
+    constructor (address?: string, port?: number, agora_endpoint?: string)
     {
         let conf = extend(true, {}, ServerConfig.defaultValue());
-        extend(true, conf, {address: address, port: port, agora_endpoint: agora_endpoint, white_ip_list: white_ip_list});
+        extend(true, conf, {address: address, port: port, agora_endpoint: agora_endpoint});
         this.address = conf.address;
         this.port = conf.port;
         this.agora_endpoint = conf.agora_endpoint;
-        this.white_ip_list = conf.white_ip_list;
     }
 
     /**
@@ -186,7 +179,6 @@ export class ServerConfig implements IServerConfig
         this.port = conf.port;
         this.agora_endpoint = conf.agora_endpoint;
         this.agora_endpoint = conf.agora_endpoint;
-        this.white_ip_list = conf.white_ip_list;
     }
 
     /**
@@ -197,8 +189,7 @@ export class ServerConfig implements IServerConfig
         return {
             address: "",
             port: 3836,
-            agora_endpoint: new URL("http://127.0.0.1:2826"),
-            white_ip_list: ["::ffff:127.0.0.1", "::ffff:172.17.0.0/16"]
+            agora_endpoint: new URL("http://127.0.0.1:2826")
         }
     }
 }
@@ -317,11 +308,6 @@ export interface IServerConfig
      * The endpoint of Agora
      */
     agora_endpoint: URL;
-
-    /**
-     * The white IP list for IP-filtering
-     */
-    white_ip_list: Array<string>;
 }
 
 /**

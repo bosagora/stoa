@@ -25,9 +25,6 @@ describe('Test of Config', () => {
                 "   address: 127.0.0.1",
                 "   port:    3838",
                 "   agora_endpoint: http://127.0.0.1:2826",
-                "   white_ip_list:",
-                "       - ::ffff:127.0.0.1",
-                "       - ::ffff:172.17.0.0/16",
                 "database:",
                 "   filename: database",
                 "logging:",
@@ -39,7 +36,6 @@ describe('Test of Config', () => {
         assert.strictEqual(config.server.address, "127.0.0.1");
         assert.strictEqual(config.server.port.toString(), "3838");
         assert.strictEqual(config.server.agora_endpoint.toString(), "http://127.0.0.1:2826");
-        assert.deepStrictEqual(config.server.white_ip_list, ['::ffff:127.0.0.1', '::ffff:172.17.0.0/16']);
 
         assert.strictEqual(config.database.filename, path.resolve(appRootPath.toString(), "database"));
 
@@ -53,7 +49,6 @@ describe('Test of Config', () => {
         assert.strictEqual(config.server.address, "");
         assert.strictEqual(config.server.port.toString(), "3836");
         assert.strictEqual(config.server.agora_endpoint.toString(), "http://127.0.0.1:2826");
-        assert.deepStrictEqual(config.server.white_ip_list, ['::ffff:127.0.0.1', '::ffff:172.17.0.0/16']);
 
         assert.strictEqual(config.database.filename, path.resolve(appRootPath.toString(), "stoa/data/database"));
 

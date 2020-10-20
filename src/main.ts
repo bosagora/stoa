@@ -19,7 +19,6 @@ logger.info(`The file name of sqlite3 database: ${config.database.filename}`);
 const stoa: Stoa = new Stoa(config.database.filename,
     config.server.agora_endpoint,
     config.server.port,
-    config.server.address,
-    config.server.white_ip_list,
+    config.server.address
     );
 stoa.start();
