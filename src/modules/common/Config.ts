@@ -15,6 +15,7 @@ import { Utils } from '../utils/Utils';
 
 import {ArgumentParser} from 'argparse';
 import extend from 'extend';
+import ip from 'ip';
 import fs from "fs";
 import path from 'path';
 import { URL } from 'url';
@@ -138,6 +139,13 @@ export class ServerConfig implements IServerConfig
     {
         let conf = extend(true, {}, ServerConfig.defaultValue());
         extend(true, conf, {address: address, port: port, agora_endpoint: agora_endpoint});
+
+        if (!ip.isV4Format(conf.address) && !ip.isV6Format(conf.address))
+        {
+            console.error(`${conf.address}' is not appropriate to use as an IP address.`);
+            process.exit(1);
+        }
+
         this.address = conf.address;
         this.port = conf.port;
         this.agora_endpoint = conf.agora_endpoint;
@@ -151,6 +159,12 @@ export class ServerConfig implements IServerConfig
     {
         let conf = extend(true, {}, ServerConfig.defaultValue());
         extend(true, conf, config);
+
+        if (!ip.isV4Format(conf.address) && !ip.isV6Format(conf.address))
+        {
+            console.error(`${conf.address}' is not appropriate to use as an IP address.`);
+            process.exit(1);
+        }
         this.address = conf.address;
         this.port = conf.port;
         this.agora_endpoint = conf.agora_endpoint;
@@ -162,7 +176,7 @@ export class ServerConfig implements IServerConfig
     public static defaultValue (): IServerConfig
     {
         return {
-            address: "",
+            address: "127.0.0.1",
             port: 3836,
             agora_endpoint: new URL("http://127.0.0.1:2826")
         }
