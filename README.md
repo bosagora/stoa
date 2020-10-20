@@ -13,7 +13,7 @@ For a test run,
 This requires the Agora config.yaml file in advance.
 try:
 ```console
-docker run -p 127.0.0.1:3836:3836/tcp -v $(pwd)/config.yaml:/stoa/config.yaml -e "CONFIG=/stoa/config.yaml" bpfk/stoa
+docker run -p 127.0.0.1:3836:3836/tcp -v $(pwd)/config.yaml:/stoa/wd/config.yaml bpfk/stoa -- -c /stoa/wd/config.yaml
 ```
 This will start a stoa & full node agora with the example config/agora_config file,
 and make the port locally accessible (See http://127.0.0.1:3836/).
