@@ -11,11 +11,6 @@ server:
   # Endpoint of Agora
   agora_endpoint: http://127.0.0.1:2826
 
-  # White IP list for IP-filtering ('\block_externalized', '\preimage_received')
-  white_ip_list:
-    - ::ffff:127.0.0.1
-    - ::ffff:172.17.0.0/16
-
 ################################################################################
 ##                               Database options                             ##
 ################################################################################

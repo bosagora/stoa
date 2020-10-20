@@ -12,7 +12,6 @@ import { WebService } from './modules/service/WebService';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
-import { IpFilter, IpList } from 'express-ipfilter';
 import { UInt64 } from 'spu-integer-math';
 import { URL } from 'url';
 
@@ -41,18 +40,13 @@ class Stoa extends WebService
     private _max_count_on_recovery: number = 64;
 
     /**
-     * List that allows access only to those IPs
-     */
-    private readonly white_ip_list: IpList;
-
-    /**
      * Constructor
      * @param database_filename sqlite3 database file name
      * @param agora_endpoint The network endpoint to connect to Agora
      * @param port The network port of Stoa
      * @param address The network address of Stoa
      */
-    constructor (database_filename: string, agora_endpoint: URL, port: number | string, address?: string, white_ip_list?: Array<string>)
+    constructor (database_filename: string, agora_endpoint: URL, port: number | string, address?: string)
     {
         super(port, address);
 
@@ -75,12 +69,6 @@ class Stoa extends WebService
         {
             return this.task();
         }, 10);
-
-        // List that allows access only to those IPs
-        if (white_ip_list !== undefined)
-            this.white_ip_list = white_ip_list;
-        else
-            this.white_ip_list = ['::ffff:127.0.0.1'];
 
         this.prepareMiddleware();
         this.prepareRoutes();
@@ -108,12 +96,10 @@ class Stoa extends WebService
         this.app.get("/validator/:address", this.getValidator.bind(this));
 
         // POST /block_externalized
-        this.app.post("/block_externalized",
-            IpFilter(this.white_ip_list, { mode: 'allow', log: false }), this.putBlock.bind(this));
+        this.app.post("/block_externalized", this.putBlock.bind(this));
 
         // POST /preimage_received
-        this.app.post("/preimage_received",
-            IpFilter(this.white_ip_list, { mode: 'allow', log: false }), this.putPreImage.bind(this));
+        this.app.post("/preimage_received", this.putPreImage.bind(this));
     }
 
     /**
