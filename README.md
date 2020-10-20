@@ -33,9 +33,7 @@ $ npm ci
 ````
 
 ## How to start
-`npm start`: Run Stoa in the Node.js. It is being watched by nodemon.
-               When changing the source, the code configured with typescript
-               is transpiled to javascript and restarted.
+`npm start`: Run Stoa in the Node.js.
 
 ## Stoa test
 `npm test`: Test run the *.test.ts files in the tests folder.
