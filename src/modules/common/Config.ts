@@ -126,6 +126,9 @@ export class Config implements IConfig
             {
                 // Logging setup has not been completed and is output to the console.
                 console.error(error.message);
+
+                // If the process fails to read the configuration file, the process exits.
+                process.exit(1);
             }
         }
         return cfg;
