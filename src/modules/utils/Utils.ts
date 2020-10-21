@@ -11,6 +11,7 @@
 
 *******************************************************************************/
 
+import * as assert from 'assert';
 import { UInt64 } from 'spu-integer-math';
 
 export class Utils
@@ -109,5 +110,21 @@ export class Utils
         }
 
         return res;
+    }
+
+    /**
+     *  Gets the path to where the execution command was entered for this process.
+     *  If this value is not set, returns the root path of the app.
+     */
+    public static getInitCWD (): string
+    {
+        //  A type of process.env.INIT_CWD is string | undefined.
+        //  In order to use this, it is always necessary to make sure
+        //  that it is `undefined`.
+        //  `string` can be return only when it is not `undefined`.
+        if (process.env.INIT_CWD === undefined)
+            assert.fail("INIT_CWD is not defined.");
+        else
+            return process.env.INIT_CWD;
     }
 }
