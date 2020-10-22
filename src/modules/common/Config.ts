@@ -41,20 +41,13 @@ export class Config implements IConfig
     public logging: LoggingConfig;
 
     /**
-     * Argument
-     */
-    private readonly args: IArgument | null;
-
-    /**
      * Constructor
      */
-    constructor (args: IArgument | null)
+    constructor ()
     {
-        this.args = args;
         this.server = new ServerConfig();
         this.database = new DatabaseConfig();
         this.logging = new LoggingConfig();
-        this.applyArguments();
     }
 
     /**
@@ -77,29 +70,6 @@ export class Config implements IConfig
         this.server.readFromObject(cfg.server);
         this.database.readFromObject(cfg.database);
         this.logging.readFromObject(cfg.logging);
-        this.applyArguments();
-    }
-
-    /**
-     * Applies the command lime arguments
-     */
-    private applyArguments ()
-    {
-        // Gets the information entered as a command line arguments
-        if (this.args != null)
-        {
-            if ((this.args.agora !== undefined) && (this.args.agora !== ""))
-                this.server.agora_endpoint = new URL(this.args.agora);
-
-            if ((this.args.port !== undefined) && (this.args.port !== ""))
-                this.server.port = Number(this.args.port);
-
-            if ((this.args.address !== undefined) && (this.args.address !== ""))
-                this.server.address = this.args.address;
-
-            if ((this.args.database !== undefined) && (this.args.database !== ""))
-                this.database.filename = path.resolve(Utils.getInitCWD(), this.args.database);
-        }
     }
 
     /**
@@ -109,28 +79,30 @@ export class Config implements IConfig
     {
         // Parse the arguments
         const parser = new ArgumentParser();
-        parser.add_argument('-a', '--agora', { help: "The endpoint of Agora" });
-        parser.add_argument('--address', { help: "The address to which we bind to Stoa" });
-        parser.add_argument('-p', '--port', { help: "The port on which we bind to Stoa" });
-        parser.add_argument('-d', '--database', { help: "The file name of sqlite3 database" });
-        parser.add_argument('-c', '--config', { help: "The filename of config" });
-        let args =  parser.parse_args();
+        parser.add_argument('-c', '--config', {
+            default: "config.yaml",
+            help: "Path to the config file to use",
+        });
+        let args = parser.parse_args();
 
-        let cfg = new Config(args);
-        if (args.config !== undefined)
+        const configPath = path.resolve(Utils.getInitCWD(), args.config);
+        if (!fs.existsSync(args.config)) {
+            console.error(`Config file '${configPath}' does not exists`);
+            process.exit(1);
+        }
+
+        let cfg = new Config();
+        try
         {
-            try
-            {
-                cfg.readFromFile(args.config);
-            }
-            catch (error)
-            {
-                // Logging setup has not been completed and is output to the console.
-                console.error(error.message);
+            cfg.readFromFile(configPath);
+        }
+        catch (error)
+        {
+            // Logging setup has not been completed and is output to the console.
+            console.error(error.message);
 
-                // If the process fails to read the configuration file, the process exits.
-                process.exit(1);
-            }
+            // If the process fails to read the configuration file, the process exits.
+            process.exit(1);
         }
         return cfg;
     }
@@ -359,28 +331,4 @@ export interface IConfig
      * Logging config
      */
     logging: ILoggingConfig;
-}
-
-
-export interface IArgument
-{
-    /**
-     * The endpoint of Agora
-     */
-    agora?: string;
-
-    /**
-     * THe address to which we bind
-     */
-    address?: string;
-
-    /**
-     * The port on which we bind
-     */
-    port?: string;
-
-    /**
-     * The database file name
-     */
-    database?: string;
 }
