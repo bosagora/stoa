@@ -207,7 +207,7 @@ export class DatabaseConfig implements IDatabaseConfig
     public static defaultValue (): IDatabaseConfig
     {
         return {
-            filename: path.resolve(Utils.getInitCWD(), "stoa/data/Stoa.db")
+            filename: path.resolve(Utils.getInitCWD(), "data/main.db")
         }
     }
 }
@@ -258,7 +258,7 @@ export class LoggingConfig implements ILoggingConfig
     public static defaultValue (): ILoggingConfig
     {
         return {
-            folder: path.resolve(Utils.getInitCWD(), "stoa/logs/"),
+            folder: path.resolve(Utils.getInitCWD(), "logs/"),
             level: "info"
         }
     }
