@@ -182,7 +182,6 @@ export class ServerConfig implements IServerConfig
         this.address = conf.address;
         this.port = conf.port;
         this.agora_endpoint = conf.agora_endpoint;
-        this.agora_endpoint = conf.agora_endpoint;
     }
 
     /**
