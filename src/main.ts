@@ -11,10 +11,8 @@ let config = Config.createWithArgument();
 // Set the folder where the log is stored.
 Logger.setFolder(config.logging.folder);
 
-logger.info(`Using Agora located at: ${config.server.agora_endpoint.toString()}`);
-logger.info(`The address to which we bind to Stoa: ${config.server.address}`);
-logger.info(`The port to which we bind to Stoa: ${config.server.port}`);
-logger.info(`The file name of sqlite3 database: ${config.database.filename}`);
+logger.info(`Agora endpoint: ${config.server.agora_endpoint.toString()}`);
+logger.info(`sqlite3 database filename: ${config.database.filename}`);
 
 const stoa: Stoa = new Stoa(config.database.filename,
     config.server.agora_endpoint,
