@@ -45,7 +45,7 @@ describe('Test of Config', () => {
 
     it ('Test parsing the settings of a file', () => {
         let config: Config = new Config(null);
-        config.readFromFile(path.resolve(Utils.getInitCWD(), "tests/config.example.yaml"));
+        config.readFromFile(path.resolve(process.cwd(), "docs/config.example.yaml"));
         assert.strictEqual(config.server.address, "");
         assert.strictEqual(config.server.port.toString(), "3836");
         assert.strictEqual(config.server.agora_endpoint.toString(), "http://127.0.0.1:2826");
@@ -64,7 +64,7 @@ describe('Test of Config', () => {
             database: "argument-db"
         };
         let config: Config = new Config(argument);
-        config.readFromFile(path.resolve(Utils.getInitCWD(), "tests/config.example.yaml"));
+        config.readFromFile(path.resolve(process.cwd(), "docs/config.example.yaml"));
         assert.strictEqual(config.server.address, "127.0.0.1");
         assert.strictEqual(config.server.port.toString(), "5000");
         assert.strictEqual(config.server.agora_endpoint.toString(), "http://127.0.0.1:4000/");
