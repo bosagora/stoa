@@ -86,7 +86,7 @@ export class Config implements IConfig
         let args = parser.parse_args();
 
         const configPath = path.resolve(Utils.getInitCWD(), args.config);
-        if (!fs.existsSync(args.config)) {
+        if (!fs.existsSync(configPath)) {
             console.error(`Config file '${configPath}' does not exists`);
             process.exit(1);
         }
