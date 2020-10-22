@@ -1,24 +1,16 @@
 # Stoa
-API server for Agora
+
+Stoa is an API server for [Agora](https://github.com/bpfkorea/agora).
+It needs to be paired to an Agora server, both by configuring the Agora server and by connecting to it from Stoa.
+This separation allows Agora to stay lightweight, and Stoa to expose high-level data and metrics,
+such as transaction aggregations, the list of validators, etc...
 
 # Build instructions
-Install any version of Node.js >= 12.18.0
 
-# Docker usage
-
-The easiest way to get stoa is to run `docker pull bpfk/stoa`.
-The `Dockerfile` lives at the root of this repository,
-
-For a test run,
-This requires the Agora config.yaml file in advance.
-try:
-```console
-docker run -p 127.0.0.1:3836:3836/tcp -v $(pwd)/config.yaml:/stoa/wd/config.yaml bpfk/stoa -- -c /stoa/wd/config.yaml
-```
-This will start a stoa & full node agora with the example config/agora_config file,
-and make the port locally accessible (See http://127.0.0.1:3836/).
+This application is based on Node.JS and requires Node.js >= 12.18.0.
 
 ## Building on Ubuntu
+
 ```sh
 $ sudo apt-get install nodejs
 $ sudo apt-get install npm
@@ -26,14 +18,21 @@ $ npm ci
 ```
 
 ## Building on MacOS
+
 ```sh
 $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 $ brew install node
 $ npm ci
-````
+```
 
-## How to start
-`npm start`: Run Stoa in the Node.js.
+# Usage
 
-## Stoa test
-`npm test`: Test run the *.test.ts files in the tests folder.
+## Docker image
+
+There is  an image automatically deployed on [Docker Hub](https://hub.docker.com/r/bpfk/stoa).
+It can be pulled with `docker pull bpfk/stoa`.
+
+## Manual
+
+One can use `npm start` to run Stoa, and access it on its default port (3836).
+Tests can be run via `npm test`, which executes the `*.test.ts` files in the `tests` folder.
