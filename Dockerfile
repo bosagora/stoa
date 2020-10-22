@@ -9,4 +9,4 @@ ADD . /stoa/bin/
 RUN npm ci --prefix /stoa/bin/
 
 # Starts a node process, which compiles TS and watches `src` for changes
-ENTRYPOINT /stoa/bin/docker/entrypoint.sh
+ENTRYPOINT [ "/stoa/bin/docker/entrypoint.sh" ]
