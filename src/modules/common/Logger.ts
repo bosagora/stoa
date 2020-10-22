@@ -14,7 +14,8 @@
 
 *******************************************************************************/
 
-import appRoot from 'app-root-path';
+import { Utils } from '../utils/Utils';
+
 import path from 'path';
 import winston from 'winston';
 
@@ -26,7 +27,7 @@ const logFormat = printf(({ level, message, label, timestamp }) => {
 
 export class Logger
 {
-    public static folder: string = path.resolve(appRoot.toString(), 'stoa/logs/');
+    public static folder: string = path.resolve(Utils.getInitCWD(), 'stoa/logs/');
 
     public static setFolder(folder: string)
     {

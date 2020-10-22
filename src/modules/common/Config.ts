@@ -11,7 +11,8 @@
 
 *******************************************************************************/
 
-import appRootPath from 'app-root-path';
+import { Utils } from '../utils/Utils';
+
 import {ArgumentParser} from 'argparse';
 import extend from 'extend';
 import fs from "fs";
@@ -62,7 +63,7 @@ export class Config implements IConfig
      */
     public readFromFile (config_file: string)
     {
-        let config_content = fs.readFileSync(path.resolve(appRootPath.toString(), config_file), 'utf8');
+        let config_content = fs.readFileSync(path.resolve(Utils.getInitCWD(), config_file), 'utf8');
         this.readFromString(config_content);
     }
 
@@ -97,7 +98,7 @@ export class Config implements IConfig
                 this.server.address = this.args.address;
 
             if ((this.args.database !== undefined) && (this.args.database !== ""))
-                this.database.filename = path.resolve(appRootPath.toString(), this.args.database);
+                this.database.filename = path.resolve(Utils.getInitCWD(), this.args.database);
         }
     }
 
@@ -212,7 +213,7 @@ export class DatabaseConfig implements IDatabaseConfig
     {
         let conf = extend(true, {}, DatabaseConfig.defaultValue());
         extend(true, conf, {filename: filename});
-        this.filename = path.resolve(appRootPath.toString(), conf.filename);
+        this.filename = path.resolve(Utils.getInitCWD(), conf.filename);
     }
 
     /**
@@ -223,7 +224,7 @@ export class DatabaseConfig implements IDatabaseConfig
     {
         let conf = extend(true, {}, DatabaseConfig.defaultValue());
         extend(true, conf, config);
-        this.filename = path.resolve(appRootPath.toString(), conf.filename);
+        this.filename = path.resolve(Utils.getInitCWD(), conf.filename);
     }
 
     /**
@@ -232,7 +233,7 @@ export class DatabaseConfig implements IDatabaseConfig
     public static defaultValue (): IDatabaseConfig
     {
         return {
-            filename: path.resolve(appRootPath.toString(), "stoa/data/Stoa.db")
+            filename: path.resolve(Utils.getInitCWD(), "stoa/data/Stoa.db")
         }
     }
 }
@@ -261,7 +262,7 @@ export class LoggingConfig implements ILoggingConfig
     {
         let conf = extend(true, {}, LoggingConfig.defaultValue());
         extend(true, conf, {folder: folder, level: level});
-        this.folder = path.resolve(appRootPath.toString(), conf.folder);
+        this.folder = path.resolve(Utils.getInitCWD(), conf.folder);
         this.level = conf.level;
     }
 
@@ -273,7 +274,7 @@ export class LoggingConfig implements ILoggingConfig
     {
         let conf = extend(true, {}, LoggingConfig.defaultValue());
         extend(true, conf, config);
-        this.folder = path.resolve(appRootPath.toString(), conf.folder);
+        this.folder = path.resolve(Utils.getInitCWD(), conf.folder);
         this.level = conf.level;
     }
 
@@ -283,7 +284,7 @@ export class LoggingConfig implements ILoggingConfig
     public static defaultValue (): ILoggingConfig
     {
         return {
-            folder: path.resolve(appRootPath.toString(), "stoa/logs/"),
+            folder: path.resolve(Utils.getInitCWD(), "stoa/logs/"),
             level: "info"
         }
     }
