@@ -46,13 +46,13 @@ describe('Test of Config', () => {
     it ('Test parsing the settings of a file', () => {
         let config: Config = new Config(null);
         config.readFromFile(path.resolve(process.cwd(), "docs/config.example.yaml"));
-        assert.strictEqual(config.server.address, "");
-        assert.strictEqual(config.server.port.toString(), "3836");
-        assert.strictEqual(config.server.agora_endpoint.toString(), "http://127.0.0.1:2826");
+        assert.strictEqual(config.server.address, "0.0.0.0");
+        assert.strictEqual(config.server.port.toString(), "4242");
+        assert.strictEqual(config.server.agora_endpoint.toString(), "http://127.1.1.1:4567");
 
-        assert.strictEqual(config.database.filename, path.resolve(Utils.getInitCWD(), "stoa/data/database"));
+        assert.strictEqual(config.database.filename, path.resolve(Utils.getInitCWD(), "data/main.db"));
 
-        assert.strictEqual(config.logging.folder, path.resolve(Utils.getInitCWD(), "stoa/logs/"));
+        assert.strictEqual(config.logging.folder, path.resolve(Utils.getInitCWD(), "logs/"));
         assert.strictEqual(config.logging.level, "info");
     });
 
