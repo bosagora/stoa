@@ -1,27 +1,26 @@
-
 ################################################################################
 ##                             Network interface                              ##
 ################################################################################
 server:
-  # Address to which we bind
-  address: ""      # default value
-  # Port on which we bind
-  port:    3836    # default value
+  # Address to which we bind (default: 127.0.0.1)
+  address: "0.0.0.0"
+  # Port on which we bind (default: 3836)
+  port:    4242
 
   # Endpoint of Agora
-  agora_endpoint: http://127.0.0.1:2826
+  agora_endpoint: http://127.1.1.1:4567
 
 ################################################################################
 ##                               Database options                             ##
 ################################################################################
 database:
-  filename: stoa/data/database
+  filename: data/main.db
 
 ################################################################################
 ##                               Logging options                              ##
 ################################################################################
 logging:
   # The name of the folder where the logs are stored.
-  folder: stoa/logs/
+  folder: logs/
   # Values: error, warn, info, http, verbose, debug, silly
   level: info
