@@ -114,14 +114,13 @@ export class Utils
 
     /**
      *  Gets the path to where the execution command was entered for this process.
-     *  If this value is not set, returns the root path of the app.
+     * This value must be set, otherwise the application will terminate.
      */
     public static getInitCWD (): string
     {
-        //  A type of process.env.INIT_CWD is string | undefined.
-        //  In order to use this, it is always necessary to make sure
-        //  that it is `undefined`.
-        //  `string` can be return only when it is not `undefined`.
+        //  The type of `process.env.INIT_CWD` is `string | undefined`.
+        //  In order to simply return `string`, it is necessary to make sure
+        //  that it is not `undefined` first.
         if (process.env.INIT_CWD === undefined)
             assert.fail("INIT_CWD is not defined.");
         else
