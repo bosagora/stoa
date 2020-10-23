@@ -228,6 +228,11 @@ export class LoggingConfig implements ILoggingConfig
     public level: string;
 
     /**
+     * Whether the console is enabled as well
+     */
+    public console: boolean;
+
+    /**
      * Constructor
      */
     constructor ()
@@ -235,6 +240,7 @@ export class LoggingConfig implements ILoggingConfig
         const defaults = LoggingConfig.defaultValue();
         this.folder = path.resolve(Utils.getInitCWD(), defaults.folder);
         this.level = defaults.level;
+        this.console = defaults.console;
     }
 
     /**
@@ -247,6 +253,8 @@ export class LoggingConfig implements ILoggingConfig
             this.folder = path.resolve(Utils.getInitCWD(), config.folder);
         if (config.level)
             this.level = config.level;
+        if (config.console !== undefined)
+            this.console = config.console;
     }
 
     /**
@@ -256,7 +264,8 @@ export class LoggingConfig implements ILoggingConfig
     {
         return {
             folder: path.resolve(Utils.getInitCWD(), "logs/"),
-            level: "info"
+            level: "info",
+            console: false
         }
     }
 }
@@ -307,6 +316,11 @@ export interface ILoggingConfig
      * The level of logging
      */
     level: string;
+
+    /**
+     * Whether the console is enabled as well
+     */
+    console: boolean;
 }
 
 /**
