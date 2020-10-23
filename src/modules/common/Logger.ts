@@ -34,7 +34,7 @@ export class Logger
         Logger.folder = folder;
     }
 
-    public static createLogger ()
+    public static createLogger () : winston.Logger
     {
         const options = {
             // write log file options
@@ -88,4 +88,4 @@ export class Logger
     }
 }
 
-export const logger = Logger.createLogger();
+export const logger : winston.Logger = Logger.createLogger();
