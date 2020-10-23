@@ -53,6 +53,6 @@ describe('Test of Config', () => {
         assert.strictEqual(config.database.filename, path.resolve(Utils.getInitCWD(), "data/main.db"));
 
         assert.strictEqual(config.logging.folder, path.resolve(Utils.getInitCWD(), "logs/"));
-        assert.strictEqual(config.logging.level, "info");
+        assert.strictEqual(config.logging.level, "http");
     });
 });

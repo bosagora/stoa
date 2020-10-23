@@ -23,6 +23,6 @@ logging:
   # The name of the folder where the logs are stored.
   folder: logs/
   # Values: error, warn, info, http, verbose, debug, silly
-  level: info
+  level: http
   # Default to false
   console: true
