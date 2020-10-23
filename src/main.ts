@@ -23,6 +23,8 @@ switch (process.env.NODE_ENV) {
     default:
         // Read the config file and potentially use both
         logger.add(Logger.defaultFileTransport(config.logging.folder));
+        if (config.logging.console)
+            logger.add(Logger.defaultConsoleTransport());
 }
 
 logger.info(`Agora endpoint: ${config.server.agora_endpoint.toString()}`);
