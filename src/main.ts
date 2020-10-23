@@ -8,8 +8,22 @@ import { URL } from 'url';
 // Create with the arguments and read from file
 let config = Config.createWithArgument();
 
-// Set the folder where the log is stored.
-Logger.setFolder(config.logging.folder);
+// Now configure the logger with the expected transports
+switch (process.env.NODE_ENV) {
+    case "test":
+        // Logger is silent, do nothingg
+        break;
+
+    case "development":
+        // Only use the console log
+        logger.add(Logger.defaultConsoleTransport());
+        break;
+
+    case "production":
+    default:
+        // Read the config file and potentially use both
+        logger.add(Logger.defaultFileTransport(config.logging.folder));
+}
 
 logger.info(`Agora endpoint: ${config.server.agora_endpoint.toString()}`);
 logger.info(`sqlite3 database filename: ${config.database.filename}`);
