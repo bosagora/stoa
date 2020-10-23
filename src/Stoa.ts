@@ -123,6 +123,11 @@ class Stoa extends WebService
             ? new Height(UInt64.fromString(req.query.height.toString()))
             : null;
 
+        if (height != null)
+            logger.http(`GET /validators height=${height.toString()}`);
+        else
+            logger.http(`GET /validators`);
+
         this.ledger_storage.getValidatorsAPI(height, null)
             .then((rows: any[]) => {
                 if (rows.length)
@@ -204,6 +209,11 @@ class Stoa extends WebService
 
         let address: string = String(req.params.address);
 
+        if (height != null)
+            logger.http(`GET /validator/${address} height=${height.toString()}`);
+        else
+            logger.http(`GET /validator/${address}}`);
+
         this.ledger_storage.getValidatorsAPI(height, address)
             .then((rows: any[]) => {
                 if (rows.length)
@@ -279,6 +289,8 @@ class Stoa extends WebService
             return;
         }
 
+        logger.http(`POST /blocks_externalized block=${body.block.toString()}`);
+
         // To do
         // For a more stable operating environment,
         // it would be necessary to consider organizing the pool
@@ -302,6 +314,8 @@ class Stoa extends WebService
             res.status(400).send("Missing 'preImage' object in body");
             return;
         }
+
+        logger.http(`POST /preimage_received preimage=${body.pre_image.toString()}`);
 
         // To do
         // For a more stable operating environment,
