@@ -26,9 +26,9 @@ class Stoa extends WebService
     public ledger_storage: LedgerStorage;
 
     /**
-     * The network endpoint to connect to Agora
+     * Network client to interact with Agora
      */
-    private readonly agora_endpoint: URL;
+    private readonly agora: AgoraClient;
 
     /**
      * Chain of pending store operations
@@ -56,8 +56,6 @@ class Stoa extends WebService
     {
         super(port, address);
 
-        this.agora_endpoint = agora_endpoint;
-
         // create blockStorage
         this.ledger_storage = new LedgerStorage(database_filename, (err: Error | null) =>
         {
@@ -75,6 +73,10 @@ class Stoa extends WebService
         BigInt.prototype.toJSON = function(key?: string) {
             return this.toString();
         }
+
+        // Do this last, as it is possible it will fail, and we only want failure
+        // to happen after we checked that our own state is correct.
+        this.agora = new AgoraClient(agora_endpoint);
     }
 
     /**
@@ -363,8 +365,7 @@ class Stoa extends WebService
 
                     if (max_blocks > 0)
                     {
-                        let agora_client = new AgoraClient(this.agora_endpoint);
-                        let blocks = await agora_client.getBlocksFrom(expected_height, max_blocks);
+                        let blocks = await this.agora.getBlocksFrom(expected_height, max_blocks);
 
                         // Save previous block
                         for (let elem of blocks)
