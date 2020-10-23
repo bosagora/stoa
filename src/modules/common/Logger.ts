@@ -27,43 +27,63 @@ const logFormat = printf(({ level, message, label, timestamp }) => {
 
 export class Logger
 {
-    public static folder: string = path.resolve(Utils.getInitCWD(), 'stoa/logs/');
-
-    public static setFolder(folder: string)
+    /**
+     * Create the 'default' file transport to be added to a logger
+     *
+     * Currently our setup only supports one logger and one file output.
+     * However, the log folder is configurable, hence the File transport
+     * cannot be setup before the config parsing is done.
+     *
+     * @param folderPath The absolute path to the folder in which to store the file
+     * @return A transport that can be passed to `logger.add`
+     */
+    public static defaultFileTransport (folderPath: string)
     {
-        Logger.folder = folder;
+        // write log file options
+        const options = {
+            filename: path.join(folderPath, 'Stoa.log'),
+            handleExceptions: true,
+            json: false,
+            maxsize: 10485760, // 10MB
+            maxFiles: 10,
+            colorize: false,
+            format: combine(
+                label({ label: 'Stoa' }),
+                timestamp(),
+                logFormat
+            )
+        };
+
+        return new winston.transports.File(options);
+    }
+
+    /**
+     * Create the 'default' console transport to be added to a logger
+     *
+     * Just like `defaultFileTransport`, this allows to delay logger configuration
+     * until after the configuration file parsing is done.
+     *
+     * @return A transport that can be passed to `logger.add`
+     */
+    public static defaultConsoleTransport ()
+    {
+        // console log mode options
+        const options = {
+            handleExceptions: true,
+            json: false,
+            colorize: false,
+            format: combine(
+                label({ label: 'Stoa' }),
+                timestamp(),
+                logFormat
+            )
+        };
+
+        return new winston.transports.Console(options);
     }
 
     public static create () : winston.Logger
     {
-        const options = {
-            // write log file options
-            file: {
-                filename: path.join(Logger.folder, 'Stoa.log'),
-                handleExceptions: true,
-                json: false,
-                maxsize: 10485760, // 10MB
-                maxFiles: 10,
-                colorize: false,
-                format: combine(
-                    label({ label: 'Stoa' }),
-                    timestamp(),
-                    logFormat
-                )
-            },
-            // console log mode options
-            console: {
-                handleExceptions: true,
-                json: false,
-                colorize: false,
-                format: combine(
-                    label({ label: 'Stoa' }),
-                    timestamp(),
-                    logFormat
-                )
-            }
-        };
-
         switch (process.env.NODE_ENV) {
             case "test":
                 return winston.createLogger({
@@ -72,17 +92,11 @@ export class Logger
             case "development":
                 return winston.createLogger({
                     level: "debug",
-                    transports: [
-                        new winston.transports.Console(options.console)
-                    ],
                 });
             case "production":
             default:
                 return winston.createLogger({
-                    level: "info",
-                    transports: [
-                        new winston.transports.File(options.file)
-                    ],
+                    level: "info"
                 });
         }
     }
