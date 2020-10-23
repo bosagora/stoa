@@ -229,15 +229,12 @@ export class LoggingConfig implements ILoggingConfig
 
     /**
      * Constructor
-     * @param folder The path of logging files
-     * @param level The level of logging
      */
-    constructor (folder?: string, level?: string)
+    constructor ()
     {
-        let conf = extend(true, {}, LoggingConfig.defaultValue());
-        extend(true, conf, {folder: folder, level: level});
-        this.folder = path.resolve(Utils.getInitCWD(), conf.folder);
-        this.level = conf.level;
+        const defaults = LoggingConfig.defaultValue();
+        this.folder = path.resolve(Utils.getInitCWD(), defaults.folder);
+        this.level = defaults.level;
     }
 
     /**
@@ -246,10 +243,10 @@ export class LoggingConfig implements ILoggingConfig
      */
     public readFromObject (config: ILoggingConfig)
     {
-        let conf = extend(true, {}, LoggingConfig.defaultValue());
-        extend(true, conf, config);
-        this.folder = path.resolve(Utils.getInitCWD(), conf.folder);
-        this.level = conf.level;
+        if (config.folder)
+            this.folder = path.resolve(Utils.getInitCWD(), config.folder);
+        if (config.level)
+            this.level = config.level;
     }
 
     /**
