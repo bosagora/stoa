@@ -26,6 +26,7 @@ switch (process.env.NODE_ENV) {
         if (config.logging.console)
             logger.add(Logger.defaultConsoleTransport());
 }
+logger.transports.forEach((tp) => { tp.level = config.logging.level });
 
 logger.info(`Agora endpoint: ${config.server.agora_endpoint.toString()}`);
 logger.info(`sqlite3 database filename: ${config.database.filename}`);
