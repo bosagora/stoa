@@ -112,79 +112,72 @@ class Stoa extends WebService
      */
     private getValidators (req: express.Request, res: express.Response)
     {
-        // TODO: No indentation was made to reduce change. Fix this next time.
-            if  (
-                    (req.query.height !== undefined) &&
-                    !Utils.isPositiveInteger(req.query.height.toString())
-                )
-            {
-                res.status(400).send("The Height value is not valid.");
-                return;
-            }
+        if ((req.query.height !== undefined) &&
+            !Utils.isPositiveInteger(req.query.height.toString()))
+        {
+            res.status(400).send("The Height value is not valid.");
+            return;
+        }
 
-            let height = (req.query.height !== undefined)
-                ? new Height(UInt64.fromString(req.query.height.toString()))
-                : null;
+        let height = (req.query.height !== undefined)
+            ? new Height(UInt64.fromString(req.query.height.toString()))
+            : null;
 
-            this.ledger_storage.getValidatorsAPI(height, null)
-                .then((rows: any[]) =>
+        this.ledger_storage.getValidatorsAPI(height, null)
+            .then((rows: any[]) => {
+                if (rows.length)
                 {
-                    if (rows.length)
-                    {
-                        let out_put:Array<ValidatorData> = new Array<ValidatorData>();
+                    let out_put:Array<ValidatorData> = new Array<ValidatorData>();
 
-                        for (const row of rows)
+                    for (const row of rows)
+                    {
+                        let preimage_hash: Buffer = row.preimage_hash;
+                        let preimage_distance: number = row.preimage_distance;
+                        let target_height: UInt64 = UInt64.fromNumber(row.height);
+                        let result_preimage_hash = new Hash();
+                        let start_index: UInt64 = UInt64.add(UInt64.fromNumber(row.enrolled_at), 1);
+
+                        // Hashing preImage
+                        if ((UInt64.compare(target_height, start_index) >= 0) &&
+                            (UInt64.compare(UInt64.add(start_index, row.preimage_distance), target_height) >= 0))
                         {
-                            let preimage_hash: Buffer = row.preimage_hash;
-                            let preimage_distance: number = row.preimage_distance;
-                            let target_height: UInt64 = UInt64.fromNumber(row.height);
-                            let result_preimage_hash = new Hash();
-                            let start_index: UInt64 = UInt64.add(UInt64.fromNumber(row.enrolled_at), 1);
-
-                            // Hashing preImage
-                            if (
-                                (UInt64.compare(target_height, start_index) >= 0) &&
-                                (UInt64.compare(UInt64.add(start_index, row.preimage_distance), target_height) >= 0)
-                            )
+                            result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
+                            let count = Number(Utils.UInt64ToString(UInt64.sub(UInt64.add(start_index, row.preimage_distance), target_height)));
+                            for (let i = 0; i < count; i++)
                             {
-                                result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                                let count = Number(Utils.UInt64ToString(UInt64.sub(UInt64.add(start_index, row.preimage_distance), target_height)));
-                                for (let i = 0; i < count; i++)
-                                {
-                                    result_preimage_hash = hash(result_preimage_hash.data);
-                                    preimage_distance--;
-                                }
+                                result_preimage_hash = hash(result_preimage_hash.data);
+                                preimage_distance--;
                             }
-                            else
-                            {
-                                preimage_distance = NaN;
-                                result_preimage_hash = Hash.NULL;
-                            }
-
-                            let preimage: IPreimage =
-                                {
-                                    distance: preimage_distance,
-                                    hash: result_preimage_hash.toString()
-                                } as IPreimage;
-
-                            let validator: ValidatorData =
-                                new ValidatorData(row.address, UInt64.fromNumber(row.enrolled_at),
-                                    Hash.createFromBinary(row.stake, Endian.Little).toString(), preimage);
-                            out_put.push(validator);
                         }
-                        res.status(200).send(Utils.toJson(out_put));
+                        else
+                        {
+                            preimage_distance = NaN;
+                            result_preimage_hash = Hash.NULL;
+                        }
+
+                        let preimage: IPreimage = {
+                            distance: preimage_distance,
+                            hash: result_preimage_hash.toString()
+                        } as IPreimage;
+
+                        let validator: ValidatorData =
+                            new ValidatorData(row.address, UInt64.fromNumber(row.enrolled_at),
+                                              Hash.createFromBinary(row.stake, Endian.Little).toString(),
+                                              preimage);
+                        out_put.push(validator);
                     }
-                    else
-                    {
-                        res.status(204).send();
-                    }
-                })
-                .catch((err) =>
-                {
-                    logger.error("Failed to data lookup to the DB: " + err);
-                    res.status(500).send("Failed to data lookup");
+                    res.status(200).send(Utils.toJson(out_put));
                 }
-            );
+                else
+                {
+                    res.status(204).send();
+                }
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err);
+                res.status(500).send("Failed to data lookup");
+            }
+        );
     }
 
     /**
@@ -198,81 +191,74 @@ class Stoa extends WebService
      */
     private getValidator (req: express.Request, res: express.Response)
     {
-        // TODO: No indentation was made to reduce change. Fix this next time.
-            if  (
-                (req.query.height !== undefined) &&
-                !Utils.isPositiveInteger(req.query.height.toString())
-            )
-            {
-                res.status(400).send("The Height value is not valid.");
-                return;
-            }
+        if ((req.query.height !== undefined) &&
+            !Utils.isPositiveInteger(req.query.height.toString()))
+        {
+            res.status(400).send("The Height value is not valid.");
+            return;
+        }
 
-            let height = (req.query.height !== undefined)
-                ? new Height(UInt64.fromString(req.query.height.toString()))
-                : null;
+        let height = (req.query.height !== undefined)
+            ? new Height(UInt64.fromString(req.query.height.toString()))
+            : null;
 
-            let address: string = String(req.params.address);
+        let address: string = String(req.params.address);
 
-            this.ledger_storage.getValidatorsAPI(height, address)
-                .then((rows: any[]) =>
+        this.ledger_storage.getValidatorsAPI(height, address)
+            .then((rows: any[]) => {
+                if (rows.length)
                 {
-                    if (rows.length)
-                    {
-                        let out_put:Array<ValidatorData> = new Array<ValidatorData>();
+                    let out_put:Array<ValidatorData> = new Array<ValidatorData>();
 
-                        for (const row of rows)
+                    for (const row of rows)
+                    {
+                        let preimage_hash: Buffer = row.preimage_hash;
+                        let preimage_distance: number = row.preimage_distance;
+                        let target_height: UInt64 = UInt64.fromNumber(row.height);
+                        let result_preimage_hash = new Hash();
+                        let start_index: UInt64 = UInt64.add(UInt64.fromNumber(row.enrolled_at), 1);
+
+                        // Hashing preImage
+                        if ((UInt64.compare(target_height, start_index) >= 0) &&
+                            (UInt64.compare(UInt64.add(start_index, row.preimage_distance), target_height) >= 0))
                         {
-                            let preimage_hash: Buffer = row.preimage_hash;
-                            let preimage_distance: number = row.preimage_distance;
-                            let target_height: UInt64 = UInt64.fromNumber(row.height);
-                            let result_preimage_hash = new Hash();
-                            let start_index: UInt64 = UInt64.add(UInt64.fromNumber(row.enrolled_at), 1);
-
-                            // Hashing preImage
-                            if (
-                                (UInt64.compare(target_height, start_index) >= 0) &&
-                                (UInt64.compare(UInt64.add(start_index, row.preimage_distance), target_height) >= 0)
-                            )
+                            result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
+                            let count = Number(Utils.UInt64ToString(UInt64.sub(UInt64.add(start_index, row.preimage_distance), target_height)));
+                            for (let i = 0; i < count; i++)
                             {
-                                result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                                let count = Number(Utils.UInt64ToString(UInt64.sub(UInt64.add(start_index, row.preimage_distance), target_height)));
-                                for (let i = 0; i < count; i++)
-                                {
-                                    result_preimage_hash = hash(result_preimage_hash.data);
-                                    preimage_distance--;
-                                }
+                                result_preimage_hash = hash(result_preimage_hash.data);
+                                preimage_distance--;
                             }
-                            else
-                            {
-                                preimage_distance = NaN;
-                                result_preimage_hash = Hash.NULL;
-                            }
-
-                            let preimage: IPreimage =
-                                {
-                                    distance: preimage_distance,
-                                    hash: result_preimage_hash.toString()
-                                } as IPreimage;
-
-                            let validator: ValidatorData =
-                                new ValidatorData(row.address, UInt64.fromNumber(row.enrolled_at),
-                                    Hash.createFromBinary(row.stake, Endian.Little).toString(), preimage);
-                            out_put.push(validator);
                         }
-                        res.status(200).send(Utils.toJson(out_put));
+                        else
+                        {
+                            preimage_distance = NaN;
+                            result_preimage_hash = Hash.NULL;
+                        }
+
+                        let preimage: IPreimage = {
+                            distance: preimage_distance,
+                            hash: result_preimage_hash.toString()
+                        } as IPreimage;
+
+                        let validator: ValidatorData =
+                            new ValidatorData(row.address, UInt64.fromNumber(row.enrolled_at),
+                                              Hash.createFromBinary(row.stake, Endian.Little).toString(),
+                                              preimage);
+                        out_put.push(validator);
                     }
-                    else
-                    {
-                        res.status(204).send();
-                    }
-                })
-                .catch((err) =>
-                {
-                    logger.error("Failed to data lookup to the DB: " + err);
-                    res.status(500).send("Failed to data lookup");
+                    res.status(200).send(Utils.toJson(out_put));
                 }
-            );
+                else
+                {
+                    res.status(204).send();
+                }
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err);
+                res.status(500).send("Failed to data lookup");
+            }
+        );
     }
 
     /**
@@ -284,23 +270,22 @@ class Stoa extends WebService
      */
     private putBlock (req: express.Request, res: express.Response)
     {
-        // TODO: No indentation was made to reduce change. Fix this next time.
-            // Change the number to a string to preserve the precision of UInt64
-            let text = req.body.toString().replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3");
-            let body = JSON.parse(text);
-            if (body.block === undefined)
-            {
-                res.status(400).send("Missing 'block' object in body");
-                return;
-            }
+        // Change the number to a string to preserve the precision of UInt64
+        let text = req.body.toString().replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3");
+        let body = JSON.parse(text);
+        if (body.block === undefined)
+        {
+            res.status(400).send("Missing 'block' object in body");
+            return;
+        }
 
-            // To do
-            // For a more stable operating environment,
-            // it would be necessary to consider organizing the pool
-            // using the database instead of the array.
-            this.pool.push({type: "block", data: body.block});
+        // To do
+        // For a more stable operating environment,
+        // it would be necessary to consider organizing the pool
+        // using the database instead of the array.
+        this.pool.push({type: "block", data: body.block});
 
-            res.status(200).send();
+        res.status(200).send();
     }
 
     /**
@@ -311,21 +296,20 @@ class Stoa extends WebService
      */
     private putPreImage (req: express.Request, res: express.Response)
     {
-        // TODO: No indentation was made to reduce change. Fix this next time.
-            let body = JSON.parse(req.body.toString());
-            if (body.pre_image === undefined)
-            {
-                res.status(400).send("Missing 'preImage' object in body");
-                return;
-            }
+        let body = JSON.parse(req.body.toString());
+        if (body.pre_image === undefined)
+        {
+            res.status(400).send("Missing 'preImage' object in body");
+            return;
+        }
 
-            // To do
-            // For a more stable operating environment,
-            // it would be necessary to consider organizing the pool
-            // using the database instead of the array.
-            this.pool.push({type: "pre_image", data: body.pre_image});
+        // To do
+        // For a more stable operating environment,
+        // it would be necessary to consider organizing the pool
+        // using the database instead of the array.
+        this.pool.push({type: "pre_image", data: body.pre_image});
 
-            res.status(200).send();
+        res.status(200).send();
     }
 
     /**
@@ -334,10 +318,8 @@ class Stoa extends WebService
      */
     private static getBlockHeight(block: any): Height
     {
-        if  (
-            (block.header === undefined) ||
-            (block.header.height === undefined)
-        )
+        if ((block.header === undefined) ||
+            (block.header.height === undefined))
         {
             throw Error("Not found block height in JSON Block");
         }
