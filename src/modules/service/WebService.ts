@@ -86,14 +86,10 @@ export class WebService
             }
         });
 
-        this.server.on('listening', () =>
-        {
-            logger.info(`Listening to requests on: ${this.address}:${this.port}`);
-        });
-
         // Listen on provided this.port on this.address.
         this.server.listen(this.port, this.address, () =>
         {
+            logger.info(`Listening to requests on: ${this.address}:${this.port}`);
             if (callback !== undefined)
                 callback();
         });
