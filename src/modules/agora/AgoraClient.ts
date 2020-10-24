@@ -40,7 +40,7 @@ export class AgoraClient
     {
         this.endpoint = endpoint;
         this.client = axios.create();
-        this.client.defaults.timeout = 10000;
+        this.client.defaults.timeout = 2000;
     }
 
     /**
