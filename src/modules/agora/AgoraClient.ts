@@ -18,9 +18,32 @@ import URI from 'urijs';
 import { URL } from 'url';
 
 /**
+ * The interface exposed by a full node
+ *
+ * See_Also: https://github.com/bpfkorea/agora/blob/v0.x.x/source/agora/api/FullNode.d
+ */
+export interface FullNodeAPI
+{
+    // getNodeInfo () : NodeInfo;
+    // getLocalTime () : bigint;
+
+    // getBlockHeight () : Height;
+    getBlocksFrom (block_height : Height, max_blocks : number) : Promise<any[]>;
+    // getMerklePath (block_height : Height, hash : Hash) : Hash[];
+    // hasTransactionHash (tx : Hash) : boolean;
+    // putTransaction (Transaction tx) : void;
+
+    // enrollValidator (enroll : Enrollment) : void;
+    // getEnrollment (enroll_hash : Hash) : Enrollment;
+    // getPreimage (enroll_key : Hash) : PreImageInfo;
+    // receivePreimage (preimage : PreImageInfo) : void;
+}
+
+
+/**
  * The class that recovers data
  */
-export class AgoraClient
+export class AgoraClient implements FullNodeAPI
 {
     /**
      * The network endpoint to connect to Agora
@@ -51,7 +74,7 @@ export class AgoraClient
      * @param block_height - The height of the block
      * @param max_blocks - The maximum number of block to request
      */
-    public requestBlocks (block_height: Height, max_blocks: number): Promise<Array<any>>
+    public getBlocksFrom (block_height: Height, max_blocks: number): Promise<Array<any>>
     {
         return new Promise<Array<any>>((resolve, reject) =>
         {

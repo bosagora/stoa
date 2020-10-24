@@ -365,7 +365,7 @@ class Stoa extends WebService
                     if (max_blocks > 0)
                     {
                         let agora_client = new AgoraClient(this.agora_endpoint);
-                        let blocks = await agora_client.requestBlocks(expected_height, max_blocks);
+                        let blocks = await agora_client.getBlocksFrom(expected_height, max_blocks);
 
                         // Save previous block
                         for (let elem of blocks)
