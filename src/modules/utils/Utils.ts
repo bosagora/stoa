@@ -118,12 +118,14 @@ export class Utils
      */
     public static getInitCWD (): string
     {
-        //  The type of `process.env.INIT_CWD` is `string | undefined`.
-        //  In order to simply return `string`, it is necessary to make sure
-        //  that it is not `undefined` first.
-        if (process.env.INIT_CWD === undefined)
-            assert.fail("INIT_CWD is not defined.");
-        else
+        // Get the working directory the user was in when the process was started,
+        // as opposed to the `cwd` exposed by node which is the program's path.
+        // Try to use `INIT_CWD` which is provided by npm, and fall back to
+        // `PWD` otherwise.
+        // See also: https://github.com/npm/cli/issues/2033
+        if (process.env.INIT_CWD !== undefined)
             return process.env.INIT_CWD;
+        assert.ok(process.env.PWD !== undefined, "Neither `INIT_CWD` nor `PWD` are defined");
+        return process.env.PWD;
     }
 }
