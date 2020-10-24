@@ -39,8 +39,11 @@ export class AgoraClient
     constructor (endpoint: URL)
     {
         this.endpoint = endpoint;
-        this.client = axios.create();
-        this.client.defaults.timeout = 2000;
+        this.client = axios.create({
+            baseURL: endpoint.toString(),
+            // Timeout are in ms, so 2s timeout
+            timeout: 2000,
+        });
     }
 
     /**
@@ -52,8 +55,7 @@ export class AgoraClient
     {
         return new Promise<Array<any>>((resolve, reject) =>
         {
-            let uri = URI(this.endpoint)
-                .directory("blocks_from")
+            let uri = URI("/blocks_from")
                 .addSearch("block_height", block_height.toString())
                 .addSearch("max_blocks", max_blocks);
 
