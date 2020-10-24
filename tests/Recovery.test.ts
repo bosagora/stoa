@@ -185,13 +185,13 @@ describe ('Test of Recovery', () =>
         stoa_server.stop(doneIt);
     });
 
-    it ('Test a function requestBlocks', async () =>
+    it ('Test `getBlocksFrom`', async () =>
     {
         let agora_client = new AgoraClient(agora_endpoint);
 
         await assert.doesNotReject(async () =>
         {
-            await agora_client.requestBlocks(new Height(UInt64.fromNumber(1)), 3)
+            await agora_client.getBlocksFrom(new Height(UInt64.fromNumber(1)), 3)
                 .then((response) =>
                 {
                     // The number of blocks is three.
@@ -213,13 +213,13 @@ describe ('Test of Recovery', () =>
         });
     });
 
-    it ('Test a function requestBlocks using async, await', (doneIt: () => void) =>
+    it ('Test a `getBlocksFrom` using async, await', (doneIt: () => void) =>
     {
         let agora_client = new AgoraClient(agora_endpoint);
 
         assert.doesNotThrow(async () =>
         {
-            let response = await agora_client.requestBlocks(new Height(UInt64.fromNumber(8)), 3);
+            let response = await agora_client.getBlocksFrom(new Height(UInt64.fromNumber(8)), 3);
             // The number of blocks is two.
             // Because the total number is 10. The last block height is 9.
             assert.strictEqual(response.length, 2);
