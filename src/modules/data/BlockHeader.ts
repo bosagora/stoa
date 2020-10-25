@@ -77,7 +77,7 @@ export class BlockHeader
         if (height !== undefined)
             this.height = height;
         else
-            this.height = new Height();
+            this.height = new Height(0n);
 
         if (merkle_root !== undefined)
             this.merkle_root = merkle_root;

@@ -30,12 +30,12 @@ export class Height
      * Construct
      * @param value - The block height
      */
-    constructor (value?: UInt64)
+    constructor (value: bigint | string | UInt64)
     {
-        if (value !== undefined)
+        if (value instanceof UInt64)
             this.value = new UInt64(value);
         else
-            this.value = UInt64.fromNumber(0);
+            this.value = UInt64.fromString(value.toString());
     }
 
     /**
