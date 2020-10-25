@@ -180,9 +180,8 @@ describe ('Test of Stoa API Server', () =>
                 "0xba665738077b352ed93c2d30882bd0505cf1147ed7610fd43d8bfe72cb29eee3b9b95a81bb3550c23dfa811bde4a7290d1dba85097b064de3557878fe62fd6ab");
 
             let block = new Block();
-            let height = new Height();
+            let height = new Height(1008n);
             let enrollment = new Enrollment();
-            height.value = UInt64.fromNumber(1008);
             block.header.height = height;
 
             // re-enrollment
