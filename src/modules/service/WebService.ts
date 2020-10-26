@@ -59,7 +59,8 @@ export class WebService
 
     /**
      * Start web server
-     * @param callback
+     *
+     * @param callback An optional callback to register as listener
      */
     public start (callback?: Function)
     {
