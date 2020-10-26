@@ -69,37 +69,32 @@ class Stoa extends WebService
         {
             return this.task();
         }, 10);
-
-        this.prepareMiddleware();
-        this.prepareRoutes();
     }
 
-    private prepareMiddleware ()
+    /**
+     * Setup and start the server
+     *
+     * @param callback An optional callback to register as listener
+     */
+    public start (callback?: Function)
     {
+        // Prepare middleware
+
         // parse application/x-www-form-urlencoded
         this.app.use(bodyParser.urlencoded({extended: false}));
-
         this.app.use(bodyParser.raw({type: "*/*"}));
-
         this.app.use(cors(cors_options));
-
         // enable pre-flight
         this.app.options('*', cors(cors_options));
-    }
 
-    private prepareRoutes ()
-    {
-        // GET /validators
+        // Prepare routes
         this.app.get("/validators", this.getValidators.bind(this));
-
-        // GET /validator/:address
         this.app.get("/validator/:address", this.getValidator.bind(this));
-
-        // POST /block_externalized
         this.app.post("/block_externalized", this.putBlock.bind(this));
-
-        // POST /preimage_received
         this.app.post("/preimage_received", this.putPreImage.bind(this));
+
+        // Start the server
+        super.start(callback);
     }
 
     /**
