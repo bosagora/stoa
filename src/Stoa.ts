@@ -99,8 +99,18 @@ class Stoa extends WebService
         this.app.post("/block_externalized", this.putBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
 
-        // Start the server
-        return super.start();
+        // Start the server once we can establish a connection to Agora
+        return this.agora.getBlockHeight()
+            .then(
+                (res) => {
+                    logger.info(`Connected to Agora, block height is ${res.toString()}`);
+                    return super.start();
+                },
+                (err) => {
+                    logger.error(`Error: Could not connect to Agora node: ${err.toString()}`);
+                    process.exit(1);
+                }
+            );
     }
 
     /**
