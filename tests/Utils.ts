@@ -66,6 +66,12 @@ export class TestAgora
 
         this.blocks = blocks;
 
+        this.agora.get("/block_height",
+            (req: express.Request, res: express.Response) =>
+        {
+            res.status(200).send(JSON.stringify(Number(this.blocks.length - 1)));
+        });
+
         this.agora.get("/blocks_from",
             (req: express.Request, res: express.Response) =>
         {

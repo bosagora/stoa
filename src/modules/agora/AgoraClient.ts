@@ -27,7 +27,7 @@ export interface FullNodeAPI
     // getNodeInfo (): NodeInfo;
     // getLocalTime (): bigint;
 
-    // getBlockHeight (): Height;
+    getBlockHeight (): Promise<Height>;
     getBlocksFrom (block_height: Height, max_blocks: number): Promise<any[]>;
     // getMerklePath (block_height: Height, hash: Hash): Hash[];
     // hasTransactionHash (tx: Hash): boolean;
@@ -67,6 +67,15 @@ export class AgoraClient implements FullNodeAPI
             // Timeout are in ms, so 2s timeout
             timeout: 2000,
         });
+    }
+
+    /**
+     * Request an Agora node's current block height.
+     */
+    public getBlockHeight (): Promise<Height>
+    {
+        return this.client.get(URI("/block_height").toString())
+            .then((res) => { return new Height(res.data); });
     }
 
     /**
