@@ -115,7 +115,7 @@ class Stoa extends WebService
         }
 
         let height = (req.query.height !== undefined)
-            ? new Height(UInt64.fromString(req.query.height.toString()))
+            ? new Height(req.query.height.toString())
             : null;
 
         if (height != null)
@@ -199,7 +199,7 @@ class Stoa extends WebService
         }
 
         let height = (req.query.height !== undefined)
-            ? new Height(UInt64.fromString(req.query.height.toString()))
+            ? new Height(req.query.height.toString())
             : null;
 
         let address: string = String(req.params.address);
@@ -333,7 +333,7 @@ class Stoa extends WebService
             throw Error("Not found block height in JSON Block");
         }
 
-        return new Height(UInt64.fromString(block.header.height));
+        return new Height(block.header.height);
     };
 
     /**

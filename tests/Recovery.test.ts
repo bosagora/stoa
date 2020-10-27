@@ -124,7 +124,7 @@ class TestStoa extends Stoa
                     return;
                 }
 
-                let block_height = new Height(UInt64.fromString(req.query.block_height.toString()));
+                let block_height = new Height(req.query.block_height.toString());
 
                 try
                 {
@@ -191,7 +191,7 @@ describe ('Test of Recovery', () =>
 
         await assert.doesNotReject(async () =>
         {
-            await agora_client.getBlocksFrom(new Height(UInt64.fromNumber(1)), 3)
+            await agora_client.getBlocksFrom(new Height(1n), 3)
                 .then((response) =>
                 {
                     // The number of blocks is three.
@@ -219,7 +219,7 @@ describe ('Test of Recovery', () =>
 
         assert.doesNotThrow(async () =>
         {
-            let response = await agora_client.getBlocksFrom(new Height(UInt64.fromNumber(8)), 3);
+            let response = await agora_client.getBlocksFrom(new Height(8n), 3);
             // The number of blocks is two.
             // Because the total number is 10. The last block height is 9.
             assert.strictEqual(response.length, 2);

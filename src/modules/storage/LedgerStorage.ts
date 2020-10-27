@@ -19,8 +19,6 @@ import { Endian } from '../utils/buffer';
 import { Storages } from './Storages';
 import { Utils } from '../utils/Utils';
 
-import { UInt64 } from 'spu-integer-math';
-
 /**
  * The class that insert and read the ledger into the database.
  */
@@ -678,11 +676,11 @@ export class LedgerStorage extends Storages
                     if ((rows.length > 0) && (rows[0].value !== undefined) &&
                         Utils.isPositiveInteger(rows[0].value))
                     {
-                        resolve(new Height(UInt64.add(UInt64.fromString(rows[0].value), 1)));
+                        resolve(new Height(BigInt(rows[0].value) + 1n));
                     }
                     else
                     {
-                        resolve(new Height(UInt64.fromNumber(0)));
+                        resolve(new Height(0n));
                     }
                 })
                 .catch((err) =>

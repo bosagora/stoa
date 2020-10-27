@@ -17,7 +17,6 @@ import { Block, Hash, Height } from '../src/modules/data';
 import { PreImageInfo } from '../src/modules/data';
 import { sample_data_raw, sample_preImageInfo } from "./SampleData.test";
 import { Endian } from "../src/modules/utils/buffer";
-import { UInt64 } from "spu-integer-math";
 
 describe ('Test ledger storage and inquiry function.', () =>
 {
@@ -61,7 +60,7 @@ describe ('Test ledger storage and inquiry function.', () =>
             .then(() =>
             {
                 let height_value = 1;
-                let height = new Height(UInt64.fromNumber(height_value));
+                let height = new Height(BigInt(height_value));
                 ledger_storage.getBlocks(height)
                     .then((rows: any[]) =>
                     {
@@ -87,7 +86,7 @@ describe ('Test ledger storage and inquiry function.', () =>
 
     it ('Test for transaction', (doneIt: () => void) =>
     {
-        ledger_storage.getTransactions(new Height(UInt64.fromNumber(0)))
+        ledger_storage.getTransactions(new Height(0n))
             .then((rows3: any[]) =>
             {
                 assert.strictEqual(rows3.length, 4);
@@ -95,7 +94,7 @@ describe ('Test ledger storage and inquiry function.', () =>
                     '0x3a245017fee266f2aeacaa0ca11171b5825d34814bf1e33fae76cca50751e5c' +
                     'fb010896f009971a8748a1d3720e33404f5a999ae224b54f5d5c1ffa345c046f7');
 
-                ledger_storage.getTxInputs(new Height(UInt64.fromNumber(1)), 0)
+                ledger_storage.getTxInputs(new Height(1n), 0)
                     .then((rows4: any[]) =>
                     {
                         assert.strictEqual(rows4.length, 1);
@@ -103,7 +102,7 @@ describe ('Test ledger storage and inquiry function.', () =>
                             '0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd223671' +
                             '3dc369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73');
 
-                        ledger_storage.getTxOutputs(new Height(UInt64.fromNumber(0)), 1)
+                        ledger_storage.getTxOutputs(new Height(0n), 1)
                             .then((rows5: any[]) =>
                             {
                                 assert.strictEqual(rows5.length, 8);
@@ -139,7 +138,7 @@ describe ('Test ledger storage and inquiry function.', () =>
     it ('Test for enrollment', (doneIt: () => void) =>
     {
         let height_value = 0;
-        let height = new Height(UInt64.fromNumber(height_value));
+        let height = new Height(BigInt(height_value));
         ledger_storage.getEnrollments(height)
             .then((rows: any[]) =>
             {
@@ -177,14 +176,14 @@ describe ('Test ledger storage and inquiry function.', () =>
     it ('Test for validator', (doneIt: () => void) =>
     {
         let address: string = 'GA3DMXTREDC4AIUTHRFIXCKWKF7BDIXRWM2KLV74OPK2OKDM2VJ235GN';
-        ledger_storage.getValidatorsAPI(new Height(UInt64.fromNumber(1)), null)
+        ledger_storage.getValidatorsAPI(new Height(1n), null)
             .then((rows: any[]) =>
             {
                 assert.strictEqual(rows[0].address, address);
                 assert.strictEqual(rows[0].enrolled_at, 0);
                 assert.strictEqual(rows[0].distance, undefined);
 
-                ledger_storage.getValidatorsAPI(new Height(UInt64.fromNumber(1)), address)
+                ledger_storage.getValidatorsAPI(new Height(1n), address)
                     .then((rows: any[]) =>
                     {
                         assert.strictEqual(rows.length, 1);
@@ -289,11 +288,11 @@ describe ('Test for storing block data in the database', () =>
                     " enrollments.block_height, enrollments.enrollment_index"
             });
 
-        let rows0: any[] = await ledger_storage.getBlocks(new Height(UInt64.fromNumber(0)));
+        let rows0: any[] = await ledger_storage.getBlocks(new Height(0n));
         assert.strictEqual(rows0.length, 0);
 
         await ledger_storage.putTransactions(block);
-        let rows1: any[] = await ledger_storage.getTransactions(new Height(UInt64.fromNumber(0)));
+        let rows1: any[] = await ledger_storage.getTransactions(new Height(0n));
         assert.strictEqual(rows1.length, 4);
     });
 
@@ -306,7 +305,7 @@ describe ('Test for storing block data in the database', () =>
         await ledger_storage.putBlocks(sample_data0);
 
         // The block is read from the database.
-        let rows = await ledger_storage.getBlocks(new Height(UInt64.fromNumber(0)));
+        let rows = await ledger_storage.getBlocks(new Height(0n));
         if (rows.length > 0)
         {
             // Check that the `prev_block` of block1 is the same as the hash value of the database.
@@ -320,7 +319,7 @@ describe ('Test for storing block data in the database', () =>
 describe ('Tests that sending a pre-image', () =>
 {
     let ledger_storage: LedgerStorage;
-    let height = new Height(UInt64.fromNumber(0));
+    let height = new Height(0n);
 
     before ('Start sending a pre-image', (doneIt: () => void) =>
     {
