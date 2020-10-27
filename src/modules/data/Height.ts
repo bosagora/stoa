@@ -64,4 +64,15 @@ export class Height
     {
         return Utils.UInt64ToString(this.value);
     }
+
+    /**
+     * Converts this object to its JSON representation
+     *
+     * Use `string` as primitive types, as JS is only precise up to
+     * `2 ** 53 - 1` but we can get numbers up to `2 ** 64 - 1`.
+     */
+    public toJSON (key?: string): string
+    {
+        return this.toString();
+    }
 }

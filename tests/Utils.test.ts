@@ -42,7 +42,7 @@ describe ('Test of isInteger, isPositiveInteger, isNegativeInteger', () =>
     });
 });
 
-describe ('Test of toJson', () =>
+describe ('Test for JSON serialization', () =>
 {
     it ('Test that `BigInt` serializes to JSON', () =>
     {
@@ -52,17 +52,17 @@ describe ('Test of toJson', () =>
         assert.strictEqual(json2, '{"value":"42"}');
     });
 
-    it ('We can not get the desired result when UInt64 is used in `JSON.stringify`', () =>
+    it ('Test that `JSON.stringify` correctly picks up `Height.toJSON`', () =>
     {
         let height = new Height(45n);
         let json = JSON.stringify(height);
-        assert.strictEqual(json, '{"value":{"hi":0,"lo":45}}');
+        assert.strictEqual(json, '"45"');
     });
 
-    it ('It works well when UInt64 is used in `toJson`', () =>
+    it ('Test that `Height.toJSON` works within an object', () =>
     {
         let height = new Height(45n);
-        let json = Utils.toJson(height);
-        assert.strictEqual(json, '{"value":45}');
+        let json = JSON.stringify({ value: height });
+        assert.strictEqual(json, '{"value":"45"}');
     });
 });
