@@ -205,7 +205,7 @@ describe ('Test of Stoa API Server', () =>
             assert.strictEqual(response.data.length, 3);
 
             assert.strictEqual(response.data[0].stake, enrollment.utxo_key.toString());
-            assert.strictEqual(response.data[0].enrolled_at, 0);
+            assert.strictEqual(response.data[0].enrolled_at, "0");
 
             let uri7 = URI(host)
             .port(port)
@@ -216,7 +216,7 @@ describe ('Test of Stoa API Server', () =>
             assert.strictEqual(response.data.length, 1);
 
             assert.strictEqual(response.data[0].stake, enrollment.utxo_key.toString());
-            assert.strictEqual(response.data[0].enrolled_at, 1008);
+            assert.strictEqual(response.data[0].enrolled_at, "1008");
 
             let uri8 = URI(host)
             .port(port)
@@ -227,7 +227,7 @@ describe ('Test of Stoa API Server', () =>
             assert.strictEqual(response.data.length, 1);
 
             assert.strictEqual(response.data[0].stake, enrollment.utxo_key.toString());
-            assert.strictEqual(response.data[0].enrolled_at, 1008);
+            assert.strictEqual(response.data[0].enrolled_at, "1008");
 
             let uri9 = URI(host)
             .port(port)

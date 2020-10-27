@@ -173,7 +173,7 @@ class Stoa extends WebService
                         } as IPreimage;
 
                         let validator: ValidatorData =
-                            new ValidatorData(row.address, UInt64.fromNumber(row.enrolled_at),
+                            new ValidatorData(row.address, new Height(BigInt(row.enrolled_at)),
                                               Hash.createFromBinary(row.stake, Endian.Little).toString(),
                                               preimage);
                         out_put.push(validator);
@@ -259,7 +259,7 @@ class Stoa extends WebService
                         } as IPreimage;
 
                         let validator: ValidatorData =
-                            new ValidatorData(row.address, UInt64.fromNumber(row.enrolled_at),
+                            new ValidatorData(row.address, new Height(BigInt(row.enrolled_at)),
                                               Hash.createFromBinary(row.stake, Endian.Little).toString(),
                                               preimage);
                         out_put.push(validator);

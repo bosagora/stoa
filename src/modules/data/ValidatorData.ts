@@ -1,8 +1,8 @@
-import { UInt64 } from 'spu-integer-math';
+import { Height } from ".";
 
 export interface IValidator {
     address: string;
-    enrolled_at: UInt64;
+    enrolled_at: Height;
     stake: string;
     preimage?: IPreimage;
 }
@@ -14,13 +14,13 @@ export interface IPreimage {
 
 export class ValidatorData implements IValidator {
     address: string;
-    enrolled_at: UInt64;
+    enrolled_at: Height;
     stake: string;
     preimage: IPreimage;
 
-    constructor(address: string, enrolled_at: UInt64, stake: string, preimage: IPreimage) {
+    constructor(address: string, enrolled_at: Height, stake: string, preimage: IPreimage) {
         this.address = address;
-        this.enrolled_at = new UInt64(enrolled_at);
+        this.enrolled_at = enrolled_at;
         this.stake = stake;
         this.preimage = preimage;
     }
