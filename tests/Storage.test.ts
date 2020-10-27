@@ -27,7 +27,8 @@ describe ('Test ledger storage and inquiry function.', () =>
     {
         ledger_storage = new LedgerStorage(":memory:", (err: Error | null) =>
         {
-            assert.ok(!err, err?.message);
+            if (err)
+                assert.fail(err.message);
             doneIt();
         });
     });
@@ -228,7 +229,8 @@ describe ('Test for storing block data in the database', () =>
     {
         ledger_storage = new LedgerStorage(":memory:", (err: Error | null) =>
         {
-            assert.ok(!err, err?.message);
+            if (err)
+                assert.fail(err.message);
             doneIt();
         });
     });
@@ -324,9 +326,10 @@ describe ('Tests that sending a pre-image', () =>
 
     before ('Start sending a pre-image', (doneIt: () => void) =>
     {
-        ledger_storage = new LedgerStorage(":memory:", (err1: Error | null) =>
+        ledger_storage = new LedgerStorage(":memory:", (err: Error | null) =>
         {
-            assert.ok(!err1, err1?.message);
+            if (err)
+                assert.fail(err.message);
 
             (() => {
                 return new Promise<void>(async (resolve, reject) =>
