@@ -3,8 +3,6 @@ import { Config } from './modules/common/Config';
 import { logger, Logger } from './modules/common/Logger';
 import Stoa from './Stoa';
 
-import { URL } from 'url';
-
 // Create with the arguments and read from file
 let config = Config.createWithArgument();
 

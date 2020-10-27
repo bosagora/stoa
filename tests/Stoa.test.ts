@@ -22,7 +22,6 @@ import { TaskManager } from '../src/modules/task/TaskManager';
 
 import * as assert from 'assert';
 import axios from 'axios';
-import { UInt64 } from 'spu-integer-math';
 import URI from 'urijs';
 import { URL } from 'url';
 
