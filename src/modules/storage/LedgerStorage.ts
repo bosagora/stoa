@@ -164,11 +164,11 @@ export class LedgerStorage extends Storages
         return new Promise<void>((resolve, reject) =>
         {
             (async () => {
+                let block: Block = new Block();
+                block.parseJSON(data);
+                await this.begin();
                 try
                 {
-                    let block: Block = new Block();
-                    block.parseJSON(data);
-                    await this.begin();
                     await saveBlock(this, block);
                     await this.putTransactions(block);
                     await this.putEnrollments(block);
