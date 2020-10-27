@@ -245,7 +245,7 @@ describe ('Test for storing block data in the database', () =>
         block.parseJSON(sample_data0);
 
         await ledger_storage.putTransactions(block);
-        assert.rejects(ledger_storage.putTransactions(block),
+        await assert.rejects(ledger_storage.putTransactions(block),
             {
                 message: "SQLITE_CONSTRAINT: UNIQUE constraint failed:" +
                     " transactions.block_height, transactions.tx_index"
@@ -259,7 +259,7 @@ describe ('Test for storing block data in the database', () =>
         block.parseJSON(sample_data0);
 
         await ledger_storage.putEnrollments(block);
-        assert.rejects(ledger_storage.putEnrollments(block),
+        await assert.rejects(ledger_storage.putEnrollments(block),
             {
                 message: "SQLITE_CONSTRAINT: UNIQUE constraint failed:" +
                     " enrollments.block_height, enrollments.enrollment_index"
@@ -270,7 +270,7 @@ describe ('Test for storing block data in the database', () =>
     {
         let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
         await ledger_storage.putBlocks(sample_data0);
-        assert.rejects(ledger_storage.putBlocks(sample_data0),
+        await assert.rejects(ledger_storage.putBlocks(sample_data0),
             {
                 message: "SQLITE_CONSTRAINT: UNIQUE constraint failed: blocks.height"
             });
@@ -366,6 +366,11 @@ describe ('Tests that sending a pre-image', () =>
                     doneIt();
                 });
         })
+    });
+
+    after ('Close Storage', () =>
+    {
+        ledger_storage.close();
     });
 
     it ('Tests that sending a pre-image with a distance of 6 works', (doneIt: () => void) =>
