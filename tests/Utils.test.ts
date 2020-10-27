@@ -44,6 +44,14 @@ describe ('Test of isInteger, isPositiveInteger, isNegativeInteger', () =>
 
 describe ('Test of toJson', () =>
 {
+    it ('Test that `BigInt` serializes to JSON', () =>
+    {
+        let json1 = JSON.stringify(BigInt(42));
+        assert.strictEqual(json1, '"42"');
+        let json2 = JSON.stringify({ value: BigInt(42) });
+        assert.strictEqual(json2, '{"value":"42"}');
+    });
+
     it ('We can not get the desired result when UInt64 is used in `JSON.stringify`', () =>
     {
         let height = new Height(45n);

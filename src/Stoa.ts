@@ -15,6 +15,13 @@ import express from 'express';
 import { UInt64 } from 'spu-integer-math';
 import { URL } from 'url';
 
+// Module extension to allow customizing JSON serialization
+declare global {
+    interface BigInt {
+        toJSON(key?: string): string;
+    }
+}
+
 class Stoa extends WebService
 {
     public ledger_storage: LedgerStorage;
@@ -69,6 +76,11 @@ class Stoa extends WebService
         {
             return this.task();
         }, 10);
+
+        // Allow JSON serialization of BigInt
+        BigInt.prototype.toJSON = function(key?: string) {
+            return this.toString();
+        }
     }
 
     /**
