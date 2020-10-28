@@ -87,7 +87,8 @@ export class Logger
         switch (process.env.NODE_ENV) {
             case "test":
                 return winston.createLogger({
-                    silent: true,
+                    level: "error",
+                    transports: [ Logger.defaultConsoleTransport() ],
                 });
             case "development":
                 return winston.createLogger({
