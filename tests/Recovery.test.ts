@@ -143,7 +143,6 @@ class TestStoa extends Stoa
 
     public stop (callback?: (err?: Error) => void)
     {
-        this.task_manager.terminate();
         if (this.server != null)
             this.server.close(callback);
         else if (callback !== undefined)

@@ -4,7 +4,6 @@ import { Endian } from './modules/utils/buffer';
 import { LedgerStorage } from './modules/storage/LedgerStorage';
 import { logger } from './modules/common/Logger';
 import { Height, PreImageInfo, Hash, hash } from './modules/data';
-import { TaskManager } from './modules/task/TaskManager';
 import { Utils } from './modules/utils/Utils';
 import { ValidatorData, IPreimage } from './modules/data/ValidatorData';
 import { WebService } from './modules/service/WebService';
@@ -32,14 +31,14 @@ class Stoa extends WebService
     private readonly agora_endpoint: URL;
 
     /**
-     * The temporary storage of the data received from Agora
+     * Chain of pending store operations
+     *
+     * To ensure swift response time to Agora when our handlers are called,
+     * we start the storage asynchronously and respond immediately with HTTP/200.
+     * This means that if we get called in a quick succession, we need to make sure
+     * the data is processed serially. To do so, we chain `Promise`s in this member.
      */
-    protected pool: Array<IPooledData>;
-
-    /**
-     * The task manager that periodically executes registered a task function
-     */
-    protected task_manager: TaskManager;
+    private pending: Promise<void>;
 
     /**
      * The maximum number of blocks that can be recovered at one time
@@ -59,8 +58,6 @@ class Stoa extends WebService
 
         this.agora_endpoint = agora_endpoint;
 
-        this.pool = [];
-
         // create blockStorage
         this.ledger_storage = new LedgerStorage(database_filename, (err: Error | null) =>
         {
@@ -71,11 +68,8 @@ class Stoa extends WebService
             }
         });
 
-        // create task manager, delay time is 10 milliseconds
-        this.task_manager = new TaskManager(() =>
-        {
-            return this.task();
-        }, 10);
+        // Instantiate a dummy promise for chaining
+        this.pending = new Promise<void>(function (resolve, reject) { resolve() });
 
         // Allow JSON serialization of BigInt
         BigInt.prototype.toJSON = function(key?: string) {
@@ -280,8 +274,8 @@ class Stoa extends WebService
      * POST /block_externalized
      *
      * When a request is received through the `/push` handler
-     * The block data received is stored in the pool
-     * and immediately sends a response to Agora
+     * we we call the storage handler asynchronously and  immediately
+     * respond to Agora.
      */
     private putBlock (req: express.Request, res: express.Response)
     {
@@ -300,7 +294,7 @@ class Stoa extends WebService
         // For a more stable operating environment,
         // it would be necessary to consider organizing the pool
         // using the database instead of the array.
-        this.pool.push({type: "block", data: body.block});
+        this.pending = this.pending.then(() => { return this.task({type: "block", data: body.block}); });
 
         res.status(200).send();
     }
@@ -326,7 +320,7 @@ class Stoa extends WebService
         // For a more stable operating environment,
         // it would be necessary to consider organizing the pool
         // using the database instead of the array.
-        this.pool.push({type: "pre_image", data: body.pre_image});
+        this.pending = this.pending.then(() => { return this.task({type: "pre_image", data: body.pre_image}); });
 
         res.status(200).send();
     }
@@ -412,17 +406,20 @@ class Stoa extends WebService
     }
 
     /**
-     * The task function to process data received from Agora one by one
-     * @returns Returns the Promise. If it is finished successfully the `.then`
-     * of the returned Promise is called and if an error occurs the `.catch`
-     * is called with an error.
+     * Process pending data and put it into the storage.
+     *
+     * This function will take care of querying Agora if some blocks are missing.
+     * It is separate from the actual handler as we don't want to suffer timeout
+     * on the connection, hence we reply with a 200 before the info is stored.
+     * This also means that we need to store data serially, in the order it arrived,
+     * hence the `pending: Promise<void>` member acts as a queue.
+     *
+     * @returns A new `Promise<void>` for the caller to chain with `pending`.
      */
-    private task (): Promise<void>
+    private task (stored_data: IPooledData): Promise<void>
     {
         return new Promise<void>(async (resolve, reject) =>
         {
-            let stored_data = this.pool.shift();
-
             if (stored_data === undefined)
             {
                 resolve();
@@ -448,11 +445,9 @@ class Stoa extends WebService
                     else if (UInt64.compare(height.value, expected_height.value) > 0)
                     {
                         // Recovery is required for blocks that are not received.
-                        let success: boolean = await this.recoverBlock(block, height, expected_height);
-                        if (!success)
-                        {
-                            this.pool.unshift(stored_data);
-                        }
+                        let success: boolean = false;
+                        while (!success)
+                            success = await this.recoverBlock(block, height, expected_height);
                     }
                     else
                     {
