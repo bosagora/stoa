@@ -174,10 +174,10 @@ describe ('Test of Recovery', () =>
         agora_node.stop(doneIt);
     });
 
-    beforeEach ('Start TestStoa', (doneIt: () => void) =>
+    beforeEach ('Start TestStoa', () =>
     {
         stoa_server = new TestStoa(":memory:", agora_endpoint, stoa_port);
-        stoa_server.start(doneIt);
+        return stoa_server.start();
     });
 
     afterEach ('Stop TestStoa', (doneIt: () => void) =>
