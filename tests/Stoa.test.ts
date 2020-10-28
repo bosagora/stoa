@@ -48,10 +48,10 @@ describe ('Test of Stoa API Server', () =>
     let stoa_server : TestStoa;
     let client = axios.create();
 
-    before ('Start Stoa API Server', (doneIt: () => void) =>
+    before ('Start Stoa API Server', () =>
     {
         stoa_server = new TestStoa(":memory:", new URL("http://127.0.0.1:2826"), port);
-        stoa_server.start(doneIt);
+        return stoa_server.start();
     });
 
     after ('Stop Stoa API Server', (doneIt: () => void) =>

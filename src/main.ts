@@ -34,4 +34,20 @@ const stoa: Stoa = new Stoa(config.database.filename,
     config.server.port,
     config.server.address
     );
-stoa.start();
+
+stoa.start().then(() => {
+    logger.info(`Listening to requests on: ${config.server.address}:${config.server.port}`);
+}).catch((error) => {
+    // handle specific listen errors with friendly messages
+    switch (error.code) {
+        case 'EACCES':
+            logger.error(`${config.server.port} requires elevated privileges`);
+            break;
+        case 'EADDRINUSE':
+            logger.error(`Port ${config.server.port} is already in use`);
+            break;
+        default:
+            logger.error(`An error occured while starting the server: ${error.stack}`);
+    }
+    process.exit(1);
+});

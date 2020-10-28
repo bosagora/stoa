@@ -58,40 +58,20 @@ export class WebService
     }
 
     /**
-     * Start web server
-     *
-     * @param callback An optional callback to register as listener
+     * Asynchronously start the web server
      */
-    public start (callback?: Function)
+    public async start (): Promise<void>
     {
         this.app.set('port', this.port);
 
-        // Create HTTP server.
-        this.server = http.createServer(this.app);
-
-        this.server.on('error', (error: any) =>
-        {
-            // handle specific listen errors with friendly messages
-            switch (error.code) {
-                case 'EACCES':
-                    logger.error(`${this.port} requires elevated privileges`);
-                    process.exit(1);
-                    break;
-                case 'EADDRINUSE':
-                    logger.error(`${this.port} is already in use`);
-                    process.exit(1);
-                    break;
-                default:
-                    logger.error(error);
-            }
-        });
-
         // Listen on provided this.port on this.address.
-        this.server.listen(this.port, this.address, () =>
-        {
-            logger.info(`Listening to requests on: ${this.address}:${this.port}`);
-            if (callback !== undefined)
-                callback();
+        return new Promise<void>((resolve, reject) => {
+            // Create HTTP server.
+            this.server = http.createServer(this.app);
+            this.server.on('error', reject);
+            this.server.listen(this.port, this.address, () => {
+                resolve();
+            });
         });
     }
 }

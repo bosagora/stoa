@@ -85,10 +85,8 @@ class Stoa extends WebService
 
     /**
      * Setup and start the server
-     *
-     * @param callback An optional callback to register as listener
      */
-    public start (callback?: Function)
+    public async start (): Promise<void>
     {
         // Prepare middleware
 
@@ -106,7 +104,7 @@ class Stoa extends WebService
         this.app.post("/preimage_received", this.putPreImage.bind(this));
 
         // Start the server
-        super.start(callback);
+        return super.start();
     }
 
     /**
