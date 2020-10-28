@@ -81,4 +81,14 @@ export class Block
 
         return this;
     }
+
+    /**
+     * This create new instance of Block and parses JSON.
+     * @param json - The JSON data
+     * @returns The new instance of Block
+     */
+    public static fromJSON (json: any): Block
+    {
+        return (new Block()).parseJSON(json)
+    }
 }

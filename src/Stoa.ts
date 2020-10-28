@@ -3,7 +3,7 @@ import { cors_options } from './cors';
 import { Endian } from './modules/utils/buffer';
 import { LedgerStorage } from './modules/storage/LedgerStorage';
 import { logger } from './modules/common/Logger';
-import { Height, PreImageInfo, Hash, hash } from './modules/data';
+import {Height, PreImageInfo, Hash, hash, Block } from './modules/data';
 import { Utils } from './modules/utils/Utils';
 import { ValidatorData, IPreimage } from './modules/data/ValidatorData';
 import { WebService } from './modules/service/WebService';
@@ -383,7 +383,7 @@ class Stoa extends WebService
                             let element_height = Stoa.getBlockHeight(elem);
                             if (UInt64.compare(element_height.value, expected_height.value) == 0)
                             {
-                                await this.ledger_storage.putBlocks(elem);
+                                await this.ledger_storage.putBlocks(Block.fromJSON(elem));
                                 expected_height.value = UInt64.add(expected_height.value, 1);
                                 logger.info(`Recovered a block with block height of ${element_height.toString()}`);
                             }
@@ -398,7 +398,7 @@ class Stoa extends WebService
                     // Save a block just received
                     if (UInt64.compare(height.value, expected_height.value) <= 0)
                     {
-                        await this.ledger_storage.putBlocks(block);
+                        await this.ledger_storage.putBlocks(Block.fromJSON(block));
                         logger.info(`Saved a block with block height of ${height.toString()}`);
                         resolve(true);
                     }
@@ -450,7 +450,7 @@ class Stoa extends WebService
                     {
                         // The normal case
                         // Save a block just received
-                        await this.ledger_storage.putBlocks(block);
+                        await this.ledger_storage.putBlocks(Block.fromJSON(block));
                         logger.info(`Saved a block with block height of ${height.toString()}`);
                     }
                     else if (UInt64.compare(height.value, expected_height.value) > 0)

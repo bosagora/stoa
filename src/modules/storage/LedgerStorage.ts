@@ -139,12 +139,12 @@ export class LedgerStorage extends Storages
 
     /**
      * Puts a block to database
-     * @param data a block data
+     * @param block a block data
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called and if an error occurs the `.catch`
      * is called with an error.
      */
-    public putBlocks (data: any): Promise<void>
+    public putBlocks (block: Block): Promise<void>
     {
         function saveBlock (storage: LedgerStorage, block: Block): Promise<void>
         {
@@ -183,8 +183,6 @@ export class LedgerStorage extends Storages
             (async () => {
                 try
                 {
-                    let block: Block = new Block();
-                    block.parseJSON(data);
                     await this.begin();
                     await saveBlock(this, block);
                     await this.putTransactions(block);
