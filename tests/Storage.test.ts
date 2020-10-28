@@ -37,52 +37,37 @@ describe ('Test ledger storage and inquiry function.', () =>
         ledger_storage.close();
     });
 
-    it ('Test for saving of all blocks', (doneIt: () => void) =>
+    it ('Test for saving of all blocks', () =>
     {
-        (() => {
-            return new Promise<void>(async (resolve, reject) =>
+        return new Promise<void>(async (resolve, reject) =>
+        {
+            try
             {
-                try
+                for (let elem of sample_data_raw)
                 {
-                    for (let elem of sample_data_raw)
-                    {
-                        let sample_data_item = JSON.parse(elem.replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
-                        await ledger_storage.putBlocks(sample_data_item);
-                    }
+                    let sample_data_item = JSON.parse(elem.replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+                    await ledger_storage.putBlocks(sample_data_item);
                 }
-                catch (error)
+            }
+            catch (error)
+            {
+                reject(error);
+                return;
+            }
+            resolve();
+        }).then(() => {
+            let height_value = 1;
+            let height = new Height(BigInt(height_value));
+            ledger_storage.getBlocks(height)
+                .then((rows: any[]) =>
                 {
-                    reject(error);
-                    return;
-                }
-                resolve();
-            });
-        })()
-            .then(() =>
-            {
-                let height_value = 1;
-                let height = new Height(BigInt(height_value));
-                ledger_storage.getBlocks(height)
-                    .then((rows: any[]) =>
-                    {
-                        assert.strictEqual(rows.length, 1);
-                        assert.strictEqual(rows[0].height, height_value);
-                        assert.strictEqual(Hash.createFromBinary(rows[0].merkle_root, Endian.Little).toString(),
-                            '0x9c4a20550ac796274f64e93872466ebb551ba2cd3f2f051533d07a478d2402b' +
-                            '59e5b0f0a2a14e818b88007ec61d4a82dc9128851f43799d6c1dc0609fca1537d');
-                        doneIt();
-                    })
-                    .catch((err) =>
-                    {
-                        assert.ok(!err, err);
-                        doneIt();
-                    });
-            })
-            .catch((err) =>
-            {
-                assert.ok(!err, err);
-                doneIt();
-            });
+                    assert.strictEqual(rows.length, 1);
+                    assert.strictEqual(rows[0].height, height_value);
+                    assert.strictEqual(Hash.createFromBinary(rows[0].merkle_root, Endian.Little).toString(),
+                        '0x9c4a20550ac796274f64e93872466ebb551ba2cd3f2f051533d07a478d2402b' +
+                        '59e5b0f0a2a14e818b88007ec61d4a82dc9128851f43799d6c1dc0609fca1537d');
+                })
+        });
     });
 
     it ('Test for transaction', (doneIt: () => void) =>
