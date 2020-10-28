@@ -7,7 +7,7 @@ such as transaction aggregations, the list of validators, etc...
 
 # Build instructions
 
-This application is based on Node.JS and requires Node.js >= 12.18.0.
+This application is based on Node.JS and requires Node.js >= 14.13.1.
 
 ## Building on Ubuntu
 
@@ -34,5 +34,5 @@ It can be pulled with `docker pull bpfk/stoa`.
 
 ## Manual
 
-One can use `npm start` to run Stoa, and access it on its default port (3836).
+One can use `npm start` to run Stoa, and access it on its default port (4242).
 Tests can be run via `npm test`, which executes the `*.test.ts` files in the `tests` folder.
