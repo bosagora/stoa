@@ -310,49 +310,18 @@ describe ('Tests that sending a pre-image', () =>
 
     before ('Start sending a pre-image', (doneIt: () => void) =>
     {
-        ledger_storage = new LedgerStorage(":memory:", (err: Error | null) =>
+        ledger_storage = new LedgerStorage(":memory:", async (err: Error | null) =>
         {
             if (err)
-                assert.fail(err.message);
+                throw err;
 
-            (() => {
-                return new Promise<void>(async (resolve, reject) =>
-                {
-                    try
-                    {
-                        for (let elem of sample_data_raw)
-                        {
-                            let sample_data_item = JSON.parse(elem.replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
-                            await ledger_storage.putBlocks(sample_data_item);
-                        }
-                    }
-                    catch (error)
-                    {
-                        reject(error);
-                        return;
-                    }
-                    resolve();
-                });
-            })()
-                .then(() =>
-                {
-                    ledger_storage.getEnrollments(height)
-                        .then(() =>
-                        {
-                            doneIt();
-                        })
-                        .catch((err) =>
-                        {
-                            assert.ok(!err, err);
-                            doneIt();
-                        });
-                })
-                .catch((err) =>
-                {
-                    assert.ok(!err, err);
-                    doneIt();
-                });
-        })
+            for (let elem of sample_data_raw)
+            {
+                let sample_data_item = JSON.parse(elem.replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+                await ledger_storage.putBlocks(sample_data_item);
+            }
+            ledger_storage.getEnrollments(height).then(() => { doneIt(); });
+        });
     });
 
     after ('Close Storage', () =>
