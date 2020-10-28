@@ -24,9 +24,28 @@ import { Utils } from '../utils/Utils';
  */
 export class LedgerStorage extends Storages
 {
+    /**
+     * Construct an instance of `LedgerStorage`, exposes callback API
+     */
     constructor (filename: string, callback: (err: Error | null) => void)
     {
         super(filename, callback);
+    }
+
+    /**
+     * Construct an instance of `LedgerStorage` using `Promise` API.
+     */
+    public static make (filename: string) : Promise<LedgerStorage>
+    {
+        return new Promise<LedgerStorage>((resolve, reject) => {
+            let result = new LedgerStorage(filename, (err: Error | null) => {
+                if (err)
+                    reject(err);
+                else
+                    resolve(result);
+            });
+            return result;
+        });
     }
 
     /**
