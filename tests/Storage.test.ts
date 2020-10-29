@@ -22,14 +22,9 @@ describe ('Test ledger storage and inquiry function.', () =>
 {
     let ledger_storage: LedgerStorage;
 
-    before ('Prepare Storage', (doneIt: () => void) =>
+    before ('Prepare Storage', () =>
     {
-        ledger_storage = new LedgerStorage(":memory:", (err: Error | null) =>
-        {
-            if (err)
-                assert.fail(err.message);
-            doneIt();
-        });
+        return LedgerStorage.make(":memory:").then((result) => { ledger_storage = result; });
     });
 
     after ('Close Storage', () =>
@@ -209,14 +204,9 @@ describe ('Test for storing block data in the database', () =>
 {
     let ledger_storage: LedgerStorage;
 
-    beforeEach ('Prepare Storage', (doneIt: () => void) =>
+    beforeEach ('Prepare Storage', () =>
     {
-        ledger_storage = new LedgerStorage(":memory:", (err: Error | null) =>
-        {
-            if (err)
-                assert.fail(err.message);
-            doneIt();
-        });
+        return LedgerStorage.make(":memory:").then((result) => { ledger_storage = result; });
     });
 
     afterEach ('Close Storage', () =>
@@ -306,22 +296,24 @@ describe ('Test for storing block data in the database', () =>
 describe ('Tests that sending a pre-image', () =>
 {
     let ledger_storage: LedgerStorage;
-    let height = new Height(0n);
+    const height = new Height(0n);
 
-    before ('Start sending a pre-image', (doneIt: () => void) =>
+    before ('Start sending a pre-image', () =>
     {
-        ledger_storage = new LedgerStorage(":memory:", async (err: Error | null) =>
-        {
-            if (err)
-                throw err;
-
-            for (let elem of sample_data_raw)
-            {
-                let sample_data_item = JSON.parse(elem.replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
-                await ledger_storage.putBlocks(sample_data_item);
-            }
-            ledger_storage.getEnrollments(height).then(() => { doneIt(); });
-        });
+        return LedgerStorage.make(":memory:")
+            // Store it first
+            .then((result) => { ledger_storage = result; return result; })
+            // Then fill it with sample data
+            .then(async (result) => {
+                for (let elem of sample_data_raw)
+                {
+                    let sample_data_item = JSON.parse(elem.replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+                    await result.putBlocks(sample_data_item);
+                }
+                return result;
+            })
+            // Then wait until it's ready (returns enrollments)
+            .then(() => { return ledger_storage.getEnrollments(height); });
     });
 
     after ('Close Storage', () =>
