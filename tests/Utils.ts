@@ -119,8 +119,10 @@ export class TestAgora
         });
     }
 
-    public stop (callback?: (err?: Error) => void)
+    public stop (): Promise<void>
     {
-        this.server.close(callback);
+        return new Promise<void>((resolve, reject) => {
+            this.server.close((err?) => { err === undefined ? resolve() : reject(err); });
+        });
     }
 }
