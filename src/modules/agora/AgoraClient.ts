@@ -24,19 +24,19 @@ import { URL } from 'url';
  */
 export interface FullNodeAPI
 {
-    // getNodeInfo () : NodeInfo;
-    // getLocalTime () : bigint;
+    // getNodeInfo (): NodeInfo;
+    // getLocalTime (): bigint;
 
-    // getBlockHeight () : Height;
-    getBlocksFrom (block_height : Height, max_blocks : number) : Promise<any[]>;
-    // getMerklePath (block_height : Height, hash : Hash) : Hash[];
-    // hasTransactionHash (tx : Hash) : boolean;
-    // putTransaction (Transaction tx) : void;
+    // getBlockHeight (): Height;
+    getBlocksFrom (block_height: Height, max_blocks: number): Promise<any[]>;
+    // getMerklePath (block_height: Height, hash: Hash): Hash[];
+    // hasTransactionHash (tx: Hash): boolean;
+    // putTransaction (tx: Transaction): void;
 
-    // enrollValidator (enroll : Enrollment) : void;
-    // getEnrollment (enroll_hash : Hash) : Enrollment;
-    // getPreimage (enroll_key : Hash) : PreImageInfo;
-    // receivePreimage (preimage : PreImageInfo) : void;
+    // enrollValidator (enroll: Enrollment): void;
+    // getEnrollment (enroll_hash: Hash): Enrollment;
+    // getPreimage (enroll_key: Hash): PreImageInfo;
+    // receivePreimage (preimage: PreImageInfo): void;
 }
 
 
