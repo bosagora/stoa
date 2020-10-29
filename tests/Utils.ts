@@ -11,6 +11,11 @@
 
 *******************************************************************************/
 
+import { recovery_sample_data } from './RecoveryData.test';
+
+import express from 'express';
+import * as http from 'http';
+
 export const sample_data_raw =
     [
         '{"header":{"prev_block":"0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000","height":"0","merkle_root":"0xc650b573ab70777363924a0eb2c84cbc76005ba8083c5c77dd57a09f4b6e14f98136ba0d84661109d0b7619877b814cf950cd7fe7b14eaa46bef254352791951","validators":{"_storage":[2818572288,2818572288]},"signature":"0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000","enrollments":[{"utxo_key":"0x210b66053c73e7bd7b27673706f0272617d09b8cda76605e91ab66ad1cc3bfc1f3f5fede91fd74bb2d2073de587c6ee495cfb0d981f03a83651b48ce0e576a1a","random_seed":"0xfb05e20321ae11b2f799a71a736fd172c5dec39540f53d6213cd1b7522898c8bfb86445c6b6db9437899f5917bb5f9c9be7358ba0ecaa37675692f7d08766950","cycle_length":1008,"enroll_sig":"0x0c48e78972e1b138a37e37ae27a01d5ebdea193088ddef2d9883446efe63086925e8803400d7b93d22b1eef5c475098ce08a5b47e8125cf6b04274cc4db34bfd"},{"utxo_key":"0x86f1a6dff3b1f2256d2417b71ecc5511293b224894da5fd75c192965aa1874824ca777ecac678c871e717ad38c295046f4f64130f31750aa967c30c35529944a","random_seed":"0x6fca4361542993ef7e349f5d2a8eb1461281efd0f968904a8e76ea4729f36d32a7d018ef3362b4c92968574c794d502e96896a475fbe32410b415132f06a719b","cycle_length":1008,"enroll_sig":"0x0a9d030f7316b90264f7c9c3869a84c2cdd87030122bb7025dd1ee149514529fee604d00c47d6ef2fe8da4e85f3207589f27887d0cb4e4f098839e2db1396705"},{"utxo_key":"0xf21f606e96d6130b02a807655fda22c8888111f2045c0d45eda9c26d3c97741ca32fc68960ae68220809843d92671083e32395a848203380e5dfd46e4b0261f0","random_seed":"0x92c1fda566bb85faa06201dc06484a0e43a7ba1ac42b0c08b236fc4537420d2a3b4f569d8b6cddc08e5ffc1b4da6751d121de27ab52598906a1a521c3a12ec81","cycle_length":1008,"enroll_sig":"0x06d66ac87b2ae6265f0c91d1e6bd9b9095a0b68206669593938fe785456600fa2a2226f5b8e906075d36a2202dc95da48d50cc141646d4d8a0609a072774981c"}]},"txs":[{"type":1,"inputs":[],"outputs":[{"value":"400000000000","address":"GA3DMXTREDC4AIUTHRFIXCKWKF7BDIXRWM2KLV74OPK2OKDM2VJ235GN"}]},{"type":0,"inputs":[],"outputs":[{"value":"625000000000000","address":"GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ"},{"value":"625000000000000","address":"GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ"},{"value":"625000000000000","address":"GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ"},{"value":"625000000000000","address":"GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ"},{"value":"625000000000000","address":"GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ"},{"value":"625000000000000","address":"GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ"},{"value":"625000000000000","address":"GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ"},{"value":"625000000000000","address":"GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ"}]},{"type":1,"inputs":[],"outputs":[{"value":"400000000000","address":"GBUVRIIBMHKC4PE6BK7MO2O26U2NJLW4WGGWKLAVLAA2DLFZTBHHKOEK"}]},{"type":1,"inputs":[],"outputs":[{"value":"400000000000","address":"GBJABNUCDJCIL5YJQMB5OZ7VCFPKYLMTUXM2ZKQJACT7PXL7EVOMEKNZ"}]}],"merkle_tree":["0x3a245017fee266f2aeacaa0ca11171b5825d34814bf1e33fae76cca50751e5cfb010896f009971a8748a1d3720e33404f5a999ae224b54f5d5c1ffa345c046f7","0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5cd252c2c6f10cdbd2236713dc369ef2a44b62ba113814a9d819a276ff61582874c9aee9c98efa2aa1f10d73","0xaf8aa53dbce1c75fba4559f8a67c93963e739b40d0da6424918804756b85c10a84d3c3f6625841cfb7fa530c10cf425d21682376a28a6847f86eed0e3b5af78b","0xf75ba97650c9a74e9db66a23e985ccd2bced6740c2bebc0d1684171677ee09fe5fce1ed29c1f033a33777ac6d03814b008d8b710a637da7aadc3a107c0075415","0x3518d6be6bff91110c3d146ad19b75e3c06e242c69578a89ee9cf80e924105859899aaa17fc47ace85fe0a298862c42577c0523f72377f5ac83d63c9eee9936d","0xfd8f15a343839b73ab7582ae3414f9386f076eb6fb75aa1710777705263cd82a389facc3f7190df1b5f9596edee33e0b008b443c4ec2fb2f08a67853890cd31e","0xc650b573ab70777363924a0eb2c84cbc76005ba8083c5c77dd57a09f4b6e14f98136ba0d84661109d0b7619877b814cf950cd7fe7b14eaa46bef254352791951"]}',
@@ -38,3 +43,79 @@ export const sample_reEnroll_preImageInfo =
         "hash": "0x25677ee5a05590d68276d1967cbe37e3cf3e731502afd043fafc82b0181cd120cef6272e5aea2dafaca0236a4ce7c1edd4fe21ae770930a8e206bd7080066a4c",
         "distance": 6
     };
+
+/**
+ * This is an Agora node for testing.
+ * The test code allows the Agora node to be started and shut down.
+ */
+export class TestAgora
+{
+    public server: http.Server;
+
+    public agora: express.Application;
+
+    // Add latency to induce new blocks to arrive during write of the previous block.
+    public delay: number = 0;
+
+    constructor (port: string, done: () => void)
+    {
+        this.agora = express();
+
+        this.agora.get("/blocks_from",
+            (req: express.Request, res: express.Response) =>
+        {
+            if  (
+                    (req.query.block_height === undefined) ||
+                    (req.query.max_blocks === undefined) ||
+                    Number.isNaN(req.query.block_height) ||
+                    Number.isNaN(req.query.max_blocks)
+                )
+            {
+                res.status(200).send(JSON.stringify([]));
+                return;
+            }
+
+            let block_height = Math.max(Number(req.query.block_height), 0);
+            let max_blocks = Math.max(Number(req.query.max_blocks), 0);
+
+            block_height = Math.min(block_height, recovery_sample_data.length - 1);
+            max_blocks = Math.min(max_blocks, 1000);
+
+            let data = recovery_sample_data.slice(
+                block_height,
+                Math.min(block_height + max_blocks, recovery_sample_data.length)
+            );
+
+            if (this.delay > 0)
+            {
+                setTimeout(() =>
+                {
+                    res.status(200).send(JSON.stringify(data));
+                }, this.delay);
+            }
+            else
+            {
+                res.status(200).send(JSON.stringify(data));
+            }
+        });
+
+        // Shut down
+        this.agora.get("/stop",
+            (req: express.Request, res: express.Response) =>
+        {
+            res.send("The test server is stopped.");
+            this.server.close();
+        });
+
+        // Start to listen
+        this.server = this.agora.listen(port, () =>
+        {
+            done();
+        });
+    }
+
+    public stop (callback?: (err?: Error) => void)
+    {
+        this.server.close(callback);
+    }
+}
