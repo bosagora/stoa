@@ -15,7 +15,7 @@ import * as assert from 'assert';
 import { LedgerStorage } from '../src/modules/storage/LedgerStorage';
 import { Block, Hash, Height } from '../src/modules/data';
 import { PreImageInfo } from '../src/modules/data';
-import { sample_data_raw, sample_preImageInfo } from "./SampleData.test";
+import { sample_data_raw, sample_preImageInfo } from "./Utils";
 import { Endian } from "../src/modules/utils/buffer";
 
 describe ('Test ledger storage and inquiry function.', () =>

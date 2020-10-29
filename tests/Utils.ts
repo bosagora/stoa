@@ -1,6 +1,6 @@
 /*******************************************************************************
 
-    The sample block data for the test.
+    Utilities and sample data that can be used within the test suitea
 
     Copyright:
         Copyright (c) 2020 BOS Platform Foundation Korea
