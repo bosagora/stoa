@@ -11,8 +11,6 @@
 
 *******************************************************************************/
 
-import { recovery_sample_data } from './RecoveryData.test';
-
 import express from 'express';
 import * as http from 'http';
 
@@ -57,9 +55,16 @@ export class TestAgora
     // Add latency to induce new blocks to arrive during write of the previous block.
     public delay: number = 0;
 
-    constructor (port: string, done: () => void)
+    /**
+     * The blocks that this Agora instance will serve
+     */
+    private blocks: any[];
+
+    constructor (port: string, blocks: any[], done: () => void)
     {
         this.agora = express();
+
+        this.blocks = blocks;
 
         this.agora.get("/blocks_from",
             (req: express.Request, res: express.Response) =>
@@ -78,12 +83,12 @@ export class TestAgora
             let block_height = Math.max(Number(req.query.block_height), 0);
             let max_blocks = Math.max(Number(req.query.max_blocks), 0);
 
-            block_height = Math.min(block_height, recovery_sample_data.length - 1);
+            block_height = Math.min(block_height, this.blocks.length - 1);
             max_blocks = Math.min(max_blocks, 1000);
 
-            let data = recovery_sample_data.slice(
+            let data = this.blocks.slice(
                 block_height,
-                Math.min(block_height + max_blocks, recovery_sample_data.length)
+                Math.min(block_height + max_blocks, this.blocks.length)
             );
 
             if (this.delay > 0)
