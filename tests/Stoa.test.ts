@@ -15,7 +15,8 @@ import { Block, Enrollment, Height, Hash, Signature } from '../src/modules/data'
 import {
     sample_data,
     sample_preImageInfo,
-    sample_reEnroll_preImageInfo
+    sample_reEnroll_preImageInfo,
+    TestAgora,
 } from './Utils';
 import Stoa from '../src/Stoa';
 
@@ -46,17 +47,21 @@ describe ('Test of Stoa API Server', () =>
     let host: string = 'http://localhost';
     let port: string = '3837';
     let stoa_server: TestStoa;
+    let agora_server: TestAgora;
     let client = axios.create();
 
-    before ('Start Stoa API Server', () =>
+    before ('Start Stoa API Server and a fake Agora', () =>
     {
+        let prom = new Promise<void>((resolve, reject) => {
+            agora_server = new TestAgora("2826", sample_data, resolve);
+        });
         stoa_server = new TestStoa(":memory:", new URL("http://127.0.0.1:2826"), port);
-        return stoa_server.start();
+        return prom.then(() => { return stoa_server.start() });
     });
 
-    after ('Stop Stoa API Server', () =>
+    after ('Stop Stoa and Agora server instances', () =>
     {
-        return stoa_server.stop();
+        return stoa_server.stop().then(() => { return agora_server.stop() });
     });
 
     it ('Test of the path /block_externalized', (doneIt: () => void) =>
