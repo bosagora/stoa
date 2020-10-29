@@ -43,7 +43,7 @@ describe ('Test of Stoa API Server', () =>
 {
     let host: string = 'http://localhost';
     let port: string = '3837';
-    let stoa_server : TestStoa;
+    let stoa_server: TestStoa;
     let client = axios.create();
 
     before ('Start Stoa API Server', () =>
