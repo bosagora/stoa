@@ -1,7 +1,7 @@
 # From Agora Runner
-FROM alpine:3.12
-RUN apk add --no-cache curl git python3 py-pip alpine-sdk \
-    bash autoconf libtool automake nodejs npm
+FROM node:14-alpine3.12
+RUN apk add --no-cache git py-pip alpine-sdk \
+    bash autoconf libtool automake
 
 WORKDIR /stoa/wd/
 
