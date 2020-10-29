@@ -15,92 +15,16 @@
 import { AgoraClient } from '../src/modules/agora/AgoraClient';
 import { Block, Height } from '../src/modules/data';
 import { recovery_sample_data } from './RecoveryData.test';
+import { TestAgora } from './Utils'
 import Stoa from '../src/Stoa';
 import { Utils } from '../src/modules/utils/Utils';
 
 import * as assert from 'assert';
 import axios from 'axios';
 import express from 'express';
-import * as http from 'http';
 import { UInt64 } from 'spu-integer-math';
 import URI from 'urijs';
 import { URL } from 'url';
-
-/**
- * This is an Agora node for testing.
- * The test code allows the Agora node to be started and shut down.
- */
-class TestAgora
-{
-    public server: http.Server;
-
-    public agora: express.Application;
-
-    // Add latency to induce new blocks to arrive during write of the previous block.
-    public delay: number = 0;
-
-    constructor (port: string, done: () => void)
-    {
-        this.agora = express();
-
-        this.agora.get("/blocks_from",
-            (req: express.Request, res: express.Response) =>
-        {
-            if  (
-                    (req.query.block_height === undefined) ||
-                    (req.query.max_blocks === undefined) ||
-                    Number.isNaN(req.query.block_height) ||
-                    Number.isNaN(req.query.max_blocks)
-                )
-            {
-                res.status(200).send(JSON.stringify([]));
-                return;
-            }
-
-            let block_height = Math.max(Number(req.query.block_height), 0);
-            let max_blocks = Math.max(Number(req.query.max_blocks), 0);
-
-            block_height = Math.min(block_height, recovery_sample_data.length - 1);
-            max_blocks = Math.min(max_blocks, 1000);
-
-            let data = recovery_sample_data.slice(
-                block_height,
-                Math.min(block_height + max_blocks, recovery_sample_data.length)
-            );
-
-            if (this.delay > 0)
-            {
-                setTimeout(() =>
-                {
-                    res.status(200).send(JSON.stringify(data));
-                }, this.delay);
-            }
-            else
-            {
-                res.status(200).send(JSON.stringify(data));
-            }
-        });
-
-        // Shut down
-        this.agora.get("/stop",
-            (req: express.Request, res: express.Response) =>
-        {
-            res.send("The test server is stopped.");
-            this.server.close();
-        });
-
-        // Start to listen
-        this.server = this.agora.listen(port, () =>
-        {
-            done();
-        });
-    }
-
-    public stop (callback?: (err?: Error) => void)
-    {
-        this.server.close(callback);
-    }
-}
 
 /**
  * This is an API server for testing and inherited from Stoa.
