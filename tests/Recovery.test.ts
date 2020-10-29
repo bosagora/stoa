@@ -65,12 +65,14 @@ class TestStoa extends Stoa
             });
     }
 
-    public stop (callback?: (err?: Error) => void)
+    public stop () : Promise<void>
     {
-        if (this.server != null)
-            this.server.close(callback);
-        else if (callback !== undefined)
-            callback();
+        return new Promise<void>((resolve, reject) => {
+            if (this.server != null)
+                this.server.close((err?) => { err === undefined ? resolve() : reject(err); });
+            else
+                resolve();
+        });
     }
 }
 
@@ -89,9 +91,9 @@ describe ('Test of Recovery', () =>
         agora_node = new TestAgora(agora_addr.port, recovery_sample_data, doneIt);
     });
 
-    after ('Stop TestAgora', (doneIt: () => void) =>
+    after ('Stop TestAgora', () =>
     {
-        agora_node.stop(doneIt);
+        return agora_node.stop();
     });
 
     beforeEach ('Start TestStoa', () =>
@@ -100,9 +102,9 @@ describe ('Test of Recovery', () =>
         return stoa_server.start();
     });
 
-    afterEach ('Stop TestStoa', (doneIt: () => void) =>
+    afterEach ('Stop TestStoa', () =>
     {
-        stoa_server.stop(doneIt);
+        return stoa_server.stop();
     });
 
     it ('Test `getBlocksFrom`', async () =>

@@ -30,12 +30,14 @@ import { URL } from 'url';
  */
 class TestStoa extends Stoa
 {
-    public stop (callback?: (err?: Error) => void)
+    public stop () : Promise<void>
     {
-        if (this.server != null)
-            this.server.close(callback);
-        else if (callback !== undefined)
-            callback();
+        return new Promise<void>((resolve, reject) => {
+            if (this.server != null)
+                this.server.close((err?) => { err === undefined ? resolve() : reject(err); });
+            else
+                resolve();
+        });
     }
 }
 
@@ -52,9 +54,9 @@ describe ('Test of Stoa API Server', () =>
         return stoa_server.start();
     });
 
-    after ('Stop Stoa API Server', (doneIt: () => void) =>
+    after ('Stop Stoa API Server', () =>
     {
-        stoa_server.stop(doneIt);
+        return stoa_server.stop();
     });
 
     it ('Test of the path /block_externalized', (doneIt: () => void) =>
