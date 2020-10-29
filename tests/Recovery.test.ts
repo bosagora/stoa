@@ -86,7 +86,7 @@ describe ('Test of Recovery', () =>
     // Changed test agora to run only once.
     before ('Start TestAgora', (doneIt: () => void) =>
     {
-        agora_node = new TestAgora(agora_addr.port, doneIt);
+        agora_node = new TestAgora(agora_addr.port, recovery_sample_data, doneIt);
     });
 
     after ('Stop TestAgora', (doneIt: () => void) =>
