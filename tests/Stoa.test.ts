@@ -16,7 +16,7 @@ import {
     sample_data,
     sample_preImageInfo,
     sample_reEnroll_preImageInfo
-} from './SampleData.test';
+} from './Utils';
 import Stoa from '../src/Stoa';
 
 import * as assert from 'assert';

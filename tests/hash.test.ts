@@ -12,7 +12,7 @@
 *******************************************************************************/
 
 import { Block, Hash, hash, hashFull, hashMulti, makeUTXOKey } from '../src/modules/data'
-import { sample_data_raw } from './SampleData.test';
+import { sample_data_raw } from './Utils';
 
 import * as assert from 'assert';
 
