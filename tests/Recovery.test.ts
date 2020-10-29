@@ -152,12 +152,9 @@ class TestStoa extends Stoa
 
 describe ('Test of Recovery', () =>
 {
-    let agora_endpoint: URL = new URL('http://localhost:2820');
-    let agora_port: string = '2820';
+    const agora_addr: URL = new URL('http://localhost:2820');
+    const stoa_addr: URL = new URL('http://localhost:3837/');
     let agora_node: TestAgora;
-
-    let stoa_host: string = 'http://localhost';
-    let stoa_port: string = '3837';
     let stoa_server : TestStoa;
 
     let client = axios.create();
@@ -165,7 +162,7 @@ describe ('Test of Recovery', () =>
     // Changed test agora to run only once.
     before ('Start TestAgora', (doneIt: () => void) =>
     {
-        agora_node = new TestAgora(agora_port, doneIt);
+        agora_node = new TestAgora(agora_addr.port, doneIt);
     });
 
     after ('Stop TestAgora', (doneIt: () => void) =>
@@ -175,7 +172,7 @@ describe ('Test of Recovery', () =>
 
     beforeEach ('Start TestStoa', () =>
     {
-        stoa_server = new TestStoa(":memory:", agora_endpoint, stoa_port);
+        stoa_server = new TestStoa(":memory:", agora_addr, stoa_addr.port);
         return stoa_server.start();
     });
 
@@ -186,7 +183,7 @@ describe ('Test of Recovery', () =>
 
     it ('Test `getBlocksFrom`', async () =>
     {
-        let agora_client = new AgoraClient(agora_endpoint);
+        let agora_client = new AgoraClient(agora_addr);
 
         await assert.doesNotReject(async () =>
         {
@@ -214,7 +211,7 @@ describe ('Test of Recovery', () =>
 
     it ('Test a `getBlocksFrom` using async, await', (doneIt: () => void) =>
     {
-        let agora_client = new AgoraClient(agora_endpoint);
+        let agora_client = new AgoraClient(agora_addr);
 
         assert.doesNotThrow(async () =>
         {
@@ -239,12 +236,8 @@ describe ('Test of Recovery', () =>
     {
         (async () =>
         {
-
-            let uri = URI(stoa_host)
-                .port(stoa_port)
-                .directory("block_externalized");
-
-            let url = uri.toString();
+            const url = URI(stoa_addr).directory("block_externalized")
+                .toString();
 
             await client.post(url, {block: recovery_sample_data[0]});
             await client.post(url, {block: recovery_sample_data[1]});
@@ -257,8 +250,7 @@ describe ('Test of Recovery', () =>
                 // Verifies that all sent blocks are wrote
                 for (let idx = 0; idx <= 4; idx++)
                 {
-                    let uri = URI(stoa_host)
-                        .port(stoa_port)
+                    const uri = URI(stoa_addr)
                         .directory("block")
                         .addSearch("block_height", idx);
 
@@ -277,8 +269,7 @@ describe ('Test of Recovery', () =>
     {
         (async () =>
         {
-            let uri = URI(stoa_host)
-                .port(stoa_port)
+            let uri = URI(stoa_addr)
                 .directory("block_externalized");
 
             let url = uri.toString();
@@ -305,8 +296,7 @@ describe ('Test of Recovery', () =>
                 // Verifies that all sent blocks are wrote
                 for (let idx = 0; idx <= 8; idx++)
                 {
-                    let uri = URI(stoa_host)
-                        .port(stoa_port)
+                    let uri = URI(stoa_addr)
                         .directory("block")
                         .addSearch("block_height", idx);
 
@@ -327,8 +317,7 @@ describe ('Test of Recovery', () =>
         {
             agora_node.delay = 100;
 
-            let uri = URI(stoa_host)
-                .port(stoa_port)
+            let uri = URI(stoa_addr)
                 .directory("block_externalized");
 
             let url = uri.toString();
@@ -367,8 +356,7 @@ describe ('Test of Recovery', () =>
                 // Verifies that all sent blocks are wrote
                 for (let idx = 0; idx <= 4; idx++)
                 {
-                    let uri = URI(stoa_host)
-                        .port(stoa_port)
+                    let uri = URI(stoa_addr)
                         .directory("block")
                         .addSearch("block_height", idx);
 
@@ -390,8 +378,7 @@ describe ('Test of Recovery', () =>
             stoa_server.max_count_on_recovery = 2;
             agora_node.delay = 0;
 
-            let uri = URI(stoa_host)
-                .port(stoa_port)
+            let uri = URI(stoa_addr)
                 .directory("block_externalized");
 
             let url = uri.toString();
@@ -404,8 +391,7 @@ describe ('Test of Recovery', () =>
                 // Verifies that all sent blocks are wrote
                 for (let idx = 0; idx <= 9; idx++)
                 {
-                    let uri = URI(stoa_host)
-                        .port(stoa_port)
+                    let uri = URI(stoa_addr)
                         .directory("block")
                         .addSearch("block_height", idx);
 
