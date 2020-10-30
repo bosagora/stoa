@@ -181,7 +181,7 @@ class Stoa extends WebService
                                               preimage);
                         out_put.push(validator);
                     }
-                    res.status(200).send(Utils.toJson(out_put));
+                    res.status(200).send(JSON.stringify(out_put));
                 }
                 else
                 {
@@ -267,7 +267,7 @@ class Stoa extends WebService
                                               preimage);
                         out_put.push(validator);
                     }
-                    res.status(200).send(Utils.toJson(out_put));
+                    res.status(200).send(JSON.stringify(out_put));
                 }
                 else
                 {
