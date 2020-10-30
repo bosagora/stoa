@@ -495,7 +495,7 @@ export class LedgerStorage extends Storages
                         hash.toBinary(Endian.Little),
                         utxo_key.toBinary(Endian.Little),
                         output.address.toString(),
-                        Utils.UInt64ToString(output.value)
+                        output.value.toString(),
                     ]
                 )
                     .then(() =>

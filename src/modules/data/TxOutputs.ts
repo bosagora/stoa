@@ -16,7 +16,6 @@ import { Utils } from '../utils/Utils';
 import { Validator, ITxOutputs } from './validator';
 
 import { SmartBuffer } from 'smart-buffer';
-import { UInt64 } from 'spu-integer-math';
 
 /**
  * The class that defines the transaction's outputs of a block.
@@ -28,7 +27,7 @@ export class TxOutputs
     /**
      * The monetary value of this output, in 1/10^7
      */
-    public value: UInt64;
+    public value: bigint;
 
     /**
      * The public key that can spend this output
@@ -40,12 +39,12 @@ export class TxOutputs
      * @param value - The monetary value
      * @param address - The public key
      */
-    constructor (value?: UInt64, address?: PublicKey)
+    constructor (value?: bigint, address?: PublicKey)
     {
         if (value !== undefined)
-            this.value = new UInt64(value);
+            this.value = value;
         else
-            this.value = new UInt64(0);
+            this.value = 0n;
 
         if (address !== undefined)
             this.address = address;
@@ -63,7 +62,7 @@ export class TxOutputs
         Validator.isValidOtherwiseThrow<ITxOutputs>('TxOutputs', json);
 
         if (Utils.isPositiveInteger(json.value))
-            this.value = UInt64.fromString(json.value);
+            this.value = BigInt(json.value);
         else
             throw new Error ("Amount is not a positive number.");
 
@@ -78,8 +77,9 @@ export class TxOutputs
      */
     public computeHash (buffer: SmartBuffer)
     {
-        buffer.writeInt32LE(this.value.lo);
-        buffer.writeInt32LE(this.value.hi);
+        const buf = Buffer.allocUnsafe(8);
+        buf.writeBigUInt64LE(this.value);
+        buffer.writeBuffer(buf);
         this.address.computeHash(buffer);
     }
 }
