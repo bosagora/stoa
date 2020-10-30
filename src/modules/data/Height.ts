@@ -14,7 +14,6 @@
 import { Utils } from '../utils/Utils';
 
 import { SmartBuffer } from 'smart-buffer';
-import { UInt64 } from 'spu-integer-math';
 
 /**
  * The class that defines the Height.
@@ -24,18 +23,15 @@ export class Height
     /**
      * the block height
      */
-    public value: UInt64;
+    public value: bigint;
 
     /**
      * Construct
      * @param value - The block height
      */
-    constructor (value: bigint | string | UInt64)
+    constructor (value: bigint | string)
     {
-        if (value instanceof UInt64)
-            this.value = new UInt64(value);
-        else
-            this.value = UInt64.fromString(value.toString());
+        this.value = BigInt(value);
     }
 
     /**
@@ -44,8 +40,9 @@ export class Height
      */
     public computeHash (buffer: SmartBuffer)
     {
-        buffer.writeInt32LE(this.value.lo);
-        buffer.writeInt32LE(this.value.hi);
+        let buf = Buffer.allocUnsafe(8);
+        buf.writeBigUInt64LE(this.value);
+        buffer.writeBuffer(buf);
     }
 
     /**
@@ -54,7 +51,7 @@ export class Height
      */
     public fromString (value: string)
     {
-        this.value = UInt64.fromString(value);
+        this.value = BigInt(value);
     }
 
     /**
@@ -62,7 +59,7 @@ export class Height
      */
     public toString ()
     {
-        return Utils.UInt64ToString(this.value);
+        return this.value.toString();
     }
 
     /**

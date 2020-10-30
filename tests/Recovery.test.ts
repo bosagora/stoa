@@ -22,7 +22,6 @@ import { Utils } from '../src/modules/utils/Utils';
 import * as assert from 'assert';
 import axios from 'axios';
 import express from 'express';
-import { UInt64 } from 'spu-integer-math';
 import URI from 'urijs';
 import { URL } from 'url';
 
@@ -118,14 +117,14 @@ describe ('Test of Recovery', () =>
                 {
                     // The number of blocks is three.
                     assert.strictEqual(response.length, 3);
-                    let expected_height = UInt64.fromNumber(1);
+                    let expected_height : Height = new Height(1n);
                     for (let elem of response)
                     {
                         let block = new Block();
                         block.parseJSON(elem);
                         // Make sure that the received block height is equal to the expected value.
-                        assert.ok(UInt64.compare(block.header.height.value, expected_height) == 0);
-                        expected_height = UInt64.add(expected_height, 1);
+                        assert.deepEqual(block.header.height, expected_height);
+                        expected_height.value += 1n;
                     }
                 })
                 .catch((error) =>
@@ -145,14 +144,14 @@ describe ('Test of Recovery', () =>
             // The number of blocks is two.
             // Because the total number is 10. The last block height is 9.
             assert.strictEqual(response.length, 2);
-            let expected_height = UInt64.fromNumber(8);
+            let expected_height : Height = new Height(8n);
             for (let elem of response)
             {
                 let block = new Block();
                 block.parseJSON(elem);
                 // Make sure that the received block height is equal to the expected value.
-                assert.ok(UInt64.compare(block.header.height.value, expected_height) == 0);
-                expected_height = UInt64.add(expected_height, 1);
+                assert.deepEqual(block.header.height, expected_height);
+                expected_height.value += 1n;
             }
             doneIt();
         });

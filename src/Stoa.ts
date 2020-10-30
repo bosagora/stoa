@@ -11,7 +11,6 @@ import { WebService } from './modules/service/WebService';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
-import { UInt64 } from 'spu-integer-math';
 import { URL } from 'url';
 
 // Module extension to allow customizing JSON serialization
@@ -149,16 +148,16 @@ class Stoa extends WebService
                     {
                         let preimage_hash: Buffer = row.preimage_hash;
                         let preimage_distance: number = row.preimage_distance;
-                        let target_height: UInt64 = UInt64.fromNumber(row.height);
+                        let target_height: Height = new Height(row.height);
                         let result_preimage_hash = new Hash();
-                        let start_index: UInt64 = UInt64.add(UInt64.fromNumber(row.enrolled_at), 1);
+                        let start_index: bigint = BigInt(row.enrolled_at) + 1n;
 
                         // Hashing preImage
-                        if ((UInt64.compare(target_height, start_index) >= 0) &&
-                            (UInt64.compare(UInt64.add(start_index, row.preimage_distance), target_height) >= 0))
+                        if (target_height.value >= start_index &&
+                            (start_index + BigInt(preimage_distance)) >= target_height.value)
                         {
                             result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                            let count = Number(Utils.UInt64ToString(UInt64.sub(UInt64.add(start_index, row.preimage_distance), target_height)));
+                            let count = start_index + BigInt(preimage_distance) - target_height.value;
                             for (let i = 0; i < count; i++)
                             {
                                 result_preimage_hash = hash(result_preimage_hash.data);
@@ -172,7 +171,7 @@ class Stoa extends WebService
                         }
 
                         let preimage: IPreimage = {
-                            distance: preimage_distance,
+                            distance: Number(preimage_distance),
                             hash: result_preimage_hash.toString()
                         } as IPreimage;
 
@@ -235,16 +234,16 @@ class Stoa extends WebService
                     {
                         let preimage_hash: Buffer = row.preimage_hash;
                         let preimage_distance: number = row.preimage_distance;
-                        let target_height: UInt64 = UInt64.fromNumber(row.height);
+                        let target_height: Height = new Height(BigInt(row.height));
                         let result_preimage_hash = new Hash();
-                        let start_index: UInt64 = UInt64.add(UInt64.fromNumber(row.enrolled_at), 1);
+                        let start_index: bigint = BigInt(row.enrolled_at) +1n;
 
                         // Hashing preImage
-                        if ((UInt64.compare(target_height, start_index) >= 0) &&
-                            (UInt64.compare(UInt64.add(start_index, row.preimage_distance), target_height) >= 0))
+                        if (target_height.value >= start_index &&
+                            start_index + BigInt(preimage_distance) >= target_height.value)
                         {
                             result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                            let count = Number(Utils.UInt64ToString(UInt64.sub(UInt64.add(start_index, row.preimage_distance), target_height)));
+                            let count = start_index + BigInt(preimage_distance) - target_height.value;
                             for (let i = 0; i < count; i++)
                             {
                                 result_preimage_hash = hash(result_preimage_hash.data);
@@ -368,23 +367,23 @@ class Stoa extends WebService
             (async () => {
                 try
                 {
-                    let max_blocks = Number(UInt64.sub(height.value, expected_height.value).toString());
+                    let max_blocks : bigint = height.value - expected_height.value;
 
-                    if (UInt64.compare(max_blocks, this._max_count_on_recovery) > 0)
-                        max_blocks = this._max_count_on_recovery;
+                    if (max_blocks > this._max_count_on_recovery)
+                        max_blocks = BigInt(this._max_count_on_recovery);
 
-                    if (max_blocks > 0)
+                    if (max_blocks > 0n)
                     {
-                        let blocks = await this.agora.getBlocksFrom(expected_height, max_blocks);
+                        let blocks = await this.agora.getBlocksFrom(expected_height, Number(max_blocks));
 
                         // Save previous block
                         for (let elem of blocks)
                         {
                             let element_height = Stoa.getBlockHeight(elem);
-                            if (UInt64.compare(element_height.value, expected_height.value) == 0)
+                            if (element_height.value == expected_height.value)
                             {
                                 await this.ledger_storage.putBlocks(Block.fromJSON(elem));
-                                expected_height.value = UInt64.add(expected_height.value, 1);
+                                expected_height.value += 1n;
                                 logger.info(`Recovered a block with block height of ${element_height.toString()}`);
                             }
                             else
@@ -396,7 +395,7 @@ class Stoa extends WebService
                     }
 
                     // Save a block just received
-                    if (UInt64.compare(height.value, expected_height.value) <= 0)
+                    if (height.value <= expected_height.value)
                     {
                         await this.ledger_storage.putBlocks(Block.fromJSON(block));
                         logger.info(`Saved a block with block height of ${height.toString()}`);
@@ -446,14 +445,14 @@ class Stoa extends WebService
                     let height = Stoa.getBlockHeight(block);
                     let expected_height = await this.ledger_storage.getExpectedBlockHeight();
 
-                    if (UInt64.compare(height.value, expected_height.value) == 0)
+                    if (height.value == expected_height.value)
                     {
                         // The normal case
                         // Save a block just received
                         await this.ledger_storage.putBlocks(Block.fromJSON(block));
                         logger.info(`Saved a block with block height of ${height.toString()}`);
                     }
-                    else if (UInt64.compare(height.value, expected_height.value) > 0)
+                    else if (height.value > expected_height.value)
                     {
                         // Recovery is required for blocks that are not received.
                         let success: boolean = false;
