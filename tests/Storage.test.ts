@@ -40,8 +40,10 @@ describe ('Test ledger storage and inquiry function.', () =>
             {
                 for (let elem of sample_data_raw)
                 {
-                    let sample_data_item = JSON.parse(elem.replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
-                    await ledger_storage.putBlocks(Block.fromJSON(sample_data_item));
+                    const block = JSON.parse(
+                        elem.replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
+                        Block.reviver);
+                    await ledger_storage.putBlocks(block);
                 }
             }
             catch (error)
@@ -216,9 +218,9 @@ describe ('Test for storing block data in the database', () =>
 
     it ('Error-handling test when writing a transaction.', async () =>
     {
-        let block = new Block();
-        let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
-        block.parseJSON(sample_data0);
+        const block = JSON.parse(
+            sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
+            Block.reviver);
 
         await ledger_storage.putTransactions(block);
         await assert.rejects(ledger_storage.putTransactions(block),
@@ -230,9 +232,9 @@ describe ('Test for storing block data in the database', () =>
 
     it ('Error-handling test when writing a enrollment.', async () =>
     {
-        let block = new Block();
-        let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
-        block.parseJSON(sample_data0);
+        const block = JSON.parse(
+            sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
+            Block.reviver);
 
         await ledger_storage.putEnrollments(block);
         await assert.rejects(ledger_storage.putEnrollments(block),
@@ -244,8 +246,9 @@ describe ('Test for storing block data in the database', () =>
 
     it ('Error-handling test when writing a block.', async () =>
     {
-        let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
-        let block = Block.fromJSON(sample_data0);
+        const block = JSON.parse(
+            sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
+            Block.reviver);
         await ledger_storage.putBlocks(block);
         await assert.rejects(ledger_storage.putBlocks(block),
             {
@@ -255,8 +258,9 @@ describe ('Test for storing block data in the database', () =>
 
     it ('DB transaction test when writing a block', async () =>
     {
-        let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
-        const block = Block.fromJSON(sample_data0);
+        const block = JSON.parse(
+            sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
+            Block.reviver);
 
         await ledger_storage.putEnrollments(block);
         await assert.rejects(ledger_storage.putBlocks(block),
@@ -275,19 +279,21 @@ describe ('Test for storing block data in the database', () =>
 
     it ('Test for writing the block hash', async () =>
     {
-        let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
-        let sample_data1 = JSON.parse(sample_data_raw[1].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+        const block0 = JSON.parse(
+            sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
+            Block.reviver);
+        const block1 = JSON.parse(
+            sample_data_raw[1].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
+            Block.reviver);
 
         // Write the Genesis block.
-        await ledger_storage.putBlocks(Block.fromJSON(sample_data0));
+        await ledger_storage.putBlocks(block0);
 
         // The block is read from the database.
         let rows = await ledger_storage.getBlocks(new Height(0n));
         if (rows.length > 0)
         {
             // Check that the `prev_block` of block1 is the same as the hash value of the database.
-            const block1 = Block.fromJSON(sample_data1);
-
             assert.deepStrictEqual(block1.header.prev_block, new Hash(rows[0].hash, Endian.Little));
         }
     });
@@ -307,8 +313,10 @@ describe ('Tests that sending a pre-image', () =>
             .then(async (result) => {
                 for (let elem of sample_data_raw)
                 {
-                    let sample_data_item = JSON.parse(elem.replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
-                    await result.putBlocks(Block.fromJSON(sample_data_item));
+                    const block = JSON.parse(
+                        elem.replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
+                        Block.reviver);
+                    await result.putBlocks(block);
                 }
                 return result;
             })

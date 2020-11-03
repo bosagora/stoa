@@ -53,22 +53,22 @@ export class TxOutputs
     }
 
     /**
-     * This parses JSON.
-     * @param json The object of the JSON
-     * @returns The instance of TxOutputs
+     * The reviver parameter to give to `JSON.parse`
+     *
+     * This function allows to perform any necessary conversion,
+     * as well as validation of the final object.
+     *
+     * @param key   Name of the field being parsed
+     * @param value The value associated with `key`
+     * @returns A new instance of `TxOutputs` if `key == ""`, `value` otherwise.
      */
-    public parseJSON (json: any): TxOutputs
+    public static reviver (key: string, value: any): any
     {
-        Validator.isValidOtherwiseThrow<ITxOutputs>('TxOutputs', json);
+        if (key !== "")
+            return value;
 
-        if (Utils.isPositiveInteger(json.value))
-            this.value = BigInt(json.value);
-        else
-            throw new Error ("Amount is not a positive number.");
-
-        this.address = new PublicKey(json.address);
-
-        return this;
+        Validator.isValidOtherwiseThrow<ITxOutputs>('TxOutputs', value);
+        return new TxOutputs(BigInt(value.value), new PublicKey(value.address));
     }
 
     /**

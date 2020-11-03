@@ -63,32 +63,31 @@ export class Block
     }
 
     /**
-     * This parses JSON.
-     * @param json - The JSON data
-     * @returns The instance of Block
+     * The reviver parameter to give to `JSON.parse`
+     *
+     * This function allows to perform any necessary conversion,
+     * as well as validation of the final object.
+     *
+     * @param key   Name of the field being parsed
+     * @param value The value associated with `key`
+     * @returns A new instance of `Block` if `key == ""`, `value` otherwise.
      */
-    public parseJSON (json: any): Block
+    public static reviver (key: string, value: any): any
     {
-        Validator.isValidOtherwiseThrow<IBlock>('Block', json);
+        if (key !== "")
+            return value;
 
-        this.header.parseJSON(json.header);
+        Validator.isValidOtherwiseThrow<IBlock>('Block', value);
 
-        for (let elem of json.txs)
-            this.txs.push((new Transaction()).parseJSON(elem));
+        let transactions: Transaction[] = [];
+        for (let elem of value.txs)
+            transactions.push(Transaction.reviver("", elem));
 
-        for (let elem of json.merkle_tree)
-            this.merkle_tree.push(new Hash(elem));
+        let merkle_tree: Hash[] = [];
+        for (let elem of value.merkle_tree)
+            merkle_tree.push(new Hash(elem));
 
-        return this;
-    }
-
-    /**
-     * This create new instance of Block and parses JSON.
-     * @param json - The JSON data
-     * @returns The new instance of Block
-     */
-    public static fromJSON (json: any): Block
-    {
-        return (new Block()).parseJSON(json)
+        return new Block(
+            BlockHeader.reviver("", value.header), transactions, merkle_tree)
     }
 }

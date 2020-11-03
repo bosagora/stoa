@@ -80,11 +80,15 @@ describe ('Test for hash value of block data', () =>
 
     before ('Prepare test for block data hash', () =>
     {
-        let sample_data0 = JSON.parse(sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
-        let sample_data1 = JSON.parse(sample_data_raw[1].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"));
+        const block1 = JSON.parse(
+            sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
+            Block.reviver);
+        const block2 = JSON.parse(
+            sample_data_raw[1].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
+            Block.reviver);
 
-        blocks.push((new Block()).parseJSON(sample_data0));
-        blocks.push((new Block()).parseJSON(sample_data1));
+        blocks.push(block1);
+        blocks.push(block2);
     });
 
     it ('Test that hash of block header', () =>

@@ -75,20 +75,25 @@ export class Enrollment
     }
 
     /**
-     * This parses JSON.
-     * @param json The object of the JSON
-     * @returns The instance of Enrollment
+     * The reviver parameter to give to `JSON.parse`
+     *
+     * This function allows to perform any necessary conversion,
+     * as well as validation of the final object.
+     *
+     * @param key   Name of the field being parsed
+     * @param value The value associated with `key`
+     * @returns A new instance of `Enrollment` if `key == ""`, `value` otherwise.
      */
-    public parseJSON (json: any): Enrollment
+    public static reviver (key: string, value: any): any
     {
-        Validator.isValidOtherwiseThrow<IEnrollment>('Enrollment', json);
+        if (key !== "")
+            return value;
 
-        this.utxo_key.fromString(json.utxo_key);
-        this.random_seed.fromString(json.random_seed);
-        this.cycle_length = Number(json.cycle_length);
-        this.enroll_sig.fromString(json.enroll_sig);
+        Validator.isValidOtherwiseThrow<IEnrollment>('Enrollment', value);
 
-        return this;
+        return new Enrollment(
+            new Hash(value.utxo_key), new Hash(value.random_seed),
+            Number(value.cycle_length), new Signature(value.enroll_sig));
     }
 
     /**
