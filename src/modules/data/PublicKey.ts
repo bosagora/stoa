@@ -42,7 +42,7 @@ export class PublicKey
      * @param data   The string or binary representation of the public key
      * @param endian The byte order
      */
-    constructor (data?: Buffer | string)
+    constructor (data: Buffer | string)
     {
         if (typeof data === 'string')
         {
@@ -59,8 +59,7 @@ export class PublicKey
         else
         {
             this.data = Buffer.alloc(PublicKey.Width);
-            if (data !== undefined)
-                data.copy(this.data);
+            data.copy(this.data);
         }
         assert.ok(this.data.length == PublicKey.Width);
     }

@@ -149,7 +149,7 @@ class Stoa extends WebService
                         let preimage_hash: Buffer = row.preimage_hash;
                         let preimage_distance: number = row.preimage_distance;
                         let target_height: Height = new Height(row.height);
-                        let result_preimage_hash = new Hash();
+                        let result_preimage_hash = Hash.NULL;
                         let start_index: bigint = BigInt(row.enrolled_at) + 1n;
 
                         // Hashing preImage
@@ -235,7 +235,7 @@ class Stoa extends WebService
                         let preimage_hash: Buffer = row.preimage_hash;
                         let preimage_distance: number = row.preimage_distance;
                         let target_height: Height = new Height(BigInt(row.height));
-                        let result_preimage_hash = new Hash();
+                        let result_preimage_hash = Hash.NULL;
                         let start_index: bigint = BigInt(row.enrolled_at) +1n;
 
                         // Hashing preImage

@@ -44,22 +44,11 @@ export class Block
      * @param txs - The array of the transaction
      * @param merkle_tree - The merkle tree
      */
-    constructor (header?: BlockHeader, txs?: Transaction[], merkle_tree?: Hash[])
+    constructor (header: BlockHeader, txs: Transaction[], merkle_tree: Hash[])
     {
-        if (header !== undefined)
-            this.header = header;
-        else
-            this.header = new BlockHeader();
-
-        if (txs !== undefined)
-            this.txs = txs;
-        else
-            this.txs = [];
-
-        if (merkle_tree !== undefined)
-            this.merkle_tree = merkle_tree;
-        else
-            this.merkle_tree = [];
+        this.header = header;
+        this.txs = txs;
+        this.merkle_tree = merkle_tree;
     }
 
     /**

@@ -29,12 +29,9 @@ export class BitField
      * Constructor
      * @param storage - The source storage with bit data
      */
-    constructor (storage?: number[])
+    constructor (storage: number[])
     {
-        if (storage !== undefined)
-            this._storage = storage;
-        else
-            this._storage = [];
+        this._storage = storage;
     }
 
     /**

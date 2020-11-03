@@ -39,17 +39,12 @@ export class TxOutputs
      * @param value - The monetary value
      * @param address - The public key
      */
-    constructor (value?: bigint, address?: PublicKey)
+    constructor (value: bigint, address: PublicKey)
     {
-        if (value !== undefined)
-            this.value = value;
-        else
-            this.value = 0n;
-
-        if (address !== undefined)
-            this.address = address;
-        else
-            this.address = new PublicKey();
+        if (value <= 0n)
+            throw new Error(`[Output][${address.toString()}] Positive amount expected, not ${value.toString()}`);
+        this.value = value;
+        this.address = address;
     }
 
     /**

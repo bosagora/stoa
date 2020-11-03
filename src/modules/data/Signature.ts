@@ -36,15 +36,14 @@ export class Signature
      * @param data   The string or binary representation of the Signature
      * @param endian The byte order
      */
-    constructor (data?: Buffer | string, endian?: Endian)
+    constructor (data: Buffer | string, endian?: Endian)
     {
         if (typeof data === 'string')
             this.data = readFromString(data, Buffer.alloc(Signature.Width));
         else
         {
             this.data = Buffer.alloc(Signature.Width);
-            if (data !== undefined)
-                this.fromBinary(data, endian);
+            this.fromBinary(data, endian);
         }
         assert.ok(this.data.length == Signature.Width);
     }

@@ -66,38 +66,15 @@ export class BlockHeader
      * @param signature - The Schnorr multisig of all validators which signed this block
      * @param enrollments - The enrolled validators
      */
-    constructor (prev_block?: Hash, height?: Height, merkle_root?: Hash,
-        validators?: BitField, signature?: Signature, enrollments?: Enrollment[])
+    constructor (prev_block: Hash, height: Height, merkle_root: Hash,
+        validators: BitField, signature: Signature, enrollments: Enrollment[])
     {
-        if (prev_block !== undefined)
-            this.prev_block = prev_block;
-        else
-            this.prev_block = new Hash();
-
-        if (height !== undefined)
-            this.height = height;
-        else
-            this.height = new Height(0n);
-
-        if (merkle_root !== undefined)
-            this.merkle_root = merkle_root;
-        else
-            this.merkle_root = new Hash();
-
-        if (validators !== undefined)
-            this.validators = validators;
-        else
-            this.validators = new BitField();
-
-        if (signature !== undefined)
-            this.signature = signature;
-        else
-            this.signature = new Signature();
-
-        if (enrollments !== undefined)
-            this.enrollments = enrollments;
-        else
-            this.enrollments = [];
+        this.prev_block = prev_block;
+        this.height = height;
+        this.merkle_root = merkle_root;
+        this.validators = validators;
+        this.signature = signature;
+        this.enrollments = enrollments;
     }
 
     /**
