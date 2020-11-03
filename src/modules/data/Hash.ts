@@ -42,15 +42,22 @@ export class Hash
     }
 
     /**
-     * Constructor
-     * @param bin The binary data of the hash
+     * Construct a new instance of this class
+     *
+     * @param data   The string or binary representation of the hash
      * @param endian The byte order
      */
-    constructor (bin?: Buffer, endian?: Endian)
+    constructor (data?: Buffer | string, endian?: Endian)
     {
-        this.data = Buffer.alloc(Hash.Width);
-        if (bin != undefined)
-            this.fromBinary(bin, endian);
+        if (typeof data === 'string')
+            this.data = readFromString(data, Buffer.alloc(Hash.Width));
+        else
+        {
+            this.data = Buffer.alloc(Hash.Width);
+            if (data !== undefined)
+                this.fromBinary(data, endian);
+        }
+        assert.ok(this.data.length == Hash.Width);
     }
 
     /**
@@ -107,16 +114,6 @@ export class Hash
             return Buffer.from(this.data).reverse();
         else
             return this.data;
-    }
-
-    /**
-     * Creates from the hex string
-     * @param hex The hex string
-     * @returns The instance of Hash
-     */
-    public static createFromString (hex: string): Hash
-    {
-        return (new Hash()).fromString(hex);
     }
 
     /**

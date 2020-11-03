@@ -66,7 +66,7 @@ export class TxOutputs
         else
             throw new Error ("Amount is not a positive number.");
 
-        this.address.fromString(json.address);
+        this.address = new PublicKey(json.address);
 
         return this;
     }
