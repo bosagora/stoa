@@ -21,26 +21,33 @@ import { Validator, IPreImageInfo } from './validator'
  */
 export class PreImageInfo
 {
+    /**
+     * UTXO used to enroll
+     */
     public enroll_key: Hash;
+
+    /**
+     * Value of the pre-image
+     */
     public hash: Hash;
-    public distance: number = 0;
 
-    constructor (enroll_key?: Hash, hash?: Hash, distance?: number)
+    /**
+     * Distance from the enrollment, 0 based
+     */
+    public distance: number;
+
+    /**
+     * Construct a new instance of this object
+     *
+     * @param enroll_key The UTXO used to enroll
+     * @param hash       The value of the pre-image
+     * @param distance   The distance from the Enrollment
+     */
+    constructor (enroll_key: Hash, hash: Hash, distance: number)
     {
-        if (enroll_key !== undefined)
-            this.enroll_key = enroll_key;
-        else
-            this.enroll_key = new Hash();
-
-        if (hash !== undefined)
-            this.hash = hash;
-        else
-            this.hash = new Hash();
-
-        if (distance !== undefined)
-            this.distance = distance;
-        else
-            this.distance = 0;
+        this.enroll_key = enroll_key;
+        this.hash = hash;
+        this.distance = distance;
     }
 
     /**
