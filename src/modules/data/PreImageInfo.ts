@@ -44,18 +44,23 @@ export class PreImageInfo
     }
 
     /**
-     * This parses JSON.
-     * @param json The object of the JSON
-     * @returns The instance of PreImageInfo
+     * The reviver parameter to give to `JSON.parse`
+     *
+     * This function allows to perform any necessary conversion,
+     * as well as validation of the final object.
+     *
+     * @param key   Name of the field being parsed
+     * @param value The value associated with `key`
+     * @returns A new instance of `PreImageInfo` if `key == ""`, `value` otherwise.
      */
-    public parseJSON (json: any): PreImageInfo
+    public static reviver (key: string, value: any): any
     {
-        Validator.isValidOtherwiseThrow<IPreImageInfo>('PreImageInfo', json);
+        if (key !== "")
+            return value;
 
-        this.enroll_key.fromString(json.enroll_key);
-        this.hash.fromString(json.hash);
-        this.distance = Number(json.distance);
+        Validator.isValidOtherwiseThrow<IPreImageInfo>('PreImageInfo', value);
 
-        return this;
+        return new PreImageInfo(
+            new Hash(value.enroll_key), new Hash(value.hash), Number(value.distance));
     }
 }

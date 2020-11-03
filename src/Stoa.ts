@@ -474,11 +474,9 @@ class Stoa extends WebService
             }
             else if (stored_data.type === "pre_image")
             {
-                let pre_image: PreImageInfo = new PreImageInfo();
-
                 try
                 {
-                    pre_image.parseJSON(stored_data.data);
+                    let pre_image = PreImageInfo.reviver("", stored_data.data);
 
                     await this.ledger_storage.updatePreImage(pre_image);
                     logger.info(`Saved a pre-image enroll_key : ${pre_image.enroll_key.toString().substr(0, 18)}, ` +

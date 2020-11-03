@@ -323,8 +323,7 @@ describe ('Tests that sending a pre-image', () =>
 
     it ('Tests that sending a pre-image with a distance of 6 works', (doneIt: () => void) =>
     {
-        let pre_image: PreImageInfo = new PreImageInfo();
-        pre_image.parseJSON(sample_preImageInfo);
+        let pre_image: PreImageInfo = PreImageInfo.reviver("", sample_preImageInfo);
         ledger_storage.updatePreImage(pre_image)
             .then(() =>
             {
@@ -351,8 +350,7 @@ describe ('Tests that sending a pre-image', () =>
     it ('Fail tests that sending a pre-image with a distance of 5 works', (doneIt: () => void) =>
     {
         sample_preImageInfo.distance = 5;
-        let pre_image: PreImageInfo = new PreImageInfo();
-        pre_image.parseJSON(sample_preImageInfo);
+        let pre_image: PreImageInfo = PreImageInfo.reviver("", sample_preImageInfo);
         ledger_storage.updatePreImage(pre_image)
             .then(() =>
             {
@@ -380,8 +378,7 @@ describe ('Tests that sending a pre-image', () =>
     {
         // Distance test out of cycle_length range Test
         sample_preImageInfo.distance = 1008;
-        let pre_image: PreImageInfo = new PreImageInfo();
-        pre_image.parseJSON(sample_preImageInfo);
+        let pre_image: PreImageInfo = PreImageInfo.reviver("", sample_preImageInfo);
         ledger_storage.updatePreImage(pre_image)
             .then(() =>
             {
