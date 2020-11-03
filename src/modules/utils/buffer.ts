@@ -30,26 +30,17 @@ export enum Endian
  * Read from the hex string
  * @param hex The hex string
  * @param target The buffer to output
- * @param endian The byte order
  * @returns The output buffer
  */
-export function readFromString (hex: string, target?: Buffer, endian?: Endian): Buffer
+export function readFromString (hex: string, target?: Buffer): Buffer
 {
     let start = (hex.substr(0, 2) == '0x') ? 2 : 0;
     let length = (hex.length - start) >> 1;
     if (target == undefined)
         target = Buffer.alloc(length);
 
-    if ((endian === undefined) || (endian == Endian.Little))
-    {
-        for (let pos = 0, idx = start; idx < length * 2 + start; idx += 2, pos++)
-            target[length - pos - 1] = parseInt(hex.substr(idx, 2), 16);
-    }
-    else
-    {
-        for (let pos = 0, idx = start; idx < length * 2 + start; idx += 2, pos++)
-            target[pos] = parseInt(hex.substr(idx, 2), 16);
-    }
+    for (let pos = 0, idx = start; idx < length * 2 + start; idx += 2, pos++)
+        target[length - pos - 1] = parseInt(hex.substr(idx, 2), 16);
     return target;
 }
 
