@@ -125,7 +125,8 @@ class Stoa extends WebService
         if ((req.query.height !== undefined) &&
             !Utils.isPositiveInteger(req.query.height.toString()))
         {
-            res.status(400).send("The Height value is not valid.");
+            res.status(400).send({
+                statusMessage: `Invalid value for parameter 'height': ${req.query.height.toString()}`});
             return;
         }
 
@@ -209,7 +210,8 @@ class Stoa extends WebService
         if ((req.query.height !== undefined) &&
             !Utils.isPositiveInteger(req.query.height.toString()))
         {
-            res.status(400).send("The Height value is not valid.");
+            res.status(400).send({
+                statusMessage: `Invalid value for parameter 'height': ${req.query.height.toString()}`});
             return;
         }
 
@@ -295,7 +297,7 @@ class Stoa extends WebService
         let body = JSON.parse(text);
         if (body.block === undefined)
         {
-            res.status(400).send("Missing 'block' object in body");
+            res.status(400).send({ statusMessage: "Missing 'block' object in body"});
             return;
         }
 
@@ -321,7 +323,7 @@ class Stoa extends WebService
         let body = JSON.parse(req.body.toString());
         if (body.pre_image === undefined)
         {
-            res.status(400).send("Missing 'preImage' object in body");
+            res.status(400).send({ statusMessage: "Missing 'preImage' object in body"});
             return;
         }
 
