@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { readFromString, writeToString, Endian, reverse } from '../utils/buffer';
+import { readFromString, writeToString, Endian } from '../utils/buffer';
 
 import * as assert from 'assert';
 import { SmartBuffer } from 'smart-buffer';
@@ -94,10 +94,9 @@ export class Hash
         if (endian === undefined)
             endian = Endian.Big;
 
+        bin.copy(this.data);
         if (endian === Endian.Little)
-            reverse(bin, this.data);
-        else
-            bin.copy(this.data);
+            this.data.reverse();
 
         return this;
     }
@@ -113,7 +112,7 @@ export class Hash
             endian = Endian.Big;
 
         if (endian === Endian.Little)
-            return reverse(this.data);
+            return Buffer.from(this.data).reverse();
         else
             return this.data;
     }

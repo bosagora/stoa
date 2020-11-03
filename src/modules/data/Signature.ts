@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { readFromString, writeToString, Endian, reverse } from '../utils/buffer';
+import { readFromString, writeToString, Endian } from '../utils/buffer';
 
 import * as assert from 'assert';
 
@@ -83,10 +83,9 @@ export class Signature
         if (endian === undefined)
             endian = Endian.Big;
 
+        bin.copy(this.data);
         if (endian === Endian.Little)
-            reverse(bin, this.data);
-        else
-            bin.copy(this.data);
+            this.data.reverse();
 
         return this;
     }
@@ -102,7 +101,7 @@ export class Signature
             endian = Endian.Big;
 
         if (endian === Endian.Little)
-            return reverse(this.data);
+            return Buffer.from(this.data).reverse();
         else
             return this.data;
     }
