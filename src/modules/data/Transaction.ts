@@ -73,23 +73,26 @@ export class Transaction
     }
 
     /**
-     * This parses JSON.
-     * @param json The object of the JSON
-     * @returns The instance of Transaction
+     * The reviver parameter to give to `JSON.parse`
+     *
+     * This function allows to perform any necessary conversion,
+     * as well as validation of the final object.
+     *
+     * @param key   Name of the field being parsed
+     * @param value The value associated with `key`
+     * @returns A new instance of `Transaction` if `key == ""`, `value` otherwise.
      */
-    public parseJSON (json: any): Transaction
+    public static reviver (key: string, value: any): any
     {
-        Validator.isValidOtherwiseThrow<ITransaction>('Transaction', json);
+        if (key !== "")
+            return value;
 
-        this.type = Number(json.type);
+        Validator.isValidOtherwiseThrow<ITransaction>('Transaction', value);
 
-        for (let elem of json.inputs)
-            this.inputs.push((new TxInputs()).parseJSON(elem));
-
-        for (let elem of json.outputs)
-            this.outputs.push((new TxOutputs()).parseJSON(elem));
-
-        return this;
+        return new Transaction(
+            Number(value.type),
+            value.inputs.map((elem: any) => TxInputs.reviver("", elem)),
+            value.outputs.map((elem: any) => TxOutputs.reviver("", elem)));
     }
 
     /**

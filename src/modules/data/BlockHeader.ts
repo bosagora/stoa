@@ -101,26 +101,29 @@ export class BlockHeader
     }
 
     /**
-     * This parses JSON.
-     * @param json The object of the JSON
-     * @returns The instance of BlockHeader
+     * The reviver parameter to give to `JSON.parse`
+     *
+     * This function allows to perform any necessary conversion,
+     * as well as validation of the final object.
+     *
+     * @param key   Name of the field being parsed
+     * @param value The value associated with `key`
+     * @returns A new instance of `BlockHeader` if `key == ""`, `value` otherwise.
      */
-    public parseJSON (json: any): BlockHeader
+    public static reviver (key: string, value: any): any
     {
-        Validator.isValidOtherwiseThrow<IBlockHeader>('BlockHeader', json);
+        if (key !== "")
+            return value;
 
-        this.prev_block.fromString(json.prev_block);
+        Validator.isValidOtherwiseThrow<IBlockHeader>('BlockHeader', value);
 
-        this.height.fromString(json.height);
-
-        this.merkle_root.fromString(json.merkle_root);
-        this.validators.parseJSON(json.validators);
-        this.signature.fromString(json.signature);
-
-        for (let elem of json.enrollments)
-            this.enrollments.push((new Enrollment()).parseJSON(elem));
-
-        return this;
+        return new BlockHeader(
+            new Hash(value.prev_block), new Height(value.height),
+            new Hash(value.merkle_root),
+            BitField.reviver("", value.validators),
+            new Signature(value.signature),
+            value.enrollments.map((elem: any) => Enrollment.reviver("", elem)),
+        );
     }
 
     /**

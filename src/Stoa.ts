@@ -382,7 +382,7 @@ class Stoa extends WebService
                             let element_height = Stoa.getBlockHeight(elem);
                             if (element_height.value == expected_height.value)
                             {
-                                await this.ledger_storage.putBlocks(Block.fromJSON(elem));
+                                await this.ledger_storage.putBlocks(Block.reviver("", elem));
                                 expected_height.value += 1n;
                                 logger.info(`Recovered a block with block height of ${element_height.toString()}`);
                             }
@@ -397,7 +397,7 @@ class Stoa extends WebService
                     // Save a block just received
                     if (height.value <= expected_height.value)
                     {
-                        await this.ledger_storage.putBlocks(Block.fromJSON(block));
+                        await this.ledger_storage.putBlocks(Block.reviver("", block));
                         logger.info(`Saved a block with block height of ${height.toString()}`);
                         resolve(true);
                     }
@@ -449,7 +449,7 @@ class Stoa extends WebService
                     {
                         // The normal case
                         // Save a block just received
-                        await this.ledger_storage.putBlocks(Block.fromJSON(block));
+                        await this.ledger_storage.putBlocks(Block.reviver("", block));
                         logger.info(`Saved a block with block height of ${height.toString()}`);
                     }
                     else if (height.value > expected_height.value)

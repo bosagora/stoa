@@ -64,21 +64,23 @@ export class TxInputs
     }
 
     /**
-     * This parses JSON.
-     * @param json The object of the JSON
-     * @returns The instance of TxInputs
+     * The reviver parameter to give to `JSON.parse`
+     *
+     * This function allows to perform any necessary conversion,
+     * as well as validation of the final object.
+     *
+     * @param key   Name of the field being parsed
+     * @param value The value associated with `key`
+     * @returns A new instance of `TxInputs` if `key == ""`, `value` otherwise.
      */
-    public parseJSON (json: any): TxInputs
+    public static reviver (key: string, value: any): any
     {
-        Validator.isValidOtherwiseThrow<ITxInputs>('TxInputs', json);
+        if (key !== "")
+            return value;
 
-        this.previous.fromString(json.previous);
-
-        this.index = Number(json.index);
-
-        this.signature.fromString(json.signature);
-
-        return this;
+        Validator.isValidOtherwiseThrow<ITxInputs>('TxInputs', value);
+        return new TxInputs(
+            new Hash(value.previous), Number(value.index), new Signature(value.signature));
     }
 
     /**

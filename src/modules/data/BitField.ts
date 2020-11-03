@@ -38,17 +38,21 @@ export class BitField
     }
 
     /**
-     * This parses JSON.
-     * @param json - The JSON data
-     * @returns The instance of BitField
+     * The reviver parameter to give to `JSON.parse`
+     *
+     * This function allows to perform any necessary conversion,
+     * as well as validation of the final object.
+     *
+     * @param key   Name of the field being parsed
+     * @param value The value associated with `key`
+     * @returns A new instance of `BitField` if `key == ""`, `value` otherwise.
      */
-    public parseJSON (json: any): BitField
+    public static reviver (key: string, value: any): any
     {
-        Validator.isValidOtherwiseThrow<IBitField>('BitField', json);
+        if (key != "")
+            return value;
 
-        for (let elem of json._storage)
-            this._storage.push(Number(elem));
-
-        return this;
+        Validator.isValidOtherwiseThrow<IBitField>('BitField', value);
+        return new BitField(value._storage.map((elem: string) => Number(elem)));
     }
 }

@@ -120,8 +120,7 @@ describe ('Test of Recovery', () =>
                     let expected_height : Height = new Height(1n);
                     for (let elem of response)
                     {
-                        let block = new Block();
-                        block.parseJSON(elem);
+                        let block = Block.reviver("", elem);
                         // Make sure that the received block height is equal to the expected value.
                         assert.deepEqual(block.header.height, expected_height);
                         expected_height.value += 1n;
@@ -147,8 +146,7 @@ describe ('Test of Recovery', () =>
             let expected_height : Height = new Height(8n);
             for (let elem of response)
             {
-                let block = new Block();
-                block.parseJSON(elem);
+                let block = Block.reviver("", elem);
                 // Make sure that the received block height is equal to the expected value.
                 assert.deepEqual(block.header.height, expected_height);
                 expected_height.value += 1n;
