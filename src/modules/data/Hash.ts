@@ -117,17 +117,6 @@ export class Hash
     }
 
     /**
-     * Creates from Buffer
-     * @param bin The binary data of the hash
-     * @param endian The byte order
-     * @returns The instance of Hash
-     */
-    public static createFromBinary (bin: Buffer, endian?: Endian): Hash
-    {
-        return new Hash(bin, endian);
-    }
-
-    /**
      * Collects data to create a hash.
      * @param buffer - The buffer where collected data is stored
      */

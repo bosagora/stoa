@@ -177,7 +177,7 @@ class Stoa extends WebService
 
                         let validator: ValidatorData =
                             new ValidatorData(row.address, new Height(BigInt(row.enrolled_at)),
-                                              Hash.createFromBinary(row.stake, Endian.Little).toString(),
+                                              new Hash(row.stake, Endian.Little).toString(),
                                               preimage);
                         out_put.push(validator);
                     }
@@ -263,7 +263,7 @@ class Stoa extends WebService
 
                         let validator: ValidatorData =
                             new ValidatorData(row.address, new Height(BigInt(row.enrolled_at)),
-                                              Hash.createFromBinary(row.stake, Endian.Little).toString(),
+                                              new Hash(row.stake, Endian.Little).toString(),
                                               preimage);
                         out_put.push(validator);
                     }
