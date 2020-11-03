@@ -56,29 +56,21 @@ export class Hash
     /**
      * Reads from the hex string
      * @param hex The hex string
-     * @param endian The byte order
      * @returns The instance of Hash
      */
-    public fromString (hex: string, endian?: Endian): Hash
+    public fromString (hex: string): Hash
     {
-        if (endian === undefined)
-            endian = Endian.Little;
-
-        readFromString(hex, this.data, endian);
+        readFromString(hex, this.data);
         return this;
     }
 
     /**
      * Writes to the hex string
-     * @param endian The byte order
      * @returns The hex string
      */
-    public toString (endian?: Endian): string
+    public toString (): string
     {
-        if (endian === undefined)
-            endian = Endian.Little;
-
-        return writeToString(this.data, endian);
+        return writeToString(this.data);
     }
 
     /**
@@ -120,12 +112,11 @@ export class Hash
     /**
      * Creates from the hex string
      * @param hex The hex string
-     * @param endian The byte order
      * @returns The instance of Hash
      */
-    public static createFromString (hex: string, endian?: Endian): Hash
+    public static createFromString (hex: string): Hash
     {
-        return (new Hash()).fromString(hex, endian);
+        return (new Hash()).fromString(hex);
     }
 
     /**
