@@ -51,27 +51,12 @@ export class Enrollment
      * @param cycle - The number of rounds a validator will participate in
      * @param sig - A signature for the message H(K, X, n, R) and the key K, using R
      */
-    constructor (key?: Hash, seed?: Hash, cycle?: number, sig?: Signature)
+    constructor (key: Hash, seed: Hash, cycle: number, sig: Signature)
     {
-        if (key !== undefined)
-            this.utxo_key = key;
-        else
-            this.utxo_key = new Hash();
-
-        if (seed !== undefined)
-            this.random_seed = seed;
-        else
-            this.random_seed = new Hash();
-
-        if (cycle !== undefined)
-            this.cycle_length = cycle;
-        else
-            this.cycle_length = 0;
-
-        if (sig !== undefined)
-            this.enroll_sig = sig;
-        else
-            this.enroll_sig = new Signature();
+        this.utxo_key = key;
+        this.random_seed = seed;
+        this.cycle_length = cycle;
+        this.enroll_sig = sig;
     }
 
     /**

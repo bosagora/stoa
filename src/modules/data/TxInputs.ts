@@ -45,22 +45,11 @@ export class TxInputs
      * @param index - The index of the output in the previous transaction
      * @param signature - A signature that should be verified using public key of the output in the previous transaction
      */
-    constructor (previous?: Hash, index?: number, signature?: Signature)
+    constructor (previous: Hash, index: number, signature: Signature)
     {
-        if (previous !== undefined)
-            this.previous = new Hash(previous.data);
-        else
-            this.previous = new Hash();
-
-        if (index !== undefined)
-            this.index = index;
-        else
-            this.index = 0;
-
-        if (signature !== undefined)
-            this.signature = new Signature(signature.data);
-        else
-            this.signature = new Signature();
+        this.previous = previous;
+        this.index = index;
+        this.signature = signature;
     }
 
     /**

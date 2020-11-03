@@ -54,22 +54,11 @@ export class Transaction
      * @param inputs - The array of references to the unspent output of the previous transaction
      * @param outputs - The array of newly created outputs
      */
-    constructor (type?: number, inputs?: TxInputs[], outputs?: TxOutputs[])
+    constructor (type: number, inputs: TxInputs[], outputs: TxOutputs[])
     {
-        if (type !== undefined)
-            this.type = type;
-        else
-            this.type = 0;
-
-        if (inputs !== undefined)
-            this.inputs = inputs;
-        else
-            this.inputs = [];
-
-        if (outputs !== undefined)
-            this.outputs = outputs;
-        else
-            this.outputs = [];
+        this.type = type;
+        this.inputs = inputs;
+        this.outputs = outputs;
     }
 
     /**

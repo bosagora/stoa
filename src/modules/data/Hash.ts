@@ -38,7 +38,7 @@ export class Hash
      */
     static get NULL(): Hash
     {
-        return new Hash();
+        return new Hash(Buffer.alloc(Hash.Width));
     }
 
     /**
@@ -47,15 +47,14 @@ export class Hash
      * @param data   The string or binary representation of the hash
      * @param endian The byte order
      */
-    constructor (data?: Buffer | string, endian?: Endian)
+    constructor (data: Buffer | string, endian?: Endian)
     {
         if (typeof data === 'string')
             this.data = readFromString(data, Buffer.alloc(Hash.Width));
         else
         {
             this.data = Buffer.alloc(Hash.Width);
-            if (data !== undefined)
-                this.fromBinary(data, endian);
+            this.fromBinary(data, endian);
         }
         assert.ok(this.data.length == Hash.Width);
     }
@@ -181,7 +180,7 @@ export function makeUTXOKey (h: Hash, index: bigint): Hash
 export function hashFull (record: any): Hash
 {
     if ((record === null) || (record === undefined))
-        return new Hash();
+        return Hash.NULL;
 
     let buffer = new SmartBuffer();
     hashPart(record, buffer);
