@@ -104,15 +104,4 @@ export class Signature
         else
             return this.data;
     }
-
-    /**
-     * Creates from Buffer
-     * @param bin The binary data of the signature
-     * @param endian The byte order
-     * @returns The instance of Signature
-     */
-    public static createFromBinary (bin: Buffer, endian?: Endian): Signature
-    {
-        return new Signature(bin, endian);
-    }
 }
