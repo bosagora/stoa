@@ -77,7 +77,7 @@ export class Block
             this.txs.push((new Transaction()).parseJSON(elem));
 
         for (let elem of json.merkle_tree)
-            this.merkle_tree.push(Hash.createFromString(elem));
+            this.merkle_tree.push(new Hash(elem));
 
         return this;
     }

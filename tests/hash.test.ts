@@ -22,7 +22,7 @@ describe('Hash', () => {
     // This was treated to be the same as D language.
     it('Test of reading and writing hex string', () => {
         // Read from hex string
-        let h = Hash.createFromString('0x5d7f6a7a30f7ff591c8649f61eb8a35d034' +
+        let h = new Hash('0x5d7f6a7a30f7ff591c8649f61eb8a35d034' +
             '824ed5cd252c2c6f10cdbd2236713dc369ef2a44b62ba113814a9d819a276ff' +
             '61582874c9aee9c98efa2aa1f10d73');
 
@@ -63,7 +63,7 @@ describe('Hash', () => {
     });
 
     it('Test of utxo key, using makeUTXOKey', () => {
-        let hash = makeUTXOKey(Hash.createFromString('0x5d7f6a7a30f7ff591c86' +
+        let hash = makeUTXOKey(new Hash('0x5d7f6a7a30f7ff591c86' +
             '49f61eb8a35d034824ed5cd252c2c6f10cdbd2236713dc369ef2a44b62ba113' +
             '814a9d819a276ff61582874c9aee9c98efa2aa1f10d73'), BigInt(1));
 

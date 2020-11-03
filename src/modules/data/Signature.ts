@@ -31,15 +31,22 @@ export class Signature
     public static Width: number = 64;
 
     /**
-     * Constructor
-     * @param bin The binary data of the signature
+     * Construct a new instance of this class
+     *
+     * @param data   The string or binary representation of the Signature
      * @param endian The byte order
      */
-    constructor (bin?: Buffer, endian?: Endian)
+    constructor (data?: Buffer | string, endian?: Endian)
     {
-        this.data = Buffer.alloc(Signature.Width);
-        if (bin != undefined)
-            this.fromBinary(bin, endian);
+        if (typeof data === 'string')
+            this.data = readFromString(data, Buffer.alloc(Signature.Width));
+        else
+        {
+            this.data = Buffer.alloc(Signature.Width);
+            if (data !== undefined)
+                this.fromBinary(data, endian);
+        }
+        assert.ok(this.data.length == Signature.Width);
     }
 
     /**
@@ -96,16 +103,6 @@ export class Signature
             return Buffer.from(this.data).reverse();
         else
             return this.data;
-    }
-
-    /**
-     * Creates from the hex string
-     * @param hex The hex string
-     * @returns The instance of Signature
-     */
-    public static createFromString (hex: string): Signature
-    {
-        return (new Signature()).fromString(hex);
     }
 
     /**

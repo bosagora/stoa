@@ -37,17 +37,32 @@ export class PublicKey
     public static Width: number = sodium.crypto_sign_PUBLICKEYBYTES;
 
     /**
-     * Constructor
-     * @param bin The binary data of the public key
+     * Construct a new instance of this class
+     *
+     * @param data   The string or binary representation of the public key
+     * @param endian The byte order
      */
-    constructor (bin?: Buffer)
+    constructor (data?: Buffer | string)
     {
-        this.data = Buffer.alloc(PublicKey.Width);
-        if (bin != undefined)
+        if (typeof data === 'string')
         {
-            assert.strictEqual(bin.length, PublicKey.Width);
-            bin.copy(this.data);
+            const decoded = Buffer.from(base32Decode(data));
+            assert.strictEqual(decoded.length, 1 + PublicKey.Width + 2);
+            assert.strictEqual(decoded[0], VersionByte.AccountID);
+
+            const body = decoded.slice(0, -2);
+            this.data = body.slice(1);
+
+            const checksum = decoded.slice(-2);
+            assert.ok(utils.validate(body, checksum));
         }
+        else
+        {
+            this.data = Buffer.alloc(PublicKey.Width);
+            if (data !== undefined)
+                data.copy(this.data);
+        }
+        assert.ok(this.data.length == PublicKey.Width);
     }
 
     /**
@@ -60,38 +75,6 @@ export class PublicKey
         const checksum = utils.checksum(body);
         const unencoded = Buffer.concat([body, checksum]);
         return base32Encode(unencoded);
-    }
-
-    /**
-     * Read a Public key from Stellar's string representation
-     * @param str The address
-     * @returns The instance of PublicKey
-     */
-    public fromString (str: string): PublicKey
-    {
-        const decoded = Buffer.from(base32Decode(str));
-        assert.strictEqual(decoded.length, 1 + PublicKey.Width + 2);
-        assert.strictEqual(decoded[0], VersionByte.AccountID);
-
-        const body = decoded.slice(0, -2);
-        const data = body.slice(1);
-        const checksum = decoded.slice(-2);
-
-        assert.ok(utils.validate(body, checksum));
-
-        data.copy(this.data);
-
-        return this;
-    }
-
-    /**
-     * Create a Public key from Stellar's string representation
-     * @param str The address
-     * @returns The instance of PublicKey
-     */
-    public static createFromString (str: string): PublicKey
-    {
-        return (new PublicKey()).fromString(str);
     }
 
     /**
