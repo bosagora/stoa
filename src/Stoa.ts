@@ -321,19 +321,19 @@ class Stoa extends WebService
     private putPreImage (req: express.Request, res: express.Response)
     {
         let body = JSON.parse(req.body.toString());
-        if (body.pre_image === undefined)
+        if (body.preimage === undefined)
         {
-            res.status(400).send({ statusMessage: "Missing 'preImage' object in body"});
+            res.status(400).send({ statusMessage: "Missing 'preimage' object in body"});
             return;
         }
 
-        logger.http(`POST /preimage_received preimage=${body.pre_image.toString()}`);
+        logger.http(`POST /preimage_received preimage=${body.preimage.toString()}`);
 
         // To do
         // For a more stable operating environment,
         // it would be necessary to consider organizing the pool
         // using the database instead of the array.
-        this.pending = this.pending.then(() => { return this.task({type: "pre_image", data: body.pre_image}); });
+        this.pending = this.pending.then(() => { return this.task({type: "pre_image", data: body.preimage}); });
 
         res.status(200).send();
     }

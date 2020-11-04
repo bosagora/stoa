@@ -136,7 +136,7 @@ describe ('Test of Stoa API Server', () =>
             let uri = URI(host)
                 .port(port)
                 .directory("preimage_received");
-            let response = await client.post (uri.toString(), {pre_image: sample_preImageInfo});
+            let response = await client.post (uri.toString(), { preimage: sample_preImageInfo });
             assert.strictEqual(response.status, 200);
         })();
 
@@ -250,7 +250,7 @@ describe ('Test of Stoa API Server', () =>
             let uri10 = URI(host)
             .port(port)
             .directory("preimage_received");
-            let response = await client.post (uri10.toString(), {pre_image: sample_reEnroll_preImageInfo});
+            let response = await client.post (uri10.toString(), {preimage: sample_reEnroll_preImageInfo});
             assert.strictEqual(response.status, 200);
         }, 200);
 
