@@ -19,30 +19,13 @@ import {
     sample_preImageInfo,
     sample_reEnroll_preImageInfo,
     TestAgora,
+    TestStoa,
 } from './Utils';
-import Stoa from '../src/Stoa';
 
 import * as assert from 'assert';
 import axios from 'axios';
 import URI from 'urijs';
 import { URL } from 'url';
-
-/**
- * This is an API server for testing and inherited from Stoa.
- * The test code allows the API server to be started and shut down.
- */
-class TestStoa extends Stoa
-{
-    public stop () : Promise<void>
-    {
-        return new Promise<void>((resolve, reject) => {
-            if (this.server != null)
-                this.server.close((err?) => { err === undefined ? resolve() : reject(err); });
-            else
-                resolve();
-        });
-    }
-}
 
 describe ('Test of Stoa API Server', () =>
 {
@@ -57,7 +40,7 @@ describe ('Test of Stoa API Server', () =>
         let prom = new Promise<void>((resolve, reject) => {
             agora_server = new TestAgora("2826", sample_data, resolve);
         });
-        stoa_server = new TestStoa(":memory:", new URL("http://127.0.0.1:2826"), port, "127.0.0.1");
+        stoa_server = new TestStoa(new URL("http://127.0.0.1:2826"), port);
         return prom.then(() => { return stoa_server.start() });
     });
 

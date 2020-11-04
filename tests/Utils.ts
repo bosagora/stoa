@@ -14,6 +14,10 @@
 import express from 'express';
 import * as fs from 'fs';
 import * as http from 'http';
+import { URL } from 'url';
+
+import Stoa from '../src/Stoa';
+
 
 export const sample_data_raw = (() => {
     return [
@@ -131,6 +135,28 @@ export class TestAgora
     {
         return new Promise<void>((resolve, reject) => {
             this.server.close((err?) => { err === undefined ? resolve() : reject(err); });
+        });
+    }
+}
+
+/**
+ * This is an API server for testing and inherited from Stoa.
+ * The test code allows the API server to be started and shut down.
+ */
+export class TestStoa extends Stoa
+{
+    constructor (agora_endpoint: URL, port: number | string)
+    {
+        super(":memory:", agora_endpoint, port, "127.0.0.1");
+    }
+
+    public stop (): Promise<void>
+    {
+        return new Promise<void>((resolve, reject) => {
+            if (this.server != null)
+                this.server.close((err?) => { err === undefined ? resolve() : reject(err); });
+            else
+                resolve();
         });
     }
 }

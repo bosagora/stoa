@@ -15,8 +15,7 @@
 import { AgoraClient } from '../src/modules/agora/AgoraClient';
 import { Block, Height } from '../src/modules/data';
 import { recovery_sample_data } from './RecoveryData.test';
-import { TestAgora } from './Utils'
-import Stoa from '../src/Stoa';
+import { TestAgora, TestStoa } from './Utils'
 import { Utils } from '../src/modules/utils/Utils';
 
 import * as assert from 'assert';
@@ -29,11 +28,11 @@ import { URL } from 'url';
  * This is an API server for testing and inherited from Stoa.
  * The test code allows the API server to be started and shut down.
  */
-class TestStoa extends Stoa
+class TestRecoveryStoa extends TestStoa
 {
-    constructor (file_name: string, agora_endpoint: URL, port: string)
+    constructor (agora_endpoint: URL, port: number | string)
     {
-        super(file_name, agora_endpoint, port, "127.0.0.1");
+        super(agora_endpoint, port);
 
         this.app.get("/block",
             async (req: express.Request, res: express.Response) =>
@@ -63,16 +62,6 @@ class TestStoa extends Stoa
                 }
             });
     }
-
-    public stop () : Promise<void>
-    {
-        return new Promise<void>((resolve, reject) => {
-            if (this.server != null)
-                this.server.close((err?) => { err === undefined ? resolve() : reject(err); });
-            else
-                resolve();
-        });
-    }
 }
 
 describe ('Test of Recovery', () =>
@@ -80,7 +69,7 @@ describe ('Test of Recovery', () =>
     const agora_addr: URL = new URL('http://localhost:2820');
     const stoa_addr: URL = new URL('http://localhost:3837/');
     let agora_node: TestAgora;
-    let stoa_server : TestStoa;
+    let stoa_server: TestRecoveryStoa;
 
     let client = axios.create();
 
@@ -97,7 +86,7 @@ describe ('Test of Recovery', () =>
 
     beforeEach ('Start TestStoa', () =>
     {
-        stoa_server = new TestStoa(":memory:", agora_addr, stoa_addr.port);
+        stoa_server = new TestRecoveryStoa(agora_addr, stoa_addr.port);
         return stoa_server.start();
     });
 
