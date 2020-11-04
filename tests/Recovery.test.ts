@@ -33,7 +33,7 @@ class TestStoa extends Stoa
 {
     constructor (file_name: string, agora_endpoint: URL, port: string)
     {
-        super(file_name, agora_endpoint, port);
+        super(file_name, agora_endpoint, port, "127.0.0.1");
 
         this.app.get("/block",
             async (req: express.Request, res: express.Response) =>

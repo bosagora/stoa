@@ -51,7 +51,7 @@ class Stoa extends WebService
      * @param port The network port of Stoa
      * @param address The network address of Stoa
      */
-    constructor (database_filename: string, agora_endpoint: URL, port: number | string, address?: string)
+    constructor (database_filename: string, agora_endpoint: URL, port: number | string, address: string)
     {
         super(port, address);
 
