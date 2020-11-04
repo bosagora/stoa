@@ -57,7 +57,7 @@ describe ('Test of Stoa API Server', () =>
         let prom = new Promise<void>((resolve, reject) => {
             agora_server = new TestAgora("2826", sample_data, resolve);
         });
-        stoa_server = new TestStoa(":memory:", new URL("http://127.0.0.1:2826"), port);
+        stoa_server = new TestStoa(":memory:", new URL("http://127.0.0.1:2826"), port, "127.0.0.1");
         return prom.then(() => { return stoa_server.start() });
     });
 
