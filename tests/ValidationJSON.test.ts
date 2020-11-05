@@ -81,7 +81,6 @@ describe ('Test that validation with JSON schema', () =>
                     "previous": "0x5d7f6a7a30f7ff591c8649f61eb8a35d034824ed5" +
                         "cd252c2c6f10cdbd2236713dc369ef2a44b62ba113814a9d819" +
                         "a276ff61582874c9aee9c98efa2aa1f10d73",
-                    "index": 1,
                     "signature": "0x07557ce0845a7ccbba61643b95e310bd3ae06c41" +
                         "fab9e8761ff3b0e5d28a5d625a3b951223c618910b239e7b779" +
                         "c6c671252a78edff4d0f37bdb25982e4f4228"

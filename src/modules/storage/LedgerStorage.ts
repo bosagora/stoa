@@ -96,10 +96,9 @@ export class LedgerStorage extends Storages
         (
             block_height        INTEGER NOT NULL,
             tx_index            INTEGER NOT NULL,
-            in_index            INTEGER NOT NULL,
-            previous            BLOB    NOT NULL,
+            utxo                BLOB    NOT NULL,
             out_index           INTEGER NOT NULL,
-            PRIMARY KEY(block_height, tx_index, in_index)
+            PRIMARY KEY(block_height, tx_index, utxo)
         );
 
         CREATE TABLE IF NOT EXISTS tx_outputs
@@ -429,21 +428,20 @@ export class LedgerStorage extends Storages
         }
 
         function save_input (storage: LedgerStorage, height: Height, tx_idx: number,
-            in_idx: number, input: TxInputs): Promise<void>
+            input: TxInputs, out_index: number): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
             {
                 storage.run(
                     `INSERT INTO tx_inputs
-                        (block_height, tx_index, in_index, previous, out_index)
+                        (block_height, tx_index, utxo, out_index)
                     VALUES
-                        (?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?)`,
                     [
                         height.toString(),
                         tx_idx,
-                        in_idx,
-                        input.previous.toBinary(Endian.Little),
-                        input.index
+                        input.utxo.toBinary(Endian.Little),
+                        out_index
                     ]
                 )
                     .then(() =>
@@ -463,9 +461,9 @@ export class LedgerStorage extends Storages
             return new Promise<void>((resolve, reject) =>
             {
                 storage.run(
-                    `UPDATE tx_outputs SET used = 1 WHERE tx_hash = ? and output_index = ?`,
+                    `UPDATE tx_outputs SET used = 1 WHERE tx_hash = ?`,
                     [
-                        input.previous.toBinary(Endian.Little), input.index
+                        input.utxo.toBinary(Endian.Little)
                     ])
                     .then(() => {
                         resolve();
@@ -521,7 +519,7 @@ export class LedgerStorage extends Storages
 
                         for (let in_idx = 0; in_idx < block.txs[tx_idx].inputs.length; in_idx++)
                         {
-                            await save_input(this, block.header.height, tx_idx, in_idx, block.txs[tx_idx].inputs[in_idx]);
+                            await save_input(this, block.header.height, tx_idx, block.txs[tx_idx].inputs[in_idx], in_idx);
                             await update_spend_output(this, block.txs[tx_idx].inputs[in_idx]);
                         }
 
@@ -573,7 +571,7 @@ export class LedgerStorage extends Storages
     {
         let sql =
         `SELECT
-            block_height, tx_index, in_index, previous, out_index
+            block_height, tx_index, utxo, out_index
         FROM
             tx_inputs
         WHERE block_height = ? AND tx_index = ?`;
