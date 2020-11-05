@@ -141,53 +141,53 @@ class Stoa extends WebService
 
         this.ledger_storage.getValidatorsAPI(height, null)
             .then((rows: any[]) => {
-                if (rows.length)
-                {
-                    let out_put:Array<ValidatorData> = new Array<ValidatorData>();
-
-                    for (const row of rows)
-                    {
-                        let preimage_hash: Buffer = row.preimage_hash;
-                        let preimage_distance: number = row.preimage_distance;
-                        let target_height: Height = new Height(row.height);
-                        let result_preimage_hash = Hash.NULL;
-                        let start_index: bigint = BigInt(row.enrolled_at) + 1n;
-
-                        // Hashing preImage
-                        if (target_height.value >= start_index &&
-                            (start_index + BigInt(preimage_distance)) >= target_height.value)
-                        {
-                            result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                            let count = start_index + BigInt(preimage_distance) - target_height.value;
-                            for (let i = 0; i < count; i++)
-                            {
-                                result_preimage_hash = hash(result_preimage_hash.data);
-                                preimage_distance--;
-                            }
-                        }
-                        else
-                        {
-                            preimage_distance = NaN;
-                            result_preimage_hash = Hash.NULL;
-                        }
-
-                        let preimage: IPreimage = {
-                            distance: Number(preimage_distance),
-                            hash: result_preimage_hash.toString()
-                        } as IPreimage;
-
-                        let validator: ValidatorData =
-                            new ValidatorData(row.address, new Height(BigInt(row.enrolled_at)),
-                                              new Hash(row.stake, Endian.Little).toString(),
-                                              preimage);
-                        out_put.push(validator);
-                    }
-                    res.status(200).send(JSON.stringify(out_put));
-                }
-                else
+                // Nothing found
+                if (!rows.length)
                 {
                     res.status(204).send();
+                    return;
                 }
+
+                let out_put:Array<ValidatorData> = new Array<ValidatorData>();
+
+                for (const row of rows)
+                {
+                    let preimage_hash: Buffer = row.preimage_hash;
+                    let preimage_distance: number = row.preimage_distance;
+                    let target_height: Height = new Height(row.height);
+                    let result_preimage_hash = Hash.NULL;
+                    let start_index: bigint = BigInt(row.enrolled_at) + 1n;
+
+                    // Hashing preImage
+                    if (target_height.value >= start_index &&
+                        (start_index + BigInt(preimage_distance)) >= target_height.value)
+                    {
+                        result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
+                        let count = start_index + BigInt(preimage_distance) - target_height.value;
+                        for (let i = 0; i < count; i++)
+                        {
+                            result_preimage_hash = hash(result_preimage_hash.data);
+                            preimage_distance--;
+                        }
+                    }
+                    else
+                    {
+                        preimage_distance = NaN;
+                        result_preimage_hash = Hash.NULL;
+                    }
+
+                    let preimage: IPreimage = {
+                        distance: Number(preimage_distance),
+                        hash: result_preimage_hash.toString()
+                    } as IPreimage;
+
+                    let validator: ValidatorData =
+                        new ValidatorData(row.address, new Height(BigInt(row.enrolled_at)),
+                                          new Hash(row.stake, Endian.Little).toString(),
+                                          preimage);
+                    out_put.push(validator);
+                }
+                res.status(200).send(JSON.stringify(out_put));
             })
             .catch((err) => {
                 logger.error("Failed to data lookup to the DB: " + err);
@@ -228,53 +228,53 @@ class Stoa extends WebService
 
         this.ledger_storage.getValidatorsAPI(height, address)
             .then((rows: any[]) => {
-                if (rows.length)
-                {
-                    let out_put:Array<ValidatorData> = new Array<ValidatorData>();
-
-                    for (const row of rows)
-                    {
-                        let preimage_hash: Buffer = row.preimage_hash;
-                        let preimage_distance: number = row.preimage_distance;
-                        let target_height: Height = new Height(BigInt(row.height));
-                        let result_preimage_hash = Hash.NULL;
-                        let start_index: bigint = BigInt(row.enrolled_at) +1n;
-
-                        // Hashing preImage
-                        if (target_height.value >= start_index &&
-                            start_index + BigInt(preimage_distance) >= target_height.value)
-                        {
-                            result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                            let count = start_index + BigInt(preimage_distance) - target_height.value;
-                            for (let i = 0; i < count; i++)
-                            {
-                                result_preimage_hash = hash(result_preimage_hash.data);
-                                preimage_distance--;
-                            }
-                        }
-                        else
-                        {
-                            preimage_distance = NaN;
-                            result_preimage_hash = Hash.NULL;
-                        }
-
-                        let preimage: IPreimage = {
-                            distance: preimage_distance,
-                            hash: result_preimage_hash.toString()
-                        } as IPreimage;
-
-                        let validator: ValidatorData =
-                            new ValidatorData(row.address, new Height(BigInt(row.enrolled_at)),
-                                              new Hash(row.stake, Endian.Little).toString(),
-                                              preimage);
-                        out_put.push(validator);
-                    }
-                    res.status(200).send(JSON.stringify(out_put));
-                }
-                else
+                // Nothing to show
+                if (!rows.length)
                 {
                     res.status(204).send();
+                    return;
                 }
+
+                let out_put:Array<ValidatorData> = new Array<ValidatorData>();
+
+                for (const row of rows)
+                {
+                    let preimage_hash: Buffer = row.preimage_hash;
+                    let preimage_distance: number = row.preimage_distance;
+                    let target_height: Height = new Height(BigInt(row.height));
+                    let result_preimage_hash = Hash.NULL;
+                    let start_index: bigint = BigInt(row.enrolled_at) +1n;
+
+                    // Hashing preImage
+                    if (target_height.value >= start_index &&
+                        start_index + BigInt(preimage_distance) >= target_height.value)
+                    {
+                        result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
+                        let count = start_index + BigInt(preimage_distance) - target_height.value;
+                        for (let i = 0; i < count; i++)
+                        {
+                            result_preimage_hash = hash(result_preimage_hash.data);
+                            preimage_distance--;
+                        }
+                    }
+                    else
+                    {
+                        preimage_distance = NaN;
+                        result_preimage_hash = Hash.NULL;
+                    }
+
+                    let preimage: IPreimage = {
+                        distance: preimage_distance,
+                        hash: result_preimage_hash.toString()
+                    } as IPreimage;
+
+                    let validator: ValidatorData =
+                        new ValidatorData(row.address, new Height(BigInt(row.enrolled_at)),
+                                          new Hash(row.stake, Endian.Little).toString(),
+                                          preimage);
+                    out_put.push(validator);
+                }
+                res.status(200).send(JSON.stringify(out_put));
             })
             .catch((err) => {
                 logger.error("Failed to data lookup to the DB: " + err);
