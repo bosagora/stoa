@@ -25,14 +25,9 @@ import { SmartBuffer } from 'smart-buffer';
 export class TxInputs
 {
     /**
-     * The hash of the previous transaction containing the output to spend
+     * The hash of the UTXO to be spent
      */
-    public previous: Hash;
-
-    /**
-     * The index of the output in the previous transaction
-     */
-    public index: number;
+    public utxo: Hash;
 
     /**
      * A signature that should be verified using public key of the output in the previous transaction
@@ -41,14 +36,12 @@ export class TxInputs
 
     /**
      * Constructor
-     * @param previous - The hash of the previous transaction containing the output to spend
-     * @param index - The index of the output in the previous transaction
+     * @param utxo - The hash of the UTXO to be spent
      * @param signature - A signature that should be verified using public key of the output in the previous transaction
      */
-    constructor (previous: Hash, index: number, signature: Signature)
+    constructor (utxo: Hash, signature: Signature)
     {
-        this.previous = previous;
-        this.index = index;
+        this.utxo = utxo;
         this.signature = signature;
     }
 
@@ -69,7 +62,7 @@ export class TxInputs
 
         Validator.isValidOtherwiseThrow<ITxInputs>('TxInputs', value);
         return new TxInputs(
-            new Hash(value.previous), Number(value.index), new Signature(value.signature));
+            new Hash(value.utxo), new Signature(value.signature));
     }
 
     /**
@@ -78,7 +71,6 @@ export class TxInputs
      */
     public computeHash (buffer: SmartBuffer)
     {
-        this.previous.computeHash(buffer);
-        buffer.writeUInt32LE(this.index);
+        this.utxo.computeHash(buffer);
     }
 }

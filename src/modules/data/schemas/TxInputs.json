@@ -2,16 +2,13 @@
   "title": "ITxInputs",
   "type": "object",
   "properties": {
-    "previous": {
+    "utxo": {
       "type": "string"
-    },
-    "index": {
-      "type": "number"
     },
     "signature": {
       "type": "string"
     }
   },
   "additionalProperties": false,
-  "required": ["previous", "index", "signature"]
+  "required": ["utxo", "signature"]
 }
