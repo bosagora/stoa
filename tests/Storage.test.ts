@@ -15,7 +15,7 @@ import * as assert from 'assert';
 import { LedgerStorage } from '../src/modules/storage/LedgerStorage';
 import { Block, Hash, Height } from '../src/modules/data';
 import { PreImageInfo } from '../src/modules/data';
-import { sample_data_raw, sample_preImageInfo } from "./Utils";
+import { sample_data, sample_preImageInfo } from "./Utils";
 import { Endian } from "../src/modules/utils/buffer";
 
 describe ('Test ledger storage and inquiry function.', () =>
@@ -38,12 +38,9 @@ describe ('Test ledger storage and inquiry function.', () =>
         {
             try
             {
-                for (let elem of sample_data_raw)
+                for (let elem of sample_data)
                 {
-                    const block = JSON.parse(
-                        elem.replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
-                        Block.reviver);
-                    await ledger_storage.putBlocks(block);
+                    await ledger_storage.putBlocks(Block.reviver("", elem));
                 }
             }
             catch (error)
@@ -218,9 +215,7 @@ describe ('Test for storing block data in the database', () =>
 
     it ('Error-handling test when writing a transaction.', async () =>
     {
-        const block = JSON.parse(
-            sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
-            Block.reviver);
+        let block = Block.reviver("", sample_data[0]);
 
         await ledger_storage.putTransactions(block);
         await assert.rejects(ledger_storage.putTransactions(block),
@@ -232,9 +227,7 @@ describe ('Test for storing block data in the database', () =>
 
     it ('Error-handling test when writing a enrollment.', async () =>
     {
-        const block = JSON.parse(
-            sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
-            Block.reviver);
+        let block = Block.reviver("", sample_data[0]);
 
         await ledger_storage.putEnrollments(block);
         await assert.rejects(ledger_storage.putEnrollments(block),
@@ -246,9 +239,7 @@ describe ('Test for storing block data in the database', () =>
 
     it ('Error-handling test when writing a block.', async () =>
     {
-        const block = JSON.parse(
-            sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
-            Block.reviver);
+        const block = Block.reviver("", sample_data[0]);
         await ledger_storage.putBlocks(block);
         await assert.rejects(ledger_storage.putBlocks(block),
             {
@@ -258,9 +249,7 @@ describe ('Test for storing block data in the database', () =>
 
     it ('DB transaction test when writing a block', async () =>
     {
-        const block = JSON.parse(
-            sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
-            Block.reviver);
+        const block = Block.reviver("", sample_data[0]);
 
         await ledger_storage.putEnrollments(block);
         await assert.rejects(ledger_storage.putBlocks(block),
@@ -279,12 +268,8 @@ describe ('Test for storing block data in the database', () =>
 
     it ('Test for writing the block hash', async () =>
     {
-        const block0 = JSON.parse(
-            sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
-            Block.reviver);
-        const block1 = JSON.parse(
-            sample_data_raw[1].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
-            Block.reviver);
+        const block0 = Block.reviver("", sample_data[0]);
+        const block1 = Block.reviver("", sample_data[1]);
 
         // Write the Genesis block.
         await ledger_storage.putBlocks(block0);
@@ -311,12 +296,9 @@ describe ('Tests that sending a pre-image', () =>
             .then((result) => { ledger_storage = result; return result; })
             // Then fill it with sample data
             .then(async (result) => {
-                for (let elem of sample_data_raw)
+                for (let elem of sample_data)
                 {
-                    const block = JSON.parse(
-                        elem.replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
-                        Block.reviver);
-                    await result.putBlocks(block);
+                    await result.putBlocks(Block.reviver("", elem));
                 }
                 return result;
             })

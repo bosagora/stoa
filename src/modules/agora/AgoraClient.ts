@@ -91,14 +91,12 @@ export class AgoraClient implements FullNodeAPI
                 .addSearch("block_height", block_height.toString())
                 .addSearch("max_blocks", max_blocks);
 
-            this.client.get(uri.toString(), { transformResponse: (r) => r })
+            this.client.get(uri.toString())
                 .then((response: AxiosResponse) =>
                 {
                     if (response.status == 200)
                     {
-                        // Change the number to a string to preserve the precision of UInt64
-                        let text = response.data.replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3");
-                        resolve(JSON.parse(text));
+                        resolve(response.data);
                     }
                     else
                     {
