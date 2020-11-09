@@ -86,8 +86,9 @@ class Stoa extends WebService
         // Prepare middleware
 
         // parse application/x-www-form-urlencoded
-        this.app.use(bodyParser.urlencoded({extended: false}));
-        this.app.use(bodyParser.raw({type: "*/*"}));
+        this.app.use(bodyParser.urlencoded({ extended: false }))
+        // parse application/json
+        this.app.use(bodyParser.json())
         this.app.use(cors(cors_options));
         // enable pre-flight
         this.app.options('*', cors(cors_options));
@@ -292,22 +293,19 @@ class Stoa extends WebService
      */
     private putBlock (req: express.Request, res: express.Response)
     {
-        // Change the number to a string to preserve the precision of UInt64
-        let text = req.body.toString().replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3");
-        let body = JSON.parse(text);
-        if (body.block === undefined)
+        if (req.body.block === undefined)
         {
             res.status(400).send({ statusMessage: "Missing 'block' object in body"});
             return;
         }
 
-        logger.http(`POST /blocks_externalized block=${body.block.toString()}`);
+        logger.http(`POST /blocks_externalized block=${req.body.block.toString()}`);
 
         // To do
         // For a more stable operating environment,
         // it would be necessary to consider organizing the pool
         // using the database instead of the array.
-        this.pending = this.pending.then(() => { return this.task({type: "block", data: body.block}); });
+        this.pending = this.pending.then(() => { return this.task({type: "block", data: req.body.block}); });
 
         res.status(200).send();
     }
@@ -320,20 +318,19 @@ class Stoa extends WebService
      */
     private putPreImage (req: express.Request, res: express.Response)
     {
-        let body = JSON.parse(req.body.toString());
-        if (body.preimage === undefined)
+        if (req.body.preimage === undefined)
         {
             res.status(400).send({ statusMessage: "Missing 'preimage' object in body"});
             return;
         }
 
-        logger.http(`POST /preimage_received preimage=${body.preimage.toString()}`);
+        logger.http(`POST /preimage_received preimage=${req.body.preimage.toString()}`);
 
         // To do
         // For a more stable operating environment,
         // it would be necessary to consider organizing the pool
         // using the database instead of the array.
-        this.pending = this.pending.then(() => { return this.task({type: "pre_image", data: body.preimage}); });
+        this.pending = this.pending.then(() => { return this.task({type: "pre_image", data: req.body.preimage}); });
 
         res.status(200).send();
     }

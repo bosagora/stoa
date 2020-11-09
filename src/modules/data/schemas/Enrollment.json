@@ -9,7 +9,7 @@
       "type": "string"
     },
     "cycle_length": {
-      "type": "string"
+      "type": "number"
     },
     "enroll_sig": {
       "type": "string"

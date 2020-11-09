@@ -3,7 +3,7 @@
   "type": "object",
   "properties": {
     "type": {
-      "type": "string"
+      "type": "number"
     },
     "inputs": {
       "items": {

@@ -12,7 +12,7 @@
 *******************************************************************************/
 
 import { Block, Hash, hash, hashFull, hashMulti, makeUTXOKey } from '../src/modules/data'
-import { sample_data_raw } from './Utils';
+import { sample_data } from './Utils';
 
 import * as assert from 'assert';
 
@@ -80,15 +80,8 @@ describe ('Test for hash value of block data', () =>
 
     before ('Prepare test for block data hash', () =>
     {
-        const block1 = JSON.parse(
-            sample_data_raw[0].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
-            Block.reviver);
-        const block2 = JSON.parse(
-            sample_data_raw[1].replace(/([\[:])?(\d+)([,\}\]])/g, "$1\"$2\"$3"),
-            Block.reviver);
-
-        blocks.push(block1);
-        blocks.push(block2);
+        blocks.push(Block.reviver("", sample_data[0]));
+        blocks.push(Block.reviver("", sample_data[1]));
     });
 
     it ('Test that hash of block header', () =>
