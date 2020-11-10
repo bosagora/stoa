@@ -17,7 +17,7 @@ export const recovery_sample_data =
             "prev_block": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
             "height": "0",
             "merkle_root": "0x788c159d62b565655d9f725786c38e6802038ee73d7a9d187b3be1c7de95aa0ba856bf81bb556d7448488e71f4b89ce6eba319d0536798308112416413289254",
-            "validators": {"_storage":[]},
+            "validators": "[]",
             "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
             "enrollments": [
                 {
@@ -139,7 +139,7 @@ export const recovery_sample_data =
             "prev_block": "0x72e60ed061f8cef70cea61931d958f0744bc6a373f91bd4b5b2f72681aba3b53733d6715afeb474b22dd91ae99ed8f4a011138ebc252547e2cd3a297ca063b7d",
             "height": "1",
             "merkle_root": "0xe9b0c3807a04faef54ac5c870767a7a2313384fa5948f400a3b400b21a327ff6a8849608baf591638cdaf048f52e8261acb201545c7ad218e2977e18fc6f55a7",
-            "validators": {"_storage":[]},
+            "validators": "[]",
             "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
             "enrollments": []
         },
@@ -288,7 +288,7 @@ export const recovery_sample_data =
             "prev_block": "0x672047cd4e85b1d9705cae2a84183a48fab432ebac302e916afed60ec142a274c0bba97b9b493827b07f34efd9487486fc1aea304b50f55351205b5779fde5b5",
             "height": "2",
             "merkle_root": "0x255bcd64a980ade8633b9e0a7594932f530224c3ad02760c2a56ab446a433b5e587062aace9e11b3a2c0389e6c7141c01b6a5f918fa13dcc28c22e5a289f0cc0",
-            "validators": {"_storage":[]},
+            "validators": "[]",
             "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
             "enrollments": []
         },
@@ -437,7 +437,7 @@ export const recovery_sample_data =
             "prev_block": "0x927169e2e3ee1739e48fa52c8a2dae29f2581d7e7102b0082e4b7294fe4abaa9cb27496816eb7397a6d813494be0b3f6eed2325a57c1bfc1496fcdf25e7d3d06",
             "height": "3",
             "merkle_root": "0xa4c67f4db07c273ef67353937b4f038f7547958b8c97d83e50a2dfce7bfc8cf062cdce2e76b7beb5d2b8866c269892115675ecdf376814e442ab44250ae79a2a",
-            "validators": {"_storage":[]},
+            "validators": "[]",
             "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
             "enrollments": []
         },
@@ -586,7 +586,7 @@ export const recovery_sample_data =
             "prev_block": "0xefebe5516c80746a597459ef90e5123eb1e30ec6f65a6ef8e436015697d7da03522b4ec63e7987abda07af3d0610f95f9bba61f49a12822429df8dce55c3a69d",
             "height": "4",
             "merkle_root": "0x55f58a6e91d82c3c6d2c49e02745bd8fe4bf99de3edc2e8a20144260bb8e9ff07d397f5fee7a113b33b0fe547e706c4cfdc867e26a0df54d6fad8e7b983d23a4",
-            "validators": {"_storage":[]},
+            "validators": "[]",
             "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
             "enrollments": []
         },
@@ -735,7 +735,7 @@ export const recovery_sample_data =
             "prev_block": "0x35545d5be25ebe0fe916d1b09b9160aaf2e8d45c3cc1de07885b3b7ddad7ca13dca775a60fb38fdf085576c859a16bd06eea6ea73ee5335c722ce0cd7a8cbc6a",
             "height": "5",
             "merkle_root": "0xf366497f4d19d1c3bf4b32940136572091ad7df12bd73bdfc91789e96a64d204023811b360bf3055476c4122f649a8f410e775a2c7444722ff6eec531dd2a9d2",
-            "validators": {"_storage":[]},
+            "validators": "[]",
             "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
             "enrollments": []
         },
@@ -884,7 +884,7 @@ export const recovery_sample_data =
             "prev_block": "0x2c00dc07e59b9946dcd44e2e45542a5a3ae55e714cf775bdff87c7e8f0c12299fe763269c02f9562b77de484a12f31658aeef7c45946f5ee9c55ee1c03f20038",
             "height": "6",
             "merkle_root": "0x26f30b7ff4d11816c40aaeefb75c825ba9848cf599d942a3dd3bdff21b4b85b8f9192388ac5cbb05429684d6ed44473c624d41c6dd28c77d1b2582ea24d5fd3e",
-            "validators": {"_storage":[]},
+            "validators": "[]",
             "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
             "enrollments": []
         },
@@ -1033,7 +1033,7 @@ export const recovery_sample_data =
             "prev_block": "0x7b21ea1c05360ac6be88869ef478d6a0a50246200411c31841076fcf1e7c2180b12894fcade6dabed8bc225ba65138a594a41624273fec6d8dc762b8753c6da0",
             "height": "7",
             "merkle_root": "0xa2f482fde5e3226a492b858c597a3eea5a5d9c32bf59e1e10d74aa54a57f08fc0ff75877964b6bb00b6ac57d4d4ae02a3ce5f473850f6281397fc40099932c61",
-            "validators": {"_storage":[]},
+            "validators": "[]",
             "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
             "enrollments": []
         },
@@ -1182,7 +1182,7 @@ export const recovery_sample_data =
             "prev_block": "0x19d95442fd9cc376f39e0daba8249b6e00f41e65602729b1667ffd0d57ba5cc25018fd26c3af289f4af45b7635d7f93ec99c1476ad187d2f64282cb3941e1b8b",
             "height": "8",
             "merkle_root": "0x5c8c45e707c6e645363b8222ba47ff32fbc2f5b3f3d05381d86b75c26d850152bd6f42379ac9dff55f2880201b40d6030b014f6f205a135bb5ed0209731dfa5b",
-            "validators": {"_storage":[]},
+            "validators": "[]",
             "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
             "enrollments": []
         },
@@ -1331,7 +1331,7 @@ export const recovery_sample_data =
             "prev_block": "0x0087cd7156767490b57deb30a3fe292f2f6275a366b2db7447db115a37010cfb44a0707b3cf998a4927f7a53dbce90505e3d110bda78eb3aa7b853d89c2372f4",
             "height": "9",
             "merkle_root": "0xfad13a88aae2389de18c5216abbac233d2dc1ca5f1bb06ff7f072fddcca726257566c4efc10507ee7d13cebdd60b12f47f60adb0f06611fefa19d94a3a354971",
-            "validators": {"_storage":[]},
+            "validators": "[]",
             "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
             "enrollments": []
         },

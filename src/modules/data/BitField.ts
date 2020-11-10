@@ -23,7 +23,7 @@ export class BitField
     /**
      * The storage with bit data
      */
-    public _storage: number[];
+    public storage: number[];
 
     /**
      * Constructor
@@ -31,7 +31,7 @@ export class BitField
      */
     constructor (storage: number[])
     {
-        this._storage = storage;
+        this.storage = storage;
     }
 
     /**
@@ -49,7 +49,9 @@ export class BitField
         if (key != "")
             return value;
 
-        Validator.isValidOtherwiseThrow<IBitField>('BitField', value);
-        return new BitField(value._storage.map((elem: string) => Number(elem)));
+        let storage = JSON.parse(value);
+        Validator.isValidOtherwiseThrow<IBitField>('BitField', storage);
+
+        return new BitField(storage);
     }
 }

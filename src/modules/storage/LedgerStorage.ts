@@ -159,7 +159,7 @@ export class LedgerStorage extends Storages
                         block.header.height.toString(),
                         block_hash.toBinary(Endian.Little),
                         block.header.prev_block.toBinary(Endian.Little),
-                        JSON.stringify(block.header.validators._storage),
+                        JSON.stringify(block.header.validators.storage),
                         block.header.merkle_root.toBinary(Endian.Little),
                         block.header.signature.toBinary(Endian.Little),
                         block.txs.length,

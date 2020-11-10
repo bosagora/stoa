@@ -1,14 +1,9 @@
 {
   "title": "IBitField",
-  "type": "object",
-  "properties": {
-    "_storage": {
-      "items": {
-        "type": "number"
-      },
-      "type": "array"
-    }
+  "type": "array",
+  "items": {
+    "type": "number"
   },
   "additionalProperties": false,
-  "required": ["_storage"]
+  "required": []
 }

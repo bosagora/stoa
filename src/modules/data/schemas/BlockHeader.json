@@ -12,7 +12,7 @@
       "type": "string"
     },
     "validators": {
-      "type": "object"
+      "type": "string"
     },
     "signature": {
       "type": "string"
