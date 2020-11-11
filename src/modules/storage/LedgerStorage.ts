@@ -619,19 +619,24 @@ export class LedgerStorage extends Storages
                 enrollments.enrolled_at,
                 enrollments.utxo_key as stake,
                 enrollments.random_seed,
+                enrollments.avail_height,
                 ` + cur_height + ` as height,
                 validators.preimage_distance,
-                validators.preimage_hash,
-                (` + cur_height + ` - (enrollments.enrolled_at + 1)) as test
+                validators.preimage_hash
         FROM (SELECT MAX(block_height) as enrolled_at,
+                (CASE WHEN block_height = 0 THEN
+                      block_height
+                 ELSE
+                      block_height + 1
+                 END) as avail_height,
                 enrollment_index,
                 utxo_key,
                 random_seed,
                 cycle_length,
                 enroll_sig
              FROM enrollments
-             WHERE (block_height + 1) <= ` + cur_height + `
-               AND ` + cur_height + ` <= (block_height + cycle_length)
+             WHERE avail_height <= ` + cur_height + `
+               AND ` + cur_height + ` < (avail_height + cycle_length)
              GROUP BY utxo_key) as enrollments
         INNER JOIN tx_outputs
             ON enrollments.utxo_key = tx_outputs.utxo_key
