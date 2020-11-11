@@ -99,18 +99,25 @@ class Stoa extends WebService
         this.app.post("/block_externalized", this.putBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
 
+        let height: Height = new Height(0n);
+
         // Start the server once we can establish a connection to Agora
         return this.agora.getBlockHeight()
             .then(
                 (res) => {
+                    height.value = res.value;
                     logger.info(`Connected to Agora, block height is ${res.toString()}`);
                     return super.start();
                 },
                 (err) => {
                     logger.error(`Error: Could not connect to Agora node: ${err.toString()}`);
                     process.exit(1);
-                }
-            );
+                })
+            .then(
+                () =>
+                {
+                    return this.pending = this.pending.then(() => { return this.catchup(height); });
+                });
     }
 
     /**
@@ -366,7 +373,7 @@ class Stoa extends WebService
             (async () => {
                 try
                 {
-                    let max_blocks : bigint = height.value - expected_height.value;
+                    let max_blocks : bigint = height.value - expected_height.value + ((block == null) ? 1n : 0n);
 
                     if (max_blocks > this._max_count_on_recovery)
                         max_blocks = BigInt(this._max_count_on_recovery);
@@ -396,8 +403,11 @@ class Stoa extends WebService
                     // Save a block just received
                     if (height.value <= expected_height.value)
                     {
-                        await this.ledger_storage.putBlocks(Block.reviver("", block));
-                        logger.info(`Saved a block with block height of ${height.toString()}`);
+                        if (block != null)
+                        {
+                            await this.ledger_storage.putBlocks(Block.reviver("", block));
+                            logger.info(`Saved a block with block height of ${height.toString()}`);
+                        }
                         resolve(true);
                     }
                     else
@@ -487,6 +497,41 @@ class Stoa extends WebService
                     logger.error("Failed to store the payload of a update to the DB: " + err);
                     reject(err);
                 }
+            }
+        });
+    }
+
+    /**
+     * Catches up to block height of Agora
+     * This is done only once immediately after Stoa is executed.
+     * @param height The block height of Agora
+     */
+    private catchup (height: Height): Promise<void>
+    {
+        return new Promise<void>(async (resolve, reject) =>
+        {
+            try
+            {
+                let expected_height = await this.ledger_storage.getExpectedBlockHeight();
+
+                if (height.value > expected_height.value) {
+                    while (true) {
+                        if (await this.recoverBlock(null, height, expected_height))
+                            break;
+                        // If the number of blocks to be recovered is too large,
+                        // only a part of them will be recovered.
+                        // Therefore, the height of the block to start the recovery
+                        // is taken from the database.
+                        expected_height = await this.ledger_storage.getExpectedBlockHeight();
+                    }
+                }
+
+                resolve();
+            }
+            catch(err)
+            {
+                logger.error("Failed to catch up to block height of Agora: " + err);
+                reject(err);
             }
         });
     }
