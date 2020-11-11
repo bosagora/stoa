@@ -133,8 +133,7 @@ class Stoa extends WebService
         if ((req.query.height !== undefined) &&
             !Utils.isPositiveInteger(req.query.height.toString()))
         {
-            res.status(400).send({
-                statusMessage: `Invalid value for parameter 'height': ${req.query.height.toString()}`});
+            res.status(400).send(`Invalid value for parameter 'height': ${req.query.height.toString()}`);
             return;
         }
 
@@ -152,7 +151,11 @@ class Stoa extends WebService
                 // Nothing found
                 if (!rows.length)
                 {
-                    res.status(204).send();
+                    if (height !== null)
+                        res.status(400).send("No validator exists for block height.");
+                    else
+                        res.status(503).send("Stoa is currently unavailable.");
+
                     return;
                 }
 
@@ -218,8 +221,7 @@ class Stoa extends WebService
         if ((req.query.height !== undefined) &&
             !Utils.isPositiveInteger(req.query.height.toString()))
         {
-            res.status(400).send({
-                statusMessage: `Invalid value for parameter 'height': ${req.query.height.toString()}`});
+            res.status(400).send(`Invalid value for parameter 'height': ${req.query.height.toString()}`);
             return;
         }
 
@@ -239,7 +241,8 @@ class Stoa extends WebService
                 // Nothing to show
                 if (!rows.length)
                 {
-                    res.status(204).send();
+                    res.status(400).send(`The validator data not found.` +
+                    `'address': (${address}), 'height': (${height?.toString()})`);
                     return;
                 }
 

@@ -97,6 +97,20 @@ describe ('Test of Stoa API Server', () =>
             .filename("GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY")
             .setSearch("height", "10");
 
+        let fail_uri = URI(host)
+            .port(port)
+            .directory("validator")
+            .filename("GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY")
+            .setSearch("height", "99");
+
+        (async () =>
+        {
+            await assert.rejects(
+                client.get(fail_uri.toString()),
+                {message: "Request failed with status code 400"}
+            )
+        })();
+
         client.get (uri.toString())
             .then((response) =>
             {
@@ -222,8 +236,10 @@ describe ('Test of Stoa API Server', () =>
             .directory("validators")
             .setSearch("height", "41");
 
-            response = await client.get (uri9.toString());
-            assert.strictEqual(response.data.length, 0);
+            await assert.rejects(
+                client.get(uri9.toString()),
+                {message: "Request failed with status code 400"}
+            );
 
             doneIt();
         }, 200);
