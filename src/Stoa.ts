@@ -454,9 +454,11 @@ class Stoa extends WebService
                     else if (height.value > expected_height.value)
                     {
                         // Recovery is required for blocks that are not received.
-                        let success: boolean = false;
-                        while (!success)
-                            success = await this.recoverBlock(block, height, expected_height);
+                        while (true) {
+                            if (await this.recoverBlock(block, height, expected_height))
+                                break;
+                            expected_height = await this.ledger_storage.getExpectedBlockHeight();
+                        }
                     }
                     else
                     {
