@@ -37,14 +37,14 @@ export const sample_data =
 export const sample_preImageInfo =
     {
         "enroll_key": "0x46883e83778481d640a95fcffd6e1a1b6defeaac5a8001cd3f99e17576b809c7e9bc7a44c3917806765a5ff997366e217ff54cd4da09c0c51dc339c47052a3ac",
-        "hash": "0x0a8201f9f5096e1ce8e8de4147694940a57a188b78293a55144fc8777a774f2349b3a910fb1fb208514fb16deaf49eb05882cdb6796a81f913c6daac3eb74328",
+        "hash": "0x790ab7c8f8ddbf012561e70c944c1835fd1a873ca55c973c828164906f8b35b924df7bddcafade688ad92cfb4414b2cf69a02d115dc214bbd00d82167f645e7e",
         "distance": 6
     };
 
 export const sample_reEnroll_preImageInfo =
     {
         "enroll_key": "0x46883e83778481d640a95fcffd6e1a1b6defeaac5a8001cd3f99e17576b809c7e9bc7a44c3917806765a5ff997366e217ff54cd4da09c0c51dc339c47052a3ac",
-        "hash": "0x25677ee5a05590d68276d1967cbe37e3cf3e731502afd043fafc82b0181cd120cef6272e5aea2dafaca0236a4ce7c1edd4fe21ae770930a8e206bd7080066a4c",
+        "hash": "0xe51e1cc8dfdcdcd02586c9648c6977504eade2dffc8f3289e7ae7e501c2879f99af6a199ccad499be02a66d409ca4ab51b35f1c3a06a82464ce4efcfeb3ade33",
         "distance": 6
     };
 

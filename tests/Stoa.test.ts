@@ -140,17 +140,29 @@ describe ('Test of Stoa API Server', () =>
         // Wait for the data added to the pool to be processed.
         setTimeout(async () =>
         {
+            let uri1 = URI(host)
+            .port(port)
+            .directory("validator")
+            .filename("GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY")
+            .setSearch("height", "0");
+
+            let response = await client.get (uri1.toString());
+            assert.strictEqual(response.data.length, 1);
+            assert.strictEqual(response.data[0].preimage.distance, 0);
+            assert.strictEqual(response.data[0].preimage.hash,
+            "0x0a8201f9f5096e1ce8e8de4147694940a57a188b78293a55144fc8777a774f2349b3a910fb1fb208514fb16deaf49eb05882cdb6796a81f913c6daac3eb74328");
+
             let uri2 = URI(host)
                 .port(port)
                 .directory("validator")
                 .filename("GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY")
-                .setSearch("height", "7");
+                .setSearch("height", "6");
 
-            let response = await client.get (uri2.toString());
+            response = await client.get (uri2.toString());
             assert.strictEqual(response.data.length, 1);
             assert.strictEqual(response.data[0].preimage.distance, 6);
             assert.strictEqual(response.data[0].preimage.hash,
-                "0x0a8201f9f5096e1ce8e8de4147694940a57a188b78293a55144fc8777a774f2349b3a910fb1fb208514fb16deaf49eb05882cdb6796a81f913c6daac3eb74328");
+                "0x790ab7c8f8ddbf012561e70c944c1835fd1a873ca55c973c828164906f8b35b924df7bddcafade688ad92cfb4414b2cf69a02d115dc214bbd00d82167f645e7e");
 
             let uri3 = URI(host)
                 .port(port)
@@ -159,9 +171,9 @@ describe ('Test of Stoa API Server', () =>
                 .setSearch("height", "1");
             response = await client.get (uri3.toString());
             assert.strictEqual(response.data.length, 1);
-            assert.strictEqual(response.data[0].preimage.distance, 0);
+            assert.strictEqual(response.data[0].preimage.distance, 1);
             assert.strictEqual(response.data[0].preimage.hash,
-                "0x00b72d857beb3f5b3dd378fed5df1f20dad68a3710082b10d48d47d1ac09fabfd0d4463ee1a34ef499d7c0dd09f644e32fc1f315f68f67c35b9d99b228be6377");
+                "0x314e30482fd0b498361e8537961d875e52b7e82edb8260cd548d3edacb451c80f41dd0ba9c5700adfb646066d41b0031120b65cba2df91def9bd83263fb306bd");
 
             let uri4 = URI(host)
                 .port(port)
@@ -178,9 +190,9 @@ describe ('Test of Stoa API Server', () =>
                 .directory("validators");
             response = await client.get (uri5.toString());
             assert.strictEqual(response.data.length, 6);
-            assert.strictEqual(response.data[0].preimage.distance, 0);
+            assert.strictEqual(response.data[0].preimage.distance, 1);
             assert.strictEqual(response.data[0].preimage.hash,
-                "0x00b72d857beb3f5b3dd378fed5df1f20dad68a3710082b10d48d47d1ac09fabfd0d4463ee1a34ef499d7c0dd09f644e32fc1f315f68f67c35b9d99b228be6377");
+                "0x314e30482fd0b498361e8537961d875e52b7e82edb8260cd548d3edacb451c80f41dd0ba9c5700adfb646066d41b0031120b65cba2df91def9bd83263fb306bd");
 
             // re-enrollment
             const enroll_sig =
@@ -191,7 +203,7 @@ describe ('Test of Stoa API Server', () =>
                 new Hash("0xe0c04a5bd47ffc5b065b7d397e251016310c43dc77220bf803b73f1183da00b0e67602b1f95cb18a0059aa1cdf2f9adafe979998364b38cd5c15d92b9b8fd815");
             const enrollment = new Enrollment(utxo_key, random_seed, 20, enroll_sig);
             const header = new BlockHeader(
-                Hash.NULL, new Height(20n), Hash.NULL, new BitField([]),
+                Hash.NULL, new Height(19n), Hash.NULL, new BitField([]),
                 new Signature(Buffer.alloc(Signature.Width)), [ enrollment ]);
             const block = new Block(header, [], []);
 
@@ -201,7 +213,7 @@ describe ('Test of Stoa API Server', () =>
             let uri6 = URI(host)
             .port(port)
             .directory("validators")
-            .setSearch("height", "20");
+            .setSearch("height", "19");
 
             response = await client.get (uri6.toString());
             assert.strictEqual(response.data.length, 6);
@@ -212,29 +224,29 @@ describe ('Test of Stoa API Server', () =>
             let uri7 = URI(host)
             .port(port)
             .directory("validators")
-            .setSearch("height", "21");
+            .setSearch("height", "20");
 
             response = await client.get (uri7.toString());
             assert.strictEqual(response.data.length, 1);
 
             assert.strictEqual(response.data[0].stake, enrollment.utxo_key.toString());
-            assert.strictEqual(response.data[0].enrolled_at, "20");
+            assert.strictEqual(response.data[0].enrolled_at, "19");
 
             let uri8 = URI(host)
             .port(port)
             .directory("validators")
-            .setSearch("height", "40");
+            .setSearch("height", "39");
 
             response = await client.get (uri8.toString());
             assert.strictEqual(response.data.length, 1);
 
             assert.strictEqual(response.data[0].stake, enrollment.utxo_key.toString());
-            assert.strictEqual(response.data[0].enrolled_at, "20");
+            assert.strictEqual(response.data[0].enrolled_at, "19");
 
             let uri9 = URI(host)
             .port(port)
             .directory("validators")
-            .setSearch("height", "41");
+            .setSearch("height", "40");
 
             await assert.rejects(
                 client.get(uri9.toString()),

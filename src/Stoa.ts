@@ -167,14 +167,14 @@ class Stoa extends WebService
                     let preimage_distance: number = row.preimage_distance;
                     let target_height: Height = new Height(row.height);
                     let result_preimage_hash = Hash.NULL;
-                    let start_index: bigint = BigInt(row.enrolled_at) + 1n;
+                    let avail_height: bigint = BigInt(row.avail_height);
 
                     // Hashing preImage
-                    if (target_height.value >= start_index &&
-                        (start_index + BigInt(preimage_distance)) >= target_height.value)
+                    if (target_height.value >= avail_height &&
+                        (avail_height + BigInt(preimage_distance)) >= target_height.value)
                     {
                         result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                        let count = start_index + BigInt(preimage_distance) - target_height.value;
+                        let count = avail_height + BigInt(preimage_distance) - target_height.value;
                         for (let i = 0; i < count; i++)
                         {
                             result_preimage_hash = hash(result_preimage_hash.data);
@@ -183,8 +183,16 @@ class Stoa extends WebService
                     }
                     else
                     {
-                        preimage_distance = NaN;
-                        result_preimage_hash = Hash.NULL;
+                        if (target_height.value == row.enrolled_at)
+                        {
+                            preimage_distance = 0;
+                            result_preimage_hash.fromBinary(row.random_seed, Endian.Little);
+                        }
+                        else
+                        {
+                            preimage_distance = NaN;
+                            result_preimage_hash = Hash.NULL;
+                        }
                     }
 
                     let preimage: IPreimage = {
@@ -254,14 +262,13 @@ class Stoa extends WebService
                     let preimage_distance: number = row.preimage_distance;
                     let target_height: Height = new Height(BigInt(row.height));
                     let result_preimage_hash = Hash.NULL;
-                    let start_index: bigint = BigInt(row.enrolled_at) +1n;
-
+                    let avail_height: bigint = BigInt(row.avail_height);
                     // Hashing preImage
-                    if (target_height.value >= start_index &&
-                        start_index + BigInt(preimage_distance) >= target_height.value)
+                    if (target_height.value >= avail_height &&
+                        avail_height + BigInt(preimage_distance) >= target_height.value)
                     {
                         result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                        let count = start_index + BigInt(preimage_distance) - target_height.value;
+                        let count = avail_height + BigInt(preimage_distance) - target_height.value;
                         for (let i = 0; i < count; i++)
                         {
                             result_preimage_hash = hash(result_preimage_hash.data);
@@ -270,8 +277,16 @@ class Stoa extends WebService
                     }
                     else
                     {
-                        preimage_distance = NaN;
-                        result_preimage_hash = Hash.NULL;
+                        if (target_height.value == row.avail_height)
+                        {
+                            preimage_distance = 0;
+                            result_preimage_hash.fromBinary(row.random_seed, Endian.Little);
+                        }
+                        else
+                        {
+                            preimage_distance = NaN;
+                            result_preimage_hash = Hash.NULL;
+                        }
                     }
 
                     let preimage: IPreimage = {
