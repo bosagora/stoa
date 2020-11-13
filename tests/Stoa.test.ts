@@ -35,13 +35,17 @@ describe ('Test of Stoa API Server', () =>
     let agora_server: TestAgora;
     let client = axios.create();
 
-    before ('Start Stoa API Server and a fake Agora', () =>
+    before ('Start a fake Agora', () =>
     {
-        let prom = new Promise<void>((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             agora_server = new TestAgora("2826", sample_data, resolve);
         });
+    });
+
+    before ('Start Stoa API Server', () =>
+    {
         stoa_server = new TestStoa(new URL("http://127.0.0.1:2826"), port);
-        return prom.then(() => { return stoa_server.start() });
+        return stoa_server.start();
     });
 
     after ('Stop Stoa and Agora server instances', () =>
