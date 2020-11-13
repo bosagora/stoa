@@ -116,7 +116,7 @@ class Stoa extends WebService
             .then(
                 () =>
                 {
-                    return this.pending = this.pending.then(() => { return this.catchup(height); });
+                    return this.catchup(height);
                 });
     }
 
