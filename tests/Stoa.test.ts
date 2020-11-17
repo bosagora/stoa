@@ -67,6 +67,25 @@ describe ('Test of Stoa API Server', () =>
         });
     });
 
+    it ('Test of the path /block_height', (doneIt: () => void) =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .filename("block_height");
+
+        let url = uri.toString();
+        client.get (url)
+            .then((response) =>
+            {
+                assert.strictEqual(response.data, '1');
+            })
+            .catch((error) =>
+            {
+                assert.ok(!error, error);
+            })
+            .finally(doneIt);
+    });
+
     it ('Test of the path /validators', (doneIt: () => void) =>
     {
         let uri = URI(host)

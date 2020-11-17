@@ -219,6 +219,32 @@ export class LedgerStorage extends Storages
     }
 
     /**
+     * Get the highest block height in this Stoa DB
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the block height
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getBlockHeight (): Promise<Height | null>
+    {
+        return new Promise<Height | null>((resolve, reject) =>
+        {
+            let sql = `SELECT MAX(height) as height FROM blocks`;
+            this.query(sql, [])
+                .then((row: any[]) =>
+                {
+                    if (row[0].height !== null)
+                        resolve(new Height(BigInt(row[0].height)));
+                    else
+                        resolve(null);
+                })
+                .catch((err) =>
+                {
+                    reject(err);
+                });
+        });
+    }
+
+    /**
      * Puts all enrollments
      * @param block: The instance of the `Block`
      */
