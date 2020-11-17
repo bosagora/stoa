@@ -207,7 +207,7 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getBlocks (height: Height): Promise<any[]>
+    public getBlock (height: Height): Promise<any[]>
     {
         let sql =
         `SELECT

@@ -52,7 +52,7 @@ describe ('Test ledger storage and inquiry function.', () =>
         }).then(() => {
             let height_value = 1;
             let height = new Height(BigInt(height_value));
-            ledger_storage.getBlocks(height)
+            ledger_storage.getBlock(height)
                 .then((rows: any[]) =>
                 {
                     assert.strictEqual(rows.length, 1);
@@ -258,7 +258,7 @@ describe ('Test for storing block data in the database', () =>
                     " enrollments.block_height, enrollments.enrollment_index"
             });
 
-        let rows0: any[] = await ledger_storage.getBlocks(new Height(0n));
+        let rows0: any[] = await ledger_storage.getBlock(new Height(0n));
         assert.strictEqual(rows0.length, 0);
 
         await ledger_storage.putTransactions(block);
@@ -275,7 +275,7 @@ describe ('Test for storing block data in the database', () =>
         await ledger_storage.putBlocks(block0);
 
         // The block is read from the database.
-        let rows = await ledger_storage.getBlocks(new Height(0n));
+        let rows = await ledger_storage.getBlock(new Height(0n));
         if (rows.length > 0)
         {
             // Check that the `prev_block` of block1 is the same as the hash value of the database.

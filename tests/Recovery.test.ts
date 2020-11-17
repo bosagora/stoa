@@ -50,7 +50,7 @@ class TestRecoveryStoa extends TestStoa
 
                 try
                 {
-                    let rows = await this.ledger_storage.getBlocks(block_height);
+                    let rows = await this.ledger_storage.getBlock(block_height);
                     if (rows.length > 0)
                         res.status(200).send(rows[0]);
                     else
