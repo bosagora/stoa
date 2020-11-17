@@ -364,7 +364,7 @@ class Stoa extends WebService
      * Extract the block height from JSON.
      * @param block
      */
-    private static getBlockHeight(block: any): Height
+    private static getJsonBlockHeight(block: any): Height
     {
         if ((block.header === undefined) ||
             (block.header.height === undefined))
@@ -403,7 +403,7 @@ class Stoa extends WebService
                         // Save previous block
                         for (let elem of blocks)
                         {
-                            let element_height = Stoa.getBlockHeight(elem);
+                            let element_height = Stoa.getJsonBlockHeight(elem);
                             if (element_height.value == expected_height.value)
                             {
                                 await this.ledger_storage.putBlocks(Block.reviver("", elem));
@@ -469,7 +469,7 @@ class Stoa extends WebService
 
                 try
                 {
-                    let height = Stoa.getBlockHeight(block);
+                    let height = Stoa.getJsonBlockHeight(block);
                     let expected_height = await this.ledger_storage.getExpectedBlockHeight();
 
                     if (height.value == expected_height.value)
