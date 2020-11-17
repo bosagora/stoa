@@ -94,6 +94,7 @@ class Stoa extends WebService
         this.app.options('*', cors(cors_options));
 
         // Prepare routes
+        this.app.get("/block_height", this.getBlockHeight.bind(this));
         this.app.get("/validators", this.getValidators.bind(this));
         this.app.get("/validator/:address", this.getValidator.bind(this));
         this.app.post("/block_externalized", this.putBlock.bind(this));
@@ -359,6 +360,29 @@ class Stoa extends WebService
 
         res.status(200).send();
     }
+
+    /**
+     * GET /block_height
+     *
+     * Return the highest block height stored in Stoa
+     */
+    private getBlockHeight (req: express.Request, res: express.Response)
+    {
+        logger.http(`GET /block_height`);
+
+        this.ledger_storage.getBlockHeight()
+            .then((row: Height | null) => {
+                if (row == null)
+                    res.status(400).send(`The block height not found.`);
+                else
+                    res.status(200).send(JSON.stringify(row));
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err);
+                res.status(500).send("Failed to data lookup");
+            }
+            );
+    };
 
     /**
      * Extract the block height from JSON.
