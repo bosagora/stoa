@@ -7,6 +7,7 @@ import {Height, PreImageInfo, Hash, hash, Block } from './modules/data';
 import { Utils } from './modules/utils/Utils';
 import { ValidatorData, IPreimage } from './modules/data/ValidatorData';
 import { WebService } from './modules/service/WebService';
+import { IUnspentTxOutput } from './Types';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -97,6 +98,7 @@ class Stoa extends WebService
         this.app.get("/block_height", this.getBlockHeight.bind(this));
         this.app.get("/validators", this.getValidators.bind(this));
         this.app.get("/validator/:address", this.getValidator.bind(this));
+        this.app.get("/utxo/:address", this.getUTXO.bind(this));
         this.app.post("/block_externalized", this.putBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
 
@@ -308,6 +310,47 @@ class Stoa extends WebService
                 res.status(500).send("Failed to data lookup");
             }
         );
+    }
+
+    /**
+     * GET /utxo/:address
+     *
+     * Called when a request is received through the `/utxo/:address` handler
+     *
+     * Returns a set of UTXOs of the address.
+     */
+    private getUTXO (req: express.Request, res: express.Response)
+    {
+        let address: string = String(req.params.address);
+
+        logger.http(`GET /utxo/${address}}`);
+
+        this.ledger_storage.getUTXO(address)
+            .then((rows: any[]) => {
+                if (!rows.length)
+                {
+                    res.status(400).send(`The UTXO not found. address': (${address})`);
+                    return;
+                }
+
+                let utxo_array: Array<IUnspentTxOutput> = [];
+                for (const row of rows)
+                {
+                    let utxo = {
+                        utxo: new Hash(row.utxo, Endian.Little).toString(),
+                        type: row.type,
+                        unlock_height: BigInt(row.unlock_height).toString(),
+                        amount: BigInt(row.amount).toString()
+                    }
+                    utxo_array.push(utxo);
+                }
+                res.status(200).send(JSON.stringify(utxo_array));
+            })
+            .catch((err) => {
+                    logger.error("Failed to data lookup to the DB: " + err);
+                    res.status(500).send("Failed to data lookup");
+                }
+            );
     }
 
     /**
