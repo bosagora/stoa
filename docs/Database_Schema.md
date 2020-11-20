@@ -170,10 +170,30 @@ CREATE TABLE IF NOT EXISTS "validators" (
     PRIMARY KEY("enrolled_at","utxo_key")
 )
 ```
+----
+
+## 7. Table **payloads**
+
+### _Schema_
+
+| Column            | Data Type | PK | Not NULL | Default  |Description|
+|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
+|  tx_hash          | BLOB      | Y  | Y        |          | The hash of transaction |
+|  payload          | BLOB      |    | Y        |          | The transaction data payload |
+
+### _Create Script_
+
+```sql
+CREATE TABLE IF NOT EXISTS "payloads" (
+    "tx_hash"               BLOB    NOT NULL,
+    "payload"               BLOB    NOT NULL,
+    PRIMARY KEY("tx_hash")
+)
+```
 
 ----
 
-## 6. Table **information**
+## 8. Table **information**
 
 It can store information that is required for operation.
 The following data is recorded when the most recently recorded block height is 100.

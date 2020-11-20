@@ -73,7 +73,8 @@
                     "value": "20000000000000",
                     "address": "GDNODE7J5EUK7T6HLEO2FDUBWZEXVXHJO7C4AF5VZAKZENGQ4WR3IX2U"
                 }
-            ]
+            ],
+            "payload": ""
         },
         {
             "type": 0,
@@ -111,7 +112,8 @@
                     "value": "610000000000000",
                     "address": "GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ"
                 }
-            ]
+            ],
+            "payload": ""
         }
     ],
     "merkle_tree": [

@@ -19,6 +19,7 @@ export { IPreImageInfo } from '../types/PreImageInfo';
 export { ITransaction } from '../types/Transaction';
 export { ITxInputs } from '../types/TxInputs';
 export { ITxOutputs } from '../types/TxOutputs';
+export { IDataPayload } from '../types/DataPayload';
 
 import Ajv from 'ajv';
 

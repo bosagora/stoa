@@ -13,10 +13,12 @@
 
 import * as assert from 'assert';
 import { LedgerStorage } from '../src/modules/storage/LedgerStorage';
-import { Block, Hash, Height } from '../src/modules/data';
+import { Block, Hash, Height, DataPayload } from '../src/modules/data';
 import { PreImageInfo } from '../src/modules/data';
 import { sample_data, sample_preImageInfo } from "./Utils";
 import { Endian } from "../src/modules/utils/buffer";
+
+import * as fs from 'fs';
 
 describe ('Test ledger storage and inquiry function.', () =>
 {
@@ -196,6 +198,32 @@ describe ('Test ledger storage and inquiry function.', () =>
                 assert.ok(!err, err);
                 doneIt();
             });
+    });
+
+    it ('Test for saving of a block with transaction data payload', () =>
+    {
+        let data: string = fs.readFileSync('tests/data/Block.2.sample1.json', 'utf-8');
+        let block: Block = Block.reviver("", JSON.parse(data))
+        return new Promise<void>(async (resolve, reject) =>
+        {
+            try
+            {
+                await ledger_storage.putBlocks(block);
+            }
+            catch (error)
+            {
+                reject(error);
+                return;
+            }
+            resolve();
+        }).then(() => {
+            ledger_storage.getPayload(block.merkle_tree[0])
+                .then((rows: any[]) =>
+                {
+                    assert.strictEqual(rows.length, 1);
+                    assert.deepStrictEqual(new DataPayload(rows[0].payload, Endian.Little), block.txs[0].payload);
+                })
+        });
     });
 });
 

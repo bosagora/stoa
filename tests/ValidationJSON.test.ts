@@ -25,7 +25,8 @@ describe ('Test that validation with JSON schema', () =>
             Validator.isValidOtherwiseThrow<ITransaction>
             ("Transaction", {
                 "inputs": [],
-                "outputs": []
+                "outputs": [],
+                "payload": ""
             });
         }, new Error("Validation failed: Transaction" +
             " - should have required property 'type'"));
@@ -37,7 +38,8 @@ describe ('Test that validation with JSON schema', () =>
             ("Transaction", {
                 "type": 1,
                 "inputs": {},
-                "outputs": []
+                "outputs": [],
+                "payload": ""
             });
         }, new Error("Validation failed: Transaction - should be array"));
 
@@ -45,7 +47,8 @@ describe ('Test that validation with JSON schema', () =>
         assert.ok(!Validator.isValidOtherwiseNoThrow<ITransaction>
         ("Transaction", {
             "inputs": [],
-            "outputs": []
+            "outputs": [],
+            "payload": ""
         }));
 
         // When attribute `inputs` is not an array
@@ -53,7 +56,8 @@ describe ('Test that validation with JSON schema', () =>
         ("Transaction", {
             "type": 1,
             "inputs": {},
-            "outputs": []
+            "outputs": [],
+            "payload": ""
         }));
 
         // When everything is normal
@@ -68,7 +72,8 @@ describe ('Test that validation with JSON schema', () =>
                     "address": "GA3DMXTREDC4AIUTHRFIXCKWKF7BDIXRWM2KLV74OPK2" +
                         "OKDM2VJ235GN"
                 }
-            ]
+            ],
+            "payload": ""
         }));
 
         // When everything is normal
@@ -92,7 +97,8 @@ describe ('Test that validation with JSON schema', () =>
                     "address": "GA3DMXTREDC4AIUTHRFIXCKWKF7BDIXRWM2KLV74OPK2" +
                         "OKDM2VJ235GN"
                 }
-            ]
+            ],
+            "payload": ""
         }));
 
     });
