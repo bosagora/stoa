@@ -114,6 +114,12 @@ export class LedgerStorage extends Storages
             PRIMARY KEY(block_height, tx_index, output_index)
         );
 
+        CREATE TABLE IF NOT EXISTS payloads (
+            tx_hash             BLOB    NOT NULL,
+            payload             BLOB    NOT NULL,
+            PRIMARY KEY("tx_hash")
+        );
+        
         CREATE TABLE IF NOT EXISTS validators
         (
             enrolled_at         INTEGER NOT NULL,
@@ -533,6 +539,34 @@ export class LedgerStorage extends Storages
             });
         }
 
+        function save_payload (storage: LedgerStorage, tx_hash: Hash, tx: Transaction): Promise<void>
+        {
+            return new Promise<void>((resolve, reject) =>
+            {
+                if (tx.payload.data.length == 0)
+                    resolve();
+
+                storage.run(
+                    `INSERT INTO payloads
+                        (tx_hash, payload)
+                    VALUES
+                        (?, ?)`,
+                    [
+                        tx_hash.toBinary(Endian.Little),
+                        tx.payload.toBinary(Endian.Little)
+                    ]
+                )
+                    .then(() =>
+                    {
+                        resolve();
+                    })
+                    .catch((err) =>
+                    {
+                        reject(err);
+                    });
+            });
+        }
+
         return new Promise<void>((resolve, reject) =>
         {
             (async () =>
@@ -542,6 +576,9 @@ export class LedgerStorage extends Storages
                     for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++)
                     {
                         await save_transaction(this, block.header.height, tx_idx, block.merkle_tree[tx_idx], block.txs[tx_idx]);
+
+                        if (block.txs[tx_idx].payload.data.length > 0)
+                            await save_payload(this, block.merkle_tree[tx_idx], block.txs[tx_idx]);
 
                         for (let in_idx = 0; in_idx < block.txs[tx_idx].inputs.length; in_idx++)
                         {
@@ -583,6 +620,24 @@ export class LedgerStorage extends Storages
             transactions
         WHERE block_height = ?`;
         return this.query(sql, [height.toString()]);
+    }
+
+    /**
+     * Gets a transaction data payload
+     * @param tx_hash The hash of the transaction to get
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getPayload (tx_hash: Hash): Promise<any[]>
+    {
+        let sql =
+            `SELECT
+                tx_hash, payload
+            FROM
+                payloads
+            WHERE hex(tx_hash) = ?`;
+        return this.query(sql, [tx_hash.toString().substring(2).toUpperCase()]);
     }
 
     /**

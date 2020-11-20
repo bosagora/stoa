@@ -13,6 +13,7 @@
 
 import { TxInputs } from './TxInputs';
 import { TxOutputs } from './TxOutputs';
+import { DataPayload } from './DataPayload';
 import { Validator, ITransaction } from './validator'
 
 import { SmartBuffer } from 'smart-buffer';
@@ -49,16 +50,23 @@ export class Transaction
     public outputs: TxOutputs[];
 
     /**
+     * The data payload to store
+     */
+    public payload: DataPayload;
+
+    /**
      * Constructor
      * @param type - The type of the transaction
      * @param inputs - The array of references to the unspent output of the previous transaction
      * @param outputs - The array of newly created outputs
+     * @param payload - The data payload to store
      */
-    constructor (type: number, inputs: TxInputs[], outputs: TxOutputs[])
+    constructor (type: number, inputs: TxInputs[], outputs: TxOutputs[], payload: DataPayload)
     {
         this.type = type;
         this.inputs = inputs;
         this.outputs = outputs;
+        this.payload = payload;
     }
 
     /**
@@ -81,7 +89,8 @@ export class Transaction
         return new Transaction(
             Number(value.type),
             value.inputs.map((elem: any) => TxInputs.reviver("", elem)),
-            value.outputs.map((elem: any) => TxOutputs.reviver("", elem)));
+            value.outputs.map((elem: any) => TxOutputs.reviver("", elem)),
+            DataPayload.reviver("", value.payload));
     }
 
     /**
@@ -95,5 +104,6 @@ export class Transaction
             elem.computeHash(buffer);
         for (let elem of this.outputs)
             elem.computeHash(buffer);
+        this.payload.computeHash(buffer);
     }
 }

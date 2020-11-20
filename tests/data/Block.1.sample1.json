@@ -117,7 +117,8 @@
                     "value": "24400000000000",
                     "address": "GDAHP22JB7GKD5D6DR42VNVYFSXCHJ2BAGYG65JV5B3MLHJ3I2DIOVT6"
                 }
-            ]
+            ],
+            "payload": ""
         },
         {
             "type": 0,
@@ -228,7 +229,8 @@
                     "value": "24400000000000",
                     "address": "GDQD22J34GZCX425ZFP6RUBMEQXDNOVALDROLVO2W5ZPVLWHFOGJ5IZM"
                 }
-            ]
+            ],
+            "payload": ""
         },
         {
             "type": 0,
@@ -339,7 +341,8 @@
                     "value": "24400000000000",
                     "address": "GDED22RMEUO6E7I3X2IYAETVY32LHK2WSOHBRVYPCQT2WMR5ZFT5PG5B"
                 }
-            ]
+            ],
+            "payload": ""
         },
         {
             "type": 0,
@@ -450,7 +453,8 @@
                     "value": "24400000000000",
                     "address": "GDKQ22UKJZC3FQ7FAGQXXNN67TOXYBSWCVBIR5QY7BBPM3RVZYMUAGIK"
                 }
-            ]
+            ],
+            "payload": ""
         },
         {
             "type": 0,
@@ -561,7 +565,8 @@
                     "value": "24400000000000",
                     "address": "GDEU22CIQGY4QXP7RLWAIGQBTPTYZTPCBCDSUQWKRU2V3HCACGZZLSNP"
                 }
-            ]
+            ],
+            "payload": ""
         },
         {
             "type": 0,
@@ -672,7 +677,8 @@
                     "value": "24400000000000",
                     "address": "GDARL22RUQZKAB2UJWXLDLVWMDWDZ67PBFIHOT2I566JFKRV4JAWCFEN"
                 }
-            ]
+            ],
+            "payload": ""
         },
         {
             "type": 0,
@@ -783,7 +789,8 @@
                     "value": "24400000000000",
                     "address": "GDAMR22C6L45IQKEFC4ZA4EIPC6CNK7HDLEV7DW4KMQWVITXB7NS26TW"
                 }
-            ]
+            ],
+            "payload": ""
         },
         {
             "type": 0,
@@ -894,7 +901,8 @@
                     "value": "24400000000000",
                     "address": "GDNC22KXQGDKH6EO2UIOWNCYOPMO6XZX7T6P4TH6XZ4UYSR6JOBGY5U6"
                 }
-            ]
+            ],
+            "payload": ""
         }
     ],
     "merkle_tree": [

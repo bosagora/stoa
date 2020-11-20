@@ -23,3 +23,4 @@ export { Signature } from './Signature';
 export { Transaction, TxType } from './Transaction';
 export { TxInputs } from './TxInputs';
 export { TxOutputs } from './TxOutputs';
+export { DataPayload } from './DataPayload';

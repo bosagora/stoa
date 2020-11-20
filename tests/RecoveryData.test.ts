@@ -87,7 +87,8 @@ export const recovery_sample_data =
                         "value": "20000000000000",
                         "address": "GDNODE7J5EUK7T6HLEO2FDUBWZEXVXHJO7C4AF5VZAKZENGQ4WR3IX2U"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -125,7 +126,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ"
                     }
-                ]
+                ],
+                "payload": ""
             }
         ],
         "merkle_tree": [
@@ -157,7 +159,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDB22QJ4NHOHPOGWZG2Y5IFXKW6DCBEFX6QNBR6NSCT6E7CYU66IDGJJ"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -172,7 +175,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDH22SK6XFL6ZETRGFHYHIYXHPRSFR2RWT4RZYU5YNYIF6BIHCRKPSEI"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -187,7 +191,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDD22H4TGRGS5ENN3DHBGMMCSZELKORKEZT4SZKTKHZESTVQMONREB2D"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -202,7 +207,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDF22EW2CZW2KVRSLFNGJQOTTDH5XWOK7MLINZPWO526WWXJMDXU3DPI"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -217,7 +223,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDG22B5FTPXE5THQMCTGDUC4LF2N4DFF44PGX2LIFG4WNUZZAT4L6ZGD"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -232,7 +239,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDA225RGC4GOCVASSAMROSWJSGNOZX2IGPXZG52ESDSKQW2VN6UJFKWI"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -247,7 +255,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDE22BZJPPMELAQUZBQR7GTILNHMSUHS5J2BVMKU36LPW3SSKQU737SP"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -262,7 +271,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDC22CFFKB4ZNRZUP6EMRIGVZSQEPSNH2CBMWLU5GLGKE36M3KX5YD36"
                     }
-                ]
+                ],
+                "payload": ""
             }
         ],
         "merkle_tree": [
@@ -306,7 +316,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDO22PFYWMU3YFLKDYP2PVM4PLX2D4BLJ2IRQMIHWJHFS3TZ6ITJMGPU"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -321,7 +332,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDL22GNXKCG5QLZ2WG7GUX5B7LXYVFUA4QU5IDKD5ESHBMGZXFUJHDUT"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -336,7 +348,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDK223SKRC2QD3FFIXSZJRL6SKQI4MLJNVJB4FE356OEIVVGWGBAWLRM"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -351,7 +364,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDJ227UY64U4VLOW773KIT64RHHRZKRZFA7YS7MFMJK5WUDEQCEEEJUW"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -366,7 +380,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDI22L72RGWY3BEFK2VUBWMJMSZU5SQNCQLN5FCF467RFIYN5KMY3YJT"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -381,7 +396,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDM226GCA5DXXTS2YN3SNBUOFUACT7G57MWUG4F57HF65DDQ4DTRNP3Q"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -396,7 +412,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDN22BSZ6JCLELE4AJJJR4DYSIGK72Q37RLAEX2AH7CFULG4OUQB6A7I"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -411,7 +428,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDP22NLZYRX2TBOBWTG46YCHB7WV76J56TMDZO5TDUQPIL7NCM4Q7TGU"
                     }
-                ]
+                ],
+                "payload": ""
             }
         ],
         "merkle_tree": [
@@ -455,7 +473,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDC22CFFKB4ZNRZUP6EMRIGVZSQEPSNH2CBMWLU5GLGKE36M3KX5YD36"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -470,7 +489,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDF22EW2CZW2KVRSLFNGJQOTTDH5XWOK7MLINZPWO526WWXJMDXU3DPI"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -485,7 +505,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDA225RGC4GOCVASSAMROSWJSGNOZX2IGPXZG52ESDSKQW2VN6UJFKWI"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -500,7 +521,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDG22B5FTPXE5THQMCTGDUC4LF2N4DFF44PGX2LIFG4WNUZZAT4L6ZGD"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -515,7 +537,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDH22SK6XFL6ZETRGFHYHIYXHPRSFR2RWT4RZYU5YNYIF6BIHCRKPSEI"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -530,7 +553,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDB22QJ4NHOHPOGWZG2Y5IFXKW6DCBEFX6QNBR6NSCT6E7CYU66IDGJJ"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -545,7 +569,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDE22BZJPPMELAQUZBQR7GTILNHMSUHS5J2BVMKU36LPW3SSKQU737SP"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -560,7 +585,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDD22H4TGRGS5ENN3DHBGMMCSZELKORKEZT4SZKTKHZESTVQMONREB2D"
                     }
-                ]
+                ],
+                "payload": ""
             }
         ],
         "merkle_tree": [
@@ -604,7 +630,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDL22GNXKCG5QLZ2WG7GUX5B7LXYVFUA4QU5IDKD5ESHBMGZXFUJHDUT"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -619,7 +646,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDP22NLZYRX2TBOBWTG46YCHB7WV76J56TMDZO5TDUQPIL7NCM4Q7TGU"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -634,7 +662,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDK223SKRC2QD3FFIXSZJRL6SKQI4MLJNVJB4FE356OEIVVGWGBAWLRM"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -649,7 +678,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDN22BSZ6JCLELE4AJJJR4DYSIGK72Q37RLAEX2AH7CFULG4OUQB6A7I"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -664,7 +694,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDJ227UY64U4VLOW773KIT64RHHRZKRZFA7YS7MFMJK5WUDEQCEEEJUW"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -679,7 +710,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDO22PFYWMU3YFLKDYP2PVM4PLX2D4BLJ2IRQMIHWJHFS3TZ6ITJMGPU"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -694,7 +726,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDI22L72RGWY3BEFK2VUBWMJMSZU5SQNCQLN5FCF467RFIYN5KMY3YJT"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -709,7 +742,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDM226GCA5DXXTS2YN3SNBUOFUACT7G57MWUG4F57HF65DDQ4DTRNP3Q"
                     }
-                ]
+                ],
+                "payload": ""
             }
         ],
         "merkle_tree": [
@@ -753,7 +787,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDC22CFFKB4ZNRZUP6EMRIGVZSQEPSNH2CBMWLU5GLGKE36M3KX5YD36"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -768,7 +803,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDA225RGC4GOCVASSAMROSWJSGNOZX2IGPXZG52ESDSKQW2VN6UJFKWI"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -783,7 +819,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDH22SK6XFL6ZETRGFHYHIYXHPRSFR2RWT4RZYU5YNYIF6BIHCRKPSEI"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -798,7 +835,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDB22QJ4NHOHPOGWZG2Y5IFXKW6DCBEFX6QNBR6NSCT6E7CYU66IDGJJ"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -813,7 +851,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDE22BZJPPMELAQUZBQR7GTILNHMSUHS5J2BVMKU36LPW3SSKQU737SP"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -828,7 +867,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDG22B5FTPXE5THQMCTGDUC4LF2N4DFF44PGX2LIFG4WNUZZAT4L6ZGD"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -843,7 +883,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDD22H4TGRGS5ENN3DHBGMMCSZELKORKEZT4SZKTKHZESTVQMONREB2D"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -858,7 +899,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDF22EW2CZW2KVRSLFNGJQOTTDH5XWOK7MLINZPWO526WWXJMDXU3DPI"
                     }
-                ]
+                ],
+                "payload": ""
             }
         ],
         "merkle_tree": [
@@ -902,7 +944,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDM226GCA5DXXTS2YN3SNBUOFUACT7G57MWUG4F57HF65DDQ4DTRNP3Q"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -917,7 +960,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDN22BSZ6JCLELE4AJJJR4DYSIGK72Q37RLAEX2AH7CFULG4OUQB6A7I"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -932,7 +976,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDO22PFYWMU3YFLKDYP2PVM4PLX2D4BLJ2IRQMIHWJHFS3TZ6ITJMGPU"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -947,7 +992,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDJ227UY64U4VLOW773KIT64RHHRZKRZFA7YS7MFMJK5WUDEQCEEEJUW"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -962,7 +1008,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDK223SKRC2QD3FFIXSZJRL6SKQI4MLJNVJB4FE356OEIVVGWGBAWLRM"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -977,7 +1024,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDI22L72RGWY3BEFK2VUBWMJMSZU5SQNCQLN5FCF467RFIYN5KMY3YJT"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -992,7 +1040,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDP22NLZYRX2TBOBWTG46YCHB7WV76J56TMDZO5TDUQPIL7NCM4Q7TGU"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1007,7 +1056,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDL22GNXKCG5QLZ2WG7GUX5B7LXYVFUA4QU5IDKD5ESHBMGZXFUJHDUT"
                     }
-                ]
+                ],
+                "payload": ""
             }
         ],
         "merkle_tree": [
@@ -1051,7 +1101,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDF22EW2CZW2KVRSLFNGJQOTTDH5XWOK7MLINZPWO526WWXJMDXU3DPI"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1066,7 +1117,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDC22CFFKB4ZNRZUP6EMRIGVZSQEPSNH2CBMWLU5GLGKE36M3KX5YD36"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1081,7 +1133,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDG22B5FTPXE5THQMCTGDUC4LF2N4DFF44PGX2LIFG4WNUZZAT4L6ZGD"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1096,7 +1149,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDE22BZJPPMELAQUZBQR7GTILNHMSUHS5J2BVMKU36LPW3SSKQU737SP"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1111,7 +1165,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDB22QJ4NHOHPOGWZG2Y5IFXKW6DCBEFX6QNBR6NSCT6E7CYU66IDGJJ"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1126,7 +1181,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDD22H4TGRGS5ENN3DHBGMMCSZELKORKEZT4SZKTKHZESTVQMONREB2D"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1141,7 +1197,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDA225RGC4GOCVASSAMROSWJSGNOZX2IGPXZG52ESDSKQW2VN6UJFKWI"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1156,7 +1213,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDH22SK6XFL6ZETRGFHYHIYXHPRSFR2RWT4RZYU5YNYIF6BIHCRKPSEI"
                     }
-                ]
+                ],
+                "payload": ""
             }
         ],
         "merkle_tree": [
@@ -1200,7 +1258,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDI22L72RGWY3BEFK2VUBWMJMSZU5SQNCQLN5FCF467RFIYN5KMY3YJT"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1215,7 +1274,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDN22BSZ6JCLELE4AJJJR4DYSIGK72Q37RLAEX2AH7CFULG4OUQB6A7I"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1230,7 +1290,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDO22PFYWMU3YFLKDYP2PVM4PLX2D4BLJ2IRQMIHWJHFS3TZ6ITJMGPU"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1245,7 +1306,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDM226GCA5DXXTS2YN3SNBUOFUACT7G57MWUG4F57HF65DDQ4DTRNP3Q"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1260,7 +1322,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDL22GNXKCG5QLZ2WG7GUX5B7LXYVFUA4QU5IDKD5ESHBMGZXFUJHDUT"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1275,7 +1338,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDJ227UY64U4VLOW773KIT64RHHRZKRZFA7YS7MFMJK5WUDEQCEEEJUW"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1290,7 +1354,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDP22NLZYRX2TBOBWTG46YCHB7WV76J56TMDZO5TDUQPIL7NCM4Q7TGU"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1305,7 +1370,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDK223SKRC2QD3FFIXSZJRL6SKQI4MLJNVJB4FE356OEIVVGWGBAWLRM"
                     }
-                ]
+                ],
+                "payload": ""
             }
         ],
         "merkle_tree": [
@@ -1349,7 +1415,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDB22QJ4NHOHPOGWZG2Y5IFXKW6DCBEFX6QNBR6NSCT6E7CYU66IDGJJ"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1364,7 +1431,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDH22SK6XFL6ZETRGFHYHIYXHPRSFR2RWT4RZYU5YNYIF6BIHCRKPSEI"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1379,7 +1447,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDF22EW2CZW2KVRSLFNGJQOTTDH5XWOK7MLINZPWO526WWXJMDXU3DPI"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1394,7 +1463,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDD22H4TGRGS5ENN3DHBGMMCSZELKORKEZT4SZKTKHZESTVQMONREB2D"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1409,7 +1479,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDA225RGC4GOCVASSAMROSWJSGNOZX2IGPXZG52ESDSKQW2VN6UJFKWI"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1424,7 +1495,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDC22CFFKB4ZNRZUP6EMRIGVZSQEPSNH2CBMWLU5GLGKE36M3KX5YD36"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1439,7 +1511,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDE22BZJPPMELAQUZBQR7GTILNHMSUHS5J2BVMKU36LPW3SSKQU737SP"
                     }
-                ]
+                ],
+                "payload": ""
             },
             {
                 "type": 0,
@@ -1454,7 +1527,8 @@ export const recovery_sample_data =
                         "value": "610000000000000",
                         "address": "GDG22B5FTPXE5THQMCTGDUC4LF2N4DFF44PGX2LIFG4WNUZZAT4L6ZGD"
                     }
-                ]
+                ],
+                "payload": ""
             }
         ],
         "merkle_tree": [
