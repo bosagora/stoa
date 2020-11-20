@@ -225,6 +225,30 @@ describe ('Test ledger storage and inquiry function.', () =>
                 })
         });
     });
+
+    it ('Test for UTXO', async () => {
+        let address: string = 'GDML22LKP3N6S37CYIBFRANXVY7KMJMINH5VFADGDFLGIWNOR3YU7T6I';
+        let rows = await ledger_storage.getUTXO(address);
+        assert.strictEqual(rows.length, 1);
+        assert.strictEqual(rows[0].type, 0);
+        assert.strictEqual(rows[0].unlock_height, 2);
+        assert.strictEqual(BigInt(rows[0].amount), BigInt('24400000000000'));
+        assert.strictEqual(new Hash(rows[0].utxo, Endian.Little).toString(),
+            '0x2e04f355ab7fbc0b495f8267e362b6914b756a60e8c4627142b6a6bd85a20b59' +
+            '86838aaa7fc40f18b7c9601ccdba06cada0d7cb28e098b08605e21324e4bbd1d');
+    });
+
+    it ('Test for UTXO in melting', async () => {
+        let address: string = 'GDNODE7J5EUK7T6HLEO2FDUBWZEXVXHJO7C4AF5VZAKZENGQ4WR3IX2U';
+        let rows = await ledger_storage.getUTXO(address);
+        assert.strictEqual(rows.length, 5);
+        assert.strictEqual(rows[0].type, 0);
+        assert.strictEqual(rows[0].unlock_height, 2018);
+        assert.strictEqual(BigInt(rows[0].amount), BigInt('4000000000000'));
+        assert.strictEqual(new Hash(rows[0].utxo, Endian.Little).toString(),
+            '0xfb73e18075a842a889db153cf12d7633967841d54346076b586fe9f319c1735' +
+            'a4bde8473ca9ed9114dad3a9e78152c0c6ddbc6875947793096d246a740b3022c');
+    });
 });
 
 describe ('Test for storing block data in the database', () =>
