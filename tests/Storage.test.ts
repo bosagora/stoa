@@ -95,7 +95,7 @@ describe ('Test ledger storage and inquiry function.', () =>
                                     '0x7a5bfeb96f9caefa377cb9a7ffe3ea3dd59ea84d4a1c66304ab8c307a4f4770' +
                                     '6fe0aec2a73ce2b186a9f45641620995f8c7e4c157cee7940872d96d9b2f0f95c');
                                 assert.strictEqual(rows5[0].address, 'GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ');
-                                assert.strictEqual(rows5[0].used, 0);
+                                assert.strictEqual(rows5[0].used, 1);
                                 doneIt();
                             })
                             .catch((err) =>
