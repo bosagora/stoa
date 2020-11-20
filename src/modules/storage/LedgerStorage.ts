@@ -493,7 +493,7 @@ export class LedgerStorage extends Storages
             return new Promise<void>((resolve, reject) =>
             {
                 storage.run(
-                    `UPDATE tx_outputs SET used = 1 WHERE tx_hash = ?`,
+                    `UPDATE tx_outputs SET used = 1 WHERE utxo_key = ?`,
                     [
                         input.utxo.toBinary(Endian.Little)
                     ])
