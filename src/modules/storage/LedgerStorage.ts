@@ -13,7 +13,7 @@
 
 import {
     Block, Enrollment, Hash, Height, PreImageInfo, Transaction,
-    TxInputs, TxOutputs, makeUTXOKey, hashFull
+    TxInputs, TxOutputs, makeUTXOKey, hashFull, TxType
 } from '../data';
 import { Endian } from '../utils/buffer';
 import { Storages } from './Storages';
@@ -87,6 +87,7 @@ export class LedgerStorage extends Storages
             tx_index            INTEGER NOT NULL,
             tx_hash             BLOB    NOT NULL,
             type                INTEGER NOT NULL,
+            unlock_height       INTEGER NOT NULL,
             inputs_count        INTEGER NOT NULL,
             outputs_count       INTEGER NOT NULL,
             PRIMARY KEY(block_height, tx_index)
@@ -434,11 +435,42 @@ export class LedgerStorage extends Storages
         {
             return new Promise<void>((resolve, reject) =>
             {
+                let unlock_height_query: string;
+                if ((tx.type == TxType.Payment) && (tx.inputs.length > 0))
+                {
+                    let utxo: Array<string> = [];
+                    for (let input of tx.inputs)
+                        utxo.push(`'${input.utxo.toString().substring(2).toUpperCase()}'`);
+
+                    unlock_height_query =
+                        `(
+                            SELECT '${(height.value + 2016n).toString()}' AS unlock_height WHERE EXISTS  
+                            (
+                                SELECT
+                                    *
+                                FROM 
+                                    tx_outputs AS a, 
+                                    transactions AS b 
+                                WHERE 
+                                    a.tx_hash = b.tx_hash
+                                    and b.type = 1
+                                    and hex(a.utxo_key) in (${utxo.join(',')})
+                            )
+                            UNION ALL
+                            SELECT '${(height.value + 1n).toString()}' AS unlock_height
+                            LIMIT 1 
+                        )`;
+                }
+                else
+                {
+                    unlock_height_query = `( SELECT '${(height.value + 1n).toString()}' AS unlock_height )`;
+                }
+
                 storage.run(
                     `INSERT INTO transactions
-                        (block_height, tx_index, tx_hash, type, inputs_count, outputs_count)
+                        (block_height, tx_index, tx_hash, type, unlock_height, inputs_count, outputs_count)
                     VALUES
-                        (?, ?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ${unlock_height_query}, ?, ?)`,
                     [
                         height.toString(),
                         tx_idx,
@@ -789,5 +821,30 @@ export class LedgerStorage extends Storages
                     reject(err);
                 });
         });
+    }
+
+    /**
+     * Returns the UTXO of the address.
+     * @param address The public address to receive UTXO
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the array of UTXO
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getUTXO (address: string): Promise<any[]>
+    {
+        let sql =
+            `SELECT 
+                tx_outputs.utxo_key AS utxo,
+                transactions.type,
+                transactions.unlock_height,
+                tx_outputs.amount
+            FROM
+                tx_outputs, 
+                transactions
+            WHERE 
+                tx_outputs.tx_hash = transactions.tx_hash 
+                AND tx_outputs.address = ?
+                AND tx_outputs.used != 1;`;
+        return this.query(sql, [address]);
     }
 }

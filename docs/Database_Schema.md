@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS "enrollments" (
 | tx_index          | INTEGER   | Y  | Y        |          | The index of transaction in the block |
 | tx_hash           | BLOB      |    | Y        |          | The hash of transaction |
 | type              | INTEGER   |    | Y        |          | The type of transaction |
+| unlock_height     | INTEGER   |    | Y        |          | Height of the block to be unlock|
 | inputs_count      | INTEGER   |    | Y        |          | The number of inputs in the transaction |
 | outputs_count     | INTEGER   |    | Y        |          | The number of outputs in the transaction |
 
@@ -82,6 +83,7 @@ CREATE TABLE IF NOT EXISTS "transactions" (
     "tx_index"              INTEGER NOT NULL,
     "tx_hash"               BLOB    NOT NULL,
     "type"                  INTEGER NOT NULL,
+    "unlock_height"         INTEGER NOT NULL,
     "inputs_count"          INTEGER NOT NULL,
     "outputs_count"         INTEGER NOT NULL,
     PRIMARY KEY("block_height","tx_index")
