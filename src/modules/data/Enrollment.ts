@@ -46,10 +46,10 @@ export class Enrollment
 
     /**
      * Constructor
-     * @param key - A hash of a frozen UTXO
-     * @param seed - The nth image of random value
-     * @param cycle - The number of rounds a validator will participate in
-     * @param sig - A signature for the message H(K, X, n, R) and the key K, using R
+     * @param key   A hash of a frozen UTXO
+     * @param seed  The nth image of random value
+     * @param cycle The number of rounds a validator will participate in
+     * @param sig A signature for the message H(K, X, n, R) and the key K, using R
      */
     constructor (key: Hash, seed: Hash, cycle: number, sig: Signature)
     {
@@ -83,7 +83,7 @@ export class Enrollment
 
     /**
      * Collects data to create a hash.
-     * @param buffer - The buffer where collected data is stored
+     * @param buffer The buffer where collected data is stored
      */
     public computeHash (buffer: SmartBuffer)
     {

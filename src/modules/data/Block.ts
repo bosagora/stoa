@@ -40,9 +40,9 @@ export class Block
 
     /**
      * Constructor
-     * @param header - The header of the block
-     * @param txs - The array of the transaction
-     * @param merkle_tree - The merkle tree
+     * @param header      The header of the block
+     * @param txs         The array of the transaction
+     * @param merkle_tree The merkle tree
      */
     constructor (header: BlockHeader, txs: Transaction[], merkle_tree: Hash[])
     {

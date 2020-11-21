@@ -27,7 +27,7 @@ export class BitField
 
     /**
      * Constructor
-     * @param storage - The source storage with bit data
+     * @param storage The source storage with bit data
      */
     constructor (storage: number[])
     {
