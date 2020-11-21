@@ -35,8 +35,8 @@ export class TxOutput
 
     /**
      * Constructor
-     * @param value - The monetary value
-     * @param address - The public key
+     * @param value   The monetary value
+     * @param address The public key
      */
     constructor (value: bigint, address: PublicKey)
     {
@@ -67,7 +67,7 @@ export class TxOutput
 
     /**
      * Collects data to create a hash.
-     * @param buffer - The buffer where collected data is stored
+     * @param buffer The buffer where collected data is stored
      */
     public computeHash (buffer: SmartBuffer)
     {

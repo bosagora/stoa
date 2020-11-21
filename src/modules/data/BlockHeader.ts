@@ -59,12 +59,12 @@ export class BlockHeader
 
     /**
      * Constructor
-     * @param prev_block - The Hash of the previous block in the chain of blocks
-     * @param height - The block height
-     * @param merkle_root - The hash of the merkle root of the transactions
-     * @param validators - The bit-field containing the validators' key indices which signed the block
-     * @param signature - The Schnorr multisig of all validators which signed this block
-     * @param enrollments - The enrolled validators
+     * @param prev_block  The Hash of the previous block in the chain of blocks
+     * @param height      The block height
+     * @param merkle_root The hash of the merkle root of the transactions
+     * @param validators  The bit-field containing the validators' key indices which signed the block
+     * @param signature   The Schnorr multisig of all validators which signed this block
+     * @param enrollments The enrolled validators
      */
     constructor (prev_block: Hash, height: Height, merkle_root: Hash,
         validators: BitField, signature: Signature, enrollments: Enrollment[])
@@ -105,7 +105,7 @@ export class BlockHeader
 
     /**
      * Collects data to create a hash.
-     * @param buffer - The buffer where collected data is stored
+     * @param buffer The buffer where collected data is stored
      */
     public computeHash (buffer: SmartBuffer)
     {

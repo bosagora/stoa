@@ -9,7 +9,7 @@
     License:
         MIT License. See LICENSE for details.
 
- *******************************************************************************/
+*******************************************************************************/
 
 import { Utils, Endian } from '../utils/Utils';
 
@@ -28,8 +28,8 @@ export class DataPayload
 
     /**
      * Constructor
-     * @param data The data payload to store
-     * @param endian The byte order
+     * @param data      The data payload to store
+     * @param endian    The byte order
      */
     constructor (data: Buffer | string, endian: Endian = Endian.Big)
     {
@@ -45,7 +45,7 @@ export class DataPayload
      * This function allows to perform any necessary conversion,
      * as well as validation of the final object.
      *
-     * @param key Name of the field being parsed
+     * @param key   Name of the field being parsed
      * @param value The value associated with `key`
      * @returns A new instance of `DataPayload` if `key == ""`, `value` otherwise.
      */
@@ -81,8 +81,8 @@ export class DataPayload
 
     /**
      * Set binary data
-     * @param bin The binary data of the data payload
-     * @param endian The byte order
+     * @param bin       The binary data of the data payload
+     * @param endian    The byte order
      * @returns The instance of DataPayload
      */
     public fromBinary (bin: Buffer, endian: Endian = Endian.Big): DataPayload
@@ -109,7 +109,7 @@ export class DataPayload
 
     /**
      * Collects data to create a data payload.
-     * @param buffer - The buffer where collected data is stored
+     * @param buffer The buffer where collected data is stored
      */
     public computeHash (buffer: SmartBuffer)
     {

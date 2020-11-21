@@ -70,7 +70,7 @@ export class Signature
 
     /**
      * Set binary data
-     * @param bin The binary data of the signature
+     * @param bin    The binary data of the signature
      * @param endian The byte order
      * @returns The instance of Signature
      */

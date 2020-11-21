@@ -100,7 +100,7 @@ export class TxInput
 
     /**
      * Collects data to create a hash.
-     * @param buffer - The buffer where collected data is stored
+     * @param buffer The buffer where collected data is stored
      */
     public computeHash (buffer: SmartBuffer)
     {

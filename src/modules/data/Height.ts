@@ -27,7 +27,7 @@ export class Height
 
     /**
      * Construct
-     * @param value - The block height
+     * @param value The block height
      */
     constructor (value: bigint | string)
     {
@@ -36,7 +36,7 @@ export class Height
 
     /**
      * Collects data to create a hash.
-     * @param buffer - The buffer where collected data is stored
+     * @param buffer The buffer where collected data is stored
      */
     public computeHash (buffer: SmartBuffer)
     {
@@ -47,7 +47,7 @@ export class Height
 
     /**
      * Writes to the string
-     * @param value - The height of the block
+     * @param value The height of the block
      */
     public fromString (value: string)
     {

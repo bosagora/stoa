@@ -56,10 +56,10 @@ export class Transaction
 
     /**
      * Constructor
-     * @param type - The type of the transaction
-     * @param inputs - The array of references to the unspent output of the previous transaction
-     * @param outputs - The array of newly created outputs
-     * @param payload - The data payload to store
+     * @param type    The type of the transaction
+     * @param inputs  The array of references to the unspent output of the previous transaction
+     * @param outputs The array of newly created outputs
+     * @param payload The data payload to store
      */
     constructor (type: number, inputs: TxInput[], outputs: TxOutput[], payload: DataPayload)
     {
@@ -95,7 +95,7 @@ export class Transaction
 
     /**
      * Collects data to create a hash.
-     * @param buffer - The buffer where collected data is stored
+     * @param buffer The buffer where collected data is stored
      */
     public computeHash (buffer: SmartBuffer)
     {
