@@ -1,10 +1,9 @@
 import { AgoraClient } from './modules/agora/AgoraClient';
 import { cors_options } from './cors';
-import { Endian } from './modules/utils/buffer';
 import { LedgerStorage } from './modules/storage/LedgerStorage';
 import { logger } from './modules/common/Logger';
-import {Height, PreImageInfo, Hash, hash, Block } from './modules/data';
-import { Utils } from './modules/utils/Utils';
+import { Height, PreImageInfo, Hash, hash, Block } from './modules/data';
+import { Utils, Endian } from './modules/utils/Utils';
 import { ValidatorData, IPreimage } from './modules/data/ValidatorData';
 import { WebService } from './modules/service/WebService';
 import { IUnspentTxOutput } from './Types';

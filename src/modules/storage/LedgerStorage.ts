@@ -15,9 +15,8 @@ import {
     Block, Enrollment, Hash, Height, PreImageInfo, Transaction,
     TxInputs, TxOutputs, makeUTXOKey, hashFull, TxType
 } from '../data';
-import { Endian } from '../utils/buffer';
 import { Storages } from './Storages';
-import { Utils } from '../utils/Utils';
+import { Utils, Endian } from '../utils/Utils';
 
 /**
  * The class that insert and read the ledger into the database.

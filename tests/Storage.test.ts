@@ -16,7 +16,7 @@ import { LedgerStorage } from '../src/modules/storage/LedgerStorage';
 import { Block, Hash, Height, DataPayload } from '../src/modules/data';
 import { PreImageInfo } from '../src/modules/data';
 import { sample_data, sample_preImageInfo } from "./Utils";
-import { Endian } from "../src/modules/utils/buffer";
+import { Endian } from "../src/modules/utils/Utils";
 
 import * as fs from 'fs';
 

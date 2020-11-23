@@ -11,7 +11,7 @@
 
  *******************************************************************************/
 
-import {Endian, readFromString, writeToString} from '../utils/buffer';
+import { Utils, Endian } from '../utils/Utils';
 
 import { SmartBuffer } from 'smart-buffer';
 import { Validator, IDataPayload } from "./validator";
@@ -34,7 +34,7 @@ export class DataPayload
     constructor (data: Buffer | string, endian?: Endian)
     {
         if (typeof data === 'string')
-            this.data = readFromString(data);
+            this.data = Utils.readFromString(data);
         else
             this.data = this.fromBinary(data, endian).data;
     }
@@ -66,7 +66,7 @@ export class DataPayload
      */
     public fromString (hex: string): DataPayload
     {
-        this.data = readFromString(hex);
+        this.data = Utils.readFromString(hex);
         return this;
     }
 
@@ -76,7 +76,7 @@ export class DataPayload
      */
     public toString (): string
     {
-        return writeToString(this.data);
+        return Utils.writeToString(this.data);
     }
 
     /**
