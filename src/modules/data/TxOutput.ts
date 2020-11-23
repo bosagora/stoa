@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { PublicKey } from './PublicKey';
+import { PublicKey } from './KeyPair';
 import { Validator, ITxOutput } from './validator';
 
 import { SmartBuffer } from 'smart-buffer';

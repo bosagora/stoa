@@ -18,7 +18,7 @@ export { Enrollment } from './Enrollment';
 export { Hash, hash, hashMulti, makeUTXOKey, hashFull } from './Hash';
 export { Height } from './Height';
 export { PreImageInfo } from './PreImageInfo';
-export { PublicKey } from './PublicKey';
+export { KeyPair, PublicKey, SecretKey, Seed } from './KeyPair';
 export { Signature } from './Signature';
 export { Transaction, TxType } from './Transaction';
 export { TxInput } from './TxInput';
