@@ -101,6 +101,7 @@ CREATE TABLE IF NOT EXISTS "transactions" (
 | tx_index          | INTEGER   | Y  | Y        |          | The index of this transaction in the block's transactions array|
 | in_index          | INTEGER   | Y  | Y        |          | The index of this input in the Transaction's inputs array|
 | utxo              | BLOB      | Y  | Y        |          | The hash of the UTXO to be spent|
+| signature         | BLOB      |    | Y        |          | The signature of this transaction input|
 ### _Create Script_
 
 ```sql
@@ -109,6 +110,7 @@ CREATE TABLE IF NOT EXISTS "tx_inputs" (
     "tx_index"              INTEGER NOT NULL,
     "in_index"              INTEGER NOT NULL,
     "utxo"                  BLOB    NOT NULL,
+    "signature"             BLOB    NOT NULL,
     PRIMARY KEY("block_height","tx_index","in_index","utxo")
 )
 ```

@@ -98,6 +98,7 @@ export class LedgerStorage extends Storages
             tx_index            INTEGER NOT NULL,
             in_index            INTEGER NOT NULL,
             utxo                BLOB    NOT NULL,
+            signature           BLOB    NOT NULL,
             PRIMARY KEY(block_height, tx_index, in_index, utxo)
         );
 
@@ -497,14 +498,15 @@ export class LedgerStorage extends Storages
             {
                 storage.run(
                     `INSERT INTO tx_inputs
-                        (block_height, tx_index, in_index, utxo)
+                        (block_height, tx_index, in_index, utxo, signature)
                     VALUES
-                        (?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?)`,
                     [
                         height.toString(),
                         tx_idx,
                         in_idx,
-                        input.utxo.toBinary(Endian.Little)
+                        input.utxo.toBinary(Endian.Little),
+                        input.signature.toBinary(Endian.Little)
                     ]
                 )
                     .then(() =>
@@ -683,7 +685,7 @@ export class LedgerStorage extends Storages
     {
         let sql =
         `SELECT
-            block_height, tx_index, in_index, utxo
+            block_height, tx_index, in_index, utxo, signature
         FROM
             tx_inputs
         WHERE block_height = ? AND tx_index = ?`;
