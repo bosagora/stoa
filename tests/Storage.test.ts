@@ -19,10 +19,16 @@ import { sample_data, sample_preImageInfo } from "./Utils";
 import { Endian } from "../src/modules/utils/Utils";
 
 import * as fs from 'fs';
+import {SodiumHelper} from "../src/modules/utils/SodiumHelper";
 
 describe ('Test ledger storage and inquiry function.', () =>
 {
     let ledger_storage: LedgerStorage;
+
+    before('Wait for the package libsodium to finish loading', () =>
+    {
+        return SodiumHelper.init();
+    });
 
     before ('Prepare Storage', () =>
     {
@@ -254,6 +260,11 @@ describe ('Test ledger storage and inquiry function.', () =>
 describe ('Test for storing block data in the database', () =>
 {
     let ledger_storage: LedgerStorage;
+
+    before('Wait for the package libsodium to finish loading', () =>
+    {
+        return SodiumHelper.init();
+    });
 
     beforeEach ('Prepare Storage', () =>
     {

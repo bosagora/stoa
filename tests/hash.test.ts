@@ -12,12 +12,19 @@
 *******************************************************************************/
 
 import { Block, Hash, hash, hashFull, hashMulti, makeUTXOKey } from '../src/modules/data'
-import { Transaction, TxInput, TxOutput, TxType, PublicKey, DataPayload, Signature } from "../src/modules/data";
+import { Transaction, TxInput, TxOutput, TxType, DataPayload } from "../src/modules/data";
+import { SodiumHelper } from '../src/modules/utils/SodiumHelper'
 import { sample_data } from './Utils';
 
 import * as assert from 'assert';
 
-describe('Hash', () => {
+describe('Hash', () =>
+{
+    before('Wait for the package libsodium to finish loading', () =>
+    {
+        return SodiumHelper.init();
+    });
+
     // Buffer has the same content. However, when printed with hex strings,
     // the order of output is different.
     // This was treated to be the same as D language.

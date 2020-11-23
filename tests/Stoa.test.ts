@@ -21,6 +21,7 @@ import {
     TestAgora,
     TestStoa,
 } from './Utils';
+import {SodiumHelper} from "../src/modules/utils/SodiumHelper";
 
 import * as assert from 'assert';
 import axios from 'axios';
@@ -34,6 +35,11 @@ describe ('Test of Stoa API Server', () =>
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     let client = axios.create();
+
+    before('Wait for the package libsodium to finish loading', () =>
+    {
+        return SodiumHelper.init();
+    });
 
     before ('Start a fake Agora', () =>
     {

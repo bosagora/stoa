@@ -14,12 +14,12 @@
 *******************************************************************************/
 
 import { Signature } from './Signature';
+import { SodiumHelper } from '../utils/SodiumHelper'
 import { checksum, validate } from "../utils/CRC16";
 
 import * as assert from 'assert';
 import { base32Encode, base32Decode } from '@ctrl/ts-base32';
 import { SmartBuffer } from 'smart-buffer';
-import * as sodium from "sodium-native";
 
 /**
  * The class to hold a secret key + public key + seed
@@ -61,10 +61,11 @@ export class KeyPair
      */
     public static fromSeed (seed: Seed): KeyPair
     {
-        let sk = Buffer.alloc(SecretKey.Width);
-        let pk = Buffer.alloc(PublicKey.Width);
-        sodium.crypto_sign_seed_keypair(pk, sk, seed.data);
-        return new KeyPair(new PublicKey(pk), new SecretKey(sk), new Seed(seed.data));
+        let kp = SodiumHelper.sodium.crypto_sign_seed_keypair(seed.data);
+        return new KeyPair(
+            new PublicKey(Buffer.from(kp.publicKey)),
+            new SecretKey(Buffer.from(kp.privateKey)),
+            seed);
     }
 
     /**
@@ -73,13 +74,12 @@ export class KeyPair
      */
     public static random (): KeyPair
     {
-        let sk = Buffer.alloc(SecretKey.Width);
-        let pk = Buffer.alloc(PublicKey.Width);
-        let seed = Buffer.alloc(Seed.Width);
-
-        sodium.crypto_sign_keypair(pk, sk);
-        sk.copy(seed, 0, 0, Seed.Width);
-        return new KeyPair(new PublicKey(pk), new SecretKey(sk), new Seed(seed));
+        let kp = SodiumHelper.sodium.crypto_sign_keypair();
+        let seed = new Seed(Buffer.from(SodiumHelper.sodium.crypto_sign_ed25519_sk_to_seed(kp.privateKey)));
+        return new KeyPair(
+            new PublicKey(Buffer.from(kp.publicKey)),
+            new SecretKey(Buffer.from(kp.privateKey)),
+            seed);
     }
 }
 
@@ -94,11 +94,6 @@ export class PublicKey
     public readonly data: Buffer;
 
     /**
-     * The number of byte of the public key
-     */
-    public static Width: number = sodium.crypto_sign_PUBLICKEYBYTES;
-
-    /**
      * Constructor
      * @param data The string or binary representation of the public key
      */
@@ -107,7 +102,7 @@ export class PublicKey
         if (typeof data === 'string')
         {
             const decoded = Buffer.from(base32Decode(data));
-            assert.strictEqual(decoded.length, 1 + PublicKey.Width + 2);
+            assert.strictEqual(decoded.length, 1 + SodiumHelper.sodium.crypto_sign_PUBLICKEYBYTES + 2);
             assert.strictEqual(decoded[0], VersionByte.AccountID);
 
             const body = decoded.slice(0, -2);
@@ -118,10 +113,10 @@ export class PublicKey
         }
         else
         {
-            assert.ok(data.length == PublicKey.Width);
+            assert.ok(data.length == SodiumHelper.sodium.crypto_sign_PUBLICKEYBYTES);
             this.data = Buffer.from(data);
         }
-        assert.ok(this.data.length == PublicKey.Width);
+        assert.ok(this.data.length == SodiumHelper.sodium.crypto_sign_PUBLICKEYBYTES);
     }
 
     /**
@@ -144,7 +139,7 @@ export class PublicKey
      */
     public verify (signature: Signature, msg: Buffer): boolean
     {
-        return sodium.crypto_sign_verify_detached(signature.data, msg, this.data);
+        return SodiumHelper.sodium.crypto_sign_verify_detached(signature.data, msg, this.data);
     }
 
     /**
@@ -170,7 +165,7 @@ export class PublicKey
      */
     static get init(): PublicKey
     {
-        return new PublicKey(Buffer.alloc(PublicKey.Width));
+        return new PublicKey(Buffer.alloc(SodiumHelper.sodium.crypto_sign_PUBLICKEYBYTES));
     }
 }
 
@@ -185,17 +180,12 @@ export class SecretKey
     public readonly data: Buffer;
 
     /**
-     * The number of byte of the secret key
-     */
-    public static Width: number = sodium.crypto_sign_SECRETKEYBYTES;
-
-    /**
      * Constructor
      * @param data The binary data of the secret key
      */
     constructor (data: Buffer)
     {
-        assert.strictEqual(data.length, SecretKey.Width);
+        assert.strictEqual(data.length, SodiumHelper.sodium.crypto_sign_SECRETKEYBYTES);
         this.data = Buffer.from(data);
     }
 
@@ -207,9 +197,7 @@ export class SecretKey
      */
     public sign (msg: Buffer): Signature
     {
-        let data = Buffer.alloc(Signature.Width);
-        sodium.crypto_sign_detached(data, msg, this.data)
-        return new Signature(data);
+        return new Signature(Buffer.from(SodiumHelper.sodium.crypto_sign_detached(msg, this.data)));
     }
 
     /**
@@ -218,7 +206,7 @@ export class SecretKey
      */
     static get init(): SecretKey
     {
-        return new SecretKey(Buffer.alloc(SecretKey.Width));
+        return new SecretKey(Buffer.alloc(SodiumHelper.sodium.crypto_sign_SECRETKEYBYTES));
     }
 }
 
@@ -233,11 +221,6 @@ export class Seed
     public readonly data: Buffer;
 
     /**
-     * The number of byte of the seed
-     */
-    public static Width: number = sodium.crypto_sign_SEEDBYTES;
-
-    /**
      * Constructor
      * @param data The binary data of the seed
      */
@@ -246,7 +229,7 @@ export class Seed
         if (typeof data === 'string')
         {
             const decoded = Buffer.from(base32Decode(data));
-            assert.strictEqual(decoded.length, 1 + Seed.Width + 2);
+            assert.strictEqual(decoded.length, 1 + SodiumHelper.sodium.crypto_sign_SEEDBYTES + 2);
             assert.strictEqual(decoded[0], VersionByte.Seed);
 
             const body = decoded.slice(0, -2);
@@ -258,10 +241,10 @@ export class Seed
         }
         else
         {
-            assert.strictEqual(data.length, Seed.Width);
+            assert.strictEqual(data.length, SodiumHelper.sodium.crypto_sign_SEEDBYTES);
             this.data = Buffer.from(data);
         }
-        assert.ok(this.data.length == Seed.Width);
+        assert.ok(this.data.length == SodiumHelper.sodium.crypto_sign_SEEDBYTES);
     }
 
     /**

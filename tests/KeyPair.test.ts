@@ -12,6 +12,7 @@
 *******************************************************************************/
 
 import { KeyPair, PublicKey, Seed }  from '../src/modules/data'
+import { SodiumHelper } from '../src/modules/utils/SodiumHelper'
 
 import * as assert from 'assert';
 
@@ -19,6 +20,7 @@ describe ('ED25519 Public Key', () =>
 {
     before('Wait for the package libsodium to finish loading', () =>
     {
+        return SodiumHelper.init();
     });
 
     it ('Extract the public key from a string then convert it back into a string and compare it.', () =>

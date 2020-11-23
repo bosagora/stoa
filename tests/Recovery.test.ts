@@ -17,6 +17,7 @@ import { Block, Height } from '../src/modules/data';
 import { recovery_sample_data } from './RecoveryData.test';
 import { TestAgora, TestStoa } from './Utils'
 import { Utils } from '../src/modules/utils/Utils';
+import {SodiumHelper} from "../src/modules/utils/SodiumHelper";
 
 import * as assert from 'assert';
 import axios from 'axios';
@@ -72,6 +73,11 @@ describe ('Test of Recovery', () =>
     let stoa_server: TestRecoveryStoa;
 
     let client = axios.create();
+
+    before('Wait for the package libsodium to finish loading', () =>
+    {
+        return SodiumHelper.init();
+    });
 
     // Changed test agora to run only once.
     before ('Start TestAgora', (doneIt: () => void) =>
