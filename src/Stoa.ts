@@ -4,9 +4,8 @@ import { LedgerStorage } from './modules/storage/LedgerStorage';
 import { logger } from './modules/common/Logger';
 import { Height, PreImageInfo, Hash, hash, Block } from './modules/data';
 import { Utils, Endian } from './modules/utils/Utils';
-import { ValidatorData, IPreimage } from './modules/data/ValidatorData';
 import { WebService } from './modules/service/WebService';
-import { IUnspentTxOutput } from './Types';
+import { ValidatorData, IPreimage, IUnspentTxOutput } from './Types';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
