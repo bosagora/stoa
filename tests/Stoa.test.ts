@@ -211,7 +211,7 @@ describe ('Test of Stoa API Server', () =>
             response = await client.get (uri4.toString());
             assert.strictEqual(response.data.length, 1);
             assert.strictEqual(response.data[0].preimage.distance, null);
-            assert.strictEqual(response.data[0].preimage.hash, Hash.NULL.toString());
+            assert.strictEqual(response.data[0].preimage.hash, Hash.init.toString());
 
             let uri5 = URI(host)
                 .port(port)
@@ -231,7 +231,7 @@ describe ('Test of Stoa API Server', () =>
                 new Hash("0xe0c04a5bd47ffc5b065b7d397e251016310c43dc77220bf803b73f1183da00b0e67602b1f95cb18a0059aa1cdf2f9adafe979998364b38cd5c15d92b9b8fd815");
             const enrollment = new Enrollment(utxo_key, random_seed, 20, enroll_sig);
             const header = new BlockHeader(
-                Hash.NULL, new Height(19n), Hash.NULL, new BitField([]),
+                Hash.init, new Height(19n), Hash.init, new BitField([]),
                 new Signature(Buffer.alloc(Signature.Width)), [ enrollment ]);
             const block = new Block(header, [], []);
 
