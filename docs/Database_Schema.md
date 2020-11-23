@@ -99,17 +99,17 @@ CREATE TABLE IF NOT EXISTS "transactions" (
 |:----------------- |:--------- |:--:|:--------:| -------- | --------- |
 | block_height      | INTEGER   | Y  | Y        |          | The height of the block|
 | tx_index          | INTEGER   | Y  | Y        |          | The index of this transaction in the block's transactions array|
+| in_index          | INTEGER   | Y  | Y        |          | The index of this input in the Transaction's inputs array|
 | utxo              | BLOB      | Y  | Y        |          | The hash of the UTXO to be spent|
-| out_index         | INTEGER   |    | Y        |          | The index of the output in the previous transaction|
 ### _Create Script_
 
 ```sql
 CREATE TABLE IF NOT EXISTS "tx_inputs" (
     "block_height"          INTEGER NOT NULL,
     "tx_index"              INTEGER NOT NULL,
+    "in_index"              INTEGER NOT NULL,
     "utxo"                  BLOB    NOT NULL,
-    "out_index"             INTEGER NOT NULL,
-    PRIMARY KEY("block_height","tx_index","utxo")
+    PRIMARY KEY("block_height","tx_index","in_index","utxo")
 )
 ```
 ----
