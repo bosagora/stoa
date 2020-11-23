@@ -42,9 +42,14 @@ describe ('Test of Stoa API Server', () =>
         });
     });
 
-    before ('Start Stoa API Server', () =>
+    before ('Create TestStoa', () =>
     {
         stoa_server = new TestStoa(new URL("http://127.0.0.1:2826"), port);
+        return stoa_server.createStorage();
+    });
+
+    before ('Start TestStoa', () =>
+    {
         return stoa_server.start();
     });
 

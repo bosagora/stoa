@@ -84,9 +84,14 @@ describe ('Test of Recovery', () =>
         return agora_node.stop();
     });
 
-    beforeEach ('Start TestStoa', () =>
+    beforeEach ('Create TestStoa', () =>
     {
         stoa_server = new TestRecoveryStoa(agora_addr, stoa_addr.port);
+        return stoa_server.createStorage();
+    });
+
+    beforeEach ('Start TestStoa', () =>
+    {
         return stoa_server.start();
     });
 

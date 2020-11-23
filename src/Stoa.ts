@@ -22,7 +22,7 @@ declare global {
 
 class Stoa extends WebService
 {
-    public ledger_storage: LedgerStorage;
+    private _ledger_storage: LedgerStorage | null;
 
     /**
      * Network client to interact with Agora
@@ -45,6 +45,11 @@ class Stoa extends WebService
     private _max_count_on_recovery: number = 64;
 
     /**
+     * sqlite3 database file name
+     */
+    private storage_filename: string;
+
+    /**
      * Constructor
      * @param database_filename sqlite3 database file name
      * @param agora_endpoint The network endpoint to connect to Agora
@@ -55,15 +60,8 @@ class Stoa extends WebService
     {
         super(port, address);
 
-        // create blockStorage
-        this.ledger_storage = new LedgerStorage(database_filename, (err: Error | null) =>
-        {
-            if (err != null)
-            {
-                logger.error(err);
-                throw new Error(err.message);
-            }
-        });
+        this._ledger_storage = null;
+        this.storage_filename = database_filename;
 
         // Instantiate a dummy promise for chaining
         this.pending = new Promise<void>(function (resolve, reject) { resolve() });
@@ -76,6 +74,35 @@ class Stoa extends WebService
         // Do this last, as it is possible it will fail, and we only want failure
         // to happen after we checked that our own state is correct.
         this.agora = new AgoraClient(agora_endpoint);
+    }
+
+    /**
+     * Creates a instance of LedgerStorage
+     */
+    public createStorage (): Promise<void>
+    {
+        return LedgerStorage.make(this.storage_filename)
+            .then((storage) => {
+                this._ledger_storage = storage;
+            });
+    }
+
+    /**
+     * Returns the instance of LedgerStorage
+     * This must be invoked after creating an instance of
+     * `LedgerStorage` using `createStorage`.
+     * @returns If `_ledger_storage` is not null, return `_ledger_storage`.
+     * Otherwise, terminate the process.
+     */
+    public get ledger_storage (): LedgerStorage
+    {
+        if (this._ledger_storage !== null)
+            return this._ledger_storage;
+        else
+        {
+            logger.error('LedgerStorage is not ready yet.');
+            process.exit(1);
+        }
     }
 
     /**
