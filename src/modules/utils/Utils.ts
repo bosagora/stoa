@@ -92,12 +92,12 @@ export class Utils
      * @param endian The byte order
      * @returns The hex string
      */
-    public static writeToString (source: Buffer, endian?: Endian): string
+    public static writeToString (source: Buffer, endian: Endian = Endian.Little): string
     {
         if (source.length == 0)
             return '0x';
 
-        if ((endian === undefined) || (endian == Endian.Little))
+        if (endian == Endian.Little)
         {
             let hex: Array<string> = [];
             for (let idx = source.length-1; idx >= 0; idx--) {

@@ -31,7 +31,7 @@ export class DataPayload
      * @param data The data payload to store
      * @param endian The byte order
      */
-    constructor (data: Buffer | string, endian?: Endian)
+    constructor (data: Buffer | string, endian: Endian = Endian.Big)
     {
         if (typeof data === 'string')
             this.data = Utils.readFromString(data);
@@ -85,11 +85,8 @@ export class DataPayload
      * @param endian The byte order
      * @returns The instance of DataPayload
      */
-    public fromBinary (bin: Buffer, endian?: Endian): DataPayload
+    public fromBinary (bin: Buffer, endian: Endian = Endian.Big): DataPayload
     {
-        if (endian === undefined)
-            endian = Endian.Big;
-
         this.data = Buffer.from(bin);
         if (endian === Endian.Little)
             this.data.reverse();
@@ -102,11 +99,8 @@ export class DataPayload
      * @param endian The byte order
      * @returns The binary data of the data payload
      */
-    public toBinary (endian?: Endian): Buffer
+    public toBinary (endian: Endian = Endian.Big): Buffer
     {
-        if (endian === undefined)
-            endian = Endian.Big;
-
         if (endian === Endian.Little)
             return Buffer.from(this.data).reverse();
         else
