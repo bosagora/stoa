@@ -33,15 +33,6 @@ export class Hash
     public static Width: number = 64;
 
     /**
-     * The hash consisting of zero values for all bytes.
-     * @returns The instance of Hash
-     */
-    static get NULL(): Hash
-    {
-        return new Hash(Buffer.alloc(Hash.Width));
-    }
-
-    /**
      * Construct a new instance of this class
      *
      * @param data   The string or binary representation of the hash
@@ -125,6 +116,15 @@ export class Hash
     {
         return this.toString();
     }
+
+    /**
+     * The hash consisting of zero values for all bytes.
+     * @returns The instance of Hash
+     */
+    static get init(): Hash
+    {
+        return new Hash(Buffer.alloc(Hash.Width));
+    }
 }
 
 /**
@@ -182,7 +182,7 @@ export function makeUTXOKey (h: Hash, index: bigint): Hash
 export function hashFull (record: any): Hash
 {
     if ((record === null) || (record === undefined))
-        return Hash.NULL;
+        return Hash.init;
 
     let buffer = new SmartBuffer();
     hashPart(record, buffer);
