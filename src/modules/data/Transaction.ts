@@ -106,4 +106,17 @@ export class Transaction
             elem.computeHash(buffer);
         this.payload.computeHash(buffer);
     }
+
+    /**
+     * Converts this object to its JSON representation
+     */
+    public toJSON (key?: string): object
+    {
+        return {
+            "type": this.type,
+            "inputs": this.inputs,
+            "outputs": this.outputs,
+            "payload": this.payload
+        }
+    }
 }

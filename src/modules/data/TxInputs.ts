@@ -73,4 +73,15 @@ export class TxInputs
     {
         this.utxo.computeHash(buffer);
     }
+
+    /**
+     * Converts this object to its JSON representation
+     */
+    public toJSON (key?: string): object
+    {
+        return {
+            "utxo": this.utxo,
+            "signature": this.signature
+        }
+    }
 }
