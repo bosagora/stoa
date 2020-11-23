@@ -104,6 +104,15 @@ export class PublicKey
     {
         return this.toString();
     }
+
+    /**
+     * The public key consisting of zero values for all bytes.
+     * @returns The instance of PublicKey
+     */
+    static get init(): PublicKey
+    {
+        return new PublicKey(Buffer.alloc(PublicKey.Width));
+    }
 }
 
 /**

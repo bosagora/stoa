@@ -87,4 +87,15 @@ export class TxOutput
             "address": this.address
         }
     }
+
+    /**
+     * The instance consisting of zero values for all bytes.
+     * @returns The instance of TxOutput
+     */
+    static get init(): TxOutput
+    {
+        let res = new TxOutput(BigInt(1), PublicKey.init);
+        res.value = BigInt(0);
+        return res;
+    }
 }
