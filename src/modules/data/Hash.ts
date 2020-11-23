@@ -47,7 +47,7 @@ export class Hash
      * @param data   The string or binary representation of the hash
      * @param endian The byte order
      */
-    constructor (data: Buffer | string, endian?: Endian)
+    constructor (data: Buffer | string, endian: Endian = Endian.Big)
     {
         if (typeof data === 'string')
             this.data = Utils.readFromString(data, Buffer.alloc(Hash.Width));
@@ -85,12 +85,9 @@ export class Hash
      * @param endian The byte order
      * @returns The instance of Hash
      */
-    public fromBinary (bin: Buffer, endian?: Endian): Hash
+    public fromBinary (bin: Buffer, endian: Endian = Endian.Big): Hash
     {
         assert.strictEqual(bin.length, Hash.Width);
-
-        if (endian === undefined)
-            endian = Endian.Big;
 
         bin.copy(this.data);
         if (endian === Endian.Little)
@@ -104,11 +101,8 @@ export class Hash
      * @param endian The byte order
      * @returns The binary data of the hash
      */
-    public toBinary (endian?: Endian): Buffer
+    public toBinary (endian: Endian = Endian.Big): Buffer
     {
-        if (endian === undefined)
-            endian = Endian.Big;
-
         if (endian === Endian.Little)
             return Buffer.from(this.data).reverse();
         else

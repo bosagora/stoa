@@ -36,7 +36,7 @@ export class Signature
      * @param data   The string or binary representation of the Signature
      * @param endian The byte order
      */
-    constructor (data: Buffer | string, endian?: Endian)
+    constructor (data: Buffer | string, endian: Endian = Endian.Big)
     {
         if (typeof data === 'string')
             this.data = Utils.readFromString(data, Buffer.alloc(Signature.Width));
@@ -74,12 +74,9 @@ export class Signature
      * @param endian The byte order
      * @returns The instance of Signature
      */
-    public fromBinary (bin: Buffer, endian?: Endian): Signature
+    public fromBinary (bin: Buffer, endian: Endian = Endian.Big): Signature
     {
         assert.strictEqual(bin.length, Signature.Width);
-
-        if (endian === undefined)
-            endian = Endian.Big;
 
         bin.copy(this.data);
         if (endian === Endian.Little)
@@ -93,11 +90,8 @@ export class Signature
      * @param endian The byte order
      * @returns The binary data of the signature
      */
-    public toBinary (endian?: Endian): Buffer
+    public toBinary (endian: Endian = Endian.Big): Buffer
     {
-        if (endian === undefined)
-            endian = Endian.Big;
-
         if (endian === Endian.Little)
             return Buffer.from(this.data).reverse();
         else
