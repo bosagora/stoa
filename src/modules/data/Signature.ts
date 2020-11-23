@@ -105,4 +105,13 @@ export class Signature
     {
         return this.toString();
     }
+
+    /**
+     * The signature consisting of zero values for all bytes.
+     * @returns The instance of Signature
+     */
+    static get init(): Signature
+    {
+        return new Signature(Buffer.alloc(Signature.Width));
+    }
 }

@@ -84,4 +84,13 @@ export class TxInput
             "signature": this.signature
         }
     }
+
+    /**
+     * The instance consisting of zero values for all bytes.
+     * @returns The instance of TxInput
+     */
+    static get init(): TxInput
+    {
+        return new TxInput(Hash.init, Signature.init);
+    }
 }

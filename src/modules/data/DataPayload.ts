@@ -123,4 +123,13 @@ export class DataPayload
     {
         return this.toString();
     }
+
+    /**
+     * The data payload consisting of zero values for all bytes.
+     * @returns The instance of DataPayload
+     */
+    static get init(): DataPayload
+    {
+        return new DataPayload(Buffer.alloc(0));
+    }
 }
