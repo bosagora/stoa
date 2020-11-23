@@ -95,7 +95,7 @@ export class Utils
     public static writeToString (source: Buffer, endian: Endian = Endian.Little): string
     {
         if (source.length == 0)
-            return '0x';
+            return '';
 
         if (endian == Endian.Little)
         {
