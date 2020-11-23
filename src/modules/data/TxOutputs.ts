@@ -12,7 +12,6 @@
 *******************************************************************************/
 
 import { PublicKey } from './PublicKey';
-import { Utils } from '../utils/Utils';
 import { Validator, ITxOutputs } from './validator';
 
 import { SmartBuffer } from 'smart-buffer';
@@ -76,5 +75,16 @@ export class TxOutputs
         buf.writeBigUInt64LE(this.value);
         buffer.writeBuffer(buf);
         this.address.computeHash(buffer);
+    }
+
+    /**
+     * Converts this object to its JSON representation
+     */
+    public toJSON (key?: string): object
+    {
+        return {
+            "value": this.value.toString(),
+            "address": this.address
+        }
     }
 }

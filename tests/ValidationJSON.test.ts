@@ -11,6 +11,7 @@
 
 *******************************************************************************/
 
+import { Transaction, TxInputs, TxOutputs, TxType, PublicKey, DataPayload, Hash, Signature } from "../src/modules/data";
 import { Validator, ITransaction, IEnrollment } from '../src/modules/data/validator';
 
 import * as assert from 'assert';
@@ -147,5 +148,32 @@ describe ('Test that validation with JSON schema', () =>
                 "d9883446efe63086925e8803400d7b93d22b1eef5c475098ce08a5b47e8" +
                 "125cf6b04274cc4db34bfd"
         }));
+    });
+});
+
+describe ('Test that JSON.stringify of Transaction', () =>
+{
+    it ('Test that JSON of Transaction', () =>
+    {
+        let tx = new Transaction(
+            TxType.Payment,
+            [
+                new TxInputs(
+                    new Hash("0xd9482016835acc6defdfd060216a5890e00cf8f0a79ab0b83d3385fc723cd45bfea66eb3587a684518ff1756951d38bf4f07abda96dcdea1c160a4f83e377c32"),
+                    new Signature("0x09039e412cd8bf8cb0364454f6737aaeee9e403e69198e418e87589ea6b3acd6171fe8d29fd6e5d5abc62390fbad0649f62e392be0c3228abd069c14c3fea5bd"))
+            ],
+            [
+                new TxOutputs(
+                    BigInt("1663400000"),
+                    new PublicKey("GCOMMONBGUXXP4RFCYGEF74JDJVPUW2GUENGTKKJECDNO6AGO32CUWGU")
+                ),
+                new TxOutputs(
+                    BigInt("24398336600000"),
+                    new PublicKey("GDID227ETHPOMLRLIHVDJSNSJVLDS4D4ANYOUHXPMG2WWEZN5JO473ZO")
+                )
+            ],
+            new DataPayload("0x0001")
+        )
+        assert.strictEqual(JSON.stringify(tx), `{"type":0,"inputs":[{"utxo":"0xd9482016835acc6defdfd060216a5890e00cf8f0a79ab0b83d3385fc723cd45bfea66eb3587a684518ff1756951d38bf4f07abda96dcdea1c160a4f83e377c32","signature":"0x09039e412cd8bf8cb0364454f6737aaeee9e403e69198e418e87589ea6b3acd6171fe8d29fd6e5d5abc62390fbad0649f62e392be0c3228abd069c14c3fea5bd"}],"outputs":[{"value":"1663400000","address":"GCOMMONBGUXXP4RFCYGEF74JDJVPUW2GUENGTKKJECDNO6AGO32CUWGU"},{"value":"24398336600000","address":"GDID227ETHPOMLRLIHVDJSNSJVLDS4D4ANYOUHXPMG2WWEZN5JO473ZO"}],"payload":"0x0001"}`);
     });
 });
