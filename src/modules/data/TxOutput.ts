@@ -12,7 +12,7 @@
 *******************************************************************************/
 
 import { PublicKey } from './PublicKey';
-import { Validator, ITxOutputs } from './validator';
+import { Validator, ITxOutput } from './validator';
 
 import { SmartBuffer } from 'smart-buffer';
 
@@ -21,7 +21,7 @@ import { SmartBuffer } from 'smart-buffer';
  * Convert JSON object to TypeScript's instance.
  * An exception occurs if the required property is not present.
  */
-export class TxOutputs
+export class TxOutput
 {
     /**
      * The monetary value of this output, in 1/10^7
@@ -61,8 +61,8 @@ export class TxOutputs
         if (key !== "")
             return value;
 
-        Validator.isValidOtherwiseThrow<ITxOutputs>('TxOutputs', value);
-        return new TxOutputs(BigInt(value.value), new PublicKey(value.address));
+        Validator.isValidOtherwiseThrow<ITxOutput>('TxOutput', value);
+        return new TxOutput(BigInt(value.value), new PublicKey(value.address));
     }
 
     /**

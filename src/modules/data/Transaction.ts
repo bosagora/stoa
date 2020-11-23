@@ -11,8 +11,8 @@
 
 *******************************************************************************/
 
-import { TxInputs } from './TxInputs';
-import { TxOutputs } from './TxOutputs';
+import { TxInput } from './TxInput';
+import { TxOutput } from './TxOutput';
 import { DataPayload } from './DataPayload';
 import { Validator, ITransaction } from './validator'
 
@@ -42,12 +42,12 @@ export class Transaction
     /**
      * The array of references to the unspent output of the previous transaction
      */
-    public inputs: TxInputs[];
+    public inputs: TxInput[];
 
     /**
      * The array of newly created outputs
      */
-    public outputs: TxOutputs[];
+    public outputs: TxOutput[];
 
     /**
      * The data payload to store
@@ -61,7 +61,7 @@ export class Transaction
      * @param outputs - The array of newly created outputs
      * @param payload - The data payload to store
      */
-    constructor (type: number, inputs: TxInputs[], outputs: TxOutputs[], payload: DataPayload)
+    constructor (type: number, inputs: TxInput[], outputs: TxOutput[], payload: DataPayload)
     {
         this.type = type;
         this.inputs = inputs;
@@ -88,8 +88,8 @@ export class Transaction
 
         return new Transaction(
             Number(value.type),
-            value.inputs.map((elem: any) => TxInputs.reviver("", elem)),
-            value.outputs.map((elem: any) => TxOutputs.reviver("", elem)),
+            value.inputs.map((elem: any) => TxInput.reviver("", elem)),
+            value.outputs.map((elem: any) => TxOutput.reviver("", elem)),
             DataPayload.reviver("", value.payload));
     }
 

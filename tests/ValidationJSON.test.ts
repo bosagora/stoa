@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { Transaction, TxInputs, TxOutputs, TxType, PublicKey, DataPayload, Hash, Signature } from "../src/modules/data";
+import { Transaction, TxInput, TxOutput, TxType, PublicKey, DataPayload, Hash, Signature } from "../src/modules/data";
 import { Validator, ITransaction, IEnrollment } from '../src/modules/data/validator';
 
 import * as assert from 'assert';
@@ -158,16 +158,16 @@ describe ('Test that JSON.stringify of Transaction', () =>
         let tx = new Transaction(
             TxType.Payment,
             [
-                new TxInputs(
+                new TxInput(
                     new Hash("0xd9482016835acc6defdfd060216a5890e00cf8f0a79ab0b83d3385fc723cd45bfea66eb3587a684518ff1756951d38bf4f07abda96dcdea1c160a4f83e377c32"),
                     new Signature("0x09039e412cd8bf8cb0364454f6737aaeee9e403e69198e418e87589ea6b3acd6171fe8d29fd6e5d5abc62390fbad0649f62e392be0c3228abd069c14c3fea5bd"))
             ],
             [
-                new TxOutputs(
+                new TxOutput(
                     BigInt("1663400000"),
                     new PublicKey("GCOMMONBGUXXP4RFCYGEF74JDJVPUW2GUENGTKKJECDNO6AGO32CUWGU")
                 ),
-                new TxOutputs(
+                new TxOutput(
                     BigInt("24398336600000"),
                     new PublicKey("GDID227ETHPOMLRLIHVDJSNSJVLDS4D4ANYOUHXPMG2WWEZN5JO473ZO")
                 )

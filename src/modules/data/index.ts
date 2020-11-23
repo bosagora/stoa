@@ -21,6 +21,6 @@ export { PreImageInfo } from './PreImageInfo';
 export { PublicKey } from './PublicKey';
 export { Signature } from './Signature';
 export { Transaction, TxType } from './Transaction';
-export { TxInputs } from './TxInputs';
-export { TxOutputs } from './TxOutputs';
+export { TxInput } from './TxInput';
+export { TxOutput } from './TxOutput';
 export { DataPayload } from './DataPayload';

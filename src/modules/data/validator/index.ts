@@ -17,8 +17,8 @@ export { IBlockHeader } from '../types/BlockHeader';
 export { IEnrollment } from '../types/Enrollment';
 export { IPreImageInfo } from '../types/PreImageInfo';
 export { ITransaction } from '../types/Transaction';
-export { ITxInputs } from '../types/TxInputs';
-export { ITxOutputs } from '../types/TxOutputs';
+export { ITxInput } from '../types/TxInput';
+export { ITxOutput } from '../types/TxOutput';
 export { IDataPayload } from '../types/DataPayload';
 
 import Ajv from 'ajv';

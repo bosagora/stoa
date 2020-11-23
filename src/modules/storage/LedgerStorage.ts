@@ -13,7 +13,7 @@
 
 import {
     Block, Enrollment, Hash, Height, PreImageInfo, Transaction,
-    TxInputs, TxOutputs, makeUTXOKey, hashFull, TxType
+    TxInput, TxOutput, makeUTXOKey, hashFull, TxType
 } from '../data';
 import { Storages } from './Storages';
 import { Utils, Endian } from '../utils/Utils';
@@ -492,7 +492,7 @@ export class LedgerStorage extends Storages
         }
 
         function save_input (storage: LedgerStorage, height: Height, tx_idx: number,
-            in_idx: number, input: TxInputs): Promise<void>
+            in_idx: number, input: TxInput): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
             {
@@ -521,7 +521,7 @@ export class LedgerStorage extends Storages
         }
 
         function update_spend_output (storage: LedgerStorage,
-            input: TxInputs): Promise<void>
+            input: TxInput): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
             {
@@ -542,7 +542,7 @@ export class LedgerStorage extends Storages
 
         function save_output (storage: LedgerStorage, height: Height, tx_idx: number,
             out_idx: number, hash: Hash, utxo_key: Hash,
-            output: TxOutputs): Promise<void>
+            output: TxOutput): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
             {
