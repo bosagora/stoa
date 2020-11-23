@@ -13,7 +13,7 @@
 
 import { Hash } from './Hash';
 import { Signature } from './Signature';
-import { Validator, ITxInputs } from './validator';
+import { Validator, ITxInput } from './validator';
 
 import { SmartBuffer } from 'smart-buffer';
 
@@ -22,7 +22,7 @@ import { SmartBuffer } from 'smart-buffer';
  * Convert JSON object to TypeScript's instance.
  * An exception occurs if the required property is not present.
  */
-export class TxInputs
+export class TxInput
 {
     /**
      * The hash of the UTXO to be spent
@@ -60,8 +60,8 @@ export class TxInputs
         if (key !== "")
             return value;
 
-        Validator.isValidOtherwiseThrow<ITxInputs>('TxInputs', value);
-        return new TxInputs(
+        Validator.isValidOtherwiseThrow<ITxInput>('TxInput', value);
+        return new TxInput(
             new Hash(value.utxo), new Signature(value.signature));
     }
 
