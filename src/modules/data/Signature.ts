@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { readFromString, writeToString, Endian } from '../utils/buffer';
+import { Utils, Endian } from '../utils/Utils';
 
 import * as assert from 'assert';
 
@@ -39,7 +39,7 @@ export class Signature
     constructor (data: Buffer | string, endian?: Endian)
     {
         if (typeof data === 'string')
-            this.data = readFromString(data, Buffer.alloc(Signature.Width));
+            this.data = Utils.readFromString(data, Buffer.alloc(Signature.Width));
         else
         {
             this.data = Buffer.alloc(Signature.Width);
@@ -55,7 +55,7 @@ export class Signature
      */
     public fromString (hex: string): Signature
     {
-        readFromString(hex, this.data);
+        Utils.readFromString(hex, this.data);
         return this;
     }
 
@@ -65,7 +65,7 @@ export class Signature
      */
     public toString (): string
     {
-        return writeToString(this.data);
+        return Utils.writeToString(this.data);
     }
 
     /**

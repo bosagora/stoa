@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { readFromString, writeToString, Endian } from '../utils/buffer';
+import { Utils, Endian } from '../utils/Utils';
 
 import * as assert from 'assert';
 import { SmartBuffer } from 'smart-buffer';
@@ -50,7 +50,7 @@ export class Hash
     constructor (data: Buffer | string, endian?: Endian)
     {
         if (typeof data === 'string')
-            this.data = readFromString(data, Buffer.alloc(Hash.Width));
+            this.data = Utils.readFromString(data, Buffer.alloc(Hash.Width));
         else
         {
             this.data = Buffer.alloc(Hash.Width);
@@ -66,7 +66,7 @@ export class Hash
      */
     public fromString (hex: string): Hash
     {
-        readFromString(hex, this.data);
+        Utils.readFromString(hex, this.data);
         return this;
     }
 
@@ -76,7 +76,7 @@ export class Hash
      */
     public toString (): string
     {
-        return writeToString(this.data);
+        return Utils.writeToString(this.data);
     }
 
     /**
