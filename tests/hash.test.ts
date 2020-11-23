@@ -12,6 +12,7 @@
 *******************************************************************************/
 
 import { Block, Hash, hash, hashFull, hashMulti, makeUTXOKey } from '../src/modules/data'
+import { Transaction, TxInput, TxOutput, TxType, PublicKey, DataPayload, Signature } from "../src/modules/data";
 import { sample_data } from './Utils';
 
 import * as assert from 'assert';
@@ -71,6 +72,40 @@ describe('Hash', () => {
             '0x7c95c29b184e47fbd32e58e5abd42c6e22e8bd5a7e934ab049d21df545e09' +
             'c2e33bb2b89df2e59ee01eb2519b1508284b577f66a76d42546b65a6813e592' +
             'bb84');
+    });
+
+    // See_Also: https://github.com/bpfkorea/agora/blob/dac8b3ea6500af68a99c0248c3ade8ab821ee9ef/source/agora/consensus/data/Transaction.d#L203-L229
+    it ('Test for hash value of transaction data', () =>
+    {
+        let payment_tx = new Transaction(
+            TxType.Payment,
+            [
+                new TxInput(Hash.init, BigInt(0))
+            ],
+            [
+                TxOutput.init
+            ],
+            DataPayload.init
+        );
+
+        assert.strictEqual(hashFull(payment_tx).toString(),
+            "0x35927f79ab7f2c8273f5dc24bb1efa5ebe3ac050fd4fd84d014b51124d0322ed" +
+            "709225b92ba28b3ee6b70144d4acafb9a5289fc48ecb4a4f273b537837c78cb0");
+
+        let freeze_tx = new Transaction(
+            TxType.Freeze,
+            [
+                new TxInput(Hash.init, BigInt(0))
+            ],
+            [
+                TxOutput.init
+            ],
+            DataPayload.init
+        );
+
+        assert.strictEqual(hashFull(freeze_tx).toString(),
+            "0x0277044f0628605485a8f8a999f9a2519231e8c59c1568ef2dac2f241ce569d8" +
+            "54e15f950e0fd3d88460309d3e0ef3fbd57b8f5af998f8bacbe391ddb9aea328");
     });
 });
 
