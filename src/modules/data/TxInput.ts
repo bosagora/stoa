@@ -108,17 +108,6 @@ export class TxInput
     }
 
     /**
-     * Converts this object to its JSON representation
-     */
-    public toJSON (key?: string): object
-    {
-        return {
-            "utxo": this.utxo,
-            "signature": this.signature
-        }
-    }
-
-    /**
      * The instance consisting of zero values for all bytes.
      * @returns The instance of TxInput
      */
