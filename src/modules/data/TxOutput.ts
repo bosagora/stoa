@@ -78,17 +78,6 @@ export class TxOutput
     }
 
     /**
-     * Converts this object to its JSON representation
-     */
-    public toJSON (key?: string): object
-    {
-        return {
-            "value": this.value.toString(),
-            "address": this.address
-        }
-    }
-
-    /**
      * The instance consisting of zero values for all bytes.
      * @returns The instance of TxOutput
      */
