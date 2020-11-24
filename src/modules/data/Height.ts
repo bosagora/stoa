@@ -11,8 +11,6 @@
 
 *******************************************************************************/
 
-import { Utils } from '../utils/Utils';
-
 import { SmartBuffer } from 'smart-buffer';
 
 /**
