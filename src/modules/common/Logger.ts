@@ -14,8 +14,6 @@
 
 *******************************************************************************/
 
-import { Utils } from '../utils/Utils';
-
 import path from 'path';
 import winston from 'winston';
 
