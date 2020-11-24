@@ -37,45 +37,22 @@ export class TxInput
 
     /**
      * Constructor
-     * @param first  UTXO or hash of transaction or instance of Transaction
-     * @param second Instance of Signature or index of Outputs
+     * @param first  The hash of the UTXO or the hash of the transaction
+     * @param second The instance of Signature or output index
+     * in the previous transaction
+     * If the type of the second parameter is bigint,
+     * the first parameter is considered the hash of the transaction
+     * otherwise, the first parameter is considered the hash of the UTXO.
      */
-    constructor (first: Hash | Transaction, second?: Signature | bigint)
+    constructor (first: Hash, second: Signature | bigint)
     {
-        // constructor (first: Hash, second: Signature) {}
-        // first is the hash of the utxo
-        // second is the instance of the Signature
-        if ((first instanceof Hash) && (second instanceof Signature))
-        {
+        if (typeof second == "bigint") {
+            this.utxo = makeUTXOKey(first, second);
+            this.signature = Signature.init;
+        } else {
             this.utxo = first;
             this.signature = second;
         }
-        // constructor (first: Transaction, second: bigint) {}
-        // first is the instance of the previous transaction
-        // second is the index of the output in the previous transaction
-        else if ((first instanceof Transaction) && (typeof second === 'bigint'))
-        {
-            this.utxo = makeUTXOKey(hashFull(first), second);
-            this.signature = Signature.init;
-        }
-        // constructor (first: Hash, second: bigint) {}
-        // first is the hash of the transaction
-        // second is the index of the output in the previous transaction
-        else if ((first instanceof Hash) && (typeof second === 'bigint'))
-        {
-            this.utxo = makeUTXOKey(first, second);
-            this.signature = Signature.init;
-        }
-        // constructor (first: Hash) {}
-        // first is the hash of the utxo
-        // second is undefined
-        else if (first instanceof Hash)
-        {
-            this.utxo = first;
-            this.signature = Signature.init;
-        }
-        else
-            throw new Error("The entered parameters are not supported by the constructor of TxInput.")
     }
 
     /**
