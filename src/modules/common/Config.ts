@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { Utils } from '../utils/Utils';
+import { Utils } from 'boa-sdk-ts';
 
 import {ArgumentParser} from 'argparse';
 import extend from 'extend';

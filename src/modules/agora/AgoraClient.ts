@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { Height } from '../data/';
+import { Height } from 'boa-sdk-ts';
 
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import URI from 'urijs';

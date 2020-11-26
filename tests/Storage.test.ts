@@ -13,16 +13,19 @@
 
 import * as assert from 'assert';
 import { LedgerStorage } from '../src/modules/storage/LedgerStorage';
-import { Block, Hash, Height, DataPayload } from '../src/modules/data';
-import { PreImageInfo } from '../src/modules/data';
+import { Block, Hash, Height, DataPayload, PreImageInfo, SodiumHelper, Endian } from 'boa-sdk-ts';
 import { sample_data, sample_preImageInfo } from "./Utils";
-import { Endian } from "../src/modules/utils/Utils";
 
 import * as fs from 'fs';
 
 describe ('Test ledger storage and inquiry function.', () =>
 {
     let ledger_storage: LedgerStorage;
+
+    before('Wait for the package libsodium to finish loading', () =>
+    {
+        return SodiumHelper.init();
+    });
 
     before ('Prepare Storage', () =>
     {

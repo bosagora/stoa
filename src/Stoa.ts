@@ -2,8 +2,7 @@ import { AgoraClient } from './modules/agora/AgoraClient';
 import { cors_options } from './cors';
 import { LedgerStorage } from './modules/storage/LedgerStorage';
 import { logger } from './modules/common/Logger';
-import { Height, PreImageInfo, Hash, hash, Block } from './modules/data';
-import { Utils, Endian } from './modules/utils/Utils';
+import { Height, PreImageInfo, Hash, hash, Block, Utils, Endian } from 'boa-sdk-ts';
 import { WebService } from './modules/service/WebService';
 import { ValidatorData, IPreimage, IUnspentTxOutput } from './Types';
 
@@ -194,7 +193,7 @@ class Stoa extends WebService
                     let preimage_hash: Buffer = row.preimage_hash;
                     let preimage_distance: number = row.preimage_distance;
                     let target_height: Height = new Height(row.height);
-                    let result_preimage_hash = Hash.init;
+                    let result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
                     let avail_height: bigint = BigInt(row.avail_height);
 
                     // Hashing preImage
@@ -219,7 +218,7 @@ class Stoa extends WebService
                         else
                         {
                             preimage_distance = NaN;
-                            result_preimage_hash = Hash.init;
+                            result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
                         }
                     }
 
@@ -289,7 +288,7 @@ class Stoa extends WebService
                     let preimage_hash: Buffer = row.preimage_hash;
                     let preimage_distance: number = row.preimage_distance;
                     let target_height: Height = new Height(BigInt(row.height));
-                    let result_preimage_hash = Hash.init;
+                    let result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
                     let avail_height: bigint = BigInt(row.avail_height);
                     // Hashing preImage
                     if (target_height.value >= avail_height &&
@@ -313,7 +312,7 @@ class Stoa extends WebService
                         else
                         {
                             preimage_distance = NaN;
-                            result_preimage_hash = Hash.init;
+                            result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
                         }
                     }
 

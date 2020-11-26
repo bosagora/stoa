@@ -1,6 +1,0 @@
-{
-  "title": "IDataPayload",
-  "type": "string",
-  "additionalProperties": false,
-  "required": []
-}
