@@ -11,7 +11,7 @@
 
  *******************************************************************************/
 
-import { Height } from './modules/data';
+import { Height } from 'boa-sdk-ts';
 
 /**
  * The interface of the Validator

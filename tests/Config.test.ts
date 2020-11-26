@@ -12,7 +12,7 @@
  *******************************************************************************/
 
 import { Config } from '../src/modules/common/Config';
-import { Utils } from '../src/modules/utils/Utils';
+import { Utils } from 'boa-sdk-ts';
 
 import * as assert from 'assert';
 import path from "path";
