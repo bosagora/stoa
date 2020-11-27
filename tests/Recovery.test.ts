@@ -111,14 +111,13 @@ describe ('Test of Recovery', () =>
         await assert.doesNotReject(async () =>
         {
             await agora_client.getBlocksFrom(new Height(1n), 3)
-                .then((response) =>
+                .then((blocks) =>
                 {
                     // The number of blocks is three.
-                    assert.strictEqual(response.length, 3);
+                    assert.strictEqual(blocks.length, 3);
                     let expected_height : Height = new Height(1n);
-                    for (let elem of response)
+                    for (let block of blocks)
                     {
-                        let block = Block.reviver("", elem);
                         // Make sure that the received block height is equal to the expected value.
                         assert.deepEqual(block.header.height, expected_height);
                         expected_height.value += 1n;
@@ -137,14 +136,13 @@ describe ('Test of Recovery', () =>
 
         assert.doesNotThrow(async () =>
         {
-            let response = await agora_client.getBlocksFrom(new Height(8n), 3);
+            const blocks = await agora_client.getBlocksFrom(new Height(8n), 3);
             // The number of blocks is two.
             // Because the total number is 10. The last block height is 9.
-            assert.strictEqual(response.length, 2);
+            assert.strictEqual(blocks.length, 2);
             let expected_height : Height = new Height(8n);
-            for (let elem of response)
+            for (let block of blocks)
             {
-                let block = Block.reviver("", elem);
                 // Make sure that the received block height is equal to the expected value.
                 assert.deepEqual(block.header.height, expected_height);
                 expected_height.value += 1n;
