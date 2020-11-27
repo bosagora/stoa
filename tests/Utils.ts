@@ -98,15 +98,35 @@ export class TestAgora
                 return;
             }
 
-            let block_height = Math.max(Number(req.query.block_height), 0);
-            let max_blocks = Math.max(Number(req.query.max_blocks), 0);
+            let block_height = new Height(BigInt(req.query.block_height));
+            if (block_height.value < 0n)
+            {
+                res.status(400).json({ statusText: 'Query parameter block_height must not be negative' });
+                return;
+            }
 
-            block_height = Math.min(block_height, this.blocks.length - 1);
+            // Slightly stricter requirement than Agora (strictly positive instead of positive)
+            // as we don't want Stoa to request 0 blocks
+            let max_blocks = Number(req.query.max_blocks);
+            if (max_blocks <= 0)
+            {
+                res.status(400).json({ statusText: 'Query parameter max_block must be strictly positive' });
+                return;
+            }
+
+            if (this.blocks.length < 1)
+            {
+                res.status(500).json({ statusText: 'No data on server' });
+                return;
+            }
+
+            if (block_height.value > BigInt(this.blocks.length - 1))
+                block_height.value = BigInt(this.blocks.length - 1);
             max_blocks = Math.min(max_blocks, 1000);
 
             let data = this.blocks.slice(
-                block_height,
-                Math.min(block_height + max_blocks, this.blocks.length)
+                Number(block_height.value),
+                Math.min(Number(block_height.value) + max_blocks, this.blocks.length)
             );
 
             if (this.delay > 0)
