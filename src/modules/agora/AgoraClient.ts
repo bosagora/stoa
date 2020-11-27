@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { Height } from 'boa-sdk-ts';
+import { Block, Height } from 'boa-sdk-ts';
 
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import URI from 'urijs';
@@ -28,7 +28,7 @@ export interface FullNodeAPI
     // getLocalTime (): bigint;
 
     getBlockHeight (): Promise<Height>;
-    getBlocksFrom (block_height: Height, max_blocks: number): Promise<any[]>;
+    getBlocksFrom (block_height: Height, max_blocks: number): Promise<Block[]>;
     // getMerklePath (block_height: Height, hash: Hash): Hash[];
     // hasTransactionHash (tx: Hash): boolean;
     // putTransaction (tx: Transaction): void;
@@ -83,9 +83,9 @@ export class AgoraClient implements FullNodeAPI
      * @param block_height - The height of the block
      * @param max_blocks - The maximum number of block to request
      */
-    public getBlocksFrom (block_height: Height, max_blocks: number): Promise<Array<any>>
+    public getBlocksFrom (block_height: Height, max_blocks: number): Promise<Block[]>
     {
-        return new Promise<Array<any>>((resolve, reject) =>
+        return new Promise<Block[]>((resolve, reject) =>
         {
             let uri = URI("/blocks_from")
                 .addSearch("block_height", block_height.toString())
@@ -96,7 +96,7 @@ export class AgoraClient implements FullNodeAPI
                 {
                     if (response.status == 200)
                     {
-                        resolve(response.data);
+                        resolve(response.data.map((entry: any) => Block.reviver("", entry)));
                     }
                     else
                     {

@@ -778,14 +778,13 @@ class Stoa extends WebService
                         let blocks = await this.agora.getBlocksFrom(expected_height, Number(max_blocks));
 
                         // Save previous block
-                        for (let elem of blocks)
+                        for (let block of blocks)
                         {
-                            let element_height = Stoa.getJsonBlockHeight(elem);
-                            if (element_height.value == expected_height.value)
+                            if (block.header.height.value == expected_height.value)
                             {
-                                await this.ledger_storage.putBlocks(Block.reviver("", elem));
+                                await this.ledger_storage.putBlocks(block);
                                 expected_height.value += 1n;
-                                logger.info(`Recovered a block with block height of ${element_height.toString()}`);
+                                logger.info(`Recovered a block with block height of ${block.header.height.toString()}`);
                             }
                             else
                             {
