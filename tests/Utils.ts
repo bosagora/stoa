@@ -17,7 +17,7 @@ import * as http from 'http';
 import { URL } from 'url';
 
 import Stoa from '../src/Stoa';
-
+import { Height } from 'boa-sdk-ts';
 
 export const sample_data_raw = (() => {
     return [
@@ -81,7 +81,7 @@ export class TestAgora
         this.agora.get("/block_height",
             (req: express.Request, res: express.Response) =>
         {
-            res.status(200).send(JSON.stringify(Number(this.blocks.length - 1)));
+            res.json(new Height(BigInt(this.blocks.length - 1)));
         });
 
         this.agora.get("/blocks_from",
