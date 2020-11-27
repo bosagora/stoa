@@ -116,10 +116,10 @@ export class Storages
     {
         return new Promise<sqlite.RunResult>((resolve, reject) =>
         {
-            this.db.run(sql, params, (err: Error | null, result: sqlite.RunResult) =>
+            this.db.run(sql, params, function(err: Error)
             {
                 if (!err)
-                    resolve(result);
+                    resolve(this);
                 else
                     reject(err);
             });
