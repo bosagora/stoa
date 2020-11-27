@@ -120,7 +120,7 @@ export class LedgerStorage extends Storages
             payload             BLOB    NOT NULL,
             PRIMARY KEY("tx_hash")
         );
-        
+
         CREATE TABLE IF NOT EXISTS validators
         (
             enrolled_at         INTEGER NOT NULL,
@@ -444,21 +444,21 @@ export class LedgerStorage extends Storages
 
                     unlock_height_query =
                         `(
-                            SELECT '${(height.value + 2016n).toString()}' AS unlock_height WHERE EXISTS  
+                            SELECT '${(height.value + 2016n).toString()}' AS unlock_height WHERE EXISTS
                             (
                                 SELECT
                                     *
-                                FROM 
-                                    tx_outputs AS a, 
-                                    transactions AS b 
-                                WHERE 
+                                FROM
+                                    tx_outputs AS a,
+                                    transactions AS b
+                                WHERE
                                     a.tx_hash = b.tx_hash
                                     and b.type = 1
                                     and hex(a.utxo_key) in (${utxo.join(',')})
                             )
                             UNION ALL
                             SELECT '${(height.value + 1n).toString()}' AS unlock_height
-                            LIMIT 1 
+                            LIMIT 1
                         )`;
                 }
                 else
@@ -834,16 +834,16 @@ export class LedgerStorage extends Storages
     public getUTXO (address: string): Promise<any[]>
     {
         let sql =
-            `SELECT 
+            `SELECT
                 tx_outputs.utxo_key AS utxo,
                 transactions.type,
                 transactions.unlock_height,
                 tx_outputs.amount
             FROM
-                tx_outputs, 
+                tx_outputs,
                 transactions
-            WHERE 
-                tx_outputs.tx_hash = transactions.tx_hash 
+            WHERE
+                tx_outputs.tx_hash = transactions.tx_hash
                 AND tx_outputs.address = ?
                 AND tx_outputs.used != 1;`;
         return this.query(sql, [address]);
