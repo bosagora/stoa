@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { Block, Height } from 'boa-sdk-ts';
+import { Block, Hash, Height, PreImageInfo } from 'boa-sdk-ts';
 
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import URI from 'urijs';
@@ -35,7 +35,7 @@ export interface FullNodeAPI
 
     // enrollValidator (enroll: Enrollment): void;
     // getEnrollment (enroll_hash: Hash): Enrollment;
-    // getPreimage (enroll_key: Hash): PreImageInfo;
+    getPreimage (enroll_key: Hash): Promise<PreImageInfo>;
     // receivePreimage (preimage: PreImageInfo): void;
 }
 
@@ -102,6 +102,33 @@ export class AgoraClient implements FullNodeAPI
                     {
                         reject(new Error(response.statusText));
                     }
+                })
+                .catch((reason: any) => {
+                    reject(handleNetworkError(reason));
+                });
+        });
+    }
+
+    /**
+     * Request the latest PreImageInfo for an enrollment key
+     *
+     * @param enroll_key Hash of the UTXO used by the validator
+     * @returns A `PreImageInfo` matching this `enroll_key`
+     */
+    public getPreimage (enroll_key: Hash): Promise<PreImageInfo>
+    {
+        return new Promise<PreImageInfo>((resolve, reject) =>
+        {
+            let uri = URI("/preimage")
+                .addSearch("enroll_key", enroll_key);
+
+            this.client.get(uri.toString())
+                .then((response: AxiosResponse) =>
+                {
+                    if (response.status == 200)
+                        resolve(PreImageInfo.reviver("", response.data));
+                    else
+                        reject(new Error(response.statusText));
                 })
                 .catch((reason: any) => {
                     reject(handleNetworkError(reason));
