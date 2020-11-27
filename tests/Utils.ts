@@ -87,14 +87,14 @@ export class TestAgora
         this.agora.get("/blocks_from",
             (req: express.Request, res: express.Response) =>
         {
-            if  (
-                    (req.query.block_height === undefined) ||
-                    (req.query.max_blocks === undefined) ||
-                    Number.isNaN(req.query.block_height) ||
-                    Number.isNaN(req.query.max_blocks)
-                )
+            if (req.query.block_height === undefined || Number.isNaN(req.query.block_height))
             {
-                res.status(200).send(JSON.stringify([]));
+                res.status(400).json({ statusText: 'Missing or invalid block_height query parameter' });
+                return;
+            }
+            if (req.query.max_blocks === undefined || Number.isNaN(req.query.max_blocks))
+            {
+                res.status(400).json({ statusText: 'Missing or invalid max_blocks query parameter' });
                 return;
             }
 
