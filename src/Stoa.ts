@@ -597,9 +597,10 @@ class Stoa extends WebService
                 try
                 {
                     let pre_image = PreImageInfo.reviver("", stored_data.data);
+                    let changes = await this.ledger_storage.updatePreImage(pre_image);
 
-                    await this.ledger_storage.updatePreImage(pre_image);
-                    logger.info(`Saved a pre-image enroll_key : ${pre_image.enroll_key.toString().substr(0, 18)}, ` +
+                    if (changes)
+                        logger.info(`Saved a pre-image enroll_key : ${pre_image.enroll_key.toString().substr(0, 18)}, ` +
                         `hash : ${pre_image.hash.toString().substr(0, 18)}, distance : ${pre_image.distance}`);
                     resolve();
                 }

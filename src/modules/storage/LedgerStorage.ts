@@ -16,6 +16,7 @@ import {
     TxInput, TxOutput, makeUTXOKey, hashFull, TxType,
     Utils, Endian
 } from 'boa-sdk-ts';
+import { logger } from '../common/Logger';
 import { Storages } from './Storages';
 
 /**
@@ -340,10 +341,10 @@ export class LedgerStorage extends Storages
     /**
      * Update a preImage to database
      */
-    public updatePreImage (pre_image: PreImageInfo): Promise<void>
+    public updatePreImage (pre_image: PreImageInfo): Promise<number>
     {
         let enroll_key = pre_image.enroll_key.toBinary(Endian.Little);
-        return new Promise<void>((resolve, reject) =>
+        return new Promise<number>((resolve, reject) =>
         {
             this.run(
                 `UPDATE validators
@@ -374,9 +375,9 @@ export class LedgerStorage extends Storages
                     pre_image.distance,
                     pre_image.distance
                 ])
-                .then(() =>
+                .then((result) =>
                 {
-                    resolve();
+                    resolve(result.changes);
                 })
                 .catch((err) =>
                 {
