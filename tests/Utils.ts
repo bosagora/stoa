@@ -17,7 +17,8 @@ import * as http from 'http';
 import { URL } from 'url';
 
 import Stoa from '../src/Stoa';
-import { Height } from 'boa-sdk-ts';
+import { FullNodeAPI } from '../src/modules/agora/AgoraClient';
+import { Block, Hash, Height, PreImageInfo } from 'boa-sdk-ts';
 
 export const sample_data_raw = (() => {
     return [
@@ -58,7 +59,7 @@ export const sample_reEnroll_preImageInfo =
  * This is an Agora node for testing.
  * The test code allows the Agora node to be started and shut down.
  */
-export class TestAgora
+export class TestAgora implements FullNodeAPI
 {
     public server: http.Server;
 
@@ -72,6 +73,27 @@ export class TestAgora
      */
     private blocks: any[];
 
+    /**
+     * Construct an instance of this class
+     *
+     * @param port   The port to bind to
+     * @param blocks The initial state of the blockchain
+     * @param done   A delegate to forward to express' `listen` method
+     *
+     * This construct a new instance of `TestAgora` and sets up the handlers.
+     * Note that the handlers will do parameter validation and deserialization,
+     * then forward to the appropriate methods, which are implementation of the
+     * `FullNodeAPI` interface.
+     *
+     * There are two kind of handlers that can be written: regular and `Promise`-based.
+     * - For `Promise`-based handlers, if parameter validation fails,
+     *   the handler will return using `Promise.reject`,
+     *   or otherwise `return` the result of the method it forwards to directly.
+     * - For "regular" method, the handler will call a method on `res`,
+     *   using `then` on the result of the method it wraps.
+     *
+     * When possible, prefer using the `Promise`-based approach.
+     */
     constructor (port: string, blocks: any[], done: () => void)
     {
         this.agora = express();
@@ -79,13 +101,13 @@ export class TestAgora
         this.blocks = blocks;
 
         this.agora.get("/block_height",
-            (req: express.Request, res: express.Response) =>
+            (req: express.Request, res: express.Response, next) =>
         {
-            res.json(new Height(BigInt(this.blocks.length - 1)));
+            return this.getBlockHeight().then((result) => { res.json(result); }, next);
         });
 
         this.agora.get("/blocks_from",
-            (req: express.Request, res: express.Response) =>
+            (req: express.Request, res: express.Response, next) =>
         {
             if (req.query.block_height === undefined || Number.isNaN(req.query.block_height))
             {
@@ -114,32 +136,21 @@ export class TestAgora
                 return;
             }
 
-            if (this.blocks.length < 1)
-            {
-                res.status(500).json({ statusText: 'No data on server' });
-                return;
-            }
+            this.getBlocksFrom(block_height, max_blocks).then((result) => {
+                // Adds an artificial delay to our responses
+                if (this.delay > 0)
+                    setTimeout(() => { res.json(result); }, this.delay);
+                else
+                    res.json(result);
+            }, next);
+        });
 
-            if (block_height.value > BigInt(this.blocks.length - 1))
-                block_height.value = BigInt(this.blocks.length - 1);
-            max_blocks = Math.min(max_blocks, 1000);
-
-            let data = this.blocks.slice(
-                Number(block_height.value),
-                Math.min(Number(block_height.value) + max_blocks, this.blocks.length)
-            );
-
-            if (this.delay > 0)
-            {
-                setTimeout(() =>
-                {
-                    res.status(200).send(JSON.stringify(data));
-                }, this.delay);
-            }
+        this.agora.get("/preimage", (req: express.Request, res: express.Response, next) => {
+            if (req.query.enroll_key === undefined)
+                return Promise.reject(new Error('Missing query parameter enroll_key'));
             else
-            {
-                res.status(200).send(JSON.stringify(data));
-            }
+                return this.getPreimage(new Hash(req.query.enroll_key.toString()))
+                    .then((result) => { res.json(result); }, next);
         });
 
         // Shut down
@@ -155,6 +166,38 @@ export class TestAgora
         {
             done();
         });
+    }
+
+    /// Implements FullNodeAPI.getBlockHeight
+    public getBlockHeight (): Promise<Height>
+    {
+        return Promise.resolve(new Height(BigInt(this.blocks.length - 1)));
+    }
+
+    /// Implements FullNodeAPI.getBlocksFrom
+    public getBlocksFrom (block_height: Height, max_blocks: number): Promise<Block[]>
+    {
+        // Follow what Agora is doing
+        max_blocks = Math.min(max_blocks, 1000);
+
+        if (block_height.value >= BigInt(this.blocks.length))
+            return Promise.resolve([]);
+
+        // FIXME: Should handle > 2^53 but we're safe for the time being
+        const block_height_ = Number(BigInt.asUintN(64, block_height.value));
+
+        return Promise.resolve(
+            this.blocks.slice(
+                block_height_,
+                Math.min(block_height_ + max_blocks, this.blocks.length)
+            )
+        );
+    }
+
+    /// Implements FullNodeAPI.getPreimage
+    public getPreimage (enroll_key: Hash): Promise<PreImageInfo>
+    {
+        return Promise.reject("Not implemented");
     }
 
     public stop (): Promise<void>
