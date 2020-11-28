@@ -258,6 +258,11 @@ describe ('Test for storing block data in the database', () =>
 {
     let ledger_storage: LedgerStorage;
 
+    before('Wait for the package libsodium to finish loading', () =>
+    {
+        return SodiumHelper.init();
+    });
+
     beforeEach ('Prepare Storage', () =>
     {
         return LedgerStorage.make(":memory:").then((result) => { ledger_storage = result; });
@@ -343,6 +348,11 @@ describe ('Tests that sending a pre-image', () =>
 {
     let ledger_storage: LedgerStorage;
     const height = new Height(0n);
+
+    before('Wait for the package libsodium to finish loading', () =>
+    {
+        return SodiumHelper.init();
+    });
 
     before ('Start sending a pre-image', () =>
     {
