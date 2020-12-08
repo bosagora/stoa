@@ -625,7 +625,7 @@ class Stoa extends WebService
             {
                 let expected_height = await this.ledger_storage.getExpectedBlockHeight();
 
-                if (height.value > expected_height.value) {
+                if (height.value >= expected_height.value) {
                     while (true) {
                         if (await this.recoverBlock(null, height, expected_height))
                             break;
