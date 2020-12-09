@@ -353,7 +353,7 @@ class Stoa extends WebService
             .then((rows: any[]) => {
                 if (!rows.length)
                 {
-                    res.status(400).send(`The UTXO not found. address': (${address})`);
+                    res.status(204).send(`The UTXO not found. address': (${address})`);
                     return;
                 }
 
