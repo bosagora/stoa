@@ -4,7 +4,7 @@ import { LedgerStorage } from './modules/storage/LedgerStorage';
 import { logger } from './modules/common/Logger';
 import { Height, PreImageInfo, Hash, hash, Block, Utils, Endian } from 'boa-sdk-ts';
 import { WebService } from './modules/service/WebService';
-import { ValidatorData, IPreimage, IUnspentTxOutput } from './Types';
+import { ValidatorData, IPreimage, IUnspentTxOutput, ITxHistoryElement } from './Types';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -123,6 +123,7 @@ class Stoa extends WebService
         this.app.get("/validators", this.getValidators.bind(this));
         this.app.get("/validator/:address", this.getValidator.bind(this));
         this.app.get("/utxo/:address", this.getUTXO.bind(this));
+        this.app.get("/wallet/transactions/history/:addresses", this.getWalletTransactionsHistory.bind(this));
         this.app.post("/block_externalized", this.putBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
 
@@ -375,6 +376,87 @@ class Stoa extends WebService
                     res.status(500).send("Failed to data lookup");
                 }
             );
+    }
+
+    /**
+     * GET /wallet/transactions/history/:addresses
+     *
+     * Called when a request is received through the `/wallet/transactions/history/:addresses` handler
+     * The parameter `addresses` are the form of multiple addresses separated by `,`.
+     * The parameter `pageSize` is the maximum size that can be obtained from one query, default is 10
+     * The parameter `page` is the number on the page, this value begins with 1, default is 1
+     *
+     * Returns a set of transactions history of the addresses.
+     */
+    private getWalletTransactionsHistory (req: express.Request, res: express.Response)
+    {
+        let params_addresses: string = String(req.params.addresses);
+
+        logger.http(`GET /wallet/transactions/history/${params_addresses}}`);
+
+        let page_size = (req.query.pageSize !== undefined)
+            ? Number(req.query.pageSize.toString())
+            : 10;
+
+        let page = (req.query.page !== undefined)
+            ? Number(req.query.page.toString())
+            : 1;
+
+        if (page_size <= 0)
+        {
+            res.status(400).send(`Positive pageSize expected: ${page_size}`);
+            return;
+        }
+
+        if (page_size > 30)
+        {
+            res.status(400).send(`Page size cannot be a number greater than 30: ${page_size}`);
+            return;
+        }
+
+        if (page <= 0)
+        {
+            res.status(400).send(`Positive page expected: ${page}`);
+            return;
+        }
+
+        let addresses:Array<string> = params_addresses.split(',');
+        if (addresses.length > 10)
+        {
+            res.status(400).send(`The number of addresses cannot be a number greater than 10: ${addresses.length}`);
+            return;
+        }
+
+        this.ledger_storage.getWalletTransactionsHistory(addresses, page_size, page)
+            .then((rows: any[]) => {
+                if (!rows.length)
+                {
+                    res.status(204).send(`The data not exist. 'addresses': (${params_addresses})`);
+                    return;
+                }
+
+                // TODO We should apply the block's timestamp to this method when it is added.
+                let out_put: Array<ITxHistoryElement> = [];
+                let base_time = Date.UTC(2020, 0);
+                for (const row of rows)
+                {
+                    out_put.push({
+                        address: row.address,
+                        height: BigInt(row.height).toString(),
+                        time: base_time + row.height * 10 * 60000,
+                        tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
+                        type: row.type,
+                        amount: BigInt(row.amount).toString(),
+                        unlock_height: BigInt(row.unlock_height).toString(),
+                        unlock_time: base_time + row.unlock_height * 10 * 60000
+                    });
+                }
+                res.status(200).send(JSON.stringify(out_put));
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err);
+                res.status(500).send("Failed to data lookup");
+            });
     }
 
     /**

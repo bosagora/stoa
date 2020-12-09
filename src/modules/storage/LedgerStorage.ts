@@ -849,4 +849,70 @@ export class LedgerStorage extends Storages
                 AND tx_outputs.used != 1;`;
         return this.query(sql, [address]);
     }
+
+    /**
+     * Provides a history of transactions.
+     * Returns data sorted in descending order by block height.
+     * The most recent transaction is located at the front.
+     *
+     * @param addresses An array of addresses that want to be inquired.
+     * @param page_size Maximum record count that can be obtained from one query
+     * @param page      The number on the page, this value begins with 1
+     */
+    public getWalletTransactionsHistory (addresses: string[], page_size: number, page: number) : Promise<any[]>
+    {
+        let accounts = addresses.map((n) => `'${n}'`).join(',');
+
+        let sql =
+            `SELECT
+                TX.address,
+                TX.block_height as height,
+                TX.tx_hash,
+                TX.type,
+                TX.unlock_height,
+                (SUM(TX.income) - SUM(TX.spend)) as amount
+            FROM
+            (
+                SELECT
+                    S.address,
+                    T.block_height,
+                    T.tx_hash,
+                    T.tx_index,
+                    T.type,
+                    T.unlock_height,
+                    0 as income,
+                    IFNULL(SUM(S.amount), 0) AS spend
+                FROM
+                    tx_outputs S
+                    INNER JOIN tx_inputs I ON (I.utxo = S.utxo_key)
+                    INNER JOIN transactions T ON (T.block_height = I.block_height AND T.tx_index = I.tx_index)
+                    INNER JOIN blocks B ON (B.height = T.block_height)
+                WHERE
+                    S.address IN (${accounts})
+                GROUP BY T.tx_hash, S.address
+
+                UNION ALL
+
+                SELECT
+                    O.address,
+                    T.block_height,
+                    T.tx_hash,
+                    T.tx_index,
+                    T.type,
+                    T.unlock_height,
+                    IFNULL(SUM(O.amount), 0) AS income,
+                    0 as spend
+                FROM
+                    tx_outputs O
+                    INNER JOIN transactions T ON (T.block_height = O.block_height AND T.tx_index = O.tx_index)
+                    INNER JOIN blocks B ON (B.height = T.block_height)
+                WHERE
+                    O.address IN (${accounts})
+                GROUP BY T.tx_hash, O.address
+            ) AS TX
+            GROUP BY TX.block_height, TX.tx_hash, TX.address, TX.type
+            ORDER BY TX.block_height DESC, TX.tx_index DESC
+            LIMIT ? OFFSET ?;`;
+        return this.query(sql, [page_size, page_size*(page-1)]);
+    }
 }
