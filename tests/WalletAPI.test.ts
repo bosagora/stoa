@@ -93,4 +93,39 @@ describe ('Test of Stoa API Server', () =>
             })
             .finally(doneIt);
     });
+
+    it ('Test of the path /wallet/transaction/overview', (doneIt: () => void) =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("/wallet/transaction/overview")
+            .filename("0x6f2e7b2cb25a2146970e6e495ba1cec378a90acdc7817804dd9f41e1ba34a6c55fad4b24395d2da4f6a8d14a4fb2cfbc1cdbb486acda8094e0ab936d56e031c5")
+
+        client.get (uri.toString())
+            .then((response) => {
+                let expected = {
+                    height: '9',
+                    time: 1577842200000,
+                    tx_hash: '0x6f2e7b2cb25a2146970e6e495ba1cec378a90acdc7817804dd9f41e1ba34a6c55fad4b24395d2da4f6a8d14a4fb2cfbc1cdbb486acda8094e0ab936d56e031c5',
+                    type: 0,
+                    unlock_height: '10',
+                    unlock_time: 1577842800000,
+                    senders: [
+                        {
+                            address: 'GDI22L72RGWY3BEFK2VUBWMJMSZU5SQNCQLN5FCF467RFIYN5KMY3YJT',
+                            amount: 610000000000000
+                        }
+                    ],
+                    receivers: [
+                        {
+                            address: 'GDA225RGC4GOCVASSAMROSWJSGNOZX2IGPXZG52ESDSKQW2VN6UJFKWI',
+                            amount: 610000000000000
+                        }
+                    ],
+                    fee: '0'
+                };
+                assert.deepStrictEqual(expected, response.data);
+            })
+            .finally(doneIt);
+    });
 });

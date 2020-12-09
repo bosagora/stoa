@@ -915,4 +915,60 @@ export class LedgerStorage extends Storages
             LIMIT ? OFFSET ?;`;
         return this.query(sql, [page_size, page_size*(page-1)]);
     }
+
+    /**
+     * Provides a overview of a transaction.
+     * @param tx_hash The hash of the transaction
+     */
+    public getWalletTransactionOverview (tx_hash: string): Promise<any[]>
+    {
+        let hash = new Hash(tx_hash).toBinary(Endian.Little);
+
+        let sql_tx =
+            `SELECT
+                T.block_height as height,
+                T.tx_hash,
+                T.type,
+                T.unlock_height
+            FROM
+                blocks B
+                INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?);`;
+
+        let sql_sender =
+            `SELECT
+                S.address,
+                S.amount
+            FROM
+                blocks B
+                INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
+                INNER JOIN tx_inputs I ON (T.block_height = I.block_height AND T.tx_index = I.tx_index)
+                INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key);`;
+
+        let sql_receiver =
+            `SELECT
+                O.address,
+                O.amount
+            FROM
+                blocks B
+                INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
+                INNER JOIN tx_outputs O ON (T.block_height = O.block_height AND T.tx_index = O.tx_index);`;
+
+        let result: any = {};
+        return new Promise<any[]>((resolve, reject) => {
+            this.query(sql_tx, [hash])
+                .then((rows: any[]) => {
+                    result.tx = rows;
+                    return this.query(sql_sender, [hash]);
+                })
+                .then((rows: any[]) => {
+                    result.senders = rows;
+                    return this.query(sql_receiver, [hash]);
+                })
+                .then((rows: any[]) => {
+                    result.receivers = rows;
+                    resolve(result);
+                })
+                .catch(reject);
+        });
+    }
 }

@@ -4,7 +4,7 @@ import { LedgerStorage } from './modules/storage/LedgerStorage';
 import { logger } from './modules/common/Logger';
 import { Height, PreImageInfo, Hash, hash, Block, Utils, Endian } from 'boa-sdk-ts';
 import { WebService } from './modules/service/WebService';
-import { ValidatorData, IPreimage, IUnspentTxOutput, ITxHistoryElement } from './Types';
+import { ValidatorData, IPreimage, IUnspentTxOutput, ITxHistoryElement, ITxOverview } from './Types';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -124,6 +124,7 @@ class Stoa extends WebService
         this.app.get("/validator/:address", this.getValidator.bind(this));
         this.app.get("/utxo/:address", this.getUTXO.bind(this));
         this.app.get("/wallet/transactions/history/:addresses", this.getWalletTransactionsHistory.bind(this));
+        this.app.get("/wallet/transaction/overview/:hash", this.getWalletTransactionOverview.bind(this));
         this.app.post("/block_externalized", this.putBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
 
@@ -452,6 +453,63 @@ class Stoa extends WebService
                     });
                 }
                 res.status(200).send(JSON.stringify(out_put));
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err);
+                res.status(500).send("Failed to data lookup");
+            });
+    }
+
+    /**
+     * GET /wallet/transaction/overview/:hash
+     *
+     * Called when a request is received through the `/transaction_overview/:addresses` handler
+     * The parameter `hash` is the hash of the transaction
+     *
+     * Returns a transaction overview.
+     */
+    private getWalletTransactionOverview (req: express.Request, res: express.Response)
+    {
+        let tx_hash: string = String(req.params.hash);
+
+        logger.http(`GET //wallet/transaction/overview/${tx_hash}}`);
+
+        this.ledger_storage.getWalletTransactionOverview(tx_hash)
+            .then((data: any) => {
+                if ((data === undefined) || (data.tx === undefined) ||
+                    (data.senders === undefined) || (data.receivers === undefined))
+                {
+                    res.status(500).send("Failed to data lookup");
+                    return;
+                }
+
+                if (data.tx.length == 0)
+                {
+                    res.status(204).send(`The data not exist. 'hash': (${tx_hash})`);
+                    return;
+                }
+
+                let base_time = Date.UTC(2020, 0);
+
+                let overview: ITxOverview = {
+                    height: BigInt(data.tx[0].height).toString(),
+                    time: base_time + data.tx[0].height * 10 * 60000,
+                    tx_hash: new Hash(data.tx[0].tx_hash, Endian.Little).toString(),
+                    type: data.tx[0].type,
+                    unlock_height: BigInt(data.tx[0].unlock_height).toString(),
+                    unlock_time: base_time + data.tx[0].unlock_height * 10 * 60000,
+                    senders: [],
+                    receivers: [],
+                    fee: "0"
+                };
+
+                for (let elem of data.senders)
+                    overview.senders.push({address: elem.address, amount: elem.amount});
+
+                for (let elem of data.receivers)
+                    overview.receivers.push({address: elem.address, amount: elem.amount});
+
+                res.status(200).send(JSON.stringify(overview));
             })
             .catch((err) => {
                 logger.error("Failed to data lookup to the DB: " + err);
