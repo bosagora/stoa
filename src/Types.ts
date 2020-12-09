@@ -107,3 +107,70 @@ export interface ITxHistoryElement
      */
     unlock_time: number;
 }
+
+/**
+ * The interface of the transaction overview
+ */
+export interface ITxOverview
+{
+    /**
+     * Block height
+     */
+    height: string;
+
+    /**
+     * Transaction time
+     */
+    time: number;
+
+    /**
+     * Transaction hash
+     */
+    tx_hash: string;
+
+    /**
+     * Transaction type
+     */
+    type: number;
+
+    /**
+     * Block height at which the output of the transaction becomes available
+     */
+    unlock_height: string;
+
+    /**
+     * Time at which the output of the transaction becomes available
+     */
+    unlock_time: number;
+
+    /**
+     * The address and amount of the output associated with the transaction input
+     */
+    senders: Array<ITxOverviewElement>;
+
+    /**
+     * The address and amount of transaction output
+     */
+    receivers: Array<ITxOverviewElement>;
+
+    /**
+     * Transaction fee
+     */
+    fee: string;
+}
+
+/**
+ * The interface of the transaction overview element
+ */
+export interface ITxOverviewElement
+{
+    /**
+     * Address, Public key
+     */
+    address: string;
+
+    /**
+     * Amount
+     */
+    amount: string;
+}
