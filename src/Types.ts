@@ -61,3 +61,49 @@ export interface IUnspentTxOutput
     unlock_height: string;
     amount: string;
 }
+
+/**
+ * The interface of the transactions history element
+ */
+export interface ITxHistoryElement
+{
+    /**
+     * Address, Public key
+     */
+    address: string;
+
+    /**
+     * Block height
+     */
+    height: string;
+
+    /**
+     * Transaction time
+     */
+    time: number;
+
+    /**
+     * Transaction hash
+     */
+    tx_hash: string;
+
+    /**
+     * Transaction type
+     */
+    type: number;
+
+    /**
+     * Amount
+     */
+    amount: string;
+
+    /**
+     * Block height at which the output of the transaction becomes available
+     */
+    unlock_height: string;
+
+    /**
+     * Time at which the output of the transaction becomes available
+     */
+    unlock_time: number;
+}
