@@ -865,14 +865,45 @@ export class LedgerStorage extends Storages
     {
         let accounts = addresses.map((n) => `'${n}'`).join(',');
 
+        // TODO We should apply the block's timestamp to this method when it is added
         let sql =
             `SELECT
                 TX.address,
                 TX.block_height as height,
+                STRFTIME('%s', '2020-01-01 00:00:00') * 1000 + TX.block_height * 10 * 60000 as block_time,
                 TX.tx_hash,
                 TX.type,
                 TX.unlock_height,
-                (SUM(TX.income) - SUM(TX.spend)) as amount
+                STRFTIME('%s', '2020-01-01 00:00:00') * 1000 + TX.unlock_height * 10 * 60000 as unlock_time,
+                (SUM(TX.income) - SUM(TX.spend)) as amount,
+                CASE
+                    WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
+                    (
+                        SELECT S.address FROM tx_inputs I, tx_outputs S WHERE TX.tx_hash = I.tx_hash AND I.utxo = S.utxo_key
+                        ORDER BY S.amount DESC LIMIT 1
+                    )
+                    ELSE
+                    (
+                        SELECT O.address FROM tx_outputs O WHERE TX.tx_hash = O.tx_hash
+                        ORDER BY O.amount DESC LIMIT 1
+                    )
+                END AS peer,
+                CASE
+                    WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
+                    (
+                        SELECT COUNT(S.address) FROM tx_inputs I, tx_outputs S WHERE TX.tx_hash = I.tx_hash AND I.utxo = S.utxo_key
+                    )
+                    ELSE
+                    (
+                        SELECT COUNT(O.address) FROM tx_outputs O WHERE TX.tx_hash = O.tx_hash
+                    )
+                END AS peer_count,
+                CASE
+                    WHEN (TX.type = 1) THEN 2
+                    WHEN (TX.payload_count) > 0 THEN 3
+                    WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN 0
+                    ELSE 1
+                END AS display_tx_type
             FROM
             (
                 SELECT
@@ -882,12 +913,15 @@ export class LedgerStorage extends Storages
                     T.tx_index,
                     T.type,
                     T.unlock_height,
+                    (
+                        SELECT count(P.payload) FROM payloads P WHERE T.tx_hash = P.tx_hash
+                    ) payload_count,
                     0 as income,
                     IFNULL(SUM(S.amount), 0) AS spend
                 FROM
                     tx_outputs S
                     INNER JOIN tx_inputs I ON (I.utxo = S.utxo_key)
-                    INNER JOIN transactions T ON (T.block_height = I.block_height AND T.tx_index = I.tx_index)
+                    INNER JOIN transactions T ON (T.tx_hash = I.tx_hash)
                     INNER JOIN blocks B ON (B.height = T.block_height)
                 WHERE
                     S.address IN (${accounts})
@@ -902,11 +936,14 @@ export class LedgerStorage extends Storages
                     T.tx_index,
                     T.type,
                     T.unlock_height,
+                    (
+                        SELECT count(P.payload) FROM payloads P WHERE T.tx_hash = P.tx_hash
+                    ) payload_count,
                     IFNULL(SUM(O.amount), 0) AS income,
                     0 as spend
                 FROM
                     tx_outputs O
-                    INNER JOIN transactions T ON (T.block_height = O.block_height AND T.tx_index = O.tx_index)
+                    INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
                     INNER JOIN blocks B ON (B.height = T.block_height)
                 WHERE
                     O.address IN (${accounts})

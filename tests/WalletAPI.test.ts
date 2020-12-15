@@ -20,7 +20,7 @@ import axios from 'axios';
 import URI from 'urijs';
 import { URL } from 'url';
 
-describe ('Test of Stoa API Server', () =>
+describe ('Test of Stoa API for the wallet', () =>
 {
     let host: string = 'http://localhost';
     let port: string = '3837';
@@ -56,18 +56,21 @@ describe ('Test of Stoa API Server', () =>
         return stoa_server.stop().then(() => { return agora_server.stop() });
     });
 
-    it ('Store blocks', async () =>
+    it ('Store blocks', (doneIt: () => void) =>
     {
         let uri = URI(host)
             .port(port)
             .directory("block_externalized");
 
         let url = uri.toString();
-        for (let elem of recovery_sample_data)
-            await client.post(url, {block: elem});
+        (async () => {
+            for (let idx = 0; idx < 10; idx++)
+                await client.post(url, {block: recovery_sample_data[idx]});
+            setTimeout(doneIt, 1000);
+        })();
     });
 
-    it ('Test of the path /wallet/transactions/history', (doneIt: () => void) =>
+    it ('Test of the path /wallet/transactions/history', () =>
     {
         let uri = URI(host)
             .port(port)
@@ -76,22 +79,25 @@ describe ('Test of Stoa API Server', () =>
             .setSearch("pageSize", "10")
             .setSearch("page", "1");
 
-        client.get (uri.toString())
+        return client.get (uri.toString())
             .then((response) =>
             {
                 assert.strictEqual(response.data.length, 10);
+                assert.strictEqual(response.data[0].display_tx_type, "inbound");
                 assert.strictEqual(response.data[0].address,
                     "GDG22B5FTPXE5THQMCTGDUC4LF2N4DFF44PGX2LIFG4WNUZZAT4L6ZGD");
+                assert.strictEqual(response.data[0].peer,
+                    "GDO22PFYWMU3YFLKDYP2PVM4PLX2D4BLJ2IRQMIHWJHFS3TZ6ITJMGPU");
+                assert.strictEqual(response.data[0].peer_count, 1);
                 assert.strictEqual(response.data[0].height, "9");
                 assert.strictEqual(response.data[0].tx_hash,
                     "0xc7ac3e24aa7d0df99a0fb1fd95c8d8a1fd6a90b17f6ded45210df8" +
                     "8fec0e4e09b45987d15ea18b1a00c6830354c8a49cce11c33fb5719b" +
                     "1234c60137d33a2ce4");
-                assert.strictEqual(response.data[0].type, 0);
+                assert.strictEqual(response.data[0].tx_type, "payment");
                 assert.strictEqual(response.data[0].amount, "610000000000000");
                 assert.strictEqual(response.data[0].unlock_height, "10");
-            })
-            .finally(doneIt);
+            });
     });
 
     it ('Test of the path /wallet/transaction/overview', (doneIt: () => void) =>
