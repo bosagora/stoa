@@ -11,7 +11,7 @@
 
  *******************************************************************************/
 
-import { Height } from 'boa-sdk-ts';
+import { Height, TxType } from 'boa-sdk-ts';
 
 /**
  * The interface of the Validator
@@ -68,9 +68,24 @@ export interface IUnspentTxOutput
 export interface ITxHistoryElement
 {
     /**
+     * The transaction type of wallet ('inbound', 'outbound', 'freeze', 'payload')
+     */
+    display_tx_type: string;
+
+    /**
      * Address, Public key
      */
     address: string;
+
+    /**
+     * The address that sent (or received) the funds
+     */
+    peer: string;
+
+    /**
+     * The number of the peer
+     */
+    peer_count: number;
 
     /**
      * Block height
@@ -90,7 +105,7 @@ export interface ITxHistoryElement
     /**
      * Transaction type
      */
-    type: number;
+    tx_type: string;
 
     /**
      * Amount
@@ -173,4 +188,41 @@ export interface ITxOverviewElement
      * Amount
      */
     amount: string;
+}
+
+
+/**
+ * Define the types of transactions to be displayed in various applications
+ */
+export enum DisplayTxType
+{
+    Inbound = 0,
+    Outbound = 1,
+    Freeze = 2,
+    Payload = 3
+}
+
+/**
+ * Class that converts various enum values into strings
+ */
+export class ConvertTypes
+{
+    static tx_types: Array<string> = ["payment", "freeze"];
+    static display_tx_type: Array<string> = ["inbound", "outbound", "freeze", "payload"];
+
+    public static DisplayTxTypeToString (type: TxType): string
+    {
+        if (type < ConvertTypes.display_tx_type.length)
+            return ConvertTypes.display_tx_type[type];
+        else
+            return "";
+    }
+
+    public static TxTypeToString (type: TxType): string
+    {
+        if (type < ConvertTypes.tx_types.length)
+            return ConvertTypes.tx_types[type];
+        else
+            return "";
+    }
 }

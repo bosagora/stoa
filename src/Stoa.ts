@@ -4,7 +4,8 @@ import { LedgerStorage } from './modules/storage/LedgerStorage';
 import { logger } from './modules/common/Logger';
 import { Height, PreImageInfo, Hash, hash, Block, Utils, Endian } from 'boa-sdk-ts';
 import { WebService } from './modules/service/WebService';
-import { ValidatorData, IPreimage, IUnspentTxOutput, ITxHistoryElement, ITxOverview } from './Types';
+import { ValidatorData, IPreimage, IUnspentTxOutput,
+    ITxHistoryElement, ITxOverview, ConvertTypes } from './Types';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -436,20 +437,21 @@ class Stoa extends WebService
                     return;
                 }
 
-                // TODO We should apply the block's timestamp to this method when it is added.
                 let out_put: Array<ITxHistoryElement> = [];
-                let base_time = Date.UTC(2020, 0);
                 for (const row of rows)
                 {
                     out_put.push({
+                        display_tx_type: ConvertTypes.DisplayTxTypeToString(row.display_tx_type),
                         address: row.address,
+                        peer: row.peer,
+                        peer_count: row.peer_count,
                         height: BigInt(row.height).toString(),
-                        time: base_time + row.height * 10 * 60000,
+                        time: row.block_time,
                         tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
-                        type: row.type,
+                        tx_type: ConvertTypes.TxTypeToString(row.type),
                         amount: BigInt(row.amount).toString(),
                         unlock_height: BigInt(row.unlock_height).toString(),
-                        unlock_time: base_time + row.unlock_height * 10 * 60000
+                        unlock_time: row.unlock_time
                     });
                 }
                 res.status(200).send(JSON.stringify(out_put));
