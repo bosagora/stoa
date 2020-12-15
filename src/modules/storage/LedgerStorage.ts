@@ -963,34 +963,41 @@ export class LedgerStorage extends Storages
     {
         let hash = new Hash(tx_hash).toBinary(Endian.Little);
 
+        // TODO We should apply the block's timestamp to this method when it is added
         let sql_tx =
             `SELECT
                 T.block_height as height,
+                STRFTIME('%s', '2020-01-01 00:00:00') * 1000 + T.block_height * 10 * 60000 as block_time,
                 T.tx_hash,
                 T.type,
-                T.unlock_height
+                T.unlock_height,
+                STRFTIME('%s', '2020-01-01 00:00:00') * 1000 + T.unlock_height * 10 * 60000 as unlock_time,
+                P.payload
             FROM
                 blocks B
-                INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?);`;
+                INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
+                LEFT OUTER JOIN payloads P ON (T.tx_hash = P.tx_hash);`;
 
         let sql_sender =
             `SELECT
                 S.address,
-                S.amount
+                S.amount,
+                S.utxo_key as utxo
             FROM
                 blocks B
                 INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
-                INNER JOIN tx_inputs I ON (T.block_height = I.block_height AND T.tx_index = I.tx_index)
+                INNER JOIN tx_inputs I ON (T.tx_hash = I.tx_hash)
                 INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key);`;
 
         let sql_receiver =
             `SELECT
                 O.address,
-                O.amount
+                O.amount,
+                O.utxo_key as utxo
             FROM
                 blocks B
                 INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
-                INNER JOIN tx_outputs O ON (T.block_height = O.block_height AND T.tx_index = O.tx_index);`;
+                INNER JOIN tx_outputs O ON (T.tx_hash = O.tx_hash);`;
 
         let result: any = {};
         return new Promise<any[]>((resolve, reject) => {

@@ -146,7 +146,7 @@ export interface ITxOverview
     /**
      * Transaction type
      */
-    type: number;
+    tx_type: string;
 
     /**
      * Block height at which the output of the transaction becomes available
@@ -157,6 +157,11 @@ export interface ITxOverview
      * Time at which the output of the transaction becomes available
      */
     unlock_time: number;
+
+    /**
+     * The transaction data payload
+     */
+    payload: string;
 
     /**
      * The address and amount of the output associated with the transaction input
@@ -188,6 +193,11 @@ export interface ITxOverviewElement
      * Amount
      */
     amount: string;
+
+    /**
+     * The hash of UTXO
+     */
+    utxo: string;
 }
 
 

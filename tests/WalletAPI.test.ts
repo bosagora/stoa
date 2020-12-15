@@ -100,38 +100,40 @@ describe ('Test of Stoa API for the wallet', () =>
             });
     });
 
-    it ('Test of the path /wallet/transaction/overview', (doneIt: () => void) =>
+    it ('Test of the path /wallet/transaction/overview', () =>
     {
         let uri = URI(host)
             .port(port)
             .directory("/wallet/transaction/overview")
             .filename("0x6f2e7b2cb25a2146970e6e495ba1cec378a90acdc7817804dd9f41e1ba34a6c55fad4b24395d2da4f6a8d14a4fb2cfbc1cdbb486acda8094e0ab936d56e031c5")
 
-        client.get (uri.toString())
+        return client.get (uri.toString())
             .then((response) => {
                 let expected = {
                     height: '9',
                     time: 1577842200000,
                     tx_hash: '0x6f2e7b2cb25a2146970e6e495ba1cec378a90acdc7817804dd9f41e1ba34a6c55fad4b24395d2da4f6a8d14a4fb2cfbc1cdbb486acda8094e0ab936d56e031c5',
-                    type: 0,
+                    tx_type: "payment",
                     unlock_height: '10',
                     unlock_time: 1577842800000,
+                    payload: '',
                     senders: [
                         {
                             address: 'GDI22L72RGWY3BEFK2VUBWMJMSZU5SQNCQLN5FCF467RFIYN5KMY3YJT',
-                            amount: 610000000000000
+                            amount: 610000000000000,
+                            utxo: '0x73d7f7994156c073c764e59ad65522ea58d28992ac5a857a59475168745f1b9ac160a059e77a7f342d2a6b12f20b8f4b42e7131aeb65dd1cf912069532c045a3'
                         }
                     ],
                     receivers: [
                         {
                             address: 'GDA225RGC4GOCVASSAMROSWJSGNOZX2IGPXZG52ESDSKQW2VN6UJFKWI',
-                            amount: 610000000000000
+                            amount: 610000000000000,
+                            utxo: '0x71c16727e6eb2ca6c8244b8071a78c5bb4ec9253234e51b3f9c8e901cb1c71ee34dd0c4c09bbc16591bf09ecbe962280d8b5e45945490ebe8e6a9fc49f8530dd'
                         }
                     ],
                     fee: '0'
                 };
                 assert.deepStrictEqual(expected, response.data);
             })
-            .finally(doneIt);
     });
 });

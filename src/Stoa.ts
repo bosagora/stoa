@@ -474,7 +474,7 @@ class Stoa extends WebService
     {
         let tx_hash: string = String(req.params.hash);
 
-        logger.http(`GET //wallet/transaction/overview/${tx_hash}}`);
+        logger.http(`GET /wallet/transaction/overview/${tx_hash}}`);
 
         this.ledger_storage.getWalletTransactionOverview(tx_hash)
             .then((data: any) => {
@@ -491,25 +491,24 @@ class Stoa extends WebService
                     return;
                 }
 
-                let base_time = Date.UTC(2020, 0);
-
                 let overview: ITxOverview = {
                     height: BigInt(data.tx[0].height).toString(),
-                    time: base_time + data.tx[0].height * 10 * 60000,
+                    time: data.tx[0].block_time,
                     tx_hash: new Hash(data.tx[0].tx_hash, Endian.Little).toString(),
-                    type: data.tx[0].type,
+                    tx_type: ConvertTypes.TxTypeToString(data.tx[0].type),
                     unlock_height: BigInt(data.tx[0].unlock_height).toString(),
-                    unlock_time: base_time + data.tx[0].unlock_height * 10 * 60000,
+                    unlock_time: data.tx[0].unlock_time,
+                    payload: (data.tx[0].payload !== null) ? new Hash(data.tx[0].payload, Endian.Little).toString() : "",
                     senders: [],
                     receivers: [],
                     fee: "0"
                 };
 
                 for (let elem of data.senders)
-                    overview.senders.push({address: elem.address, amount: elem.amount});
+                    overview.senders.push({address: elem.address, amount: elem.amount, utxo: new Hash(elem.utxo, Endian.Little).toString()});
 
                 for (let elem of data.receivers)
-                    overview.receivers.push({address: elem.address, amount: elem.amount});
+                    overview.receivers.push({address: elem.address, amount: elem.amount, utxo: new Hash(elem.utxo, Endian.Little).toString()});
 
                 res.status(200).send(JSON.stringify(overview));
             })
