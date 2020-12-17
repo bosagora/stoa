@@ -860,97 +860,157 @@ export class LedgerStorage extends Storages
      * @param addresses An array of addresses that want to be inquired.
      * @param page_size Maximum record count that can be obtained from one query
      * @param page      The number on the page, this value begins with 1
+     * @param type      The parameter `type` is the type of transaction to query.
+     * @param begin     The start date of the range of dates to look up.
+     * @param end       The end date of the range of dates to look up.
+     * @param peer      This is used when users want to look up only specific
+     * Peer is the withdrawal address in the inbound transaction and a deposit address
+     * in the outbound transaction address of their counterparts.
      */
-    public getWalletTransactionsHistory (addresses: string[], page_size: number, page: number) : Promise<any[]>
+    public getWalletTransactionsHistory (addresses: string[], page_size: number, page: number,
+        type: Array<number>, begin?: number, end?: number, peer?: string) : Promise<any[]>
     {
         let accounts = addresses.map((n) => `'${n}'`).join(',');
 
         // TODO We should apply the block's timestamp to this method when it is added
+        let filter_type = 'AND FTX.display_tx_type in (' + type.map(n =>`${n}`).join(',') + ')'
+        let filter_date = ((begin !== undefined) && (end !== undefined))
+            ? `AND (STRFTIME('%s', '2020-01-01 00:00:00') * 1000 + T.block_height * 10 * 60000) BETWEEN ${begin} AND ${end}`
+            : ``;
+        let filter_peer_field;
+        let filter_peer_condition;
+        if (peer !== undefined)
+        {
+            filter_peer_field = `,
+                    CASE
+                        WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
+                        (
+                            SELECT COUNT(S.address) FROM tx_inputs I, tx_outputs S WHERE TX.tx_hash = I.tx_hash AND I.utxo = S.utxo_key
+                            AND S.address LIKE '${peer}%'
+                        )
+                        ELSE
+                        (
+                            SELECT COUNT(O.address) FROM tx_outputs O WHERE TX.tx_hash = O.tx_hash
+                            AND O.address LIKE '${peer}%'
+                        )
+                    END AS peer_filter
+            `;
+            filter_peer_condition = 'AND FTX.peer_filter > 0'
+        }
+        else
+        {
+            filter_peer_field = '';
+            filter_peer_condition = '';
+        }
+
         let sql =
             `SELECT
-                TX.address,
-                TX.block_height as height,
-                STRFTIME('%s', '2020-01-01 00:00:00') * 1000 + TX.block_height * 10 * 60000 as block_time,
-                TX.tx_hash,
-                TX.type,
-                TX.unlock_height,
-                STRFTIME('%s', '2020-01-01 00:00:00') * 1000 + TX.unlock_height * 10 * 60000 as unlock_time,
-                (SUM(TX.income) - SUM(TX.spend)) as amount,
-                CASE
-                    WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
-                    (
-                        SELECT S.address FROM tx_inputs I, tx_outputs S WHERE TX.tx_hash = I.tx_hash AND I.utxo = S.utxo_key
-                        ORDER BY S.amount DESC LIMIT 1
-                    )
-                    ELSE
-                    (
-                        SELECT O.address FROM tx_outputs O WHERE TX.tx_hash = O.tx_hash
-                        ORDER BY O.amount DESC LIMIT 1
-                    )
-                END AS peer,
-                CASE
-                    WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
-                    (
-                        SELECT COUNT(S.address) FROM tx_inputs I, tx_outputs S WHERE TX.tx_hash = I.tx_hash AND I.utxo = S.utxo_key
-                    )
-                    ELSE
-                    (
-                        SELECT COUNT(O.address) FROM tx_outputs O WHERE TX.tx_hash = O.tx_hash
-                    )
-                END AS peer_count,
-                CASE
-                    WHEN (TX.type = 1) THEN 2
-                    WHEN (TX.payload_count) > 0 THEN 3
-                    WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN 0
-                    ELSE 1
-                END AS display_tx_type
+                FTX.display_tx_type,
+                FTX.address,
+                FTX.height,
+                FTX.block_time,
+                FTX.amount,
+                FTX.unlock_height,
+                FTX.unlock_time,
+                FTX.peer,
+                FTX.peer_count,
+                FTX.tx_hash,
+                FTX.type
             FROM
             (
                 SELECT
-                    S.address,
-                    T.block_height,
-                    T.tx_hash,
-                    T.tx_index,
-                    T.type,
-                    T.unlock_height,
-                    (
-                        SELECT count(P.payload) FROM payloads P WHERE T.tx_hash = P.tx_hash
-                    ) payload_count,
-                    0 as income,
-                    IFNULL(SUM(S.amount), 0) AS spend
+                    TX.address,
+                    TX.block_height as height,
+                    STRFTIME('%s', '2020-01-01 00:00:00') * 1000 + TX.block_height * 10 * 60000 as block_time,
+                    TX.tx_hash,
+                    TX.type,
+                    TX.unlock_height,
+                    STRFTIME('%s', '2020-01-01 00:00:00') * 1000 + TX.unlock_height * 10 * 60000 as unlock_time,
+                    (SUM(TX.income) - SUM(TX.spend)) as amount,
+                    IFNULL(CASE
+                        WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
+                        (
+                            SELECT S.address FROM tx_inputs I, tx_outputs S
+                            WHERE TX.tx_hash = I.tx_hash AND I.utxo = S.utxo_key AND S.address != TX.address
+                            ORDER BY S.amount DESC LIMIT 1
+                        )
+                        ELSE
+                        (
+                            SELECT O.address FROM tx_outputs O
+                            WHERE TX.tx_hash = O.tx_hash AND O.address != TX.address
+                            ORDER BY O.amount DESC LIMIT 1
+                        )
+                    END, TX.address) AS peer,
+                    CASE
+                        WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
+                        (
+                            SELECT COUNT(S.address) FROM tx_inputs I, tx_outputs S WHERE TX.tx_hash = I.tx_hash AND I.utxo = S.utxo_key
+                        )
+                        ELSE
+                        (
+                            SELECT COUNT(O.address) FROM tx_outputs O WHERE TX.tx_hash = O.tx_hash
+                        )
+                    END AS peer_count,
+                    CASE
+                        WHEN (TX.type = 1) THEN 2
+                        WHEN (TX.payload_count) > 0 THEN 3
+                        WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN 0
+                        ELSE 1
+                    END AS display_tx_type
+                    ${filter_peer_field}
                 FROM
-                    tx_outputs S
-                    INNER JOIN tx_inputs I ON (I.utxo = S.utxo_key)
-                    INNER JOIN transactions T ON (T.tx_hash = I.tx_hash)
-                    INNER JOIN blocks B ON (B.height = T.block_height)
-                WHERE
-                    S.address IN (${accounts})
-                GROUP BY T.tx_hash, S.address
+                (
+                    SELECT
+                        S.address,
+                        T.block_height,
+                        T.tx_hash,
+                        T.tx_index,
+                        T.type,
+                        T.unlock_height,
+                        (
+                            SELECT count(P.payload) FROM payloads P WHERE T.tx_hash = P.tx_hash
+                        ) payload_count,
+                        0 as income,
+                        IFNULL(SUM(S.amount), 0) AS spend
+                    FROM
+                        tx_outputs S
+                        INNER JOIN tx_inputs I ON (I.utxo = S.utxo_key)
+                        INNER JOIN transactions T ON (T.tx_hash = I.tx_hash)
+                        INNER JOIN blocks B ON (B.height = T.block_height)
+                    WHERE
+                        S.address IN (${accounts})
+                        ${filter_date}
+                    GROUP BY T.tx_hash, S.address
 
-                UNION ALL
+                    UNION ALL
 
-                SELECT
-                    O.address,
-                    T.block_height,
-                    T.tx_hash,
-                    T.tx_index,
-                    T.type,
-                    T.unlock_height,
-                    (
-                        SELECT count(P.payload) FROM payloads P WHERE T.tx_hash = P.tx_hash
-                    ) payload_count,
-                    IFNULL(SUM(O.amount), 0) AS income,
-                    0 as spend
-                FROM
-                    tx_outputs O
-                    INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
-                    INNER JOIN blocks B ON (B.height = T.block_height)
-                WHERE
-                    O.address IN (${accounts})
-                GROUP BY T.tx_hash, O.address
-            ) AS TX
-            GROUP BY TX.block_height, TX.tx_hash, TX.address, TX.type
-            ORDER BY TX.block_height DESC, TX.tx_index DESC
+                    SELECT
+                        O.address,
+                        T.block_height,
+                        T.tx_hash,
+                        T.tx_index,
+                        T.type,
+                        T.unlock_height,
+                        (
+                            SELECT count(P.payload) FROM payloads P WHERE T.tx_hash = P.tx_hash
+                        ) payload_count,
+                        IFNULL(SUM(O.amount), 0) AS income,
+                        0 as spend
+                    FROM
+                        tx_outputs O
+                        INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
+                        INNER JOIN blocks B ON (B.height = T.block_height)
+                    WHERE
+                        O.address IN (${accounts})
+                        ${filter_date}
+                    GROUP BY T.tx_hash, O.address
+                ) AS TX
+                GROUP BY TX.block_height, TX.tx_hash, TX.address, TX.type
+                ORDER BY TX.block_height DESC, TX.tx_index DESC
+            ) FTX
+            WHERE 1 = 1
+                ${filter_type}
+                ${filter_peer_condition}
             LIMIT ? OFFSET ?;`;
         return this.query(sql, [page_size, page_size*(page-1)]);
     }

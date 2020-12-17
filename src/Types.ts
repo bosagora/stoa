@@ -235,4 +235,9 @@ export class ConvertTypes
         else
             return "";
     }
+
+    public static toDisplayTxType (type: string): DisplayTxType
+    {
+        return ConvertTypes.display_tx_type.findIndex(m => (m === type.trim().toLowerCase()));
+    }
 }
