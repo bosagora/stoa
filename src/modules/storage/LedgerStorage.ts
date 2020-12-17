@@ -90,6 +90,7 @@ export class LedgerStorage extends Storages
             unlock_height       INTEGER NOT NULL,
             inputs_count        INTEGER NOT NULL,
             outputs_count       INTEGER NOT NULL,
+            payload_size        INTEGER NOT NULL,
             PRIMARY KEY(block_height, tx_index)
         );
 
@@ -470,16 +471,17 @@ export class LedgerStorage extends Storages
 
                 storage.run(
                     `INSERT INTO transactions
-                        (block_height, tx_index, tx_hash, type, unlock_height, inputs_count, outputs_count)
+                        (block_height, tx_index, tx_hash, type, unlock_height, inputs_count, outputs_count, payload_size)
                     VALUES
-                        (?, ?, ?, ?, ${unlock_height_query}, ?, ?)`,
+                        (?, ?, ?, ?, ${unlock_height_query}, ?, ?, ?)`,
                     [
                         height.toString(),
                         tx_idx,
                         hash.toBinary(Endian.Little),
                         tx.type,
                         tx.inputs.length,
-                        tx.outputs.length
+                        tx.outputs.length,
+                        tx.payload.data.length
                     ]
                 )
                     .then(() =>
@@ -953,7 +955,7 @@ export class LedgerStorage extends Storages
                     END AS peer_count,
                     CASE
                         WHEN (TX.type = 1) THEN 2
-                        WHEN (TX.payload_count) > 0 THEN 3
+                        WHEN (TX.payload_size) > 0 THEN 3
                         WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN 0
                         ELSE 1
                     END AS display_tx_type
@@ -967,9 +969,7 @@ export class LedgerStorage extends Storages
                         T.tx_index,
                         T.type,
                         T.unlock_height,
-                        (
-                            SELECT count(P.payload) FROM payloads P WHERE T.tx_hash = P.tx_hash
-                        ) payload_count,
+                        T.payload_size,
                         0 as income,
                         IFNULL(SUM(S.amount), 0) AS spend
                     FROM
@@ -991,9 +991,7 @@ export class LedgerStorage extends Storages
                         T.tx_index,
                         T.type,
                         T.unlock_height,
-                        (
-                            SELECT count(P.payload) FROM payloads P WHERE T.tx_hash = P.tx_hash
-                        ) payload_count,
+                        T.payload_size,
                         IFNULL(SUM(O.amount), 0) AS income,
                         0 as spend
                     FROM
