@@ -74,6 +74,7 @@ CREATE TABLE IF NOT EXISTS "enrollments" (
 | unlock_height     | INTEGER   |    | Y        |          | Height of the block to be unlock|
 | inputs_count      | INTEGER   |    | Y        |          | The number of inputs in the transaction |
 | outputs_count     | INTEGER   |    | Y        |          | The number of outputs in the transaction |
+| payload_size      | INTEGER   |    | Y        |          | The size of data payload in the transaction |
 
 ### _Create Script_
 
@@ -86,6 +87,7 @@ CREATE TABLE IF NOT EXISTS "transactions" (
     "unlock_height"         INTEGER NOT NULL,
     "inputs_count"          INTEGER NOT NULL,
     "outputs_count"         INTEGER NOT NULL,
+    "payload_size"          INTEGER NOT NULL,
     PRIMARY KEY("block_height","tx_index")
 )
 ```
