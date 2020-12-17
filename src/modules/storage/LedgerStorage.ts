@@ -98,6 +98,7 @@ export class LedgerStorage extends Storages
             block_height        INTEGER NOT NULL,
             tx_index            INTEGER NOT NULL,
             in_index            INTEGER NOT NULL,
+            tx_hash             BLOB    NOT NULL,
             utxo                BLOB    NOT NULL,
             signature           BLOB    NOT NULL,
             PRIMARY KEY(block_height, tx_index, in_index, utxo)
@@ -493,19 +494,20 @@ export class LedgerStorage extends Storages
         }
 
         function save_input (storage: LedgerStorage, height: Height, tx_idx: number,
-            in_idx: number, input: TxInput): Promise<void>
+            in_idx: number, hash: Hash, input: TxInput): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
             {
                 storage.run(
                     `INSERT INTO tx_inputs
-                        (block_height, tx_index, in_index, utxo, signature)
+                        (block_height, tx_index, in_index, tx_hash, utxo, signature)
                     VALUES
-                        (?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?, ?)`,
                     [
                         height.toString(),
                         tx_idx,
                         in_idx,
+                        hash.toBinary(Endian.Little),
                         input.utxo.toBinary(Endian.Little),
                         input.signature.toBinary(Endian.Little)
                     ]
@@ -616,7 +618,7 @@ export class LedgerStorage extends Storages
 
                         for (let in_idx = 0; in_idx < block.txs[tx_idx].inputs.length; in_idx++)
                         {
-                            await save_input(this, block.header.height, tx_idx, in_idx, block.txs[tx_idx].inputs[in_idx]);
+                            await save_input(this, block.header.height, tx_idx, in_idx, block.merkle_tree[tx_idx], block.txs[tx_idx].inputs[in_idx]);
                             await update_spend_output(this, block.txs[tx_idx].inputs[in_idx]);
                         }
 
