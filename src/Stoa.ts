@@ -5,7 +5,7 @@ import { logger } from './modules/common/Logger';
 import { Height, PreImageInfo, Hash, hash, Block, Utils, Endian } from 'boa-sdk-ts';
 import { WebService } from './modules/service/WebService';
 import { ValidatorData, IPreimage, IUnspentTxOutput,
-    ITxHistoryElement, ITxOverview, ConvertTypes } from './Types';
+    ITxHistoryElement, ITxOverview, ConvertTypes, DisplayTxType } from './Types';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -384,11 +384,28 @@ class Stoa extends WebService
      * GET /wallet/transactions/history/:addresses
      *
      * Called when a request is received through the `/wallet/transactions/history/:addresses` handler
+     * ```
      * The parameter `addresses` are the form of multiple addresses separated by `,`.
-     * The parameter `pageSize` is the maximum size that can be obtained from one query, default is 10
-     * The parameter `page` is the number on the page, this value begins with 1, default is 1
-     *
+     * The parameter `pageSize` is the maximum size that can be obtained
+     *      from one query, default is 10
+     * The parameter `page` is the number on the page, this value begins with 1,
+     *      default is 1
+     * The parameter `type` is the type of transaction to query.
+     *      This can include multiple types.
+     *      Transaction types include "inbound", "outbound", "freeze", "payload".
+     *      The "inbound" is an increased transaction of funds at the address.
+     *      The "outbound" is a transaction with reduced funds at the address.
+     *      Users can select only "inbound", "outbound".
+     *      The "freeze", "payload" are always included.
+     *      default is "inbound,outbound,freeze,payload"
+     * The parameter `beginDate` is the start date of the range of dates to look up.
+     * The parameter `endDate` is the end date of the range of dates to look up.
+     * The parameter `peer` is used when users want to look up only specific
+     *      address of their counterparts.
+     *      Peer is the withdrawal address in the inbound transaction and
+     *      a deposit address in the outbound transaction
      * Returns a set of transactions history of the addresses.
+     * ```
      */
     private getWalletTransactionsHistory (req: express.Request, res: express.Response)
     {
@@ -396,31 +413,97 @@ class Stoa extends WebService
 
         logger.http(`GET /wallet/transactions/history/${params_addresses}}`);
 
-        let page_size = (req.query.pageSize !== undefined)
-            ? Number(req.query.pageSize.toString())
-            : 10;
+        let filter_begin: number | undefined;
+        let filter_end: number | undefined;
+        let page_size: number;
+        let page: number;
+        let filter_type: Array<DisplayTxType>;
 
-        let page = (req.query.page !== undefined)
-            ? Number(req.query.page.toString())
-            : 1;
-
-        if (page_size <= 0)
+        // Validating Parameter - beginDate, endDate
+        if ((req.query.beginDate !== undefined) && (req.query.endDate !== undefined))
         {
-            res.status(400).send(`Positive pageSize expected: ${page_size}`);
+            if (!Utils.isPositiveInteger(req.query.beginDate.toString()))
+            {
+                res.status(400).send(`Invalid value for parameter 'beginDate': ${req.query.beginDate.toString()}`);
+                return;
+            }
+
+            if (!Utils.isPositiveInteger(req.query.endDate.toString()))
+            {
+                res.status(400).send(`Invalid value for parameter 'endDate': ${req.query.endDate.toString()}`);
+                return;
+            }
+
+            filter_begin = Number(req.query.beginDate.toString());
+            filter_end = Number(req.query.endDate.toString());
+
+            if (filter_begin > filter_end)
+            {
+                res.status(204).send(`Parameter beginDate must be less than a parameter endDate. 'beginDate': (${filter_begin}), 'endDate': (${filter_end})`);
+                return;
+            }
+        }
+        else if ((req.query.beginDate !== undefined) && (req.query.endDate === undefined))
+        {
+            res.status(400).send(`Parameter endDate must also be set.`);
+            return;
+        }
+        else if ((req.query.beginDate === undefined) && (req.query.endDate !== undefined))
+        {
+            res.status(400).send(`Parameter beginDate must also be set.`);
+            return;
+        }
+        else
+        {
+            filter_begin = undefined;
+            filter_end = undefined;
+        }
+
+        // Validating Parameter - pageSize
+        if (req.query.pageSize !== undefined)
+        {
+            if (!Utils.isPositiveInteger(req.query.pageSize.toString()))
+            {
+                res.status(400).send(`Invalid value for parameter 'pageSize': ${req.query.pageSize.toString()}`);
+                return;
+            }
+            page_size = Number(req.query.pageSize.toString());
+            if (page_size > 30)
+            {
+                res.status(400).send(`Page size cannot be a number greater than 30: ${page_size}`);
+                return;
+            }
+        }
+        else
+            page_size = 10;
+
+        // Validating Parameter - page
+        if (req.query.page !== undefined)
+        {
+            if (!Utils.isPositiveInteger(req.query.page.toString()))
+            {
+                res.status(400).send(`Invalid value for parameter 'page': ${req.query.page.toString()}`);
+                return;
+            }
+            page = Number(req.query.page.toString());
+        }
+        else
+            page = 1;
+
+        filter_type = (req.query.type !== undefined)
+            ? req.query.type.toString().split(',').map((m) => ConvertTypes.toDisplayTxType(m))
+            : [0, 1];
+        filter_type.push(...[DisplayTxType.Freeze, DisplayTxType.Payload].filter(n => filter_type.find(m => m == n) === undefined));
+
+        if (filter_type.find(m => (m === -1)) !== undefined)
+        {
+            res.status(400).send(`Invalid transaction type: ${req.query.type}`);
             return;
         }
 
-        if (page_size > 30)
-        {
-            res.status(400).send(`Page size cannot be a number greater than 30: ${page_size}`);
-            return;
-        }
-
-        if (page <= 0)
-        {
-            res.status(400).send(`Positive page expected: ${page}`);
-            return;
-        }
+        let filter_peer = (req.query.peer !== undefined)
+            ? req.query.peer.toString()
+            : undefined;
 
         let addresses:Array<string> = params_addresses.split(',');
         if (addresses.length > 10)
@@ -429,7 +512,8 @@ class Stoa extends WebService
             return;
         }
 
-        this.ledger_storage.getWalletTransactionsHistory(addresses, page_size, page)
+        this.ledger_storage.getWalletTransactionsHistory(addresses, page_size, page,
+            filter_type, filter_begin, filter_end, filter_peer)
             .then((rows: any[]) => {
                 if (!rows.length)
                 {
