@@ -859,7 +859,7 @@ export class LedgerStorage extends Storages
      * Returns data sorted in descending order by block height.
      * The most recent transaction is located at the front.
      *
-     * @param addresses An array of addresses that want to be inquired.
+     * @param address   An address that want to be inquired.
      * @param page_size Maximum record count that can be obtained from one query
      * @param page      The number on the page, this value begins with 1
      * @param type      The parameter `type` is the type of transaction to query.
@@ -869,11 +869,9 @@ export class LedgerStorage extends Storages
      * Peer is the withdrawal address in the inbound transaction and a deposit address
      * in the outbound transaction address of their counterparts.
      */
-    public getWalletTransactionsHistory (addresses: string[], page_size: number, page: number,
+    public getWalletTransactionsHistory (address: string, page_size: number, page: number,
         type: Array<number>, begin?: number, end?: number, peer?: string) : Promise<any[]>
     {
-        let accounts = addresses.map((n) => `'${n}'`).join(',');
-
         // TODO We should apply the block's timestamp to this method when it is added
         let filter_type = 'AND FTX.display_tx_type in (' + type.map(n =>`${n}`).join(',') + ')'
         let filter_date = ((begin !== undefined) && (end !== undefined))
@@ -978,7 +976,7 @@ export class LedgerStorage extends Storages
                         INNER JOIN transactions T ON (T.tx_hash = I.tx_hash)
                         INNER JOIN blocks B ON (B.height = T.block_height)
                     WHERE
-                        S.address IN (${accounts})
+                        S.address = '${address}'
                         ${filter_date}
                     GROUP BY T.tx_hash, S.address
 
@@ -999,7 +997,7 @@ export class LedgerStorage extends Storages
                         INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
                         INNER JOIN blocks B ON (B.height = T.block_height)
                     WHERE
-                        O.address IN (${accounts})
+                        O.address = '${address}'
                         ${filter_date}
                     GROUP BY T.tx_hash, O.address
                 ) AS TX
