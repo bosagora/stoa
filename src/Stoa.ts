@@ -124,7 +124,7 @@ class Stoa extends WebService
         this.app.get("/validators", this.getValidators.bind(this));
         this.app.get("/validator/:address", this.getValidator.bind(this));
         this.app.get("/utxo/:address", this.getUTXO.bind(this));
-        this.app.get("/wallet/transactions/history/:addresses", this.getWalletTransactionsHistory.bind(this));
+        this.app.get("/wallet/transactions/history/:address", this.getWalletTransactionsHistory.bind(this));
         this.app.get("/wallet/transaction/overview/:hash", this.getWalletTransactionOverview.bind(this));
         this.app.post("/block_externalized", this.putBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
@@ -381,11 +381,11 @@ class Stoa extends WebService
     }
 
     /**
-     * GET /wallet/transactions/history/:addresses
+     * GET /wallet/transactions/history/:address
      *
-     * Called when a request is received through the `/wallet/transactions/history/:addresses` handler
+     * Called when a request is received through the `/wallet/transactions/history/:address` handler
      * ```
-     * The parameter `addresses` are the form of multiple addresses separated by `,`.
+     * The parameter `address` are the address to query.
      * The parameter `pageSize` is the maximum size that can be obtained
      *      from one query, default is 10
      * The parameter `page` is the number on the page, this value begins with 1,
@@ -409,9 +409,9 @@ class Stoa extends WebService
      */
     private getWalletTransactionsHistory (req: express.Request, res: express.Response)
     {
-        let params_addresses: string = String(req.params.addresses);
+        let address: string = String(req.params.address);
 
-        logger.http(`GET /wallet/transactions/history/${params_addresses}}`);
+        logger.http(`GET /wallet/transactions/history/${address}}`);
 
         let filter_begin: number | undefined;
         let filter_end: number | undefined;
@@ -505,19 +505,12 @@ class Stoa extends WebService
             ? req.query.peer.toString()
             : undefined;
 
-        let addresses:Array<string> = params_addresses.split(',');
-        if (addresses.length > 10)
-        {
-            res.status(400).send(`The number of addresses cannot be a number greater than 10: ${addresses.length}`);
-            return;
-        }
-
-        this.ledger_storage.getWalletTransactionsHistory(addresses, page_size, page,
+        this.ledger_storage.getWalletTransactionsHistory(address, page_size, page,
             filter_type, filter_begin, filter_end, filter_peer)
             .then((rows: any[]) => {
                 if (!rows.length)
                 {
-                    res.status(204).send(`The data not exist. 'addresses': (${params_addresses})`);
+                    res.status(204).send(`The data not exist. 'addresses': (${address})`);
                     return;
                 }
 

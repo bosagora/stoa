@@ -75,14 +75,14 @@ describe ('Test of Stoa API for the wallet', () =>
         let uri = URI(host)
             .port(port)
             .directory("/wallet/transactions/history")
-            .filename("GDG22B5FTPXE5THQMCTGDUC4LF2N4DFF44PGX2LIFG4WNUZZAT4L6ZGD,GDA225RGC4GOCVASSAMROSWJSGNOZX2IGPXZG52ESDSKQW2VN6UJFKWI")
+            .filename("GDG22B5FTPXE5THQMCTGDUC4LF2N4DFF44PGX2LIFG4WNUZZAT4L6ZGD")
             .setSearch("pageSize", "10")
             .setSearch("page", "1");
 
         return client.get (uri.toString())
             .then((response) =>
             {
-                assert.strictEqual(response.data.length, 10);
+                assert.strictEqual(response.data.length, 9);
                 assert.strictEqual(response.data[0].display_tx_type, "inbound");
                 assert.strictEqual(response.data[0].address,
                     "GDG22B5FTPXE5THQMCTGDUC4LF2N4DFF44PGX2LIFG4WNUZZAT4L6ZGD");
@@ -162,7 +162,7 @@ describe ('Test of Stoa API for the wallet', () =>
         let uri = URI(host)
             .port(port)
             .directory("/wallet/transactions/history")
-            .filename("GDG22B5FTPXE5THQMCTGDUC4LF2N4DFF44PGX2LIFG4WNUZZAT4L6ZGD,GDA225RGC4GOCVASSAMROSWJSGNOZX2IGPXZG52ESDSKQW2VN6UJFKWI")
+            .filename("GDG22B5FTPXE5THQMCTGDUC4LF2N4DFF44PGX2LIFG4WNUZZAT4L6ZGD")
             .setSearch("pageSize", "10")
             .setSearch("page", "1")
             .setSearch("type", "outbound");
@@ -170,7 +170,7 @@ describe ('Test of Stoa API for the wallet', () =>
         return client.get (uri.toString())
             .then((response) =>
             {
-                assert.strictEqual(response.data.length, 8);
+                assert.strictEqual(response.data.length, 4);
                 assert.strictEqual(response.data[0].display_tx_type, "outbound");
                 assert.strictEqual(response.data[0].address,
                     "GDG22B5FTPXE5THQMCTGDUC4LF2N4DFF44PGX2LIFG4WNUZZAT4L6ZGD");
@@ -192,7 +192,7 @@ describe ('Test of Stoa API for the wallet', () =>
         let uri = URI(host)
             .port(port)
             .directory("/wallet/transactions/history")
-            .filename("GDG22B5FTPXE5THQMCTGDUC4LF2N4DFF44PGX2LIFG4WNUZZAT4L6ZGD,GDA225RGC4GOCVASSAMROSWJSGNOZX2IGPXZG52ESDSKQW2VN6UJFKWI")
+            .filename("GDG22B5FTPXE5THQMCTGDUC4LF2N4DFF44PGX2LIFG4WNUZZAT4L6ZGD")
             .setSearch("pageSize", "10")
             .setSearch("page", "1")
             .setSearch("beginDate", "1577837400000")
@@ -201,10 +201,10 @@ describe ('Test of Stoa API for the wallet', () =>
         return client.get (uri.toString())
             .then((response) =>
             {
-                assert.strictEqual(response.data.length, 2);
+                assert.strictEqual(response.data.length, 1);
                 assert.strictEqual(response.data[0].display_tx_type, "inbound");
                 assert.strictEqual(response.data[0].address,
-                    "GDA225RGC4GOCVASSAMROSWJSGNOZX2IGPXZG52ESDSKQW2VN6UJFKWI");
+                    "GDG22B5FTPXE5THQMCTGDUC4LF2N4DFF44PGX2LIFG4WNUZZAT4L6ZGD");
                 assert.strictEqual(response.data[0].peer,
                     "GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ");
                 assert.strictEqual(response.data[0].peer_count, 1);
@@ -212,9 +212,9 @@ describe ('Test of Stoa API for the wallet', () =>
                 assert.strictEqual(response.data[0].tx_type, "payment");
                 assert.strictEqual(response.data[0].amount, "610000000000000");
                 assert.strictEqual(response.data[0].tx_hash,
-                    "0x70afa99af2b052d86716b88270ee3561125953026660ce7920e6726" +
-                    "824810c6c8ff2024f0b273e47bd39d4adf98f2725d78ce21fb02c6916" +
-                    "fe7a770b5b01d75b");
+                    "0x5091c6120ebc2c85ff1414225f3813ab80e13275507f2a3d2c82248" +
+                    "0ca7fa6247a48f5addcefd8193eca836054a9a12fcc6aabbc8e1675bc" +
+                    "749213d7771cde44");
             });
     });
 
