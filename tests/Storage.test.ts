@@ -14,7 +14,7 @@
 import * as assert from 'assert';
 import { LedgerStorage } from '../src/modules/storage/LedgerStorage';
 import { Block, Hash, Height, DataPayload, PreImageInfo, SodiumHelper, Endian } from 'boa-sdk-ts';
-import { sample_data, sample_preImageInfo } from "./Utils";
+import { sample_data, sample_data2, sample_preImageInfo } from "./Utils";
 
 import * as fs from 'fs';
 
@@ -449,6 +449,43 @@ describe ('Tests that sending a pre-image', () =>
                         assert.ok(!err, err);
                         doneIt();
                     });
+            })
+            .catch((err) =>
+            {
+                assert.ok(!err, err);
+                doneIt();
+            });
+    });
+});
+
+describe ('Tests storing transaction pools of a transaction', () =>
+{
+    let ledger_storage: LedgerStorage;
+
+    before('Wait for the package libsodium to finish loading', () =>
+    {
+        return SodiumHelper.init();
+    });
+
+    before ('Preparation the ledgerStorage', () =>
+    {
+        return LedgerStorage.make(":memory:")
+            .then((result) => { ledger_storage = result })
+    });
+
+    after ('Close Storage', () =>
+    {
+        ledger_storage.close();
+    });
+
+    it ('Tests to store a transaction on the transaction pool', (doneIt: () => void) =>
+    {
+        const block = Block.reviver("", sample_data2);
+        ledger_storage.putTransactionPool(block.txs[0])
+            .then((changes) =>
+            {
+                assert.strictEqual(changes, 1);
+                doneIt();
             })
             .catch((err) =>
             {

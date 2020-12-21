@@ -2,7 +2,7 @@ import { AgoraClient } from './modules/agora/AgoraClient';
 import { cors_options } from './cors';
 import { LedgerStorage } from './modules/storage/LedgerStorage';
 import { logger } from './modules/common/Logger';
-import { Height, PreImageInfo, Hash, hash, Block, Utils, Endian } from 'boa-sdk-ts';
+import { Height, PreImageInfo, Hash, hash, Block, Utils, Endian, Transaction, hashFull } from 'boa-sdk-ts';
 import { WebService } from './modules/service/WebService';
 import { ValidatorData, IPreimage, IUnspentTxOutput,
     ITxHistoryElement, ITxOverview, ConvertTypes, DisplayTxType } from './Types';
@@ -128,6 +128,7 @@ class Stoa extends WebService
         this.app.get("/wallet/transaction/overview/:hash", this.getWalletTransactionOverview.bind(this));
         this.app.post("/block_externalized", this.putBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
+        this.app.post("/transaction_received", this.putTransaction.bind(this));
 
         let height: Height = new Height(0n);
 
@@ -647,6 +648,27 @@ class Stoa extends WebService
     }
 
     /**
+     * POST /transaction_received
+     *
+     * When a request is received through the `/transaction_received` handler
+     * JSON transaction data is parsed and stored on each storage.
+     */
+    private putTransaction (req: express.Request, res: express.Response)
+    {
+        if (req.body.transaction === undefined)
+        {
+            res.status(400).send({ statusMessage: "Missing 'transaction' object in body"});
+            return;
+        }
+
+        logger.http(`POST /transaction_received transaction=${req.body.transaction.toString()}`);
+
+        this.pending = this.pending.then(() => { return this.task({type: "transaction", data: req.body.transaction}); });
+
+        res.status(200).send();
+    }
+
+    /**
      * GET /block_height
      *
      * Return the highest block height stored in Stoa
@@ -825,6 +847,24 @@ class Stoa extends WebService
                 catch(err)
                 {
                     logger.error("Failed to store the payload of a update to the DB: " + err);
+                    reject(err);
+                }
+            }
+            else if (stored_data.type === "transaction")
+            {
+                try
+                {
+                    let tx = Transaction.reviver("", stored_data.data);
+                    let changes = await this.ledger_storage.putTransactionPool(tx);
+
+                    if (changes)
+                        logger.info(`Saved a transaction hash : ${hashFull(tx).toString()}, ` +
+                        `data : ` + stored_data.data);
+                    resolve();
+                }
+                catch(err)
+                {
+                    logger.error("Failed to store the payload of a push to the DB: " + err);
                     reject(err);
                 }
             }

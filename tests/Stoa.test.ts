@@ -16,6 +16,7 @@ import {
 } from 'boa-sdk-ts';
 import {
     sample_data,
+    sample_data2,
     sample_preImageInfo,
     sample_reEnroll_preImageInfo,
     TestAgora,
@@ -346,5 +347,24 @@ describe ('Test of Stoa API Server', () =>
                 assert.ok(!error, error);
             })
             .finally(doneIt);
+    });
+
+    it ('Test of the path /transaction_received', (doneIt: () => void) =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("transaction_received");
+
+        let url = uri.toString();
+        assert.doesNotThrow(async () =>
+        {
+            const block = Block.reviver("", sample_data2);
+            await client.post(url, {transaction: block.txs[0]})
+
+            setTimeout(() =>
+            {
+                doneIt();
+            }, 100);
+        });
     });
 });

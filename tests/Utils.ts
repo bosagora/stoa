@@ -34,6 +34,12 @@ export const sample_data =
         return record;
     })();
 
+export const sample_data2 =
+    (() => {
+        let data: string = fs.readFileSync('tests/data/Block.2.sample1.json', 'utf-8');
+        return JSON.parse(data);
+    })();
+
 export const sample_preImageInfo =
     {
         "enroll_key": "0x46883e83778481d640a95fcffd6e1a1b6defeaac5a8001cd3f99e17576b809c7e9bc7a44c3917806765a5ff997366e217ff54cd4da09c0c51dc339c47052a3ac",
