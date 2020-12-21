@@ -16,6 +16,7 @@ import {
     TxInput, TxOutput, makeUTXOKey, hashFull, TxType,
     Utils, Endian
 } from 'boa-sdk-ts';
+import { assert, AssertionError } from 'chai';
 import { logger } from '../common/Logger';
 import { Storages } from './Storages';
 
@@ -662,6 +663,135 @@ export class LedgerStorage extends Storages
                     return;
                 }
                 resolve();
+            })();
+        });
+    }
+
+        /**
+     * Put a transaction on transactionPool
+     * @param tx: The instance of the `Transaction`
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called and if an error occurs the `.catch`
+     * is called with an error.
+     */
+    public putTransactionPool (tx: Transaction): Promise<number>
+    {
+        function save_transaction_pool (storage: LedgerStorage, tx: Transaction,
+            hash: Hash): Promise<number>
+        {
+            return new Promise<number>((resolve, reject) =>
+            {
+                storage.run(
+                    `INSERT INTO transactionPool
+                        (tx_hash, type, payload, time)
+                    VALUES
+                        (?, ?, ?, strftime('%s', 'now', 'UTC'))`,
+                    [
+                        hash.toBinary(Endian.Little),
+                        tx.type,
+                        tx.payload.toBinary(Endian.Little)
+                    ])
+                    .then((result) =>
+                    {
+                        resolve(result.changes);
+                    })
+                    .catch((err) =>
+                    {
+                        reject(err);
+                    })
+            });
+        }
+
+        function save_input_pool (storage: LedgerStorage, hash: Hash,
+            in_idx: number, input: TxInput): Promise<number>
+        {
+            return new Promise<number>((resolve, reject) =>
+            {
+                storage.run(
+                    `INSERT INTO txInputPool
+                        (tx_hash, input_index, utxo, signature)
+                    VALUES
+                        (?, ?, ?, ?)`,
+                    [
+                        hash.toBinary(Endian.Little),
+                        in_idx,
+                        input.utxo.toBinary(Endian.Little),
+                        input.signature.toBinary(Endian.Little)
+                    ]
+                )
+                    .then((result) =>
+                    {
+                        resolve(result.changes);
+                    })
+                    .catch((err) =>
+                    {
+                        reject(err);
+                    })
+            });
+        }
+
+        function save_output_pool (storage: LedgerStorage, hash: Hash,
+            out_idx: number, output: TxOutput): Promise<number>
+        {
+            return new Promise<number>((resolve, reject) =>
+            {
+                storage.run(
+                    `INSERT INTO txOutputPool
+                        (tx_hash, output_index, amount, address)
+                    VALUES
+                        (?, ?, ?, ?)`,
+                    [
+                        hash.toBinary(Endian.Little),
+                        out_idx,
+                        output.address.toString(),
+                        output.value.toString(),
+                    ]
+                )
+                    .then((result) =>
+                    {
+                        resolve(result.changes);
+                    })
+                    .catch((err) =>
+                    {
+                        reject(err);
+                    })
+            });
+        }
+
+        return new Promise<number>((resolve, reject) =>
+        {
+            (async () =>
+            {
+                let tx_changes, in_changes, out_changes;
+                try
+                {
+                    let hash = hashFull(tx);
+                    tx_changes = await save_transaction_pool(this, tx, hash);
+                    if (tx_changes !== 1)
+                        throw new Error('Failed to save a transaction.');
+
+                    for (let in_idx = 0; in_idx < tx.inputs.length; in_idx++)
+                    {
+                        in_changes = await save_input_pool(this, hash, in_idx, tx.inputs[in_idx]);
+                        if (in_changes !== 1)
+                            throw new Error('Failed to save a input on transactionPool.');
+                    }
+
+                    for (let out_idx = 0; out_idx < tx.outputs.length; out_idx++)
+                    {
+                        out_changes = await save_output_pool(this, hash, out_idx, tx.outputs[out_idx]);
+                        if (out_changes !== 1)
+                            throw new Error('Failed to save a output on transactionPool.');
+                    }
+                }
+                catch (err)
+                {
+                    await this.rollback();
+                    reject(err);
+                    return;
+                }
+
+                resolve(tx_changes);
             })();
         });
     }
