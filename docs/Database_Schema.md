@@ -224,3 +224,78 @@ CREATE TABLE IF NOT EXISTS information (
     PRIMARY KEY(key)
 )
 ```
+
+----
+
+## 9. Table **transactionPool**
+
+### _Schema_
+
+| Column            | Data Type | PK | Not NULL | Default  |Description|
+|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
+| tx_hash           | BLOB      | Y  | Y        |          | The hash of transaction |
+| type              | INTEGER   |    | Y        |          | The type of transaction |
+| payload           | BLOB      |    | Y        |          | The transaction data payload |
+| time              | INTEGER   |    | Y        |          | Received time |
+
+### _Create Script_
+
+```sql
+CREATE TABLE IF NOT EXISTS "transactionPool" (
+    "tx_hash"               BLOB    NOT NULL,
+    "type"                  INTEGER NOT NULL,
+    "payload"               BLOB    NOT NULL,
+    "time"                  INTEGER NOT NULL,
+    PRIMARY KEY("tx_hash")
+)
+```
+
+----
+
+## 4. Table **txInputPool**
+
+### _Schema_
+
+| Column            | Data Type | PK | Not NULL | Default  |Description|
+|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
+| tx_hash           | BLOB      | Y  | Y        |          | The hash of transaction|
+| input_index       | INTEGER   | Y  | Y        |          | The index of input in the inputs|
+| utxo              | BLOB      |    | Y        |          | The hash of the UTXO to be spent|
+| signature         | BLOB      |    | Y        |          | The signature of this transaction input|
+### _Create Script_
+
+```sql
+CREATE TABLE IF NOT EXISTS "txInputPool" (
+    "tx_hash"               BLOB    NOT NULL,
+    "input_index"           INTEGER NOT NULL,
+    "utxo"                  BLOB    NOT NULL,
+    "signature"             BLOB    NOT NULL,
+    PRIMARY KEY("tx_hash","input_index")
+)
+```
+
+----
+
+## 5. Table **txOutputPool**
+
+### _Schema_
+
+| Column            | Data Type | PK | Not NULL | Default  |Description|
+|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
+|  tx_hash          | BLOB      | Y  | Y        |          | The hash of transaction|
+|  output_index     | INTEGER   | Y  | Y        |          | The index of output in the outputs|
+|  amount           | NUMERIC   |    | Y        |          | The monetary value of this output, in 1/10^7|
+|  address          | TEXT      |    | Y        |          | The public key that can redeem this output|
+
+### _Create Script_
+
+```sql
+CREATE TABLE IF NOT EXISTS "txOutputPool" (
+    "tx_hash"               BLOB    NOT NULL,
+    "output_index"          INTEGER NOT NULL,
+    "amount"                NUMERIC NOT NULL,
+    "address"               TEXT    NOT NULL,
+    PRIMARY KEY("tx_hash","output_index")
+)
+```
+----
