@@ -141,6 +141,30 @@ export class LedgerStorage extends Storages
             value               TEXT    NOT NULL,
             PRIMARY KEY(key)
         );
+
+        CREATE TABLE IF NOT EXISTS transactionPool (
+            tx_hash             BLOB    NOT NULL,
+            type                INTEGER NOT NULL,
+            payload             BLOB    NOT NULL,
+            time                INTEGER NOT NULL,
+            PRIMARY KEY(tx_hash)
+        );
+
+        CREATE TABLE IF NOT EXISTS txInputPool (
+            tx_hash             BLOB    NOT NULL,
+            input_index         INTEGER NOT NULL,
+            utxo                BLOB    NOT NULL,
+            signature           BLOB    NOT NULL,
+            PRIMARY KEY(tx_hash, input_index)
+        );
+
+        CREATE TABLE IF NOT EXISTS txOutputPool (
+            tx_hash             BLOB    NOT NULL,
+            output_index        INTEGER NOT NULL,
+            amount              NUMERIC NOT NULL,
+            address             TEXT    NOT NULL,
+            PRIMARY KEY(tx_hash, output_index)
+        );
         `;
 
         return this.exec(sql);
