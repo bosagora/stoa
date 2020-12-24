@@ -252,7 +252,7 @@ CREATE TABLE IF NOT EXISTS "transaction_pool" (
 
 ----
 
-## 4. Table **tx_input_pool**
+## 10. Table **tx_input_pool**
 
 ### _Schema_
 
@@ -276,7 +276,7 @@ CREATE TABLE IF NOT EXISTS "tx_input_pool" (
 
 ----
 
-## 5. Table **tx_output_pool**
+## 11. Table **tx_output_pool**
 
 ### _Schema_
 
