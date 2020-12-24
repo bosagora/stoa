@@ -166,6 +166,13 @@ export class LedgerStorage extends Storages
             address             TEXT    NOT NULL,
             PRIMARY KEY(tx_hash, output_index)
         );
+
+        CREATE TRIGGER tx_trigger AFTER INSERT ON transactions
+        BEGIN
+            DELETE FROM transaction_pool WHERE tx_hash = NEW.tx_hash;
+            DELETE FROM tx_input_pool WHERE tx_hash = NEW.tx_hash;
+            DELETE FROM tx_output_pool WHERE tx_hash = NEW.tx_hash;
+        END;
         `;
 
         return this.exec(sql);
@@ -765,6 +772,7 @@ export class LedgerStorage extends Storages
                 let tx_changes, in_changes, out_changes;
                 try
                 {
+                    await this.begin();
                     let hash = hashFull(tx);
                     tx_changes = await save_transaction_pool(this, tx, hash);
                     if (tx_changes !== 1)
@@ -791,6 +799,7 @@ export class LedgerStorage extends Storages
                     return;
                 }
 
+                await this.commit();
                 resolve(tx_changes);
             })();
         });
@@ -865,6 +874,24 @@ export class LedgerStorage extends Storages
             tx_outputs
         WHERE block_height = ? AND tx_index = ?`;
         return this.query(sql, [height.toString(), tx_index]);
+    }
+
+    /**
+     * Gets transaction pool data
+     * @param height The height of the block to get
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getTransactionPool (): Promise<any[]>
+    {
+        let sql =
+        `SELECT
+            tx_hash, type, payload, time
+        FROM
+            transaction_pool
+        `;
+        return this.query(sql,[]);
     }
 
     /**
