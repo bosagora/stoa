@@ -478,19 +478,40 @@ describe ('Tests storing transaction pools of a transaction', () =>
         ledger_storage.close();
     });
 
-    it ('Tests to store a transaction on the transaction pool', (doneIt: () => void) =>
+    it ('Tests to store a transaction on the transaction pool', async () =>
     {
-        const block = Block.reviver("", sample_data2);
-        ledger_storage.putTransactionPool(block.txs[0])
+        const block0 = Block.reviver("", sample_data[0]);
+        const block1 = Block.reviver("", sample_data[1]);
+
+        // Write the Genesis block.
+        await ledger_storage.putBlocks(block0);
+
+        await ledger_storage.putTransactionPool(block1.txs[0])
             .then((changes) =>
             {
                 assert.strictEqual(changes, 1);
-                doneIt();
             })
             .catch((err) =>
             {
                 assert.ok(!err, err);
-                doneIt();
             });
+    });
+
+    it ('Test to transaction pool deletion trigger', async () =>
+    {
+        let before_pool_rows = await ledger_storage.getTransactionPool();
+        assert.deepStrictEqual(before_pool_rows.length, 1);
+
+         // Write the block 1.
+        const block1 = Block.reviver("", sample_data[1]);
+        await ledger_storage.putBlocks(block1);
+
+        // The block is read from the database.
+        let rows = await ledger_storage.getBlock(new Height(1n));
+        assert.deepStrictEqual(rows.length, 1);
+
+        // Check the transaction on the transaction pool is cleared
+        let after_pool_rows = await ledger_storage.getTransactionPool();
+        assert.deepStrictEqual(after_pool_rows.length, 0);
     });
 });
