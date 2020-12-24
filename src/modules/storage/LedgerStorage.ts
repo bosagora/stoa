@@ -143,7 +143,7 @@ export class LedgerStorage extends Storages
             PRIMARY KEY(key)
         );
 
-        CREATE TABLE IF NOT EXISTS transactionPool (
+        CREATE TABLE IF NOT EXISTS transaction_pool (
             tx_hash             BLOB    NOT NULL,
             type                INTEGER NOT NULL,
             payload             BLOB    NOT NULL,
@@ -151,7 +151,7 @@ export class LedgerStorage extends Storages
             PRIMARY KEY(tx_hash)
         );
 
-        CREATE TABLE IF NOT EXISTS txInputPool (
+        CREATE TABLE IF NOT EXISTS tx_input_pool (
             tx_hash             BLOB    NOT NULL,
             input_index         INTEGER NOT NULL,
             utxo                BLOB    NOT NULL,
@@ -159,7 +159,7 @@ export class LedgerStorage extends Storages
             PRIMARY KEY(tx_hash, input_index)
         );
 
-        CREATE TABLE IF NOT EXISTS txOutputPool (
+        CREATE TABLE IF NOT EXISTS tx_output_pool (
             tx_hash             BLOB    NOT NULL,
             output_index        INTEGER NOT NULL,
             amount              NUMERIC NOT NULL,
@@ -682,7 +682,7 @@ export class LedgerStorage extends Storages
             return new Promise<number>((resolve, reject) =>
             {
                 storage.run(
-                    `INSERT INTO transactionPool
+                    `INSERT INTO transaction_pool
                         (tx_hash, type, payload, time)
                     VALUES
                         (?, ?, ?, strftime('%s', 'now', 'UTC'))`,
@@ -708,7 +708,7 @@ export class LedgerStorage extends Storages
             return new Promise<number>((resolve, reject) =>
             {
                 storage.run(
-                    `INSERT INTO txInputPool
+                    `INSERT INTO tx_input_pool
                         (tx_hash, input_index, utxo, signature)
                     VALUES
                         (?, ?, ?, ?)`,
@@ -736,7 +736,7 @@ export class LedgerStorage extends Storages
             return new Promise<number>((resolve, reject) =>
             {
                 storage.run(
-                    `INSERT INTO txOutputPool
+                    `INSERT INTO tx_output_pool
                         (tx_hash, output_index, amount, address)
                     VALUES
                         (?, ?, ?, ?)`,
