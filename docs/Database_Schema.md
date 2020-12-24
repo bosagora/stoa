@@ -227,7 +227,7 @@ CREATE TABLE IF NOT EXISTS information (
 
 ----
 
-## 9. Table **transactionPool**
+## 9. Table **transaction_pool**
 
 ### _Schema_
 
@@ -241,7 +241,7 @@ CREATE TABLE IF NOT EXISTS information (
 ### _Create Script_
 
 ```sql
-CREATE TABLE IF NOT EXISTS "transactionPool" (
+CREATE TABLE IF NOT EXISTS "transaction_pool" (
     "tx_hash"               BLOB    NOT NULL,
     "type"                  INTEGER NOT NULL,
     "payload"               BLOB    NOT NULL,
@@ -252,7 +252,7 @@ CREATE TABLE IF NOT EXISTS "transactionPool" (
 
 ----
 
-## 4. Table **txInputPool**
+## 4. Table **tx_input_pool**
 
 ### _Schema_
 
@@ -265,7 +265,7 @@ CREATE TABLE IF NOT EXISTS "transactionPool" (
 ### _Create Script_
 
 ```sql
-CREATE TABLE IF NOT EXISTS "txInputPool" (
+CREATE TABLE IF NOT EXISTS "tx_input_pool" (
     "tx_hash"               BLOB    NOT NULL,
     "input_index"           INTEGER NOT NULL,
     "utxo"                  BLOB    NOT NULL,
@@ -276,7 +276,7 @@ CREATE TABLE IF NOT EXISTS "txInputPool" (
 
 ----
 
-## 5. Table **txOutputPool**
+## 5. Table **tx_output_pool**
 
 ### _Schema_
 
@@ -290,7 +290,7 @@ CREATE TABLE IF NOT EXISTS "txInputPool" (
 ### _Create Script_
 
 ```sql
-CREATE TABLE IF NOT EXISTS "txOutputPool" (
+CREATE TABLE IF NOT EXISTS "tx_output_pool" (
     "tx_hash"               BLOB    NOT NULL,
     "output_index"          INTEGER NOT NULL,
     "amount"                NUMERIC NOT NULL,
