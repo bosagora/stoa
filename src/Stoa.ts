@@ -2,7 +2,8 @@ import { AgoraClient } from './modules/agora/AgoraClient';
 import { cors_options } from './cors';
 import { LedgerStorage } from './modules/storage/LedgerStorage';
 import { logger } from './modules/common/Logger';
-import { Height, PreImageInfo, Hash, hash, Block, Utils, Endian, Transaction, hashFull } from 'boa-sdk-ts';
+import { Height, PreImageInfo, Hash, hash, Block, Utils,
+    Endian, Transaction, hashFull, DataPayload } from 'boa-sdk-ts';
 import { WebService } from './modules/service/WebService';
 import { ValidatorData, IPreimage, IUnspentTxOutput,
     ITxHistoryElement, ITxOverview, ConvertTypes, DisplayTxType } from './Types';
@@ -576,7 +577,7 @@ class Stoa extends WebService
                     tx_type: ConvertTypes.TxTypeToString(data.tx[0].type),
                     unlock_height: BigInt(data.tx[0].unlock_height).toString(),
                     unlock_time: data.tx[0].unlock_time,
-                    payload: (data.tx[0].payload !== null) ? new Hash(data.tx[0].payload, Endian.Little).toString() : "",
+                    payload: (data.tx[0].payload !== null) ? new DataPayload(data.tx[0].payload, Endian.Little).toString() : "",
                     senders: [],
                     receivers: [],
                     fee: "0"

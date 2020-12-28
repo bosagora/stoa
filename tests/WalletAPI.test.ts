@@ -13,7 +13,7 @@
 
 import { SodiumHelper } from 'boa-sdk-ts';
 import { recovery_sample_data } from './RecoveryData.test';
-import { TestAgora, TestStoa } from './Utils';
+import { TestAgora, TestStoa, sample_data, sample_data2 } from './Utils';
 
 import * as assert from 'assert';
 import axios from 'axios';
@@ -246,5 +246,94 @@ describe ('Test of Stoa API for the wallet', () =>
                     "0ca7fa6247a48f5addcefd8193eca836054a9a12fcc6aabbc8e1675bc" +
                     "749213d7771cde44");
             });
+    });
+});
+
+describe ('Test of Stoa API for the wallet with `sample_data`', () => {
+    let host: string = 'http://localhost';
+    let port: string = '3837';
+    let stoa_server: TestStoa;
+    let agora_server: TestAgora;
+    let client = axios.create();
+
+    before('Wait for the package libsodium to finish loading', () => {
+        return SodiumHelper.init();
+    });
+
+    before('Start a fake Agora', () => {
+        return new Promise<void>((resolve, reject) => {
+            agora_server = new TestAgora("2826", [], resolve);
+        });
+    });
+
+    before('Create TestStoa', () => {
+        stoa_server = new TestStoa(new URL("http://127.0.0.1:2826"), port);
+        return stoa_server.createStorage();
+    });
+
+    before('Start TestStoa', () => {
+        return stoa_server.start();
+    });
+
+    after('Stop Stoa and Agora server instances', () => {
+        return stoa_server.stop().then(() => {
+            return agora_server.stop()
+        });
+    });
+
+    it('Store blocks', (doneIt: () => void) => {
+        let uri = URI(host)
+            .port(port)
+            .directory("block_externalized");
+
+        let url = uri.toString();
+        (async () => {
+            await client.post(url, {block: sample_data[0]});
+            await client.post(url, {block: sample_data[1]});
+            await client.post(url, {block: sample_data2});
+            setTimeout(doneIt, 1000);
+        })();
+    });
+
+    it('Test of the path /wallet/transaction/overview with payload', () => {
+        let uri = URI(host)
+            .port(port)
+            .directory("/wallet/transaction/overview")
+            .filename("0x3bccc34c22d03f9beb642c45c6f92fe7d84b61d19aeca335fc58d1a8b87cfc933e1ccff1871f5d1ce018b69ede6c11c86a57c32f5cf271820e287beb09764215")
+
+        return client.get(uri.toString())
+            .then((response) => {
+                let expected = {
+                    height: '2',
+                    time: 1577838000000,
+                    tx_hash: '0x3bccc34c22d03f9beb642c45c6f92fe7d84b61d19aeca335fc58d1a8b87cfc933e1ccff1871f5d1ce018b69ede6c11c86a57c32f5cf271820e287beb09764215',
+                    tx_type: 'payment',
+                    unlock_height: '3',
+                    unlock_time: 1577838600000,
+                    payload: '0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff',
+                    senders: [
+                        {
+                            address: 'GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ',
+                            amount: 24400000000000,
+                            utxo: '0xd9482016835acc6defdfd060216a5890e00cf8f0a79ab0b83d3385fc723cd45bfea66eb3587a684518ff1756951d38bf4f07abda96dcdea1c160a4f83e377c32'
+                        }
+                    ],
+                    receivers: [
+                        {
+                            address: 'GDID227ETHPOMLRLIHVDJSNSJVLDS4D4ANYOUHXPMG2WWEZN5JO473ZO',
+                            amount: 24398336600000,
+                            utxo: '0x0ffc56afccf4c2fb17f5aa9238808444a77975da1d7c496892427e7b2c2cc832bafcd657f911cc45552bbfaf97f80bee7766951ce8a3461f7de7204dcc5f9848'
+                        },
+                        {
+                            address: 'GCOMMONBGUXXP4RFCYGEF74JDJVPUW2GUENGTKKJECDNO6AGO32CUWGU',
+                            amount: 1663400000,
+                            utxo: '0x6e2eeeca803a6cebed8739a03fd25182bbe7ccb1cb4fa5f994075782b68e5c6270d478b7cad09327f02072ffcb70e9a9136f6b19d3f308996e6bdf51599b2fbd'
+                        }
+                    ],
+                    fee: '0'
+                }
+
+                assert.deepStrictEqual(expected, response.data);
+            })
     });
 });
