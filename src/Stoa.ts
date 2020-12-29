@@ -127,7 +127,7 @@ class Stoa extends WebService
         this.app.get("/utxo/:address", this.getUTXO.bind(this));
         this.app.get("/wallet/transactions/history/:address", this.getWalletTransactionsHistory.bind(this));
         this.app.get("/wallet/transaction/overview/:hash", this.getWalletTransactionOverview.bind(this));
-        this.app.post("/block_externalized", this.putBlock.bind(this));
+        this.app.post("/block_externalized", this.postBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
         this.app.post("/transaction_received", this.putTransaction.bind(this));
 
@@ -604,7 +604,7 @@ class Stoa extends WebService
      * we we call the storage handler asynchronously and  immediately
      * respond to Agora.
      */
-    private putBlock (req: express.Request, res: express.Response)
+    private postBlock (req: express.Request, res: express.Response)
     {
         if (req.body.block === undefined)
         {
