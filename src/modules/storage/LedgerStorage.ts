@@ -167,7 +167,7 @@ export class LedgerStorage extends Storages
             PRIMARY KEY(tx_hash, output_index)
         );
 
-        CREATE TRIGGER tx_trigger AFTER INSERT ON transactions
+        CREATE TRIGGER IF NOT EXISTS tx_trigger AFTER INSERT ON transactions
         BEGIN
             DELETE FROM transaction_pool WHERE tx_hash = NEW.tx_hash;
             DELETE FROM tx_input_pool WHERE tx_hash = NEW.tx_hash;
