@@ -750,8 +750,8 @@ export class LedgerStorage extends Storages
                     [
                         hash.toBinary(Endian.Little),
                         out_idx,
-                        output.address.toString(),
                         output.value.toString(),
+                        output.address.toString(),
                     ]
                 )
                     .then((result) =>
@@ -1253,5 +1253,40 @@ export class LedgerStorage extends Storages
                 })
                 .catch(reject);
         });
+    }
+
+    /**
+     * Provides pending of transactions.
+     * Lists the total by output address of the pending transactions.
+     * @param address The input address of the pending transaction
+     */
+    public getTransactionsPending (address: string): Promise<any[]>
+    {
+        let sql =
+            `SELECT
+                T.tx_hash,
+                T.time,
+                O.address,
+                IFNULL(SUM(O.amount), 0) as amount
+            FROM
+                transaction_pool T
+                LEFT OUTER JOIN tx_output_pool O
+                    ON T.tx_hash = O.tx_hash
+            WHERE
+                T.tx_hash = IFNULL(
+                (
+                    SELECT
+                            I.tx_hash
+                    FROM
+                        tx_outputs O
+                        INNER JOIN tx_input_pool I
+                            ON O.utxo_key = I.utxo
+                    WHERE
+                        O.used = 0
+                        AND O.address = ?
+                ), NULL)
+            GROUP BY T.tx_hash, O.address;`;
+
+        return this.query(sql, [address]);
     }
 }
