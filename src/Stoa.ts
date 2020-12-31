@@ -6,7 +6,7 @@ import { Height, PreImageInfo, Hash, hash, Block, Utils,
     Endian, Transaction, hashFull, DataPayload } from 'boa-sdk-ts';
 import { WebService } from './modules/service/WebService';
 import { ValidatorData, IPreimage, IUnspentTxOutput,
-    ITxHistoryElement, ITxOverview, ConvertTypes, DisplayTxType } from './Types';
+    ITxHistoryElement, ITxOverview, ConvertTypes, DisplayTxType, IPendingTxs } from './Types';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -127,6 +127,7 @@ class Stoa extends WebService
         this.app.get("/utxo/:address", this.getUTXO.bind(this));
         this.app.get("/wallet/transactions/history/:address", this.getWalletTransactionsHistory.bind(this));
         this.app.get("/wallet/transaction/overview/:hash", this.getWalletTransactionOverview.bind(this));
+        this.app.get("/transactions/pending/:address", this.getTransactionsPending.bind(this));
         this.app.post("/block_externalized", this.postBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
         this.app.post("/transaction_received", this.putTransaction.bind(this));
@@ -667,6 +668,48 @@ class Stoa extends WebService
         this.pending = this.pending.then(() => { return this.task({type: "transaction", data: req.body.transaction}); });
 
         res.status(200).send();
+    }
+
+    /**
+     * GET /transactions/pending/:address
+     *
+     * Called when a request is received through the `/transactions/pending/:address` handler
+     *
+     * Returns List the total by output address of the pending transaction.
+     */
+    private getTransactionsPending (req: express.Request, res: express.Response)
+    {
+        let address: string = String(req.params.address);
+
+        logger.http(`GET /transactions/pending/${address}}`);
+
+        this.ledger_storage.getTransactionsPending(address)
+            .then((rows: any[]) => {
+                if (!rows.length)
+                {
+                    res.status(204).send(`No pending transactions. address': (${address})`);
+                    return;
+                }
+
+                let pending_array: Array<IPendingTxs> = [];
+                for (const row of rows)
+                {
+                    let tx = {
+                        tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
+                        submission_time: row.time,
+                        address: row.address,
+                        amount: BigInt(row.amount).toString(),
+                        fee: BigInt(0).toString()
+                    }
+                    pending_array.push(tx);
+                }
+                res.status(200).send(JSON.stringify(pending_array));
+            })
+            .catch((err) => {
+                    logger.error("Failed to data lookup to the DB: " + err);
+                    res.status(500).send("Failed to data lookup");
+                }
+            );
     }
 
     /**

@@ -200,6 +200,17 @@ export interface ITxOverviewElement
     utxo: string;
 }
 
+/**
+ * The interface of the pending transactions
+ */
+export interface IPendingTxs
+{
+    tx_hash: string;
+    submission_time: number;
+    address: string;
+    amount: string;
+    fee: string;
+}
 
 /**
  * Define the types of transactions to be displayed in various applications
