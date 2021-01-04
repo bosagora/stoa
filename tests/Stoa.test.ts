@@ -238,7 +238,7 @@ describe ('Test of Stoa API Server', () =>
             const enrollment = new Enrollment(utxo_key, random_seed, 20, enroll_sig);
             const header = new BlockHeader(
                 new Hash(Buffer.alloc(Hash.Width)), new Height(19n), new Hash(Buffer.alloc(Hash.Width)), new BitField([]),
-                new Signature(Buffer.alloc(Signature.Width)), [ enrollment ]);
+                new Signature(Buffer.alloc(Signature.Width)), [ enrollment ], new Hash(Buffer.alloc(Hash.Width)), []);
             const block = new Block(header, [], []);
 
             // put the re-enrollment
