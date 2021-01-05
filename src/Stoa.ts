@@ -370,7 +370,9 @@ class Stoa extends WebService
                         utxo: new Hash(row.utxo, Endian.Little).toString(),
                         type: row.type,
                         unlock_height: BigInt(row.unlock_height).toString(),
-                        amount: BigInt(row.amount).toString()
+                        amount: BigInt(row.amount).toString(),
+                        height: BigInt(row.block_height).toString(),
+                        time: row.block_time
                     }
                     utxo_array.push(utxo);
                 }

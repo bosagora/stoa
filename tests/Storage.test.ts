@@ -249,8 +249,8 @@ describe ('Test ledger storage and inquiry function.', () =>
         assert.strictEqual(rows[0].unlock_height, 2018);
         assert.strictEqual(BigInt(rows[0].amount), BigInt('4000000000000'));
         assert.strictEqual(new Hash(rows[0].utxo, Endian.Little).toString(),
-            '0xfb73e18075a842a889db153cf12d7633967841d54346076b586fe9f319c1735' +
-            'a4bde8473ca9ed9114dad3a9e78152c0c6ddbc6875947793096d246a740b3022c');
+            '0x2065e56e5113084eaf8dcd8beb1010a313f8551642fa81575febeed9314a1ed' +
+            '0adbd86d2f1917b31852867d86415296a53bcde758fbfe9820b4d3684fbfa3175');
     });
 });
 
