@@ -56,10 +56,35 @@ export class ValidatorData implements IValidator
  */
 export interface IUnspentTxOutput
 {
+    /**
+     * Hash of unspent transaction output
+     */
     utxo: string;
+
+    /**
+     * Transaction type
+     */
     type: number;
+
+    /**
+     * Block height at which the output of the transaction becomes available
+     */
     unlock_height: string;
+
+    /**
+     * Amount of transaction output
+     */
     amount: string;
+
+    /**
+     * Block height on created
+     */
+    height: string;
+
+    /**
+     * Block time on created
+     */
+    time: number;
 }
 
 /**

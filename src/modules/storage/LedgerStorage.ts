@@ -1019,19 +1019,24 @@ export class LedgerStorage extends Storages
      */
     public getUTXO (address: string): Promise<any[]>
     {
+        // TODO We should apply the block's timestamp to this method when it is added
         let sql =
             `SELECT
-                tx_outputs.utxo_key AS utxo,
-                transactions.type,
-                transactions.unlock_height,
-                tx_outputs.amount
+                O.utxo_key as utxo,
+                O.amount,
+                T.block_height,
+                STRFTIME('%s', '2020-01-01 00:00:00') * 1000 + T.block_height * 10 * 60000 as block_time,
+                T.type,
+                T.unlock_height
             FROM
-                tx_outputs,
-                transactions
+                tx_outputs O
+                INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
+                INNER JOIN blocks B ON (B.height = T.block_height)
             WHERE
-                tx_outputs.tx_hash = transactions.tx_hash
-                AND tx_outputs.address = ?
-                AND tx_outputs.used != 1;`;
+                O.address = ?
+                AND O.used = 0;
+            ORDER BY T.block_height, O.amount
+            `;
         return this.query(sql, [address]);
     }
 
