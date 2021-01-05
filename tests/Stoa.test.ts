@@ -324,31 +324,6 @@ describe ('Test of Stoa API Server', () =>
 
     });
 
-    it ('Test of the path /utxo', (doneIt: () => void) =>
-    {
-        let uri = URI(host)
-            .port(port)
-            .directory("utxo")
-            .filename("GDML22LKP3N6S37CYIBFRANXVY7KMJMINH5VFADGDFLGIWNOR3YU7T6I");
-
-        client.get (uri.toString())
-            .then((response) =>
-            {
-                assert.strictEqual(response.data.length, 1);
-                assert.strictEqual(response.data[0].utxo, '0x2e04f355ab7fbc0b495f8267e3' +
-                    '62b6914b756a60e8c4627142b6a6bd85a20b5986838aaa7fc40f18b7c9601ccdba' +
-                    '06cada0d7cb28e098b08605e21324e4bbd1d');
-                assert.strictEqual(response.data[0].type, 0);
-                assert.strictEqual(response.data[0].unlock_height, '2');
-                assert.strictEqual(response.data[0].amount, '24400000000000');
-            })
-            .catch((error) =>
-            {
-                assert.ok(!error, error);
-            })
-            .finally(doneIt);
-    });
-
     it ('Test of the path /transaction_received', (doneIt: () => void) =>
     {
         let uri = URI(host)
