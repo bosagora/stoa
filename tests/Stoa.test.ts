@@ -393,3 +393,100 @@ describe ('Test of Stoa API Server', () =>
             .finally(doneIt);
     });
 });
+
+describe ('Test of the path /utxo', () =>
+{
+    let host: string = 'http://localhost';
+    let port: string = '3837';
+    let stoa_server: TestStoa;
+    let agora_server: TestAgora;
+    let client = axios.create();
+
+    before('Wait for the package libsodium to finish loading', () =>
+    {
+        return SodiumHelper.init();
+    });
+
+    before('Start a fake Agora', () => {
+        return new Promise<void>((resolve, reject) => {
+            agora_server = new TestAgora("2826", [], resolve);
+        });
+    });
+
+    before('Create TestStoa', () => {
+        stoa_server = new TestStoa(new URL("http://127.0.0.1:2826"), port);
+        return stoa_server.createStorage();
+    });
+
+    before('Start TestStoa', () => {
+        return stoa_server.start();
+    });
+
+    after('Stop Stoa and Agora server instances', () => {
+        return stoa_server.stop().then(() => {
+            return agora_server.stop()
+        });
+    });
+
+    it ('Store two blocks', (doneIt: () => void) => {
+        let uri = URI(host)
+            .port(port)
+            .directory("block_externalized");
+
+        (async () => {
+            let url = uri.toString();
+            await client.post(url, {block: sample_data[0]});
+            await client.post(url, {block: sample_data[1]});
+            setTimeout(doneIt, 1000);
+        })();
+    });
+
+    it ('Test of the path /utxo no pending transaction ', () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("utxo")
+            .filename("GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ");
+
+        return client.get (uri.toString())
+            .then((response) =>
+            {
+                let expected = [
+                    {
+                        type: 0,
+                        utxo: '0xd9482016835acc6defdfd060216a5890e00cf8f0a79ab0b83d3385fc723cd45bfea66eb3587a684518ff1756951d38bf4f07abda96dcdea1c160a4f83e377c32',
+                        amount: '24400000000000',
+                        height: '1',
+                        time: 1577837400000,
+                        unlock_height: '2'
+                    }];
+                assert.deepStrictEqual(response.data, expected);
+            });
+    });
+
+    it ('Store one pending transaction', (doneIt: () => void) => {
+        let uri = URI(host)
+            .port(port)
+            .directory("transaction_received");
+
+        (async () => {
+            let url = uri.toString();
+            await client.post(url, { transaction: Block.reviver("", sample_data2).txs[0] })
+            setTimeout(doneIt, 100);
+        })();
+    });
+
+    it ('Test of the path /utxo with pending transaction ', () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("utxo")
+            .filename("GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ");
+
+        return client.get (uri.toString())
+            .then((response) =>
+            {
+                assert.strictEqual(response.data.length, 0);
+            });
+    });
+});
