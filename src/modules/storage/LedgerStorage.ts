@@ -1020,7 +1020,7 @@ export class LedgerStorage extends Storages
     public getUTXO (address: string): Promise<any[]>
     {
         // TODO We should apply the block's timestamp to this method when it is added
-        let sql =
+        let sql_utxo =
             `SELECT
                 O.utxo_key as utxo,
                 O.amount,
@@ -1037,7 +1037,30 @@ export class LedgerStorage extends Storages
                 AND O.used = 0;
             ORDER BY T.block_height, O.amount
             `;
-        return this.query(sql, [address]);
+
+        let sql_pending =
+            `SELECT
+                S.utxo_key as utxo
+            FROM
+                tx_outputs S
+                INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
+                INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
+            WHERE
+                S.address = ?;
+           `;
+
+        let result: any[];
+        return new Promise<any[]>((resolve, reject) => {
+            this.query(sql_utxo, [address])
+                .then((utxos: any[]) => {
+                    result = utxos;
+                    return this.query(sql_pending, [address]);
+                })
+                .then((pending: any[]) => {
+                    resolve(result.filter(n => pending.find(m => (Buffer.compare(n.utxo, m.utxo) === 0)) === undefined));
+                })
+                .catch(reject);
+        });
     }
 
     /**
