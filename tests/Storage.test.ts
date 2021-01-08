@@ -16,8 +16,6 @@ import { LedgerStorage } from '../src/modules/storage/LedgerStorage';
 import { Block, Hash, Height, DataPayload, PreImageInfo, SodiumHelper, Endian } from 'boa-sdk-ts';
 import { sample_data, sample_data2, sample_preImageInfo } from "./Utils";
 
-import * as fs from 'fs';
-
 describe ('Test ledger storage and inquiry function.', () =>
 {
     let ledger_storage: LedgerStorage;
@@ -177,8 +175,7 @@ describe ('Test ledger storage and inquiry function.', () =>
         let block: Block;
         before ('Save a block with transaction data payload', () =>
         {
-            let data: string = fs.readFileSync('tests/data/Block.2.sample1.json', 'utf-8');
-            block = Block.reviver("", JSON.parse(data));
+            block = Block.reviver("", sample_data2);
             return ledger_storage.putBlocks(block);
         });
 
