@@ -104,37 +104,35 @@ describe ('Test of Recovery', () =>
         return stoa_server.stop();
     });
 
-    it ('Test `getBlocksFrom`', async () =>
+    it ('Test `getBlocksFrom`', () =>
     {
         let agora_client = new AgoraClient(agora_addr);
 
-        await assert.doesNotReject(async () =>
-        {
-            await agora_client.getBlocksFrom(new Height(1n), 3)
-                .then((blocks) =>
+        return agora_client.getBlocksFrom(new Height(1n), 3)
+            .then((blocks) =>
+            {
+                // The number of blocks is three.
+                assert.strictEqual(blocks.length, 3);
+                let expected_height : Height = new Height(1n);
+                for (let block of blocks)
                 {
-                    // The number of blocks is three.
-                    assert.strictEqual(blocks.length, 3);
-                    let expected_height : Height = new Height(1n);
-                    for (let block of blocks)
-                    {
-                        // Make sure that the received block height is equal to the expected value.
-                        assert.deepEqual(block.header.height, expected_height);
-                        expected_height.value += 1n;
-                    }
-                })
-                .catch((error) =>
-                {
-                    assert.ok(false, error);
-                });
-        });
+                    // Make sure that the received block height is equal to the expected value.
+                    assert.deepEqual(block.header.height, expected_height);
+                    expected_height.value += 1n;
+                }
+            });
     });
 
-    it ('Test a `getBlocksFrom` using async, await', (doneIt: () => void) =>
+    it ('Test a `getBlocksFrom` using async, await', async () =>
     {
         let agora_client = new AgoraClient(agora_addr);
 
-        assert.doesNotThrow(async () =>
+        const blocks = await agora_client.getBlocksFrom(new Height(8n), 3);
+        // The number of blocks is two.
+        // Because the total number is 10. The last block height is 9.
+        assert.strictEqual(blocks.length, 2);
+        let expected_height : Height = new Height(8n);
+        for (let block of blocks)
         {
             const blocks = await agora_client.getBlocksFrom(new Height(8n), 3);
             // The number of blocks is two.
@@ -147,8 +145,7 @@ describe ('Test of Recovery', () =>
                 assert.deepEqual(block.header.height, expected_height);
                 expected_height.value += 1n;
             }
-            doneIt();
-        });
+        }
     });
 
     it ('Test for continuous write', (doneIt: () => void) =>
