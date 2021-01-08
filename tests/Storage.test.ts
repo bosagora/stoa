@@ -20,7 +20,7 @@ describe ('Test ledger storage and inquiry function.', () =>
 {
     let ledger_storage: LedgerStorage;
 
-    before('Wait for the package libsodium to finish loading', () =>
+    before ('Wait for the package libsodium to finish loading', () =>
     {
         return SodiumHelper.init();
     });

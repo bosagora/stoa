@@ -72,7 +72,7 @@ describe ('Test of Recovery', () =>
 
     let client = axios.create();
 
-    before('Wait for the package libsodium to finish loading', () =>
+    before ('Wait for the package libsodium to finish loading', () =>
     {
         return SodiumHelper.init();
     });

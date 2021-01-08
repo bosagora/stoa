@@ -28,14 +28,15 @@ describe ('Test of Stoa API for the wallet', () =>
     let agora_server: TestAgora;
     let client = axios.create();
 
-    before('Wait for the package libsodium to finish loading', () =>
+    before ('Wait for the package libsodium to finish loading', () =>
     {
         return SodiumHelper.init();
     });
 
     before ('Start a fake Agora', () =>
     {
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<void>((resolve, reject) =>
+        {
             agora_server = new TestAgora("2826", [], resolve);
         });
     });
@@ -249,39 +250,46 @@ describe ('Test of Stoa API for the wallet', () =>
     });
 });
 
-describe ('Test of Stoa API for the wallet with `sample_data`', () => {
+describe ('Test of Stoa API for the wallet with `sample_data`', () =>
+{
     let host: string = 'http://localhost';
     let port: string = '3837';
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     let client = axios.create();
 
-    before('Wait for the package libsodium to finish loading', () => {
+    before ('Wait for the package libsodium to finish loading', () =>
+    {
         return SodiumHelper.init();
     });
 
-    before('Start a fake Agora', () => {
+    before ('Start a fake Agora', () =>
+    {
         return new Promise<void>((resolve, reject) => {
             agora_server = new TestAgora("2826", [], resolve);
         });
     });
 
-    before('Create TestStoa', () => {
+    before ('Create TestStoa', () =>
+    {
         stoa_server = new TestStoa(new URL("http://127.0.0.1:2826"), port);
         return stoa_server.createStorage();
     });
 
-    before('Start TestStoa', () => {
+    before ('Start TestStoa', () =>
+    {
         return stoa_server.start();
     });
 
-    after('Stop Stoa and Agora server instances', () => {
+    after ('Stop Stoa and Agora server instances', () =>
+    {
         return stoa_server.stop().then(() => {
             return agora_server.stop()
         });
     });
 
-    it('Store blocks', (doneIt: () => void) => {
+    it ('Store blocks', (doneIt: () => void) =>
+    {
         let uri = URI(host)
             .port(port)
             .directory("block_externalized");
@@ -295,7 +303,8 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
         })();
     });
 
-    it('Test of the path /wallet/transaction/overview with payload', () => {
+    it ('Test of the path /wallet/transaction/overview with payload', () =>
+    {
         let uri = URI(host)
             .port(port)
             .directory("/wallet/transaction/overview")

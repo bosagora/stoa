@@ -36,7 +36,7 @@ describe ('Test of Stoa API Server', () =>
     let agora_server: TestAgora;
     let client = axios.create();
 
-    before('Wait for the package libsodium to finish loading', () =>
+    before ('Wait for the package libsodium to finish loading', () =>
     {
         return SodiumHelper.init();
     });
@@ -107,7 +107,7 @@ describe ('Test of Stoa API Server', () =>
                 assert.strictEqual(response.data[0].address,
                     "GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY");
                 assert.strictEqual(response.data[0].preimage.distance, null);
-            })
+            });
     });
 
     it ('Test of the path /validator - Wrong Height', () =>
@@ -345,33 +345,37 @@ describe ('Test of the path /utxo', () =>
     let agora_server: TestAgora;
     let client = axios.create();
 
-    before('Wait for the package libsodium to finish loading', () =>
+    before ('Wait for the package libsodium to finish loading', () =>
     {
         return SodiumHelper.init();
     });
 
-    before('Start a fake Agora', () => {
+    before ('Start a fake Agora', () =>
+    {
         return new Promise<void>((resolve, reject) => {
             agora_server = new TestAgora("2826", [], resolve);
         });
     });
 
-    before('Create TestStoa', () => {
+    before ('Create TestStoa', () =>
+    {
         stoa_server = new TestStoa(new URL("http://127.0.0.1:2826"), port);
         return stoa_server.createStorage();
     });
 
-    before('Start TestStoa', () => {
+    before ('Start TestStoa', () =>
+    {
         return stoa_server.start();
     });
 
     after('Stop Stoa and Agora server instances', () => {
         return stoa_server.stop().then(() => {
-            return agora_server.stop()
+            return agora_server.stop();
         });
     });
 
-    it ('Store two blocks', (doneIt: () => void) => {
+    it ('Store two blocks', (doneIt: () => void) =>
+    {
         let uri = URI(host)
             .port(port)
             .directory("block_externalized");
@@ -407,14 +411,15 @@ describe ('Test of the path /utxo', () =>
             });
     });
 
-    it ('Store one pending transaction', (doneIt: () => void) => {
+    it ('Store one pending transaction', (doneIt: () => void) =>
+    {
         let uri = URI(host)
             .port(port)
-            .directory("transaction_received");
+            .filename("transaction_received");
 
         (async () => {
             let url = uri.toString();
-            await client.post(url, { transaction: Block.reviver("", sample_data2).txs[0] })
+            await client.post(url, { transaction: Block.reviver("", sample_data2).txs[0] });
             setTimeout(doneIt, 100);
         })();
     });
