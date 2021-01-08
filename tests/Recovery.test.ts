@@ -117,7 +117,7 @@ describe ('Test of Recovery', () =>
                 for (let block of blocks)
                 {
                     // Make sure that the received block height is equal to the expected value.
-                    assert.deepEqual(block.header.height, expected_height);
+                    assert.deepStrictEqual(block.header.height, expected_height);
                     expected_height.value += 1n;
                 }
             });
@@ -142,7 +142,7 @@ describe ('Test of Recovery', () =>
             for (let block of blocks)
             {
                 // Make sure that the received block height is equal to the expected value.
-                assert.deepEqual(block.header.height, expected_height);
+                assert.deepStrictEqual(block.header.height, expected_height);
                 expected_height.value += 1n;
             }
         }
