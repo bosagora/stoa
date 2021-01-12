@@ -72,9 +72,9 @@ describe ('Test of Recovery', () =>
 
     let client = axios.create();
 
-    before('Wait for the package libsodium to finish loading', () =>
+    before('Wait for the package libsodium to finish loading', async () =>
     {
-        return SodiumHelper.init();
+        await SodiumHelper.init();
     });
 
     // Changed test agora to run only once.
@@ -83,72 +83,41 @@ describe ('Test of Recovery', () =>
         agora_node = new TestAgora(agora_addr.port, recovery_sample_data, doneIt);
     });
 
-    after ('Stop TestAgora', () =>
+    after ('Stop TestAgora', async () =>
     {
-        return agora_node.stop();
+        await agora_node.stop();
     });
 
-    beforeEach ('Create TestStoa', () =>
+    beforeEach ('Create TestStoa', async () =>
     {
         stoa_server = new TestRecoveryStoa(agora_addr, stoa_addr.port);
-        return stoa_server.createStorage();
+        await stoa_server.createStorage();
     });
 
-    beforeEach ('Start TestStoa', () =>
+    beforeEach ('Start TestStoa', async () =>
     {
-        return stoa_server.start();
+        await stoa_server.start();
     });
 
-    afterEach ('Stop TestStoa', () =>
+    afterEach ('Stop TestStoa', async () =>
     {
-        return stoa_server.stop();
+        await stoa_server.stop();
     });
 
     it ('Test `getBlocksFrom`', async () =>
     {
         let agora_client = new AgoraClient(agora_addr);
 
-        await assert.doesNotReject(async () =>
+        let blocks: Array<Block> = await agora_client.getBlocksFrom(new Height(1n), 3);
+        // The number of blocks is three.
+        assert.strictEqual(blocks.length, 3);
+        let expected_height : Height = new Height(1n);
+        for (let block of blocks)
         {
-            await agora_client.getBlocksFrom(new Height(1n), 3)
-                .then((blocks) =>
-                {
-                    // The number of blocks is three.
-                    assert.strictEqual(blocks.length, 3);
-                    let expected_height : Height = new Height(1n);
-                    for (let block of blocks)
-                    {
-                        // Make sure that the received block height is equal to the expected value.
-                        assert.deepEqual(block.header.height, expected_height);
-                        expected_height.value += 1n;
-                    }
-                })
-                .catch((error) =>
-                {
-                    assert.ok(false, error);
-                });
-        });
-    });
-
-    it ('Test a `getBlocksFrom` using async, await', (doneIt: () => void) =>
-    {
-        let agora_client = new AgoraClient(agora_addr);
-
-        assert.doesNotThrow(async () =>
-        {
-            const blocks = await agora_client.getBlocksFrom(new Height(8n), 3);
-            // The number of blocks is two.
-            // Because the total number is 10. The last block height is 9.
-            assert.strictEqual(blocks.length, 2);
-            let expected_height : Height = new Height(8n);
-            for (let block of blocks)
-            {
-                // Make sure that the received block height is equal to the expected value.
-                assert.deepEqual(block.header.height, expected_height);
-                expected_height.value += 1n;
-            }
-            doneIt();
-        });
+            // Make sure that the received block height is equal to the expected value.
+            assert.deepEqual(block.header.height, expected_height);
+            expected_height.value += 1n;
+        }
     });
 
     it ('Test for continuous write', async () =>
