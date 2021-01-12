@@ -15,7 +15,7 @@
 import { AgoraClient } from '../src/modules/agora/AgoraClient';
 import { Block, Height, SodiumHelper, Utils } from 'boa-sdk-ts';
 import { recovery_sample_data } from './RecoveryData.test';
-import { TestAgora, TestStoa } from './Utils'
+import { TestAgora, TestStoa, delay } from './Utils'
 
 import * as assert from 'assert';
 import axios from 'axios';
@@ -151,177 +151,117 @@ describe ('Test of Recovery', () =>
         });
     });
 
-    it ('Test for continuous write', (doneIt: () => void) =>
+    it ('Test for continuous write', async () =>
     {
-        (async () =>
+        const url = URI(stoa_addr).directory("block_externalized")
+            .toString();
+
+        await client.post(url, {block: recovery_sample_data[0]});
+        await client.post(url, {block: recovery_sample_data[1]});
+        await client.post(url, {block: recovery_sample_data[2]});
+        await client.post(url, {block: recovery_sample_data[3]});
+        await client.post(url, {block: recovery_sample_data[4]});
+
+        await delay(300);
+
+        // Verifies that all sent blocks are wrote
+        for (let idx = 0; idx <= 4; idx++)
         {
-            const url = URI(stoa_addr).directory("block_externalized")
-                .toString();
+            const uri = URI(stoa_addr)
+                .directory("block")
+                .addSearch("block_height", idx);
 
-            await client.post(url, {block: recovery_sample_data[0]});
-            await client.post(url, {block: recovery_sample_data[1]});
-            await client.post(url, {block: recovery_sample_data[2]});
-            await client.post(url, {block: recovery_sample_data[3]});
-            await client.post(url, {block: recovery_sample_data[4]});
-
-            setTimeout(async () =>
-            {
-                // Verifies that all sent blocks are wrote
-                for (let idx = 0; idx <= 4; idx++)
-                {
-                    const uri = URI(stoa_addr)
-                        .directory("block")
-                        .addSearch("block_height", idx);
-
-                    let response = await client.get(uri.toString());
-                    assert.strictEqual(response.status, 200);
-                    assert.strictEqual(response.data.height, idx);
-                }
-
-                doneIt();
-
-            }, 300);
-        })();
+            let response = await client.get(uri.toString());
+            assert.strictEqual(response.status, 200);
+            assert.strictEqual(response.data.height, idx);
+        }
     });
 
-    it ('Test for continuous recovery and write', (doneIt: () => void) =>
+    it ('Test for continuous recovery and write', async () =>
     {
-        (async () =>
+        let uri = URI(stoa_addr)
+            .directory("block_externalized");
+
+        let url = uri.toString();
+
+        await client.post(url, {block: recovery_sample_data[2]});
+        await client.post(url, {block: recovery_sample_data[4]});
+        await client.post(url, {block: recovery_sample_data[6]});
+        await client.post(url, {block: recovery_sample_data[8]});
+
+        await delay(300);
+
+        // Verifies that all sent blocks are wrote
+        for (let idx = 0; idx <= 8; idx++)
         {
             let uri = URI(stoa_addr)
-                .directory("block_externalized");
+                .directory("block")
+                .addSearch("block_height", idx);
 
-            let url = uri.toString();
-
-            await client.post(url, {block: recovery_sample_data[2]});
-
-            setTimeout(() =>
-            {
-                client.post(url, {block: recovery_sample_data[4]});
-            }, 15);
-
-            setTimeout(() =>
-            {
-                client.post(url, {block: recovery_sample_data[6]});
-            }, 30);
-
-            setTimeout(() =>
-            {
-                client.post(url, {block: recovery_sample_data[8]});
-            }, 45);
-
-            setTimeout(async () =>
-            {
-                // Verifies that all sent blocks are wrote
-                for (let idx = 0; idx <= 8; idx++)
-                {
-                    let uri = URI(stoa_addr)
-                        .directory("block")
-                        .addSearch("block_height", idx);
-
-                    let response = await client.get(uri.toString());
-                    assert.strictEqual(response.status, 200);
-                    assert.strictEqual(response.data.height, idx);
-                }
-
-                doneIt();
-
-            }, 800);
-        })();
+            let response = await client.get(uri.toString());
+            assert.strictEqual(response.status, 200);
+            assert.strictEqual(response.data.height, idx);
+        }
     });
 
-    it ('Test for ignoring already wrote block data', (doneIt: () => void) =>
+    it ('Test for ignoring already wrote block data', async () =>
     {
-        (async () =>
+        agora_node.delay = 100;
+
+        let uri = URI(stoa_addr)
+            .directory("block_externalized");
+
+        let url = uri.toString();
+
+        await client.post(url, {block: recovery_sample_data[0]});
+        await client.post(url, {block: recovery_sample_data[1]});
+        // Blocks 2 is recovered, Block 3 is saved
+        await client.post(url, {block: recovery_sample_data[3]});
+        await client.post(url, {block: recovery_sample_data[4]});
+
+        // Block 3 is ignored.
+        // If Block 3 was not ignored and attempted to write
+        // to the database, an error would occur.
+        await client.post(url, {block: recovery_sample_data[3]});
+        await delay(300);
+
+        // Verifies that all sent blocks are wrote
+        for (let idx = 0; idx <= 4; idx++)
         {
-            agora_node.delay = 100;
-
             let uri = URI(stoa_addr)
-                .directory("block_externalized");
+                .directory("block")
+                .addSearch("block_height", idx);
 
-            let url = uri.toString();
-
-            await client.post(url, {block: recovery_sample_data[0]});
-
-            // Delay to wait for data added to the pool to be processed.
-            setTimeout(() =>
-            {
-                client.post(url, {block: recovery_sample_data[1]});
-            }, 15);
-
-            // Blocks 2 is recovered, Block 3 is saved
-            setTimeout(() =>
-            {
-                client.post(url, {block: recovery_sample_data[3]});
-            }, 30);
-
-            // Make sure Block 4 arrives during the saving of Block 2, and 3.
-            // 100ms - 30ms < 100ms(agora_node.delay)
-            setTimeout(() =>
-            {
-                client.post(url, {block: recovery_sample_data[4]});
-            }, 100);
-
-            // Block 3 is ignored.
-            // If Block 3 was not ignored and attempted to write
-            // to the database, an error would occur.
-            setTimeout(() =>
-            {
-                client.post(url, {block: recovery_sample_data[3]});
-            }, 130);
-
-            setTimeout(async () =>
-            {
-                // Verifies that all sent blocks are wrote
-                for (let idx = 0; idx <= 4; idx++)
-                {
-                    let uri = URI(stoa_addr)
-                        .directory("block")
-                        .addSearch("block_height", idx);
-
-                    let response = await client.get(uri.toString());
-                    assert.strictEqual(response.status, 200);
-                    assert.strictEqual(response.data.height, idx);
-                }
-
-                doneIt();
-
-            }, 300);
-        })();
+            let response = await client.get(uri.toString());
+            assert.strictEqual(response.status, 200);
+            assert.strictEqual(response.data.height, idx);
+        }
     });
 
-    it ('Test recovery of more blocks than the maximum number of blocks that can be recovered at a time', (doneIt: () => void) =>
+    it ('Test recovery of more blocks than the maximum number of blocks that can be recovered at a time', async () =>
     {
-        (async () =>
+        stoa_server.max_count_on_recovery = 2;
+        agora_node.delay = 0;
+
+        let uri = URI(stoa_addr)
+            .directory("block_externalized");
+
+        let url = uri.toString();
+
+        await client.post(url, {block: recovery_sample_data[0]});
+        await client.post(url, {block: recovery_sample_data[9]});
+        await delay(300);
+
+        // Verifies that all sent blocks are wrote
+        for (let idx = 0; idx <= 9; idx++)
         {
-            stoa_server.max_count_on_recovery = 2;
-            agora_node.delay = 0;
-
             let uri = URI(stoa_addr)
-                .directory("block_externalized");
+                .directory("block")
+                .addSearch("block_height", idx);
 
-            let url = uri.toString();
-
-            await client.post(url, {block: recovery_sample_data[0]});
-            await client.post(url, {block: recovery_sample_data[9]});
-
-            setTimeout(async () =>
-            {
-                // Verifies that all sent blocks are wrote
-                for (let idx = 0; idx <= 9; idx++)
-                {
-                    let uri = URI(stoa_addr)
-                        .directory("block")
-                        .addSearch("block_height", idx);
-
-                    let response = await client.get(uri.toString());
-                    assert.strictEqual(response.status, 200);
-                    assert.strictEqual(response.data.height, idx);
-                }
-
-                doneIt();
-
-            }, 300);
-        })();
+            let response = await client.get(uri.toString());
+            assert.strictEqual(response.status, 200);
+            assert.strictEqual(response.data.height, idx);
+        }
     });
 });

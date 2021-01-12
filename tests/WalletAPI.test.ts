@@ -13,7 +13,7 @@
 
 import { SodiumHelper } from 'boa-sdk-ts';
 import { recovery_sample_data } from './RecoveryData.test';
-import { TestAgora, TestStoa, sample_data, sample_data2 } from './Utils';
+import { TestAgora, TestStoa, sample_data, sample_data2, delay } from './Utils';
 
 import * as assert from 'assert';
 import axios from 'axios';
@@ -56,18 +56,16 @@ describe ('Test of Stoa API for the wallet', () =>
         return stoa_server.stop().then(() => { return agora_server.stop() });
     });
 
-    it ('Store blocks', (doneIt: () => void) =>
+    it ('Store blocks', async () =>
     {
         let uri = URI(host)
             .port(port)
             .directory("block_externalized");
 
         let url = uri.toString();
-        (async () => {
-            for (let idx = 0; idx < 10; idx++)
-                await client.post(url, {block: recovery_sample_data[idx]});
-            setTimeout(doneIt, 1000);
-        })();
+        for (let idx = 0; idx < 10; idx++)
+            await client.post(url, {block: recovery_sample_data[idx]});
+        await delay(100);
     });
 
     it ('Test of the path /wallet/transactions/history', () =>
@@ -281,18 +279,17 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
         });
     });
 
-    it('Store blocks', (doneIt: () => void) => {
+    it('Store blocks', async () => {
         let uri = URI(host)
             .port(port)
             .directory("block_externalized");
 
         let url = uri.toString();
-        (async () => {
-            await client.post(url, {block: sample_data[0]});
-            await client.post(url, {block: sample_data[1]});
-            await client.post(url, {block: sample_data2});
-            setTimeout(doneIt, 1000);
-        })();
+
+        await client.post(url, {block: sample_data[0]});
+        await client.post(url, {block: sample_data[1]});
+        await client.post(url, {block: sample_data2});
+        await delay(100);
     });
 
     it('Test of the path /wallet/transaction/overview with payload', () => {
