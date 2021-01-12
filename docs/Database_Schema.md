@@ -15,6 +15,7 @@
 | signature         | BLOB      |    | Y        |          | Schnorr multisig of all validators which signed this block |
 | tx_count          | INTEGER   |    | Y        |          | The number of transactions in the block|
 | enrollment_count  | INTEGER   |    | Y        |          | The number of enrollments in the block|
+| time_stamp        | INTEGER   |    | Y        |          | Block unix timestamp |
 
 ### _Create Script_
 
@@ -28,6 +29,7 @@ CREATE TABLE IF NOT EXISTS "blocks" (
     "signature"             BLOB    NOT NULL,
     "tx_count"              INTEGER NOT NULL,
     "enrollment_count"      INTEGER NOT NULL,
+    "time_stamp"            INTEGER NOT NULL,
     PRIMARY KEY("height")
 )
 ```

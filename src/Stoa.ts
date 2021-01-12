@@ -117,8 +117,6 @@ class Stoa extends WebService
         // parse application/json
         this.app.use(bodyParser.json())
         this.app.use(cors(cors_options));
-        // enable pre-flight
-        this.app.options('*', cors(cors_options));
 
         // Prepare routes
         this.app.get("/block_height", this.getBlockHeight.bind(this));

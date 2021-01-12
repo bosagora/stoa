@@ -65,6 +65,7 @@ describe ('Test ledger storage and inquiry function.', () =>
                     assert.strictEqual(new Hash(rows[0].merkle_root, Endian.Little).toString(),
                         '0x85367aedf5cb99ca54510464fa6af150c836539c457229f6bad4c838ddf52fb' +
                         '3b793e256a1f258ba7810236c426645ad357abc265c5a3e1ed836250c23706dd4');
+                    assert.strictEqual(rows[0].time_stamp, 1596153600);
                 })
         });
     });
