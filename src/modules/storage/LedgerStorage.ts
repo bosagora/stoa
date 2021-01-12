@@ -68,6 +68,7 @@ export class LedgerStorage extends Storages
             signature           BLOB    NOT NULL,
             tx_count            INTEGER NOT NULL,
             enrollment_count    INTEGER NOT NULL,
+            time_stamp          INTEGER NOT NULL,
             PRIMARY KEY(height)
         );
 
@@ -194,9 +195,9 @@ export class LedgerStorage extends Storages
                 let block_hash = hashFull(block.header);
                 storage.query(
                     `INSERT INTO blocks
-                        (height, hash, prev_block, validators, merkle_root, signature, tx_count, enrollment_count)
+                        (height, hash, prev_block, validators, merkle_root, signature, tx_count, enrollment_count, time_stamp)
                     VALUES
-                        (?, ?, ?, ?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         block.header.height.toString(),
                         block_hash.toBinary(Endian.Little),
@@ -205,7 +206,8 @@ export class LedgerStorage extends Storages
                         block.header.merkle_root.toBinary(Endian.Little),
                         block.header.signature.toBinary(Endian.Little),
                         block.txs.length,
-                        block.header.enrollments.length
+                        block.header.enrollments.length,
+                        block.header.timestamp,
                     ]
                 )
                     .then(() =>
@@ -253,7 +255,7 @@ export class LedgerStorage extends Storages
     {
         let sql =
         `SELECT
-            height, hash, prev_block, validators, merkle_root, signature, tx_count, enrollment_count
+            height, hash, prev_block, validators, merkle_root, signature, tx_count, enrollment_count, time_stamp
         FROM
             blocks
         WHERE height = ?`;
@@ -1019,13 +1021,12 @@ export class LedgerStorage extends Storages
      */
     public getUTXO (address: string): Promise<any[]>
     {
-        // TODO We should apply the block's timestamp to this method when it is added
         let sql_utxo =
             `SELECT
                 O.utxo_key as utxo,
                 O.amount,
                 T.block_height,
-                STRFTIME('%s', '2020-01-01 00:00:00') * 1000 + T.block_height * 10 * 60000 as block_time,
+                B.time_stamp as block_time,
                 T.type,
                 T.unlock_height
             FROM
@@ -1081,10 +1082,9 @@ export class LedgerStorage extends Storages
     public getWalletTransactionsHistory (address: string, page_size: number, page: number,
         type: Array<number>, begin?: number, end?: number, peer?: string) : Promise<any[]>
     {
-        // TODO We should apply the block's timestamp to this method when it is added
         let filter_type = 'AND FTX.display_tx_type in (' + type.map(n =>`${n}`).join(',') + ')'
         let filter_date = ((begin !== undefined) && (end !== undefined))
-            ? `AND (STRFTIME('%s', '2020-01-01 00:00:00') * 1000 + T.block_height * 10 * 60000) BETWEEN ${begin} AND ${end}`
+            ? `AND B.time_stamp BETWEEN ${begin} AND ${end}`
             : ``;
         let filter_peer_field;
         let filter_peer_condition;
@@ -1130,11 +1130,11 @@ export class LedgerStorage extends Storages
                 SELECT
                     TX.address,
                     TX.block_height as height,
-                    STRFTIME('%s', '2020-01-01 00:00:00') * 1000 + TX.block_height * 10 * 60000 as block_time,
+                    TX.time_stamp as block_time,
                     TX.tx_hash,
                     TX.type,
                     TX.unlock_height,
-                    STRFTIME('%s', '2020-01-01 00:00:00') * 1000 + TX.unlock_height * 10 * 60000 as unlock_time,
+                    (TX.time_stamp + (TX.unlock_height - TX.block_height) * 10 * 60) as unlock_time,
                     (SUM(TX.income) - SUM(TX.spend)) as amount,
                     IFNULL(CASE
                         WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
@@ -1172,6 +1172,7 @@ export class LedgerStorage extends Storages
                     SELECT
                         S.address,
                         T.block_height,
+                        B.time_stamp,
                         T.tx_hash,
                         T.tx_index,
                         T.type,
@@ -1194,6 +1195,7 @@ export class LedgerStorage extends Storages
                     SELECT
                         O.address,
                         T.block_height,
+                        B.time_stamp,
                         T.tx_hash,
                         T.tx_index,
                         T.type,
@@ -1228,15 +1230,14 @@ export class LedgerStorage extends Storages
     {
         let hash = new Hash(tx_hash).toBinary(Endian.Little);
 
-        // TODO We should apply the block's timestamp to this method when it is added
         let sql_tx =
             `SELECT
                 T.block_height as height,
-                STRFTIME('%s', '2020-01-01 00:00:00') * 1000 + T.block_height * 10 * 60000 as block_time,
+                B.time_stamp as block_time,
                 T.tx_hash,
                 T.type,
                 T.unlock_height,
-                STRFTIME('%s', '2020-01-01 00:00:00') * 1000 + T.unlock_height * 10 * 60000 as unlock_time,
+                (B.time_stamp + (T.unlock_height - T.block_height) * 10 * 60) as unlock_time,
                 P.payload
             FROM
                 blocks B

@@ -238,7 +238,7 @@ describe ('Test of Stoa API Server', () =>
             const enrollment = new Enrollment(utxo_key, random_seed, 20, enroll_sig);
             const header = new BlockHeader(
                 new Hash(Buffer.alloc(Hash.Width)), new Height(19n), new Hash(Buffer.alloc(Hash.Width)), new BitField([]),
-                new Signature(Buffer.alloc(Signature.Width)), [ enrollment ], new Hash(Buffer.alloc(Hash.Width)), []);
+                new Signature(Buffer.alloc(Signature.Width)), [ enrollment ], new Hash(Buffer.alloc(Hash.Width)), [], 0);
             const block = new Block(header, [], []);
 
             // put the re-enrollment
@@ -432,7 +432,7 @@ describe ('Test of the path /utxo', () =>
                         utxo: '0xd9482016835acc6defdfd060216a5890e00cf8f0a79ab0b83d3385fc723cd45bfea66eb3587a684518ff1756951d38bf4f07abda96dcdea1c160a4f83e377c32',
                         amount: '24400000000000',
                         height: '1',
-                        time: 1577837400000,
+                        time: 1596753600,
                         unlock_height: '2'
                     }];
                 assert.deepStrictEqual(response.data, expected);
