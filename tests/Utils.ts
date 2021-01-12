@@ -229,3 +229,10 @@ export class TestStoa extends Stoa
         });
     }
 }
+
+export function delay (interval: number): Promise<void>
+{
+    return new Promise<void>((resolve, reject) => {
+        setTimeout(resolve, interval);
+    });
+}

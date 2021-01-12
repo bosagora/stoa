@@ -21,6 +21,7 @@ import {
     sample_reEnroll_preImageInfo,
     TestAgora,
     TestStoa,
+    delay
 } from './Utils';
 
 import * as assert from 'assert';
@@ -64,22 +65,17 @@ describe ('Test of Stoa API Server', () =>
         return stoa_server.stop().then(() => { return agora_server.stop() });
     });
 
-    it ('Test of the path /block_externalized', (doneIt: () => void) =>
+    it ('Test of the path /block_externalized', async () =>
     {
         let uri = URI(host)
             .port(port)
             .directory("block_externalized");
 
         let url = uri.toString();
-        assert.doesNotThrow(async () =>
-        {
-            await client.post(url, {block: sample_data[0]});
-            await client.post(url, {block: sample_data[1]});
-            setTimeout(() =>
-            {
-                doneIt();
-            }, 100);
-        });
+        await client.post(url, {block: sample_data[0]});
+        await client.post(url, {block: sample_data[1]});
+        // Wait for the block to be stored in the database for the next test.
+        await delay(100);
     });
 
     it ('Test of the path /block_height', (doneIt: () => void) =>
@@ -324,23 +320,16 @@ describe ('Test of Stoa API Server', () =>
 
     });
 
-    it ('Test of the path /transaction_received', (doneIt: () => void) =>
+    it ('Test of the path /transaction_received', async () =>
     {
         let uri = URI(host)
             .port(port)
             .directory("transaction_received");
 
         let url = uri.toString();
-        assert.doesNotThrow(async () =>
-        {
-            const block = Block.reviver("", sample_data2);
-            await client.post(url, {transaction: block.txs[0]})
-
-            setTimeout(() =>
-            {
-                doneIt();
-            }, 100);
-        });
+        const block = Block.reviver("", sample_data2);
+        await client.post(url, {transaction: block.txs[0]})
+        await delay(100);
     });
 
     it ('Test of the path /pending_transactions/:address', (doneIt: () => void) =>
@@ -403,17 +392,17 @@ describe ('Test of the path /utxo', () =>
         });
     });
 
-    it ('Store two blocks', (doneIt: () => void) => {
+    it ('Store two blocks', async () =>
+    {
         let uri = URI(host)
             .port(port)
             .directory("block_externalized");
 
-        (async () => {
-            let url = uri.toString();
-            await client.post(url, {block: sample_data[0]});
-            await client.post(url, {block: sample_data[1]});
-            setTimeout(doneIt, 1000);
-        })();
+        let url = uri.toString();
+        await client.post(url, {block: sample_data[0]});
+        await client.post(url, {block: sample_data[1]});
+        // Wait for the block to be stored in the database for the next test.
+        await delay(100);
     });
 
     it ('Test of the path /utxo no pending transaction ', () =>
@@ -439,16 +428,14 @@ describe ('Test of the path /utxo', () =>
             });
     });
 
-    it ('Store one pending transaction', (doneIt: () => void) => {
+    it ('Store one pending transaction', async () => {
         let uri = URI(host)
             .port(port)
             .directory("transaction_received");
 
-        (async () => {
-            let url = uri.toString();
-            await client.post(url, { transaction: Block.reviver("", sample_data2).txs[0] })
-            setTimeout(doneIt, 100);
-        })();
+        let url = uri.toString();
+        await client.post(url, { transaction: Block.reviver("", sample_data2).txs[0] })
+        await delay(100);
     });
 
     it ('Test of the path /utxo with pending transaction ', () =>
