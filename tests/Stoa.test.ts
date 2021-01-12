@@ -37,9 +37,9 @@ describe ('Test of Stoa API Server', () =>
     let agora_server: TestAgora;
     let client = axios.create();
 
-    before('Wait for the package libsodium to finish loading', () =>
+    before ('Wait for the package libsodium to finish loading', async () =>
     {
-        return SodiumHelper.init();
+        await SodiumHelper.init();
     });
 
     before ('Start a fake Agora', () =>
@@ -49,20 +49,21 @@ describe ('Test of Stoa API Server', () =>
         });
     });
 
-    before ('Create TestStoa', () =>
+    before ('Create TestStoa', async () =>
     {
         stoa_server = new TestStoa(new URL("http://127.0.0.1:2826"), port);
-        return stoa_server.createStorage();
+        await stoa_server.createStorage();
     });
 
-    before ('Start TestStoa', () =>
+    before ('Start TestStoa', async () =>
     {
-        return stoa_server.start();
+        await stoa_server.start();
     });
 
-    after ('Stop Stoa and Agora server instances', () =>
+    after ('Stop Stoa and Agora server instances', async () =>
     {
-        return stoa_server.stop().then(() => { return agora_server.stop() });
+        await stoa_server.stop();
+        await agora_server.stop();
     });
 
     it ('Test of the path /block_externalized', async () =>
@@ -78,48 +79,32 @@ describe ('Test of Stoa API Server', () =>
         await delay(100);
     });
 
-    it ('Test of the path /block_height', (doneIt: () => void) =>
+    it ('Test of the path /block_height', async () =>
     {
         let uri = URI(host)
             .port(port)
             .filename("block_height");
 
         let url = uri.toString();
-        client.get (url)
-            .then((response) =>
-            {
-                assert.strictEqual(response.data, '1');
-            })
-            .catch((error) =>
-            {
-                assert.ok(!error, error);
-            })
-            .finally(doneIt);
+        let response = await client.get (url);
+        assert.strictEqual(response.data, '1');
     });
 
-    it ('Test of the path /validators', (doneIt: () => void) =>
+    it ('Test of the path /validators', async () =>
     {
         let uri = URI(host)
             .port(port)
             .directory("validators")
             .setSearch("height", "10");
 
-        client.get (uri.toString())
-            .then((response) =>
-            {
-                assert.strictEqual(response.data.length, 6);
-                assert.strictEqual(response.data[0].address,
-                    "GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY");
-                assert.strictEqual(response.data[0].preimage.distance, null);
-            })
-            .catch((error) =>
-            {
-                assert.ok(!error, error);
-            })
-            .finally(doneIt);
+        let response = await client.get (uri.toString());
+        assert.strictEqual(response.data.length, 6);
+        assert.strictEqual(response.data[0].address,
+            "GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY");
+        assert.strictEqual(response.data[0].preimage.distance, null);
     });
 
-    it ('Test of the path /validator', (doneIt: () => void) =>
+    it ('Test of the path /validator', async () =>
     {
         let uri = URI(host)
             .port(port)
@@ -133,43 +118,29 @@ describe ('Test of Stoa API Server', () =>
             .filename("GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY")
             .setSearch("height", "99");
 
-        (async () =>
-        {
-            await assert.rejects(
-                client.get(fail_uri.toString()),
-                {message: "Request failed with status code 400"}
-            )
-        })();
+        await assert.rejects(
+            client.get(fail_uri.toString()),
+            {message: "Request failed with status code 400"}
+        );
 
-        client.get (uri.toString())
-            .then((response) =>
-            {
-                assert.strictEqual(response.data.length, 1);
-                assert.strictEqual(response.data[0].address,
-                    "GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY");
-                assert.strictEqual(response.data[0].preimage.distance, null);
-            })
-            .catch((error) =>
-            {
-                assert.ok(!error, error);
-            })
-            .finally(doneIt);
+        let response = await client.get (uri.toString());
+        assert.strictEqual(response.data.length, 1);
+        assert.strictEqual(response.data[0].address,
+            "GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY");
+        assert.strictEqual(response.data[0].preimage.distance, null);
     });
 
-    it ('Tests that sending a pre-image with get /validator and /validators', (doneIt: () => void) =>
+    it ('Tests that sending a pre-image with get /validator and /validators', async () =>
     {
-        (async () =>
-        {
-            let uri = URI(host)
-                .port(port)
-                .directory("preimage_received");
-            let response = await client.post (uri.toString(), { preimage: sample_preImageInfo });
-            assert.strictEqual(response.status, 200);
-        })();
+        let uri = URI(host)
+            .port(port)
+            .directory("preimage_received");
+        let response1 = await client.post (uri.toString(), { preimage: sample_preImageInfo });
+        assert.strictEqual(response1.status, 200);
+
+        await delay(200);
 
         // Wait for the data added to the pool to be processed.
-        setTimeout(async () =>
-        {
             let uri1 = URI(host)
             .port(port)
             .directory("validator")
@@ -283,9 +254,6 @@ describe ('Test of Stoa API Server', () =>
                 {message: "Request failed with status code 400"}
             );
 
-            doneIt();
-        }, 200);
-
         /**
          * To do
          * The preimage_reserved service requires improvement and modification.
@@ -366,9 +334,9 @@ describe ('Test of the path /utxo', () =>
     let agora_server: TestAgora;
     let client = axios.create();
 
-    before('Wait for the package libsodium to finish loading', () =>
+    before ('Wait for the package libsodium to finish loading', async () =>
     {
-        return SodiumHelper.init();
+        await SodiumHelper.init();
     });
 
     before('Start a fake Agora', () => {
@@ -377,19 +345,20 @@ describe ('Test of the path /utxo', () =>
         });
     });
 
-    before('Create TestStoa', () => {
+    before ('Create TestStoa', async () =>
+    {
         stoa_server = new TestStoa(new URL("http://127.0.0.1:2826"), port);
-        return stoa_server.createStorage();
+        await stoa_server.createStorage();
     });
 
-    before('Start TestStoa', () => {
-        return stoa_server.start();
+    before ('Start TestStoa', async () =>
+    {
+        await stoa_server.start();
     });
 
-    after('Stop Stoa and Agora server instances', () => {
-        return stoa_server.stop().then(() => {
-            return agora_server.stop()
-        });
+    after('Stop Stoa and Agora server instances', async () => {
+        await stoa_server.stop();
+        await agora_server.stop();
     });
 
     it ('Store two blocks', async () =>
@@ -405,50 +374,45 @@ describe ('Test of the path /utxo', () =>
         await delay(100);
     });
 
-    it ('Test of the path /utxo no pending transaction ', () =>
+    it ('Test of the path /utxo no pending transaction ', async () =>
     {
         let uri = URI(host)
             .port(port)
             .directory("utxo")
             .filename("GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ");
 
-        return client.get (uri.toString())
-            .then((response) =>
+        let response = await client.get (uri.toString());
+        let expected = [
             {
-                let expected = [
-                    {
-                        type: 0,
-                        utxo: '0xd9482016835acc6defdfd060216a5890e00cf8f0a79ab0b83d3385fc723cd45bfea66eb3587a684518ff1756951d38bf4f07abda96dcdea1c160a4f83e377c32',
-                        amount: '24400000000000',
-                        height: '1',
-                        time: 1596753600,
-                        unlock_height: '2'
-                    }];
-                assert.deepStrictEqual(response.data, expected);
-            });
+                type: 0,
+                utxo: '0xd9482016835acc6defdfd060216a5890e00cf8f0a79ab0b83d3385fc723cd45bfea66eb3587a684518ff1756951d38bf4f07abda96dcdea1c160a4f83e377c32',
+                amount: '24400000000000',
+                height: '1',
+                time: 1596753600,
+                unlock_height: '2'
+            }];
+        assert.deepStrictEqual(response.data, expected);
     });
 
-    it ('Store one pending transaction', async () => {
+    it ('Store one pending transaction', async () =>
+    {
         let uri = URI(host)
             .port(port)
             .directory("transaction_received");
 
         let url = uri.toString();
-        await client.post(url, { transaction: Block.reviver("", sample_data2).txs[0] })
+        await client.post(url, { transaction: Block.reviver("", sample_data2).txs[0] });
         await delay(100);
     });
 
-    it ('Test of the path /utxo with pending transaction ', () =>
+    it ('Test of the path /utxo with pending transaction ', async () =>
     {
         let uri = URI(host)
             .port(port)
             .directory("utxo")
             .filename("GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ");
 
-        return client.get (uri.toString())
-            .then((response) =>
-            {
-                assert.strictEqual(response.data.length, 0);
-            });
+        let response = await client.get (uri.toString());
+        assert.strictEqual(response.data.length, 0);
     });
 });
