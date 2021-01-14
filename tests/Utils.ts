@@ -17,8 +17,9 @@ import * as http from 'http';
 import { URL } from 'url';
 
 import Stoa from '../src/Stoa';
+import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from "axios";
 import { FullNodeAPI } from '../src/modules/agora/AgoraClient';
-import { Block, Hash, Height, PreImageInfo } from 'boa-sdk-ts';
+import { Block, Hash, Height, PreImageInfo, NetworkError, NotFoundError, BadRequestError } from 'boa-sdk-ts';
 
 export const sample_data_raw = (() => {
     return [
@@ -233,6 +234,122 @@ export class TestStoa extends Stoa
             else
                 resolve();
         });
+    }
+}
+
+/**
+ * This is a client for testing.
+ * Test codes can easily access error messages received from the server.
+ */
+export class TestClient
+{
+    private client: AxiosInstance;
+
+    constructor ()
+    {
+        this.client = axios.create();
+    }
+
+    public get (url: string, config?: AxiosRequestConfig): Promise<AxiosResponse>
+    {
+        return new Promise<AxiosResponse>((resolve, reject) =>
+        {
+            this.client.get(url, config)
+                .then((response: AxiosResponse) =>
+                {
+                    resolve(response);
+                })
+                .catch((reason: any) =>
+                {
+                    reject(this.handleNetworkError(reason));
+                });
+        });
+    }
+
+    public delete (url: string, config?: AxiosRequestConfig): Promise<AxiosResponse>
+    {
+        return new Promise<AxiosResponse>((resolve, reject) =>
+        {
+            this.client.delete(url, config)
+                .then((response: AxiosResponse) =>
+                {
+                    resolve(response);
+                })
+                .catch((reason: any) =>
+                {
+                    reject(this.handleNetworkError(reason));
+                });
+        });
+    }
+
+    public post (url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse>
+    {
+        return new Promise<AxiosResponse>((resolve, reject) =>
+        {
+            this.client.post(url, data, config)
+                .then((response: AxiosResponse) =>
+                {
+                    resolve(response);
+                })
+                .catch((reason: any) =>
+                {
+                    reject(this.handleNetworkError(reason));
+                });
+        });
+    }
+
+    public put (url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse>
+    {
+        return new Promise<AxiosResponse>((resolve, reject) =>
+        {
+            this.client.put(url, data, config)
+                .then((response: AxiosResponse) =>
+                {
+                    resolve(response);
+                })
+                .catch((reason: any) =>
+                {
+                    reject(this.handleNetworkError(reason));
+                });
+        });
+    }
+
+    private handleNetworkError (error: any): Error
+    {
+        if (error.response && error.response.status && error.response.statusText)
+        {
+            let statusMessage: string;
+            if (error.response.data !== undefined)
+            {
+                if (typeof error.response.data === "string")
+                    statusMessage = error.response.data;
+                else if ((typeof error.response.data === "object") && (error.response.data.statusMessage !== undefined))
+                    statusMessage = error.response.data.statusMessage;
+                else if ((typeof error.response.data === "object") && (error.response.data.errorMessage !== undefined))
+                    statusMessage = error.response.data.errorMessage;
+                else
+                    statusMessage = error.response.data.toString();
+            }
+            else
+                statusMessage = '';
+
+            switch (error.response.status)
+            {
+                case 400:
+                    return new BadRequestError(error.response.status, error.response.statusText, statusMessage);
+                case 404:
+                    return new NotFoundError(error.response.status, error.response.statusText, statusMessage);
+                default:
+                    return new NetworkError(error.response.status, error.response.statusText, statusMessage);
+            }
+        }
+        else
+        {
+            if (error.message !== undefined)
+                return new Error(error.message);
+            else
+                return new Error("An unknown error has occurred.");
+        }
     }
 }
 

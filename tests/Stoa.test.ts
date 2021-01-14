@@ -21,11 +21,11 @@ import {
     sample_reEnroll_preImageInfo,
     TestAgora,
     TestStoa,
+    TestClient,
     delay
 } from './Utils';
 
 import * as assert from 'assert';
-import axios from 'axios';
 import URI from 'urijs';
 import { URL } from 'url';
 
@@ -35,7 +35,7 @@ describe ('Test of Stoa API Server', () =>
     let port: string = '3837';
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
-    let client = axios.create();
+    let client = new TestClient();
 
     before ('Wait for the package libsodium to finish loading', async () =>
     {
@@ -120,7 +120,7 @@ describe ('Test of Stoa API Server', () =>
 
         await assert.rejects(
             client.get(fail_uri.toString()),
-            {message: "Request failed with status code 400"}
+            {statusMessage: "The validator data not found.'address': (GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY), 'height': (99)"}
         );
 
         let response = await client.get (uri.toString());
@@ -257,7 +257,7 @@ describe ('Test of Stoa API Server', () =>
 
             await assert.rejects(
                 client.get(uri9.toString()),
-                {message: "Request failed with status code 400"}
+                {statusMessage: "No validator exists for block height."}
             );
 
         /**
@@ -402,7 +402,7 @@ describe ('Test of the path /utxo', () =>
     let port: string = '3837';
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
-    let client = axios.create();
+    let client = new TestClient();
 
     before ('Wait for the package libsodium to finish loading', async () =>
     {

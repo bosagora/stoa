@@ -14,10 +14,9 @@
 
 import { AgoraClient } from '../src/modules/agora/AgoraClient';
 import { Block, Height, SodiumHelper, Utils } from 'boa-sdk-ts';
-import { TestAgora, TestStoa, delay, recovery_sample_data } from './Utils'
+import { TestAgora, TestStoa, TestClient, delay, recovery_sample_data } from './Utils'
 
 import * as assert from 'assert';
-import axios from 'axios';
 import express from 'express';
 import URI from 'urijs';
 import { URL } from 'url';
@@ -69,7 +68,7 @@ describe ('Test of Recovery', () =>
     let agora_node: TestAgora;
     let stoa_server: TestRecoveryStoa;
 
-    let client = axios.create();
+    let client = new TestClient();
 
     before('Wait for the package libsodium to finish loading', async () =>
     {

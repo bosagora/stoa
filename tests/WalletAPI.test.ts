@@ -12,10 +12,9 @@
 *******************************************************************************/
 
 import { SodiumHelper } from 'boa-sdk-ts';
-import { TestAgora, TestStoa, sample_data, sample_data2, recovery_sample_data, delay } from './Utils';
+import { TestAgora, TestStoa, TestClient, sample_data, sample_data2, recovery_sample_data, delay } from './Utils';
 
 import * as assert from 'assert';
-import axios from 'axios';
 import URI from 'urijs';
 import { URL } from 'url';
 
@@ -25,7 +24,7 @@ describe ('Test of Stoa API for the wallet', () =>
     let port: string = '3837';
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
-    let client = axios.create();
+    let client = new TestClient();
 
     before('Wait for the package libsodium to finish loading', async () =>
     {
@@ -139,16 +138,10 @@ describe ('Test of Stoa API for the wallet', () =>
             .setSearch("page", "1")
             .setSearch("type", "in,out");
 
-        let error_message;
-        try
-        {
-            await client.get (uri.toString())
-        }
-        catch (error)
-        {
-            error_message = error.response.data;
-        }
-        assert.strictEqual(error_message, "Invalid transaction type: in,out");
+        await assert.rejects(client.get (uri.toString()),
+            {
+                statusMessage: "Invalid transaction type: in,out"
+            });
     });
 
     it ('Test of the path /wallet/transactions/history - Filtering - TransactionType', async () =>
@@ -236,7 +229,7 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
     let port: string = '3837';
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
-    let client = axios.create();
+    let client = new TestClient();
 
     before('Wait for the package libsodium to finish loading', async () => {
         await SodiumHelper.init();
