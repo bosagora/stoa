@@ -19,7 +19,7 @@ import { URL } from 'url';
 import Stoa from '../src/Stoa';
 import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from "axios";
 import { FullNodeAPI } from '../src/modules/agora/AgoraClient';
-import { Block, Hash, Height, PreImageInfo, NetworkError, NotFoundError, BadRequestError } from 'boa-sdk-ts';
+import { Block, Hash, Height, PreImageInfo, handleNetworkError } from 'boa-sdk-ts';
 
 export const sample_data_raw = (() => {
     return [
@@ -261,7 +261,7 @@ export class TestClient
                 })
                 .catch((reason: any) =>
                 {
-                    reject(this.handleNetworkError(reason));
+                    reject(handleNetworkError(reason));
                 });
         });
     }
@@ -277,7 +277,7 @@ export class TestClient
                 })
                 .catch((reason: any) =>
                 {
-                    reject(this.handleNetworkError(reason));
+                    reject(handleNetworkError(reason));
                 });
         });
     }
@@ -293,7 +293,7 @@ export class TestClient
                 })
                 .catch((reason: any) =>
                 {
-                    reject(this.handleNetworkError(reason));
+                    reject(handleNetworkError(reason));
                 });
         });
     }
@@ -309,47 +309,9 @@ export class TestClient
                 })
                 .catch((reason: any) =>
                 {
-                    reject(this.handleNetworkError(reason));
+                    reject(handleNetworkError(reason));
                 });
         });
-    }
-
-    private handleNetworkError (error: any): Error
-    {
-        if (error.response && error.response.status && error.response.statusText)
-        {
-            let statusMessage: string;
-            if (error.response.data !== undefined)
-            {
-                if (typeof error.response.data === "string")
-                    statusMessage = error.response.data;
-                else if ((typeof error.response.data === "object") && (error.response.data.statusMessage !== undefined))
-                    statusMessage = error.response.data.statusMessage;
-                else if ((typeof error.response.data === "object") && (error.response.data.errorMessage !== undefined))
-                    statusMessage = error.response.data.errorMessage;
-                else
-                    statusMessage = error.response.data.toString();
-            }
-            else
-                statusMessage = '';
-
-            switch (error.response.status)
-            {
-                case 400:
-                    return new BadRequestError(error.response.status, error.response.statusText, statusMessage);
-                case 404:
-                    return new NotFoundError(error.response.status, error.response.statusText, statusMessage);
-                default:
-                    return new NetworkError(error.response.status, error.response.statusText, statusMessage);
-            }
-        }
-        else
-        {
-            if (error.message !== undefined)
-                return new Error(error.message);
-            else
-                return new Error("An unknown error has occurred.");
-        }
     }
 }
 

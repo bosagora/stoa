@@ -11,9 +11,9 @@
 
 *******************************************************************************/
 
-import { Block, Hash, Height, PreImageInfo } from 'boa-sdk-ts';
+import { Block, Hash, Height, PreImageInfo, handleNetworkError } from 'boa-sdk-ts';
 
-import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import URI from 'urijs';
 import { URL } from 'url';
 
@@ -95,13 +95,9 @@ export class AgoraClient implements FullNodeAPI
                 .then((response: AxiosResponse) =>
                 {
                     if (response.status == 200)
-                    {
                         resolve(response.data.map((entry: any) => Block.reviver("", entry)));
-                    }
                     else
-                    {
-                        reject(new Error(response.statusText));
-                    }
+                        reject(handleNetworkError({response: response}));
                 })
                 .catch((reason: any) => {
                     reject(handleNetworkError(reason));
@@ -128,61 +124,11 @@ export class AgoraClient implements FullNodeAPI
                     if (response.status == 200)
                         resolve(PreImageInfo.reviver("", response.data));
                     else
-                        reject(new Error(response.statusText));
+                        reject(handleNetworkError({response: response}));
                 })
                 .catch((reason: any) => {
                     reject(handleNetworkError(reason));
                 });
         });
-    }
-}
-
-/**
- * Check if parameter `reason` is type `AxiosError`.
- * @param reason{any} This is why the error occurred
- * @returns {boolean}
- */
-function isAxiosError (reason: any): reason is AxiosError
-{
-    return ((reason as AxiosError).isAxiosError);
-}
-
-/**
- * Check if parameter `reason` is type `Error`.
- * @param reason{any} This is why the error occurred
- * @returns {boolean}
- */
-function isError (reason: any): reason is Error
-{
-    return ((reason as Error).message != undefined);
-}
-
-/**
- * It is a common function that handles errors that occur
- * during network communication.
- * @param reason{any} This is why the error occurred
- * @returns {Error}
- */
-function handleNetworkError (reason: any): Error
-{
-    if (isAxiosError(reason))
-    {
-        let e = reason as AxiosError;
-        if (e.response != undefined)
-        {
-            let message = "";
-            if (e.response.statusText != undefined) message = e.response.statusText + ", ";
-            if (e.response.data != undefined) message += e.response.data;
-            return new Error(message);
-        }
-    }
-
-    if (isError(reason))
-    {
-        return new Error((reason as Error).message);
-    }
-    else
-    {
-        return new Error("An unknown error has occurred.");
     }
 }
