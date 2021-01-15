@@ -100,7 +100,7 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get (uri.toString());
         assert.strictEqual(response.data.length, 6);
         assert.strictEqual(response.data[0].address,
-            "GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY");
+            "GDNODE6ZXW2NNOOQIGN24MBEZRO5226LSMHGQA3MUAMYQSTJVR7XT6GH");
         assert.strictEqual(response.data[0].preimage.distance, null);
     });
 
@@ -190,16 +190,19 @@ describe ('Test of Stoa API Server', () =>
                 .port(port)
                 .directory("validators");
             response = await client.get (uri5.toString());
+            let validators: Array<any> = response.data;
             assert.strictEqual(response.data.length, 6);
-            assert.strictEqual(response.data[0].preimage.distance, 1);
-            assert.strictEqual(response.data[0].preimage.hash,
+            let validator = validators.find(n => n.address === "GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY");
+            assert.ok(validator !== undefined);
+            assert.strictEqual(validator.preimage.distance, 1);
+            assert.strictEqual(validator.preimage.hash,
                 "0x314e30482fd0b498361e8537961d875e52b7e82edb8260cd548d3edacb451c80f41dd0ba9c5700adfb646066d41b0031120b65cba2df91def9bd83263fb306bd");
 
             // re-enrollment
             const enroll_sig =
                 new Signature("0x0c48e78972e1b138a37e37ae27a01d5ebdea193088ddef2d9883446efe63086925e8803400d7b93d22b1eef5c475098ce08a5b47e8125cf6b04274cc4db34bfd");
             const utxo_key =
-                new Hash("0x46883e83778481d640a95fcffd6e1a1b6defeaac5a8001cd3f99e17576b809c7e9bc7a44c3917806765a5ff997366e217ff54cd4da09c0c51dc339c47052a3ac");
+                new Hash("0xbf150033f0c3123f0b851c3a97b6cf5335b2bc2f4e9f0c2f3d44b863b10c261614d79f72c2ec0b1180c9135893c3575d4a1e1951a0ba24a1a25bfe8737db0aef");
             const random_seed =
                 new Hash("0xe0c04a5bd47ffc5b065b7d397e251016310c43dc77220bf803b73f1183da00b0e67602b1f95cb18a0059aa1cdf2f9adafe979998364b38cd5c15d92b9b8fd815");
             const enrollment = new Enrollment(utxo_key, random_seed, 20, enroll_sig);
@@ -217,10 +220,13 @@ describe ('Test of Stoa API Server', () =>
             .setSearch("height", "19");
 
             response = await client.get (uri6.toString());
+            validators = response.data;
             assert.strictEqual(response.data.length, 6);
 
-            assert.strictEqual(response.data[0].stake, enrollment.utxo_key.toString());
-            assert.strictEqual(response.data[0].enrolled_at, "0");
+            validator = validators.find(n => n.address === "GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY");
+            assert.ok(validator !== undefined);
+            assert.strictEqual(validator.stake, enrollment.utxo_key.toString());
+            assert.strictEqual(validator.enrolled_at, "0");
 
             let uri7 = URI(host)
             .port(port)
@@ -309,9 +315,9 @@ describe ('Test of Stoa API Server', () =>
 
         let response = await client.get (uri.toString())
         assert.strictEqual(response.data.length, 2);
-        assert.strictEqual(response.data[0].tx_hash, '0x42febd46e93ace' +
-            'bfc7f81e7a8b0228c5c4fed42de29bb5b4872b09699c28bb3b29e8dbb' +
-            'c65eb3a46b60ccb688e8a6d4ffbc341a0d59f7de13d28de2fede5566d');
+        assert.strictEqual(response.data[0].tx_hash, '0xcf8e55b5102734' +
+            '2537ebbdfc503146033fcd8091054913e78d6a858125f892a24b0734a' +
+            'fce7154fdde85688ab1700307b999b2e5a17a724990bb83d3785e89da');
         assert.strictEqual(response.data[0].address, 'GCOMMONBGUXXP4RFCYGEF74JDJVPUW2GUENGTKKJECDNO6AGO32CUWGU');
         assert.strictEqual(response.data[0].amount, '1663400000');
         assert.strictEqual(response.data[0].fee, '0');
@@ -377,7 +383,7 @@ describe ('Test of the path /utxo', () =>
         let expected = [
             {
                 type: 0,
-                utxo: '0xd9482016835acc6defdfd060216a5890e00cf8f0a79ab0b83d3385fc723cd45bfea66eb3587a684518ff1756951d38bf4f07abda96dcdea1c160a4f83e377c32',
+                utxo: '0x831e492f4401df05832b5958e54a7d248b69b7366e1e5723e36da97559a8213ac313ac32526001e4ae72f83f3bb7553d616049838b91f31be1daeab935eee82e',
                 amount: '24400000000000',
                 height: '1',
                 time: 1596753600,
