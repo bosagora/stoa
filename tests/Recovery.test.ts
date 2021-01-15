@@ -14,8 +14,7 @@
 
 import { AgoraClient } from '../src/modules/agora/AgoraClient';
 import { Block, Height, SodiumHelper, Utils } from 'boa-sdk-ts';
-import { recovery_sample_data } from './RecoveryData.test';
-import { TestAgora, TestStoa, delay } from './Utils'
+import { TestAgora, TestStoa, delay, recovery_sample_data } from './Utils'
 
 import * as assert from 'assert';
 import axios from 'axios';
