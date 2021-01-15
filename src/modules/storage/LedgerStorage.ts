@@ -14,7 +14,7 @@
 import {
     Block, Enrollment, Hash, Height, PreImageInfo, Transaction,
     TxInput, TxOutput, makeUTXOKey, hashFull, TxType,
-    Utils, Endian
+    Utils, Endian, PublicKey
 } from 'boa-sdk-ts';
 import { assert, AssertionError } from 'chai';
 import { logger } from '../common/Logger';
@@ -90,6 +90,7 @@ export class LedgerStorage extends Storages
             tx_hash             BLOB    NOT NULL,
             type                INTEGER NOT NULL,
             unlock_height       INTEGER NOT NULL,
+            lock_height         INTEGER NOT NULL,
             inputs_count        INTEGER NOT NULL,
             outputs_count       INTEGER NOT NULL,
             payload_size        INTEGER NOT NULL,
@@ -103,7 +104,8 @@ export class LedgerStorage extends Storages
             in_index            INTEGER NOT NULL,
             tx_hash             BLOB    NOT NULL,
             utxo                BLOB    NOT NULL,
-            signature           BLOB    NOT NULL,
+            unlock_bytes        BLOB    NOT NULL,
+            unlock_age          INTEGER NOT NULL,
             PRIMARY KEY(block_height, tx_index, in_index, utxo)
         );
 
@@ -115,6 +117,8 @@ export class LedgerStorage extends Storages
             tx_hash             BLOB    NOT NULL,
             utxo_key            BLOB    NOT NULL,
             amount              NUMERIC NOT NULL,
+            lock_type           INTEGER NOT NULL,
+            lock_bytes          BLOB    NOT NULL,
             address             TEXT    NOT NULL,
             used                INTEGER NOT NULL DEFAULT 0,
             PRIMARY KEY(block_height, tx_index, output_index)
@@ -148,6 +152,7 @@ export class LedgerStorage extends Storages
             tx_hash             BLOB    NOT NULL,
             type                INTEGER NOT NULL,
             payload             BLOB    NOT NULL,
+            lock_height         INTEGER NOT NULL,
             time                INTEGER NOT NULL,
             PRIMARY KEY(tx_hash)
         );
@@ -156,7 +161,8 @@ export class LedgerStorage extends Storages
             tx_hash             BLOB    NOT NULL,
             input_index         INTEGER NOT NULL,
             utxo                BLOB    NOT NULL,
-            signature           BLOB    NOT NULL,
+            unlock_bytes        BLOB    NOT NULL,
+            unlock_age          INTEGER NOT NULL,
             PRIMARY KEY(tx_hash, input_index)
         );
 
@@ -164,6 +170,8 @@ export class LedgerStorage extends Storages
             tx_hash             BLOB    NOT NULL,
             output_index        INTEGER NOT NULL,
             amount              NUMERIC NOT NULL,
+            lock_type           INTEGER NOT NULL,
+            lock_bytes          BLOB    NOT NULL,
             address             TEXT    NOT NULL,
             PRIMARY KEY(tx_hash, output_index)
         );
@@ -505,14 +513,15 @@ export class LedgerStorage extends Storages
 
                 storage.run(
                     `INSERT INTO transactions
-                        (block_height, tx_index, tx_hash, type, unlock_height, inputs_count, outputs_count, payload_size)
+                        (block_height, tx_index, tx_hash, type, unlock_height, lock_height, inputs_count, outputs_count, payload_size)
                     VALUES
-                        (?, ?, ?, ?, ${unlock_height_query}, ?, ?, ?)`,
+                        (?, ?, ?, ?, ${unlock_height_query}, ?, ?, ?, ?)`,
                     [
                         height.toString(),
                         tx_idx,
                         hash.toBinary(Endian.Little),
                         tx.type,
+                        tx.lock_height.toString(),
                         tx.inputs.length,
                         tx.outputs.length,
                         tx.payload.data.length
@@ -536,16 +545,17 @@ export class LedgerStorage extends Storages
             {
                 storage.run(
                     `INSERT INTO tx_inputs
-                        (block_height, tx_index, in_index, tx_hash, utxo, signature)
+                        (block_height, tx_index, in_index, tx_hash, utxo, unlock_bytes, unlock_age)
                     VALUES
-                        (?, ?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?, ?, ?)`,
                     [
                         height.toString(),
                         tx_idx,
                         in_idx,
                         hash.toBinary(Endian.Little),
                         input.utxo.toBinary(Endian.Little),
-                        input.signature.toBinary(Endian.Little)
+                        input.unlock.bytes,
+                        input.unlock_age
                     ]
                 )
                     .then(() =>
@@ -585,19 +595,25 @@ export class LedgerStorage extends Storages
         {
             return new Promise<void>((resolve, reject) =>
             {
+                let address: string = (output.lock.type == 0)
+                    ? (new PublicKey(output.lock.bytes)).toString()
+                    : "";
+
                 storage.run(
                     `INSERT INTO tx_outputs
-                        (block_height, tx_index, output_index, tx_hash, utxo_key, address, amount)
+                        (block_height, tx_index, output_index, tx_hash, utxo_key, address, amount, lock_type, lock_bytes)
                     VALUES
-                        (?, ?, ?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         height.toString(),
                         tx_idx,
                         out_idx,
                         hash.toBinary(Endian.Little),
                         utxo_key.toBinary(Endian.Little),
-                        output.address.toString(),
+                        address,
                         output.value.toString(),
+                        output.lock.type,
+                        output.lock.bytes
                     ]
                 )
                     .then(() =>
@@ -692,13 +708,14 @@ export class LedgerStorage extends Storages
             {
                 storage.run(
                     `INSERT INTO transaction_pool
-                        (tx_hash, type, payload, time)
+                        (tx_hash, type, payload, lock_height, time)
                     VALUES
-                        (?, ?, ?, strftime('%s', 'now', 'UTC'))`,
+                        (?, ?, ?, ?, strftime('%s', 'now', 'UTC'))`,
                     [
                         hash.toBinary(Endian.Little),
                         tx.type,
-                        tx.payload.toBinary(Endian.Little)
+                        tx.payload.toBinary(Endian.Little),
+                        tx.lock_height.toString()
                     ])
                     .then((result) =>
                     {
@@ -718,14 +735,15 @@ export class LedgerStorage extends Storages
             {
                 storage.run(
                     `INSERT INTO tx_input_pool
-                        (tx_hash, input_index, utxo, signature)
+                        (tx_hash, input_index, utxo, unlock_bytes, unlock_age)
                     VALUES
-                        (?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?)`,
                     [
                         hash.toBinary(Endian.Little),
                         in_idx,
                         input.utxo.toBinary(Endian.Little),
-                        input.signature.toBinary(Endian.Little)
+                        input.unlock.bytes,
+                        input.unlock_age
                     ]
                 )
                     .then((result) =>
@@ -744,16 +762,22 @@ export class LedgerStorage extends Storages
         {
             return new Promise<number>((resolve, reject) =>
             {
+                let address: string = (output.lock.type == 0)
+                    ? (new PublicKey(output.lock.bytes)).toString()
+                    : "";
+
                 storage.run(
                     `INSERT INTO tx_output_pool
-                        (tx_hash, output_index, amount, address)
+                        (tx_hash, output_index, amount, address, lock_type, lock_bytes)
                     VALUES
-                        (?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?, ?)`,
                     [
                         hash.toBinary(Endian.Little),
                         out_idx,
                         output.value.toString(),
-                        output.address.toString(),
+                        address,
+                        output.lock.type,
+                        output.lock.bytes
                     ]
                 )
                     .then((result) =>
@@ -818,7 +842,7 @@ export class LedgerStorage extends Storages
     {
         let sql =
         `SELECT
-            block_height, tx_index, tx_hash, type, inputs_count, outputs_count
+            block_height, tx_index, tx_hash, type, unlock_height, lock_height, inputs_count, outputs_count, payload_size
         FROM
             transactions
         WHERE block_height = ?`;
@@ -855,7 +879,7 @@ export class LedgerStorage extends Storages
     {
         let sql =
         `SELECT
-            block_height, tx_index, in_index, utxo, signature
+            block_height, tx_index, in_index, utxo, unlock_bytes, unlock_age
         FROM
             tx_inputs
         WHERE block_height = ? AND tx_index = ?`;
@@ -871,7 +895,7 @@ export class LedgerStorage extends Storages
     {
         let sql =
         `SELECT
-            block_height, tx_index, output_index, tx_hash, utxo_key, address, amount, used
+            block_height, tx_index, output_index, tx_hash, utxo_key, amount, lock_type, lock_bytes, address, used
         FROM
             tx_outputs
         WHERE block_height = ? AND tx_index = ?`;
@@ -889,7 +913,7 @@ export class LedgerStorage extends Storages
     {
         let sql =
         `SELECT
-            tx_hash, type, payload, time
+            tx_hash, type, payload, lock_height, time
         FROM
             transaction_pool
         `;

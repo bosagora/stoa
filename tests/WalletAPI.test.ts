@@ -12,8 +12,7 @@
 *******************************************************************************/
 
 import { SodiumHelper } from 'boa-sdk-ts';
-import { recovery_sample_data } from './RecoveryData.test';
-import { TestAgora, TestStoa, sample_data, sample_data2, delay } from './Utils';
+import { TestAgora, TestStoa, sample_data, sample_data2, recovery_sample_data, delay } from './Utils';
 
 import * as assert from 'assert';
 import axios from 'axios';
@@ -88,9 +87,8 @@ describe ('Test of Stoa API for the wallet', () =>
         assert.strictEqual(response.data[0].peer_count, 1);
         assert.strictEqual(response.data[0].height, "9");
         assert.strictEqual(response.data[0].tx_hash,
-            "0xc7ac3e24aa7d0df99a0fb1fd95c8d8a1fd6a90b17f6ded45210df8" +
-            "8fec0e4e09b45987d15ea18b1a00c6830354c8a49cce11c33fb5719b" +
-            "1234c60137d33a2ce4");
+            "0xf3a013153900f6416af03efc855df3880e3927fff386b3635bf46cd6e2c5476" +
+            "9f88bd24128b6b935ab95af803cc41412fe9079b4ed7684538d86840115838814");
         assert.strictEqual(response.data[0].tx_type, "payment");
         assert.strictEqual(response.data[0].amount, "610000000000000");
         assert.strictEqual(response.data[0].unlock_height, "10");
@@ -101,13 +99,13 @@ describe ('Test of Stoa API for the wallet', () =>
         let uri = URI(host)
             .port(port)
             .directory("/wallet/transaction/overview")
-            .filename("0x6f2e7b2cb25a2146970e6e495ba1cec378a90acdc7817804dd9f41e1ba34a6c55fad4b24395d2da4f6a8d14a4fb2cfbc1cdbb486acda8094e0ab936d56e031c5")
+            .filename("0xc2fed6fe6e445328bf363bb2725c23593b5ac43f0e0cd456f22bab77ef7b81a2661b9a07308a909047acf2b886522a50d7dd9195072de2272509963aeec34e52")
 
         let response = await client.get (uri.toString());
         let expected = {
             height: '9',
             time: 1601553600,
-            tx_hash: '0x6f2e7b2cb25a2146970e6e495ba1cec378a90acdc7817804dd9f41e1ba34a6c55fad4b24395d2da4f6a8d14a4fb2cfbc1cdbb486acda8094e0ab936d56e031c5',
+            tx_hash: '0xc2fed6fe6e445328bf363bb2725c23593b5ac43f0e0cd456f22bab77ef7b81a2661b9a07308a909047acf2b886522a50d7dd9195072de2272509963aeec34e52',
             tx_type: "payment",
             unlock_height: '10',
             unlock_time: 1601554200,
@@ -116,14 +114,14 @@ describe ('Test of Stoa API for the wallet', () =>
                 {
                     address: 'GDI22L72RGWY3BEFK2VUBWMJMSZU5SQNCQLN5FCF467RFIYN5KMY3YJT',
                     amount: 610000000000000,
-                    utxo: '0x73d7f7994156c073c764e59ad65522ea58d28992ac5a857a59475168745f1b9ac160a059e77a7f342d2a6b12f20b8f4b42e7131aeb65dd1cf912069532c045a3'
+                    utxo: '0xb0383981111438cf154c7725293009d53462c66d641f76506400f64f55f9cb2e253dafb37af9fafd8b0031e6b9789f96a3a4be06b3a15fa592828ec7f8c489cc'
                 }
             ],
             receivers: [
                 {
                     address: 'GDA225RGC4GOCVASSAMROSWJSGNOZX2IGPXZG52ESDSKQW2VN6UJFKWI',
                     amount: 610000000000000,
-                    utxo: '0x71c16727e6eb2ca6c8244b8071a78c5bb4ec9253234e51b3f9c8e901cb1c71ee34dd0c4c09bbc16591bf09ecbe962280d8b5e45945490ebe8e6a9fc49f8530dd'
+                    utxo: '0xefed6c1701d1195524d469a3bbb058492a7922ff98e7284a01f14c0a32c31814f4ed0d6666aaf7071ae0f1eb615920173f13a63c8774aa5955a3af77c51e55e9'
                 }
             ],
             fee: '0'
@@ -175,9 +173,8 @@ describe ('Test of Stoa API for the wallet', () =>
         assert.strictEqual(response.data[0].tx_type, "payment");
         assert.strictEqual(response.data[0].amount, "-610000000000000");
         assert.strictEqual(response.data[0].tx_hash,
-            "0x4c9b7ff106dde2a2ee1e44bddccae7a660800a7146858c6f7338f79" +
-            "f5eb7009b5617f9e747e99d9cdcf898209b3470c3e952256a21b5daee" +
-            "e79f488141558af8");
+            "0x63341a4502434e2c89d0f4e46cb9cbd27dfa8a6d244685bb5eb6635d634b217" +
+            "9b49108e949f176906a13b8685254b1098ebf1adf44033f5c9dd6b4362c14b020");
     });
 
     it ('Test of the path /wallet/transactions/history - Filtering - Date', async () =>
@@ -203,9 +200,8 @@ describe ('Test of Stoa API for the wallet', () =>
         assert.strictEqual(response.data[0].tx_type, "payment");
         assert.strictEqual(response.data[0].amount, "610000000000000");
         assert.strictEqual(response.data[0].tx_hash,
-            "0x5091c6120ebc2c85ff1414225f3813ab80e13275507f2a3d2c82248" +
-            "0ca7fa6247a48f5addcefd8193eca836054a9a12fcc6aabbc8e1675bc" +
-            "749213d7771cde44");
+            "0x520d6766f3142d391d80ac1a47d63d7978476415030f9ff61eea2374dda1b85" +
+            "e7f699364d7f8db8993dd078de6f95f525c5e2d66cd20fea2ed34c340b44db9f3");
     });
 
     it ('Test of the path /wallet/transactions/history - Filtering - Peer', async () =>
@@ -230,9 +226,8 @@ describe ('Test of Stoa API for the wallet', () =>
         assert.strictEqual(response.data[0].tx_type, "payment");
         assert.strictEqual(response.data[0].amount, "610000000000000");
         assert.strictEqual(response.data[0].tx_hash,
-            "0x5091c6120ebc2c85ff1414225f3813ab80e13275507f2a3d2c82248" +
-            "0ca7fa6247a48f5addcefd8193eca836054a9a12fcc6aabbc8e1675bc" +
-            "749213d7771cde44");
+            "0x520d6766f3142d391d80ac1a47d63d7978476415030f9ff61eea2374dda1b85" +
+            "e7f699364d7f8db8993dd078de6f95f525c5e2d66cd20fea2ed34c340b44db9f3");
     });
 });
 
@@ -287,13 +282,13 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
         let uri = URI(host)
             .port(port)
             .directory("/wallet/transaction/overview")
-            .filename("0x42febd46e93acebfc7f81e7a8b0228c5c4fed42de29bb5b4872b09699c28bb3b29e8dbbc65eb3a46b60ccb688e8a6d4ffbc341a0d59f7de13d28de2fede5566d")
+            .filename("0x91de02460f72697f82c714aedb367eca757ea721e013f5c9627deeabcc2ef3234809428922f1b04cde9520a9f312130ac9bea7bf264e7192eae1cd7ba9c3e26e")
 
         let response = await client.get(uri.toString());
         let expected = {
             height: '2',
             time: 1597353600,
-            tx_hash: '0x42febd46e93acebfc7f81e7a8b0228c5c4fed42de29bb5b4872b09699c28bb3b29e8dbbc65eb3a46b60ccb688e8a6d4ffbc341a0d59f7de13d28de2fede5566d',
+            tx_hash: '0x91de02460f72697f82c714aedb367eca757ea721e013f5c9627deeabcc2ef3234809428922f1b04cde9520a9f312130ac9bea7bf264e7192eae1cd7ba9c3e26e',
             tx_type: 'payment',
             unlock_height: '3',
             unlock_time: 1597354200,
@@ -302,19 +297,19 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
                 {
                     address: 'GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ',
                     amount: 24400000000000,
-                    utxo: '0xd9482016835acc6defdfd060216a5890e00cf8f0a79ab0b83d3385fc723cd45bfea66eb3587a684518ff1756951d38bf4f07abda96dcdea1c160a4f83e377c32'
+                    utxo: '0x831e492f4401df05832b5958e54a7d248b69b7366e1e5723e36da97559a8213ac313ac32526001e4ae72f83f3bb7553d616049838b91f31be1daeab935eee82e'
                 }
             ],
             receivers: [
                 {
-                    address: 'GDID227ETHPOMLRLIHVDJSNSJVLDS4D4ANYOUHXPMG2WWEZN5JO473ZO',
-                    amount: 24398336600000,
-                    utxo: '0x1ea9e5e2c8327cfe20a6b0236767a0af9b5cae74a7addc21cef6a5e925694efa64eb7585db5004b78e5efa2b3c40f43dcd9a36f2ebfda4555214a3fcf8a5d150'
-                },
-                {
                     address: 'GCOMMONBGUXXP4RFCYGEF74JDJVPUW2GUENGTKKJECDNO6AGO32CUWGU',
                     amount: 1663400000,
-                    utxo: '0xa3c797dcf6385fc45e14448a15125791547757b6a34bc8e449d9bd738e70ca2ce644eba9ad7a4476f3ee59c3956b37a47ef364f461df8e97e2765c41a889b3d3'
+                    utxo: '0x71bacab5b8f7e47d90d9ef8820c370e990a5b3a98415e0c73f7b05cecfc9c05018505fd55fe34b636c02faf353210fe580947836960499f562c8576d54451009'
+                },
+                {
+                    address: 'GDID227ETHPOMLRLIHVDJSNSJVLDS4D4ANYOUHXPMG2WWEZN5JO473ZO',
+                    amount: 24398336600000,
+                    utxo: '0xd1c4e497ee659143cb4ae8bbdda368754a24a4dae134fa83ddf5f7f69baf0a404d01fd5c3f6b60c6168a3c950d6732e928f5794b28b7f11b6b3eb835a056f092'
                 }
             ],
             fee: '0'
