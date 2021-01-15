@@ -1,8 +1,8 @@
 {
     "header": {
-        "prev_block": "0xd56c64a29cabc48a3517d8bf3d6d7e7324c3d5b2b2807045f16487c931b4178ba4f713a50eb43d7eb5e9a889cb13fcf3aac17ce22de07aa10fd9b4c2cecc8a5f",
+        "prev_block": "0x0bf4809ece9fcfa27910c9326e7d1093dee605ffac9cd6591de0dbdb3bf5a8344db9917b5c672f26d1fd8ce74df4a87f44b9d18010a6e66fa014c8ad9eeabe98",
         "height": "1",
-        "merkle_root": "0x85367aedf5cb99ca54510464fa6af150c836539c457229f6bad4c838ddf52fb3b793e256a1f258ba7810236c426645ad357abc265c5a3e1ed836250c23706dd4",
+        "merkle_root": "0x7da70e52f75480b8f8eac191980e3ac37669612fb22c8d4b2b23cf8281968dd827822863bd38bc93acdec7b18cf272be38c33eb663a44de60af878cd480c4554",
         "validators": "[252]",
         "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
         "enrollments": [],
@@ -15,914 +15,1546 @@
             "type": 0,
             "inputs": [
                 {
-                    "utxo": "0x6d85d61fd9d7bb663349ca028bd023ad1bd8fa65c68b4b1363a9c7406b4d663fd73fd386195ba2389100b5cd5fc06b440f053fe513f739844e2d72df302e8ad0",
-                    "signature": "0x0207bd673d38d298d97206c200bb5a34d03235595b1ac98c53c773d3d5cf9ad737f4b16d2b79c68496106f7c2d2b6ed58dab0c55ddf71b423597324d9bb56752"
+                    "utxo": "0x3909833e3755e875f03032ae8a3af30b40722fc09c52743005e4dcdc617964b8c436ce244cb217a1b34ceddad4378c8ea7311739ba15e5a6c427e6a371acc173",
+                    "unlock": {
+                        "bytes": "CueWerz2xChyr3YSdUKi10NoIeFCkFGnFu8EUbo5KQQASbPpcVv3W9p7IJxaU2J7J9P4alonkhGl939HlYK9Dg=="
+                    },
+                    "unlock_age": 0
                 }
             ],
             "outputs": [
                 {
                     "value": "24400000000000",
-                    "address": "GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGjrV+Is0jvFO3G34okd30FESntMARJgpUxNmBapXy8="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAGS22PVTFDZ3OAMNBNATVAG6NM4WRCQLWCZOX2MGOF6ZVTP4CSR62B"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGlrT6zKPO3AY0LQTqA3ms5aIoLsLLr6YZxfZrN/BSg="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAGT226PEZM2PPZTBL2PX7Z5IMNZU7GZPTYEO6OZXOSOPTKPDZT6KEH"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGnrXnkyzT35mFen3/nqGNzT5svngjvOzd0nPmp48z8="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAGU22XAVP3C55ACZ6KQVHCPQ3RIVJKR2AMPXJ7WQRGLHLD5BZHDAX4"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGprVwVfsXegFnyoVOJ8NxRVKo6Ax90/tCJlnWPocnE="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAGV222FQXHVVNTOW4QTOC3TNKLB34MQG3E557WSQ5C2IN2HYTGO3Q3"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGrrWiwuetWzdbkJuFubVLDvjIG2Tvf2lDotIbo+Jmc="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAGW22PLIYMV6LXXVJYZ55XAB73QZNVF23QW5CPLRA5L2ZMDP5JSQU5"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGtrT1owyvl3vVOM97cAf7hltS63C3RPXEHV6ywb+pk="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAGX22NRDJVCHPMPG5CXGFJTXLXBIGA2R6M2LM4EEFHHWWDXQKDZ5CY"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGvrTYjTUR3sebormKmd13CgwNR8zS2cIQpz2sO8FDw="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAGY22CZRBOVCM3KH3O4ZQV3AFBIOL7R2L4BKKSBP7QH2P76KSVZIOE"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGxrQsxC6ombUfbuZhXYChQ5f46XwKlSC/8D6f/ypVw="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAGZ22UUDZGIVAE5H6VUPSXFBKU7EJU3ICW7RH3JZDIMCIRZ6DNFKAV"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGzrVKDyZFQE6f1aPlcoVU+RNNoFb8T7TkaGCRHPhtI="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAHA22WGAXRFJJ3OZXEBNCN2SRR37KMDR3JYQMCFTBCIZ2V3XQUSW6R"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHBrVjAvEqU7dm5AtE3Uox39TBx2nEGCLMIkZ1Xd4Uk="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAHB22WBRNVUWYCWVDGQAVEXUAGQTKKG6BC7UPWWN332MPFQKFQFMA3"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHDrVgxbWlsCtUZoAqS9AGhNSjeCL9H2s3e9MeWCiwI="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAHC22NFTRL7GWQGMWP3SPUF7NQFX6M2DXMUO4GIMNBND53ELMEHEDK"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHFrTSziv5rQMyz9yfQv2wLfzNDuyjuGQxoWj7si2EM="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAHD22J7S4WTYDTDQE3EG3SG4GZPFW7AP3ZQLLISLR4ROYY3KZTMGWR"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHHrSfy5aeBzHAmyG3I3DZeW3wP3mC1okuPIuxjaszY="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAHE22KQE46DIBFQW2AXGODYUWOSPL4G7CM35WBND7Y5IHXPSTF3H4G"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHJrSoE54aAlhbQLmcPFLOk9fDfEzfbBaP+OoPd8pl0="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAHF22J26ERAXIX4U6WSUSEQH4OLDQJN5EDM6WSGCCIJHO3OKLE2AIG"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHLrSdeJEF0X5T1pUkSB+OWOCW9INnrSMISEndtylk0="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAHG22MLLHHP2HXCCML5Z5TMDCKUCPMTXS5N7DUOBDZ57FVQPTZOXOC"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHNrTFrOd+j3EJi+57NgxKoJ7J3l1vx0cEee/LWD55c="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAHH22XHMA3AILVVRYZLWU6RP3WINI6Y2MAEOO3URGDXN4EF4JXHGFC"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHPrVzsBsCF1rHGV2p6L92Q1HsaYAjnbpEw7t4QvE3M="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAHI224Z4I2452OZDJMXNGXF2EKAIQMGQXEZRFL5F66EYADQ6S2BLX2"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHRrXM8RrndOyNLLtNcuiKAiDDQuTMSr6X3iYAOHpaA="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAHJ22EQB3TY62Y7BPLG2YQON7LQXD3WYMLAY36HYBYFRFUMVGCFVFN"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHTrRIB3PHtY+F6zaxBzfrhce7YYsGN+PgOCxLRlTCI="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAHK22JOW3DB3NYGWLPTDLJQPG7SJGQWRQTWTQO2OR6VXVU3TUXUDSD"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHVrSXW2MO24NZb5jWmDzfkk0LRhO04O06Pq3rTc6Xo="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAHL22BJYV2MV4VCNTJRQNOVA4H3WKPPPZR2MSQBUISFJ6XSKBOFFML"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHXrQU4rpleVE2aYwa6oOH3ZT3vzHTJQDREip9eSguI="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAHM22HTHCPPAHMMSFKGMSFTZW5BHFGOKLFLCWSSREXUK2A527CGYHA"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHZrR5nE94DsZIqjMkWebdCcpnKWVYrSlEl6K0DuviM="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAHN22UNSTENHZ3KG3BWPG7I2JAAAU6ECQHX5CD3BID4N3G5KZAEXTW"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHbrVGymRp87UbYbPN9GkgACniCge/RD2FA+N2bqsgI="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAHO225X4G4NMVRLXO6BS5ZU7TQSYX74Y3CVUORRDOMMIC3BLRD5J52"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHdrXb8NxrKxXd3gy7mn5wli/+Y2KtHRiNzGIFsK4j4="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAHP22JB7GKD5D6DR42VNVYFSXCHJ2BAGYG65JV5B3MLHJ3I2DIOVT6"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHfrSQ/MofR+HHmqtrgsriOnQQGwb3U16HbFnTtGhoc="
+                    }
                 }
             ],
-            "payload": ""
+            "payload": "",
+            "lock_height": "0"
         },
         {
             "type": 0,
             "inputs": [
                 {
-                    "utxo": "0x3451d94322524e3923fd26f0597fb8a9cdbf3a9427c38ed1ca61104796d39c5b9b5ea33d576f17c2dc17bebc5d84a0559de8c8c521dfe725d4c352255fc71e85",
-                    "signature": "0x0407676e0408eb7de4d6ff75055b8344217d193351ef4106aeb4d2c3bb741a6370c0667ff4b1140641e50e1f57372de176ca84b738531bb5b454286cefb71db6"
+                    "utxo": "0xee36b48f75cb4bb774de4ea4db2ac3ac08e77efe71c5c6bbe98484d51c47f7bf0e393ee4beaa8a1cee8b41a38202c3a1f5584c500232c91669cf417bff1b7c28",
+                    "unlock": {
+                        "bytes": "H6DI+FipwINadAJMYDygMIXXqRCK/vIs6c+CA/DeBciuhNld3clUDJE+gpHXo6lJQCO6HXBwQHnvKnx5IOxuDA=="
+                    },
+                    "unlock_age": 0
                 }
             ],
             "outputs": [
                 {
                     "value": "24400000000000",
-                    "address": "GDPF22L2ZO6SNZRT7NR6U5OVLT5YJZUQTS4Y3D75PIGBGFZAZU6QNLED"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "3l1pesu9JuYz+2PqddVc+4TmkJy5jY/9egwTFyDNPQY="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPG22IINMKXTPYB3QQUGKUHQXBZKSN2XM4LACUANNJGRYYE6JTQFV6K"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "3m1pCGsVeb8B3CFDKoeFw5VJurs4sAqAa1Jo4wTyZwI="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPH22AF3C7ADJTFDFCTOALO7GFOYPQN6SRSLJH7D7LWK7QNLBBYJ42W"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "3n1oBdi+AaZlGUU3AW75iuw+DfSjJaT/H9dlfg1YQ4Q="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPI22DFZP25F3PW2KW6HK6QDS42SRG2IQC4LEQMMJ36Q5TKVOTLDK4L"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "3o1oZcv10u320q3jq9AcualE2kQFxZIMYnfodmqrprE="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPJ224AITWHMDI5HWDISLLSOCMRBR4LACDRVL2CCWXZK7HOEM7KRU57"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "3p1rgETsdg0dPYaJLXJwmRDHiwCHGq9CFa+VfO4jPqg="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPK22PHSTO3X5OKT5FUUWEVE6APU7KFCYKBS3BUFY5C74TCE65DAD3H"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "3q1p55Tdu/XKn0tKWJUngPp9RRYUGWw0Ljov8mInujA="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPL22SWCWA3BTSMUG63CTT3H3JO75ZE25MMIBGJWSPHPGOGSBPQYORB"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "3r1qVhWBsM5Mob2xTns+0u/3JNdYxATJtJ53mcaQXww="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPM225HEGZAZ4TJ3MJ37KSIATHNLHDWE2UEJJJW34L34XYVOLIBUDFJ"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "3s1rpyGyDPJp2xO/qkgEztWcdiaoRKU23xe+XxVy0Bo="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPN22JQIUIUGEDRRZJ2DJAENJHAAEQZRDEE4BL6JKOTCMPM2R34FO6X"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "3t1pMEURQxBxjlOhpARqTgASGYjITgV+Sp0xMezUd8I="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPO22WUJC45ATZA6HEPZNMMSAH74RHACHDLTJR5OWWADL2574ZQQ7LJ"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "3u1q1Ei50E8g8cj8tYyQD/5E4BHGuaY9dawBr13/Mwg="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPP22WOC72DKJOYBCSUHKTQYOZDF5H7NVQSB4MXFJL3C5HYZABF5PGQ"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "3v1qzhf0NSXYCKVDqnDDsjL0/21hIPGXKlexdPjIAl4="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPQ22XJYFXIEUG3UWZREKQ4AKL6TFVSDPKLCUBBP75JAXN6WRNDN4YZ"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "3w1q6cFuglDbpbMSKhwCl+mWshvUsVAhf/qQXb60WjY="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPR22DW7W4EPJK7Z3YVJIH3A3NXC6AW2G2I2BJXPTD7HKCHCARA3ZED"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "3x1odv24R6VfzvFUoPsG23F4FtG0jQU3fMfzqEcQIg0="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPS2264WBMPXIGRZQ4UCP5LSKDFJD73LYJMHPFCHKUWPX266H25LV2H"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "3y1r3LBY+6DRzDlBP6uShlSP+14Sw7yiOqln317x9dU="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPT22OOPAH3IC7AWRALYVY4BEWKXASPULNROE7CH3M4MDKNXF5WOQB4"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "3z1pzngPtAvgtEC8VxwJLKuCT6LbFxPiPtnGDU25e2c="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPU22KOCCNMCACFVN3BGDNC4NWXKQ4YGMZ75X4JXMNS7LO5IBQWB7CJ"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "301pThCawQBFq3YTDaLjbXVDmDMz/t+Juxsvrd1AYWA="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPV22UHJUZKPO4SDIZBNZXNKDFFSPLRHC3VPBO2TUBP2Y4LHGZYCP4L"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "311qh00yp7uSGjIW5u1Qylk9cTi3V4XanQL9Y4s5s4E="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPW227UM2JOHIV7ASZPZ7KQ6DP2V2QX4VHLSKZX27545YBYFS7FZWFK"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "321r9GaS46K/BLL8/VDw36rqF+VOuSs31/vO4Dgsvlw="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPX22XXTETXC4YJCMGMI55OBGUVIXVL5AOKP2RGT24B4HCGBRIPFHHD"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "331q95kncXMJEwzEd64JqVReq+gcp+omnrgeHEYMUPI="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPY22WMCY3TH5OUZRRN2CZF4I6UFBV3VDT627HCQMQCQAR7M2WQ5UT4"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "341qzBY3M/XUzGLdCyXiPUKGu6jn7XzigyAoAj9mrQ4="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDPZ225K4MUNOHGEYKP4RWBFXCHL6TXDLHZYRNGRXQ2MGGLTUSUCUNA7"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "351rquMo1xzEwp/I2CW4jr9O41nziLTRvDTDGXOkqCo="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDQA224KNN7LBDRWG3VFL72DRZGKKLNYE4RB6NWP4HX26WKPPEWLNYWW"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "4A1rimt+sI42NupV/0OOTKUtuCciHzbP4e+vWU95LLY="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDQB22BXV375QVNWTB6AN4X7ML6Y6747JRU424TUM4X4ERH2B2XNU4R7"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "4B1oN67/2FW2mHwG8v9i/Y9/n0xpzXJ0Zy/CRPoOrto="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDQC22UCX6LMREY6KAL5RVJHWLJYQZFY5RV223GLIDWW6Q57SC5YZBAS"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "4C1qgr+WyJMeUBfY1Sey04hkuOxrrWzLQO1vQ7+Qu4w="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDQD22J34GZCX425ZFP6RUBMEQXDNOVALDROLVO2W5ZPVLWHFOGJ5IZM"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "4D1pO+GyK/NdyV/o0CwkLja6oFji5dXat3L6rscrjJ4="
+                    }
                 }
             ],
-            "payload": ""
+            "payload": "",
+            "lock_height": "0"
         },
         {
             "type": 0,
             "inputs": [
                 {
-                    "utxo": "0xfca92fe76629311c6208a49e89cb26f5260777278cd8b272e7bb3021adf429957fd6844eb3b8ff64a1f6074126163fd636877fa92a1f4329c5116873161fbaf8",
-                    "signature": "0x0716b1b6cdbabfefcb6cbfc205ddf3132ec6f51a72d48b98e8930f178ec3119e6fbf0075d4890e37653b4621af4d2c73a25729fec804b1df8159639b13e53629"
+                    "utxo": "0x533f664df20aa5f3f657bea7073c9fdbe930c3887db8c57ddb2efd258c3bfddf644b645f3c399996bd4d97dbb17138e1b670d254d3518959d97793ef27c55e2e",
+                    "unlock": {
+                        "bytes": "1u8F2kH3rFGdcsxEK4ZDr49CnG/kyG7pjTCb6rewSG3YEvFM1hTWVJSTDmVvbCTMjJEFm//r10Arx3G9DpyCCA=="
+                    },
+                    "unlock_age": 0
                 }
             ],
             "outputs": [
                 {
                     "value": "24400000000000",
-                    "address": "GDDF22D4LYDCLIJHJEAN6WLYKXK7EPIGCR6IDSFGXIGWOUTS3DZB4T2A"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "xl1ofF4GJaEnSQDfWXhV1fI9BhR8gcimug1nUnLY8h4="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDG22V5H34MEINQIVHKNAEOYE7CG4RLQ2KLZ4DFVT7U73XJYKN5EIB2"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "xm1qvT74wiGwRU6mgI7BPiNyK4aUvPBlrP9P7unCm9I="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDH22TIBPVENK47G7SD4RSNWVE57RL5L2HS6BTYZBAX2JN2IKTKX265"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "xn1qaAvqRqufN+Q+Rk21Sd/FfV6PLwZ4yEF9JbpCpqs="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDI22U6FZQMJDTV5XTKSBF6QXY6WAPEOZM3CXHKSPKL6UQLKLR3ZHSY"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "xo1qni5gxI517eapBL6F8esB5HZZsVzqk9S/UgtS47w="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDJ22WIK3ITUCQ6JSGGG3JOUXHGEKOUX65HMC6NHKMC4ONQCT3GMQAJ"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "xp1qyFbROgoeTIxjbS6lzmIp1L+6dgvNOpguObAU9mY="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDK22AY6BMKFEXKGAN5XCGB2TSOU43ES5O4IM6ZLFAH5VAMUFIDPU4T"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "xq1oGPBYopLqMBvbiMHU5OpzZJddxDPZWUB+1AyhUDc="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDL2274WD5KUO7SJJLSRYDV6TKYAKEG773YEL3DJYULTT723ZBFBSTB"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "xr1r/LD6qjvySlco4HX01YAohv/3gi9jTii5z/reQlA="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDM22PNPMRYQANYB3ZKRCBLQAGP7BLJW4QBEDP4HW5GM7UISDW7WOC2"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "xs1p7XsjiAG4DvKoiCuADP+FabcgEg38PbpmfoiQ7fs="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDN22GXA5FMEXZTUWV44BIDIE2QKQYCLY5BD5BZJTWI2GK6TOY2Q3DG"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "xt1o1wdKwl8zpavOBQNBNQVDAl46EfQ5TOyNGV6bsag="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDO22QZHCJPZKZUXFKRUF5FME3HQA7UG7LC7TPBRTGE6NU77TUSS2ZC"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "xu1qGTiS/Ks0uVUaF6VhNngD9DfWL83hjMxPNp/86Sk="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDP22MJRLUBLTT6QOKQCQVSLNBGQITOCBMIN454RRPJOAHZGIYWE2PV"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "xv1piYroFc5+g5UBQrJbQmgibhBYhvO8jF6XAPkyMWI="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDQ22N4XOJU2RH6T36FIX6P3GOPR4LAOQUX7RJJOZZKPO34EKNHLSIK"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "xw1pvLuTTUT+nvxUX8/ZnPjxYHQpf8UpdnKnu3wimnU="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDR22EPSGVCQTT2WI52LZAZDU5PBB5VHMWK6MX3TSQC3VA3I4UFEGCD"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "xx1oj5GqKE56sjul5BkdOvCHtTssrzL7nKAt1BtHKFI="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDS22QEWHGTXHD2N7UHVK7Y6R3OBNXIZMAUDWWBKMAEQQEWSICTFWWS"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "xy1qBLHNO5x6b+h6q/j0duC26MsBQdrBUwBIQJaSBTI="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDT22QTPK56WV5E6537HQDGLXPPYX7VFOA3Z7LTLQ7L26DE4PGN5KL6"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "xz1qE3q761ek93fzwGZd3vxf9SuBvP1zXD69eGTjzN4="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDU22FE6NR5UQZIB4ATFC4WRQGY7SJV63KRCAUZX2HDQWUIGHBKPEDD"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "x01opPNj2kMoDwEyi5aMDY/JNfbVEQKZvo44Wogxwqc="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDV22PTIY4CH5ROZTC6VLGA3XVZNU7KPDOGPBP6MUS5SUHH7OG3LJQD"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "x11p80Y4I/YuzMXqrMDd65bT6njcZ4X+ZSXZUOf7jbU="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDW22ZCJHHIRE3HB4QMJFGBR7CPVXSRQCG2AVEVSINZ45FUDI72DZJI"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "x21rIknOiJNnDyDElMGPxPreUYCNoFSVkhuedLQaP6E="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDX22K66JM3EIEXRQNIWWO6YXE37WSROYLFNYRBCVL6UH6GGZT55CBK"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "x31pXvJZsiCXjBqLWd7Fyb/aUXYWVuIhFVfqH8Y2Z94="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDY22GHHZTYZTQP2BDP6I3RFR327OPM2CBTO37FO2SA2LYFI6CCJKTN"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "x41oxz5njM4P0Eb/I3Esd6+57NCDN2/ldqQNLwVHhCQ="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDZ22E4HB2BA7LF5AVCFDSWAV2GYJML5N2ELTAHNJR4TBBNLGKBUICC"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "x51onDh0EH1l6CoijlYFdGwli+t0RcwHamPJhC1ZlBo="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEA22CLN3HBFMOECEA52VOMM4RSQFEX6ACICSTGLN3S5DLMMUPKTSEI"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yA1oS27OErHEEQHdVcxnIygUl/AEgUpmW3cujWxlHqk="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEB22BTNEHGYOXSQFBLQU5ELBULP2JPNUUC6KJ4CDCY3WBQF7NGGZ55"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yB1oM2kObDrygUK4U6RYaLfpL20oLyk8EMWN2DAv2mM="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEC22SEWGZ7PNMBQRPECFL3ASTK43IUIZPX5UR74FYGQGAC7DIC5HAV"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yC1qRLGz97WBhF5BFXsEpq5tFEZfftI/4XBoGAL40C4="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDED22RMEUO6E7I3X2IYAETVY32LHK2WSOHBRVYPCQT2WMR5ZFT5PG5B"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yD1qLCUd4n0bvpGAEnXG9LOrVpOOGNcPFCerMj3JZ9c="
+                    }
                 }
             ],
-            "payload": ""
+            "payload": "",
+            "lock_height": "0"
         },
         {
             "type": 0,
             "inputs": [
                 {
-                    "utxo": "0x7e1958dbe6839d8520d65013bbc85d36d47a9f64cf608cc66c0d816f0b45f5c8a85a8990725ffbb1ab13c3c65b45fdc06f4745d455e00e1068c4c5c0b661d685",
-                    "signature": "0x037efdcab37b556ae0a68cc0aeacf889a4c8ef54709932c082c0f573d84c6a6e5386cc8c6a2b1982c8a6ae631ab94d893c6a4c01a3fa7cd3fe7ab630396dfcb7"
+                    "utxo": "0x470785849bbb6fe3f88fb416a9b79702512b4a37b091cbf1650c637a61fd9d0e4f65a79dcc03f0d3dbd93bf2a2da34caeb7a9e95cbb5847f1e99ee67db19bcc9",
+                    "unlock": {
+                        "bytes": "iGeRO+YQVOT3aaAT92GWDImgxFfOifEHWVrCqOEJyDAn9WiGCd/qJ0q0DKhwLl/WpTM5+E9HCcDvCnVSu/94AQ=="
+                    },
+                    "unlock_age": 0
                 }
             ],
             "outputs": [
                 {
                     "value": "24400000000000",
-                    "address": "GDJS22MZQNXXVI23O4662ORA7UURVLPIS2ENOVZMU232FGJJ7UWPFUCO"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "0y1pmYNveqNbdz3tOiD9KRqt6JaI11cspreimSn9LPI="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDJT22J2KGUVGDLB4WCYXVKMFZ3FZVUBT7PBSWGAUF3ZTFWRXCYV6VCF"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "0z1pOlGpUw1h5YWL1UwudlzWgZ/eGVjAoXeZltG4sV8="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDJU22DMLACWNG3WT252T4ADUI7Q3RQ4VXPL2GYGABWTURZRZV72TDFL"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "001obFgFZpt2nrup8AOiPw3GHK3evRsGAG06RzHNf6k="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDJV22W2CZKZNKYCQEVPUPJ2TNWA7TLKJK67OVQKV5OAWIHVOBNGAR45"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "011q2hZVlqsCgSr6PTqbbA/Nakq991YKr1wLIPVwWmA="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDJW223XRMGSCCWF5WEAYIDVIZRH4A7DUX5EYL7QTANLVZMMBE4KMCP6"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "021rd4sNIQrF7YgMIHVGYn4D46X6TC/wmBq65YwJOKY="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDJX22OOWSEKGD25VJ5F7N6E6ZYMMBU6FKUPUMN7J4FWF47EKCVKRWDZ"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "031pzrSIow9dqnpft8T2cMYGniqo+jG/Twti8+RQqqg="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDJY22ZK7QAZUB6UEQEFFVLODQ7KONH2N6SIYBOATAS32HKH7E5AFMHX"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "041rKvwBmgfUJAhS1W4cPqc0+m+kjAXAmCW9HUf5OgI="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDJZ22BO7N4SSSJQ6OL7GGOEUXBCBGREERYI5DW52SIUGTE63AAB6YHE"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "051oLvt5KUkw85fzGcSlwiCaJCRwjo7d1JFDTJ7YAB8="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDKA22NYLRAZSAGWSBGVOMFU3SJTI52LSSV3SLILRRBSRQCPL5KYMQAD"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "1A1puFxBmQDWkE1XMLTckzR3S5SruS0LjEMowE9fVYY="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDKB22ZO54OMH7XXD4X7RKCASF4XRFTT7BXCM27JDKAU37W34BJO6BXA"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "1B1rLu8cw/73Hy/4qECReXiWc/huJmvpGoFN/tvgUu8="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDKC22OVBADP6HFPH64FBK7RVGIGXLAZ6QH7HQCLBDFIQUSWFP3IKZXG"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "1C1p1QgG/xyvP7hQq/GpkGusGfQP88BLCMqIUlYr9oU="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDKD22ZRRSJOYXJFZ64PZZG4OXQWE4RKMPF47ND6SS72U3YNKYZOMVZ5"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "1D1rMYyS7F0lz7j85Nx14WJyKmPLz7R+lL+qbw1WMuY="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDKE226TWSRJRM2KI5O5JJ4XILM3TJHRGG7IQEUHGQZ7WNYKCFIODINR"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "1E1r07SimLNKR13Up5dC2bmk8TG+iBKHNDP7NwoRUOE="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDKF22XD6656GXOF5274SMTUN3WTI3TP6KA7JGMENEHTAZEXQGDENQJM"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "1F1q4/e7413F7r/JMnRu7TRub/KB9JmEaQ8wZJeBhkY="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDKG22CQZV2S6FCSOSPYLTOQ6RB4IINMCR5K7IMA2TL4FIFC4VZMYGMU"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "1G1oUM11LxRSdJ+FzdD0Q8QhrBR6r6GA1NfCoKLlcsw="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDKH22NGJ7TQ7S6EB4SNGQVF5ADOB3VBK4U3EO2GZM7XJRCILMDQI6QF"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "1H1ppk/nD8vEDyTTQqXoBuDuoVcpsjtGyz90xEhbBwQ="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDKI22YQ44W7IGIRSQCNVEIAQS3WQ5WIBP4OT3ZF5MQW57TFVE4XTA7E"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "1I1rEOct9BkRlATakQCEt2h2yAv46e8l6yFu/mWpOXk="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDKJ22TPWN7RV54OFVIHTJZA4GPZO7CYISUUZQ2C3FD3FPWX4SEQDKMP"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "1J1qb7N/GveOLVB5pyDhn5d8WESpTMNC2UeyvtfkiQE="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDKK225NND5CVSY7NHWSAZ4ENJDZ7SQAM5A5B6KWSERG5MWUI6HHAHCM"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "1K1rrWj6Kssfae0gZ4RqR5/KAGdB0PlWkSJustRHjnA="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDKL22EUNI44V2PBGLD6TLEWSUPRTLESVOYT4RWW6KXY2KARPR7GRMER"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "1L1olGo5yunhMsfprJaVHxmskquxPkbW8q+NKBF8fmg="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDKM22WCXLCCMYFV3JX2HDXJOJFT6PEDJMKCJI5A2274AEIVPDZWEXTP"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "1M1qwrrEJmC12m+jjulySz88g0sUJKOg1r/AERV482I="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDKN22NVCBKRYHMU27KIQLBDCY2COA54VZIJ3UGXUYBI4AWR6OITBOVF"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "1N1ptRBVHB2U19SILCMWNCcDvK5QndDXpgKOAtHzkTA="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDKO22Q6WTVAYXGNCYPCOZX76I77GLL4FC4GD7I4EQYYPIS2XHNJRZME"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "1O1qHrTqDFzNFh4nZv/yP/MtfCi4Yf0cJDGHolq52pg="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDKP22MAMRH6BU5E4ZI3UGGT6YVV7AQPWIF4SQR42PYDSYWBR7LEG33S"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "1P1pgGRP4NOk5lG6GNP2K1+CD7ILyUI80/A5YsGP1kM="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDKQ22UKJZC3FQ7FAGQXXNN67TOXYBSWCVBIR5QY7BBPM3RVZYMUAGIK"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "1Q1qik5FssPlAaF7tb783XwGVhVCiPYY+EL2bjXOGUA="
+                    }
                 }
             ],
-            "payload": ""
+            "payload": "",
+            "lock_height": "0"
         },
         {
             "type": 0,
             "inputs": [
                 {
-                    "utxo": "0xd44608de8a5015b04f933098fd7f67f84ffbf00c678836d38c661ab6dc1f149606bdc96bad149375e16dc5722b077b14c0a4afdbe6d30932f783650f435bcb92",
-                    "signature": "0x0cfcac83c22d943f31cf02df9dcf31e9df957487a885f30456727cb1a5530741cf64c729988825e3b2c2540da65ba69b7a3901a804a2f3c1af6a19a6368b09dc"
+                    "utxo": "0x775b3cc936f4e9f6176ce33152c1cc2ab368e3b2a19d19127424551661be2308874c3522e7290752d300de1b64e368c89618a870c5a02914e5b5f0ae07f366a0",
+                    "unlock": {
+                        "bytes": "W01swh2fh11Tf8N/zDrPIoUVYskN/k1BnbuhRk6wZYntgInx33pEoRp/Ua6FcN8dNZv2EfCn0pREvmWXx4EiAw=="
+                    },
+                    "unlock_age": 0
                 }
             ],
             "outputs": [
                 {
                     "value": "24400000000000",
-                    "address": "GDDW22ZCJHHIRE3HB4QMJFGBR7CPVXSRQCG2AVEVSINZ45FUDI72DZJI"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "x21rIknOiJNnDyDElMGPxPreUYCNoFSVkhuedLQaP6E="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDX22K66JM3EIEXRQNIWWO6YXE37WSROYLFNYRBCVL6UH6GGZT55CBK"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "x31pXvJZsiCXjBqLWd7Fyb/aUXYWVuIhFVfqH8Y2Z94="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDY22GHHZTYZTQP2BDP6I3RFR327OPM2CBTO37FO2SA2LYFI6CCJKTN"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "x41oxz5njM4P0Eb/I3Esd6+57NCDN2/ldqQNLwVHhCQ="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDDZ22E4HB2BA7LF5AVCFDSWAV2GYJML5N2ELTAHNJR4TBBNLGKBUICC"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "x51onDh0EH1l6CoijlYFdGwli+t0RcwHamPJhC1ZlBo="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEA22CLN3HBFMOECEA52VOMM4RSQFEX6ACICSTGLN3S5DLMMUPKTSEI"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yA1oS27OErHEEQHdVcxnIygUl/AEgUpmW3cujWxlHqk="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEB22BTNEHGYOXSQFBLQU5ELBULP2JPNUUC6KJ4CDCY3WBQF7NGGZ55"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yB1oM2kObDrygUK4U6RYaLfpL20oLyk8EMWN2DAv2mM="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEC22SEWGZ7PNMBQRPECFL3ASTK43IUIZPX5UR74FYGQGAC7DIC5HAV"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yC1qRLGz97WBhF5BFXsEpq5tFEZfftI/4XBoGAL40C4="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDED22RMEUO6E7I3X2IYAETVY32LHK2WSOHBRVYPCQT2WMR5ZFT5PG5B"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yD1qLCUd4n0bvpGAEnXG9LOrVpOOGNcPFCerMj3JZ9c="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEE22ZPHIV2QDMFKV67REGISQW5BPBX5PBCNPH3PGNMDMSGTXVGH462"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yE1rLzorqA2FVX34kMiULdC8N+vCJrz7eZrBskad6mM="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEF22NJNE4V6LM2TDLHJRBB6PLSJXMBLZYZGXHHU7DA43I5JHML6EAJ"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yF1pqWk5Xy2amNZ0xCHz1yTdgV5xk1znp8YObR1J2L8="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEG22CG6IQLPVENM2XQNKMU66XEAURE5IRIB45KUKT6MMAII4ZVAD4P"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yG1oRvIgt9SNZq8GqZT3rkBSJOoigPOqoqfmMAhHM1A="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEH22VQGIO2TOCKCKNDSOPMLEGPC5CJNEYU3MMA4OBA4MXL2RFELSO5"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yH1qsDIdqbhKEpo5OexZDPF0SWkxTbGA44IOMuvUSkU="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEI22J3IR744JMWBMFCO5KXAIHIHVJ4YE7IFHZIR3MEW7O2JT5I7RZO"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yI1pO0R/ziWWCwondVcCDoPVPME+gp8ojthLfdpM+o8="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEJ22BQCRECQDAPY4HGXGEHQKAAA34JIDYIT3WJANOVZ2JMQXCMGFFU"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yJ1oMBRIKAwPxw5rmIeCgABviUDwie7JA11c6SyFxMM="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEK22URO47P7H4BPCFFP3L6D4SFCJIYWWECATGA5QJ6DG6R4NL65YJA"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yK1qkXc+/5+BeIpX7X4fJFElGLWIIEzA7BPhm9HjV+4="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEL22YYLOYB5DFFZRVBRMWKS5F4OYAHTVGOGH7XTQJK4J7KALXZCGFD"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yL1rGFuwHoylzGoYssqXS8dgB51M4x/3nBKuJ+oC75E="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEM22YKORETWRBTANTKMPJHWZVBK5D2QSIYQDYPRWMM7KKUEZ24KPEN"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yM1rCnRJO0QzA2amPSe2ahV0eoSRiA8PjZjPqVQmdcU="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEN22ZR754DZAC3JAQ7FTTNBR32TDDKHZNTNAZ3CCB3A3F7ZW7HBPVZ"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yN1rMf94PIBbSCHyzm0Md6mMaj5bNoM7EIOwbL/NvnA="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEO22DOEMOSLOJUIF7E6EGUSY2IVZCHZJNBO2PUFWWLAID7K5XWJNYQ"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yO1obiMdJbk0QX5PENSWNIrkR8paF2n0LaywIH9Xb2Q="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEP22J2IVC4OH7A4O7X6R42ZCKN2BCIN5SWPGRC7BWB43INC6SHXQD3"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yP1pOkVFxx/g479/R5rIlN0ESG9lZ5oi+GwebQ0XpHs="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEQ22Z6GNDWAGOOLLVSJF2ZJ4WIWZ7SC5ONXLR6HFCWGSRVTRESWKCG"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yQ1rPjNHYBnOWuskl1lPLItn8hdc264+OUVjSjWcSSs="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDER22N6N2KPG3RXEQ6GCIOF46Y56JQGWWDY3USINAWYU3IBBU3GRJ2R"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yR1pvm6U8243JDxhIcXnsd8mBrWHjdJIaC2KbQENNmg="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDES22LPDL6FBAUXQZAHXU4ZDLZJ7YZZHNDS22BREPV3RIA6GKQD6BU6"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yS1pbxr8UIKXhkB705ka8p/jOTtHLWgxI+u4oB4yoD8="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDET22XPKJ7XJXIWFTNAXQJG4RRPSDZJUHQAPTLZZGV2TLGG7RHEPAHD"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yT1q71J/dN0WLNoLwSbkYvkPKaHgB815yauprMb8Tkc="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDEU22CIQGY4QXP7RLWAIGQBTPTYZTPCBCDSUQWKRU2V3HCACGZZLSNP"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "yU1oSIGxyF3/iuwEGgGb54zN4giHKkLKjTVdnEARs5U="
+                    }
                 }
             ],
-            "payload": ""
+            "payload": "",
+            "lock_height": "0"
         },
         {
             "type": 0,
             "inputs": [
                 {
-                    "utxo": "0xc3780f9907a97c20a2955945544e7732a60702c32d81e016bdf1ea172b7b7fb96e9a4164176663a146615307aaadfbbad77e615a7c792a89191e85471120d314",
-                    "signature": "0x0997245f1e06dcdc36568770dd36192c696d0597cafeaada0e0b4bbbf8c0bfb0f5ece0878c71dca2704858ac27c07ce858d8c46b3efdd9b40bef3ef5d85d303d"
+                    "utxo": "0x915d3527aa034cdc1bbd92fc7d4691adc10c00489dd3522c8685d70bb0606558ba3367812694b6f2753c34b3e7e117ed22968d3c64bf09c319f4cb67f9c2fde1",
+                    "unlock": {
+                        "bytes": "dz0XKOY58KaqTPshUlOg4OOwsKy2uWe0GZL4bQfcQEIMNVt0Jp19dxgA4rtM1icTo8588h06hESmYvRGWmq4Ag=="
+                    },
+                    "unlock_age": 0
                 }
             ],
             "outputs": [
                 {
                     "value": "24400000000000",
-                    "address": "GDAQN22G36YSEQX6ESSPE6M63MKD2XO3APQLYMDNENRKH6NSEOSILQ66"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wQbrRt+xIkL+JKTyeZ7bFD1d2wPgvDBtI2Kj+bIjpIU="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAQO22PYHC3Q2LJH6C46C73TEVZJBGWRJF63S4CHWJLAFRYUSFXVEFC"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wQdrT8HFuGlpP4XPC/uZK5SE1opL7cuCPZKwFjiki3o="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAQP22BJ6B3QB2SJOW2EWSVFZHQTCKTZGIQDHKBJRJNMO733T4LGO2L"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wQfrQU+DuAdSS62iWlUuTwmJU8mRAZ1BTFLWO/vc+LM="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAQQ22KZZPUEUZQE74A3ZFIORJCAGOFFKOA6QZEPP56F2DOZEDNHOY5"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wQhrSs5fQlMwJ/gN5Kh0UiAZxSqcD0Mke/vi6G7JBtM="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAQR22V7E2GXTVCC7OCQG7WVCUNYIPATO6HPFTUKAAFNLU3KBGZEI73"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wQjrVfk0a86iF9woG/aoqNwh4Ju8d5Z0UABWrptQTZI="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAQS22C26VTBXEVBHW7CJU4HT5GGFIY5DB5E6EHYJM2FDHXKDD2PMZT"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wQlrQterMNyVCe3xJpw8+mMVGOjD0niHwlmijPdQx6c="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAQT22KZB4TX74J2I5YSHH4JBLKFDLU3BR27K2PXJAOWNDS3CYA5MDY"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wQnrSsh5O/+J0juJHPxIVqKNdNhjr6tPukDrNHLYsA4="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAQU22W7CDD4E7SGMHAMTHPTGFY5T6LIR4LAXNWJNIX3WQO76RZKGR4"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wQprVviGPhPyMw4GTO+Zi47Py0R4sF22S1F92g7/o5U="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAQV22DHH2RRDUI25PUSV6O5HL6TG37VMZPJHKYGDVCZLP2CBZCQCCX"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wQrrQzn1GI6I119JV87p1+mbf6sy9J1YMOosrfoQcig="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAQW22A5AXVYLQJ5A5PXO457EX7SOKCELYYW72SPKXHDSEU5JH74TCK"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wQtrQOgvXC4J6Dr7u535L/k5QiLxi39Seq5xyJTqT/4="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAQX22SZUVUYQNRFHOCZC6OQQLPTO2ATSZVZP5C2QDNZM4AKABLXA76"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wQvrUs0rTEGxKdwsi86EFvm7QJyzXL+i1Abcs4BQArs="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAQY225QGBNAGZFZ3ABZ5KTUAJ3IW754H6V5SWM3X2OQNG42ACTOD3H"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wQxrXYGC0BslzsAc9VOgE7Rb/eH9XsrM3fToNNzQBTc="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAQZ22AYG6F5MVYWZCX55N5KX5T7NEX5O5DYFBUO5NKRKWCG6ETNGQZ"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wQzrQMG8XrK4tkV+9b1V+z+0l+u6PBQ0d1qoqsI3iTY="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDARA22HIOPB4AM7O4JY3HJ5X6W427AI3YGG2MILA6IOWBJLFAUFT5S4"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wRBrR0OeHgGfdxONnT2/rc18CN4MbTELB5DrBSsoKFk="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDARB22J3IB6WPPF3WPCQPYGIMC7ZMP5ZWQALHDNJYEAKBSCZBA5UK5G"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wRDrSdoD6z3l3Z4oPwZDBfyx/c2gBZxtTggFBkLIQdo="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDARC22DRZTVX3HBTFBQRXKL6PHWLMNEZUTYBQ2CCVOP7MSZYM53EZJY"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wRFrQ45nW+zhmUMI3Uvzz2WxpM0ngMNCFVz/slnDO7I="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDARD22Y3JIQZMPJGF6C55BBPWMKIEFUCZGDMCMJGQILMBK3WOSLGX7D"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wRHrWNpRDLHpMXwu9CF9mKQQtBZMNgmJNBC2BVuzpLM="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDARE22P4JHI2HBVDSLT3UHNR7R6VGU5OCWJV6BEP5C4Y5PFF64CCJRO"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wRJrT+JOjRw1HJc90O2P4+qanXCsmvgkf0XMdeUvuCE="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDARF22ROUJJ5KJTAQLZCD7VX76XPHQVXZFRBY4NRNPHHLS6H7NCTZYK"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wRLrUXUSnqkzBBeRD/W//XeeFb5LEOONi15zrl4/2ik="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDARG22MPHDIHYZ4HAJDIB3YEDXX3YCNCDG5WHFI6KBFQ4WRDAHTRYWU"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wRNrTHnGg+M8OBI0B3gg733gTRDN2xyo8oJYctEYDzg="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDARH22M6SS7V3OIRL6TPXGZRU5IZLUKJMCBMLK7MB2DCIZ3RK7AT4CX"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wRPrTPSl+u3Iiv033NmNOoyuiksEFi1fYHQxIzuKvgk="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDARI22RSVE5FBABIOJB45Q4N5BJ5H2XJBEGFGIBZ35MYDCVSXIMSNRK"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wRRrUZVJ0oQBQ5IedhxvQp6fV0hIYpkBzvrMDFWV0Mk="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDARJ22J6O6OKOA7FAS6BSYO564QA3JC2U3UZZSZEF34CBUJPYS7Y2U4"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wRTrSfO85TgfKCXgyw7vuQBtItU3TOZZIXfBBol+Jfw="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDARK22YQQHWGMEEMG5RFIJZE6O3JSOAO47W7QTYLOSCQNFBVTG3XIGB"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wRVrWIQPYzCEYbsSoTknnbTJwHc/b8J4W6QoNKGszbs="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDARL22RUQZKAB2UJWXLDLVWMDWDZ67PBFIHOT2I566JFKRV4JAWCFEN"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wRXrUaQyoAdUTa6xrrZg7Dz77wlQd09I77ySqjXiQWE="
+                    }
                 }
             ],
-            "payload": ""
+            "payload": "",
+            "lock_height": "0"
         },
         {
             "type": 0,
             "inputs": [
                 {
-                    "utxo": "0x451a5b7929615121e0f2be759222853ea3acb45c94430a03de29a47db7c70e04eb4fce5b4a0c5af01d98331732546fede05fdfaf6ab429b3960aad6a20bbf0eb",
-                    "signature": "0x00a5da65a28dd44896934f8a72e52245473eaa72a264b100de58a037b1347a86159566d5be17445a1e51460cd5d45119eac365a1dc031b38c9ae399b70b8afbf"
+                    "utxo": "0x93c2aee604cb2ee81317aecdc471519e4b628447db99d2fe02771023a46dbfd670d30a73817775dfded1a9e5521886a7f30f6af4aa1d94c0af5a419be3de7fec",
+                    "unlock": {
+                        "bytes": "y8eZvuiEuRuEwW6UNF8A4EUT5XYU77oYunHBmrQSXP05MMiYximkW+FUagwdaXXc85oIt6mJcbhDtzWf+7LwBA=="
+                    },
+                    "unlock_age": 0
                 }
             ],
             "outputs": [
                 {
                     "value": "24400000000000",
-                    "address": "GDALT22IX7WGIDUWUIMI4B2G3ZBATIEWHIMTTMLEPMNSELI6YLROUF27"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wLnrSL/sZA6WohiOB0beQgmgljoZObFkexsiLR7C4uo="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDALU22D7HEUYVTWYTXRCBXH2FVLLJIFIQNLC3DTSYRDB5IUJEYJRD7D"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wLprQ/nJTFZ2xO8RBufRarWlBUQasWxzliIw9RRJMJg="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDALV22LVN22O3CKILLVGU33OA46M4Y3QWUMAERUHEIQMFQYIB4KAVQ7"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wLrrS6t1p2xKQtdTU3twOeZzG4WowBI0OREGFhhAeKA="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDALW22GBHJ6VKPMKB35AOJTASCIYYR6OSQFJDTT6TWBSR6PLTSBZACP"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wLtrRgnT6qnsUHfQOTMEhIxiPnSgVI5z9OwZR89c5Bw="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDALX22VYK2R4TXIOXSUZCLTE2OFNPEEUZVWI5V2F2RQZVSR4GGEAK4P"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wLvrVcK1Hk7odeVMiXMmnFa8hKZrZHa6LqMM1lHhjEA="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDALY22OSRYDDSHYMEULCQQX3NVZZFUAUHMXQB6UVMRKYR3OGNHB3P6Y"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wLxrTpRwMcj4YSixQhfba5yWgKHZeAfUqyKsR24zTh0="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDALZ22QJPRED22UT5RE7DFPTJA4CFYGDVQ764BYMFD7FTONCL4QYNXD"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wLzrUEviQetUn2JPjK+aQcEXBh1h/3A4YUfyzc0S+Qw="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAMA22J4PGXDCHDDFADHXK5FRZHGXG7OBY3RA7ZWULIRNIRAX2FAAG2"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wMBrSePNcYjjGUAz3V0scnNc33BxuIP5tRaItREF9FA="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAMB22XEB6EWANXZRKPK7IFPTSCD37VQLPIT3FAJX2SUUVBCGV4YBLL"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wMDrVyB8SwG3zFT1fQV85CHv9YLeieygTfUqUqERq8w="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAMC224M2DVLKEEULGLGEONHHVPRDMGL3QWISXKYDDPBZACKOEIWJMD"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wMFrXGaHVaiEosyzEc056viNhl7hZErqwMbw5AJTiIs="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAMD22CLQYQMGTHVSR3ANNCLDWAM25XQHU4QG3PZ7MNL4YDU5265GFL"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wMHrQlwxBhpnrKOwNaJY7AZrt4HpyBtvz9jV8wOnde4="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAME22M6QAQH3CUHKTO4UZK6UXNSXGMIP2XLFGO3RXWR44JEXYGIMLI"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wMJrTPQBA+xUOqbuUyr1LtlczEP1dZTO3G9o84kl8GQ="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAMF22W32YDE3XB5T7DGPZHCZ5Z6EF5XJNBSGEWQRSRUTBBN3FJ4EKZ"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wMLrVt6wMm7h7P4zPycWe58QvbpaGRiWhGUaTCFuyp4="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAMG22Q6EYKK64VRRRIWR6475UIATR54K2RBOPHIY2ID5PYMRZJOWTY"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wMNrUPEwpXuVjGKLR9z/aIBOPeK1ELnnRjSB9fhkcpc="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAMH22EE3TUPMAWK5LJIQ6HNMAO53LK3YKWRVPI6GWYDD5CNJLZF2C6"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wMPrRCbnR7AWV1aUQ8drAO7tat4VaNXo8a2Bj6JqV5I="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAMI22VXN7NT5BRTYSGSQK4MOXHOVSB42M3H4UQGXUVKOKCHJTTQA4R"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wMRrVbt+2fQxniRpQVxjrndWQeaZs/KQNelVOUI6Zzg="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAMJ22ES622Y5NYHDJ4SCV3OGPV4BGTXSZAEJPU2NCXDCMXIEHXAVAI"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wMTrRJe1rHW4ONPJCrtxn14E07yyAiX000VxiZdBD3A="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAMK225BAMYPIEZHXNZDENFFVBCJZTDSN33TP4A7SIM4LQM5HMTQVXG"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wMVrXQgZh6CZPduRkaUtQiTmY5N3ub+A/JDOLgzp2Tg="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAML22RPH2Z63Z547WFYMUKUJOQAGORGUT2LEUODPXZ2M7NNBD2QBYB"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wMXrUXn1n2895+xcMoqiXQAZ0TUnpZKOG++dM+1oR6g="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAMM22D45NAX7I2JFQR7BCR53XGFM2TUUGYIHRVO3TTUO3UIAPMQBU7"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wMZrQ+daC/0aSWEfhFHu7mKzU6UNhB41duc6O3RAHsg="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAMN22GYROO4DFLWWJUZN6NAAQW2D65VXNSSDJGOM7BSMABTP5MVY2U"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wMbrRsRc7gyrtZNMt80AIW0P3a3bKQ0mcz4ZMAGb+so="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAMO22JB425UAA5OG7LFJXZ6MJFQE4EFONHV2SZLWBDI2MEAW6CXHYC"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wMdrSQ812gAdcb6ypvnzElgThCuaeupZXYI0aYQFvCs="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GA5WUJ54Z23KILLCUOUNAKTPBVZWKMQVO4O6EQ5GHLAERIMLLHNCSKYH"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAMQ22JXRRXD7X5KKLMEPQ57N4PMZG2EG3N76I6YLICQK3HQP66MFWB"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wMhrSbxjcf79UpbCPh37ePZk2iG23/kewtAoK2eD/eY="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDAMR22C6L45IQKEFC4ZA4EIPC6CNK7HDLEV7DW4KMQWVITXB7NS26TW"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wMjrQvL51EFEKLmQcIh4vCar5xrJX47cUyFqoncP2y0="
+                    }
                 }
             ],
-            "payload": ""
+            "payload": "",
+            "lock_height": "0"
         },
         {
             "type": 0,
             "inputs": [
                 {
-                    "utxo": "0xff05579da497ac482ccd2be1851e9ff1196314e97228a1fca62e6292b5e7ea91cadca41d6afe2d57048bf594c6dd73ab1f93e96717c73c128807905e7175beeb",
-                    "signature": "0x03995e6d6831cb6f17f294bd19ec07c90d22a0c33418010e9073d93e561a9c2d9ac77ad8e8d02d9f8b97d3d1f056390bd0796c29327835b8bc026e65f288b73a"
+                    "utxo": "0x4fe19f5f98fa94746f13bc00eeda81073569191e490817245cecacf15fb4b2cc36670dc4dc9307594b64dd5150ee29935ee72d8f48110abf6f9002a266805215",
+                    "unlock": {
+                        "bytes": "1wvt81WxOBE30qqvsaQpjLXr9YOMpst9tHzQFIDAZYtkNyyATpZ4yGxLuoq83Xg7S98RPmxYM66fB3Td9nzRBA=="
+                    },
+                    "unlock_age": 0
                 }
             ],
             "outputs": [
                 {
                     "value": "24400000000000",
-                    "address": "GDME22AQV3RDGS64F2XUSEWHAKSE7YAY5WQQGLDSOKNAY5G2DPROZQ44"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2E1oEK7iM0vcLq9JEscCpE/gGO2hAyxycpoMdNob4uw="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMF22GNY7GXSBIGNUYZ2MUOE46E57S3JLLCERLHDETGMSD5JNSLSSOH"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2F1ozcfNeQUGbTGdMo4nPE7+W0rWIkVnGSZmSH1LZLk="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMG22QS6BU5DIWDN6KT4DTGEKPYQYHRN7SCDUP6OPZ7WH34QUJ7Y5X5"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2G1qEvBp0aLDb5U+DmYin4hg8W/kIdH+c/P7H3yFE/w="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMH22F3BKBSHYEL7WJCTAGKVNAXU2I4UUUXQ36JEZ44CQOQQG7BXOBE"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2H1ouwqDI+CL/ZIpgMqrQXppHKUpeG/JJnnBQdCBvhs="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMI22XJQP3UQWZUMXJWMJLSU2626QY57ZDFGVHXENVBW74YNKQEMSHE"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2I1q6YP3SFs0ZdNmJXKmva9DHf5GU1T3I2obf5hqoEY="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMJ22ANVXGDZXXV4F4QA3XC243YKOTZ35K6IJTYZAR5KTVP3EJ3JPJT"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2J1oDa3MPN714XkAbuLXN4U6ed9V5CZ4yCPVTq/ZE7Q="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMK22YZINLXNYH64YXZFCMSHHVKQXCRQNEMOPAZYBIZEWEMVETQRFXH"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2K1rGUNXduD+5i+SiZI56qhcUYNIxzwZwFGSWIypJwg="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDML22LKP3N6S37CYIBFRANXVY7KMJMINH5VFADGDFLGIWNOR3YU7T6I"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2L1pan7b6W/iwgJYgbeuPqYliGn7UoBmGVZkWa6O8U8="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMM22LU54X5YHGWQYS3TWNNNL2BZJ4AMIEKNQREEB4TKMB56IYIOXNH"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2M1pdO8v3BzWhiW52a1q9ByngGIIpsIkIHk1MD3yMIc="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMN22O4APCNQ4ICXRCY2BWTPBHQDVFSS27CRERRYL6ZCRQBUV2BEFME"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2N1p3APE2HECvEWNBtN4TwHUspa+KJIxwv2RRgGldBI="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMO22SYVHF5CXPIABI3F2MOL3L6XQF37GLU2W3SHEOIQZHXJSLFFS7W"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2O1qWKnL0V3oAFGy6Y5e1+vAu/mXTVtyORyIZPdMllI="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMP225FPLLGIRNIUJFP2QHAI3V6YCA3DT2HMBNQTMIO5EZPDH3EDIIA"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2P1rpXrWZEWookr9QOBG6+wIGxz0dgWwmxDuky8Z9kE="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMQ22YRJOQQS3UGGE43SDTS6I7F35DF442IVDS4RSUF4MJOPF3DNQDO"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2Q1rEUuhCW6GMTm5DnLyPl30Zec0io5cjKheMS55djY="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMR22F4O4GNVYTBNGBKLAK3ET25SHURBIVLHVTRDGMY5VVI3LPV4CUF"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2R1ovHcM2uJhaYKlgVsk9dkekQoqs9ZxGZmO1qja314="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMS22YAXJOT545SOSIN5ASLSAXKIDUHN7YMSRUAB7NB6QNCYLTQKQSK"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2S1rALpdPvOydJDegkuQLqQOh2/wyUaAD9ofQaLC5wU="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMT22RY3GWK5VP2N7QF7ULTQ2AS5OHIZQV5HKL5PFBIRGUC5MT27CUE"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2T1qONmsrtX6b+Bf0XOGgS646Mwr06l9eUKImoLrJ68="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMU22SCMIXRGW4Y7NK7BOJHB4ES3VFWLK7KFXC5Z3HSHNFFXGLEWD6I"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2U1qQmIvE1uY+1XwuScPCS3Utlq+otxdzs8jtKW5lks="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMV22ZPCUQWB7SLQNXRMW4XZ3RUUD6P5WMLACTZ6G7KOMSB3ZMCUMGN"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2V1rLxUhYP5Lg28WW5fO40oPz+2YsAp58b6nMkHeWCo="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMW22LVW4KDMDFMCN4GN4FEFFSPMJTJ7H7PRUFQBNRKA4W4EHXCCEFU"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2W1pdbcUNgysE3hm8KQpZPYmafn++NCwC2Kgctwh7iE="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMX22AL3QGJT55FNSNAQDWBK3JGO5G3QYBHFCWZGI6CTHFWJCOYIPZF"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2X1oC9wMmfelbJoIDsFW0md024YCcorZMjwpnLZInYQ="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMY22XQ7UECVQBWTY7SIDTEFK4CGPCKLRQPCWS47XS3NPXKVPYVR7GX"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2Y1q8P0IKsA2nj8kDmQquCM8Slxg8Vpc/eW2vuqr8Vg="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDMZ2253Q62MV5CWQ6EIVDZYFNI3BGWFIOHCUDNW5SK643JFNIA7T7O3"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2Z1ru4e0yvRWh4iKjzgrUbCaxUOOKg227JXubSVqAfk="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDNA22QDAJRNNPD7BEJG4INCI2HOBUOVNQJLRBMNXHEDBXH6JQCQPWSW"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2g1qAwJi1rx/CRJuIaJGjuDR1WwSuIWNucgw3P5MBQc="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDNB22W7MUI36RFJFGBK6VDYQ23XOMPJYWE53LB6UZH4AYV6RUN76RC4"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2h1q32URv0SpKYKvVHiGt3cx6cWJ3aw+pk/AYr6NG/8="
+                    }
                 },
                 {
                     "value": "24400000000000",
-                    "address": "GDNC22KXQGDKH6EO2UIOWNCYOPMO6XZX7T6P4TH6XZ4UYSR6JOBGY5U6"
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2i1pV4GGo/iO1RDrNFhz2O9fN/z8/kz+vnlMSj5Lgmw="
+                    }
                 }
             ],
-            "payload": ""
+            "payload": "",
+            "lock_height": "0"
         }
     ],
     "merkle_tree": [
-        "0x58bc048310290f51f8b375dfab9fe944d339d7574968692bb0ce3c76e10735a33ba7fd8d036ed2f9684a32d81a9bbb57a4a8b866f374ed23d0e82a04eae38f12",
-        "0x6fb9fdd10fd9815cbf306b32966817497af1297657384b14c440748984ed6afe103d5ae66f1a77853bcd752d6503b322393fa67bc4771c9f44a141e6890e647e",
-        "0x734dcbfd5188561b62f82380d6dc89cd717c1b838741538d88711311d03ce60652e6d7b84071215ac865828059aac32ade5ba606bea0507d15bbfbe699563797",
-        "0xaae1812666f9f662640f468a569ffe8069490911bd92e485a01125bb3b7bd78fde9670f50b321173c9100f0b91b22e8a2e7353942b09c0997e8343e6fb819837",
-        "0xcfa89b7a9cd48fddc16cdcbbf0ffa7a9fd14d89c96bc3da0151db0bd7e453fe031f8a1e4d575a299c16942d9c96fbafff2497332bc48532aa7e0acf6122be0e2",
-        "0xd1d6741c13f9b3b6a30fa16f1acfd024619a6a46aff4c41d5f719ca2352ce93b89bb90ce4204465c6ab5d572d3a31998de3849f2207a5265b2326a50f68acc90",
-        "0xf0401db46c76a4f44b56ffde9f0257c6fa2c7834c5ca6ce8d9573cd8c801cc0a0b39f7b7c29dacafddc34c86148dacd31761b96e3e12a4a7f64caa3b8733f828",
-        "0xf42270b0cf540c9775c34d190810e36503f9848fc3ff4a285dcdaae9797b4cd5133f666a89749ed21d0056345f660b7d6970fe01c9ab3c6b2820b759f1cc2573",
-        "0xc94b58be9822615057bb4b1d5f55536bc06af5bb080bcae977c032178a36c20ed5e5cb2465132b0818dbca7b4ca4cc115c86d3728abc503d19fc42eca4942fb6",
-        "0x37e17420b4bfd8be693475fbbe8b53bb80904dd3e45f3080c0d0b912b004324a27693559d884b943830f6a21b05c69061f453e8b9f03d56f3b6fd5b0c6fc2f8b",
-        "0xdc9e8820a47e1ea6c53fa7387d1ebc97c36515c518d46d2fcac39a27c6bc42292972328fec12c0a715f9b5a1b5be502480e8d79cd0dbe771099656972915811b",
-        "0xbdb17763b66d5ad08a195f391bcd2fad19b195d1e172343a061ea8f9987b12505e4c1dcdced9e4db0cd36117410fd18a5a1759df98b07c937dcc6e3a0a844ff6",
-        "0x717d20ea864bda13052a78df7ebcc024201bffd0a6157f1b5502a6fc0451594db306663c1da90d8c7b498cab783969b6bef2650ef35f3d49ae5c6ab6729b8cda",
-        "0x1793bb0c224a2bf793719f296d623cffa5f49b4a9c939364487ed5964053e2f5f41506d7b6b1c12e77879758a9b28399d58686ab6e3412917ef292d75fd955c5",
-        "0x85367aedf5cb99ca54510464fa6af150c836539c457229f6bad4c838ddf52fb3b793e256a1f258ba7810236c426645ad357abc265c5a3e1ed836250c23706dd4"
+        "0x535b358337d919474f3043db1f292a1ac44a4f4dbbaa6d89226c7abd96c38bf96018e67828ec539623e475d480af99499368780ae346dfb6cb048b377cbc92d0",
+        "0x3a432315ff72629fcf896f4b0a0e444221be9c6d962e1888a463c8dfcb8a9d4b537a577196753a3f00bb943d45f298b45231787b5745efed36bb5a702593121b",
+        "0x7e9627f8caf47a4f4386625c6adb315dfb3ef18507a57c7112c364cad1c3bb133a20100baf92b354e5615b0e5d30010ebe174ca3b29f18c307b03a806d34af86",
+        "0xad26e8b9389735998c152d2a433419e963bbf1aaf95d30f5ac716f1e826a4d4ccde15aae9d79b7f9f6eec44134427fb4ba6c45791949c8e5577fd2cf91daf639",
+        "0xa52c2c49ebdfe831074d5c0bb4139cd12a3c6c3b4ee0ee2f3394db36a2131ed2e7de7500cffd2e8cd2a8ab44e8c7797f4ba54ec87ab5d35e69e8a4c1539ee0e1",
+        "0xc0dd3f9e1c37ec1ac037685ce96417339b5d97bb4a9560e4e7ad7dd79f3f8d5646c6c7bbc3473502aa8fea6ad0e691992e5e7fa1c73c44d174dfc4196a52d84f",
+        "0x4a71597cc5ae77e385d967a59ec64fc467b7ddf8fcae8a9e9f954a121c4ac8c0ac40a772afdbd10107580eaeab0a70bed96e8293863dfdf569605855adc25458",
+        "0xe23833078b443658a3ba0a30dce59d06fb07a11ec087337b5070aafdb0ce64dee2ada8180769cea60d7c60d93a6d212651d8b99f92ec728d77a570afb9b052b4",
+        "0xb142eb406707e6177cac878eff7f5fa56015b66cc0e7b0aaaff5fc07f3560ac364f8265a88995695b4b1f8464634eed17cc5dfc4f13da7731a0c78d150137c77",
+        "0x73986a582a08631cfaece0035a0012d8574aca73813da00700a90558eca2147f78d6a1c3b6aa50ea1c4abb3c270bf34fae717eaffc5ee092a1ee4ec3803f5bfd",
+        "0xe1f132ca886fbc0446903caf2ca7d8fe7a8083ec5ebf49c889e3a3bac1d5d71089cdb4c86e10dbdf0760951b45473fc7ff3aedd87a71ac92719596e919713af5",
+        "0x4d87c84b49460d2293a4bfdd5de142693b456f9bb053a750ebdff1cefd061b9f81af2421235e73c9953adfa7208f397277276d31c42ead5a2a646c61f888547a",
+        "0x85ded90255bbd1629b44b4448ceafdba9c5d1208ba2c85d8dd7f7ae278c87b8797a2b2a297e004b0c4daea7506d064a7820a15df065bc6aecd5c75f2b37bd65c",
+        "0x943cb81d3af818b91ab200a1a8f5820a98ba02c5b98c6f8d03589175cc257fc8008ada7aa47ee1d879a79bc04d4eab7448de42c2c5174ba066981fe03f295bf5",
+        "0x7da70e52f75480b8f8eac191980e3ac37669612fb22c8d4b2b23cf8281968dd827822863bd38bc93acdec7b18cf272be38c33eb663a44de60af878cd480c4554"
     ]
 }
