@@ -2,8 +2,10 @@ import { AgoraClient } from './modules/agora/AgoraClient';
 import { cors_options } from './cors';
 import { LedgerStorage } from './modules/storage/LedgerStorage';
 import { logger } from './modules/common/Logger';
-import { Height, PreImageInfo, Hash, hash, Block, Utils,
-    Endian, Transaction, hashFull, DataPayload } from 'boa-sdk-ts';
+import {
+    Height, PreImageInfo, Hash, hash, Block, Utils,
+    Endian, Transaction, hashFull, DataPayload, PublicKey
+} from 'boa-sdk-ts';
 import { WebService } from './modules/service/WebService';
 import { ValidatorData, IPreimage, IUnspentTxOutput,
     ITxHistoryElement, ITxOverview, ConvertTypes, DisplayTxType, IPendingTxs } from './Types';
@@ -352,6 +354,13 @@ class Stoa extends WebService
         let address: string = String(req.params.address);
 
         logger.http(`GET /utxo/${address}}`);
+
+        let reason = PublicKey.validate(address);
+        if (reason !== '')
+        {
+            res.status(400).send(`${reason} address: ${address}`);
+            return;
+        }
 
         this.ledger_storage.getUTXO(address)
             .then((rows: any[]) => {

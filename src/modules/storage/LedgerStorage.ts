@@ -16,8 +16,6 @@ import {
     TxInput, TxOutput, makeUTXOKey, hashFull, TxType,
     Utils, Endian, PublicKey
 } from 'boa-sdk-ts';
-import { assert, AssertionError } from 'chai';
-import { logger } from '../common/Logger';
 import { Storages } from './Storages';
 
 /**
@@ -1045,8 +1043,14 @@ export class LedgerStorage extends Storages
      */
     public getUTXO (address: string): Promise<any[]>
     {
+        let reason = PublicKey.validate(address);
+        if (reason !== '') {
+            return Promise.reject(new Error(reason));
+        }
+        let key = new PublicKey(address);
+        let key_hash = hashFull(key);
         let sql_utxo =
-            `SELECT
+                `SELECT
                 O.utxo_key as utxo,
                 O.amount,
                 T.block_height,
@@ -1058,7 +1062,10 @@ export class LedgerStorage extends Storages
                 INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
                 INNER JOIN blocks B ON (B.height = T.block_height)
             WHERE
-                O.address = ?
+                (
+                    ((O.lock_type = 0) AND (O.lock_bytes = ?)) OR
+                    ((O.lock_type = 1) AND (O.lock_bytes = ?))
+                )
                 AND O.used = 0;
             ORDER BY T.block_height, O.amount
             `;
@@ -1071,15 +1078,16 @@ export class LedgerStorage extends Storages
                 INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
                 INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
             WHERE
-                S.address = ?;
+                ((S.lock_type = 0) AND (S.lock_bytes = ?)) OR
+                ((S.lock_type = 1) AND (S.lock_bytes = ?))
            `;
 
         let result: any[];
         return new Promise<any[]>((resolve, reject) => {
-            this.query(sql_utxo, [address])
+            this.query(sql_utxo, [key.data, key_hash.data])
                 .then((utxos: any[]) => {
                     result = utxos;
-                    return this.query(sql_pending, [address]);
+                    return this.query(sql_pending, [key.data, key_hash.data]);
                 })
                 .then((pending: any[]) => {
                     resolve(result.filter(n => pending.find(m => (Buffer.compare(n.utxo, m.utxo) === 0)) === undefined));
