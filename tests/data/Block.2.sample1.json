@@ -1,8 +1,8 @@
 {
     "header": {
-        "prev_block": "0x360259b201326a3e4025462e50cd3ba5eb6f8fe06783382ef511da7706d12d7415ed93a7980c996d665674bc581130237cd521bfd1fa8307890008674c1cfc42",
+        "prev_block": "0x8fe0ba63553a5c2ac7d91d346894674bea11a706a211817f5b400743ba87d9fa31753e008ba6ab970be3b2da29f25732abdc440f934903bfc4a4f12bcf886a7c",
         "height": "2",
-        "merkle_root": "0xfd9ee620bb9a47bdfb772d7c1af331cecefd8592b1dfee9c8780b8abf897a6d4f7eedadec08da695804079efea4965ae6254ce61664ad8fc7db46aa03ae7527c",
+        "merkle_root": "0xb9bba5048acf0c1802b19fb1d73e78c6a8cde6142c62c550c9f5441abaeb5b39b9b9dbb41301336adcd7e41306411bacd0238cb8f72dfed686bf2c897c51ce4e",
         "validators": "[252]",
         "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
         "enrollments": [],
@@ -91,11 +91,37 @@
             ],
             "payload": "",
             "lock_height": "0"
+        },
+        {
+            "type": 0,
+            "inputs": [
+                {
+                    "utxo": "0x8b2d3db0c4ca12e7ce3a44d28ad3201dc5dd3818333926b4682224d7dc7dd447e7b6fa6b46724944a7fb84b4bb378bee742a92de4dedb624b3fa0a4fa62fb711",
+                    "unlock": {
+                        "bytes": "IDStzJm0eJiDTvrC/etbWNFjwulbWeQyjHvigv/dc7QaK84aimXZgubM+/OxJ5Biyq4SnbKAtvaE2e7e+KGgBt5daXrLvSbmM/tj6nXVXPuE5pCcuY2P/XoMExcgzT0G"
+                    },
+                    "unlock_age": 0
+                }
+            ],
+            "outputs": [
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "3m1pCGsVeb8B3CFDKoeFw5VJurs4sAqAa1Jo4wTyZwI="
+                    }
+                }
+            ],
+            "payload": "",
+            "lock_height": "0"
         }
     ],
     "merkle_tree": [
         "0x91de02460f72697f82c714aedb367eca757ea721e013f5c9627deeabcc2ef3234809428922f1b04cde9520a9f312130ac9bea7bf264e7192eae1cd7ba9c3e26e",
         "0x4c1d71415c9ec7b182438e8bb669e324dde9be93b9c223a2ca831689d2e9598c628d07c84d3ee0941e9f6fb597faf4fe92518fa35e577ba12125919c0501d4bd",
-        "0xfd9ee620bb9a47bdfb772d7c1af331cecefd8592b1dfee9c8780b8abf897a6d4f7eedadec08da695804079efea4965ae6254ce61664ad8fc7db46aa03ae7527c"
+        "0x032eb59c2263f8f6d415fa060179d7fe0690888a7c851f1e27a1f79040cf73e4f3747d3542674ab9ddb80339796bd4f906a015ea97013b05b073e7e799df2fd3",
+        "0xfd9ee620bb9a47bdfb772d7c1af331cecefd8592b1dfee9c8780b8abf897a6d4f7eedadec08da695804079efea4965ae6254ce61664ad8fc7db46aa03ae7527c",
+        "0x5fabfbdc5ccf99dd8e383db91300f8c7cfb5267d444a2627ec753979d8ac067aed19ce8925362f128c05900edebc22834be3fba6baeef9ba2ed0b73057b3ae3f",
+        "0xb9bba5048acf0c1802b19fb1d73e78c6a8cde6142c62c550c9f5441abaeb5b39b9b9dbb41301336adcd7e41306411bacd0238cb8f72dfed686bf2c897c51ce4e"
     ]
 }

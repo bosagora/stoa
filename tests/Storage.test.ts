@@ -48,8 +48,8 @@ describe ('Test ledger storage and inquiry function.', () =>
         assert.strictEqual(rows.length, 1);
         assert.strictEqual(rows[0].height, height_value);
         assert.strictEqual(new Hash(rows[0].merkle_root, Endian.Little).toString(),
-            '0x7da70e52f75480b8f8eac191980e3ac37669612fb22c8d4b2b23cf8281968dd' +
-            '827822863bd38bc93acdec7b18cf272be38c33eb663a44de60af878cd480c4554');
+            '0x911890b2ff4429e1beccb4ab5ba7458cc469e8fc455c5df67291ada2c5818cc' +
+            '65a3d11220e877b746a284c95294488d4c7e8ed47b02213e3ce74389c442d9cc1');
     });
 
     it ('Test for transaction', async () =>

@@ -400,6 +400,28 @@ describe ('Test of the path /utxo', () =>
         assert.deepStrictEqual(response.data, expected);
     });
 
+    // Search by the hash of the entered address.
+    it ('Test of the path /utxo no pending transaction, LockType is KeyHash', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("utxo")
+            .filename("GDPF22L2ZO6SNZRT7NR6U5OVLT5YJZUQTS4Y3D75PIGBGFZAZU6QNLED");
+
+        let response = await client.get (uri.toString());
+        let expected = [
+                {
+                    utxo: '0x8b2d3db0c4ca12e7ce3a44d28ad3201dc5dd3818333926b4682224d7dc7dd447e7b6fa6b46724944a7fb84b4bb378bee742a92de4dedb624b3fa0a4fa62fb711',
+                    type: 0,
+                    unlock_height: '2',
+                    amount: '24400000000000',
+                    height: '1',
+                    time: 1596753600
+                }
+            ];
+        assert.deepStrictEqual(response.data, expected);
+    });
+
     it ('Store one pending transaction', async () =>
     {
         let uri = URI(host)
