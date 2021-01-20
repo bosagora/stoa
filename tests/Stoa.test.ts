@@ -395,7 +395,9 @@ describe ('Test of the path /utxo', () =>
                 amount: '24400000000000',
                 height: '1',
                 time: 1596753600,
-                unlock_height: '2'
+                unlock_height: '2',
+                lock_bytes: "wGjrV+Is0jvFO3G34okd30FESntMARJgpUxNmBapXy8=",
+                lock_type: 0
             }];
         assert.deepStrictEqual(response.data, expected);
     });
@@ -416,7 +418,9 @@ describe ('Test of the path /utxo', () =>
                     unlock_height: '2',
                     amount: '24400000000000',
                     height: '1',
-                    time: 1596753600
+                    time: 1596753600,
+                    lock_bytes: "ERKFaVsC1XVveC4wIxocan3Iv5igofUDH8sxTU96bfTBRwNt7ido6Y+SKt5Oi6k31zGIsOX07/vUKx1u9htEjA==",
+                    lock_type: 1
                 }
             ];
         assert.deepStrictEqual(response.data, expected);
