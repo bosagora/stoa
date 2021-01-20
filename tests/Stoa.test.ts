@@ -300,29 +300,21 @@ describe ('Test of Stoa API Server', () =>
         await delay(100);
     });
 
-    it ('Test of the path /pending_transactions/:address', (doneIt: () => void) =>
+    it ('Test of the path /wallet/transactions/pending/:address', async () =>
     {
         let uri = URI(host)
             .port(port)
-            .directory("pending_transactions")
+            .directory("/wallet/transactions/pending")
             .filename("GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ");
 
-        client.get (uri.toString())
-            .then((response) =>
-            {
-                assert.strictEqual(response.data.length, 1);
-                assert.strictEqual(response.data[0].tx_hash, '0x42febd46e93ace' +
-                    'bfc7f81e7a8b0228c5c4fed42de29bb5b4872b09699c28bb3b29e8dbb' +
-                    'c65eb3a46b60ccb688e8a6d4ffbc341a0d59f7de13d28de2fede5566d');
-                assert.strictEqual(response.data[0].address, 'GCOMMONBGUXXP4RFCYGEF74JDJVPUW2GUENGTKKJECDNO6AGO32CUWGU');
-                assert.strictEqual(response.data[0].amount, '1663400000');
-                assert.strictEqual(response.data[0].fee, '0');
-            })
-            .catch((error) =>
-            {
-                assert.ok(!error, error);
-            })
-            .finally(doneIt);
+        let response = await client.get (uri.toString())
+        assert.strictEqual(response.data.length, 2);
+        assert.strictEqual(response.data[0].tx_hash, '0x42febd46e93ace' +
+            'bfc7f81e7a8b0228c5c4fed42de29bb5b4872b09699c28bb3b29e8dbb' +
+            'c65eb3a46b60ccb688e8a6d4ffbc341a0d59f7de13d28de2fede5566d');
+        assert.strictEqual(response.data[0].address, 'GCOMMONBGUXXP4RFCYGEF74JDJVPUW2GUENGTKKJECDNO6AGO32CUWGU');
+        assert.strictEqual(response.data[0].amount, '1663400000');
+        assert.strictEqual(response.data[0].fee, '0');
     });
 });
 

@@ -1289,7 +1289,7 @@ export class LedgerStorage extends Storages
      * Lists the total by output address of the pending transactions.
      * @param address The input address of the pending transaction
      */
-    public getTransactionsPending (address: string): Promise<any[]>
+    public getWalletTransactionsPending (address: string): Promise<any[]>
     {
         let sql =
             `SELECT
