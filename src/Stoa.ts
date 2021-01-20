@@ -125,7 +125,7 @@ class Stoa extends WebService
         this.app.get("/utxo/:address", this.getUTXO.bind(this));
         this.app.get("/wallet/transactions/history/:address", this.getWalletTransactionsHistory.bind(this));
         this.app.get("/wallet/transaction/overview/:hash", this.getWalletTransactionOverview.bind(this));
-        this.app.get("/transactions/pending/:address", this.getTransactionsPending.bind(this));
+        this.app.get("/wallet/transactions/pending/:address", this.getWalletTransactionsPending.bind(this));
         this.app.post("/block_externalized", this.postBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
         this.app.post("/transaction_received", this.putTransaction.bind(this));
@@ -671,19 +671,19 @@ class Stoa extends WebService
     }
 
     /**
-     * GET /transactions/pending/:address
+     * GET /wallet/transactions/pending/:address
      *
      * Called when a request is received through the `/transactions/pending/:address` handler
      *
      * Returns List the total by output address of the pending transaction.
      */
-    private getTransactionsPending (req: express.Request, res: express.Response)
+    private getWalletTransactionsPending (req: express.Request, res: express.Response)
     {
         let address: string = String(req.params.address);
 
-        logger.http(`GET /transactions/pending/${address}}`);
+        logger.http(`GET /wallet/transactions/pending/${address}}`);
 
-        this.ledger_storage.getTransactionsPending(address)
+        this.ledger_storage.getWalletTransactionsPending(address)
             .then((rows: any[]) => {
                 if (!rows.length)
                 {
