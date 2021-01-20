@@ -1049,6 +1049,8 @@ export class LedgerStorage extends Storages
             `SELECT
                 O.utxo_key as utxo,
                 O.amount,
+                O.lock_type,
+                O.lock_bytes,
                 T.block_height,
                 B.time_stamp as block_time,
                 T.type,
