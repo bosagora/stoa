@@ -1312,10 +1312,10 @@ export class LedgerStorage extends Storages
                             ON O.utxo_key = I.utxo
                     WHERE
                         O.used = 0
-                        AND O.address = ?
+                        AND O.address LIKE ?
                 ), NULL)
             GROUP BY T.tx_hash, O.address;`;
 
-        return this.query(sql, [address]);
+        return this.query(sql, [address + `%`]);
     }
 }

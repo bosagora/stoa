@@ -316,6 +316,23 @@ describe ('Test of Stoa API Server', () =>
         assert.strictEqual(response.data[0].amount, '1663400000');
         assert.strictEqual(response.data[0].fee, '0');
     });
+
+    it ('Test of the path /wallet/transactions/pending/:address - partial address', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("/wallet/transactions/pending")
+            .filename("GDAGR22X4IWNEO6FHNY3PYU");
+
+        let response = await client.get (uri.toString())
+        assert.strictEqual(response.data.length, 2);
+        assert.strictEqual(response.data[0].tx_hash, '0x42febd46e93ace' +
+            'bfc7f81e7a8b0228c5c4fed42de29bb5b4872b09699c28bb3b29e8dbb' +
+            'c65eb3a46b60ccb688e8a6d4ffbc341a0d59f7de13d28de2fede5566d');
+        assert.strictEqual(response.data[0].address, 'GCOMMONBGUXXP4RFCYGEF74JDJVPUW2GUENGTKKJECDNO6AGO32CUWGU');
+        assert.strictEqual(response.data[0].amount, '1663400000');
+        assert.strictEqual(response.data[0].fee, '0');
+    });
 });
 
 describe ('Test of the path /utxo', () =>
