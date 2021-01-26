@@ -235,6 +235,7 @@ export interface IPendingTxs
     address: string;
     amount: string;
     fee: string;
+    tx: object;
 }
 
 /**

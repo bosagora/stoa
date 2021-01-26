@@ -699,7 +699,8 @@ class Stoa extends WebService
                         submission_time: row.time,
                         address: row.address,
                         amount: BigInt(row.amount).toString(),
-                        fee: BigInt(0).toString()
+                        fee: BigInt(0).toString(),
+                        tx: row.tx
                     }
                     pending_array.push(tx);
                 }

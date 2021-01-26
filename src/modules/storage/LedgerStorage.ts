@@ -14,7 +14,7 @@
 import {
     Block, Enrollment, Hash, Height, PreImageInfo, Transaction,
     TxInput, TxOutput, makeUTXOKey, hashFull, TxType,
-    Utils, Endian
+    Utils, Endian, DataPayload, Signature, PublicKey
 } from 'boa-sdk-ts';
 import { assert, AssertionError } from 'chai';
 import { logger } from '../common/Logger';
@@ -1296,7 +1296,9 @@ export class LedgerStorage extends Storages
                 T.tx_hash,
                 T.time,
                 O.address,
-                IFNULL(SUM(O.amount), 0) as amount
+                IFNULL(SUM(O.amount), 0) as amount,
+                T.type,
+                T.payload
             FROM
                 transaction_pool T
                 LEFT OUTER JOIN tx_output_pool O
@@ -1316,6 +1318,32 @@ export class LedgerStorage extends Storages
                 ), NULL)
             GROUP BY T.tx_hash, O.address;`;
 
-        return this.query(sql, [address]);
+        return new Promise<any[]>(async (resolve, reject) =>
+        {
+            let rows: any[] = [];
+            try
+            {
+                rows = await this.query(sql, [address]);
+                for (let row of rows)
+                {
+                    let input_rows = await this.query("SELECT * FROM tx_input_pool WHERE tx_hash = ?;", [row.tx_hash]);
+                    let output_rows = await this.query("SELECT * FROM tx_output_pool WHERE tx_hash = ?;", [row.tx_hash]);
+
+                    let inputs:Array<TxInput> = [];
+                    for (let input_row of input_rows)
+                        inputs.push(new TxInput(new Hash(input_row.utxo, Endian.Little), new Signature(input_row.signature, Endian.Little)));
+                    let outputs:Array<TxOutput> = [];
+                    for (let output_row of output_rows)
+                        outputs.push(new TxOutput(output_row.amount, new PublicKey(output_row.address)));
+                    row.tx = new Transaction(row.type, inputs, outputs, new DataPayload(row.payload, Endian.Little))
+                }
+            }
+            catch (error)
+            {
+                reject(error);
+                return;
+            }
+            resolve(rows);
+        });
     }
 }
