@@ -657,15 +657,15 @@ class Stoa extends WebService
      */
     private putTransaction (req: express.Request, res: express.Response)
     {
-        if (req.body.transaction === undefined)
+        if (req.body.tx === undefined)
         {
-            res.status(400).send({ statusMessage: "Missing 'transaction' object in body"});
+            res.status(400).send({ statusMessage: "Missing 'tx' object in body"});
             return;
         }
 
-        logger.http(`POST /transaction_received transaction=${req.body.transaction.toString()}`);
+        logger.http(`POST /transaction_received tx=${req.body.tx.toString()}`);
 
-        this.pending = this.pending.then(() => { return this.task({type: "transaction", data: req.body.transaction}); });
+        this.pending = this.pending.then(() => { return this.task({type: "transaction", data: req.body.tx}); });
 
         res.status(200).send();
     }
