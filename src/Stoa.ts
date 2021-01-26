@@ -122,6 +122,7 @@ class Stoa extends WebService
         this.app.get("/block_height", this.getBlockHeight.bind(this));
         this.app.get("/validators", this.getValidators.bind(this));
         this.app.get("/validator/:address", this.getValidator.bind(this));
+        this.app.get("/transaction/pending/:hash", this.getTransactionPending.bind(this));
         this.app.get("/utxo/:address", this.getUTXO.bind(this));
         this.app.get("/transaction/status/:hash", this.getTransactionStatus.bind(this));
         this.app.get("/wallet/transactions/history/:address", this.getWalletTransactionsHistory.bind(this));
@@ -374,6 +375,47 @@ class Stoa extends WebService
                 logger.error("Failed to data lookup to the DB: " + err);
                 res.status(500).send("Failed to data lookup");
             });
+    }
+
+    /**
+     * GET /transaction/pending/:hash
+     *
+     * Called when a request is received through the `/transaction/pending/:hash` handler
+     *
+     * Returns a pending transaction by the transaction hash.
+     */
+    private getTransactionPending (req: express.Request, res: express.Response)
+    {
+        let hash: string = String(req.params.hash);
+
+        logger.http(`GET /transaction/pending/${hash}}`);
+
+        let tx_hash: Hash;
+        try
+        {
+            tx_hash = new Hash(hash);
+        }
+        catch (error)
+        {
+            res.status(400).send(`Invalid value for parameter 'hash': ${hash}`);
+            return;
+        }
+
+        this.ledger_storage.getTransactionPending(tx_hash)
+            .then((tx) => {
+                if (tx === null)
+                {
+                    res.status(204).send(`No pending transactions. hash': (${hash})`);
+                    return;
+                }
+
+                res.status(200).send(JSON.stringify(tx));
+            })
+            .catch((err) => {
+                    logger.error("Failed to data lookup to the DB: " + err);
+                    res.status(500).send("Failed to data lookup");
+                }
+            );
     }
 
     /**

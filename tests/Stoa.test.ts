@@ -317,35 +317,67 @@ describe ('Test of Stoa API Server', () =>
         assert.strictEqual(response.data[0].fee, '0');
     });
 
-    it ('Test of the path /transaction/status/:hash', async () =>
-    {
+    it ('Test of the path /transaction/status/:hash', async () => {
         let uri = URI(host)
             .port(port)
             .directory("/transaction/status")
-            .filename("0x42febd46e93acebfc7f81e7a8b0228c5c4fed42de29bb5b4872b09699c28bb3b29e8dbbc65eb3a46b60ccb688e8a6d4ffbc341a0d59f7de13d28de2fede5566d");
+            .filename("0xe57d70273bbb37525365036715a4546d6dd93b131d166678679fd68e73116cc71cea1c733a61dc8ceffffbd139e42ea862714a99f9611aaf3c31ec7bcff459de");
 
         let response_pending = await client.get(uri.toString());
         let expected_pending = {
             status: 'pending',
-            tx_hash: '0x42febd46e93acebfc7f81e7a8b0228c5c4fed42de29bb5b4872b09699c28bb3b29e8dbbc65eb3a46b60ccb688e8a6d4ffbc341a0d59f7de13d28de2fede5566d'
+            tx_hash: '0xe57d70273bbb37525365036715a4546d6dd93b131d166678679fd68e73116cc71cea1c733a61dc8ceffffbd139e42ea862714a99f9611aaf3c31ec7bcff459de'
         }
         assert.deepStrictEqual(response_pending.data, expected_pending);
 
         uri = URI(host)
             .port(port)
             .directory("/transaction/status")
-            .filename("0x58bc048310290f51f8b375dfab9fe944d339d7574968692bb0ce3c76e10735a33ba7fd8d036ed2f9684a32d81a9bbb57a4a8b866f374ed23d0e82a04eae38f12");
+            .filename("0x486f08b5a70297c6255647002afa26cd83e2d6ddbc421daf88289b79f13082727d6850e015458c63715937d01c97bde8476eb5d5a456fe10a935f8a2a6605bb4");
 
         let response_confirmed = await client.get(uri.toString());
         let expected_confirmed = {
             status: "confirmed",
-            tx_hash: "0x58bc048310290f51f8b375dfab9fe944d339d7574968692bb0ce3c76e10735a33ba7fd8d036ed2f9684a32d81a9bbb57a4a8b866f374ed23d0e82a04eae38f12",
+            tx_hash: "0x486f08b5a70297c6255647002afa26cd83e2d6ddbc421daf88289b79f13082727d6850e015458c63715937d01c97bde8476eb5d5a456fe10a935f8a2a6605bb4",
             block: {
                 height: 1,
-                hash: "0xc970f97b114565115caeea0fcbf9d2bac65e2c9526c146febc14d151c3e6647c61eec1e9310270e273b8c7f79663260a6a0d45acdde808402efd515f5f5db2e1"
+                hash: "0x3d534f47594b2379603ec520faf7420244fd210db15a256164016018f6f1aa27d093c2957c2f4fd0b95987534339a7b7714c755cad241a454fd1c9d2aaa04bab"
             }
         };
         assert.deepStrictEqual(response_confirmed.data, expected_confirmed);
+    });
+
+    it ('Test of the path /transaction/pending/:hash', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("/transaction/pending")
+            .filename("0xe57d70273bbb37525365036715a4546d6dd93b131d166678679fd68e73116cc71cea1c733a61dc8ceffffbd139e42ea862714a99f9611aaf3c31ec7bcff459de");
+
+        let response = await client.get (uri.toString());
+        let expected = {
+            "type": 0,
+            "inputs": [
+                {
+                    "utxo": "0x1043966f59e323f9455575f4aab47c446c05a8fd375a38c8b69222ad25b83fbdf9904f676ab697e0d088c6b28c342a5b47ced960bbad76fcc5eeb46f4b3ce3f2",
+                    "signature": "0x0d03da825413591095d09648136924b08f6490d2fdabe60ff41080f62a32f7dfca4e4872bf12404f6bd1e696500d700574130f511a54b31eae32cd33875ce637",
+                    "unlock_age": 0
+                }
+            ],
+            "outputs": [
+                {
+                    "value": 1663400000,
+                    "address": "GCOMMONBGUXXP4RFCYGEF74JDJVPUW2GUENGTKKJECDNO6AGO32CUWGU"
+                },
+                {
+                    "value": 24398336600000,
+                    "address": "GDID227ETHPOMLRLIHVDJSNSJVLDS4D4ANYOUHXPMG2WWEZN5JO473ZO"
+                }
+            ],
+            "payload": "0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff",
+            "lock_height": "0"
+        };
+        assert.deepStrictEqual(expected, response.data);
     });
 });
 
