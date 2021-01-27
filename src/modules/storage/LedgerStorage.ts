@@ -1326,4 +1326,66 @@ export class LedgerStorage extends Storages
 
         return this.query(sql, [address]);
     }
+
+    /**
+     * Provides a status of a transaction.
+     * @param tx_hash The hash of the transaction
+     */
+    public getTransactionStatus (tx_hash: string): Promise<any>
+    {
+        let hash = new Hash(tx_hash).toBinary(Endian.Little);
+
+        let sql_tx =
+            `SELECT
+                B.hash,
+                T.block_height as height,
+                T.tx_hash
+            FROM
+                blocks B
+                INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?);`;
+
+        let sql_tx_pending =
+            `SELECT
+                T.tx_hash
+            FROM
+                transaction_pool T
+            WHERE
+                T.tx_hash = ?;`;
+
+        let result: any = {};
+        return new Promise<any>(async (resolve, reject) =>
+        {
+            try
+            {
+                let rows = await this.query(sql_tx_pending, [hash])
+                if (rows.length > 0)
+                {
+                    result.status = "pending";
+                    result.tx_hash = rows[0].tx_hash;
+                    resolve(result);
+                }
+                else
+                {
+                    rows = await this.query(sql_tx, [hash]);
+                    if (rows.length > 0)
+                    {
+                        result.status = "confirmed";
+                        result.tx_hash = rows[0].tx_hash;
+                        result.block = { hash: rows[0].hash, height: rows[0].height };
+                        resolve(result);
+                    }
+                    else
+                    {
+                        result.status = "not found";
+                        result.tx_hash = hash;
+                        resolve(result);
+                    }
+                }
+            }
+            catch (error)
+            {
+                reject(error);
+            }
+        });
+    }
 }

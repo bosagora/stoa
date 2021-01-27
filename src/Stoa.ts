@@ -5,7 +5,7 @@ import { logger } from './modules/common/Logger';
 import { Height, PreImageInfo, Hash, hash, Block, Utils,
     Endian, Transaction, hashFull, DataPayload } from 'boa-sdk-ts';
 import { WebService } from './modules/service/WebService';
-import { ValidatorData, IPreimage, IUnspentTxOutput,
+import { ValidatorData, IPreimage, IUnspentTxOutput, ITxStatus,
     ITxHistoryElement, ITxOverview, ConvertTypes, DisplayTxType, IPendingTxs } from './Types';
 
 import bodyParser from 'body-parser';
@@ -123,6 +123,7 @@ class Stoa extends WebService
         this.app.get("/validators", this.getValidators.bind(this));
         this.app.get("/validator/:address", this.getValidator.bind(this));
         this.app.get("/utxo/:address", this.getUTXO.bind(this));
+        this.app.get("/transaction/status/:hash", this.getTransactionStatus.bind(this));
         this.app.get("/wallet/transactions/history/:address", this.getWalletTransactionsHistory.bind(this));
         this.app.get("/wallet/transaction/overview/:hash", this.getWalletTransactionOverview.bind(this));
         this.app.get("/wallet/transactions/pending/:address", this.getWalletTransactionsPending.bind(this));
@@ -338,6 +339,41 @@ class Stoa extends WebService
                 res.status(500).send("Failed to data lookup");
             }
         );
+    }
+
+    /**
+     * GET /transaction/status/:hash
+     *
+     * Called when a request is received through the `/transaction/status/:hash` handler
+     * The parameter `hash` is the hash of the transaction
+     *
+     * Returns a transaction status.
+     */
+    private getTransactionStatus (req: express.Request, res: express.Response)
+    {
+        let tx_hash: string = String(req.params.hash);
+
+        logger.http(`GET /transaction/status/${tx_hash}}`);
+
+        this.ledger_storage.getTransactionStatus(tx_hash)
+            .then((data: any) => {
+                let status: ITxStatus = {
+                    status: data.status,
+                    tx_hash: new Hash(data.tx_hash, Endian.Little).toString()
+                };
+                if (data.block !== undefined)
+                {
+                    status.block = {
+                        height: data.block.height,
+                        hash: new Hash(data.block.hash, Endian.Little).toString()
+                    };
+                }
+                res.status(200).send(JSON.stringify(status));
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err);
+                res.status(500).send("Failed to data lookup");
+            });
     }
 
     /**

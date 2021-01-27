@@ -238,6 +238,37 @@ export interface IPendingTxs
 }
 
 /**
+ * The interface of the transaction status
+ */
+export interface ITxStatus
+{
+    /**
+     * The status of the transaction ("pending", "confirmed", "not found")
+     */
+    status: string;
+
+    /**
+     * The hash of the transaction
+     */
+    tx_hash: string;
+
+    /**
+     * The information of the block
+     */
+    block?: {
+        /**
+         * The height of the block
+         */
+        height? : number;
+
+        /**
+         * The hash of the block
+         */
+        hash? : string;
+    }
+}
+
+/**
  * Define the types of transactions to be displayed in various applications
  */
 export enum DisplayTxType
