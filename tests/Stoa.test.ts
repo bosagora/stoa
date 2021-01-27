@@ -322,6 +322,37 @@ describe ('Test of Stoa API Server', () =>
         assert.strictEqual(response.data[0].amount, '1663400000');
         assert.strictEqual(response.data[0].fee, '0');
     });
+
+    it ('Test of the path /transaction/status/:hash', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("/transaction/status")
+            .filename("0xcf8e55b51027342537ebbdfc503146033fcd8091054913e78d6a858125f892a24b0734afce7154fdde85688ab1700307b999b2e5a17a724990bb83d3785e89da");
+
+        let response_pending = await client.get(uri.toString());
+        let expected_pending = {
+            status: 'pending',
+            tx_hash: '0xcf8e55b51027342537ebbdfc503146033fcd8091054913e78d6a858125f892a24b0734afce7154fdde85688ab1700307b999b2e5a17a724990bb83d3785e89da'
+        }
+        assert.deepStrictEqual(response_pending.data, expected_pending);
+
+        uri = URI(host)
+            .port(port)
+            .directory("/transaction/status")
+            .filename("0x535b358337d919474f3043db1f292a1ac44a4f4dbbaa6d89226c7abd96c38bf96018e67828ec539623e475d480af99499368780ae346dfb6cb048b377cbc92d0");
+
+        let response_confirmed = await client.get(uri.toString());
+        let expected_confirmed = {
+            status: "confirmed",
+            tx_hash: "0x535b358337d919474f3043db1f292a1ac44a4f4dbbaa6d89226c7abd96c38bf96018e67828ec539623e475d480af99499368780ae346dfb6cb048b377cbc92d0",
+            block: {
+                height: 1,
+                hash: "0x8fe0ba63553a5c2ac7d91d346894674bea11a706a211817f5b400743ba87d9fa31753e008ba6ab970be3b2da29f25732abdc440f934903bfc4a4f12bcf886a7c"
+            }
+        };
+        assert.deepStrictEqual(response_confirmed.data, expected_confirmed);
+    });
 });
 
 describe ('Test of the path /utxo', () =>
