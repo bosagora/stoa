@@ -85,16 +85,6 @@ export interface IUnspentTxOutput
      * Block time on created
      */
     time: number;
-
-    /**
-     * The type of lock script in transaction output
-     */
-    lock_type: number;
-
-    /**
-     * The bytes of lock script in transaction output
-     */
-    lock_bytes: string;
 }
 
 /**
