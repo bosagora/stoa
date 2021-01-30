@@ -199,7 +199,7 @@ describe ('Test of Stoa API Server', () =>
             const enroll_sig =
                 new Signature("0x0c48e78972e1b138a37e37ae27a01d5ebdea193088ddef2d9883446efe63086925e8803400d7b93d22b1eef5c475098ce08a5b47e8125cf6b04274cc4db34bfd");
             const utxo_key =
-                new Hash("0x46883e83778481d640a95fcffd6e1a1b6defeaac5a8001cd3f99e17576b809c7e9bc7a44c3917806765a5ff997366e217ff54cd4da09c0c51dc339c47052a3ac");
+                new Hash("0x23f35dcecc3c7ab1c91bfbd24c9568a63fdfe273bfc263ebaf81349c063c43a32b978fb5d058281f39c6c0a9b918a4a6b7c0f16b2e37f738ba0c2999a692afbf");
             const random_seed =
                 new Hash("0xe0c04a5bd47ffc5b065b7d397e251016310c43dc77220bf803b73f1183da00b0e67602b1f95cb18a0059aa1cdf2f9adafe979998364b38cd5c15d92b9b8fd815");
             const enrollment = new Enrollment(utxo_key, random_seed, 20, enroll_sig);
@@ -309,9 +309,9 @@ describe ('Test of Stoa API Server', () =>
 
         let response = await client.get (uri.toString())
         assert.strictEqual(response.data.length, 2);
-        assert.strictEqual(response.data[0].tx_hash, '0x42febd46e93ace' +
-            'bfc7f81e7a8b0228c5c4fed42de29bb5b4872b09699c28bb3b29e8dbb' +
-            'c65eb3a46b60ccb688e8a6d4ffbc341a0d59f7de13d28de2fede5566d');
+        assert.strictEqual(response.data[0].tx_hash,
+            '0xe57d70273bbb37525365036715a4546d6dd93b131d166678679fd68e73116cc' +
+            '71cea1c733a61dc8ceffffbd139e42ea862714a99f9611aaf3c31ec7bcff459de');
         assert.strictEqual(response.data[0].address, 'GCOMMONBGUXXP4RFCYGEF74JDJVPUW2GUENGTKKJECDNO6AGO32CUWGU');
         assert.strictEqual(response.data[0].amount, '1663400000');
         assert.strictEqual(response.data[0].fee, '0');
@@ -377,7 +377,7 @@ describe ('Test of the path /utxo', () =>
         let expected = [
             {
                 type: 0,
-                utxo: '0xd9482016835acc6defdfd060216a5890e00cf8f0a79ab0b83d3385fc723cd45bfea66eb3587a684518ff1756951d38bf4f07abda96dcdea1c160a4f83e377c32',
+                utxo: '0x1043966f59e323f9455575f4aab47c446c05a8fd375a38c8b69222ad25b83fbdf9904f676ab697e0d088c6b28c342a5b47ced960bbad76fcc5eeb46f4b3ce3f2',
                 amount: '24400000000000',
                 height: '1',
                 time: 1596753600,

@@ -48,8 +48,8 @@ describe ('Test ledger storage and inquiry function.', () =>
         assert.strictEqual(rows.length, 1);
         assert.strictEqual(rows[0].height, height_value);
         assert.strictEqual(new Hash(rows[0].merkle_root, Endian.Little).toString(),
-            '0x85367aedf5cb99ca54510464fa6af150c836539c457229f6bad4c838ddf52fb' +
-            '3b793e256a1f258ba7810236c426645ad357abc265c5a3e1ed836250c23706dd4');
+            '0x9a358f42166b25cac7e9b92ff01ffd4247d32d49d400e03c41f82ffeba84a3f' +
+            'de55ecf5e12d383e5074ec3f9d565c12e300744a4c40b3dc4606c91c72a5c4f35');
     });
 
     it ('Test for transaction', async () =>
@@ -57,23 +57,23 @@ describe ('Test ledger storage and inquiry function.', () =>
         let rows3 = await ledger_storage.getTransactions(new Height(0n));
         assert.strictEqual(rows3.length, 2);
         assert.strictEqual(new Hash(rows3[0].tx_hash, Endian.Little).toString(),
-            '0x6314ce9bc41a7f5b98309c3a3d824647d7613b714c4e3ddbc1c5e9ae46db297' +
-            '15c83127ce259a3851363bff36af2e1e9a51dfa15c36a77c9f8eba6826ff975bc');
+            '0x8072b135e72dd84d59793d97839680f96300ec783bdc9786ee418a50eb40914' +
+            'f88a5de87e12df58d227bd454b08710a9b2fa9a84ee1f3bbc82bd00ac1f360c48');
 
         let rows4 = await ledger_storage.getTxInputs(new Height(1n), 0);
         assert.strictEqual(rows4.length, 1);
         assert.strictEqual(new Hash(rows4[0].utxo, Endian.Little).toString(),
-            '0x6d85d61fd9d7bb663349ca028bd023ad1bd8fa65c68b4b1363a9c7406b4d663' +
-            'fd73fd386195ba2389100b5cd5fc06b440f053fe513f739844e2d72df302e8ad0');
+            '0x65d8c653afb5ef4a8dbd4b2046871a45aa034f8608c80d96efc229ce05cfa71' +
+            '18ac30c9697a2d52dc9e2c393dbb859d4673fd0ae163d58ccd543374c76fbdcb0');
 
         let rows5 = await ledger_storage.getTxOutputs(new Height(0n), 1);
         assert.strictEqual(rows5.length, 8);
         assert.strictEqual(new Hash(rows5[0].utxo_key, Endian.Little).toString(),
-            '0xfca92fe76629311c6208a49e89cb26f5260777278cd8b272e7bb3021adf4299' +
-            '57fd6844eb3b8ff64a1f6074126163fd636877fa92a1f4329c5116873161fbaf8');
+            '0x7f87e446561e3dd852180327d0115137c06079274af4a3319624891311e2802' +
+            'e630ac4aeff5a0158920a2c3041ef31546a2a57ff4e0f1f13e8d50cc2c5831a84');
         assert.strictEqual(new Hash(rows5[0].tx_hash, Endian.Little).toString(),
-            '0x7a5bfeb96f9caefa377cb9a7ffe3ea3dd59ea84d4a1c66304ab8c307a4f4770' +
-            '6fe0aec2a73ce2b186a9f45641620995f8c7e4c157cee7940872d96d9b2f0f95c');
+            '0xf806b1fcc4173e6c132def50f0d4f6fce90b7a3964520f42133e2f7e7389949' +
+            '128262d42351eec08da45428f83f1c2c0aa65798445661eda77b8fb2388766dc0');
         assert.strictEqual(rows5[0].address, 'GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ');
         assert.strictEqual(rows5[0].used, 1);
     });
@@ -86,15 +86,15 @@ describe ('Test ledger storage and inquiry function.', () =>
         assert.strictEqual(rows.length, 6);
         assert.strictEqual(rows[0].block_height, height_value);
         assert.strictEqual(new Hash(rows[0].utxo_key, Endian.Little).toString(),
-            '0x46883e83778481d640a95fcffd6e1a1b6defeaac5a8001cd3f99e17576b809c7e' +
-            '9bc7a44c3917806765a5ff997366e217ff54cd4da09c0c51dc339c47052a3ac');
+            '0x23f35dcecc3c7ab1c91bfbd24c9568a63fdfe273bfc263ebaf81349c063c43a' +
+            '32b978fb5d058281f39c6c0a9b918a4a6b7c0f16b2e37f738ba0c2999a692afbf');
 
         rows = await ledger_storage.getValidators(height);
         assert.strictEqual(rows.length, 6);
         assert.strictEqual(rows[0].enrolled_at, height_value);
         assert.strictEqual(new Hash(rows[0].utxo_key, Endian.Little).toString(),
-            '0x46883e83778481d640a95fcffd6e1a1b6defeaac5a8001cd3f99e17576b809c7e' +
-            '9bc7a44c3917806765a5ff997366e217ff54cd4da09c0c51dc339c47052a3ac');
+            '0x23f35dcecc3c7ab1c91bfbd24c9568a63fdfe273bfc263ebaf81349c063c43a' +
+            '32b978fb5d058281f39c6c0a9b918a4a6b7c0f16b2e37f738ba0c2999a692afbf');
         assert.strictEqual(rows[0].address,
             'GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY');
     });
@@ -113,8 +113,8 @@ describe ('Test ledger storage and inquiry function.', () =>
         assert.strictEqual(rows.length, 1);
         assert.strictEqual(rows[0].address, address);
         assert.strictEqual(new Hash(rows[0].stake, Endian.Little).toString(),
-            '0x46883e83778481d640a95fcffd6e1a1b6defeaac5a8001cd3f99e17576b809c7e9b' +
-            'c7a44c3917806765a5ff997366e217ff54cd4da09c0c51dc339c47052a3ac');
+            '0x23f35dcecc3c7ab1c91bfbd24c9568a63fdfe273bfc263ebaf81349c063c43a' +
+            '32b978fb5d058281f39c6c0a9b918a4a6b7c0f16b2e37f738ba0c2999a692afbf');
 
         rows = await ledger_storage.getValidatorsAPI(null, null);
         assert.strictEqual(rows.length, 6);
@@ -139,8 +139,8 @@ describe ('Test ledger storage and inquiry function.', () =>
         assert.strictEqual(rows[0].unlock_height, 2);
         assert.strictEqual(BigInt(rows[0].amount), BigInt('24400000000000'));
         assert.strictEqual(new Hash(rows[0].utxo, Endian.Little).toString(),
-            '0x2e04f355ab7fbc0b495f8267e362b6914b756a60e8c4627142b6a6bd85a20b59' +
-            '86838aaa7fc40f18b7c9601ccdba06cada0d7cb28e098b08605e21324e4bbd1d');
+            '0x4c12cb4f16ad9b46ee120cc2f0aed61828666898bae8bdfac541e022fbc3914' +
+            'a6a1c9cac8ed550dfcfbf357d1638f51fe1faa27fe23b26587077abbc35d78dfe');
     });
 
     it ('Test for UTXO in melting', async () => {
@@ -151,8 +151,8 @@ describe ('Test ledger storage and inquiry function.', () =>
         assert.strictEqual(rows[0].unlock_height, 2018);
         assert.strictEqual(BigInt(rows[0].amount), BigInt('4000000000000'));
         assert.strictEqual(new Hash(rows[0].utxo, Endian.Little).toString(),
-            '0x2065e56e5113084eaf8dcd8beb1010a313f8551642fa81575febeed9314a1ed' +
-            '0adbd86d2f1917b31852867d86415296a53bcde758fbfe9820b4d3684fbfa3175');
+            '0x09ef6dba7df31ed549797801369f363089d2a472341ae2111a4fd25a638c60a' +
+            'b7b63b9acb74b083d0186c3d409a7d79a7cd6d2594f680f4c791a9bf6d48930b9');
     });
 });
 
