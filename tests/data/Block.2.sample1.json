@@ -1,8 +1,8 @@
 {
     "header": {
-        "prev_block": "0x360259b201326a3e4025462e50cd3ba5eb6f8fe06783382ef511da7706d12d7415ed93a7980c996d665674bc581130237cd521bfd1fa8307890008674c1cfc42",
+        "prev_block": "0xc970f97b114565115caeea0fcbf9d2bac65e2c9526c146febc14d151c3e6647c61eec1e9310270e273b8c7f79663260a6a0d45acdde808402efd515f5f5db2e1",
         "height": "2",
-        "merkle_root": "0xfd9ee620bb9a47bdfb772d7c1af331cecefd8592b1dfee9c8780b8abf897a6d4f7eedadec08da695804079efea4965ae6254ce61664ad8fc7db46aa03ae7527c",
+        "merkle_root": "0xccf8e442027e5659ea787fca6eea64a258c8761f821646939f070f5ef902e9caa338f7bb31e38706fba7c5ebf1975e1b0d503b4bf943b265d860e1bffad14dea",
         "validators": "[252]",
         "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
         "enrollments": [],
@@ -15,87 +15,58 @@
             "type": 0,
             "inputs": [
                 {
-                    "utxo": "0x831e492f4401df05832b5958e54a7d248b69b7366e1e5723e36da97559a8213ac313ac32526001e4ae72f83f3bb7553d616049838b91f31be1daeab935eee82e",
-                    "unlock": {
-                        "bytes": "mAI6YrnOK0LVVi+DqlelwVf4yLenGmKeq+KPdFx+Wtr5nar1ppzFtSc4eegd/NeVDus3HWXhtdyQkNJPFFJACg=="
-                    },
-                    "unlock_age": 0
+                    "utxo": "0xd9482016835acc6defdfd060216a5890e00cf8f0a79ab0b83d3385fc723cd45bfea66eb3587a684518ff1756951d38bf4f07abda96dcdea1c160a4f83e377c32",
+                    "signature": "0x0b98c8e36c8a4fdcdbc3e6db77fea12edf7fbfbcc2e8e27ac76fa1a2f8a3b90500cdd2e14cb7d50750fcdfd5792e30555f66841da8498e8d47d9f510fbc6983e"
                 }
             ],
             "outputs": [
                 {
                     "value": "1663400000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "nMY5oTUvd/IlFgxC/4kaavpbRqEaaalJIIbXeAZ29Co="
-                    }
+                    "address": "GCOMMONBGUXXP4RFCYGEF74JDJVPUW2GUENGTKKJECDNO6AGO32CUWGU"
                 },
                 {
                     "value": "24398336600000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "0D1r5Jne5i4rQeo0ybJNVjlwfANw6h7vYbVrEy3qXc8="
-                    }
+                    "address": "GDID227ETHPOMLRLIHVDJSNSJVLDS4D4ANYOUHXPMG2WWEZN5JO473ZO"
                 }
             ],
-            "payload": "0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff",
-            "lock_height": "0"
+            "payload": "0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"
         },
         {
             "type": 0,
             "inputs": [
                 {
-                    "utxo": "0xc0abcbff07879bfdb1495b8fdb9a9e5d2b07a689c7b9b3c583459082259be35687c125a1ddd6bd28b4fe8533ff794d3dba466b5f91117bbf557c3f1b6ff50e5f",
-                    "unlock": {
-                        "bytes": "L8uqvcw6tamnMrKu9i8xJpmqy/JYRgLksPvCWYHilKGh5XWv0OK4shy8P68V65sLWlLMgYL91EsCzKjJC0xpAA=="
-                    },
-                    "unlock_age": 0
+                    "utxo": "0x4dde806d2e09367f9d5bdaaf46deab01a336a64fdb088dbb94edb171560c63cf6a39377bf0c4d35118775681d989dee46531926299463256da303553f09be6ef",
+                    "signature": "0x09bc280ce476225eadfe2185714df4ad38d568add13de3a3eb76c327faba40663409006ee9f0c645fc0297c36448a4ef07b7b21ea8fab9521005f50429ef9f61"
                 }
             ],
             "outputs": [
                 {
                     "value": "4000000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "2uGT6ekor8/HWR2ijoG2SXrc6XfFwBe1yBWSNNDlo7Q="
-                    }
+                    "address": "GDNODE7J5EUK7T6HLEO2FDUBWZEXVXHJO7C4AF5VZAKZENGQ4WR3IX2U"
                 },
                 {
                     "value": "4000000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "2uGT6ekor8/HWR2ijoG2SXrc6XfFwBe1yBWSNNDlo7Q="
-                    }
+                    "address": "GDNODE7J5EUK7T6HLEO2FDUBWZEXVXHJO7C4AF5VZAKZENGQ4WR3IX2U"
                 },
                 {
                     "value": "4000000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "2uGT6ekor8/HWR2ijoG2SXrc6XfFwBe1yBWSNNDlo7Q="
-                    }
+                    "address": "GDNODE7J5EUK7T6HLEO2FDUBWZEXVXHJO7C4AF5VZAKZENGQ4WR3IX2U"
                 },
                 {
                     "value": "4000000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "2uGT6ekor8/HWR2ijoG2SXrc6XfFwBe1yBWSNNDlo7Q="
-                    }
+                    "address": "GDNODE7J5EUK7T6HLEO2FDUBWZEXVXHJO7C4AF5VZAKZENGQ4WR3IX2U"
                 },
                 {
                     "value": "4000000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "2uGT6ekor8/HWR2ijoG2SXrc6XfFwBe1yBWSNNDlo7Q="
-                    }
+                    "address": "GDNODE7J5EUK7T6HLEO2FDUBWZEXVXHJO7C4AF5VZAKZENGQ4WR3IX2U"
                 }
             ],
-            "payload": "",
-            "lock_height": "0"
+            "payload": ""
         }
     ],
     "merkle_tree": [
-        "0x91de02460f72697f82c714aedb367eca757ea721e013f5c9627deeabcc2ef3234809428922f1b04cde9520a9f312130ac9bea7bf264e7192eae1cd7ba9c3e26e",
-        "0x4c1d71415c9ec7b182438e8bb669e324dde9be93b9c223a2ca831689d2e9598c628d07c84d3ee0941e9f6fb597faf4fe92518fa35e577ba12125919c0501d4bd",
-        "0xfd9ee620bb9a47bdfb772d7c1af331cecefd8592b1dfee9c8780b8abf897a6d4f7eedadec08da695804079efea4965ae6254ce61664ad8fc7db46aa03ae7527c"
+        "0x42febd46e93acebfc7f81e7a8b0228c5c4fed42de29bb5b4872b09699c28bb3b29e8dbbc65eb3a46b60ccb688e8a6d4ffbc341a0d59f7de13d28de2fede5566d",
+        "0x3bf2ab5de69074cbc26bccab2e76c17faf7bbf8c73c3f3ffb34620a6981ad3a61edca79e4d884e01d0531d8045ed05f294c60496a19da13320fbab00df63ddb3",
+        "0xccf8e442027e5659ea787fca6eea64a258c8761f821646939f070f5ef902e9caa338f7bb31e38706fba7c5ebf1975e1b0d503b4bf943b265d860e1bffad14dea"
     ]
 }

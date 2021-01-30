@@ -74,7 +74,6 @@ CREATE TABLE IF NOT EXISTS "enrollments" (
 | tx_hash           | BLOB      |    | Y        |          | The hash of transaction |
 | type              | INTEGER   |    | Y        |          | The type of transaction |
 | unlock_height     | INTEGER   |    | Y        |          | Height of the block to be unlock|
-| lock_height       | INTEGER   |    | Y        |          | This transaction may only be included in a block with `block_height >= lock_height`|
 | inputs_count      | INTEGER   |    | Y        |          | The number of inputs in the transaction |
 | outputs_count     | INTEGER   |    | Y        |          | The number of outputs in the transaction |
 | payload_size      | INTEGER   |    | Y        |          | The size of data payload in the transaction |
@@ -88,7 +87,6 @@ CREATE TABLE IF NOT EXISTS "transactions" (
     "tx_hash"               BLOB    NOT NULL,
     "type"                  INTEGER NOT NULL,
     "unlock_height"         INTEGER NOT NULL,
-    "lock_height"           INTEGER NOT NULL,
     "inputs_count"          INTEGER NOT NULL,
     "outputs_count"         INTEGER NOT NULL,
     "payload_size"          INTEGER NOT NULL,
@@ -108,8 +106,7 @@ CREATE TABLE IF NOT EXISTS "transactions" (
 | in_index          | INTEGER   | Y  | Y        |          | The index of this input in the Transaction's inputs array|
 | tx_hash           | BLOB      |    | Y        |          | The hash of transaction |
 | utxo              | BLOB      | Y  | Y        |          | The hash of the UTXO to be spent|
-| unlock_bytes      | BLOB      |    | Y        |          | The unlock script, which will be ran together with the matching Input's lock script in the execution engine|
-| unlock_age        | INTEGER   |    | Y        |          | Use for implementing relative time locks |
+| signature         | BLOB      |    | Y        |          | The signature of this transaction input|
 ### _Create Script_
 
 ```sql
@@ -119,8 +116,7 @@ CREATE TABLE IF NOT EXISTS "tx_inputs" (
     "in_index"              INTEGER NOT NULL,
     "tx_hash"               BLOB    NOT NULL,
     "utxo"                  BLOB    NOT NULL,
-    "unlock_bytes"          BLOB    NOT NULL,
-    "unlock_age"            INTEGER NOT NULL,
+    "signature"             BLOB    NOT NULL,
     PRIMARY KEY("block_height","tx_index","in_index","utxo")
 )
 ```
@@ -138,9 +134,7 @@ CREATE TABLE IF NOT EXISTS "tx_inputs" (
 |  tx_hash          | BLOB      |    | Y        |          | The hash of transaction |
 |  utxo_key         | BLOB      |    | Y        |          | The hash of the UTXO|
 |  amount           | NUMERIC   |    | Y        |          | The monetary value of this output, in 1/10^7|
-|  lock_type        | INTEGER   |    | Y        |          | (0: Key; 1: Hash of Key; 2: Script; 3: Hash of Script) |
-|  lock_bytes       | BLOB      |    | Y        |          | The bytes of lock |
-|  address          | TEXT      |    | Y        |          | The public key, Valid only when lock type is 0. Other than that, it's a blank.|
+|  address          | TEXT      |    | Y        |          | The public key that can redeem this output|
 |  used             | INTEGER   |    | Y        | 0        | Whether this output was used or not(1: used, 0: not used)|
 
 ### _Create Script_
@@ -153,8 +147,6 @@ CREATE TABLE IF NOT EXISTS "tx_outputs" (
     "tx_hash"               BLOB    NOT NULL,
     "utxo_key"              BLOB    NOT NULL,
     "amount"                NUMERIC NOT NULL,
-    "lock_type"             INTEGER NOT NULL,
-    "lock_bytes"            BLOB    NOT NULL,
     "address"               TEXT    NOT NULL,
     "used"                  INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY("block_height","tx_index","output_index")
@@ -246,7 +238,6 @@ CREATE TABLE IF NOT EXISTS information (
 | tx_hash           | BLOB      | Y  | Y        |          | The hash of transaction |
 | type              | INTEGER   |    | Y        |          | The type of transaction |
 | payload           | BLOB      |    | Y        |          | The transaction data payload |
-| lock_height       | INTEGER   |    | Y        |          | This transaction may only be included in a block with `block_height >= lock_height`|
 | time              | INTEGER   |    | Y        |          | Received time |
 
 ### _Create Script_
@@ -256,7 +247,6 @@ CREATE TABLE IF NOT EXISTS "transaction_pool" (
     "tx_hash"               BLOB    NOT NULL,
     "type"                  INTEGER NOT NULL,
     "payload"               BLOB    NOT NULL,
-    "lock_height"           INTEGER NOT NULL,
     "time"                  INTEGER NOT NULL,
     PRIMARY KEY("tx_hash")
 )
@@ -273,8 +263,7 @@ CREATE TABLE IF NOT EXISTS "transaction_pool" (
 | tx_hash           | BLOB      | Y  | Y        |          | The hash of transaction|
 | input_index       | INTEGER   | Y  | Y        |          | The index of input in the inputs|
 | utxo              | BLOB      |    | Y        |          | The hash of the UTXO to be spent|
-| unlock_bytes      | BLOB      |    | Y        |          | The unlock script, which will be ran together with the matching Input's lock script in the execution engine|
-| unlock_age        | INTEGER   |    | Y        |          | Use for implementing relative time locks |
+| signature         | BLOB      |    | Y        |          | The signature of this transaction input|
 ### _Create Script_
 
 ```sql
@@ -282,8 +271,7 @@ CREATE TABLE IF NOT EXISTS "tx_input_pool" (
     "tx_hash"               BLOB    NOT NULL,
     "input_index"           INTEGER NOT NULL,
     "utxo"                  BLOB    NOT NULL,
-    "unlock_bytes"          BLOB    NOT NULL,
-    "unlock_age"            INTEGER NOT NULL,
+    "signature"             BLOB    NOT NULL,
     PRIMARY KEY("tx_hash","input_index")
 )
 ```
@@ -299,8 +287,6 @@ CREATE TABLE IF NOT EXISTS "tx_input_pool" (
 |  tx_hash          | BLOB      | Y  | Y        |          | The hash of transaction|
 |  output_index     | INTEGER   | Y  | Y        |          | The index of output in the outputs|
 |  amount           | NUMERIC   |    | Y        |          | The monetary value of this output, in 1/10^7|
-|  lock_type        | INTEGER   |    | Y        |          | (0: Key; 1: Hash of Key; 2: Script; 3: Hash of Script) |
-|  lock_bytes       | BLOB      |    | Y        |          | The bytes of lock |
 |  address          | TEXT      |    | Y        |          | The public key that can redeem this output|
 
 ### _Create Script_
@@ -310,8 +296,6 @@ CREATE TABLE IF NOT EXISTS "tx_output_pool" (
     "tx_hash"               BLOB    NOT NULL,
     "output_index"          INTEGER NOT NULL,
     "amount"                NUMERIC NOT NULL,
-    "lock_type"             INTEGER NOT NULL,
-    "lock_bytes"            BLOB    NOT NULL,
     "address"               TEXT    NOT NULL,
     PRIMARY KEY("tx_hash","output_index")
 )
