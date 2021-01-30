@@ -380,8 +380,6 @@ describe ('Test of the path /utxo', () =>
                 utxo: '0xd9482016835acc6defdfd060216a5890e00cf8f0a79ab0b83d3385fc723cd45bfea66eb3587a684518ff1756951d38bf4f07abda96dcdea1c160a4f83e377c32',
                 amount: '24400000000000',
                 height: '1',
-                lock_bytes: "wGjrV+Is0jvFO3G34okd30FESntMARJgpUxNmBapXy8=",
-                lock_type: 0,
                 time: 1596753600,
                 unlock_height: '2'
             }];

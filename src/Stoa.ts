@@ -370,9 +370,7 @@ class Stoa extends WebService
                         unlock_height: BigInt(row.unlock_height).toString(),
                         amount: BigInt(row.amount).toString(),
                         height: BigInt(row.block_height).toString(),
-                        time: row.block_time,
-                        lock_type: row.lock_type,
-                        lock_bytes: row.lock_bytes.toString('base64')
+                        time: row.block_time
                     }
                     utxo_array.push(utxo);
                 }
