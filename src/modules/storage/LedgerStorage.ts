@@ -90,6 +90,7 @@ export class LedgerStorage extends Storages
             tx_hash             BLOB    NOT NULL,
             type                INTEGER NOT NULL,
             unlock_height       INTEGER NOT NULL,
+            lock_height         INTEGER NOT NULL,
             inputs_count        INTEGER NOT NULL,
             outputs_count       INTEGER NOT NULL,
             payload_size        INTEGER NOT NULL,
@@ -104,6 +105,7 @@ export class LedgerStorage extends Storages
             tx_hash             BLOB    NOT NULL,
             utxo                BLOB    NOT NULL,
             signature           BLOB    NOT NULL,
+            unlock_age          INTEGER NOT NULL,
             PRIMARY KEY(block_height, tx_index, in_index, utxo)
         );
 
@@ -148,6 +150,7 @@ export class LedgerStorage extends Storages
             tx_hash             BLOB    NOT NULL,
             type                INTEGER NOT NULL,
             payload             BLOB    NOT NULL,
+            lock_height         INTEGER NOT NULL,
             time                INTEGER NOT NULL,
             PRIMARY KEY(tx_hash)
         );
@@ -157,6 +160,7 @@ export class LedgerStorage extends Storages
             input_index         INTEGER NOT NULL,
             utxo                BLOB    NOT NULL,
             signature           BLOB    NOT NULL,
+            unlock_age          INTEGER NOT NULL,
             PRIMARY KEY(tx_hash, input_index)
         );
 
@@ -505,14 +509,15 @@ export class LedgerStorage extends Storages
 
                 storage.run(
                     `INSERT INTO transactions
-                        (block_height, tx_index, tx_hash, type, unlock_height, inputs_count, outputs_count, payload_size)
+                        (block_height, tx_index, tx_hash, type, unlock_height, lock_height, inputs_count, outputs_count, payload_size)
                     VALUES
-                        (?, ?, ?, ?, ${unlock_height_query}, ?, ?, ?)`,
+                        (?, ?, ?, ?, ${unlock_height_query}, ?, ?, ?, ?)`,
                     [
                         height.toString(),
                         tx_idx,
                         hash.toBinary(Endian.Little),
                         tx.type,
+                        tx.lock_height.toString(),
                         tx.inputs.length,
                         tx.outputs.length,
                         tx.payload.data.length
@@ -536,16 +541,17 @@ export class LedgerStorage extends Storages
             {
                 storage.run(
                     `INSERT INTO tx_inputs
-                        (block_height, tx_index, in_index, tx_hash, utxo, signature)
+                        (block_height, tx_index, in_index, tx_hash, utxo, signature, unlock_age)
                     VALUES
-                        (?, ?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?, ?, ?)`,
                     [
                         height.toString(),
                         tx_idx,
                         in_idx,
                         hash.toBinary(Endian.Little),
                         input.utxo.toBinary(Endian.Little),
-                        input.signature.toBinary(Endian.Little)
+                        input.signature.toBinary(Endian.Little),
+                        input.unlock_age
                     ]
                 )
                     .then(() =>
@@ -692,13 +698,14 @@ export class LedgerStorage extends Storages
             {
                 storage.run(
                     `INSERT INTO transaction_pool
-                        (tx_hash, type, payload, time)
+                        (tx_hash, type, payload, lock_height, time)
                     VALUES
-                        (?, ?, ?, strftime('%s', 'now', 'UTC'))`,
+                        (?, ?, ?, ?, strftime('%s', 'now', 'UTC'))`,
                     [
                         hash.toBinary(Endian.Little),
                         tx.type,
-                        tx.payload.toBinary(Endian.Little)
+                        tx.payload.toBinary(Endian.Little),
+                        tx.lock_height.toString()
                     ])
                     .then((result) =>
                     {
@@ -718,14 +725,15 @@ export class LedgerStorage extends Storages
             {
                 storage.run(
                     `INSERT INTO tx_input_pool
-                        (tx_hash, input_index, utxo, signature)
+                        (tx_hash, input_index, utxo, signature, unlock_age)
                     VALUES
-                        (?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?)`,
                     [
                         hash.toBinary(Endian.Little),
                         in_idx,
                         input.utxo.toBinary(Endian.Little),
-                        input.signature.toBinary(Endian.Little)
+                        input.signature.toBinary(Endian.Little),
+                        input.unlock_age
                     ]
                 )
                     .then((result) =>
@@ -855,7 +863,7 @@ export class LedgerStorage extends Storages
     {
         let sql =
         `SELECT
-            block_height, tx_index, in_index, utxo, signature
+            block_height, tx_index, in_index, utxo, signature, unlock_age
         FROM
             tx_inputs
         WHERE block_height = ? AND tx_index = ?`;
@@ -889,7 +897,7 @@ export class LedgerStorage extends Storages
     {
         let sql =
         `SELECT
-            tx_hash, type, payload, time
+            tx_hash, type, payload, lock_height, time
         FROM
             transaction_pool
         `;
