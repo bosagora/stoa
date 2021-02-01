@@ -287,13 +287,13 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
         let uri = URI(host)
             .port(port)
             .directory("/wallet/transaction/overview")
-            .filename("0xe57d70273bbb37525365036715a4546d6dd93b131d166678679fd68e73116cc71cea1c733a61dc8ceffffbd139e42ea862714a99f9611aaf3c31ec7bcff459de")
+            .filename("0xd9d1782b6c14aa1bac399f149ecdae6a366baf8269cf24737f2732a4e1fda044331ba2d8fdb53d735dbb758074e07fbc4aaf063c418d79d6eb478d7f04a8d730")
 
         let response = await client.get(uri.toString());
         let expected = {
             height: '2',
             time: 1597353600,
-            tx_hash: '0xe57d70273bbb37525365036715a4546d6dd93b131d166678679fd68e73116cc71cea1c733a61dc8ceffffbd139e42ea862714a99f9611aaf3c31ec7bcff459de',
+            tx_hash: '0xd9d1782b6c14aa1bac399f149ecdae6a366baf8269cf24737f2732a4e1fda044331ba2d8fdb53d735dbb758074e07fbc4aaf063c418d79d6eb478d7f04a8d730',
             tx_type: 'payment',
             unlock_height: '3',
             unlock_time: 1597354200,
@@ -309,12 +309,12 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
                 {
                     address: 'GCOMMONBGUXXP4RFCYGEF74JDJVPUW2GUENGTKKJECDNO6AGO32CUWGU',
                     amount: 1663400000,
-                    utxo: '0x43ac86f11478e9d15dd2aa62680a000e3c8697828774f876051bfd2302727d8084ab233d34cb0b3ddc4991cec478c84553402a47b18ffaa888ba610c562b6183'
+                    utxo: '0x4110b79cd8e9b6cfd4965d3c1b15f9ed4f963b553953c44b87def1b4f78d70932e083c912a2f76312991f806e6aa0d05d882de44f4f32c254aff9cbcc932e2b5'
                 },
                 {
                     address: 'GDID227ETHPOMLRLIHVDJSNSJVLDS4D4ANYOUHXPMG2WWEZN5JO473ZO',
                     amount: 24398336600000,
-                    utxo: '0xaca8ccfddd97ca5dc9a4ec2c0ff5fd0cf0a0cc4ac738fc005cd26165cbdaa8ffe3e7948ad4299ba4c633c03d1cde85124fde1b0ab27a43738bbc197a3038caa8'
+                    utxo: '0xdfaeba8d80583573732fc627836b89dd049dc7fdb9622c4669d64b7247da5a0bc3e67f628a08df5e4abad90be255466d21b6c208f6ec1f58d289c1d1908a4f80'
                 }
             ],
             fee: '0'

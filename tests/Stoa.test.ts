@@ -310,8 +310,8 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get (uri.toString())
         assert.strictEqual(response.data.length, 2);
         assert.strictEqual(response.data[0].tx_hash,
-            '0xe57d70273bbb37525365036715a4546d6dd93b131d166678679fd68e73116cc' +
-            '71cea1c733a61dc8ceffffbd139e42ea862714a99f9611aaf3c31ec7bcff459de');
+            '0xd9d1782b6c14aa1bac399f149ecdae6a366baf8269cf24737f2732a4e1fda04' +
+            '4331ba2d8fdb53d735dbb758074e07fbc4aaf063c418d79d6eb478d7f04a8d730');
         assert.strictEqual(response.data[0].address, 'GCOMMONBGUXXP4RFCYGEF74JDJVPUW2GUENGTKKJECDNO6AGO32CUWGU');
         assert.strictEqual(response.data[0].amount, '1663400000');
         assert.strictEqual(response.data[0].fee, '0');
@@ -322,27 +322,27 @@ describe ('Test of Stoa API Server', () =>
         let uri = URI(host)
             .port(port)
             .directory("/transaction/status")
-            .filename("0x42febd46e93acebfc7f81e7a8b0228c5c4fed42de29bb5b4872b09699c28bb3b29e8dbbc65eb3a46b60ccb688e8a6d4ffbc341a0d59f7de13d28de2fede5566d");
+            .filename("0xd9d1782b6c14aa1bac399f149ecdae6a366baf8269cf24737f2732a4e1fda044331ba2d8fdb53d735dbb758074e07fbc4aaf063c418d79d6eb478d7f04a8d730");
 
         let response_pending = await client.get(uri.toString());
         let expected_pending = {
             status: 'pending',
-            tx_hash: '0x42febd46e93acebfc7f81e7a8b0228c5c4fed42de29bb5b4872b09699c28bb3b29e8dbbc65eb3a46b60ccb688e8a6d4ffbc341a0d59f7de13d28de2fede5566d'
+            tx_hash: '0xd9d1782b6c14aa1bac399f149ecdae6a366baf8269cf24737f2732a4e1fda044331ba2d8fdb53d735dbb758074e07fbc4aaf063c418d79d6eb478d7f04a8d730'
         }
         assert.deepStrictEqual(response_pending.data, expected_pending);
 
         uri = URI(host)
             .port(port)
             .directory("/transaction/status")
-            .filename("0x58bc048310290f51f8b375dfab9fe944d339d7574968692bb0ce3c76e10735a33ba7fd8d036ed2f9684a32d81a9bbb57a4a8b866f374ed23d0e82a04eae38f12");
+            .filename("0x486f08b5a70297c6255647002afa26cd83e2d6ddbc421daf88289b79f13082727d6850e015458c63715937d01c97bde8476eb5d5a456fe10a935f8a2a6605bb4");
 
         let response_confirmed = await client.get(uri.toString());
         let expected_confirmed = {
             status: "confirmed",
-            tx_hash: "0x58bc048310290f51f8b375dfab9fe944d339d7574968692bb0ce3c76e10735a33ba7fd8d036ed2f9684a32d81a9bbb57a4a8b866f374ed23d0e82a04eae38f12",
+            tx_hash: "0x486f08b5a70297c6255647002afa26cd83e2d6ddbc421daf88289b79f13082727d6850e015458c63715937d01c97bde8476eb5d5a456fe10a935f8a2a6605bb4",
             block: {
                 height: 1,
-                hash: "0xc970f97b114565115caeea0fcbf9d2bac65e2c9526c146febc14d151c3e6647c61eec1e9310270e273b8c7f79663260a6a0d45acdde808402efd515f5f5db2e1"
+                hash: "0x3d534f47594b2379603ec520faf7420244fd210db15a256164016018f6f1aa27d093c2957c2f4fd0b95987534339a7b7714c755cad241a454fd1c9d2aaa04bab"
             }
         };
         assert.deepStrictEqual(response_confirmed.data, expected_confirmed);
