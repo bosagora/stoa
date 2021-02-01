@@ -14,10 +14,8 @@
 import {
     Block, Enrollment, Hash, Height, PreImageInfo, Transaction,
     TxInput, TxOutput, makeUTXOKey, hashFull, TxType,
-    Utils, Endian, PublicKey
+    Utils, Endian, Unlock, PublicKey, DataPayload
 } from 'boa-sdk-ts';
-import { assert, AssertionError } from 'chai';
-import { logger } from '../common/Logger';
 import { Storages } from './Storages';
 
 /**
@@ -1398,6 +1396,45 @@ export class LedgerStorage extends Storages
                         result.tx_hash = hash;
                         resolve(result);
                     }
+                }
+            }
+            catch (error)
+            {
+                reject(error);
+            }
+        });
+    }
+
+    /**
+     * Gets a transaction data
+     * @param tx_hash The hash of the transaction to get
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getTransactionPending (tx_hash: Hash): Promise<Transaction | null>
+    {
+        return new Promise<Transaction | null>(async (resolve, reject) =>
+        {
+            try {
+                let hash = tx_hash.toBinary(Endian.Little);
+                let rows = await this.query("SELECT tx_hash, type, payload, time FROM transaction_pool WHERE tx_hash = ?;", [hash]);
+                if (rows.length > 0)
+                {
+                    let input_rows = await this.query("SELECT tx_hash, utxo, unlock_bytes, unlock_age FROM tx_input_pool WHERE tx_hash = ? ORDER BY input_index;", [hash]);
+                    let output_rows = await this.query("SELECT tx_hash, amount, address FROM tx_output_pool WHERE tx_hash = ? ORDER BY output_index;", [hash]);
+
+                    let inputs:Array<TxInput> = [];
+                    for (let input_row of input_rows)
+                        inputs.push(new TxInput(new Hash(input_row.utxo, Endian.Little), new Unlock(input_row.unlock_bytes), input_row.unlock_age));
+                    let outputs:Array<TxOutput> = [];
+                    for (let output_row of output_rows)
+                        outputs.push(new TxOutput(output_row.amount, new PublicKey(output_row.address)));
+                    resolve(new Transaction(rows[0].type, inputs, outputs, new DataPayload(rows[0].payload, Endian.Little)));
+                }
+                else
+                {
+                    resolve(null);
                 }
             }
             catch (error)
