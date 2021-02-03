@@ -21,6 +21,8 @@ import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from "axios";
 import { FullNodeAPI } from '../src/modules/agora/AgoraClient';
 import { Block, Hash, Height, PreImageInfo, handleNetworkError } from 'boa-sdk-ts';
 
+import JSBI from 'jsbi';
+
 export const sample_data_raw = (() => {
     return [
         fs.readFileSync('tests/data/Block.0.sample1.json', 'utf-8'),
@@ -127,8 +129,8 @@ export class TestAgora implements FullNodeAPI
                 return;
             }
 
-            let block_height = new Height(BigInt(req.query.block_height));
-            if (block_height.value < 0n)
+            let block_height = new Height(JSBI.BigInt(req.query.block_height.toString()));
+            if (JSBI.lessThan(block_height.value, JSBI.BigInt(0)))
             {
                 res.status(400).json({ statusText: 'Query parameter block_height must not be negative' });
                 return;
@@ -178,7 +180,7 @@ export class TestAgora implements FullNodeAPI
     /// Implements FullNodeAPI.getBlockHeight
     public getBlockHeight (): Promise<Height>
     {
-        return Promise.resolve(new Height(BigInt(this.blocks.length - 1)));
+        return Promise.resolve(new Height(JSBI.BigInt(this.blocks.length - 1)));
     }
 
     /// Implements FullNodeAPI.getBlocksFrom
@@ -187,11 +189,11 @@ export class TestAgora implements FullNodeAPI
         // Follow what Agora is doing
         max_blocks = Math.min(max_blocks, 1000);
 
-        if (block_height.value >= BigInt(this.blocks.length))
+        if (JSBI.greaterThanOrEqual(block_height.value, JSBI.BigInt(this.blocks.length)))
             return Promise.resolve([]);
 
         // FIXME: Should handle > 2^53 but we're safe for the time being
-        const block_height_ = Number(BigInt.asUintN(64, block_height.value));
+        const block_height_ = JSBI.toNumber(block_height.value);
 
         return Promise.resolve(
             this.blocks.slice(

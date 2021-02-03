@@ -18,6 +18,7 @@ import { TestAgora, TestStoa, TestClient, delay, recovery_sample_data } from './
 
 import * as assert from 'assert';
 import express from 'express';
+import JSBI from 'jsbi';
 import URI from 'urijs';
 import { URL } from 'url';
 
@@ -106,15 +107,15 @@ describe ('Test of Recovery', () =>
     {
         let agora_client = new AgoraClient(agora_addr);
 
-        let blocks: Array<Block> = await agora_client.getBlocksFrom(new Height(1n), 3);
+        let blocks: Array<Block> = await agora_client.getBlocksFrom(new Height("1"), 3);
         // The number of blocks is three.
         assert.strictEqual(blocks.length, 3);
-        let expected_height : Height = new Height(1n);
+        let expected_height : Height = new Height("1");
         for (let block of blocks)
         {
             // Make sure that the received block height is equal to the expected value.
             assert.deepEqual(block.header.height, expected_height);
-            expected_height.value += 1n;
+            expected_height.value = JSBI.add(expected_height.value, JSBI.BigInt(1));
         }
     });
 

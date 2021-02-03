@@ -18,6 +18,8 @@ import {
 } from 'boa-sdk-ts';
 import { Storages } from './Storages';
 
+import JSBI from 'jsbi';
+
 /**
  * The class that insert and read the ledger into the database.
  */
@@ -283,7 +285,7 @@ export class LedgerStorage extends Storages
                 .then((row: any[]) =>
                 {
                     if (row[0].height !== null)
-                        resolve(new Height(BigInt(row[0].height)));
+                        resolve(new Height(JSBI.BigInt(row[0].height)));
                     else
                         resolve(null);
                 })
@@ -487,7 +489,7 @@ export class LedgerStorage extends Storages
 
                     unlock_height_query =
                         `(
-                            SELECT '${(height.value + 2016n).toString()}' AS unlock_height WHERE EXISTS
+                            SELECT '${JSBI.add(height.value, JSBI.BigInt(2016)).toString()}' AS unlock_height WHERE EXISTS
                             (
                                 SELECT
                                     *
@@ -500,13 +502,13 @@ export class LedgerStorage extends Storages
                                     and hex(a.utxo_key) in (${utxo.join(',')})
                             )
                             UNION ALL
-                            SELECT '${(height.value + 1n).toString()}' AS unlock_height
+                            SELECT '${JSBI.add(height.value, JSBI.BigInt(1)).toString()}' AS unlock_height
                             LIMIT 1
                         )`;
                 }
                 else
                 {
-                    unlock_height_query = `( SELECT '${(height.value + 1n).toString()}' AS unlock_height )`;
+                    unlock_height_query = `( SELECT '${JSBI.add(height.value, JSBI.BigInt(1)).toString()}' AS unlock_height )`;
                 }
 
                 storage.run(
@@ -674,7 +676,7 @@ export class LedgerStorage extends Storages
 
                         for (let out_idx = 0; out_idx < block.txs[tx_idx].outputs.length; out_idx++)
                         {
-                            let utxo_key = makeUTXOKey(block.merkle_tree[tx_idx], BigInt(out_idx));
+                            let utxo_key = makeUTXOKey(block.merkle_tree[tx_idx], JSBI.BigInt(out_idx));
                             await save_output(this, block.header.height, tx_idx, out_idx,
                                 block.merkle_tree[tx_idx], utxo_key, block.txs[tx_idx].outputs[out_idx]);
                         }
@@ -1020,11 +1022,11 @@ export class LedgerStorage extends Storages
                     if ((rows.length > 0) && (rows[0].value !== undefined) &&
                         Utils.isPositiveInteger(rows[0].value))
                     {
-                        resolve(new Height(BigInt(rows[0].value) + 1n));
+                        resolve(new Height(JSBI.add(JSBI.BigInt(rows[0].value), JSBI.BigInt(1)).toString()));
                     }
                     else
                     {
-                        resolve(new Height(0n));
+                        resolve(new Height("0"));
                     }
                 })
                 .catch((err) =>

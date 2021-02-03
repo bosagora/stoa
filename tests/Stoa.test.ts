@@ -207,7 +207,7 @@ describe ('Test of Stoa API Server', () =>
                 new Hash("0xe0c04a5bd47ffc5b065b7d397e251016310c43dc77220bf803b73f1183da00b0e67602b1f95cb18a0059aa1cdf2f9adafe979998364b38cd5c15d92b9b8fd815");
             const enrollment = new Enrollment(utxo_key, random_seed, 20, enroll_sig);
             const header = new BlockHeader(
-                new Hash(Buffer.alloc(Hash.Width)), new Height(19n), new Hash(Buffer.alloc(Hash.Width)), new BitField([]),
+                new Hash(Buffer.alloc(Hash.Width)), new Height("19"), new Hash(Buffer.alloc(Hash.Width)), new BitField([]),
                 new Signature(Buffer.alloc(Signature.Width)), [ enrollment ], new Hash(Buffer.alloc(Hash.Width)), [], 0);
             const block = new Block(header, [], []);
 
@@ -375,14 +375,14 @@ describe ('Test of Stoa API Server', () =>
             ],
             "outputs": [
                 {
-                    "value": 1663400000,
+                    "value": "1663400000",
                     "lock": {
                         "type": 0,
                         "bytes": "nMY5oTUvd/IlFgxC/4kaavpbRqEaaalJIIbXeAZ29Co="
                     }
                 },
                 {
-                    "value": 24398336600000,
+                    "value": "24398336600000",
                     "lock": {
                         "type": 0,
                         "bytes": "0D1r5Jne5i4rQeo0ybJNVjlwfANw6h7vYbVrEy3qXc8="
