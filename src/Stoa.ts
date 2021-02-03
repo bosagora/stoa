@@ -11,14 +11,8 @@ import { ValidatorData, IPreimage, IUnspentTxOutput, ITxStatus,
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
+import JSBI from 'jsbi';
 import { URL } from 'url';
-
-// Module extension to allow customizing JSON serialization
-declare global {
-    interface BigInt {
-        toJSON(key?: string): string;
-    }
-}
 
 class Stoa extends WebService
 {
@@ -65,11 +59,6 @@ class Stoa extends WebService
 
         // Instantiate a dummy promise for chaining
         this.pending = new Promise<void>(function (resolve, reject) { resolve() });
-
-        // Allow JSON serialization of BigInt
-        BigInt.prototype.toJSON = function(key?: string) {
-            return this.toString();
-        }
 
         // Do this last, as it is possible it will fail, and we only want failure
         // to happen after we checked that our own state is correct.
@@ -132,13 +121,13 @@ class Stoa extends WebService
         this.app.post("/preimage_received", this.putPreImage.bind(this));
         this.app.post("/transaction_received", this.putTransaction.bind(this));
 
-        let height: Height = new Height(0n);
+        let height: Height = new Height("0");
 
         // Start the server once we can establish a connection to Agora
         return this.agora.getBlockHeight()
             .then(
                 (res) => {
-                    height.value = res.value;
+                    height.value = JSBI.BigInt(res.value);
                     logger.info(`Connected to Agora, block height is ${res.toString()}`);
                     return super.start();
                 },
@@ -200,14 +189,14 @@ class Stoa extends WebService
                     let preimage_distance: number = row.preimage_distance;
                     let target_height: Height = new Height(row.height);
                     let result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
-                    let avail_height: bigint = BigInt(row.avail_height);
+                    let avail_height = JSBI.BigInt(row.avail_height);
 
                     // Hashing preImage
-                    if (target_height.value >= avail_height &&
-                        (avail_height + BigInt(preimage_distance)) >= target_height.value)
+                    if (JSBI.greaterThanOrEqual(target_height.value, avail_height) &&
+                        JSBI.greaterThanOrEqual(JSBI.add(avail_height, JSBI.BigInt(preimage_distance)), target_height.value))
                     {
                         result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                        let count = avail_height + BigInt(preimage_distance) - target_height.value;
+                        let count = JSBI.toNumber(JSBI.subtract(JSBI.add(avail_height, JSBI.BigInt(preimage_distance)), target_height.value));
                         for (let i = 0; i < count; i++)
                         {
                             result_preimage_hash = hash(result_preimage_hash.data);
@@ -216,7 +205,7 @@ class Stoa extends WebService
                     }
                     else
                     {
-                        if (target_height.value == row.enrolled_at)
+                        if (JSBI.equal(target_height.value, JSBI.BigInt(row.enrolled_at)))
                         {
                             preimage_distance = 0;
                             result_preimage_hash.fromBinary(row.random_seed, Endian.Little);
@@ -234,7 +223,7 @@ class Stoa extends WebService
                     } as IPreimage;
 
                     let validator: ValidatorData =
-                        new ValidatorData(row.address, new Height(BigInt(row.enrolled_at)),
+                        new ValidatorData(row.address, new Height(JSBI.BigInt(row.enrolled_at)),
                                           new Hash(row.stake, Endian.Little).toString(),
                                           preimage);
                     out_put.push(validator);
@@ -293,15 +282,15 @@ class Stoa extends WebService
                 {
                     let preimage_hash: Buffer = row.preimage_hash;
                     let preimage_distance: number = row.preimage_distance;
-                    let target_height: Height = new Height(BigInt(row.height));
+                    let target_height: Height = new Height(JSBI.BigInt(row.height));
                     let result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
-                    let avail_height: bigint = BigInt(row.avail_height);
+                    let avail_height = JSBI.BigInt(row.avail_height);
                     // Hashing preImage
-                    if (target_height.value >= avail_height &&
-                        avail_height + BigInt(preimage_distance) >= target_height.value)
+                    if (JSBI.greaterThanOrEqual(target_height.value, avail_height) &&
+                        JSBI.greaterThanOrEqual(JSBI.add(avail_height, JSBI.BigInt(preimage_distance)), target_height.value))
                     {
                         result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                        let count = avail_height + BigInt(preimage_distance) - target_height.value;
+                        let count = JSBI.toNumber(JSBI.subtract(JSBI.add(avail_height, JSBI.BigInt(preimage_distance)), target_height.value));
                         for (let i = 0; i < count; i++)
                         {
                             result_preimage_hash = hash(result_preimage_hash.data);
@@ -310,7 +299,7 @@ class Stoa extends WebService
                     }
                     else
                     {
-                        if (target_height.value == row.avail_height)
+                        if (JSBI.equal(target_height.value, JSBI.BigInt(row.enrolled_at)))
                         {
                             preimage_distance = 0;
                             result_preimage_hash.fromBinary(row.random_seed, Endian.Little);
@@ -328,7 +317,7 @@ class Stoa extends WebService
                     } as IPreimage;
 
                     let validator: ValidatorData =
-                        new ValidatorData(row.address, new Height(BigInt(row.enrolled_at)),
+                        new ValidatorData(row.address, new Height(JSBI.BigInt(row.enrolled_at)),
                                           new Hash(row.stake, Endian.Little).toString(),
                                           preimage);
                     out_put.push(validator);
@@ -445,9 +434,9 @@ class Stoa extends WebService
                     let utxo = {
                         utxo: new Hash(row.utxo, Endian.Little).toString(),
                         type: row.type,
-                        unlock_height: BigInt(row.unlock_height).toString(),
-                        amount: BigInt(row.amount).toString(),
-                        height: BigInt(row.block_height).toString(),
+                        unlock_height: JSBI.BigInt(row.unlock_height).toString(),
+                        amount: JSBI.BigInt(row.amount).toString(),
+                        height: JSBI.BigInt(row.block_height).toString(),
                         time: row.block_time,
                         lock_type: row.lock_type,
                         lock_bytes: row.lock_bytes.toString('base64')
@@ -605,12 +594,12 @@ class Stoa extends WebService
                         address: row.address,
                         peer: row.peer,
                         peer_count: row.peer_count,
-                        height: BigInt(row.height).toString(),
+                        height: JSBI.BigInt(row.height).toString(),
                         time: row.block_time,
                         tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
                         tx_type: ConvertTypes.TxTypeToString(row.type),
-                        amount: BigInt(row.amount).toString(),
-                        unlock_height: BigInt(row.unlock_height).toString(),
+                        amount: JSBI.BigInt(row.amount).toString(),
+                        unlock_height: JSBI.BigInt(row.unlock_height).toString(),
                         unlock_time: row.unlock_time
                     });
                 }
@@ -652,11 +641,11 @@ class Stoa extends WebService
                 }
 
                 let overview: ITxOverview = {
-                    height: BigInt(data.tx[0].height).toString(),
+                    height: JSBI.BigInt(data.tx[0].height).toString(),
                     time: data.tx[0].block_time,
                     tx_hash: new Hash(data.tx[0].tx_hash, Endian.Little).toString(),
                     tx_type: ConvertTypes.TxTypeToString(data.tx[0].type),
-                    unlock_height: BigInt(data.tx[0].unlock_height).toString(),
+                    unlock_height: JSBI.BigInt(data.tx[0].unlock_height).toString(),
                     unlock_time: data.tx[0].unlock_time,
                     payload: (data.tx[0].payload !== null) ? new DataPayload(data.tx[0].payload, Endian.Little).toString() : "",
                     senders: [],
@@ -778,8 +767,8 @@ class Stoa extends WebService
                         tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
                         submission_time: row.time,
                         address: row.address,
-                        amount: BigInt(row.amount).toString(),
-                        fee: BigInt(0).toString()
+                        amount: JSBI.BigInt(row.amount).toString(),
+                        fee: JSBI.BigInt(0).toString()
                     }
                     pending_array.push(tx);
                 }
@@ -846,22 +835,22 @@ class Stoa extends WebService
             (async () => {
                 try
                 {
-                    let max_blocks : bigint = height.value - expected_height.value + ((block == null) ? 1n : 0n);
+                    let max_blocks = JSBI.add(JSBI.subtract(height.value, expected_height.value), (block == null) ? JSBI.BigInt(1) : JSBI.BigInt(0));
 
-                    if (max_blocks > this._max_count_on_recovery)
-                        max_blocks = BigInt(this._max_count_on_recovery);
+                    if (JSBI.greaterThan(max_blocks, JSBI.BigInt(this._max_count_on_recovery)))
+                        max_blocks = JSBI.BigInt(this._max_count_on_recovery);
 
-                    if (max_blocks > 0n)
+                    if (JSBI.greaterThan(max_blocks, JSBI.BigInt(0)))
                     {
                         let blocks = await this.agora.getBlocksFrom(expected_height, Number(max_blocks));
 
                         // Save previous block
                         for (let block of blocks)
                         {
-                            if (block.header.height.value == expected_height.value)
+                            if (JSBI.equal(block.header.height.value, expected_height.value))
                             {
                                 await this.ledger_storage.putBlocks(block);
-                                expected_height.value += 1n;
+                                expected_height.value = JSBI.add(expected_height.value, JSBI.BigInt(1));
                                 logger.info(`Recovered a block with block height of ${block.header.height.toString()}`);
                             }
                             else
@@ -873,7 +862,7 @@ class Stoa extends WebService
                     }
 
                     // Save a block just received
-                    if (height.value <= expected_height.value)
+                    if (JSBI.lessThanOrEqual(height.value, expected_height.value))
                     {
                         if (block != null)
                         {
@@ -926,14 +915,14 @@ class Stoa extends WebService
                     let height = Stoa.getJsonBlockHeight(block);
                     let expected_height = await this.ledger_storage.getExpectedBlockHeight();
 
-                    if (height.value == expected_height.value)
+                    if (JSBI.equal(height.value, expected_height.value))
                     {
                         // The normal case
                         // Save a block just received
                         await this.ledger_storage.putBlocks(Block.reviver("", block));
                         logger.info(`Saved a block with block height of ${height.toString()}`);
                     }
-                    else if (height.value > expected_height.value)
+                    else if (JSBI.greaterThan(height.value, expected_height.value))
                     {
                         // Recovery is required for blocks that are not received.
                         while (true) {
@@ -1007,7 +996,7 @@ class Stoa extends WebService
             {
                 let expected_height = await this.ledger_storage.getExpectedBlockHeight();
 
-                if (height.value >= expected_height.value) {
+                if (JSBI.greaterThanOrEqual(height.value, expected_height.value)) {
                     while (true) {
                         if (await this.recoverBlock(null, height, expected_height))
                             break;
