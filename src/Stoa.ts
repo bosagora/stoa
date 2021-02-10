@@ -6,7 +6,8 @@ import { Height, PreImageInfo, Hash, hash, Block, Utils,
     Endian, Transaction, hashFull, DataPayload } from 'boa-sdk-ts';
 import { WebService } from './modules/service/WebService';
 import { ValidatorData, IPreimage, IUnspentTxOutput, ITxStatus,
-    ITxHistoryElement, ITxOverview, ConvertTypes, DisplayTxType, IPendingTxs } from './Types';
+    ITxHistoryElement, ITxOverview, ConvertTypes, DisplayTxType,
+    IPendingTxs, ITransactionFee } from './Types';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -114,6 +115,7 @@ class Stoa extends WebService
         this.app.get("/transaction/pending/:hash", this.getTransactionPending.bind(this));
         this.app.get("/utxo/:address", this.getUTXO.bind(this));
         this.app.get("/transaction/status/:hash", this.getTransactionStatus.bind(this));
+        this.app.get("/transaction/fees/:tx_size", this.getTransactionFees.bind(this));
         this.app.get("/wallet/transactions/history/:address", this.getWalletTransactionsHistory.bind(this));
         this.app.get("/wallet/transaction/overview/:hash", this.getWalletTransactionOverview.bind(this));
         this.app.get("/wallet/transactions/pending/:address", this.getWalletTransactionsPending.bind(this));
@@ -364,6 +366,51 @@ class Stoa extends WebService
                 logger.error("Failed to data lookup to the DB: " + err);
                 res.status(500).send("Failed to data lookup");
             });
+    }
+
+    /**
+     * GET /transaction/fees/:tx_size
+     *
+     * Called when a request is received through the `/transaction/fees/:tx_size` handler
+     *
+     * Returns transaction fees by the transaction size.
+     */
+    private getTransactionFees (req: express.Request, res: express.Response)
+    {
+        // TODO This is still incomplete.
+        //  We will proceed with statistics to find appropriate fees and then upgrade.
+
+        let size: string = req.params.tx_size.toString();
+
+        logger.http(`GET /transaction/fees/${size}}`);
+
+        if (!Utils.isPositiveInteger(size))
+        {
+            res.status(400).send(`Invalid value for parameter 'tx_size': ${size}`);
+            return;
+        }
+
+        let tx_size = JSBI.BigInt(size);
+        let factor = JSBI.BigInt(200);
+        let minimum = JSBI.BigInt(100_000);     // 0.01BOA
+        let medium = JSBI.multiply(tx_size, factor);
+        if (JSBI.lessThan(medium, minimum))
+            medium = JSBI.BigInt(minimum);
+
+        let width = JSBI.divide(medium, JSBI.BigInt(10));
+        let high = JSBI.add(medium, width);
+        let low = JSBI.subtract(medium, width);
+        if (JSBI.lessThan(low, minimum))
+            low = JSBI.BigInt(minimum);
+
+        let data: ITransactionFee = {
+            tx_size: JSBI.toNumber(tx_size),
+            high: high.toString(),
+            medium: medium.toString(),
+            low: low.toString()
+        };
+
+        res.status(200).send(JSON.stringify(data));
     }
 
     /**

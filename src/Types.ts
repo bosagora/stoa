@@ -318,3 +318,29 @@ export class ConvertTypes
         return ConvertTypes.display_tx_type.findIndex(m => (m === type.trim().toLowerCase()));
     }
 }
+
+/**
+ * Define the interface of the fee of the transaction
+ */
+export interface ITransactionFee
+{
+    /**
+     * The size of the transaction
+     */
+    tx_size: number;
+
+    /**
+     * The transaction fee for a medium speed
+     */
+    medium: string;
+
+    /**
+     * The transaction fee for a high speed
+     */
+    high: string;
+
+    /**
+     * The transaction fee for a low speed
+     */
+    low: string;
+}
