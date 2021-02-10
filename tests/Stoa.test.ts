@@ -487,4 +487,17 @@ describe ('Test of the path /utxo', () =>
         let response = await client.get (uri.toString());
         assert.strictEqual(response.data.length, 0);
     });
+
+    it ('Test getting fees of the transaction', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("transaction/fees")
+            .filename("1000");
+
+        let response = await client.get (uri.toString());
+        assert.strictEqual(response.data.medium, "200000");
+        assert.strictEqual(response.data.low, "180000");
+        assert.strictEqual(response.data.high, "220000");
+    });
 });
