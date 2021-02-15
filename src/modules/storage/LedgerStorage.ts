@@ -1445,4 +1445,30 @@ export class LedgerStorage extends Storages
             }
         });
     }
+
+    /**
+     * Gets the information of block header
+     * @param height The height of the block,
+     *      If this is null, then the last block header is specified.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getWalletBlocksHeaderInfo (height: Height | null): Promise<any[]>
+    {
+        let cur_height: string;
+
+        if (height !== null)
+            cur_height = height.toString();
+        else
+            cur_height = `(SELECT MAX(height) as height FROM blocks)`;
+
+        let sql =
+            `SELECT
+                height, hash, merkle_root, time_stamp 
+            FROM
+                blocks
+            WHERE height = ${cur_height};`;
+        return this.query(sql, []);
+    }
 }
