@@ -119,6 +119,7 @@ class Stoa extends WebService
         this.app.get("/wallet/transactions/history/:address", this.getWalletTransactionsHistory.bind(this));
         this.app.get("/wallet/transaction/overview/:hash", this.getWalletTransactionOverview.bind(this));
         this.app.get("/wallet/transactions/pending/:address", this.getWalletTransactionsPending.bind(this));
+        this.app.get("/wallet/blocks/header", this.getWalletBlocksHeader.bind(this));
         this.app.post("/block_externalized", this.postBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
         this.app.post("/transaction_received", this.putTransaction.bind(this));
@@ -826,6 +827,56 @@ class Stoa extends WebService
                     res.status(500).send("Failed to data lookup");
                 }
             );
+    }
+
+    /**
+     * GET /wallet/blocks/header
+     *
+     * Called when a request is received through the `/wallet/blocks/header`
+     *
+     * Returns information about the header of the block according to the height of the block.
+     * If height was not provided the information of the last block header is returned.
+     */
+    private getWalletBlocksHeader (req: express.Request, res: express.Response)
+    {
+        if ((req.query.height !== undefined) &&
+            !Utils.isPositiveInteger(req.query.height.toString()))
+        {
+            res.status(400).send(`Invalid value for parameter 'height': ${req.query.height.toString()}`);
+            return;
+        }
+
+        let height = (req.query.height !== undefined)
+            ? new Height(req.query.height.toString())
+            : null;
+
+        if (height != null)
+            logger.http(`GET /wallet/blocks/header height=${height.toString()}`);
+        else
+            logger.http(`GET /wallet/blocks/header`);
+
+        this.ledger_storage.getWalletBlocksHeaderInfo(height)
+            .then((rows: any[]) =>
+            {
+                if (!rows.length)
+                {
+                    res.status(204).send(`No blocks`);
+                    return;
+                }
+
+                let info = {
+                    height: rows[0].height.toString(),
+                    hash: new Hash(rows[0].hash, Endian.Little).toString(),
+                    merkle_root: new Hash(rows[0].merkle_root, Endian.Little).toString(),
+                    time_stamp: rows[0].time_stamp
+                };
+                res.status(200).send(JSON.stringify(info));
+            })
+            .catch((err) =>
+            {
+                logger.error("Failed to data lookup to the DB: " + err);
+                res.status(500).send("Failed to data lookup");
+            });
     }
 
     /**
