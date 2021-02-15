@@ -294,6 +294,38 @@ describe ('Test of Stoa API Server', () =>
 
     });
 
+    it ('Test of the path /wallet/blocks/header', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("/wallet/blocks/header");
+
+        let response = await client.get (uri.toString())
+        assert.strictEqual(response.data.height, '1');
+        assert.strictEqual(response.data.hash,
+            '0x8fe0ba63553a5c2ac7d91d346894674bea11a706a211817f5b400743ba87d9f' +
+            'a31753e008ba6ab970be3b2da29f25732abdc440f934903bfc4a4f12bcf886a7c');
+        assert.strictEqual(response.data.merkle_root,
+            '0x911890b2ff4429e1beccb4ab5ba7458cc469e8fc455c5df67291ada2c5818cc' +
+            '65a3d11220e877b746a284c95294488d4c7e8ed47b02213e3ce74389c442d9cc1');
+        assert.strictEqual(response.data.time_stamp, 1596753600);
+
+        uri = URI(host)
+            .port(port)
+            .directory("/wallet/blocks/header")
+            .setSearch("height", "0");
+
+        response = await client.get (uri.toString())
+        assert.strictEqual(response.data.height, '0');
+        assert.strictEqual(response.data.hash,
+            '0x0bf4809ece9fcfa27910c9326e7d1093dee605ffac9cd6591de0dbdb3bf5a83' +
+            '44db9917b5c672f26d1fd8ce74df4a87f44b9d18010a6e66fa014c8ad9eeabe98');
+        assert.strictEqual(response.data.merkle_root,
+            '0xb12632add7615e2c4203f5ec5747c26e4fc7f333f95333ddfa4121a66b84499' +
+            'd35e5ce022ab667791549654b97a26e86054b0764ec23ee0cd3830de8f3f73364');
+        assert.strictEqual(response.data.time_stamp, 1596153600);
+    });
+
     it ('Test of the path /transaction_received', async () =>
     {
         let uri = URI(host)
