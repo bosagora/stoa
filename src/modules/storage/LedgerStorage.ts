@@ -1252,9 +1252,9 @@ export class LedgerStorage extends Storages
      * Provides a overview of a transaction.
      * @param tx_hash The hash of the transaction
      */
-    public getWalletTransactionOverview (tx_hash: string): Promise<any[]>
+    public getWalletTransactionOverview (tx_hash: Hash): Promise<any[]>
     {
-        let hash = new Hash(tx_hash).toBinary(Endian.Little);
+        let hash = tx_hash.toBinary(Endian.Little);
 
         let sql_tx =
             `SELECT
@@ -1349,9 +1349,9 @@ export class LedgerStorage extends Storages
      * Provides a status of a transaction.
      * @param tx_hash The hash of the transaction
      */
-    public getTransactionStatus (tx_hash: string): Promise<any>
+    public getTransactionStatus (tx_hash: Hash): Promise<any>
     {
-        let hash = new Hash(tx_hash).toBinary(Endian.Little);
+        let hash = tx_hash.toBinary(Endian.Little);
 
         let sql_tx =
             `SELECT

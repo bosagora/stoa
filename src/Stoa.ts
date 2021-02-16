@@ -344,9 +344,20 @@ class Stoa extends WebService
      */
     private getTransactionStatus (req: express.Request, res: express.Response)
     {
-        let tx_hash: string = String(req.params.hash);
+        let hash: string = String(req.params.hash);
 
-        logger.http(`GET /transaction/status/${tx_hash}}`);
+        logger.http(`GET /transaction/status/${hash}}`);
+
+        let tx_hash: Hash;
+        try
+        {
+            tx_hash = new Hash(hash);
+        }
+        catch (error)
+        {
+            res.status(400).send(`Invalid value for parameter 'hash': ${hash}`);
+            return;
+        }
 
         this.ledger_storage.getTransactionStatus(tx_hash)
             .then((data: any) => {
@@ -669,9 +680,20 @@ class Stoa extends WebService
      */
     private getWalletTransactionOverview (req: express.Request, res: express.Response)
     {
-        let tx_hash: string = String(req.params.hash);
+        let hash: string = String(req.params.hash);
 
-        logger.http(`GET /wallet/transaction/overview/${tx_hash}}`);
+        logger.http(`GET /wallet/transaction/overview/${hash}}`);
+
+        let tx_hash: Hash;
+        try
+        {
+            tx_hash = new Hash(hash);
+        }
+        catch (error)
+        {
+            res.status(400).send(`Invalid value for parameter 'hash': ${hash}`);
+            return;
+        }
 
         this.ledger_storage.getWalletTransactionOverview(tx_hash)
             .then((data: any) => {
