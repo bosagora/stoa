@@ -623,8 +623,7 @@ class Stoa extends WebService
 
         filter_type = (req.query.type !== undefined)
             ? req.query.type.toString().split(',').map((m) => ConvertTypes.toDisplayTxType(m))
-            : [0, 1];
-        filter_type.push(...[DisplayTxType.Freeze, DisplayTxType.Payload].filter(n => filter_type.find(m => m == n) === undefined));
+            : [0, 1, 2, 3];
 
         if (filter_type.find(m => (m === -1)) !== undefined)
         {

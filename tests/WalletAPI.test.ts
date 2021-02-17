@@ -310,4 +310,30 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
 
         assert.deepStrictEqual(expected, response.data);
     });
+
+    it ('Test of the path /wallet/transactions/history - Filtering - exclude DataPayload in specific filter', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("/wallet/transactions/history")
+            .filename("GDID227ETHPOMLRLIHVDJSNSJVLDS4D4ANYOUHXPMG2WWEZN5JO473ZO")
+            .setSearch("pageSize", "10")
+            .setSearch("page", "1")
+            .setSearch("type", "payload");
+
+        let response = await client.get (uri.toString());
+        assert.strictEqual(response.data.length, 1);
+
+
+        uri = URI(host)
+            .port(port)
+            .directory("/wallet/transactions/history")
+            .filename("GDID227ETHPOMLRLIHVDJSNSJVLDS4D4ANYOUHXPMG2WWEZN5JO473ZO")
+            .setSearch("pageSize", "10")
+            .setSearch("page", "1")
+            .setSearch("type", "outbound");
+
+        response = await client.get (uri.toString());
+        assert.strictEqual(response.data.length, 0);
+    });
 });
