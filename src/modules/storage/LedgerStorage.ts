@@ -493,9 +493,8 @@ export class LedgerStorage extends Storages
                 let unlock_height_query: string;
                 if ((tx.type == TxType.Payment) && (tx.inputs.length > 0))
                 {
-                    let utxo: Array<string> = [];
-                    for (let input of tx.inputs)
-                        utxo.push(`'${input.utxo.toString().substring(2).toUpperCase()}'`);
+                    let utxo = tx.inputs
+                        .map(m => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
 
                     unlock_height_query =
                         `(
@@ -509,7 +508,7 @@ export class LedgerStorage extends Storages
                                 WHERE
                                     a.tx_hash = b.tx_hash
                                     and b.type = 1
-                                    and hex(a.utxo_key) in (${utxo.join(',')})
+                                    and a.utxo_key in (${utxo.join(',')})
                             )
                             UNION ALL
                             SELECT '${JSBI.add(height.value, JSBI.BigInt(1)).toString()}' AS unlock_height
