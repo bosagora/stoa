@@ -12,7 +12,8 @@
 *******************************************************************************/
 
 import {
-    BitField, Block, BlockHeader, Enrollment, Height, Hash, Signature, SodiumHelper
+    BitField, Block, BlockHeader, Enrollment, Height, Hash, Signature, SodiumHelper,
+    Transaction, TxType, TxInput, TxOutput, DataPayload, PublicKey, JSBI
 } from 'boa-sdk-ts';
 import {
     sample_data,
@@ -22,7 +23,9 @@ import {
     TestAgora,
     TestStoa,
     TestClient,
-    delay
+    delay,
+    createBlock,
+    blockToJSON
 } from './Utils';
 
 import * as assert from 'assert';
@@ -531,5 +534,161 @@ describe ('Test of the path /utxo', () =>
         assert.strictEqual(response.data.medium, "200000");
         assert.strictEqual(response.data.low, "180000");
         assert.strictEqual(response.data.high, "220000");
+    });
+});
+
+describe ('Test of the path /utxo for freezing', () =>
+{
+    let host: string = 'http://localhost';
+    let port: string = '3837';
+    let stoa_server: TestStoa;
+    let agora_server: TestAgora;
+    let client = new TestClient();
+
+    let blocks: Array<Block> = [];
+    blocks.push(Block.reviver("", sample_data[0]));
+    blocks.push(Block.reviver("", sample_data[1]));
+
+    before ('Wait for the package libsodium to finish loading', async () =>
+    {
+        await SodiumHelper.init();
+    });
+
+    before('Start a fake Agora', () => {
+        return new Promise<void>((resolve, reject) => {
+            agora_server = new TestAgora("2826", [], resolve);
+        });
+    });
+
+    before ('Create TestStoa', async () =>
+    {
+        stoa_server = new TestStoa(new URL("http://127.0.0.1:2826"), port);
+        await stoa_server.createStorage();
+    });
+
+    before ('Start TestStoa', async () =>
+    {
+        await stoa_server.start();
+    });
+
+    after('Stop Stoa and Agora server instances', async () => {
+        await stoa_server.stop();
+        await agora_server.stop();
+    });
+
+    it ('Store two blocks', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("block_externalized");
+
+        let url = uri.toString();
+        await client.post(url, {block: sample_data[0]});
+        await client.post(url, {block: sample_data[1]});
+        // Wait for the block to be stored in the database for the next test.
+        await delay(100);
+    });
+
+    it ('Create a block with a freeze transaction', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("utxo")
+            .filename("GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ");
+
+        let response = await client.get (uri.toString());
+
+        //  First Transaction
+        //  Refund amount is      10,000 BOA
+        //  Freezing amount is 2,430,000 BOA
+        let tx1 = new Transaction(
+            TxType.Freeze,
+            [
+                new TxInput(new Hash(response.data[0].utxo))
+            ],
+            [
+                new TxOutput(JSBI.BigInt(  "100000000000"), new PublicKey("GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ")),
+                new TxOutput(JSBI.BigInt("24300000000000"), new PublicKey("GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ"))
+            ],
+            DataPayload.init
+        );
+
+        uri = URI(host)
+            .port(port)
+            .directory("utxo")
+            .filename("GDAGS22PVTFDZ3OAMNBNATVAG6NM4WRCQLWCZOX2MGOF6ZVTP4CSR62B");
+
+        response = await client.get (uri.toString());
+
+        //  Second Transaction
+        //  Refund amount is      40,000 BOA
+        //  Freezing amount is 2,400,000 BOA
+        let tx2 = new Transaction(
+            TxType.Freeze,
+            [
+                new TxInput(new Hash(response.data[0].utxo))
+            ],
+            [
+                new TxOutput(JSBI.BigInt(  "400000000000"), new PublicKey("GDAGS22PVTFDZ3OAMNBNATVAG6NM4WRCQLWCZOX2MGOF6ZVTP4CSR62B")),
+                new TxOutput(JSBI.BigInt("24000000000000"), new PublicKey("GDAGS22PVTFDZ3OAMNBNATVAG6NM4WRCQLWCZOX2MGOF6ZVTP4CSR62B"))
+            ],
+            DataPayload.init
+        );
+
+        // Create block with two transactions
+        blocks.push(createBlock(blocks[1], [tx1, tx2]));
+        uri = URI(host)
+            .port(port)
+            .directory("block_externalized");
+        await client.post(uri.toString(), {block: blockToJSON(blocks[2])});
+        await delay(100);
+    });
+
+    it ('Check the height of the block', async () => {
+        let uri = URI(host)
+            .port(port)
+            .filename("block_height");
+
+        let url = uri.toString();
+        let response = await client.get(url);
+        assert.strictEqual(response.data, '2');
+    });
+
+    it ('Check the UTXO included in the freeze transaction, when refund amount less then 40,000 BOA', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("utxo")
+            .filename("GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ");
+
+        let response = await client.get (uri.toString());
+        let utxo_array: Array<any> = response.data;
+        assert.strictEqual(utxo_array.length, 2);
+
+        let freeze_utxo = utxo_array.find(m => (m.amount === "24300000000000"));
+        assert.strictEqual(freeze_utxo.type, TxType.Freeze);
+
+        // It was not frozen because the amount of the refund was less than 40,000 BOA.
+        let refund_utxo = utxo_array.find(m => (m.amount === "100000000000"));
+        assert.strictEqual(refund_utxo.type, TxType.Payment);
+    });
+
+    it ('Check the UTXO included in the freeze transaction, when refund amount greater or equal then 40,000 BOA', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("utxo")
+            .filename("GDAGS22PVTFDZ3OAMNBNATVAG6NM4WRCQLWCZOX2MGOF6ZVTP4CSR62B");
+
+        let response = await client.get(uri.toString());
+        let utxo_array: Array<any> = response.data;
+        assert.strictEqual(utxo_array.length, 2);
+
+        let freeze_utxo = utxo_array.find(m => (m.amount === "24000000000000"));
+        assert.strictEqual(freeze_utxo.type, TxType.Freeze);
+
+        // It was frozen because the amount of the refund was larger than 40,000 BOA.
+        let refund_utxo = utxo_array.find(m => (m.amount === "400000000000"));
+        assert.strictEqual(refund_utxo.type, TxType.Freeze);
     });
 });

@@ -19,7 +19,9 @@ import { URL } from 'url';
 import Stoa from '../src/Stoa';
 import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from "axios";
 import { FullNodeAPI } from '../src/modules/agora/AgoraClient';
-import { Block, Hash, Height, PreImageInfo, handleNetworkError } from 'boa-sdk-ts';
+import { Block, Hash, Height, PreImageInfo, handleNetworkError,
+    BlockHeader, BitField, Signature, Transaction, hashMulti, hashFull
+} from 'boa-sdk-ts';
 
 import JSBI from 'jsbi';
 
@@ -322,4 +324,70 @@ export function delay (interval: number): Promise<void>
     return new Promise<void>((resolve, reject) => {
         setTimeout(resolve, interval);
     });
+}
+
+/**
+ * Build the merkle tree
+ * @param tx_hash_list The array of the transactions hash
+ */
+export function buildMerkleTree (tx_hash_list: Array<Hash>): Array<Hash>
+{
+    let merkle_tree: Array<Hash> = [];
+    merkle_tree.push(...tx_hash_list);
+
+    if (merkle_tree.length == 1)
+    {
+        merkle_tree.push(hashMulti(merkle_tree[0].data, merkle_tree[0].data));
+        return merkle_tree;
+    }
+
+    let offset = 0;
+    for (let length = merkle_tree.length; length > 1; length = Math.floor((length + 1) / 2))
+    {
+        for (let left = 0; left < length; left += 2)
+        {
+            let right = Math.min(left + 1, length - 1);
+            merkle_tree.push(hashMulti(merkle_tree[offset + left].data, merkle_tree[offset + right].data));
+        }
+        offset += length;
+    }
+    return merkle_tree;
+}
+
+/**
+ * Create Block
+ * @param prev_block The previous block
+ * @param txs The array of the transactions
+ */
+export function createBlock (prev_block: Block, txs: Array<Transaction>): Block
+{
+    let tx_hash_list = txs.map(tx => hashFull(tx));
+    let merkle_tree = buildMerkleTree(tx_hash_list);
+    let merkle_root = (merkle_tree.length > 0) ? merkle_tree[merkle_tree.length-1] : new Hash(Buffer.alloc(Hash.Width));
+    let block_header = new BlockHeader(
+        hashFull(prev_block.header),
+        new Height(JSBI.add(prev_block.header.height.value, JSBI.BigInt(1))),
+        merkle_root,
+        new BitField([]),
+        new Signature(Buffer.alloc(Signature.Width)),
+        [],
+        new Hash(Buffer.alloc(Hash.Width)),
+        [],
+        prev_block.header.timestamp + 10 * 60
+    );
+
+    let block = new Block(block_header, txs, merkle_tree);
+
+    return block;
+}
+
+/**
+ * Convert the block to JSON
+ * @param block The instance of the block
+ */
+export function blockToJSON (block: Block): any
+{
+    let obj = JSON.parse(JSON.stringify(block));
+    obj.header.validators = "[]";
+    return obj;
 }
