@@ -24,8 +24,7 @@ import {
     TestStoa,
     TestClient,
     delay,
-    createBlock,
-    blockToJSON
+    createBlock
 } from './Utils';
 
 import * as assert from 'assert';
@@ -640,7 +639,7 @@ describe ('Test of the path /utxo for freezing', () =>
         uri = URI(host)
             .port(port)
             .directory("block_externalized");
-        await client.post(uri.toString(), {block: blockToJSON(blocks[2])});
+        await client.post(uri.toString(), {block: blocks[2]});
         await delay(100);
     });
 

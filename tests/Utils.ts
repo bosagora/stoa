@@ -380,14 +380,3 @@ export function createBlock (prev_block: Block, txs: Array<Transaction>): Block
 
     return block;
 }
-
-/**
- * Convert the block to JSON
- * @param block The instance of the block
- */
-export function blockToJSON (block: Block): any
-{
-    let obj = JSON.parse(JSON.stringify(block));
-    obj.header.validators = "[]";
-    return obj;
-}
