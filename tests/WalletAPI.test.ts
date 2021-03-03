@@ -268,7 +268,7 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
         await client.post(url, {block: sample_data[0]});
         await client.post(url, {block: sample_data[1]});
         await client.post(url, {block: sample_data2});
-        await delay(100);
+        await delay(500);
     });
 
     it('Test of the path /wallet/transaction/overview with payload', async () => {

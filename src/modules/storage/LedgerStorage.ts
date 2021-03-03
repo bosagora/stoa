@@ -120,10 +120,20 @@ export class LedgerStorage extends Storages
             lock_type           INTEGER NOT NULL,
             lock_bytes          BLOB    NOT NULL,
             address             TEXT    NOT NULL,
-            used                INTEGER NOT NULL DEFAULT 0,
             PRIMARY KEY(block_height, tx_index, output_index)
         );
 
+        CREATE TABLE IF NOT EXISTS utxos
+        (
+            utxo_key            BLOB    NOT NULL,
+            tx_hash             BLOB    NOT NULL,
+            amount              NUMERIC NOT NULL,
+            lock_type           INTEGER NOT NULL,
+            lock_bytes          BLOB    NOT NULL,
+            address             TEXT    NOT NULL,
+            PRIMARY KEY(utxo_key)
+        );
+        
         CREATE TABLE IF NOT EXISTS payloads (
             tx_hash             BLOB    NOT NULL,
             payload             BLOB    NOT NULL,
@@ -569,13 +579,12 @@ export class LedgerStorage extends Storages
             });
         }
 
-        function update_spend_output (storage: LedgerStorage,
-            input: TxInput): Promise<void>
+        function delete_spend_output (storage: LedgerStorage, input: TxInput): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
             {
                 storage.run(
-                    `UPDATE tx_outputs SET used = 1 WHERE utxo_key = ?`,
+                    `DELETE FROM utxos WHERE utxo_key = ?`,
                     [
                         input.utxo.toBinary(Endian.Little)
                     ])
@@ -614,6 +623,46 @@ export class LedgerStorage extends Storages
                         output.value.toString(),
                         output.lock.type,
                         output.lock.bytes
+                    ]
+                )
+                    .then(() =>
+                    {
+                        resolve();
+                    })
+                    .catch((err) =>
+                    {
+                        reject(err);
+                    })
+            });
+        }
+
+        function save_utxo (storage: LedgerStorage, hash: Hash, utxo_key: Hash, output: TxOutput): Promise<void>
+        {
+            return new Promise<void>((resolve, reject) =>
+            {
+                let address: string = (output.lock.type == 0)
+                    ? (new PublicKey(output.lock.bytes)).toString()
+                    : "";
+
+                storage.run(
+                    `INSERT INTO utxos
+                        (
+                            utxo_key, 
+                            tx_hash, 
+                            amount, 
+                            lock_type, 
+                            lock_bytes, 
+                            address
+                        )
+                    VALUES
+                        (?, ?, ?, ?, ?, ?)`,
+                    [
+                        utxo_key.toBinary(Endian.Little),
+                        hash.toBinary(Endian.Little),
+                        output.value.toString(),
+                        output.lock.type,
+                        output.lock.bytes,
+                        address
                     ]
                 )
                     .then(() =>
@@ -671,7 +720,7 @@ export class LedgerStorage extends Storages
                         for (let in_idx = 0; in_idx < block.txs[tx_idx].inputs.length; in_idx++)
                         {
                             await save_input(this, block.header.height, tx_idx, in_idx, block.merkle_tree[tx_idx], block.txs[tx_idx].inputs[in_idx]);
-                            await update_spend_output(this, block.txs[tx_idx].inputs[in_idx]);
+                            await delete_spend_output(this, block.txs[tx_idx].inputs[in_idx]);
                         }
 
                         for (let out_idx = 0; out_idx < block.txs[tx_idx].outputs.length; out_idx++)
@@ -679,6 +728,7 @@ export class LedgerStorage extends Storages
                             let utxo_key = makeUTXOKey(block.merkle_tree[tx_idx], JSBI.BigInt(out_idx));
                             await save_output(this, block.header.height, tx_idx, out_idx,
                                 block.merkle_tree[tx_idx], utxo_key, block.txs[tx_idx].outputs[out_idx]);
+                            await save_utxo(this, block.merkle_tree[tx_idx], utxo_key, block.txs[tx_idx].outputs[out_idx]);
                         }
                     }
                 }
@@ -895,7 +945,7 @@ export class LedgerStorage extends Storages
     {
         let sql =
         `SELECT
-            block_height, tx_index, output_index, tx_hash, utxo_key, amount, lock_type, lock_bytes, address, used
+            block_height, tx_index, output_index, tx_hash, utxo_key, amount, lock_type, lock_bytes, address
         FROM
             tx_outputs
         WHERE block_height = ? AND tx_index = ?`;
@@ -941,7 +991,7 @@ export class LedgerStorage extends Storages
             cur_height = `(SELECT MAX(height) as height FROM blocks)`;
 
         let sql =
-        `SELECT tx_outputs.address,
+        `SELECT utxos.address,
                 enrollments.enrolled_at,
                 enrollments.utxo_key as stake,
                 enrollments.random_seed,
@@ -964,9 +1014,8 @@ export class LedgerStorage extends Storages
              WHERE avail_height <= ` + cur_height + `
                AND ` + cur_height + ` < (avail_height + cycle_length)
              GROUP BY utxo_key) as enrollments
-        INNER JOIN tx_outputs
-            ON enrollments.utxo_key = tx_outputs.utxo_key
-            AND tx_outputs.used = 0
+        INNER JOIN utxos
+            ON enrollments.utxo_key = utxos.utxo_key
         LEFT JOIN validators
             ON enrollments.enrolled_at = validators.enrolled_at
             AND enrollments.utxo_key = validators.utxo_key
@@ -974,7 +1023,7 @@ export class LedgerStorage extends Storages
         `;
 
         if (address != null)
-            sql += ` AND tx_outputs.address = '` + address + `'`;
+            sql += ` AND utxos.address = '` + address + `'`;
 
         sql += ` ORDER BY enrollments.enrolled_at ASC, enrollments.utxo_key ASC;`;
 
@@ -1056,12 +1105,11 @@ export class LedgerStorage extends Storages
                 T.type,
                 T.unlock_height
             FROM
-                tx_outputs O
+                utxos O
                 INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
                 INNER JOIN blocks B ON (B.height = T.block_height)
             WHERE
                 O.address = ?
-                AND O.used = 0;
             ORDER BY T.block_height, O.amount
             `;
 
@@ -1069,7 +1117,7 @@ export class LedgerStorage extends Storages
             `SELECT
                 S.utxo_key as utxo
             FROM
-                tx_outputs S
+                utxos S
                 INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
                 INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
             WHERE
@@ -1333,12 +1381,11 @@ export class LedgerStorage extends Storages
                     SELECT
                             I.tx_hash
                     FROM
-                        tx_outputs O
+                        utxos O
                         INNER JOIN tx_input_pool I
                             ON O.utxo_key = I.utxo
                     WHERE
-                        O.used = 0
-                        AND O.address = ?
+                        O.address = ?
                 ), NULL)
             GROUP BY T.tx_hash, O.address;`;
 

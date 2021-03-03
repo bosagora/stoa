@@ -141,7 +141,6 @@ CREATE TABLE IF NOT EXISTS "tx_inputs" (
 |  lock_type        | INTEGER   |    | Y        |          | (0: Key; 1: Hash of Key; 2: Script; 3: Hash of Script) |
 |  lock_bytes       | BLOB      |    | Y        |          | The bytes of lock |
 |  address          | TEXT      |    | Y        |          | The public key, Valid only when lock type is 0. Other than that, it's a blank.|
-|  used             | INTEGER   |    | Y        | 0        | Whether this output was used or not(1: used, 0: not used)|
 
 ### _Create Script_
 
@@ -156,13 +155,40 @@ CREATE TABLE IF NOT EXISTS "tx_outputs" (
     "lock_type"             INTEGER NOT NULL,
     "lock_bytes"            BLOB    NOT NULL,
     "address"               TEXT    NOT NULL,
-    "used"                  INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY("block_height","tx_index","output_index")
 )
 ```
 ----
 
-## 6. Table **validators**
+## 6. Table **utxos**
+
+### _Schema_
+
+| Column            | Data Type | PK | Not NULL | Default  |Description|
+|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
+|  utxo_key         | BLOB      | Y  | Y        |          | The hash of the UTXO|
+|  tx_hash          | BLOB      |    | Y        |          | The hash of transaction |
+|  amount           | NUMERIC   |    | Y        |          | The monetary value of this output, in 1/10^7|
+|  lock_type        | INTEGER   |    | Y        |          | (0: Key; 1: Hash of Key; 2: Script; 3: Hash of Script) |
+|  lock_bytes       | BLOB      |    | Y        |          | The bytes of lock |
+|  address          | TEXT      |    | Y        |          | The public key, Valid only when lock type is 0. Other than that, it's a blank.|
+
+### _Create Script_
+
+```sql
+CREATE TABLE IF NOT EXISTS "utxos" (
+    "utxo_key"              BLOB    NOT NULL,
+    "tx_hash"               BLOB    NOT NULL,
+    "amount"                NUMERIC NOT NULL,
+    "lock_type"             INTEGER NOT NULL,
+    "lock_bytes"            BLOB    NOT NULL,
+    "address"               TEXT    NOT NULL,
+    PRIMARY KEY("utxo_key")
+)
+```
+----
+
+## 7. Table **validators**
 
 ### _Schema_
 
@@ -190,7 +216,7 @@ CREATE TABLE IF NOT EXISTS "validators" (
 ```
 ----
 
-## 7. Table **payloads**
+## 8. Table **payloads**
 
 ### _Schema_
 
@@ -211,7 +237,7 @@ CREATE TABLE IF NOT EXISTS "payloads" (
 
 ----
 
-## 8. Table **information**
+## 9. Table **information**
 
 It can store information that is required for operation.
 The following data is recorded when the most recently recorded block height is 100.
@@ -237,7 +263,7 @@ CREATE TABLE IF NOT EXISTS information (
 
 ----
 
-## 9. Table **transaction_pool**
+## 10. Table **transaction_pool**
 
 ### _Schema_
 
@@ -264,7 +290,7 @@ CREATE TABLE IF NOT EXISTS "transaction_pool" (
 
 ----
 
-## 10. Table **tx_input_pool**
+## 11. Table **tx_input_pool**
 
 ### _Schema_
 
@@ -290,7 +316,7 @@ CREATE TABLE IF NOT EXISTS "tx_input_pool" (
 
 ----
 
-## 11. Table **tx_output_pool**
+## 12. Table **tx_output_pool**
 
 ### _Schema_
 
