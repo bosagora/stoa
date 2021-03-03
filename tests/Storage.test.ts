@@ -76,7 +76,6 @@ describe ('Test ledger storage and inquiry function.', () =>
             '0xb3aaf405f53560a6f6d5dd9dd83d7b031da480c0640a2897f2e2562c4670dfe' +
             '84552d84daf5b1b7c63ce249d06bf54747cc5fdc98178a932fff99ab1372e873b');
         assert.strictEqual(rows5[0].address, 'GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ');
-        assert.strictEqual(rows5[0].used, 1);
     });
 
     it ('Test for enrollment', async () =>
