@@ -168,6 +168,8 @@ CREATE TABLE IF NOT EXISTS "tx_outputs" (
 |:----------------- |:--------- |:--:|:--------:| -------- | --------- |
 |  utxo_key         | BLOB      | Y  | Y        |          | The hash of the UTXO|
 |  tx_hash          | BLOB      |    | Y        |          | The hash of transaction |
+|  type             | INTEGER   |    | Y        |          | The type of UTXO (0: Payment, 1: Freeze) If the type of transaction is `Freeze` and the refund output is less than 40,000 BOA, it is `Payment`. Others are the same as the transaction type. |
+|  unlock_height    | INTEGER   |    | Y        |          | Height of the block to be unlock|
 |  amount           | NUMERIC   |    | Y        |          | The monetary value of this output, in 1/10^7|
 |  lock_type        | INTEGER   |    | Y        |          | (0: Key; 1: Hash of Key; 2: Script; 3: Hash of Script) |
 |  lock_bytes       | BLOB      |    | Y        |          | The bytes of lock |
@@ -179,6 +181,8 @@ CREATE TABLE IF NOT EXISTS "tx_outputs" (
 CREATE TABLE IF NOT EXISTS "utxos" (
     "utxo_key"              BLOB    NOT NULL,
     "tx_hash"               BLOB    NOT NULL,
+    "type"                  INTEGER NOT NULL,
+    "unlock_height"         INTEGER NOT NULL,
     "amount"                NUMERIC NOT NULL,
     "lock_type"             INTEGER NOT NULL,
     "lock_bytes"            BLOB    NOT NULL,

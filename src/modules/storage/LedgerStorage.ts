@@ -14,7 +14,7 @@
 import {
     Block, Enrollment, Hash, Height, PreImageInfo, Transaction,
     TxInput, TxOutput, makeUTXOKey, hashFull, TxType,
-    Utils, Endian, Unlock, PublicKey, DataPayload
+    Utils, Endian, Unlock, PublicKey, DataPayload, TxPayloadFee
 } from 'boa-sdk-ts';
 import { Storages } from './Storages';
 
@@ -127,6 +127,8 @@ export class LedgerStorage extends Storages
         (
             utxo_key            BLOB    NOT NULL,
             tx_hash             BLOB    NOT NULL,
+            type                INTEGER NOT NULL,
+            unlock_height       INTEGER NOT NULL,
             amount              NUMERIC NOT NULL,
             lock_type           INTEGER NOT NULL,
             lock_bytes          BLOB    NOT NULL,
@@ -635,7 +637,44 @@ export class LedgerStorage extends Storages
             });
         }
 
-        function save_utxo (storage: LedgerStorage, hash: Hash, utxo_key: Hash, output: TxOutput): Promise<void>
+        function is_melting (storage: LedgerStorage, tx: Transaction): Promise<boolean>
+        {
+            return new Promise<boolean>((resolve, reject) =>
+            {
+                if ((tx.type == TxType.Payment) && (tx.inputs.length > 0))
+                {
+                    let utxo = tx.inputs
+                        .map(m => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
+
+                    let sql =
+                        `SELECT
+                            count(*) as count
+                        FROM
+                            utxos O
+                        WHERE
+                            O.type = 1
+                            AND O.utxo_key in (${utxo.join(',')})
+                        `;
+
+                    storage.query(sql, [])
+                        .then((rows: any[]) =>
+                        {
+                            resolve(rows[0].count > 0);
+                        })
+                        .catch((err) =>
+                        {
+                            reject(err);
+                        });
+                }
+                else
+                {
+                    resolve(false);
+                }
+            });
+        }
+
+        function save_utxo (storage: LedgerStorage, melting: boolean, height: Height, tx: Transaction,
+            out_idx: number, tx_hash: Hash, utxo_key: Hash, output: TxOutput): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
             {
@@ -643,21 +682,44 @@ export class LedgerStorage extends Storages
                     ? (new PublicKey(output.lock.bytes)).toString()
                     : "";
 
+                let unlock_height: JSBI;
+                let tx_type: TxType;
+                if (melting && address != TxPayloadFee.CommonsBudgetAddress)
+                {
+                    tx_type = tx.type;
+                    unlock_height = JSBI.add(height.value, JSBI.BigInt(2016));
+                }
+                else if (tx.type == TxType.Freeze && tx.outputs.length >= 2 &&
+                    (out_idx == 0 && JSBI.lessThan(output.value, JSBI.BigInt(400_000_000_000))))
+                {
+                    tx_type = TxType.Payment;
+                    unlock_height = JSBI.add(height.value, JSBI.BigInt(1));
+                }
+                else
+                {
+                    tx_type = tx.type;
+                    unlock_height = JSBI.add(height.value, JSBI.BigInt(1));
+                }
+
                 storage.run(
                     `INSERT INTO utxos
                         (
                             utxo_key, 
-                            tx_hash, 
+                            tx_hash,  
+                            type, 
+                            unlock_height, 
                             amount, 
                             lock_type, 
                             lock_bytes, 
                             address
                         )
                     VALUES
-                        (?, ?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         utxo_key.toBinary(Endian.Little),
-                        hash.toBinary(Endian.Little),
+                        tx_hash.toBinary(Endian.Little),
+                        tx_type,
+                        unlock_height.toString(),
                         output.value.toString(),
                         output.lock.type,
                         output.lock.bytes,
@@ -711,6 +773,8 @@ export class LedgerStorage extends Storages
                 {
                     for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++)
                     {
+                        let melting = await is_melting(this, block.txs[tx_idx]);
+
                         await save_transaction(this, block.header.height, tx_idx, block.merkle_tree[tx_idx], block.txs[tx_idx]);
 
                         if (block.txs[tx_idx].payload.data.length > 0)
@@ -727,7 +791,8 @@ export class LedgerStorage extends Storages
                             let utxo_key = makeUTXOKey(block.merkle_tree[tx_idx], JSBI.BigInt(out_idx));
                             await save_output(this, block.header.height, tx_idx, out_idx,
                                 block.merkle_tree[tx_idx], utxo_key, block.txs[tx_idx].outputs[out_idx]);
-                            await save_utxo(this, block.merkle_tree[tx_idx], utxo_key, block.txs[tx_idx].outputs[out_idx]);
+                            await save_utxo(this, melting, block.header.height, block.txs[tx_idx], out_idx,
+                                block.merkle_tree[tx_idx], utxo_key, block.txs[tx_idx].outputs[out_idx]);
                         }
                     }
                 }
@@ -1101,8 +1166,8 @@ export class LedgerStorage extends Storages
                 O.lock_bytes,
                 T.block_height,
                 B.time_stamp as block_time,
-                T.type,
-                T.unlock_height
+                O.type,
+                O.unlock_height
             FROM
                 utxos O
                 INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
