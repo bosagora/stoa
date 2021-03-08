@@ -14,7 +14,7 @@
 import {
     Block, Enrollment, Hash, Height, PreImageInfo, Transaction,
     TxInput, TxOutput, makeUTXOKey, hashFull, TxType,
-    Utils, Endian, Unlock, PublicKey, DataPayload, TxPayloadFee
+    Utils, Endian, Lock, Unlock, PublicKey, DataPayload, TxPayloadFee
 } from 'boa-sdk-ts';
 import { Storages } from './Storages';
 
@@ -1531,19 +1531,24 @@ export class LedgerStorage extends Storages
         {
             try {
                 let hash = tx_hash.toBinary(Endian.Little);
-                let rows = await this.query("SELECT tx_hash, type, payload, time FROM transaction_pool WHERE tx_hash = ?;", [hash]);
+                let rows = await this.query("SELECT tx_hash, type, payload, lock_height, time FROM transaction_pool WHERE tx_hash = ?;", [hash]);
                 if (rows.length > 0)
                 {
                     let input_rows = await this.query("SELECT tx_hash, utxo, unlock_bytes, unlock_age FROM tx_input_pool WHERE tx_hash = ? ORDER BY input_index;", [hash]);
-                    let output_rows = await this.query("SELECT tx_hash, amount, address FROM tx_output_pool WHERE tx_hash = ? ORDER BY output_index;", [hash]);
+                    let output_rows = await this.query("SELECT tx_hash, amount, lock_type, lock_bytes FROM tx_output_pool WHERE tx_hash = ? ORDER BY output_index;", [hash]);
 
                     let inputs:Array<TxInput> = [];
                     for (let input_row of input_rows)
                         inputs.push(new TxInput(new Hash(input_row.utxo, Endian.Little), new Unlock(input_row.unlock_bytes), input_row.unlock_age));
                     let outputs:Array<TxOutput> = [];
                     for (let output_row of output_rows)
-                        outputs.push(new TxOutput(output_row.amount, new PublicKey(output_row.address)));
-                    resolve(new Transaction(rows[0].type, inputs, outputs, new DataPayload(rows[0].payload, Endian.Little)));
+                        outputs.push(new TxOutput(output_row.amount, new Lock(output_row.lock_type, output_row.lock_bytes)));
+                    resolve(new Transaction(
+                        rows[0].type,
+                        inputs,
+                        outputs,
+                        new DataPayload((rows[0].payload !== null) ? (rows[0].payload) : Buffer.alloc(0), Endian.Little),
+                        new Height(rows[0].lock_height)));
                 }
                 else
                 {
