@@ -91,6 +91,9 @@ export class LedgerStorage extends Storages
             type                INTEGER NOT NULL,
             unlock_height       INTEGER NOT NULL,
             lock_height         INTEGER NOT NULL,
+            tx_fee              INTEGER NOT NULL,
+            payload_fee         INTEGER NOT NULL,
+            tx_size             INTEGER NOT NULL,
             inputs_count        INTEGER NOT NULL,
             outputs_count       INTEGER NOT NULL,
             payload_size        INTEGER NOT NULL,
@@ -478,6 +481,54 @@ export class LedgerStorage extends Storages
         return this.query(sql, [height.toString()]);
     }
 
+    public getTransactionFee(tx: Transaction):  Promise<[JSBI, JSBI, JSBI]>
+    {
+        return new Promise<[JSBI, JSBI, JSBI]>((resolve, reject) =>
+        {
+            if (tx.inputs.length == 0)
+            {
+                resolve([JSBI.BigInt(0), JSBI.BigInt(0), JSBI.BigInt(0)]);
+                return;
+            }
+
+            let utxo = tx.inputs
+                .map(m => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
+
+            let sql =
+                `SELECT
+                    SUM(O.amount) as sum_inputs
+                FROM
+                    utxos O
+                WHERE
+                    O.utxo_key in (${utxo.join(',')}); `;
+
+            this.query(sql, [])
+                .then((rows: any) =>
+                {
+                    if (rows.length > 0)
+                    {
+                        let SumOfInput = JSBI.BigInt(rows[0].sum_inputs);
+                        let SumOfOutput = tx.outputs.reduce<JSBI>((sum, n) => {
+                            return JSBI.add(sum, n.value);
+                        }, JSBI.BigInt(0));
+
+                        let total_fee = JSBI.subtract(SumOfInput, SumOfOutput);
+                        let payload_fee = TxPayloadFee.getFee(tx.payload.data.length);
+                        let tx_fee = JSBI.subtract(total_fee, payload_fee);
+
+                        resolve([total_fee, tx_fee, payload_fee]);
+                    }
+                    else {
+                        resolve([JSBI.BigInt(0), JSBI.BigInt(0), JSBI.BigInt(0)]);
+                    }
+                })
+                .catch((err) =>
+                {
+                    reject(err);
+                });
+        });
+    }
+
     /**
      * Puts all transactions
      * @param block: The instance of the `Block`
@@ -490,8 +541,11 @@ export class LedgerStorage extends Storages
         function save_transaction (storage: LedgerStorage, height: Height, tx_idx:
             number, hash: Hash, tx: Transaction): Promise<void>
         {
-            return new Promise<void>((resolve, reject) =>
+            return new Promise<void>(async (resolve, reject) =>
             {
+                let fees = await storage.getTransactionFee(tx);
+                let tx_size = tx.getNumberOfBytes();
+
                 let unlock_height_query: string;
                 if ((tx.type == TxType.Payment) && (tx.inputs.length > 0))
                 {
@@ -524,15 +578,18 @@ export class LedgerStorage extends Storages
 
                 storage.run(
                     `INSERT INTO transactions
-                        (block_height, tx_index, tx_hash, type, unlock_height, lock_height, inputs_count, outputs_count, payload_size)
+                        (block_height, tx_index, tx_hash, type, unlock_height, lock_height, tx_fee, payload_fee, tx_size, inputs_count, outputs_count, payload_size)
                     VALUES
-                        (?, ?, ?, ?, ${unlock_height_query}, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ${unlock_height_query}, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         height.toString(),
                         tx_idx,
                         hash.toBinary(Endian.Little),
                         tx.type,
                         tx.lock_height.toString(),
+                        fees[1].toString(),
+                        fees[2].toString(),
+                        tx_size,
                         tx.inputs.length,
                         tx.outputs.length,
                         tx.payload.data.length

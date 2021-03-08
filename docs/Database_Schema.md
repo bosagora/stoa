@@ -75,6 +75,9 @@ CREATE TABLE IF NOT EXISTS "enrollments" (
 | type              | INTEGER   |    | Y        |          | The type of transaction |
 | unlock_height     | INTEGER   |    | Y        |          | Height of the block to be unlock|
 | lock_height       | INTEGER   |    | Y        |          | This transaction may only be included in a block with `block_height >= lock_height`|
+| tx_fee            | INTEGER   |    | Y        |          | The fee of this transaction |
+| payload_fee       | INTEGER   |    | Y        |          | The payload fee of this transaction  |
+| tx_size           | INTEGER   |    | Y        |          | The size of this transaction  |
 | inputs_count      | INTEGER   |    | Y        |          | The number of inputs in the transaction |
 | outputs_count     | INTEGER   |    | Y        |          | The number of outputs in the transaction |
 | payload_size      | INTEGER   |    | Y        |          | The size of data payload in the transaction |
@@ -89,6 +92,9 @@ CREATE TABLE IF NOT EXISTS "transactions" (
     "type"                  INTEGER NOT NULL,
     "unlock_height"         INTEGER NOT NULL,
     "lock_height"           INTEGER NOT NULL,
+    "tx_fee"                INTEGER NOT NULL,
+    "payload_fee"           INTEGER NOT NULL,
+    "tx_size"               INTEGER NOT NULL,
     "inputs_count"          INTEGER NOT NULL,
     "outputs_count"         INTEGER NOT NULL,
     "payload_size"          INTEGER NOT NULL,
