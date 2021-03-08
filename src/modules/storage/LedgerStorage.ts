@@ -169,6 +169,9 @@ export class LedgerStorage extends Storages
             payload             BLOB    NOT NULL,
             lock_height         INTEGER NOT NULL,
             time                INTEGER NOT NULL,
+            tx_fee              INTEGER NOT NULL,
+            payload_fee         INTEGER NOT NULL,
+            tx_size             INTEGER NOT NULL,
             PRIMARY KEY(tx_hash)
         );
 
@@ -875,18 +878,24 @@ export class LedgerStorage extends Storages
         function save_transaction_pool (storage: LedgerStorage, tx: Transaction,
             hash: Hash): Promise<number>
         {
-            return new Promise<number>((resolve, reject) =>
+            return new Promise<number>(async (resolve, reject) =>
             {
+                let fees = await storage.getTransactionFee(tx);
+                let tx_size = tx.getNumberOfBytes();
+
                 storage.run(
                     `INSERT INTO transaction_pool
-                        (tx_hash, type, payload, lock_height, time)
+                        (tx_hash, type, payload, lock_height, time, tx_fee, payload_fee, tx_size)
                     VALUES
-                        (?, ?, ?, ?, strftime('%s', 'now', 'UTC'))`,
+                        (?, ?, ?, ?, strftime('%s', 'now', 'UTC'), ?, ?, ?)`,
                     [
                         hash.toBinary(Endian.Little),
                         tx.type,
                         tx.payload.toBinary(Endian.Little),
-                        tx.lock_height.toString()
+                        tx.lock_height.toString(),
+                        fees[1].toString(),
+                        fees[2].toString(),
+                        tx_size
                     ])
                     .then((result) =>
                     {

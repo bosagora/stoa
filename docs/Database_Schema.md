@@ -284,6 +284,9 @@ CREATE TABLE IF NOT EXISTS information (
 | payload           | BLOB      |    | Y        |          | The transaction data payload |
 | lock_height       | INTEGER   |    | Y        |          | This transaction may only be included in a block with `block_height >= lock_height`|
 | time              | INTEGER   |    | Y        |          | Received time |
+| tx_fee            | INTEGER   |    | Y        |          | The fee of this transaction |
+| payload_fee       | INTEGER   |    | Y        |          | The payload fee of this transaction  |
+| tx_size           | INTEGER   |    | Y        |          | The size of this transaction  |
 
 ### _Create Script_
 
@@ -294,6 +297,9 @@ CREATE TABLE IF NOT EXISTS "transaction_pool" (
     "payload"               BLOB    NOT NULL,
     "lock_height"           INTEGER NOT NULL,
     "time"                  INTEGER NOT NULL,
+    "tx_fee"                INTEGER NOT NULL,
+    "payload_fee"           INTEGER NOT NULL,
+    "tx_size"               INTEGER NOT NULL,
     PRIMARY KEY("tx_hash")
 )
 ```
