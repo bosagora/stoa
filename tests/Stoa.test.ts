@@ -428,6 +428,208 @@ describe ('Test of Stoa API Server', () =>
         };
         assert.deepStrictEqual(expected, response.data);
     });
+
+    it ('Test of the path /transaction/:hash', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("/transaction")
+            .filename("0x535b358337d919474f3043db1f292a1ac44a4f4dbbaa6d89226c7abd96c38bf96018e67828ec539623e475d480af99499368780ae346dfb6cb048b377cbc92d0");
+
+        let response = await client.get (uri.toString());
+        let expected = {
+            "type": 0,
+            "inputs": [
+                {
+                    "utxo": "0x3909833e3755e875f03032ae8a3af30b40722fc09c52743005e4dcdc617964b8c436ce244cb217a1b34ceddad4378c8ea7311739ba15e5a6c427e6a371acc173",
+                    "unlock": {
+                        "bytes": "gjO50AaHWccrKwYprzeYKoJwDQoNNKoC4U4CHImmtyjAHFw4LA0/VLZ9519HtcRQ8mW9K6a/rHhQmMRKnUWMAQ=="
+                    },
+                    "unlock_age": 0
+                }
+            ],
+            "outputs": [
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGjrV+Is0jvFO3G34okd30FESntMARJgpUxNmBapXy8="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGlrT6zKPO3AY0LQTqA3ms5aIoLsLLr6YZxfZrN/BSg="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGnrXnkyzT35mFen3/nqGNzT5svngjvOzd0nPmp48z8="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGprVwVfsXegFnyoVOJ8NxRVKo6Ax90/tCJlnWPocnE="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGrrWiwuetWzdbkJuFubVLDvjIG2Tvf2lDotIbo+Jmc="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGtrT1owyvl3vVOM97cAf7hltS63C3RPXEHV6ywb+pk="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGvrTYjTUR3sebormKmd13CgwNR8zS2cIQpz2sO8FDw="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGxrQsxC6ombUfbuZhXYChQ5f46XwKlSC/8D6f/ypVw="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wGzrVKDyZFQE6f1aPlcoVU+RNNoFb8T7TkaGCRHPhtI="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHBrVjAvEqU7dm5AtE3Uox39TBx2nEGCLMIkZ1Xd4Uk="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHDrVgxbWlsCtUZoAqS9AGhNSjeCL9H2s3e9MeWCiwI="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHFrTSziv5rQMyz9yfQv2wLfzNDuyjuGQxoWj7si2EM="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHHrSfy5aeBzHAmyG3I3DZeW3wP3mC1okuPIuxjaszY="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHJrSoE54aAlhbQLmcPFLOk9fDfEzfbBaP+OoPd8pl0="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHLrSdeJEF0X5T1pUkSB+OWOCW9INnrSMISEndtylk0="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHNrTFrOd+j3EJi+57NgxKoJ7J3l1vx0cEee/LWD55c="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHPrVzsBsCF1rHGV2p6L92Q1HsaYAjnbpEw7t4QvE3M="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHRrXM8RrndOyNLLtNcuiKAiDDQuTMSr6X3iYAOHpaA="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHTrRIB3PHtY+F6zaxBzfrhce7YYsGN+PgOCxLRlTCI="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHVrSXW2MO24NZb5jWmDzfkk0LRhO04O06Pq3rTc6Xo="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHXrQU4rpleVE2aYwa6oOH3ZT3vzHTJQDREip9eSguI="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHZrR5nE94DsZIqjMkWebdCcpnKWVYrSlEl6K0DuviM="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHbrVGymRp87UbYbPN9GkgACniCge/RD2FA+N2bqsgI="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHdrXb8NxrKxXd3gy7mn5wli/+Y2KtHRiNzGIFsK4j4="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "wHfrSQ/MofR+HHmqtrgsriOnQQGwb3U16HbFnTtGhoc="
+                    }
+                }
+            ],
+            "payload": "",
+            "lock_height": "0"
+        };
+        assert.deepStrictEqual(response.data, expected);
+    });
 });
 
 describe ('Test of the path /utxo', () =>

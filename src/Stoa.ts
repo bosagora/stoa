@@ -113,6 +113,7 @@ class Stoa extends WebService
         this.app.get("/validators", this.getValidators.bind(this));
         this.app.get("/validator/:address", this.getValidator.bind(this));
         this.app.get("/transaction/pending/:hash", this.getTransactionPending.bind(this));
+        this.app.get("/transaction/:hash", this.getTransaction.bind(this));
         this.app.get("/utxo/:address", this.getUTXO.bind(this));
         this.app.get("/transaction/status/:hash", this.getTransactionStatus.bind(this));
         this.app.get("/transaction/fees/:tx_size", this.getTransactionFees.bind(this));
@@ -454,6 +455,47 @@ class Stoa extends WebService
                 if (tx === null)
                 {
                     res.status(204).send(`No pending transactions. hash': (${hash})`);
+                    return;
+                }
+
+                res.status(200).send(JSON.stringify(tx));
+            })
+            .catch((err) => {
+                    logger.error("Failed to data lookup to the DB: " + err);
+                    res.status(500).send("Failed to data lookup");
+                }
+            );
+    }
+
+    /**
+     * GET /transaction/:hash
+     *
+     * Called when a request is received through the `/transaction/:hash` handler
+     *
+     * Returns a transaction by the transaction hash.
+     */
+    private getTransaction (req: express.Request, res: express.Response)
+    {
+        let hash: string = String(req.params.hash);
+
+        logger.http(`GET /transaction/${hash}}`);
+
+        let tx_hash: Hash;
+        try
+        {
+            tx_hash = new Hash(hash);
+        }
+        catch (error)
+        {
+            res.status(400).send(`Invalid value for parameter 'hash': ${hash}`);
+            return;
+        }
+
+        this.ledger_storage.getTransaction(tx_hash)
+            .then((tx) => {
+                if (tx === null)
+                {
+                    res.status(204).send(`No transactions. hash': (${hash})`);
                     return;
                 }
 

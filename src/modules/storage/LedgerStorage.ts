@@ -1563,6 +1563,56 @@ export class LedgerStorage extends Storages
     }
 
     /**
+     * Gets a transaction data
+     * @param tx_hash The hash of the transaction to get
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getTransaction (tx_hash: Hash): Promise<Transaction | null>
+    {
+        return new Promise<Transaction | null>(async (resolve, reject) =>
+        {
+            try {
+                let hash = tx_hash.toBinary(Endian.Little);
+                let rows = await this.query(
+                    `SELECT 
+                        T.tx_hash, T.type, T.lock_height, P.payload FROM 
+                    transactions T
+                    LEFT JOIN payloads P ON (T.tx_hash = P.tx_hash)
+                    WHERE
+                        T.tx_hash = ?`, [hash]);
+                if (rows.length > 0)
+                {
+                    let input_rows = await this.query("SELECT tx_hash, utxo, unlock_bytes, unlock_age FROM tx_inputs WHERE tx_hash = ? ORDER BY in_index;", [hash]);
+                    let output_rows = await this.query("SELECT tx_hash, amount, lock_type, lock_bytes FROM tx_outputs WHERE tx_hash = ? ORDER BY output_index;", [hash]);
+
+                    let inputs:Array<TxInput> = [];
+                    for (let input_row of input_rows)
+                        inputs.push(new TxInput(new Hash(input_row.utxo, Endian.Little), new Unlock(input_row.unlock_bytes), input_row.unlock_age));
+                    let outputs:Array<TxOutput> = [];
+                    for (let output_row of output_rows)
+                        outputs.push(new TxOutput(output_row.amount, new Lock(output_row.lock_type, output_row.lock_bytes)));
+                    resolve(new Transaction(
+                        rows[0].type,
+                        inputs,
+                        outputs,
+                        new DataPayload((rows[0].payload !== null) ? (rows[0].payload) : Buffer.alloc(0), Endian.Little),
+                        new Height(rows[0].lock_height)));
+                }
+                else
+                {
+                    resolve(null);
+                }
+            }
+            catch (error)
+            {
+                reject(error);
+            }
+        });
+    }
+
+    /**
      * Gets the information of block header
      * @param height The height of the block,
      *      If this is null, then the last block header is specified.
