@@ -1502,7 +1502,9 @@ export class LedgerStorage extends Storages
                 T.tx_hash,
                 T.time,
                 O.address,
-                IFNULL(SUM(O.amount), 0) as amount
+                IFNULL(SUM(O.amount), 0) as amount,
+                T.tx_fee,
+                T.payload_fee
             FROM
                 transaction_pool T
                 LEFT OUTER JOIN tx_output_pool O
