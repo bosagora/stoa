@@ -1433,7 +1433,9 @@ export class LedgerStorage extends Storages
                 T.type,
                 T.unlock_height,
                 (B.time_stamp + (T.unlock_height - T.block_height) * 10 * 60) as unlock_time,
-                P.payload
+                P.payload,
+                T.tx_fee,
+                T.payload_fee
             FROM
                 blocks B
                 INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
