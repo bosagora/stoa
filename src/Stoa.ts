@@ -719,7 +719,7 @@ class Stoa extends WebService
                     payload: (data.tx[0].payload !== null) ? new DataPayload(data.tx[0].payload, Endian.Little).toString() : "",
                     senders: [],
                     receivers: [],
-                    fee: "0"
+                    fee: JSBI.add(JSBI.BigInt(data.tx[0].tx_fee), JSBI.BigInt(data.tx[0].payload_fee)).toString()
                 };
 
                 for (let elem of data.senders)
