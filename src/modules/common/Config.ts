@@ -42,6 +42,11 @@ export class Config implements IConfig
     public logging: LoggingConfig;
 
     /**
+     * Consensus config
+     */
+    public consensus: ConsensusConfig;
+
+    /**
      * Constructor
      */
     constructor ()
@@ -49,6 +54,7 @@ export class Config implements IConfig
         this.server = new ServerConfig();
         this.database = new DatabaseConfig();
         this.logging = new LoggingConfig();
+        this.consensus = new ConsensusConfig();
     }
 
     /**
@@ -71,6 +77,7 @@ export class Config implements IConfig
         this.server.readFromObject(cfg.server);
         this.database.readFromObject(cfg.database);
         this.logging.readFromObject(cfg.logging);
+        this.consensus.readFromObject(cfg.consensus);
     }
 
     /**
@@ -285,6 +292,47 @@ export class LoggingConfig implements ILoggingConfig
 }
 
 /**
+ * Consensus config
+ */
+export class ConsensusConfig implements IConsensusConfig
+{
+    /**
+     * The genesis timestamp
+     */
+    public genesis_timestamp: number;
+
+    /**
+     * Constructor
+     * @param genesis_timestamp The genesis timestamp
+     */
+    constructor (genesis_timestamp?: number)
+    {
+        const defaults = ConsensusConfig.defaultValue();
+        this.genesis_timestamp = defaults.genesis_timestamp;
+    }
+
+    /**
+     * Reads from Object
+     * @param config The object of IConsensusConfig
+     */
+    public readFromObject (config: IConsensusConfig)
+    {
+        if (config.genesis_timestamp)
+            this.genesis_timestamp = config.genesis_timestamp;
+    }
+
+    /**
+     * Returns default value
+     */
+    public static defaultValue (): IConsensusConfig
+    {
+        return {
+            genesis_timestamp: 1609459200,
+        }
+    }
+}
+
+/**
  * The interface of server config
  */
 export interface IServerConfig
@@ -338,6 +386,17 @@ export interface ILoggingConfig
 }
 
 /**
+ * The interface of consensus config
+ */
+export interface IConsensusConfig
+{
+    /**
+     * The genesis timestamp
+     */
+    genesis_timestamp: number;
+}
+
+/**
  * The interface of main config
  */
 export interface IConfig
@@ -356,4 +415,9 @@ export interface IConfig
      * Logging config
      */
     logging: ILoggingConfig;
+
+    /**
+     * Consensus config
+     */
+    consensus: IConsensusConfig;
 }

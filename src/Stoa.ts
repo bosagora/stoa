@@ -1,5 +1,6 @@
 import { AgoraClient } from './modules/agora/AgoraClient';
 import { cors_options } from './cors';
+import { Config } from './modules/common/Config';
 import { LedgerStorage } from './modules/storage/LedgerStorage';
 import { logger } from './modules/common/Logger';
 import { Height, PreImageInfo, Hash, hash, Block, Utils,
@@ -45,16 +46,23 @@ class Stoa extends WebService
     private storage_filename: string;
 
     /**
+     * The genesis timestamp
+     */
+    private readonly genesis_timestamp: number;
+
+    /**
      * Constructor
      * @param database_filename sqlite3 database file name
      * @param agora_endpoint The network endpoint to connect to Agora
      * @param port The network port of Stoa
      * @param address The network address of Stoa
+     * @param genesis_timestamp The genesis timestamp
      */
-    constructor (database_filename: string, agora_endpoint: URL, port: number | string, address: string)
+    constructor (database_filename: string, agora_endpoint: URL, port: number | string, address: string, genesis_timestamp: number)
     {
         super(port, address);
 
+        this.genesis_timestamp = genesis_timestamp;
         this._ledger_storage = null;
         this.storage_filename = database_filename;
 
@@ -71,7 +79,7 @@ class Stoa extends WebService
      */
     public createStorage (): Promise<void>
     {
-        return LedgerStorage.make(this.storage_filename)
+        return LedgerStorage.make(this.storage_filename, this.genesis_timestamp)
             .then((storage) => {
                 this._ledger_storage = storage;
             });

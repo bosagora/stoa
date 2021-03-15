@@ -1,6 +1,6 @@
 {
     "header": {
-        "prev_block": "0x8fe0ba63553a5c2ac7d91d346894674bea11a706a211817f5b400743ba87d9fa31753e008ba6ab970be3b2da29f25732abdc440f934903bfc4a4f12bcf886a7c",
+        "prev_block": "0x10cb20b4310ac086da53eb0aa075fae4d956f3f95b0982af96cd2632286be27896aade2c5a8d929fef6d057c6cd8d711b4b466243b3156b00c7f97255ffa9fd0",
         "height": "2",
         "merkle_root": "0x0f0c44a8c2969cce1f00b6d3db5c2d215fdd1cae7827c509511f6384a397da632428dbef26fff8f510995aa7edb861e84dc14837002b631fb615f4bc78ab1dfe",
         "validators": "[252]",
@@ -8,7 +8,7 @@
         "enrollments": [],
         "random_seed": "0x8b35c5db6e274b1de858e13d3b7b10453a312cabe8bebd6980665fb48d62aed89495d232641252c86f385f44b71dee12190317bb979bba6444294d1ae9bcb7f2",
         "missing_validators": [],
-        "timestamp": 1597353600
+        "time_offset": 1200
     },
     "txs": [
         {
