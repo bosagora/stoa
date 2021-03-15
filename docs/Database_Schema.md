@@ -283,6 +283,7 @@ CREATE TABLE IF NOT EXISTS information (
 | type              | INTEGER   |    | Y        |          | The type of transaction |
 | payload           | BLOB      |    | Y        |          | The transaction data payload |
 | lock_height       | INTEGER   |    | Y        |          | This transaction may only be included in a block with `block_height >= lock_height`|
+| received_height   | INTEGER   |    | Y        |          | The height of the block on receipt |
 | time              | INTEGER   |    | Y        |          | Received time |
 | tx_fee            | INTEGER   |    | Y        |          | The fee of this transaction |
 | payload_fee       | INTEGER   |    | Y        |          | The payload fee of this transaction  |
@@ -296,6 +297,7 @@ CREATE TABLE IF NOT EXISTS "transaction_pool" (
     "type"                  INTEGER NOT NULL,
     "payload"               BLOB    NOT NULL,
     "lock_height"           INTEGER NOT NULL,
+    "received_height"       INTEGER NOT NULL,
     "time"                  INTEGER NOT NULL,
     "tx_fee"                INTEGER NOT NULL,
     "payload_fee"           INTEGER NOT NULL,

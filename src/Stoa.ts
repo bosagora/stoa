@@ -879,7 +879,8 @@ class Stoa extends WebService
                         submission_time: row.time,
                         address: row.address,
                         amount: JSBI.BigInt(row.amount).toString(),
-                        fee: JSBI.add(JSBI.BigInt(row.tx_fee), JSBI.BigInt(row.payload_fee)).toString()
+                        fee: JSBI.add(JSBI.BigInt(row.tx_fee), JSBI.BigInt(row.payload_fee)).toString(),
+                        block_delay: row.current_height - row.received_height
                     }
                     pending_array.push(tx);
                 }
