@@ -168,6 +168,7 @@ export class LedgerStorage extends Storages
             type                INTEGER NOT NULL,
             payload             BLOB    NOT NULL,
             lock_height         INTEGER NOT NULL,
+            received_height     INTEGER NOT NULL,
             time                INTEGER NOT NULL,
             tx_fee              INTEGER NOT NULL,
             payload_fee         INTEGER NOT NULL,
@@ -885,9 +886,9 @@ export class LedgerStorage extends Storages
 
                 storage.run(
                     `INSERT INTO transaction_pool
-                        (tx_hash, type, payload, lock_height, time, tx_fee, payload_fee, tx_size)
+                        (tx_hash, type, payload, lock_height, received_height, time, tx_fee, payload_fee, tx_size)
                     VALUES
-                        (?, ?, ?, ?, strftime('%s', 'now', 'UTC'), ?, ?, ?)`,
+                        (?, ?, ?, ?, (SELECT IFNULL(MAX(height), 0) as height FROM blocks), strftime('%s', 'now', 'UTC'), ?, ?, ?)`,
                     [
                         hash.toBinary(Endian.Little),
                         tx.type,
@@ -1504,7 +1505,9 @@ export class LedgerStorage extends Storages
                 O.address,
                 IFNULL(SUM(O.amount), 0) as amount,
                 T.tx_fee,
-                T.payload_fee
+                T.payload_fee,
+                T.received_height,
+                (SELECT IFNULL(MAX(height), 0) as height FROM blocks) as current_height
             FROM
                 transaction_pool T
                 LEFT OUTER JOIN tx_output_pool O

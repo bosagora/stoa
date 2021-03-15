@@ -245,6 +245,7 @@ export interface IPendingTxs
     address: string;
     amount: string;
     fee: string;
+    block_delay: number;
 }
 
 /**

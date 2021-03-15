@@ -355,6 +355,7 @@ describe ('Test of Stoa API Server', () =>
         assert.strictEqual(response.data[0].address, 'GCOMMONBGUXXP4RFCYGEF74JDJVPUW2GUENGTKKJECDNO6AGO32CUWGU');
         assert.strictEqual(response.data[0].amount, '1663400000');
         assert.strictEqual(response.data[0].fee, '0');
+        assert.strictEqual(response.data[0].block_delay, 0);
     });
 
     it ('Test of the path /transaction/status/:hash', async () =>
