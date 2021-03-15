@@ -33,7 +33,8 @@ logger.info(`sqlite3 database filename: ${config.database.filename}`);
 const stoa: Stoa = new Stoa(config.database.filename,
     config.server.agora_endpoint,
     config.server.port,
-    config.server.address
+    config.server.address,
+    config.consensus.genesis_timestamp,
     );
 
 SodiumHelper.init()

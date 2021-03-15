@@ -18,6 +18,7 @@ import { sample_data, sample_data2, sample_preImageInfo } from "./Utils";
 
 import * as fs from 'fs';
 import JSBI from 'jsbi';
+import {Config} from "../src/modules/common/Config";
 
 describe ('Test ledger storage and inquiry function.', () =>
 {
@@ -30,7 +31,7 @@ describe ('Test ledger storage and inquiry function.', () =>
 
     before ('Prepare Storage', () =>
     {
-        return LedgerStorage.make(":memory:").then((result) => { ledger_storage = result; });
+        return LedgerStorage.make(":memory:", 1609459200).then((result) => { ledger_storage = result; });
     });
 
     after ('Close Storage', () =>
@@ -128,24 +129,24 @@ describe ('Test ledger storage and inquiry function.', () =>
         let rows = await ledger_storage.getWalletBlocksHeaderInfo(null);
         assert.strictEqual(rows.length, 1);
         assert.strictEqual(rows[0].height, 1);
-        assert.strictEqual(rows[0].time_stamp, 1596753600);
+        assert.strictEqual(rows[0].time_stamp, 1609459800);
         assert.strictEqual(new Hash(rows[0].merkle_root, Endian.Little).toString(),
             '0x911890b2ff4429e1beccb4ab5ba7458cc469e8fc455c5df67291ada2c5818cc' +
             '65a3d11220e877b746a284c95294488d4c7e8ed47b02213e3ce74389c442d9cc1');
         assert.strictEqual(new Hash(rows[0].hash, Endian.Little).toString(),
-            '0x8fe0ba63553a5c2ac7d91d346894674bea11a706a211817f5b400743ba87d9f' +
-            'a31753e008ba6ab970be3b2da29f25732abdc440f934903bfc4a4f12bcf886a7c');
+            '0x10cb20b4310ac086da53eb0aa075fae4d956f3f95b0982af96cd2632286be27' +
+            '896aade2c5a8d929fef6d057c6cd8d711b4b466243b3156b00c7f97255ffa9fd0');
 
         rows = await ledger_storage.getWalletBlocksHeaderInfo(new Height("0"));
         assert.strictEqual(rows.length, 1);
         assert.strictEqual(rows[0].height, 0);
-        assert.strictEqual(rows[0].time_stamp, 1596153600);
+        assert.strictEqual(rows[0].time_stamp, 1609459200);
         assert.strictEqual(new Hash(rows[0].merkle_root, Endian.Little).toString(),
             '0xb12632add7615e2c4203f5ec5747c26e4fc7f333f95333ddfa4121a66b84499' +
             'd35e5ce022ab667791549654b97a26e86054b0764ec23ee0cd3830de8f3f73364');
         assert.strictEqual(new Hash(rows[0].hash, Endian.Little).toString(),
-            '0x0bf4809ece9fcfa27910c9326e7d1093dee605ffac9cd6591de0dbdb3bf5a83' +
-            '44db9917b5c672f26d1fd8ce74df4a87f44b9d18010a6e66fa014c8ad9eeabe98');
+            '0x357c0ba09ce530b7472c00e741cfc1cb2a17424488cf7e13bffc9602ed2e3b9' +
+            'b68517138ccb0b95a3e4d3da842a7f21b986ef1f00f2aa0774d92b55642e017e4');
     });
 
     it ('Test for saving of a block with transaction data payload', async () =>
@@ -194,7 +195,7 @@ describe ('Test for storing block data in the database', () =>
 
     beforeEach ('Prepare Storage', async() =>
     {
-        ledger_storage = await LedgerStorage.make(":memory:");
+        ledger_storage = await LedgerStorage.make(":memory:", 1609459200);
     });
 
     afterEach ('Close Storage', () =>
@@ -285,7 +286,7 @@ describe ('Tests that sending a pre-image', () =>
 
     before ('Start sending a pre-image', async () =>
     {
-        ledger_storage = await LedgerStorage.make(":memory:");
+        ledger_storage = await LedgerStorage.make(":memory:", 1609459200);
         for (let elem of sample_data)
             await ledger_storage.putBlocks(Block.reviver("", elem));
         await ledger_storage.getEnrollments(height);
@@ -351,7 +352,7 @@ describe ('Tests storing transaction pools of a transaction', () =>
 
     before ('Preparation the ledgerStorage', () =>
     {
-        return LedgerStorage.make(":memory:")
+        return LedgerStorage.make(":memory:", 1609459200)
             .then((result) => { ledger_storage = result })
     });
 

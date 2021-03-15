@@ -103,11 +103,11 @@ describe ('Test of Stoa API for the wallet', () =>
         let response = await client.get (uri.toString());
         let expected = {
             height: '9',
-            time: 1601553600,
+            time: 1609464600,
             tx_hash: '0xc2fed6fe6e445328bf363bb2725c23593b5ac43f0e0cd456f22bab77ef7b81a2661b9a07308a909047acf2b886522a50d7dd9195072de2272509963aeec34e52',
             tx_type: "payment",
             unlock_height: '10',
-            unlock_time: 1601554200,
+            unlock_time: 1609465200,
             payload: '',
             senders: [
                 {
@@ -125,7 +125,7 @@ describe ('Test of Stoa API for the wallet', () =>
             ],
             fee: '0'
         };
-        assert.deepStrictEqual(expected, response.data);
+        assert.deepStrictEqual(response.data, expected);
     });
 
     it ('Test of the path /wallet/transactions/history - Filtering - Wrong TransactionType', async () =>
@@ -178,8 +178,8 @@ describe ('Test of Stoa API for the wallet', () =>
             .filename("GDG22B5FTPXE5THQMCTGDUC4LF2N4DFF44PGX2LIFG4WNUZZAT4L6ZGD")
             .setSearch("pageSize", "10")
             .setSearch("page", "1")
-            .setSearch("beginDate", "1596753600")
-            .setSearch("endDate", "1596753600");
+            .setSearch("beginDate", "1609459200")
+            .setSearch("endDate", "1609459900");
 
         let response = await client.get (uri.toString());
         assert.strictEqual(response.data.length, 1);
@@ -280,11 +280,11 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
         let response = await client.get(uri.toString());
         let expected = {
             height: '2',
-            time: 1597353600,
+            time: 1609460400,
             tx_hash: '0xcf8e55b51027342537ebbdfc503146033fcd8091054913e78d6a858125f892a24b0734afce7154fdde85688ab1700307b999b2e5a17a724990bb83d3785e89da',
             tx_type: 'payment',
             unlock_height: '3',
-            unlock_time: 1597354200,
+            unlock_time: 1609461000,
             payload: '0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff',
             senders: [
                 {
@@ -308,7 +308,7 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
             fee: '0'
         };
 
-        assert.deepStrictEqual(expected, response.data);
+        assert.deepStrictEqual(response.data, expected);
     });
 
     it ('Test of the path /wallet/transactions/history - Filtering - exclude DataPayload in specific filter', async () =>

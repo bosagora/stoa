@@ -17,6 +17,7 @@ import * as http from 'http';
 import { URL } from 'url';
 
 import Stoa from '../src/Stoa';
+import { Config } from '../src/modules/common/Config';
 import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from "axios";
 import { FullNodeAPI } from '../src/modules/agora/AgoraClient';
 import { Block, Hash, Height, PreImageInfo, handleNetworkError,
@@ -227,7 +228,7 @@ export class TestStoa extends Stoa
 {
     constructor (agora_endpoint: URL, port: number | string)
     {
-        super(":memory:", agora_endpoint, port, "127.0.0.1");
+        super(":memory:", agora_endpoint, port, "127.0.0.1", 1609459200);
     }
 
     public stop (): Promise<void>
@@ -373,7 +374,7 @@ export function createBlock (prev_block: Block, txs: Array<Transaction>): Block
         [],
         new Hash(Buffer.alloc(Hash.Width)),
         [],
-        prev_block.header.timestamp + 10 * 60
+        prev_block.header.time_offset + (10 * 60)
     );
 
     let block = new Block(block_header, txs, merkle_tree);

@@ -26,20 +26,26 @@ import JSBI from 'jsbi';
 export class LedgerStorage extends Storages
 {
     /**
+     * The genesis timestamp
+     */
+    private genesis_timestamp: number;
+
+    /**
      * Construct an instance of `LedgerStorage`, exposes callback API
      */
-    constructor (filename: string, callback: (err: Error | null) => void)
+    constructor (filename: string, genesis_timestamp: number, callback: (err: Error | null) => void)
     {
         super(filename, callback);
+        this.genesis_timestamp = genesis_timestamp;
     }
 
     /**
      * Construct an instance of `LedgerStorage` using `Promise` API.
      */
-    public static make (filename: string) : Promise<LedgerStorage>
+    public static make (filename: string, genesis_timestamp: number) : Promise<LedgerStorage>
     {
         return new Promise<LedgerStorage>((resolve, reject) => {
-            let result = new LedgerStorage(filename, (err: Error | null) => {
+            let result = new LedgerStorage(filename, genesis_timestamp, (err: Error | null) => {
                 if (err)
                     reject(err);
                 else
@@ -68,6 +74,7 @@ export class LedgerStorage extends Storages
             signature           BLOB    NOT NULL,
             tx_count            INTEGER NOT NULL,
             enrollment_count    INTEGER NOT NULL,
+            time_offset         INTEGER NOT NULL,
             time_stamp          INTEGER NOT NULL,
             PRIMARY KEY(height)
         );
@@ -215,16 +222,18 @@ export class LedgerStorage extends Storages
      */
     public putBlocks (block: Block): Promise<void>
     {
-        function saveBlock (storage: LedgerStorage, block: Block): Promise<void>
+        let genesis_timestamp: number = this.genesis_timestamp;
+        
+        function saveBlock (storage: LedgerStorage, block: Block, genesis_timestamp: number): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
             {
                 let block_hash = hashFull(block.header);
                 storage.query(
                     `INSERT INTO blocks
-                        (height, hash, prev_block, validators, merkle_root, signature, tx_count, enrollment_count, time_stamp)
+                        (height, hash, prev_block, validators, merkle_root, signature, tx_count, enrollment_count, time_offset, time_stamp)
                     VALUES
-                        (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         block.header.height.toString(),
                         block_hash.toBinary(Endian.Little),
@@ -234,7 +243,8 @@ export class LedgerStorage extends Storages
                         block.header.signature.toBinary(Endian.Little),
                         block.txs.length,
                         block.header.enrollments.length,
-                        block.header.timestamp,
+                        block.header.time_offset,
+                        block.header.time_offset + genesis_timestamp,
                     ]
                 )
                     .then(() =>
@@ -254,7 +264,7 @@ export class LedgerStorage extends Storages
                 try
                 {
                     await this.begin();
-                    await saveBlock(this, block);
+                    await saveBlock(this, block, genesis_timestamp);
                     await this.putTransactions(block);
                     await this.putEnrollments(block);
                     await this.putBlockHeight(block.header.height);
@@ -282,7 +292,7 @@ export class LedgerStorage extends Storages
     {
         let sql =
         `SELECT
-            height, hash, prev_block, validators, merkle_root, signature, tx_count, enrollment_count, time_stamp
+            height, hash, prev_block, validators, merkle_root, signature, tx_count, enrollment_count, time_offset, time_stamp
         FROM
             blocks
         WHERE height = ?`;
@@ -765,13 +775,13 @@ export class LedgerStorage extends Storages
                 storage.run(
                     `INSERT INTO utxos
                         (
-                            utxo_key, 
-                            tx_hash,  
-                            type, 
-                            unlock_height, 
-                            amount, 
-                            lock_type, 
-                            lock_bytes, 
+                            utxo_key,
+                            tx_hash,
+                            type,
+                            unlock_height,
+                            amount,
+                            lock_type,
+                            lock_bytes,
                             address
                         )
                     VALUES
@@ -1649,8 +1659,8 @@ export class LedgerStorage extends Storages
             try {
                 let hash = tx_hash.toBinary(Endian.Little);
                 let rows = await this.query(
-                    `SELECT 
-                        T.tx_hash, T.type, T.lock_height, P.payload FROM 
+                    `SELECT
+                        T.tx_hash, T.type, T.lock_height, P.payload FROM
                     transactions T
                     LEFT JOIN payloads P ON (T.tx_hash = P.tx_hash)
                     WHERE
@@ -1704,7 +1714,7 @@ export class LedgerStorage extends Storages
 
         let sql =
             `SELECT
-                height, hash, merkle_root, time_stamp 
+                height, hash, merkle_root, time_stamp
             FROM
                 blocks
             WHERE height = ${cur_height};`;

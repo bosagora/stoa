@@ -30,6 +30,8 @@ describe('Test of Config', () => {
                 "logging:",
                 "   folder: /stoa/logs/",
                 "   level: debug",
+                "consensus:",
+                "   genesis_timestamp: 1609459200",
             ].join("\n");
         let config: Config = new Config();
         config.readFromString(config_content);
@@ -41,6 +43,7 @@ describe('Test of Config', () => {
 
         assert.strictEqual(config.logging.folder, "/stoa/logs");
         assert.strictEqual(config.logging.level, "debug");
+        assert.strictEqual(config.consensus.genesis_timestamp, 1609459200);
     });
 
     it ('Test parsing the settings of a file', () => {
@@ -54,5 +57,6 @@ describe('Test of Config', () => {
 
         assert.strictEqual(config.logging.folder, path.resolve(Utils.getInitCWD(), "logs/"));
         assert.strictEqual(config.logging.level, "http");
+        assert.strictEqual(config.consensus.genesis_timestamp, 1609459200);
     });
 });

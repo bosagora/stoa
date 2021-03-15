@@ -305,12 +305,12 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get (uri.toString())
         assert.strictEqual(response.data.height, '1');
         assert.strictEqual(response.data.hash,
-            '0x8fe0ba63553a5c2ac7d91d346894674bea11a706a211817f5b400743ba87d9f' +
-            'a31753e008ba6ab970be3b2da29f25732abdc440f934903bfc4a4f12bcf886a7c');
+            '0x10cb20b4310ac086da53eb0aa075fae4d956f3f95b0982af96cd2632286be27' +
+            '896aade2c5a8d929fef6d057c6cd8d711b4b466243b3156b00c7f97255ffa9fd0');
         assert.strictEqual(response.data.merkle_root,
             '0x911890b2ff4429e1beccb4ab5ba7458cc469e8fc455c5df67291ada2c5818cc' +
             '65a3d11220e877b746a284c95294488d4c7e8ed47b02213e3ce74389c442d9cc1');
-        assert.strictEqual(response.data.time_stamp, 1596753600);
+        assert.strictEqual(response.data.time_stamp, 1609459800);
 
         uri = URI(host)
             .port(port)
@@ -320,12 +320,12 @@ describe ('Test of Stoa API Server', () =>
         response = await client.get (uri.toString())
         assert.strictEqual(response.data.height, '0');
         assert.strictEqual(response.data.hash,
-            '0x0bf4809ece9fcfa27910c9326e7d1093dee605ffac9cd6591de0dbdb3bf5a83' +
-            '44db9917b5c672f26d1fd8ce74df4a87f44b9d18010a6e66fa014c8ad9eeabe98');
+            '0x357c0ba09ce530b7472c00e741cfc1cb2a17424488cf7e13bffc9602ed2e3b9' +
+            'b68517138ccb0b95a3e4d3da842a7f21b986ef1f00f2aa0774d92b55642e017e4');
         assert.strictEqual(response.data.merkle_root,
             '0xb12632add7615e2c4203f5ec5747c26e4fc7f333f95333ddfa4121a66b84499' +
             'd35e5ce022ab667791549654b97a26e86054b0764ec23ee0cd3830de8f3f73364');
-        assert.strictEqual(response.data.time_stamp, 1596153600);
+        assert.strictEqual(response.data.time_stamp, 1609459200);
     });
 
     it ('Test of the path /transaction_received', async () =>
@@ -383,7 +383,7 @@ describe ('Test of Stoa API Server', () =>
             tx_hash: "0x535b358337d919474f3043db1f292a1ac44a4f4dbbaa6d89226c7abd96c38bf96018e67828ec539623e475d480af99499368780ae346dfb6cb048b377cbc92d0",
             block: {
                 height: 1,
-                hash: "0x8fe0ba63553a5c2ac7d91d346894674bea11a706a211817f5b400743ba87d9fa31753e008ba6ab970be3b2da29f25732abdc440f934903bfc4a4f12bcf886a7c"
+                hash: "0x10cb20b4310ac086da53eb0aa075fae4d956f3f95b0982af96cd2632286be27896aade2c5a8d929fef6d057c6cd8d711b4b466243b3156b00c7f97255ffa9fd0"
             }
         };
         assert.deepStrictEqual(response_confirmed.data, expected_confirmed);
@@ -697,7 +697,7 @@ describe ('Test of the path /utxo', () =>
                 height: '1',
                 lock_bytes: "wGjrV+Is0jvFO3G34okd30FESntMARJgpUxNmBapXy8=",
                 lock_type: 0,
-                time: 1596753600,
+                time: 1609459800,
                 unlock_height: '2'
             }];
         assert.deepStrictEqual(response.data, expected);
