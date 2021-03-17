@@ -128,6 +128,22 @@ describe ('Test ledger storage and inquiry function.', () =>
         assert.strictEqual(rows[0].distance, undefined);
     });
 
+    it ('Test for merkle tree', async () =>
+    {
+        let height_value = 0;
+        let height = new Height(JSBI.BigInt(height_value));
+        let rows = await ledger_storage.getMerkleTree(height);
+        assert.strictEqual(rows.length, 3);
+        assert.strictEqual(rows[0].block_height, height_value);
+        assert.strictEqual(rows[0].merkle_index, 0);
+        assert.strictEqual(new Hash(rows[0].merkle_hash, Endian.Little).toString(),
+            '0x5208f03b3b95e90b3bff5e0daa1d657738839624d6605845d6e2ef3cf73d0d0' +
+            'ef5aff7d58bde1e00e1ccd5a502b26f569021324a4b902b7e66594e94f05e074c');
+        assert.strictEqual(new Hash(rows[1].merkle_hash, Endian.Little).toString(),
+            '0xb3aaf405f53560a6f6d5dd9dd83d7b031da480c0640a2897f2e2562c4670dfe' +
+            '84552d84daf5b1b7c63ce249d06bf54747cc5fdc98178a932fff99ab1372e873b');
+    });
+
     it ('Test for LedgerStorage.getWalletBlocksHeaderInfo()', async () =>
     {
         let rows = await ledger_storage.getWalletBlocksHeaderInfo(null);
