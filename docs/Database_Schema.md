@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS "blocks" (
     "signature"             BLOB    NOT NULL,
     "tx_count"              INTEGER NOT NULL,
     "enrollment_count"      INTEGER NOT NULL,
+    "time_offset"           INTEGER NOT NULL,
     "time_stamp"            INTEGER NOT NULL,
     PRIMARY KEY("height")
 )
