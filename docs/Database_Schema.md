@@ -253,7 +253,29 @@ CREATE TABLE IF NOT EXISTS "payloads" (
 
 ----
 
-## 9. Table **information**
+## 9. Table **merkle_trees**
+
+### _Schema_
+
+| Column            | Data Type | PK | Not NULL | Default  |Description|
+|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
+| block_height      | INTEGER   | Y  | Y        |          | The height of the block |
+| merkle_index      | INTEGER   | Y  | Y        |          | The index of merkleTree in the block |
+| merkle_hash       | BLOB      |    | Y        |          | The merkle tree |
+
+### _Create Script_
+
+```sql
+CREATE TABLE IF NOT EXISTS "merkle_trees" (
+    "block_height"          INTEGER NOT NULL,
+    "merkle_index"          INTEGER NOT NULL,
+    "merkle_hash"           BLOB    NOT NULL,
+    PRIMARY KEY("block_height","merkle_index")
+)
+```
+----
+
+## 10. Table **information**
 
 It can store information that is required for operation.
 The following data is recorded when the most recently recorded block height is 100.
@@ -279,7 +301,7 @@ CREATE TABLE IF NOT EXISTS information (
 
 ----
 
-## 10. Table **transaction_pool**
+## 11. Table **transaction_pool**
 
 ### _Schema_
 
@@ -314,7 +336,7 @@ CREATE TABLE IF NOT EXISTS "transaction_pool" (
 
 ----
 
-## 11. Table **tx_input_pool**
+## 12. Table **tx_input_pool**
 
 ### _Schema_
 
@@ -340,7 +362,7 @@ CREATE TABLE IF NOT EXISTS "tx_input_pool" (
 
 ----
 
-## 12. Table **tx_output_pool**
+## 13. Table **tx_output_pool**
 
 ### _Schema_
 

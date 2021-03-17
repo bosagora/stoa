@@ -165,6 +165,14 @@ export class LedgerStorage extends Storages
             PRIMARY KEY(enrolled_at, utxo_key)
         );
 
+        CREATE TABLE IF NOT EXISTS merkle_trees
+        (
+            block_height        INTEGER NOT NULL,
+            merkle_index        INTEGER NOT NULL,
+            merkle_hash         BLOB    NOT NULL,
+            PRIMARY KEY(block_height, merkle_index)
+        );
+
         CREATE TABLE IF NOT EXISTS information
         (
             key                 TEXT    NOT NULL,
@@ -273,6 +281,7 @@ export class LedgerStorage extends Storages
                     await this.putTransactions(block);
                     await this.putEnrollments(block);
                     await this.putBlockHeight(block.header.height);
+                    await this.putMerkleTree(block);
                     await this.commit();
                 }
                 catch (error)
@@ -405,6 +414,77 @@ export class LedgerStorage extends Storages
                             block.header.enrollments[enroll_idx]);
                         await save_validator(this, block.header.height,
                             block.header.enrollments[enroll_idx]);
+                    }
+                    catch (err)
+                    {
+                        reject(err);
+                        return;
+                    }
+                }
+                resolve();
+            })();
+        });
+    }
+
+    /**
+     * Gets a Merkle tree
+     * @param height the height of the block to get
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getMerkleTree (height: Height): Promise<any[]>
+    {
+        let sql =
+            `SELECT
+                block_height, merkle_index, merkle_hash
+             FROM
+                merkle_trees
+             WHERE block_height = ?
+             ORDER BY merkle_index ASC`;
+        return this.query(sql, [height.toString()]);
+    }
+
+    /**
+     * Puts merkle tree
+     * @param block: The instance of the `Block`
+     */
+    public putMerkleTree (block: Block): Promise<void>
+    {
+        function save_merkle (storage: LedgerStorage, height: Height, merkle_index: number, merkle_hash: Hash): Promise<void>
+        {
+            return new Promise<void>((resolve, reject) =>
+            {
+                storage.query(
+                    `INSERT INTO merkle_trees
+                        (block_height, merkle_index, merkle_hash)
+                    VALUES
+                        (?, ?, ?)`,
+                    [
+                        height.toString(),
+                        merkle_index,
+                        merkle_hash.toBinary(Endian.Little),
+                    ])
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch((err) =>
+                    {
+                        reject(err);
+                    });
+            });
+        }
+
+        return new Promise<void>((resolve, reject) =>
+        {
+            (async () =>
+            {
+                for (let merkle_index = 0; merkle_index < block.merkle_tree.length; merkle_index++)
+                {
+                    try
+                    {
+                        await save_merkle(this, block.header.height, merkle_index,
+                            block.merkle_tree[merkle_index]);
                     }
                     catch (err)
                     {
