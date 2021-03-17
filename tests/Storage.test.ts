@@ -52,6 +52,10 @@ describe ('Test ledger storage and inquiry function.', () =>
         assert.strictEqual(new Hash(rows[0].merkle_root, Endian.Little).toString(),
             '0x911890b2ff4429e1beccb4ab5ba7458cc469e8fc455c5df67291ada2c5818cc' +
             '65a3d11220e877b746a284c95294488d4c7e8ed47b02213e3ce74389c442d9cc1');
+        assert.strictEqual(new Hash(rows[0].random_seed, Endian.Little).toString(),
+            '0x691775809b9498f45a2c5ef8b8d552e318ebaf0b1b2fb15dcc39e0ec962ae98' +
+            '12d7edffa5f053590a895c9ff72c1b0838ce8f5c709579d4529f9f4caf0fab13d');
+        assert.strictEqual(rows[0].missing_validators, '');
     });
 
     it ('Test for transaction', async () =>

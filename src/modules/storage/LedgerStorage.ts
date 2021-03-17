@@ -72,6 +72,8 @@ export class LedgerStorage extends Storages
             validators          TEXT    NOT NULL,
             merkle_root         BLOB    NOT NULL,
             signature           BLOB    NOT NULL,
+            random_seed         BLOB    NOT NULL,
+            missing_validators  TEXT    NULL,
             tx_count            INTEGER NOT NULL,
             enrollment_count    INTEGER NOT NULL,
             time_offset         INTEGER NOT NULL,
@@ -231,9 +233,10 @@ export class LedgerStorage extends Storages
                 let block_hash = hashFull(block.header);
                 storage.query(
                     `INSERT INTO blocks
-                        (height, hash, prev_block, validators, merkle_root, signature, tx_count, enrollment_count, time_offset, time_stamp)
+                        (height, hash, prev_block, validators, merkle_root, signature,
+                         random_seed, missing_validators, tx_count, enrollment_count, time_offset, time_stamp)
                     VALUES
-                        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         block.header.height.toString(),
                         block_hash.toBinary(Endian.Little),
@@ -241,6 +244,8 @@ export class LedgerStorage extends Storages
                         JSON.stringify(block.header.validators.storage),
                         block.header.merkle_root.toBinary(Endian.Little),
                         block.header.signature.toBinary(Endian.Little),
+                        block.header.random_seed.toBinary(Endian.Little),
+                        block.header.missing_validators.toString(),
                         block.txs.length,
                         block.header.enrollments.length,
                         block.header.time_offset,
@@ -292,7 +297,8 @@ export class LedgerStorage extends Storages
     {
         let sql =
         `SELECT
-            height, hash, prev_block, validators, merkle_root, signature, tx_count, enrollment_count, time_offset, time_stamp
+            height, hash, prev_block, validators, merkle_root, signature, random_seed,
+            missing_validators,  tx_count, enrollment_count, time_offset, time_stamp
         FROM
             blocks
         WHERE height = ?`;
