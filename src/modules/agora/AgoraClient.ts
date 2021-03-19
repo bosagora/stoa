@@ -3,7 +3,7 @@
     The class that recovers data
 
     Copyright:
-        Copyright (c) 2020 BOS Platform Foundation Korea
+        Copyright (c) 2020-2021 BOSAGORA Foundation
         All rights reserved.
 
     License:
@@ -20,7 +20,7 @@ import { URL } from 'url';
 /**
  * The interface exposed by a full node
  *
- * See_Also: https://github.com/bpfkorea/agora/blob/v0.x.x/source/agora/api/FullNode.d
+ * See_Also: https://github.com/bosagora/agora/blob/v0.x.x/source/agora/api/FullNode.d
  */
 export interface FullNodeAPI
 {

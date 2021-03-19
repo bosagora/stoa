@@ -3,7 +3,7 @@
     Utilities and sample data that can be used within the test suitea
 
     Copyright:
-        Copyright (c) 2020 BOS Platform Foundation Korea
+        Copyright (c) 2020-2021 BOSAGORA Foundation
         All rights reserved.
 
     License:

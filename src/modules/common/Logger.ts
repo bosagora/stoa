@@ -6,7 +6,7 @@
     and file writing, depending on the 'NODE_ENV'.
 
     Copyright:
-        Copyright (c) 2020 BOS Platform Foundation Korea
+        Copyright (c) 2020-2021 BOSAGORA Foundation
         All rights reserved.
 
     License:
