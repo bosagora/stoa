@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bpfkorea/stoa.git"
+    "url": "git+https://github.com/bosagora/stoa.git"
   },
-  "author": "BOS Platform Foundation Korea",
+  "author": "BOSAGORA Foundation",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/bpfkorea/stoa/issues"
+    "url": "https://github.com/bosagora/stoa/issues"
   },
-  "homepage": "https://github.com/bpfkorea/stoa#readme",
+  "homepage": "https://github.com/bosagora/stoa#readme",
   "dependencies": {
     "@ctrl/ts-base32": "^1.2.4",
     "@types/app-root-path": "^1.2.4",

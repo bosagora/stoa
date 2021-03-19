@@ -1,6 +1,6 @@
 # Stoa
 
-Stoa is an API server for [Agora](https://github.com/bpfkorea/agora).
+Stoa is an API server for [Agora](https://github.com/bosagora/agora).
 It needs to be paired to an Agora server, both by configuring the Agora server and by connecting to it from Stoa.
 This separation allows Agora to stay lightweight, and Stoa to expose high-level data and metrics,
 such as transaction aggregations, the list of validators, etc...
