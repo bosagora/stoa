@@ -202,6 +202,17 @@ describe ('Test ledger storage and inquiry function.', () =>
             '0x245286d66621523ea08aba56a34526a5cad5d9ddff367f52268ddcba57f7ae9' +
             'a83a1fdb101d87fdebccdf2b5039003e3c162232a15c50528d82ab34f8d8f5f17');
     });
+
+    it ('Test for getting block height and merkle root with transaction hash', async () => {
+        let tx_hash = new Hash('0xc0dd3f9e1c37ec1ac037685ce96417339b5d97bb4a9560e4e7ad7dd79f3f8d5' +
+                               '646c6c7bbc3473502aa8fea6ad0e691992e5e7fa1c73c44d174dfc4196a52d84f');
+        let rows = await ledger_storage.getBlockHeaderByTxHash(tx_hash);
+        assert.strictEqual(rows.length, 1);
+        assert.strictEqual(rows[0].height, 1);
+        assert.strictEqual(new Hash(rows[0].merkle_root, Endian.Little).toString(),
+            '0x911890b2ff4429e1beccb4ab5ba7458cc469e8fc455c5df67291ada2c5818cc' +
+            '65a3d11220e877b746a284c95294488d4c7e8ed47b02213e3ce74389c442d9cc1');
+    });
 });
 
 describe ('Test for storing block data in the database', () =>

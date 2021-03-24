@@ -147,7 +147,7 @@ export class LedgerStorage extends Storages
             address             TEXT    NOT NULL,
             PRIMARY KEY(utxo_key)
         );
-        
+
         CREATE TABLE IF NOT EXISTS payloads (
             tx_hash             BLOB    NOT NULL,
             payload             BLOB    NOT NULL,
@@ -233,7 +233,7 @@ export class LedgerStorage extends Storages
     public putBlocks (block: Block): Promise<void>
     {
         let genesis_timestamp: number = this.genesis_timestamp;
-        
+
         function saveBlock (storage: LedgerStorage, block: Block, genesis_timestamp: number): Promise<void>
         {
             return new Promise<void>((resolve, reject) =>
@@ -1805,5 +1805,29 @@ export class LedgerStorage extends Storages
                 blocks
             WHERE height = ${cur_height};`;
         return this.query(sql, []);
+    }
+
+    /**
+     * Gets block height and merkle root
+     * @param tx_hash The hash of the transaction
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getBlockHeaderByTxHash (tx_hash: Hash): Promise<any[]>
+    {
+        let sql =
+        `SELECT
+            height, merkle_root
+        FROM
+            transactions T
+        INNER JOIN
+            blocks B
+        ON
+            T.block_height = B.height
+        AND
+            T.tx_hash = ?`;
+
+        return this.query(sql, [tx_hash.toBinary(Endian.Little)]);
     }
 }
