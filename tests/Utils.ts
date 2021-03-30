@@ -157,6 +157,31 @@ export class TestAgora implements FullNodeAPI
             }, next);
         });
 
+        this.agora.get("/merkle_path", (req: express.Request, res: express.Response, next) =>
+        {
+            if (req.query.block_height === undefined || Number.isNaN(req.query.block_height))
+            {
+                res.status(400).json({ statusText: 'Missing or invalid block_height query parameter' });
+                return;
+            }
+
+            if (req.query.hash === undefined)
+            {
+                res.status(400).json({ statusText: 'Missing or invalid hash query parameter'});
+                return;
+            }
+
+            let block_height = new Height(JSBI.BigInt(req.query.block_height.toString()));
+            if (JSBI.lessThan(block_height.value, JSBI.BigInt(0)))
+            {
+                res.status(400).json({ statusText: 'Query parameter block_height must not be negative' });
+                return;
+            }
+            else
+                return this.getMerklePath(block_height, new Hash(req.query.hash.toString()))
+                    .then((result) => { res.json(result); }, next);
+        });
+
         this.agora.get("/preimage", (req: express.Request, res: express.Response, next) => {
             if (req.query.enroll_key === undefined)
                 return Promise.reject(new Error('Missing query parameter enroll_key'));
@@ -204,6 +229,19 @@ export class TestAgora implements FullNodeAPI
                 Math.min(block_height_ + max_blocks, this.blocks.length)
             )
         );
+    }
+
+    /// Implements FullNodeAPI.getMerklePath
+    public getMerklePath (block_height: Height, hash: Hash): Promise<Hash[]>
+    {
+        let sample_merkle_tree = this.blocks[1].merkle_tree;
+
+        return Promise.resolve(
+            [
+                new Hash(sample_merkle_tree[1]),
+                new Hash(sample_merkle_tree[9]),
+                new Hash(sample_merkle_tree[13])
+            ]);
     }
 
     /// Implements FullNodeAPI.getPreimage

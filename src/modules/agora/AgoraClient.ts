@@ -29,7 +29,7 @@ export interface FullNodeAPI
 
     getBlockHeight (): Promise<Height>;
     getBlocksFrom (block_height: Height, max_blocks: number): Promise<Block[]>;
-    // getMerklePath (block_height: Height, hash: Hash): Hash[];
+    getMerklePath (block_height: Height, hash: Hash): Promise<Hash[]>;
     // hasTransactionHash (tx: Hash): boolean;
     // putTransaction (tx: Transaction): void;
 
@@ -101,6 +101,30 @@ export class AgoraClient implements FullNodeAPI
                 })
                 .catch((reason: any) => {
                     reject(handleNetworkError(reason));
+                });
+        });
+    }
+
+    /**
+     * Requests and receives the Merkle path.
+     * @param block_height - The height of the block
+     * @param hash - The hash of the transaction
+     */
+    public getMerklePath (block_height: Height, hash: Hash): Promise<Hash[]>
+    {
+        return new Promise<Hash[]>((resolve, reject) =>
+        {
+            let uri = URI("/merkle_path")
+                .addSearch("block_height", block_height.toString())
+                .addSearch("hash", hash.toString());
+
+            this.client.get(uri.toString())
+                .then((response: AxiosResponse) =>
+                {
+                    if (response.status == 200)
+                        resolve(response.data.map((entry: any) => new Hash(entry)));
+                    else
+                        reject(handleNetworkError({response: response}));
                 });
         });
     }

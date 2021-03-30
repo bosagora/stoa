@@ -27,6 +27,7 @@ import {
     createBlock
 } from './Utils';
 
+import { AgoraClient } from '../src/modules/agora/AgoraClient';
 import * as assert from 'assert';
 import URI from 'urijs';
 import { URL } from 'url';
@@ -892,5 +893,82 @@ describe ('Test of the path /utxo for freezing', () =>
         // It was frozen because the amount of the refund was larger than 40,000 BOA.
         let refund_utxo = utxo_array.find(m => (m.amount === "400000000000"));
         assert.strictEqual(refund_utxo.type, TxType.Freeze);
+    });
+});
+
+describe ('Test of the path /merkle_path', () =>
+{
+    let host: string = 'http://localhost';
+    let port: string = '3837';
+    let agora_host: string = 'http://localhost';
+    let agora_port: string = '2826';
+    let stoa_server: TestStoa;
+    let agora_server: TestAgora;
+    let client = new TestClient();
+
+    before ('Wait for the package libsodium to finish loading', async () =>
+    {
+        await SodiumHelper.init();
+    });
+
+    before ('Start a fake Agora', () =>
+    {
+        return new Promise<void>((resolve, reject) => {
+            agora_server = new TestAgora(agora_port, sample_data, resolve);
+        });
+    });
+
+    before ('Create TestStoa', async () =>
+    {
+        stoa_server = new TestStoa(new URL("http://127.0.0.1:2826"), port);
+        await stoa_server.createStorage();
+    });
+
+    before ('Start TestStoa', async () =>
+    {
+        await stoa_server.start();
+    });
+
+    after ('Stop Stoa and Agora server instances', async () =>
+    {
+        await stoa_server.stop();
+        await agora_server.stop();
+    });
+
+    it ('Test of the path /merkle_path', async () =>
+    {
+        let uri = URI(agora_host)
+            .port(agora_port)
+            .directory("merkle_path")
+            .setSearch("block_height", "1")
+            .setSearch("hash", "0x535b358337d919474f3043db1f292a1ac44a4f4dbbaa6d89226c7abd96c38bf96018e67828ec539623e475d480af99499368780ae346dfb6cb048b377cbc92d0");
+
+        let response = await client.get(uri.toString());
+
+        let expected =
+            [
+                "0x7440a29292bb43361c049168c0efacf0dc3df7aa6657af59e61642f38e2a61988e4db9f59d23bc2c47b6b92dc02c3c974e8778552274f3a55498d9fce2aa3536",
+                "0x73986a582a08631cfaece0035a0012d8574aca73813da00700a90558eca2147f78d6a1c3b6aa50ea1c4abb3c270bf34fae717eaffc5ee092a1ee4ec3803f5bfd",
+                "0x943cb81d3af818b91ab200a1a8f5820a98ba02c5b98c6f8d03589175cc257fc8008ada7aa47ee1d879a79bc04d4eab7448de42c2c5174ba066981fe03f295bf5",
+            ];
+
+        assert.deepStrictEqual(response.data, expected);
+    });
+
+    it ('Test of the path /merkle_path by AgoraClient', async () =>
+    {
+        const agora_addr: URL = new URL('http://localhost:2826');
+        let agora_client = new AgoraClient(agora_addr);
+        let merkle_path: Array<Hash> = await agora_client.getMerklePath(new Height("1"),
+            new Hash("0x535b358337d919474f3043db1f292a1ac44a4f4dbbaa6d89226c7abd96c38bf96018e67828ec539623e475d480af99499368780ae346dfb6cb048b377cbc92d0"))
+
+        let expected =
+            [
+                new Hash("0x7440a29292bb43361c049168c0efacf0dc3df7aa6657af59e61642f38e2a61988e4db9f59d23bc2c47b6b92dc02c3c974e8778552274f3a55498d9fce2aa3536"),
+                new Hash("0x73986a582a08631cfaece0035a0012d8574aca73813da00700a90558eca2147f78d6a1c3b6aa50ea1c4abb3c270bf34fae717eaffc5ee092a1ee4ec3803f5bfd"),
+                new Hash("0x943cb81d3af818b91ab200a1a8f5820a98ba02c5b98c6f8d03589175cc257fc8008ada7aa47ee1d879a79bc04d4eab7448de42c2c5174ba066981fe03f295bf5"),
+            ];
+
+        assert.deepStrictEqual(merkle_path, expected);
     });
 });
