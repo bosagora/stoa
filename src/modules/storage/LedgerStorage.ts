@@ -1818,13 +1818,10 @@ export class LedgerStorage extends Storages
     {
         let sql =
         `SELECT
-            height, merkle_root
+            height, merkle_root, T.tx_index
         FROM
             transactions T
-        INNER JOIN
-            blocks B
-        ON
-            T.block_height = B.height
+            INNER JOIN blocks B ON T.block_height = B.height
         AND
             T.tx_hash = ?`;
 
