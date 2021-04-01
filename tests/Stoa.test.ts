@@ -103,7 +103,7 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get (uri.toString());
         assert.strictEqual(response.data.length, 6);
         assert.strictEqual(response.data[0].address,
-            "GDNODE6ZXW2NNOOQIGN24MBEZRO5226LSMHGQA3MUAMYQSTJVR7XT6GH");
+            "boa1xrdwry7ehk6ddwwsgxd6uvpye3wa667tjv8xsqmv5qvcsjnf43lhjpggeuy");
         assert.strictEqual(response.data[0].preimage.distance, null);
     });
 
@@ -112,24 +112,24 @@ describe ('Test of Stoa API Server', () =>
         let uri = URI(host)
             .port(port)
             .directory("validator")
-            .filename("GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY")
+            .filename("boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22")
             .setSearch("height", "10");
 
         let fail_uri = URI(host)
             .port(port)
             .directory("validator")
-            .filename("GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY")
+            .filename("boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22")
             .setSearch("height", "99");
 
         await assert.rejects(
             client.get(fail_uri.toString()),
-            {statusMessage: "The validator data not found.'address': (GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY), 'height': (99)"}
+            {statusMessage: "The validator data not found.'address': (boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22), 'height': (99)"}
         );
 
         let response = await client.get (uri.toString());
         assert.strictEqual(response.data.length, 1);
         assert.strictEqual(response.data[0].address,
-            "GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY");
+            "boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22");
         assert.strictEqual(response.data[0].preimage.distance, null);
     });
 
@@ -147,7 +147,7 @@ describe ('Test of Stoa API Server', () =>
             let uri1 = URI(host)
             .port(port)
             .directory("validator")
-            .filename("GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY")
+            .filename("boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22")
             .setSearch("height", "0");
 
             let response = await client.get (uri1.toString());
@@ -159,7 +159,7 @@ describe ('Test of Stoa API Server', () =>
             let uri2 = URI(host)
                 .port(port)
                 .directory("validator")
-                .filename("GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY")
+                .filename("boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22")
                 .setSearch("height", "6");
 
             response = await client.get (uri2.toString());
@@ -171,7 +171,7 @@ describe ('Test of Stoa API Server', () =>
             let uri3 = URI(host)
                 .port(port)
                 .directory("validator")
-                .filename("GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY")
+                .filename("boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22")
                 .setSearch("height", "1");
             response = await client.get (uri3.toString());
             assert.strictEqual(response.data.length, 1);
@@ -182,7 +182,7 @@ describe ('Test of Stoa API Server', () =>
             let uri4 = URI(host)
                 .port(port)
                 .directory("validator")
-                .filename("GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY")
+                .filename("boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22")
                 .setSearch("height", "8");
             response = await client.get (uri4.toString());
             assert.strictEqual(response.data.length, 1);
@@ -195,7 +195,7 @@ describe ('Test of Stoa API Server', () =>
             response = await client.get (uri5.toString());
             let validators: Array<any> = response.data;
             assert.strictEqual(response.data.length, 6);
-            let validator = validators.find(n => n.address === "GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY");
+            let validator = validators.find(n => n.address === "boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22");
             assert.ok(validator !== undefined);
             assert.strictEqual(validator.preimage.distance, 1);
             assert.strictEqual(validator.preimage.hash,
@@ -226,7 +226,7 @@ describe ('Test of Stoa API Server', () =>
             validators = response.data;
             assert.strictEqual(response.data.length, 6);
 
-            validator = validators.find(n => n.address === "GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY");
+            validator = validators.find(n => n.address === "boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22");
             assert.ok(validator !== undefined);
             assert.strictEqual(validator.stake, enrollment.utxo_key.toString());
             assert.strictEqual(validator.enrolled_at, "0");
@@ -346,15 +346,15 @@ describe ('Test of Stoa API Server', () =>
         let uri = URI(host)
             .port(port)
             .directory("/wallet/transactions/pending")
-            .filename("GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ");
+            .filename("boa1xrqx366hugkdyw798dcm0c5frh05z3z20dxqzynq54xymxqk490j7h6a854");
 
         let response = await client.get (uri.toString())
         assert.strictEqual(response.data.length, 2);
         assert.strictEqual(response.data[0].tx_hash, '0xcf8e55b5102734' +
             '2537ebbdfc503146033fcd8091054913e78d6a858125f892a24b0734a' +
             'fce7154fdde85688ab1700307b999b2e5a17a724990bb83d3785e89da');
-        assert.strictEqual(response.data[0].address, 'GCOMMONBGUXXP4RFCYGEF74JDJVPUW2GUENGTKKJECDNO6AGO32CUWGU');
-        assert.strictEqual(response.data[0].amount, '1663400000');
+        assert.strictEqual(response.data[0].address, 'boa1xrgr66lyn80wvt3tg84rfjdjf4trjuruqdcw58h0vx6kkyedafwu7qhjjt8');
+        assert.strictEqual(response.data[0].amount, '24398336600000');
         assert.strictEqual(response.data[0].fee, '0');
         assert.strictEqual(response.data[0].block_delay, 0);
     });
@@ -687,7 +687,7 @@ describe ('Test of the path /utxo', () =>
         let uri = URI(host)
             .port(port)
             .directory("utxo")
-            .filename("GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ");
+            .filename("boa1xrqx366hugkdyw798dcm0c5frh05z3z20dxqzynq54xymxqk490j7h6a854");
 
         let response = await client.get (uri.toString());
         let expected = [
@@ -720,7 +720,7 @@ describe ('Test of the path /utxo', () =>
         let uri = URI(host)
             .port(port)
             .directory("utxo")
-            .filename("GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ");
+            .filename("boa1xrqx366hugkdyw798dcm0c5frh05z3z20dxqzynq54xymxqk490j7h6a854");
 
         let response = await client.get (uri.toString());
         assert.strictEqual(response.data.length, 0);
@@ -797,7 +797,7 @@ describe ('Test of the path /utxo for freezing', () =>
         let uri = URI(host)
             .port(port)
             .directory("utxo")
-            .filename("GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ");
+            .filename("boa1xrqx366hugkdyw798dcm0c5frh05z3z20dxqzynq54xymxqk490j7h6a854");
 
         let response = await client.get (uri.toString());
 
@@ -810,8 +810,8 @@ describe ('Test of the path /utxo for freezing', () =>
                 new TxInput(new Hash(response.data[0].utxo))
             ],
             [
-                new TxOutput(JSBI.BigInt(  "100000000000"), new PublicKey("GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ")),
-                new TxOutput(JSBI.BigInt("24300000000000"), new PublicKey("GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ"))
+                new TxOutput(JSBI.BigInt(  "100000000000"), new PublicKey("boa1xrqx366hugkdyw798dcm0c5frh05z3z20dxqzynq54xymxqk490j7h6a854")),
+                new TxOutput(JSBI.BigInt("24300000000000"), new PublicKey("boa1xrqx366hugkdyw798dcm0c5frh05z3z20dxqzynq54xymxqk490j7h6a854"))
             ],
             DataPayload.init
         );
@@ -819,7 +819,7 @@ describe ('Test of the path /utxo for freezing', () =>
         uri = URI(host)
             .port(port)
             .directory("utxo")
-            .filename("GDAGS22PVTFDZ3OAMNBNATVAG6NM4WRCQLWCZOX2MGOF6ZVTP4CSR62B");
+            .filename("boa1xrqxj6604n9remwqvdpdqn4qx7dvuk3zstkzewh6vxw97e4n0uzjsm94qdd");
 
         response = await client.get (uri.toString());
 
@@ -832,8 +832,8 @@ describe ('Test of the path /utxo for freezing', () =>
                 new TxInput(new Hash(response.data[0].utxo))
             ],
             [
-                new TxOutput(JSBI.BigInt(  "400000000000"), new PublicKey("GDAGS22PVTFDZ3OAMNBNATVAG6NM4WRCQLWCZOX2MGOF6ZVTP4CSR62B")),
-                new TxOutput(JSBI.BigInt("24000000000000"), new PublicKey("GDAGS22PVTFDZ3OAMNBNATVAG6NM4WRCQLWCZOX2MGOF6ZVTP4CSR62B"))
+                new TxOutput(JSBI.BigInt(  "400000000000"), new PublicKey("boa1xrqxj6604n9remwqvdpdqn4qx7dvuk3zstkzewh6vxw97e4n0uzjsm94qdd")),
+                new TxOutput(JSBI.BigInt("24000000000000"), new PublicKey("boa1xrqxj6604n9remwqvdpdqn4qx7dvuk3zstkzewh6vxw97e4n0uzjsm94qdd"))
             ],
             DataPayload.init
         );
@@ -862,7 +862,7 @@ describe ('Test of the path /utxo for freezing', () =>
         let uri = URI(host)
             .port(port)
             .directory("utxo")
-            .filename("GDAGR22X4IWNEO6FHNY3PYUJDXPUCRCKPNGACETAUVGE3GAWVFPS7VUJ");
+            .filename("boa1xrqx366hugkdyw798dcm0c5frh05z3z20dxqzynq54xymxqk490j7h6a854");
 
         let response = await client.get (uri.toString());
         let utxo_array: Array<any> = response.data;
@@ -881,7 +881,7 @@ describe ('Test of the path /utxo for freezing', () =>
         let uri = URI(host)
             .port(port)
             .directory("utxo")
-            .filename("GDAGS22PVTFDZ3OAMNBNATVAG6NM4WRCQLWCZOX2MGOF6ZVTP4CSR62B");
+            .filename("boa1xrqxj6604n9remwqvdpdqn4qx7dvuk3zstkzewh6vxw97e4n0uzjsm94qdd");
 
         let response = await client.get(uri.toString());
         let utxo_array: Array<any> = response.data;
