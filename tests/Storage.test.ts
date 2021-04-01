@@ -80,7 +80,7 @@ describe ('Test ledger storage and inquiry function.', () =>
         assert.strictEqual(new Hash(rows5[0].tx_hash, Endian.Little).toString(),
             '0xb3aaf405f53560a6f6d5dd9dd83d7b031da480c0640a2897f2e2562c4670dfe' +
             '84552d84daf5b1b7c63ce249d06bf54747cc5fdc98178a932fff99ab1372e873b');
-        assert.strictEqual(rows5[0].address, 'GCOQEOHAUFYUAC6G22FJ3GZRNLGVCCLESEJ2AXBIJ5BJNUVTAERPLRIJ');
+        assert.strictEqual(rows5[0].address, 'boa1xzwsyw8q59c5qz7x669fmxe3dtx4zztyjyf6qhpgfapfd54nqy302uhyqlu');
     });
 
     it ('Test for enrollment', async () =>
@@ -101,12 +101,12 @@ describe ('Test ledger storage and inquiry function.', () =>
             '0x1a1ae2be7afbe367e8e588474d93806b66b773c741b184dc5b4c59640e99864' +
             '4d2ebb0b866ac25dc053b06fd815a86d11c718f77c9e4d0fce1bdbb58486ee751');
         assert.strictEqual(rows[0].address,
-            'GDNODE6ZXW2NNOOQIGN24MBEZRO5226LSMHGQA3MUAMYQSTJVR7XT6GH');
+            'boa1xrdwry7ehk6ddwwsgxd6uvpye3wa667tjv8xsqmv5qvcsjnf43lhjpggeuy');
     });
 
     it ('Test for validator', async () =>
     {
-        let address: string = 'GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY';
+        let address: string = 'boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22';
 
         let rows = await ledger_storage.getValidatorsAPI(new Height("1"), null);
         assert.ok(rows.length > 0);
@@ -180,7 +180,7 @@ describe ('Test ledger storage and inquiry function.', () =>
     });
 
     it ('Test for UTXO', async () => {
-        let address: string = 'GDML22LKP3N6S37CYIBFRANXVY7KMJMINH5VFADGDFLGIWNOR3YU7T6I';
+        let address: string = 'boa1xrvt66t20md7jmlzcgp93qdh4cl2vfvgd8a49qrxr9txgkdw3mc57jq4lar';
         let rows = await ledger_storage.getUTXO(address);
         assert.strictEqual(rows.length, 1);
         assert.strictEqual(rows[0].type, 0);
@@ -192,7 +192,7 @@ describe ('Test ledger storage and inquiry function.', () =>
     });
 
     it ('Test for UTXO in melting', async () => {
-        let address: string = 'GDNODE7J5EUK7T6HLEO2FDUBWZEXVXHJO7C4AF5VZAKZENGQ4WR3IX2U';
+        let address: string = 'boa1xrdwrylfay52ln78tyw69r5pkeyh4h8fwlzuq9a4eq2eydxsuk3mgge25j2';
         let rows = await ledger_storage.getUTXO(address);
         assert.strictEqual(rows.length, 5);
         assert.strictEqual(rows[0].type, 0);
@@ -336,7 +336,7 @@ describe ('Tests that sending a pre-image', () =>
 
         let rows = await ledger_storage.getValidators(height);
         assert.strictEqual(rows.length, 6);
-        let validator = rows.find(n => n.address === "GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY");
+        let validator = rows.find(n => n.address === "boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22");
         assert.ok(validator !== undefined);
         assert.strictEqual(validator.preimage_distance, 6);
         assert.strictEqual(new Hash(validator.preimage_hash, Endian.Little).toString(), sample_preImageInfo.hash);
@@ -350,7 +350,7 @@ describe ('Tests that sending a pre-image', () =>
 
         let rows = await ledger_storage.getValidators(height);
         assert.strictEqual(rows.length, 6);
-        let validator = rows.find(n => n.address === "GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY");
+        let validator = rows.find(n => n.address === "boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22");
         assert.ok(validator !== undefined);
         assert.strictEqual(validator.preimage_distance, 6);
         assert.strictEqual(new Hash(validator.preimage_hash, Endian.Little).toString(), sample_preImageInfo.hash);
@@ -365,7 +365,7 @@ describe ('Tests that sending a pre-image', () =>
 
         let rows = await ledger_storage.getValidators(height);
         assert.strictEqual(rows.length, 6);
-        let validator = rows.find(n => n.address === "GDNODE4KTE7VQUHVBLXIGD7VEFY57X4XV547P72D37SDG7UEO7MWOSNY");
+        let validator = rows.find(n => n.address === "boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22");
         assert.ok(validator !== undefined);
         assert.strictEqual(validator.preimage_distance, 6);
         assert.strictEqual(new Hash(validator.preimage_hash, Endian.Little).toString(), sample_preImageInfo.hash);
