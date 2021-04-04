@@ -971,4 +971,55 @@ describe ('Test of the path /merkle_path', () =>
 
         assert.deepStrictEqual(merkle_path, expected);
     });
+
+    it ('Test of the path /spv with a Merkle path transaction', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("spv")
+            .filename("0x535b358337d919474f3043db1f292a1ac44a4f4dbbaa6d89226c7abd96c38bf96018e67828ec539623e475d480af99499368780ae346dfb6cb048b377cbc92d0");
+
+        let response = await client.get(uri.toString());
+
+        let expected = {
+            result: true,
+            message: "Success"
+        }
+
+        assert.deepStrictEqual(response.data, expected);
+    })
+
+    it ('Test of the path /spv with a non-Merkle path transaction', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("spv")
+            .filename("0x7440a29292bb43361c049168c0efacf0dc3df7aa6657af59e61642f38e2a61988e4db9f59d23bc2c47b6b92dc02c3c974e8778552274f3a55498d9fce2aa3536");
+
+        let response = await client.get(uri.toString());
+
+        let expected = {
+            result: false,
+            message: "Verification failed"
+        }
+
+        assert.deepStrictEqual(response.data, expected);
+    })
+
+    it ('Test of the path /spv with an invalid transaction ', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("spv")
+            .filename("0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+
+        let response = await client.get(uri.toString());
+
+        let expected = {
+            result: false,
+            message: "Transaction does not exist in block"
+        }
+
+        assert.deepStrictEqual(response.data, expected);
+    })
 });
