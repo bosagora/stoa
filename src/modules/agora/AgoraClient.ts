@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { Block, Hash, Height, PreImageInfo, handleNetworkError } from 'boa-sdk-ts';
+import { Block, Hash, Height, PreImageInfo, handleNetworkError, hashMulti } from 'boa-sdk-ts';
 
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import URI from 'urijs';
@@ -154,5 +154,20 @@ export class AgoraClient implements FullNodeAPI
                     reject(handleNetworkError(reason));
                 });
         });
+    }
+
+    public static checkMerklePath (merkle_path: Array<Hash>, tx_hash: Hash, tx_index: number): Hash
+    {
+        let root: Hash = tx_hash;
+        for (const otherside of merkle_path)
+        {
+            if (tx_index & 1)
+                root = hashMulti(otherside.data, root.data);
+            else
+                root = hashMulti(root.data, otherside.data);
+
+            tx_index >>= 1;
+        }
+        return root;
     }
 }
