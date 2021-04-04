@@ -8,7 +8,7 @@ import { Height, PreImageInfo, Hash, hash, Block, Utils,
 import { WebService } from './modules/service/WebService';
 import { ValidatorData, IPreimage, IUnspentTxOutput, ITxStatus,
     ITxHistoryElement, ITxOverview, ConvertTypes, DisplayTxType,
-    IPendingTxs, ITransactionFee } from './Types';
+    IPendingTxs, ISPVStatus, ITransactionFee } from './Types';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -129,6 +129,7 @@ class Stoa extends WebService
         this.app.get("/wallet/transaction/overview/:hash", this.getWalletTransactionOverview.bind(this));
         this.app.get("/wallet/transactions/pending/:address", this.getWalletTransactionsPending.bind(this));
         this.app.get("/wallet/blocks/header", this.getWalletBlocksHeader.bind(this));
+        this.app.get("/spv/:hash", this.verifyPayment.bind(this));
         this.app.post("/block_externalized", this.postBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
         this.app.post("/transaction_received", this.putTransaction.bind(this));
@@ -780,6 +781,70 @@ class Stoa extends WebService
 
                 res.status(200).send(JSON.stringify(overview));
             })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err);
+                res.status(500).send("Failed to data lookup");
+            });
+    }
+
+    private verifyPayment (req: express.Request, res: express.Response)
+    {
+        let hash: string = String(req.params.hash);
+
+        logger.http(`GET /spv/${hash}}`);
+
+        let tx_hash: Hash;
+
+        try
+        {
+            tx_hash = new Hash(hash);
+        }
+        catch (error)
+        {
+            res.status(400).send(`Invalid value for parameter 'hash': ${hash}`);
+            return;
+        }
+
+        this.ledger_storage.getBlockHeaderByTxHash(tx_hash)
+            .then((rows: any) => {
+                if (rows.length == 0)
+                {
+                    let status: ISPVStatus = {
+                        result: false,
+                        message: "Transaction does not exist in block"
+                    }
+                    res.status(200).send(JSON.stringify(status));
+                    return;
+                }
+                this.agora.getMerklePath(rows[0].height, tx_hash)
+                    .then((path: Array<Hash>) => {
+                        let root = new Hash(rows[0].merkle_root, Endian.Little)
+
+                        if (Buffer.compare(AgoraClient.checkMerklePath(path, tx_hash, rows[0].tx_index).data, root.data) === 0)
+                        {
+                            let status: ISPVStatus = {
+                                result: true,
+                                message: "Success"
+                            }
+                            res.status(200).send(JSON.stringify(status));
+                        }
+                        else
+                        {
+                            let status: ISPVStatus = {
+                                result: false,
+                                message: "Verification failed"
+                            }
+                            res.status(200).send(JSON.stringify(status));
+                        }
+                    })
+                    .catch((error) => {
+                        let status: ISPVStatus = {
+                            result: false,
+                            message: error.message
+                        }
+                        res.status(200).send(JSON.stringify(status));
+                    })
+                })
             .catch((err) => {
                 logger.error("Failed to data lookup to the DB: " + err);
                 res.status(500).send("Failed to data lookup");

@@ -345,3 +345,19 @@ export interface ITransactionFee
      */
     low: string;
 }
+
+ /**
+  * The status of the SPV
+  */
+export interface ISPVStatus
+{
+    /**
+     * True or false
+     */
+    result: boolean;
+
+    /**
+     * The message
+     */
+    message: string;
+}
