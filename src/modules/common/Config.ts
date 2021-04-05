@@ -305,7 +305,7 @@ export class ConsensusConfig implements IConsensusConfig
      * Constructor
      * @param genesis_timestamp The genesis timestamp
      */
-    constructor (genesis_timestamp?: number)
+    constructor ()
     {
         const defaults = ConsensusConfig.defaultValue();
         this.genesis_timestamp = defaults.genesis_timestamp;
@@ -317,8 +317,9 @@ export class ConsensusConfig implements IConsensusConfig
      */
     public readFromObject (config: IConsensusConfig)
     {
-        if (config.genesis_timestamp)
-            this.genesis_timestamp = config.genesis_timestamp;
+        let conf = extend(true, {}, ConsensusConfig.defaultValue());
+        extend(true, conf, config);
+        this.genesis_timestamp = conf.genesis_timestamp;
     }
 
     /**
