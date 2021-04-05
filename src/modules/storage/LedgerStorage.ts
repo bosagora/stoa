@@ -42,7 +42,7 @@ export class LedgerStorage extends Storages
     /**
      * Construct an instance of `LedgerStorage` using `Promise` API.
      */
-    public static make (filename: string, genesis_timestamp: number) : Promise<LedgerStorage>
+    public static make (filename: string, genesis_timestamp: number): Promise<LedgerStorage>
     {
         return new Promise<LedgerStorage>((resolve, reject) => {
             let result = new LedgerStorage(filename, genesis_timestamp, (err: Error | null) => {
@@ -581,7 +581,7 @@ export class LedgerStorage extends Storages
         return this.query(sql, [height.toString()]);
     }
 
-    public getTransactionFee(tx: Transaction):  Promise<[JSBI, JSBI, JSBI]>
+    public getTransactionFee (tx: Transaction): Promise<[JSBI, JSBI, JSBI]>
     {
         return new Promise<[JSBI, JSBI, JSBI]>((resolve, reject) =>
         {
@@ -1287,7 +1287,7 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the block height
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getExpectedBlockHeight(): Promise<Height>
+    public getExpectedBlockHeight (): Promise<Height>
     {
         return new Promise<Height>((resolve, reject) =>
         {
@@ -1381,7 +1381,7 @@ export class LedgerStorage extends Storages
      * in the outbound transaction address of their counterparts.
      */
     public getWalletTransactionsHistory (address: string, page_size: number, page: number,
-        type: Array<number>, begin?: number, end?: number, peer?: string) : Promise<any[]>
+        type: Array<number>, begin?: number, end?: number, peer?: string): Promise<any[]>
     {
         let filter_type = 'AND FTX.display_tx_type in (' + type.map(n =>`${n}`).join(',') + ')'
         let filter_date = ((begin !== undefined) && (end !== undefined))

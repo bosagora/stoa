@@ -691,7 +691,7 @@ class Stoa extends WebService
             .then((rows: any[]) => {
                 if (!rows.length)
                 {
-                    res.status(204).send(`The data not exist. 'addresses': (${address})`);
+                    res.status(204).send(`The data does not exist. 'addresses': (${address})`);
                     return;
                 }
 
@@ -756,7 +756,7 @@ class Stoa extends WebService
 
                 if (data.tx.length == 0)
                 {
-                    res.status(204).send(`The data not exist. 'hash': (${tx_hash})`);
+                    res.status(204).send(`The data does not exist. 'hash': (${tx_hash})`);
                     return;
                 }
 
