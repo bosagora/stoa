@@ -1,6 +1,6 @@
 /*******************************************************************************
 
-    The class that create and insert and read the ledger into the database.
+    The class that creates, inserts and reads the ledger into the database.
 
     Copyright:
         Copyright (c) 2020-2021 BOSAGORA Foundation
@@ -21,7 +21,7 @@ import { Storages } from './Storages';
 import JSBI from 'jsbi';
 
 /**
- * The class that insert and read the ledger into the database.
+ * The class that inserts and reads the ledger into the database.
  */
 export class LedgerStorage extends Storages
 {
@@ -31,7 +31,7 @@ export class LedgerStorage extends Storages
     private genesis_timestamp: number;
 
     /**
-     * Construct an instance of `LedgerStorage`, exposes callback API
+     * Construct an instance of `LedgerStorage`, exposes callback API.
      */
     constructor (filename: string, genesis_timestamp: number, callback: (err: Error | null) => void)
     {

@@ -1,6 +1,6 @@
 /*******************************************************************************
 
-    Test that parse config.
+    Test that parses config.
 
     Copyright:
         Copyright (c) 2020-2021 BOSAGORA Foundation

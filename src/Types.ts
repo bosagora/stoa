@@ -348,7 +348,7 @@ export interface ITransactionFee
 }
 
  /**
-  * The status of the SPV
+  * The interface of the SPV status
   */
 export interface ISPVStatus
 {

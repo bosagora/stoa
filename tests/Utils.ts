@@ -92,7 +92,7 @@ export class TestAgora implements FullNodeAPI
      * @param blocks The initial state of the blockchain
      * @param done   A delegate to forward to express' `listen` method
      *
-     * This construct a new instance of `TestAgora` and sets up the handlers.
+     * This constructs a new instance of `TestAgora` and sets up the handlers.
      * Note that the handlers will do parameter validation and deserialization,
      * then forward to the appropriate methods, which are implementation of the
      * `FullNodeAPI` interface.
