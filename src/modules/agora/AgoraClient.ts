@@ -130,7 +130,7 @@ export class AgoraClient implements FullNodeAPI
     }
 
     /**
-     * Request the latest PreImageInfo for an enrollment key
+     * Request the latest PreImageInfo for an enrollment key.
      *
      * @param enroll_key Hash of the UTXO used by the validator
      * @returns A `PreImageInfo` matching this `enroll_key`
