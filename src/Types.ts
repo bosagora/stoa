@@ -43,7 +43,8 @@ export class ValidatorData implements IValidator
     stake: string;
     preimage: IPreimage;
 
-    constructor(address: string, enrolled_at: Height, stake: string, preimage: IPreimage) {
+    constructor (address: string, enrolled_at: Height, stake: string, preimage: IPreimage)
+    {
         this.address = address;
         this.enrolled_at = enrolled_at;
         this.stake = stake;
