@@ -50,8 +50,8 @@ describe ('Test ledger storage and inquiry function.', () =>
         assert.strictEqual(rows.length, 1);
         assert.strictEqual(rows[0].height, height_value);
         assert.strictEqual(new Hash(rows[0].merkle_root, Endian.Little).toString(),
-            '0x911890b2ff4429e1beccb4ab5ba7458cc469e8fc455c5df67291ada2c5818cc' +
-            '65a3d11220e877b746a284c95294488d4c7e8ed47b02213e3ce74389c442d9cc1');
+            '0x1d3d908cb9bab19fcb6ac006b6eff772969a1b822cb0acbe9cadabce8b9fcb3' +
+            '34f2d3867239a80da7a3172193589469e4fe1fb9bbf472b82709ffa50f7cc46cd');
         assert.strictEqual(new Hash(rows[0].random_seed, Endian.Little).toString(),
             '0x691775809b9498f45a2c5ef8b8d552e318ebaf0b1b2fb15dcc39e0ec962ae98' +
             '12d7edffa5f053590a895c9ff72c1b0838ce8f5c709579d4529f9f4caf0fab13d');
@@ -63,24 +63,24 @@ describe ('Test ledger storage and inquiry function.', () =>
         let rows3 = await ledger_storage.getTransactions(new Height("0"));
         assert.strictEqual(rows3.length, 2);
         assert.strictEqual(new Hash(rows3[0].tx_hash, Endian.Little).toString(),
-            '0x5208f03b3b95e90b3bff5e0daa1d657738839624d6605845d6e2ef3cf73d0d0' +
-            'ef5aff7d58bde1e00e1ccd5a502b26f569021324a4b902b7e66594e94f05e074c');
+            '0xb8f5a5f4544e75b5837a370d0070361aaaf97d3b02070d3d9845598c5f55105' +
+            'b6bd9ac8e9c53e74679db77cb512ffd88a9916754744f6b5eb2a812929651f84f');
 
         let rows4 = await ledger_storage.getTxInputs(new Height("1"), 0);
         assert.strictEqual(rows4.length, 1);
         assert.strictEqual(new Hash(rows4[0].utxo, Endian.Little).toString(),
-            '0x3909833e3755e875f03032ae8a3af30b40722fc09c52743005e4dcdc617964b' +
-            '8c436ce244cb217a1b34ceddad4378c8ea7311739ba15e5a6c427e6a371acc173');
+            '0x0db044a4bd0df5e6e31ddc2b5878b0da5c4c651a1efb74747254823107ce8f4' +
+            '20f2fe9a53a7bc547974f7d4b7b2413a0d5d574862420294102ef426e775f83ef');
 
         let rows5 = await ledger_storage.getTxOutputs(new Height("0"), 1);
         assert.strictEqual(rows5.length, 8);
         assert.strictEqual(new Hash(rows5[0].utxo_key, Endian.Little).toString(),
-            '0x533f664df20aa5f3f657bea7073c9fdbe930c3887db8c57ddb2efd258c3bfdd' +
-            'f644b645f3c399996bd4d97dbb17138e1b670d254d3518959d97793ef27c55e2e');
+            '0x14262986aaf584199a9aa606c067ddbc6743021e4ed137b81943e16fcfd5648' +
+            'd3192851acb39d81ec0b405c63aeb816a895f81ec5a3427167790cd16f9569ce5');
         assert.strictEqual(new Hash(rows5[0].tx_hash, Endian.Little).toString(),
-            '0xb3aaf405f53560a6f6d5dd9dd83d7b031da480c0640a2897f2e2562c4670dfe' +
-            '84552d84daf5b1b7c63ce249d06bf54747cc5fdc98178a932fff99ab1372e873b');
-        assert.strictEqual(rows5[0].address, 'boa1xzwsyw8q59c5qz7x669fmxe3dtx4zztyjyf6qhpgfapfd54nqy302uhyqlu');
+            '0x4ef4f7195db2e20f36b46cb3cda1f529b77e2cd8423241d1a4a779f3d7845d4' +
+            'f6543a6147956bf4fe52d5f5925a04102de59b2854f90fb3e8cc1a0e85fe9b11d');
+        assert.strictEqual(rows5[0].address, 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt');
     });
 
     it ('Test for enrollment', async () =>
@@ -91,22 +91,22 @@ describe ('Test ledger storage and inquiry function.', () =>
         assert.strictEqual(rows.length, 6);
         assert.strictEqual(rows[0].block_height, height_value);
         assert.strictEqual(new Hash(rows[0].utxo_key, Endian.Little).toString(),
-            '0xbf150033f0c3123f0b851c3a97b6cf5335b2bc2f4e9f0c2f3d44b863b10c261' +
-            '614d79f72c2ec0b1180c9135893c3575d4a1e1951a0ba24a1a25bfe8737db0aef');
+            '0x6100ee7a7e00e18e06b743a7ae90e91781c09e0f1791ee2849ce15caf4c6ee1' +
+            'f3aebc23768f98153d8e3fb10ac66267e06acc31dccbfdbe671294a7fded22432');
 
         rows = await ledger_storage.getValidators(height);
         assert.strictEqual(rows.length, 6);
         assert.strictEqual(rows[0].enrolled_at, height_value);
         assert.strictEqual(new Hash(rows[0].utxo_key, Endian.Little).toString(),
-            '0x1a1ae2be7afbe367e8e588474d93806b66b773c741b184dc5b4c59640e99864' +
-            '4d2ebb0b866ac25dc053b06fd815a86d11c718f77c9e4d0fce1bdbb58486ee751');
+            '0x1da29910b5ed5b9ea3bd4207016f485f763b44bd289444a4cef77faa96480d6' +
+            '833ce0b215c3ed6e00e9119352e49bb3e04054e0fca5fef35aeb47a9e425d7ddf');
         assert.strictEqual(rows[0].address,
-            'boa1xrdwry7ehk6ddwwsgxd6uvpye3wa667tjv8xsqmv5qvcsjnf43lhjpggeuy');
+            'boa1xrdwry6fpk7a57k4gwyj3mwnf59w808nygtuxsgdrpmv4p7ua2hqx78z5en');
     });
 
     it ('Test for validator', async () =>
     {
-        let address: string = 'boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22';
+        let address: string = 'boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp';
 
         let rows = await ledger_storage.getValidatorsAPI(new Height("1"), null);
         assert.ok(rows.length > 0);
@@ -120,8 +120,8 @@ describe ('Test ledger storage and inquiry function.', () =>
         assert.strictEqual(rows.length, 1);
         assert.strictEqual(rows[0].address, address);
         assert.strictEqual(new Hash(rows[0].stake, Endian.Little).toString(),
-            '0xbf150033f0c3123f0b851c3a97b6cf5335b2bc2f4e9f0c2f3d44b863b10c261' +
-            '614d79f72c2ec0b1180c9135893c3575d4a1e1951a0ba24a1a25bfe8737db0aef');
+            '0x6100ee7a7e00e18e06b743a7ae90e91781c09e0f1791ee2849ce15caf4c6ee1' +
+            'f3aebc23768f98153d8e3fb10ac66267e06acc31dccbfdbe671294a7fded22432');
 
         rows = await ledger_storage.getValidatorsAPI(null, null);
         assert.strictEqual(rows.length, 6);
@@ -137,11 +137,11 @@ describe ('Test ledger storage and inquiry function.', () =>
         assert.strictEqual(rows[0].block_height, height_value);
         assert.strictEqual(rows[0].merkle_index, 0);
         assert.strictEqual(new Hash(rows[0].merkle_hash, Endian.Little).toString(),
-            '0x5208f03b3b95e90b3bff5e0daa1d657738839624d6605845d6e2ef3cf73d0d0' +
-            'ef5aff7d58bde1e00e1ccd5a502b26f569021324a4b902b7e66594e94f05e074c');
+            '0xb8f5a5f4544e75b5837a370d0070361aaaf97d3b02070d3d9845598c5f55105' +
+            'b6bd9ac8e9c53e74679db77cb512ffd88a9916754744f6b5eb2a812929651f84f');
         assert.strictEqual(new Hash(rows[1].merkle_hash, Endian.Little).toString(),
-            '0xb3aaf405f53560a6f6d5dd9dd83d7b031da480c0640a2897f2e2562c4670dfe' +
-            '84552d84daf5b1b7c63ce249d06bf54747cc5fdc98178a932fff99ab1372e873b');
+            '0x4ef4f7195db2e20f36b46cb3cda1f529b77e2cd8423241d1a4a779f3d7845d4' +
+            'f6543a6147956bf4fe52d5f5925a04102de59b2854f90fb3e8cc1a0e85fe9b11d');
     });
 
     it ('Test for LedgerStorage.getWalletBlocksHeaderInfo()', async () =>
@@ -151,22 +151,22 @@ describe ('Test ledger storage and inquiry function.', () =>
         assert.strictEqual(rows[0].height, 1);
         assert.strictEqual(rows[0].time_stamp, 1609459800);
         assert.strictEqual(new Hash(rows[0].merkle_root, Endian.Little).toString(),
-            '0x911890b2ff4429e1beccb4ab5ba7458cc469e8fc455c5df67291ada2c5818cc' +
-            '65a3d11220e877b746a284c95294488d4c7e8ed47b02213e3ce74389c442d9cc1');
+            '0x1d3d908cb9bab19fcb6ac006b6eff772969a1b822cb0acbe9cadabce8b9fcb3' +
+            '34f2d3867239a80da7a3172193589469e4fe1fb9bbf472b82709ffa50f7cc46cd');
         assert.strictEqual(new Hash(rows[0].hash, Endian.Little).toString(),
-            '0x10cb20b4310ac086da53eb0aa075fae4d956f3f95b0982af96cd2632286be27' +
-            '896aade2c5a8d929fef6d057c6cd8d711b4b466243b3156b00c7f97255ffa9fd0');
+            '0xc4d0f4a5734c90e13b90635aeca16b06accfad3161fc77207b5d7cb21d4a428' +
+            '6da3f033fa4692091880e6b0b1b1a4253f69fa372e3492a987253dc203e62e4b8');
 
         rows = await ledger_storage.getWalletBlocksHeaderInfo(new Height("0"));
         assert.strictEqual(rows.length, 1);
         assert.strictEqual(rows[0].height, 0);
         assert.strictEqual(rows[0].time_stamp, 1609459200);
         assert.strictEqual(new Hash(rows[0].merkle_root, Endian.Little).toString(),
-            '0xb12632add7615e2c4203f5ec5747c26e4fc7f333f95333ddfa4121a66b84499' +
-            'd35e5ce022ab667791549654b97a26e86054b0764ec23ee0cd3830de8f3f73364');
+            '0x0d453b87856c9faaf75cfac3dc993cd75c34fc1d5329d3c38e8b4757586fd54' +
+            '40cd9ed466f7c2259e5af4f8fe7f45cb997504542efd56d6bd7853fa9596d6bc2');
         assert.strictEqual(new Hash(rows[0].hash, Endian.Little).toString(),
-            '0x357c0ba09ce530b7472c00e741cfc1cb2a17424488cf7e13bffc9602ed2e3b9' +
-            'b68517138ccb0b95a3e4d3da842a7f21b986ef1f00f2aa0774d92b55642e017e4');
+            '0xe2357870cef6f690c5672293aba4e910dc3e120ab83cbfff24cf6b824af0588' +
+            'caa294900abdd46f3453229dea8680343e89f7ef06f47a2db1ec2a214553f4281');
     });
 
     it ('Test for saving of a block with transaction data payload', async () =>
@@ -180,38 +180,39 @@ describe ('Test ledger storage and inquiry function.', () =>
     });
 
     it ('Test for UTXO', async () => {
-        let address: string = 'boa1xrvt66t20md7jmlzcgp93qdh4cl2vfvgd8a49qrxr9txgkdw3mc57jq4lar';
+        let address: string = 'boa1xrvt66n33l4udhxqmem3t952h6z62ynmsnctmdllx628vxl48g6lj4ldwvl';
         let rows = await ledger_storage.getUTXO(address);
         assert.strictEqual(rows.length, 1);
         assert.strictEqual(rows[0].type, 0);
         assert.strictEqual(rows[0].unlock_height, 2);
         assert.strictEqual(BigInt(rows[0].amount), BigInt('24400000000000'));
         assert.strictEqual(new Hash(rows[0].utxo, Endian.Little).toString(),
-            '0x45d28faef4045ccc36ada79db3c6370446136d7ce9bdfd2cab06de60fe4ea0f' +
-            'afd893d6d42470a88de3fe42eb8f0670501909c4359289411e1645fa471ea6433');
+            '0xa3e90c15f3334abfb9f2393d8fbdae43b03ab7cff08450e11c10be4616f5ad7' +
+            '5c3c771d1189aa6c50ec4bc52cecc3b36f5d76c54e4412845b7cf21ca9220ba31');
     });
 
     it ('Test for UTXO in melting', async () => {
-        let address: string = 'boa1xrdwrylfay52ln78tyw69r5pkeyh4h8fwlzuq9a4eq2eydxsuk3mgge25j2';
+        let address: string = 'boa1xrdwryl0ajdd86c45w4zrjf8spmrt7u4l7s5jy64ac3dc78x2ucd7wkakac';
         let rows = await ledger_storage.getUTXO(address);
         assert.strictEqual(rows.length, 5);
         assert.strictEqual(rows[0].type, 0);
         assert.strictEqual(rows[0].unlock_height, 2018);
         assert.strictEqual(BigInt(rows[0].amount), BigInt('4000000000000'));
         assert.strictEqual(new Hash(rows[0].utxo, Endian.Little).toString(),
-            '0x245286d66621523ea08aba56a34526a5cad5d9ddff367f52268ddcba57f7ae9' +
-            'a83a1fdb101d87fdebccdf2b5039003e3c162232a15c50528d82ab34f8d8f5f17');
+            '0x07febf063cf30766cafc2a28a7553a568ae953326acb5adebd3a129b5ca4613' +
+            'a50604cafb600c85128df65aac86bb5425ffb1494433b5b1c94de6a0de8d58ea3');
     });
 
     it ('Test for getting block height and merkle root with transaction hash', async () => {
-        let tx_hash = new Hash('0xc0dd3f9e1c37ec1ac037685ce96417339b5d97bb4a9560e4e7ad7dd79f3f8d5' +
-                               '646c6c7bbc3473502aa8fea6ad0e691992e5e7fa1c73c44d174dfc4196a52d84f');
+        let tx_hash = new Hash(
+            '0xfe64dddee486f417b76da9ed1edea75829f5be8197b29e4984f1bd6d3b681e5' +
+            '2e8f9f06eda825e2445deccefa8fe51900944a0b1c71be7f022dee92e12d3e8fd');
         let rows = await ledger_storage.getBlockHeaderByTxHash(tx_hash);
         assert.strictEqual(rows.length, 1);
         assert.strictEqual(rows[0].height, 1);
         assert.strictEqual(new Hash(rows[0].merkle_root, Endian.Little).toString(),
-            '0x911890b2ff4429e1beccb4ab5ba7458cc469e8fc455c5df67291ada2c5818cc' +
-            '65a3d11220e877b746a284c95294488d4c7e8ed47b02213e3ce74389c442d9cc1');
+            '0x1d3d908cb9bab19fcb6ac006b6eff772969a1b822cb0acbe9cadabce8b9fcb3' +
+            '34f2d3867239a80da7a3172193589469e4fe1fb9bbf472b82709ffa50f7cc46cd');
     });
 });
 
@@ -336,7 +337,7 @@ describe ('Tests that sending a pre-image', () =>
 
         let rows = await ledger_storage.getValidators(height);
         assert.strictEqual(rows.length, 6);
-        let validator = rows.find(n => n.address === "boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22");
+        let validator = rows.find(n => n.address === "boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp");
         assert.ok(validator !== undefined);
         assert.strictEqual(validator.preimage_distance, 6);
         assert.strictEqual(new Hash(validator.preimage_hash, Endian.Little).toString(), sample_preImageInfo.hash);
@@ -350,7 +351,7 @@ describe ('Tests that sending a pre-image', () =>
 
         let rows = await ledger_storage.getValidators(height);
         assert.strictEqual(rows.length, 6);
-        let validator = rows.find(n => n.address === "boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22");
+        let validator = rows.find(n => n.address === "boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp");
         assert.ok(validator !== undefined);
         assert.strictEqual(validator.preimage_distance, 6);
         assert.strictEqual(new Hash(validator.preimage_hash, Endian.Little).toString(), sample_preImageInfo.hash);
@@ -365,7 +366,7 @@ describe ('Tests that sending a pre-image', () =>
 
         let rows = await ledger_storage.getValidators(height);
         assert.strictEqual(rows.length, 6);
-        let validator = rows.find(n => n.address === "boa1xrdwryu2nyl4s584pthgxrl4y9calhuh4aul0l6rmljrxl5ywlvkwgtyc22");
+        let validator = rows.find(n => n.address === "boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp");
         assert.ok(validator !== undefined);
         assert.strictEqual(validator.preimage_distance, 6);
         assert.strictEqual(new Hash(validator.preimage_hash, Endian.Little).toString(), sample_preImageInfo.hash);
