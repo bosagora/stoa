@@ -502,7 +502,7 @@ export class LedgerStorage extends Storages
      */
     public updatePreImage (pre_image: PreImageInfo): Promise<number>
     {
-        let enroll_key = pre_image.enroll_key.toBinary(Endian.Little);
+        let enroll_key = pre_image.utxo.toBinary(Endian.Little);
         return new Promise<number>((resolve, reject) =>
         {
             this.run(
