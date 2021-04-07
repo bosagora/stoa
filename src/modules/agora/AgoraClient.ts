@@ -64,8 +64,8 @@ export class AgoraClient implements FullNodeAPI
         this.endpoint = endpoint;
         this.client = axios.create({
             baseURL: endpoint.toString(),
-            // Timeout are in ms, so 2s timeout
-            timeout: 2000,
+            // Timeout is in ms
+            timeout: 10000,
         });
     }
 
