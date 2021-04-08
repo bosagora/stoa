@@ -596,7 +596,7 @@ export class LedgerStorage extends Storages
 
             let sql =
                 `SELECT
-                    SUM(O.amount) as sum_inputs
+                    IFNULL(SUM(O.amount), 0) as sum_inputs
                 FROM
                     utxos O
                 WHERE
