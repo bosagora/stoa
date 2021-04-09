@@ -940,7 +940,7 @@ describe ('Test of the path /merkle_path', () =>
         let uri = URI(agora_host)
             .port(agora_port)
             .directory("merkle_path")
-            .setSearch("block_height", "1")
+            .setSearch("height", "1")
             .setSearch("hash", "0xbbcdd3a1fe3c8942ad1523068d3cdf0fb0e29a50f96e89a1e75efc42654835552a4fe6d15648a1cb48b4ab376270374579d32a1b167df4334f668289e61e85ef");
 
         let response = await client.get(uri.toString());
