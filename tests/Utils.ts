@@ -121,7 +121,7 @@ export class TestAgora implements FullNodeAPI
         this.agora.get("/blocks_from",
             (req: express.Request, res: express.Response, next) =>
         {
-            if (req.query.block_height === undefined || Number.isNaN(req.query.block_height))
+            if (req.query.height === undefined || Number.isNaN(req.query.height))
             {
                 res.status(400).json({ statusText: 'Missing or invalid block_height query parameter' });
                 return;
@@ -132,8 +132,8 @@ export class TestAgora implements FullNodeAPI
                 return;
             }
 
-            let block_height = new Height(JSBI.BigInt(req.query.block_height.toString()));
-            if (JSBI.lessThan(block_height.value, JSBI.BigInt(0)))
+            let height = new Height(JSBI.BigInt(req.query.height.toString()));
+            if (JSBI.lessThan(height.value, JSBI.BigInt(0)))
             {
                 res.status(400).json({ statusText: 'Query parameter block_height must not be negative' });
                 return;
@@ -148,7 +148,7 @@ export class TestAgora implements FullNodeAPI
                 return;
             }
 
-            this.getBlocksFrom(block_height, max_blocks).then((result) => {
+            this.getBlocksFrom(height, max_blocks).then((result) => {
                 // Adds an artificial delay to our responses
                 if (this.delay > 0)
                     setTimeout(() => { res.json(result); }, this.delay);
@@ -159,7 +159,7 @@ export class TestAgora implements FullNodeAPI
 
         this.agora.get("/merkle_path", (req: express.Request, res: express.Response, next) =>
         {
-            if (req.query.block_height === undefined || Number.isNaN(req.query.block_height))
+            if (req.query.height === undefined || Number.isNaN(req.query.height))
             {
                 res.status(400).json({ statusText: 'Missing or invalid block_height query parameter' });
                 return;
@@ -171,7 +171,7 @@ export class TestAgora implements FullNodeAPI
                 return;
             }
 
-            let block_height = new Height(JSBI.BigInt(req.query.block_height.toString()));
+            let block_height = new Height(JSBI.BigInt(req.query.height.toString()));
             if (JSBI.lessThan(block_height.value, JSBI.BigInt(0)))
             {
                 res.status(400).json({ statusText: 'Query parameter block_height must not be negative' });
@@ -212,16 +212,16 @@ export class TestAgora implements FullNodeAPI
     }
 
     /// Implements FullNodeAPI.getBlocksFrom
-    public getBlocksFrom (block_height: Height, max_blocks: number): Promise<Block[]>
+    public getBlocksFrom (height: Height, max_blocks: number): Promise<Block[]>
     {
         // Follow what Agora is doing
         max_blocks = Math.min(max_blocks, 1000);
 
-        if (JSBI.greaterThanOrEqual(block_height.value, JSBI.BigInt(this.blocks.length)))
+        if (JSBI.greaterThanOrEqual(height.value, JSBI.BigInt(this.blocks.length)))
             return Promise.resolve([]);
 
         // FIXME: Should handle > 2^53 but we're safe for the time being
-        const block_height_ = JSBI.toNumber(block_height.value);
+        const block_height_ = JSBI.toNumber(height.value);
 
         return Promise.resolve(
             this.blocks.slice(

@@ -28,8 +28,8 @@ export interface FullNodeAPI
     // getLocalTime (): bigint;
 
     getBlockHeight (): Promise<Height>;
-    getBlocksFrom (block_height: Height, max_blocks: number): Promise<Block[]>;
-    getMerklePath (block_height: Height, hash: Hash): Promise<Hash[]>;
+    getBlocksFrom (height: Height, max_blocks: number): Promise<Block[]>;
+    getMerklePath (height: Height, hash: Hash): Promise<Hash[]>;
     // hasTransactionHash (tx: Hash): boolean;
     // putTransaction (tx: Transaction): void;
 
@@ -80,15 +80,15 @@ export class AgoraClient implements FullNodeAPI
 
     /**
      * Requests and receives data needed for recovery from Agora.
-     * @param block_height - The height of the block
+     * @param height - The height of the block
      * @param max_blocks - The maximum number of block to request
      */
-    public getBlocksFrom (block_height: Height, max_blocks: number): Promise<Block[]>
+    public getBlocksFrom (height: Height, max_blocks: number): Promise<Block[]>
     {
         return new Promise<Block[]>((resolve, reject) =>
         {
             let uri = URI("/blocks_from")
-                .addSearch("block_height", block_height.toString())
+                .addSearch("height", height.toString())
                 .addSearch("max_blocks", max_blocks);
 
             this.client.get(uri.toString())
@@ -107,15 +107,15 @@ export class AgoraClient implements FullNodeAPI
 
     /**
      * Requests and receives the Merkle path.
-     * @param block_height - The height of the block
+     * @param height - The height of the block
      * @param hash - The hash of the transaction
      */
-    public getMerklePath (block_height: Height, hash: Hash): Promise<Hash[]>
+    public getMerklePath (height: Height, hash: Hash): Promise<Hash[]>
     {
         return new Promise<Hash[]>((resolve, reject) =>
         {
             let uri = URI("/merkle_path")
-                .addSearch("block_height", block_height.toString())
+                .addSearch("height", height.toString())
                 .addSearch("hash", hash.toString());
 
             this.client.get(uri.toString())
