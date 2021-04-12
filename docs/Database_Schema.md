@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS "blocks" (
 | block_height      | INTEGER   | Y  | Y        |          | The height of the block|
 | enrollment_index  | INTEGER   | Y  | Y        |          | The index of enrollment in the block.|
 | utxo_key          | BLOB      |    | Y        |          | K: UTXO hash, A hash of a frozen UTXO|
-| random_seed       | BLOB      |    | Y        |          | X: Random seed, The nth image of random value|
+| commitment        | BLOB      |    | Y        |          | X: commitment, The nth image of random value|
 | cycle_length      | INTEGER   |    | Y        |          | n: the number of rounds a validator will participate in |
 | enroll_sig        | BLOB      |    | Y        |          | S: A signature for the message H(K, X, n, R) and the key K, using R|
 
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS "enrollments" (
     "block_height"          INTEGER NOT NULL,
     "enrollment_index"      INTEGER NOT NULL,
     "utxo_key"              BLOB    NOT NULL,
-    "random_seed"           BLOB    NOT NULL,
+    "commitment"            BLOB    NOT NULL,
     "cycle_length"          INTEGER NOT NULL,
     "enroll_sig"            BLOB    NOT NULL,
     PRIMARY KEY("block_height","enrollment_index")

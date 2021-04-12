@@ -86,7 +86,7 @@ export class LedgerStorage extends Storages
             block_height        INTEGER NOT NULL,
             enrollment_index    INTEGER NOT NULL,
             utxo_key            BLOB    NOT NULL,
-            random_seed         BLOB    NOT NULL,
+            commitment          BLOB    NOT NULL,
             cycle_length        INTEGER NOT NULL,
             enroll_sig          BLOB    NOT NULL,
             PRIMARY KEY(block_height, enrollment_index)
@@ -353,14 +353,14 @@ export class LedgerStorage extends Storages
             {
                 storage.query(
                     `INSERT INTO enrollments
-                        (block_height, enrollment_index, utxo_key, random_seed, cycle_length, enroll_sig)
+                        (block_height, enrollment_index, utxo_key, commitment, cycle_length, enroll_sig)
                     VALUES
                         (?, ?, ?, ?, ?, ?)`,
                     [
                         height.toString(),
                         enroll_idx,
                         enroll.utxo_key.toBinary(Endian.Little),
-                        enroll.random_seed.toBinary(Endian.Little),
+                        enroll.commitment.toBinary(Endian.Little),
                         enroll.cycle_length,
                         enroll.enroll_sig.toBinary(Endian.Little)
                     ])
@@ -388,7 +388,7 @@ export class LedgerStorage extends Storages
                     [
                         height.toString(),
                         0,
-                        enroll.random_seed.toBinary(Endian.Little),
+                        enroll.commitment.toBinary(Endian.Little),
                         enroll.utxo_key.toBinary(Endian.Little)
                     ])
                     .then(() =>
@@ -556,7 +556,7 @@ export class LedgerStorage extends Storages
     {
         let sql =
         `SELECT
-            block_height, enrollment_index, utxo_key, random_seed, cycle_length, enroll_sig
+            block_height, enrollment_index, utxo_key, commitment, cycle_length, enroll_sig
         FROM
             enrollments
         WHERE block_height = ?`;
@@ -1221,7 +1221,7 @@ export class LedgerStorage extends Storages
         `SELECT utxos.address,
                 enrollments.enrolled_at,
                 enrollments.utxo_key as stake,
-                enrollments.random_seed,
+                enrollments.commitment,
                 enrollments.avail_height,
                 ` + cur_height + ` as height,
                 validators.preimage_distance,
@@ -1234,7 +1234,7 @@ export class LedgerStorage extends Storages
                  END) as avail_height,
                 enrollment_index,
                 utxo_key,
-                random_seed,
+                commitment,
                 cycle_length,
                 enroll_sig
              FROM enrollments
