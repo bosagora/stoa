@@ -221,7 +221,7 @@ class Stoa extends WebService
                         if (JSBI.equal(target_height.value, JSBI.BigInt(row.enrolled_at)))
                         {
                             preimage_distance = 0;
-                            result_preimage_hash.fromBinary(row.random_seed, Endian.Little);
+                            result_preimage_hash.fromBinary(row.commitment, Endian.Little);
                         }
                         else
                         {
@@ -315,7 +315,7 @@ class Stoa extends WebService
                         if (JSBI.equal(target_height.value, JSBI.BigInt(row.enrolled_at)))
                         {
                             preimage_distance = 0;
-                            result_preimage_hash.fromBinary(row.random_seed, Endian.Little);
+                            result_preimage_hash.fromBinary(row.commitment, Endian.Little);
                         }
                         else
                         {
