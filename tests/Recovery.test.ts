@@ -22,6 +22,8 @@ import JSBI from 'jsbi';
 import URI from 'urijs';
 import { URL } from 'url';
 import { BOASodium } from 'boa-sodium-ts';
+import { IDatabaseConfig } from '../src/modules/common/Config';
+import { MockDBConfig } from "./TestConfig"
 
 /**
  * This is an API server for testing and inherited from Stoa.
@@ -29,9 +31,9 @@ import { BOASodium } from 'boa-sodium-ts';
  */
 class TestRecoveryStoa extends TestStoa
 {
-    constructor (agora_endpoint: URL, port: number | string)
+    constructor (testDBConfig :IDatabaseConfig,agora_endpoint: URL, port: number | string)
     {
-        super(agora_endpoint, port);
+        super(testDBConfig,agora_endpoint, port);
 
         this.app.get("/block",
             async (req: express.Request, res: express.Response) =>
@@ -69,6 +71,7 @@ describe ('Test of Recovery', () =>
     const stoa_addr: URL = new URL('http://localhost:3837/');
     let agora_node: TestAgora;
     let stoa_server: TestRecoveryStoa;
+    let testDBConfig : IDatabaseConfig;
 
     let client = new TestClient();
 
@@ -89,22 +92,18 @@ describe ('Test of Recovery', () =>
         await agora_node.stop();
     });
 
-    beforeEach ('Create TestStoa', async () =>
-    {
-        stoa_server = new TestRecoveryStoa(agora_addr, stoa_addr.port);
+    before ('Create TestStoa and start it', async () =>
+    {   
+         testDBConfig = await MockDBConfig();
+        stoa_server = new TestRecoveryStoa(testDBConfig,agora_addr, stoa_addr.port);
         await stoa_server.createStorage();
-    });
-
-    beforeEach ('Start TestStoa', async () =>
-    {
         await stoa_server.start();
     });
-
-    afterEach ('Stop TestStoa', async () =>
+    after ('Stop TestStoa', async () =>
     {
+        await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
         await stoa_server.stop();
     });
-
     it ('Test `getBlocksFrom`', async () =>
     {
         let agora_client = new AgoraClient(agora_addr);

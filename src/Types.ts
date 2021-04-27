@@ -160,10 +160,230 @@ export interface ITxHistoryElement
 }
 
 /**
+ * The interface of the statistics of BOA coin
+ */
+export interface IBOAStats
+{
+    /**
+     * Latest height of block
+     */
+    height: number;
+     
+    /**
+     * Total no. of transactions
+     */
+    transactions: number;
+         
+    /**
+     * Total no. of validators
+     */
+    validators: number;
+          
+    /**
+     * Total no. of frozen coins
+     */
+    frozen_coin: number;
+            
+    /**
+     * Total no. of active validators
+     */
+    active_validators: number;
+             
+    /**
+     * Circulating supply
+     */
+    circulating_supply: number;
+ }
+ 
+/**
+ * The interface of the block overview
+ */
+export interface IBlockOverview
+{
+    /**
+     * Block height
+     */
+    height: string;
+
+    /**
+     * No. of transactions
+     */
+    total_transactions: number;
+
+    /**
+     * Block hash
+     */
+    hash: string;
+
+    /**
+     * Previous block hash
+     */
+    prev_hash: string;
+
+    /**
+     * Merkle root
+     */
+    merkle_root: string;
+
+    /**
+     * Signature
+     */
+    signature: string;
+
+    /**
+     * Random seed
+     */
+    random_seed: string;
+
+    /**
+     * Transaction hash
+     */
+    time: number;
+    /**
+     * total amount sent in block
+     */
+    total_sent : string;
+    /**
+     * total recieved amount
+     */
+    total_recieved :string;
+    /**
+     * total rewards
+     */
+    total_reward :string
+    /**
+     * total fee for the block
+     */
+    total_fee :string
+    /**
+     * total size of the block
+     */
+    total_size : string
+    /**
+     * Agora version
+     */
+    version : string
+}
+
+/**
+ * The interface of the enrolled validators of block
+ */
+export interface IBlockEnrollmentElements
+{
+    /**
+     * Block height
+     */
+    height: string;
+
+    /**
+     * The hash of UTXO
+     */
+    utxo: string;
+    
+    /**
+     * Random seed
+     */
+     commitment: string,
+     
+    /**
+     * Enroll signature
+     */
+    enroll_sig: string,
+         
+    /**
+     * Cycle length
+     */
+    cycle_length: number,
+}
+
+/**
+ * The interface of the enrolled validators of block with total_records
+ */
+export interface IBlockEnrollment
+{
+    enrollmentElementList : IBlockEnrollmentElements [],
+    total_data : string
+
+}
+
+/**
+ * The interface of the transaction elements of block
+ */
+export interface IBlockTransactionElements
+{
+    /**
+     * Transaction hash
+     */
+    tx_hash: string;
+    
+    /**
+     * Block height
+     */
+    height: string;
+    
+    /**
+     * Transaction amount
+     */
+    amount: string;
+
+    /**
+     * Transaction type
+     */
+    type: string;
+
+    /**
+     * Transaction fee
+     */
+    fee: string;
+
+    /**
+     * Transaction size
+     */
+    size: string;
+
+    /**
+     * Transaction time
+     */
+    time: string;
+
+    /**
+     * Transaction receiver
+     */
+    receiver: string;
+
+    /**
+     * Transaction sender address
+     */
+    sender_address: string;
+}
+
+ /**
+  * The interface of the transactions of block
+  */
+ export interface IBlockTransactions
+ {
+     /**
+      * Transactions record
+      */
+     tx: Array<IBlockTransactionElements>;
+     
+     /**
+      * Total record
+      */
+     total_data: string;
+ 
+ }
+
+/**
  * The interface of the transaction overview
  */
 export interface ITxOverview
 {
+    /**
+     * Transaction status
+     */
+    status: string;
+
     /**
      * Block height
      */
@@ -185,9 +405,19 @@ export interface ITxOverview
     tx_type: string;
 
     /**
+     * Transaction type
+     */
+    tx_size: number;
+
+    /**
      * Block height at which the output of the transaction becomes available
      */
     unlock_height: string;
+
+    /**
+     * Transaction lock height
+     */
+    lock_height: string;
 
     /**
      * Time at which the output of the transaction becomes available
@@ -202,12 +432,12 @@ export interface ITxOverview
     /**
      * The address and amount of the output associated with the transaction input
      */
-    senders: Array<ITxOverviewElement>;
+    senders: Array<ITxOverviewInputElement>;
 
     /**
      * The address and amount of transaction output
      */
-    receivers: Array<ITxOverviewElement>;
+    receivers: Array<ITxOverviewOutputElement>;
 
     /**
      * Transaction fee
@@ -216,9 +446,44 @@ export interface ITxOverview
 }
 
 /**
- * The interface of the transaction overview element
+ * The interface of the transaction overview output element
  */
-export interface ITxOverviewElement
+export interface ITxOverviewOutputElement
+{
+    /**
+     * Address, Public key
+     */
+    address: string;
+    /**
+     * Lock type
+     */
+    lock_type: number;
+
+    /**
+     * Lock type
+     */
+    index: number;
+
+    /**
+     * Lock bytes
+     */
+    bytes: string;
+
+    /**
+     * The hash of UTXO
+     */
+    utxo: string;
+
+    /**
+     * Amount
+     */
+    amount: string;
+ }
+
+/**
+ * The interface of the transaction overview input element
+ */
+export interface ITxOverviewInputElement
 {
     /**
      * Address, Public key
@@ -228,12 +493,32 @@ export interface ITxOverviewElement
     /**
      * Amount
      */
-    amount: string;
+    amount: number;
 
     /**
      * The hash of UTXO
      */
     utxo: string;
+
+    /**
+     * Signature of block
+     */
+    signature: string;
+
+    /**
+     * Input index
+     */
+    index: number;
+
+    /**
+     * Unlock age
+     */
+    unlock_age: number;
+
+    /**
+     * Unlock bytes
+     */
+    bytes: string;
 }
 
 /**
@@ -361,4 +646,85 @@ export interface ISPVStatus
      * The message
      */
     message: string;
+}
+/**
+ * The interface of block
+ */
+
+export interface IBlock {
+    /**
+     * block height
+     */
+    height: string,
+    /**
+     * hash of block
+    */
+    hash: string,
+    /**
+     * merkle root of block
+     */
+    merkle_root: string,
+
+    /**
+     * validators of block 
+     */
+    validators: string
+    /**
+     * signature of blcok
+     */
+    signature: string
+    /**
+     * no of transactions in the block
+     */
+    tx_count: number
+    /**
+     * enrollemnet counts in that block
+     */
+    enrollment_count: string
+    /**
+     * timestamp of the block
+     */
+    time_stamp: string
+}
+
+/**
+ * The interface of transaction
+ */
+
+export interface ITransaction
+{
+    /**
+    * Block height
+    */
+    height: string,
+  
+   /**
+    * Hash of the transaction
+    */
+    tx_hash: string,
+  
+   /**
+    * Type of the transaction
+    */
+    type: string,
+
+   /**
+    * amount of transaction
+    */
+    amount: string
+   
+   /**
+    * tranaction fee 
+    */
+    tx_fee: string
+   
+   /**
+    * size of the tranaction
+    */
+    tx_size: string
+   
+    /**
+    * timestamp of the tranasaction
+    */
+    time_stamp: string
 }

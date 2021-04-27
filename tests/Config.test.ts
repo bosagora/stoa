@@ -26,7 +26,11 @@ describe('Test of Config', () => {
                 "   port:    3838",
                 "   agora_endpoint: http://127.0.0.1:2826",
                 "database:",
-                "   filename: database",
+                "   host : 127.0.0.1",
+                "   user : root",
+                "   database : test",
+                "   password : 12345678",
+                "   port : 3306",
                 "logging:",
                 "   folder: /stoa/logs/",
                 "   level: debug",
@@ -38,9 +42,11 @@ describe('Test of Config', () => {
         assert.strictEqual(config.server.address, "127.0.0.1");
         assert.strictEqual(config.server.port.toString(), "3838");
         assert.strictEqual(config.server.agora_endpoint.toString(), "http://127.0.0.1:2826");
-
-        assert.strictEqual(config.database.filename, path.resolve(Utils.getInitCWD(), "database"));
-
+        assert.strictEqual(config.database.host, "127.0.0.1");
+        assert.strictEqual(config.database.user, "root");
+        assert.strictEqual(config.database.database, "test");
+        assert.strictEqual(config.database.port.toString(), "3306");
+        assert.strictEqual(config.database.password.toString(), "12345678");
         assert.strictEqual(config.logging.folder, "/stoa/logs");
         assert.strictEqual(config.logging.level, "debug");
         assert.strictEqual(config.consensus.genesis_timestamp, 1609459200);
@@ -52,9 +58,11 @@ describe('Test of Config', () => {
         assert.strictEqual(config.server.address, "0.0.0.0");
         assert.strictEqual(config.server.port.toString(), "4242");
         assert.strictEqual(config.server.agora_endpoint.toString(), "http://127.1.1.1:4567");
-
-        assert.strictEqual(config.database.filename, path.resolve(Utils.getInitCWD(), "data/main.db"));
-
+        assert.strictEqual(config.database.host, "127.0.0.1");
+        assert.strictEqual(config.database.user, "root");
+        assert.strictEqual(config.database.database, "root");
+        assert.strictEqual(config.database.password.toString(), "root");
+        assert.strictEqual(config.database.port.toString(), "3306");
         assert.strictEqual(config.logging.folder, path.resolve(Utils.getInitCWD(), "logs/"));
         assert.strictEqual(config.logging.level, "http");
         assert.strictEqual(config.consensus.genesis_timestamp, 1609459200);
