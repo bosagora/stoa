@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS "enrollments" (
     "block_height"          INTEGER NOT NULL,
     "enrollment_index"      INTEGER NOT NULL,
     "utxo_key"              BLOB    NOT NULL,
-    "commitment"            BLOB    NOT NULL,
+    "random_seed"           BLOB    NOT NULL,
     "cycle_length"          INTEGER NOT NULL,
     "enroll_sig"            BLOB    NOT NULL,
     PRIMARY KEY("block_height","enrollment_index")

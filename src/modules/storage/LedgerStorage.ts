@@ -17,6 +17,7 @@ import {
     Utils, Endian, Lock, Unlock, PublicKey, DataPayload, TxPayloadFee
 } from 'boa-sdk-ts';
 import { Storages } from './Storages';
+import { IDatabaseConfig } from '../common/Config';
 
 import JSBI from 'jsbi';
 
@@ -33,19 +34,19 @@ export class LedgerStorage extends Storages
     /**
      * Construct an instance of `LedgerStorage`, exposes callback API.
      */
-    constructor (filename: string, genesis_timestamp: number, callback: (err: Error | null) => void)
+    constructor (databaseConfig: IDatabaseConfig, genesis_timestamp: number, callback: (err: Error | null) => void)
     {
-        super(filename, callback);
+        super(databaseConfig, callback);
         this.genesis_timestamp = genesis_timestamp;
     }
 
     /**
      * Construct an instance of `LedgerStorage` using `Promise` API.
      */
-    public static make (filename: string, genesis_timestamp: number): Promise<LedgerStorage>
+    public static make (databaseConfig: IDatabaseConfig, genesis_timestamp: number): Promise<LedgerStorage>
     {
         return new Promise<LedgerStorage>((resolve, reject) => {
-            let result = new LedgerStorage(filename, genesis_timestamp, (err: Error | null) => {
+            let result = new LedgerStorage(databaseConfig, genesis_timestamp, (err: Error | null) => {
                 if (err)
                     reject(err);
                 else
@@ -86,7 +87,7 @@ export class LedgerStorage extends Storages
             block_height        INTEGER NOT NULL,
             enrollment_index    INTEGER NOT NULL,
             utxo_key            BLOB    NOT NULL,
-            commitment          BLOB    NOT NULL,
+            random_seed         BLOB    NOT NULL,
             cycle_length        INTEGER NOT NULL,
             enroll_sig          BLOB    NOT NULL,
             PRIMARY KEY(block_height, enrollment_index)
@@ -108,7 +109,6 @@ export class LedgerStorage extends Storages
             payload_size        INTEGER NOT NULL,
             PRIMARY KEY(block_height, tx_index)
         );
-
         CREATE TABLE IF NOT EXISTS tx_inputs
         (
             block_height        INTEGER NOT NULL,
@@ -118,7 +118,7 @@ export class LedgerStorage extends Storages
             utxo                BLOB    NOT NULL,
             unlock_bytes        BLOB    NOT NULL,
             unlock_age          INTEGER NOT NULL,
-            PRIMARY KEY(block_height, tx_index, in_index, utxo)
+            PRIMARY KEY(block_height, tx_index, in_index, utxo(255))
         );
 
         CREATE TABLE IF NOT EXISTS tx_outputs
@@ -128,30 +128,28 @@ export class LedgerStorage extends Storages
             output_index        INTEGER NOT NULL,
             tx_hash             BLOB    NOT NULL,
             utxo_key            BLOB    NOT NULL,
-            amount              NUMERIC NOT NULL,
+            amount              DECIMAL(65) NOT NULL,
             lock_type           INTEGER NOT NULL,
             lock_bytes          BLOB    NOT NULL,
             address             TEXT    NOT NULL,
             PRIMARY KEY(block_height, tx_index, output_index)
         );
-
         CREATE TABLE IF NOT EXISTS utxos
         (
             utxo_key            BLOB    NOT NULL,
             tx_hash             BLOB    NOT NULL,
             type                INTEGER NOT NULL,
             unlock_height       INTEGER NOT NULL,
-            amount              NUMERIC NOT NULL,
+            amount              DECIMAL(65) NOT NULL,
             lock_type           INTEGER NOT NULL,
             lock_bytes          BLOB    NOT NULL,
             address             TEXT    NOT NULL,
-            PRIMARY KEY(utxo_key)
+            PRIMARY KEY(utxo_key(255))
         );
-
         CREATE TABLE IF NOT EXISTS payloads (
             tx_hash             BLOB    NOT NULL,
             payload             BLOB    NOT NULL,
-            PRIMARY KEY("tx_hash")
+            PRIMARY KEY(tx_hash(255))
         );
 
         CREATE TABLE IF NOT EXISTS validators
@@ -159,10 +157,10 @@ export class LedgerStorage extends Storages
             enrolled_at         INTEGER NOT NULL,
             utxo_key            BLOB    NOT NULL,
             address             TEXT    NOT NULL,
-            amount              NUMERIC NOT NULL,
+            amount              DECIMAL(65) NOT NULL,
             preimage_distance   INTEGER NOT NULL,
             preimage_hash       BLOB    NOT NULL,
-            PRIMARY KEY(enrolled_at, utxo_key)
+            PRIMARY KEY(enrolled_at, utxo_key(255))
         );
 
         CREATE TABLE IF NOT EXISTS merkle_trees
@@ -172,14 +170,6 @@ export class LedgerStorage extends Storages
             merkle_hash         BLOB    NOT NULL,
             PRIMARY KEY(block_height, merkle_index)
         );
-
-        CREATE TABLE IF NOT EXISTS information
-        (
-            key                 TEXT    NOT NULL,
-            value               TEXT    NOT NULL,
-            PRIMARY KEY(key)
-        );
-
         CREATE TABLE IF NOT EXISTS transaction_pool (
             tx_hash             BLOB    NOT NULL,
             type                INTEGER NOT NULL,
@@ -190,7 +180,7 @@ export class LedgerStorage extends Storages
             tx_fee              INTEGER NOT NULL,
             payload_fee         INTEGER NOT NULL,
             tx_size             INTEGER NOT NULL,
-            PRIMARY KEY(tx_hash)
+            PRIMARY KEY(tx_hash(255))
         );
 
         CREATE TABLE IF NOT EXISTS tx_input_pool (
@@ -199,27 +189,36 @@ export class LedgerStorage extends Storages
             utxo                BLOB    NOT NULL,
             unlock_bytes        BLOB    NOT NULL,
             unlock_age          INTEGER NOT NULL,
-            PRIMARY KEY(tx_hash, input_index)
+            PRIMARY KEY(tx_hash(255), input_index)
         );
 
         CREATE TABLE IF NOT EXISTS tx_output_pool (
             tx_hash             BLOB    NOT NULL,
             output_index        INTEGER NOT NULL,
-            amount              NUMERIC NOT NULL,
+            amount              DECIMAL(65) NOT NULL,
             lock_type           INTEGER NOT NULL,
             lock_bytes          BLOB    NOT NULL,
             address             TEXT    NOT NULL,
-            PRIMARY KEY(tx_hash, output_index)
+            PRIMARY KEY(tx_hash(255), output_index)
         );
+       CREATE TABLE IF NOT EXISTS information
+         (
+             keyname             TEXT    NOT NULL,
+             value               TEXT    NOT NULL,
+             PRIMARY KEY(keyname(255))
+         );
+       
+       DROP TRIGGER IF EXISTS tx_trigger;
 
-        CREATE TRIGGER IF NOT EXISTS tx_trigger AFTER INSERT ON transactions
-        BEGIN
-            DELETE FROM transaction_pool WHERE tx_hash = NEW.tx_hash;
-            DELETE FROM tx_input_pool WHERE tx_hash = NEW.tx_hash;
-            DELETE FROM tx_output_pool WHERE tx_hash = NEW.tx_hash;
-        END;
+       CREATE TRIGGER tx_trigger AFTER INSERT 
+       ON transactions
+       FOR EACH ROW
+       BEGIN
+       DELETE FROM transaction_pool WHERE tx_hash = NEW.tx_hash;
+       DELETE FROM tx_input_pool WHERE tx_hash = NEW.tx_hash;
+       DELETE FROM tx_output_pool WHERE tx_hash = NEW.tx_hash;
+       END 
         `;
-
         return this.exec(sql);
     }
 
@@ -353,14 +352,14 @@ export class LedgerStorage extends Storages
             {
                 storage.query(
                     `INSERT INTO enrollments
-                        (block_height, enrollment_index, utxo_key, commitment, cycle_length, enroll_sig)
+                        (block_height, enrollment_index, utxo_key, random_seed, cycle_length, enroll_sig)
                     VALUES
                         (?, ?, ?, ?, ?, ?)`,
                     [
                         height.toString(),
                         enroll_idx,
                         enroll.utxo_key.toBinary(Endian.Little),
-                        enroll.commitment.toBinary(Endian.Little),
+                        enroll.random_seed.toBinary(Endian.Little),
                         enroll.cycle_length,
                         enroll.enroll_sig.toBinary(Endian.Little)
                     ])
@@ -388,7 +387,7 @@ export class LedgerStorage extends Storages
                     [
                         height.toString(),
                         0,
-                        enroll.commitment.toBinary(Endian.Little),
+                        enroll.random_seed.toBinary(Endian.Little),
                         enroll.utxo_key.toBinary(Endian.Little)
                     ])
                     .then(() =>
@@ -536,7 +535,7 @@ export class LedgerStorage extends Storages
                 ])
                 .then((result) =>
                 {
-                    resolve(result.changes);
+                    resolve(result.affectedRows);
                 })
                 .catch((err) =>
                 {
@@ -556,7 +555,7 @@ export class LedgerStorage extends Storages
     {
         let sql =
         `SELECT
-            block_height, enrollment_index, utxo_key, commitment, cycle_length, enroll_sig
+            block_height, enrollment_index, utxo_key, random_seed, cycle_length, enroll_sig
         FROM
             enrollments
         WHERE block_height = ?`;
@@ -984,7 +983,7 @@ export class LedgerStorage extends Storages
                     `INSERT INTO transaction_pool
                         (tx_hash, type, payload, lock_height, received_height, time, tx_fee, payload_fee, tx_size)
                     VALUES
-                        (?, ?, ?, ?, (SELECT IFNULL(MAX(height), 0) as height FROM blocks), strftime('%s', 'now', 'UTC'), ?, ?, ?)`,
+                        (?, ?, ?, ?, (SELECT IFNULL(MAX(height), 0) as height FROM blocks), DATE_FORMAT(now(),'%s'), ?, ?, ?)`,
                     [
                         hash.toBinary(Endian.Little),
                         tx.type,
@@ -996,7 +995,7 @@ export class LedgerStorage extends Storages
                     ])
                     .then((result) =>
                     {
-                        resolve(result.changes);
+                        resolve(result.affectedRows);
                     })
                     .catch((err) =>
                     {
@@ -1025,7 +1024,7 @@ export class LedgerStorage extends Storages
                 )
                     .then((result) =>
                     {
-                        resolve(result.changes);
+                        resolve(result.affectedRows);
                     })
                     .catch((err) =>
                     {
@@ -1059,7 +1058,7 @@ export class LedgerStorage extends Storages
                 )
                     .then((result) =>
                     {
-                        resolve(result.changes);
+                        resolve(result.affectedRows);
                     })
                     .catch((err) =>
                     {
@@ -1221,26 +1220,25 @@ export class LedgerStorage extends Storages
         `SELECT utxos.address,
                 enrollments.enrolled_at,
                 enrollments.utxo_key as stake,
-                enrollments.commitment,
+                enrollments.random_seed,
                 enrollments.avail_height,
                 ` + cur_height + ` as height,
                 validators.preimage_distance,
                 validators.preimage_hash
         FROM (SELECT MAX(block_height) as enrolled_at,
-                (CASE WHEN block_height = 0 THEN
-                      block_height
-                 ELSE
-                      block_height + 1
-                 END) as avail_height,
-                enrollment_index,
-                utxo_key,
-                commitment,
-                cycle_length,
-                enroll_sig
-             FROM enrollments
-             WHERE avail_height <= ` + cur_height + `
-               AND ` + cur_height + ` < (avail_height + cycle_length)
-             GROUP BY utxo_key) as enrollments
+        (CASE WHEN block_height = 0 THEN
+               block_height
+          ELSE
+               block_height + 1
+          END) as avail_height,
+         enrollment_index,
+         utxo_key,
+         random_seed,
+         cycle_length,
+         enroll_sig
+      FROM enrollments
+      GROUP BY utxo_key HAVING avail_height <= `+cur_height+`
+        AND  `+cur_height+` < (avail_height + cycle_length)) as enrollments
         INNER JOIN utxos
             ON enrollments.utxo_key = utxos.utxo_key
         LEFT JOIN validators
@@ -1268,7 +1266,8 @@ export class LedgerStorage extends Storages
     {
         return new Promise<void>((resolve, reject) =>
         {
-            let sql = `INSERT OR REPLACE INTO information (key, value) VALUES (?, ?);`;
+            let sql = `INSERT INTO information (keyname, value) VALUES (?, ?) 
+            ON DUPLICATE KEY UPDATE keyname = VALUES(keyname) , value = VALUES(value);`;
             this.run(sql, ["height", height.toString()])
                 .then(() =>
                 {
@@ -1291,7 +1290,7 @@ export class LedgerStorage extends Storages
     {
         return new Promise<Height>((resolve, reject) =>
         {
-            let sql = `SELECT value FROM information WHERE key = 'height';`;
+            let sql = `SELECT value FROM information WHERE keyname = 'height';`;
             this.query(sql, [])
                 .then((rows: any[]) =>
                 {
@@ -1536,8 +1535,10 @@ export class LedgerStorage extends Storages
                 T.block_height as height,
                 B.time_stamp as block_time,
                 T.tx_hash,
+                T.tx_size,
                 T.type,
                 T.unlock_height,
+                T.lock_height,
                 (B.time_stamp + (T.unlock_height - T.block_height) * 10 * 60) as unlock_time,
                 P.payload,
                 T.tx_fee,
@@ -1551,7 +1552,11 @@ export class LedgerStorage extends Storages
             `SELECT
                 S.address,
                 S.amount,
-                S.utxo_key as utxo
+                S.utxo_key as utxo,
+				B.signature,
+				I.in_index,
+				I.unlock_age,
+				I.unlock_bytes as bytes
             FROM
                 blocks B
                 INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
@@ -1560,9 +1565,12 @@ export class LedgerStorage extends Storages
 
         let sql_receiver =
             `SELECT
-                O.address,
+                O.output_index,
                 O.amount,
-                O.utxo_key as utxo
+				O.lock_type,
+				O.lock_bytes as bytes,
+                O.utxo_key as utxo,
+                O.address
             FROM
                 blocks B
                 INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
@@ -1826,5 +1834,174 @@ export class LedgerStorage extends Storages
             T.tx_hash = ?`;
 
         return this.query(sql, [tx_hash.toBinary(Endian.Little)]);
+    }
+    /**
+     *  Get the Latest Blocks 
+     * @param limit Maximum record count that can be obtained from one query
+     * @param page The number on the page, this value begins with 1
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getLatestBlocks(limit: number, page: number): Promise<any[]> {
+        let sql =
+            `SELECT
+                height, hash , merkle_root , signature , validators , tx_count, enrollment_count ,time_stamp 
+            FROM
+                blocks ORDER BY height DESC LIMIT ? OFFSET ?`
+
+        return this.query(sql, [limit, limit * (page - 1)]);
+    }
+     /**
+      * Get the Latest transactions 
+      * @param limit Maximum record count that can be obtained from one query
+      * @param page The number on the page, this value begins with 1
+      * @returns Returns the Promise. If it is finished successfully the `.then`
+      * of the returned Promise is called with the records
+      * and if an error occurs the `.catch` is called with an error.
+      */
+    public getLatestTransactions(limit: number, page: number): Promise<any[]> {
+        let sql =
+            `SELECT 
+             T.block_height, T.tx_hash , type,tx_fee ,tx_size,Sum(O.amount) as amount,B.time_stamp 
+             From
+             transactions T INNER JOIN tx_outputs O INNER JOIN blocks B
+             ON 
+             ( T.tx_hash = O.tx_hash AND T.block_height = O.block_height ) AND B.height = T.block_height 
+             GROUP BY O.tx_hash ORDER BY T.block_height DESC LIMIT ? OFFSET ?;
+            `
+        return this.query(sql, [limit, limit * (page - 1)]);
+    }
+    /**
+     * Get the block overview
+     * @param limit Maximum record count that can be obtained from one query
+     * @param page The number on the page, this value begins with 1
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     *  
+     */
+    public getBlockSummary(field: string, value: string | Buffer): Promise<any[]> {
+        let sql =
+            `SELECT
+                height, hash , merkle_root , signature , prev_block , random_seed , time_stamp, tx_count 
+            FROM
+                blocks WHERE ${field} = ?`;
+
+        return this.query(sql, [value]);
+    }
+    /**
+     * Get enrolled validators of a block 
+     * @param limit Maximum record count that can be obtained from one query
+     * @param page The number on the page, this value begins with 1
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getBlockEnrollments(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
+        let sql =
+            `SELECT
+                e.block_height, e.utxo_key, e.random_seed, e.cycle_length, e.enroll_sig 
+            FROM
+                blocks b INNER JOIN enrollments e
+            ON
+                e.block_height = b.height AND b.${field} = ?
+                LIMIT ? OFFSET ?;`;
+        let countsql =
+                `select count(*) as total_records from  
+                blocks b INNER JOIN enrollments e ON
+                e.block_height = b.height AND b.${field} = ?`;
+
+        let result: any = {};  
+        return new Promise<any[]>((resolve, reject) => {      
+        this.query(sql, [value, limit, limit*(page-1)])
+        .then((rows :any [])=>{
+            result.enrollments = rows;
+            return this.query(countsql,[value]);
+        })
+        .then((rows :any [])=>{
+            result.total_records = rows[0].total_records
+            resolve(result); 
+        });
+       });
+    }
+    /**
+     * Get transactions of a block
+     * @param limit Maximum record count that can be obtained from one query
+     * @param page The number on the page, this value begins with 1
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error. 
+     */
+    public getBlockTransactions(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
+        let sql_tx =
+            `SELECT 
+                T.block_height, T.tx_hash, SUM(O.amount) as amount, type,
+                tx_fee, tx_size, B.time_stamp,
+                JSON_ARRAYAGG(JSON_OBJECT("address", O.address, "amount", O.amount)) as receiver,
+            (SELECT
+                    s.address
+                FROM
+                    blocks b
+                    INNER JOIN transactions t ON b.height = t.block_height
+                    INNER JOIN tx_inputs i ON t.tx_hash = i.tx_hash
+                    INNER JOIN tx_outputs s ON i.utxo = s.utxo_key
+                WHERE
+                    ${field} = ? ) as sender_address
+            FROM    
+                tx_outputs O INNER JOIN transactions T  ON ( T.tx_hash = O.tx_hash AND T.block_height = O.block_height) 
+                INNER JOIN blocks B ON  B.height = T.block_height
+            WHERE
+                ${field} = ?
+            GROUP BY T.tx_hash
+            LIMIT ? OFFSET ?;`;
+        
+        let sql_count =
+               `SELECT
+                    count(*) as total_records
+                FROM
+                    transactions t INNER JOIN blocks b ON b.height = t.block_height
+                WHERE
+                    ${field} = ?;`;
+
+        let result: any = {};
+        return new Promise<any[]>((resolve, reject) => {
+            this.query(sql_tx, [value, value, limit, limit*(page-1)])
+                .then((rows: any[]) => {
+                    result.tx = rows;
+                    return this.query(sql_count, [value]);
+                })
+                .then((rows: any[]) => {
+                    result.total_data = rows[0].total_records;
+                    resolve(result);
+                })
+                .catch(reject);
+        });
+    }
+    
+    /**
+     * Get statistics of BOA coin
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error. 
+     */
+    public getBOAStats(): Promise<any[]> {
+        let sql =
+            `SELECT max(height) as height, 
+             (SELECT count(*) from transactions) as transactions,
+             (SELECT count(*) from validators) as validators
+            FROM
+                blocks;`;
+
+        return this.query(sql, []);
+    }
+    /**
+     * Drop Database 
+     * @param database The name of database 
+     */
+    public async dropTestDB(database : any): Promise<any[]> {
+        let sql =
+            `DROP DATABASE ${database}`;
+       return this.run(sql, []);;
     }
 }
