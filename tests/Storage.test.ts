@@ -18,25 +18,29 @@ import { sample_data, sample_data2, sample_preImageInfo } from "./Utils";
 
 import * as fs from 'fs';
 import JSBI from 'jsbi';
-import {Config} from "../src/modules/common/Config";
+import { IDatabaseConfig } from '../src/modules/common/Config';
+import { MockDBConfig } from "./TestConfig"
 
 describe ('Test ledger storage and inquiry function.', () =>
 {
     let ledger_storage: LedgerStorage;
+    let testDBConfig : IDatabaseConfig;
 
     before('Wait for the package libsodium to finish loading', async () =>
     {
         await SodiumHelper.init();
     });
 
-    before ('Prepare Storage', () =>
+    before ('Prepare Storage', async() =>
     {
-        return LedgerStorage.make(":memory:", 1609459200).then((result) => { ledger_storage = result; });
+        testDBConfig = await MockDBConfig();
+        return LedgerStorage.make(testDBConfig, 1609459200).then((result) => { ledger_storage = result; });
     });
 
-    after ('Close Storage', () =>
+    after ('Close Storage', async () =>
     {
-        ledger_storage.close();
+       await ledger_storage.dropTestDB(testDBConfig.database);
+       await ledger_storage.close();
     });
 
     it ('Test for saving of all blocks', async () =>
@@ -219,19 +223,21 @@ describe ('Test ledger storage and inquiry function.', () =>
 describe ('Test for storing block data in the database', () =>
 {
     let ledger_storage: LedgerStorage;
+    let testDBConfig : IDatabaseConfig;
 
     before('Wait for the package libsodium to finish loading', async () =>
     {
         await SodiumHelper.init();
     });
 
-    beforeEach ('Prepare Storage', async() =>
+    beforeEach('Prepare Storage', async() =>
     {
-        ledger_storage = await LedgerStorage.make(":memory:", 1609459200);
+        testDBConfig = await MockDBConfig();
+        ledger_storage = await LedgerStorage.make(testDBConfig, 1609459200);
     });
 
-    afterEach ('Close Storage', () =>
-    {
+    afterEach('Close Storage', () =>
+    {   ledger_storage.dropTestDB(testDBConfig.database)
         ledger_storage.close();
     });
 
@@ -242,8 +248,7 @@ describe ('Test for storing block data in the database', () =>
         await ledger_storage.putTransactions(block);
         await assert.rejects(ledger_storage.putTransactions(block),
             {
-                message: "SQLITE_CONSTRAINT: UNIQUE constraint failed:" +
-                    " transactions.block_height, transactions.tx_index"
+                message: "Duplicate entry '0-0' for key 'transactions.PRIMARY'"
             });
     });
 
@@ -254,8 +259,7 @@ describe ('Test for storing block data in the database', () =>
         await ledger_storage.putEnrollments(block);
         await assert.rejects(ledger_storage.putEnrollments(block),
             {
-                message: "SQLITE_CONSTRAINT: UNIQUE constraint failed:" +
-                    " enrollments.block_height, enrollments.enrollment_index"
+                message: "Duplicate entry '0-0' for key 'enrollments.PRIMARY'"
             });
     });
 
@@ -265,7 +269,7 @@ describe ('Test for storing block data in the database', () =>
         await ledger_storage.putBlocks(block);
         await assert.rejects(ledger_storage.putBlocks(block),
             {
-                message: "SQLITE_CONSTRAINT: UNIQUE constraint failed: blocks.height"
+                message: "Duplicate entry '0' for key 'blocks.PRIMARY'"
             });
     });
 
@@ -276,8 +280,7 @@ describe ('Test for storing block data in the database', () =>
         await ledger_storage.putEnrollments(block);
         await assert.rejects(ledger_storage.putBlocks(block),
             {
-                message: "SQLITE_CONSTRAINT: UNIQUE constraint failed:" +
-                    " enrollments.block_height, enrollments.enrollment_index"
+                message: "Duplicate entry '0-0' for key 'enrollments.PRIMARY'"
             });
 
         let rows0: any[] = await ledger_storage.getBlock(new Height("0"));
@@ -309,6 +312,7 @@ describe ('Test for storing block data in the database', () =>
 describe ('Tests that sending a pre-image', () =>
 {
     let ledger_storage: LedgerStorage;
+    let testDBConfig : IDatabaseConfig;
     const height = new Height("0");
 
     before('Wait for the package libsodium to finish loading', async () =>
@@ -318,7 +322,8 @@ describe ('Tests that sending a pre-image', () =>
 
     before ('Start sending a pre-image', async () =>
     {
-        ledger_storage = await LedgerStorage.make(":memory:", 1609459200);
+        testDBConfig = await MockDBConfig();
+        ledger_storage = await LedgerStorage.make(testDBConfig, 1609459200);
         for (let elem of sample_data)
             await ledger_storage.putBlocks(Block.reviver("", elem));
         await ledger_storage.getEnrollments(height);
@@ -326,6 +331,7 @@ describe ('Tests that sending a pre-image', () =>
 
     after ('Close Storage', () =>
     {
+        ledger_storage.dropTestDB(testDBConfig.database)
         ledger_storage.close();
     });
 
@@ -376,20 +382,23 @@ describe ('Tests that sending a pre-image', () =>
 describe ('Tests storing transaction pools of a transaction', () =>
 {
     let ledger_storage: LedgerStorage;
+    let testDBConfig : IDatabaseConfig;
 
     before('Wait for the package libsodium to finish loading', async () =>
     {
         await SodiumHelper.init();
     });
 
-    before ('Preparation the ledgerStorage', () =>
+    before ('Preparation the ledgerStorage',async () =>
     {
-        return LedgerStorage.make(":memory:", 1609459200)
+        testDBConfig = await MockDBConfig();
+        return LedgerStorage.make(testDBConfig, 1609459200)
             .then((result) => { ledger_storage = result })
     });
 
     after ('Close Storage', () =>
     {
+        ledger_storage.dropTestDB(testDBConfig.database)
         ledger_storage.close();
     });
 

@@ -28,9 +28,9 @@ switch (process.env.NODE_ENV) {
 logger.transports.forEach((tp) => { tp.level = config.logging.level });
 
 logger.info(`Agora endpoint: ${config.server.agora_endpoint.toString()}`);
-logger.info(`sqlite3 database filename: ${config.database.filename}`);
+logger.info(`mysql database host: ${config.database.database}`);
 
-const stoa: Stoa = new Stoa(config.database.filename,
+const stoa: Stoa = new Stoa(config.database,
     config.server.agora_endpoint,
     config.server.port,
     config.server.address,

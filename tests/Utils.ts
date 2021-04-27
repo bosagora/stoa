@@ -23,6 +23,7 @@ import { FullNodeAPI } from '../src/modules/agora/AgoraClient';
 import { Block, Hash, Height, PreImageInfo, handleNetworkError,
     BlockHeader, BitField, Signature, Transaction, hashMulti, hashFull
 } from 'boa-sdk-ts';
+import { IDatabaseConfig } from '../src/modules/common/Config';
 
 import JSBI from 'jsbi';
 
@@ -264,9 +265,9 @@ export class TestAgora implements FullNodeAPI
  */
 export class TestStoa extends Stoa
 {
-    constructor (agora_endpoint: URL, port: number | string)
+    constructor (testDBConfig :IDatabaseConfig,agora_endpoint: URL, port: number | string)
     {
-        super(":memory:", agora_endpoint, port, "127.0.0.1", 1609459200);
+        super(testDBConfig, agora_endpoint, port, "127.0.0.1", 1609459200);
     }
 
     public stop (): Promise<void>
