@@ -13,48 +13,55 @@
 
 *******************************************************************************/
 
-import mkdirp from 'mkdirp';
-import path from 'path';
-import * as sqlite from 'sqlite3';
+import * as mysql from 'mysql2';
+import { DatabaseConfig, IDatabaseConfig } from '../common/Config';
+import { logger, Logger } from '../common/Logger';
 
 export class Storages
 {
     /**
-     *  The instance of sqlite
+     *  The instance of mysql Connection.
      */
-    protected db: sqlite.Database;
+    protected db: mysql.Connection;
 
     /**
      * Constructor
-     * @param filename Valid values are filenames,
-     * ":memory:" for an anonymous in-memory database and
-     * an empty string for an anonymous disk-based database
+     * @param databaseConfig Valid value is of type IDatabaseConfig,
      * @param callback If provided, this function will be called when
      * the database was opened successfully or when an error occurred.
      * The first argument is an error object. If there is no error, this value is null.
      */
-    constructor (filename: string, callback: (err: Error | null) => void)
-    {
-        if (filename !== ":memory:")
-            mkdirp.sync(path.dirname(filename));
-        this.db = new sqlite.Database(filename,
-            sqlite.OPEN_CREATE | sqlite.OPEN_READWRITE |
-            sqlite.OPEN_SHAREDCACHE, (err: Error | null) =>
-            {
-                if (err != null)
-                    callback(err);
-
-                this.db.configure("busyTimeout", 1000);
+    constructor(databaseConfig: IDatabaseConfig, callback: (err: Error | null) => void) {
+        let dbconfig: IDatabaseConfig = {
+            host: databaseConfig.host,
+            user: databaseConfig.user,
+            password: databaseConfig.password,
+            multipleStatements: databaseConfig.multipleStatements,
+            port: Number(databaseConfig.port),
+        }
+        this.db = mysql.createConnection(dbconfig);
+        this.query(`CREATE DATABASE IF NOT EXISTS \`${databaseConfig.database}\`;`, [])
+        .then(async(result) => {
+            await this.query(`SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,"ONLY_FULL_GROUP_BY",""));`,[]);
+            dbconfig.database = databaseConfig.database;
+            this.db = mysql.createConnection(dbconfig);
+            this.db.connect(function (err) {
+                if (err) throw err;
+                logger.info(`connected to mysql host: ${databaseConfig.host}`);
+            });
                 this.createTables()
                     .then(() =>
                     {
                         if (callback != null)
                             callback(null);
                     })
-                    .catch((err) => {
+                .catch((err: any) => {
                         if (callback != null)
                             callback(err);
                     });
+            }).catch((err)=>{
+                if (callback != null)
+                callback(err);
             });
     }
 
@@ -77,7 +84,7 @@ export class Storages
      */
     public close ()
     {
-        this.db.close();
+        this.db.end();
     }
 
     /**
@@ -93,7 +100,7 @@ export class Storages
     {
         return new Promise<any[]>((resolve, reject) =>
         {
-            this.db.all(sql, params, (err: Error | null, rows: any[]) =>
+            this.db.query(sql, params, (err: Error | null, rows: any[]) =>
             {
                 if (!err)
                     resolve(rows);
@@ -112,14 +119,14 @@ export class Storages
      * of the returned Promise is called with the result
      * and if an error occurs the `.catch` is called with an error.
      */
-    protected run (sql: string, params: any): Promise<sqlite.RunResult>
+    protected run (sql: string, params: any): Promise<any>
     {
-        return new Promise<sqlite.RunResult>((resolve, reject) =>
+        return new Promise<any>((resolve, reject) =>
         {
-            this.db.run(sql, params, function(err: Error)
+            this.db.query(sql, params, function (err, result)
             {
                 if (!err)
-                    resolve(this);
+                    resolve(result);
                 else
                     reject(err);
             });
@@ -137,7 +144,7 @@ export class Storages
     {
         return new Promise<void>((resolve, reject) =>
         {
-            this.db.exec(sql, (err: Error | null) =>
+            this.db.query(sql, (err: Error | null) =>
             {
                 if (!err)
                     resolve();
@@ -148,7 +155,7 @@ export class Storages
     }
 
     /**
-     * SQLite transaction statement
+     * Mysql transaction statement
      * To start a transaction explicitly,
      * Open a transaction by issuing the begin function
      * the transaction is open until it is explicitly
@@ -161,7 +168,7 @@ export class Storages
     {
         return new Promise<void>((resolve, reject) =>
         {
-            this.db.run('BEGIN', (err: Error | null) =>
+            this.db.beginTransaction((err: Error | null) =>
             {
                 if (err == null)
                     resolve();
@@ -172,7 +179,7 @@ export class Storages
     }
 
     /**
-     * SQLite transaction statement
+     * Mysql transaction statement
      * Commit the changes to the database by using this.
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called and if an error occurs the `.catch`
@@ -182,7 +189,7 @@ export class Storages
     {
         return new Promise<void>((resolve, reject) =>
         {
-            this.db.run('COMMIT', (err: Error | null) =>
+            this.db.commit((err: Error | null) =>
             {
                 if (err == null)
                     resolve();
@@ -193,7 +200,7 @@ export class Storages
     }
 
     /**
-     * SQLite transaction statement
+     * Mysql transaction statement
      * If it do not want to save the changes,
      * it can roll back using this.
      * @returns Returns the Promise. If it is finished successfully the `.then`
@@ -204,12 +211,8 @@ export class Storages
     {
         return new Promise<void>((resolve, reject) =>
         {
-            this.db.run('ROLLBACK', (err: Error | null) =>
-            {
-                if (err == null)
+             this.db.rollback(()=>{
                     resolve();
-                else
-                    reject(err);
             });
         });
     }
