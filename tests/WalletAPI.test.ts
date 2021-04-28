@@ -19,6 +19,7 @@ import URI from 'urijs';
 import { URL } from 'url';
 import { IDatabaseConfig } from '../src/modules/common/Config';
 import { MockDBConfig } from './TestConfig';
+import { BOASodium } from 'boa-sodium-ts';
 
 describe ('Test of Stoa API for the wallet', () =>
 {
@@ -31,6 +32,7 @@ describe ('Test of Stoa API for the wallet', () =>
 
     before('Wait for the package libsodium to finish loading', async () =>
     {
+        SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -242,7 +244,9 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
     let client = new TestClient();
     let testDBConfig : IDatabaseConfig;
 
-    before('Wait for the package libsodium to finish loading', async () => {
+    before('Wait for the package libsodium to finish loading', async () =>
+    {
+        SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
