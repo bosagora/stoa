@@ -31,6 +31,7 @@ import { AgoraClient } from '../src/modules/agora/AgoraClient';
 import * as assert from 'assert';
 import URI from 'urijs';
 import { URL } from 'url';
+import { BOASodium } from 'boa-sodium-ts';
 
 describe ('Test of Stoa API Server', () =>
 {
@@ -42,6 +43,7 @@ describe ('Test of Stoa API Server', () =>
 
     before ('Wait for the package libsodium to finish loading', async () =>
     {
+        SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -644,6 +646,7 @@ describe ('Test of the path /utxo', () =>
 
     before ('Wait for the package libsodium to finish loading', async () =>
     {
+        SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -679,7 +682,7 @@ describe ('Test of the path /utxo', () =>
         await client.post(url, {block: sample_data[0]});
         await client.post(url, {block: sample_data[1]});
         // Wait for the block to be stored in the database for the next test.
-        await delay(100);
+        await delay(500);
     });
 
     it ('Test of the path /utxo no pending transaction ', async () =>
@@ -712,7 +715,7 @@ describe ('Test of the path /utxo', () =>
 
         let url = uri.toString();
         await client.post(url, { tx: Block.reviver("", sample_data2).txs[0] });
-        await delay(100);
+        await delay(500);
     });
 
     it ('Test of the path /utxo with pending transaction ', async () =>
@@ -754,6 +757,7 @@ describe ('Test of the path /utxo for freezing', () =>
 
     before ('Wait for the package libsodium to finish loading', async () =>
     {
+        SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -789,7 +793,7 @@ describe ('Test of the path /utxo for freezing', () =>
         await client.post(url, {block: sample_data[0]});
         await client.post(url, {block: sample_data[1]});
         // Wait for the block to be stored in the database for the next test.
-        await delay(100);
+        await delay(500);
     });
 
     it ('Create a block with a freeze transaction', async () =>
@@ -908,6 +912,7 @@ describe ('Test of the path /merkle_path', () =>
 
     before ('Wait for the package libsodium to finish loading', async () =>
     {
+        SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 

@@ -1,6 +1,7 @@
 import 'source-map-support/register';
 import { Config } from './modules/common/Config';
 import { logger, Logger } from './modules/common/Logger';
+import { BOASodium } from "boa-sodium-ts";
 import { SodiumHelper } from "boa-sdk-ts";
 import Stoa from './Stoa';
 
@@ -37,6 +38,7 @@ const stoa: Stoa = new Stoa(config.database.filename,
     config.consensus.genesis_timestamp,
     );
 
+SodiumHelper.assign(new BOASodium());
 SodiumHelper.init()
     .then(
         () => {
