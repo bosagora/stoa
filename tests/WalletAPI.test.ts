@@ -17,6 +17,7 @@ import { TestAgora, TestStoa, TestClient, sample_data, sample_data2, recovery_sa
 import * as assert from 'assert';
 import URI from 'urijs';
 import { URL } from 'url';
+import { BOASodium } from 'boa-sodium-ts';
 
 describe ('Test of Stoa API for the wallet', () =>
 {
@@ -28,6 +29,7 @@ describe ('Test of Stoa API for the wallet', () =>
 
     before('Wait for the package libsodium to finish loading', async () =>
     {
+        SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -231,7 +233,9 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
     let agora_server: TestAgora;
     let client = new TestClient();
 
-    before('Wait for the package libsodium to finish loading', async () => {
+    before('Wait for the package libsodium to finish loading', async () =>
+    {
+        SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 

@@ -21,6 +21,7 @@ import express from 'express';
 import JSBI from 'jsbi';
 import URI from 'urijs';
 import { URL } from 'url';
+import { BOASodium } from 'boa-sodium-ts';
 
 /**
  * This is an API server for testing and inherited from Stoa.
@@ -73,6 +74,7 @@ describe ('Test of Recovery', () =>
 
     before('Wait for the package libsodium to finish loading', async () =>
     {
+        SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 

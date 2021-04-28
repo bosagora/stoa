@@ -19,6 +19,7 @@ import { sample_data, sample_data2, sample_preImageInfo } from "./Utils";
 import * as fs from 'fs';
 import JSBI from 'jsbi';
 import {Config} from "../src/modules/common/Config";
+import { BOASodium } from 'boa-sodium-ts';
 
 describe ('Test ledger storage and inquiry function.', () =>
 {
@@ -26,6 +27,7 @@ describe ('Test ledger storage and inquiry function.', () =>
 
     before('Wait for the package libsodium to finish loading', async () =>
     {
+        SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -222,6 +224,7 @@ describe ('Test for storing block data in the database', () =>
 
     before('Wait for the package libsodium to finish loading', async () =>
     {
+        SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -313,6 +316,7 @@ describe ('Tests that sending a pre-image', () =>
 
     before('Wait for the package libsodium to finish loading', async () =>
     {
+        SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -379,6 +383,7 @@ describe ('Tests storing transaction pools of a transaction', () =>
 
     before('Wait for the package libsodium to finish loading', async () =>
     {
+        SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
