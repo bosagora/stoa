@@ -33,6 +33,7 @@ import URI from 'urijs';
 import { URL } from 'url';
 import { IDatabaseConfig } from '../src/modules/common/Config';
 import { MockDBConfig } from "./TestConfig"
+import { BOASodium } from 'boa-sodium-ts';
 
 describe ('Test of Stoa API Server', () =>
 {
@@ -45,6 +46,7 @@ describe ('Test of Stoa API Server', () =>
 
     before ('Wait for the package libsodium to finish loading', async () =>
     {
+        SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -1132,6 +1134,7 @@ describe ('Test of the path /utxo', () =>
 
     before ('Wait for the package libsodium to finish loading', async () =>
     {
+        SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -1198,7 +1201,7 @@ describe ('Test of the path /utxo', () =>
 
         let url = uri.toString();
         await client.post(url, { tx: Block.reviver("", sample_data2).txs[0] });
-        await delay(100);
+        await delay(500);
     });
 
     it ('Test of the path /utxo with pending transaction ', async () =>
@@ -1241,6 +1244,7 @@ describe ('Test of the path /utxo for freezing', () =>
 
     before ('Wait for the package libsodium to finish loading', async () =>
     {
+        SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -1394,6 +1398,7 @@ describe ('Test of the path /merkle_path', () =>
 
     before ('Wait for the package libsodium to finish loading', async () =>
     {
+        SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
