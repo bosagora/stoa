@@ -820,8 +820,16 @@ class Stoa extends WebService
          // Validating Parameter - hash
         else if (req.query.hash !== undefined) {
             field = 'hash';
-            const hash: string = String(req.query.hash);
-            value = new Hash(hash).toBinary(Endian.Little);
+            try
+            {
+             const hash: string = String(req.query.hash);
+             value = new Hash(hash).toBinary(Endian.Little);
+            }
+            catch (error)
+            {
+                res.status(400).send(`Invalid value for parameter 'hash': ${req.query.hash}`);
+                return;
+            }
         }
         else {
             res.status(400).send(`Invalid value for parameter 'height': ${req.query.height} and 'hash': ${req.query.hash}`);
@@ -889,8 +897,16 @@ class Stoa extends WebService
         // Validating Parameter - hash
         else if (req.query.hash !== undefined) {
             field = 'hash';
-            const hash: string = String(req.query.hash);
-            value = new Hash(hash).toBinary(Endian.Little);
+            try
+            {
+             const hash: string = String(req.query.hash);
+             value = new Hash(hash).toBinary(Endian.Little);
+            }
+            catch (error)
+            {
+                res.status(400).send(`Invalid value for parameter 'hash': ${req.query.hash}`);
+                return;
+            }
         }
         else {
             res.status(400).send(`Invalid value for parameter 'height': ${req.query.height} and 'hash': ${req.query.hash}`);
@@ -936,7 +952,7 @@ class Stoa extends WebService
                 let enrollmentElementList: Array<IBlockEnrollmentElements> = [];
                 for (const row of data.enrollments) {
                     enrollmentElementList.push(
-    {
+                        {
                             height: JSBI.BigInt(row.block_height).toString(),
                             utxo:  new Hash(row.utxo_key, Endian.Little).toString(),
                             enroll_sig:  new Hash(row.enroll_sig, Endian.Little).toString(),
@@ -983,8 +999,16 @@ class Stoa extends WebService
         // Validating Parameter - hash
         else if (req.query.hash !== undefined) {
             field = 'hash';
-            const hash: string = String(req.query.hash);
-            value = new Hash(hash).toBinary(Endian.Little);
+            try
+            {
+             const hash: string = String(req.query.hash);
+             value = new Hash(hash).toBinary(Endian.Little);
+            }
+            catch (error)
+            {
+                res.status(400).send(`Invalid value for parameter 'hash': ${req.query.hash}`);
+                return;
+            }
         }
         else {
             res.status(400).send(`Invalid value for parameter 'height': ${req.query.height} and 'hash': ${req.query.hash}`);
@@ -1082,7 +1106,7 @@ class Stoa extends WebService
                     height: data[0].height,
                     transactions: data[0].transactions,
                     validators: data[0].validators,
-                    frozen_coin: 5283595, //static data because of unavailability of real data
+                    frozen_coin: 5283595, //FIX ME static data because of unavailability of real data
                     circulating_supply: 5283535,
                     active_validators: 155055
                 };

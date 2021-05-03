@@ -115,7 +115,7 @@ describe ('Test of Stoa API for the wallet', () =>
             senders: [
               {
                 address: 'boa1xrg66j9mgk20kflzdzrq4p3k4gw8tg6vk3pa3fgm3twsagyaxa8luz7e3vu',
-                amount: '610000000000000',
+                amount: 610000000000000,
                 utxo: '0xff4b4812d0e8e513de683cec8546a92e503f04a83340c9dd96f7897438abdc6cea69639df8703299a181d7083db2c18a753f4b20d10fafb68be54b1cc85b7b7d',
                 signature: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
                 index: 0,
@@ -127,7 +127,7 @@ describe ('Test of Stoa API for the wallet', () =>
               {
                 address: 'boa1xrq66nug6wnen9sp5cm7xhfw03yea8e9x63ggay3v5dhe6d9jerqz50eld0',
                 lock_type: 0,
-                amount: '610000000000000',
+                amount: 610000000000000,
                 utxo: '0x435f19a00fdcb41847588c275e1dd82a867f2a56595265f92ad3bc573d5f0bb52e8546f215c853e68c6aaddc82e91043af73e8279609b822b5fd8ea7b946483c',
                 index: 0,
                 bytes: '0x05e7e9c06eebd0d925078eadb875fed18f504470017a01b54d80d4b00652fd3d7a43d8b82cfc65d27e11cdcc195b2eca881dc56c9b97dcb7923382c595406068'
@@ -300,7 +300,7 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
             senders: [
               {
                 address: 'boa1xrqx366yn8xktzhtsj83gj0nnj35cv8lrk7xhszj0dfemlacumgujs595mr',
-                amount: '24400000000000',
+                amount: 24400000000000,
                 utxo: '0x79170f924260def767d30e9eb606379c59b26ab5b575097f760507e889ba097e458a19aead724e10cf15313a1da7094c5c7e708c12e91a58f1f922bd6a5da0a5',
                 signature: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
                 index: 0,
@@ -312,7 +312,7 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
               {
                 address: 'boa1xrzwvvw6l6d9k84ansqgs9yrtsetpv44wfn8zm9a7lehuej3ssskxth867s',
                 lock_type: 0,
-                amount: '1663400000',
+                amount: 1663400000,
                 utxo: '0x695ebd4843c0bab6966d4457648f0d85371361647af9bfb9dd7a7a553257efdc0be38700032cb362e614933d2d00590a98d03679a94edf573b6d574158b201cc',
                 index: 0,
                 bytes: '0x39473b67e1718801a9006a4b620aef82e06d372e2a519c16efdd7ecf8c66b907c1917b358ce17af16552ef572d19ee4000ba6cb0c8419580b898718bfecf7737'
@@ -320,7 +320,7 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
               {
                 address: 'boa1xrgr66gdm5je646x70l5ar6qkhun0hg3yy2eh7tf8xxlmlt9fgjd2q0uj8p',
                 lock_type: 0,
-                amount: '24398336600000',
+                amount: 24398336600000,
                 utxo: '0xba8a96eb3bcbc673f61652e3b6ba1c29c3f6fb996af95bcb2afe7e0d347bf1100a1bce76e64aa60f0a50bf1587b5dc01a03d32a45746656d46cfe8b073bce9a3',
                 index: 1,
                 bytes: '0xe27c7cefbec8f06175847c7f4cf45e5b017c575ede2e50eabffe4598d2d770dbe1446c0ba4e77ef2225b97c30ffe1c81f92a4359bf541e65bf0376057fb5ef82'
