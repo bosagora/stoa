@@ -60,7 +60,7 @@ describe ('Test of Stoa API Server', () =>
     before ('Create TestStoa', async () =>
     {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig,new URL("http://127.0.0.1:2826"), port);
+        stoa_server = new TestStoa(testDBConfig, new URL("http://127.0.0.1:2826"), port);
         await stoa_server.createStorage();
     });
 
@@ -794,11 +794,11 @@ describe ('Test of Stoa API Server', () =>
             random_seed: '0x691775809b9498f45a2c5ef8b8d552e318ebaf0b1b2fb15dcc39e0ec962ae9812d7edffa5f053590a895c9ff72c1b0838ce8f5c709579d4529f9f4caf0fab13d',
             time: 1609459800,
             version: 'v0.x.x',
-            total_sent: '4880000000000000',
-            total_recieved: '4880000000000000',
-            total_reward: '0',
-            total_fee: '0',
-            total_size: '9328'
+            total_sent: 4880000000000000,
+            total_recieved: 4880000000000000,
+            total_reward: 0,
+            total_fee: 0,
+            total_size: 9328
           }
         assert.deepStrictEqual(response.data, expected);
     });

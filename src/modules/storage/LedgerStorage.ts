@@ -67,159 +67,159 @@ export class LedgerStorage extends Storages
         let sql =
         `CREATE TABLE IF NOT EXISTS blocks
         (
-            height              INTEGER NOT NULL,
-            hash                BLOB    NOT NULL,
-            prev_block          BLOB    NOT NULL,
-            validators          TEXT    NOT NULL,
-            merkle_root         BLOB    NOT NULL,
-            signature           BLOB    NOT NULL,
-            random_seed         BLOB    NOT NULL,
-            missing_validators  TEXT    NULL,
-            tx_count            INTEGER NOT NULL,
-            enrollment_count    INTEGER NOT NULL,
-            time_offset         INTEGER NOT NULL,
-            time_stamp          INTEGER NOT NULL,
+            height              INTEGER  NOT NULL,
+            hash                TINYBLOB NOT NULL,
+            prev_block          TINYBLOB NOT NULL,
+            validators          TEXT     NOT NULL,
+            merkle_root         TINYBLOB NOT NULL,
+            signature           TINYBLOB NOT NULL,
+            random_seed         TINYBLOB NOT NULL,
+            missing_validators  TEXT     NULL,
+            tx_count            INTEGER  NOT NULL,
+            enrollment_count    INTEGER  NOT NULL,
+            time_offset         INTEGER  NOT NULL,
+            time_stamp          INTEGER  NOT NULL,
             PRIMARY KEY(height)
         );
 
         CREATE TABLE IF NOT EXISTS enrollments
         (
-            block_height        INTEGER NOT NULL,
-            enrollment_index    INTEGER NOT NULL,
-            utxo_key            BLOB    NOT NULL,
-            commitment          BLOB    NOT NULL,
-            cycle_length        INTEGER NOT NULL,
-            enroll_sig          BLOB    NOT NULL,
+            block_height        INTEGER  NOT NULL,
+            enrollment_index    INTEGER  NOT NULL,
+            utxo_key            TINYBLOB NOT NULL,
+            commitment          TINYBLOB NOT NULL,
+            cycle_length        INTEGER  NOT NULL,
+            enroll_sig          TINYBLOB NOT NULL,
             PRIMARY KEY(block_height, enrollment_index)
         );
 
         CREATE TABLE IF NOT EXISTS transactions
         (
-            block_height        INTEGER NOT NULL,
-            tx_index            INTEGER NOT NULL,
-            tx_hash             BLOB    NOT NULL,
-            type                INTEGER NOT NULL,
-            unlock_height       INTEGER NOT NULL,
-            lock_height         INTEGER NOT NULL,
-            tx_fee              INTEGER NOT NULL,
-            payload_fee         INTEGER NOT NULL,
-            tx_size             INTEGER NOT NULL,
-            inputs_count        INTEGER NOT NULL,
-            outputs_count       INTEGER NOT NULL,
-            payload_size        INTEGER NOT NULL,
+            block_height        INTEGER  NOT NULL,
+            tx_index            INTEGER  NOT NULL,
+            tx_hash             TINYBLOB NOT NULL,
+            type                INTEGER  NOT NULL,
+            unlock_height       INTEGER  NOT NULL,
+            lock_height         INTEGER  NOT NULL,
+            tx_fee              INTEGER  NOT NULL,
+            payload_fee         INTEGER  NOT NULL,
+            tx_size             INTEGER  NOT NULL,
+            inputs_count        INTEGER  NOT NULL,
+            outputs_count       INTEGER  NOT NULL,
+            payload_size        INTEGER  NOT NULL,
             PRIMARY KEY(block_height, tx_index)
         );
 
         CREATE TABLE IF NOT EXISTS tx_inputs
         (
-            block_height        INTEGER NOT NULL,
-            tx_index            INTEGER NOT NULL,
-            in_index            INTEGER NOT NULL,
-            tx_hash             BLOB    NOT NULL,
-            utxo                BLOB    NOT NULL,
-            unlock_bytes        BLOB    NOT NULL,
-            unlock_age          INTEGER NOT NULL,
-            PRIMARY KEY(block_height, tx_index, in_index, utxo(255))
+            block_height        INTEGER  NOT NULL,
+            tx_index            INTEGER  NOT NULL,
+            in_index            INTEGER  NOT NULL,
+            tx_hash             TINYBLOB NOT NULL,
+            utxo                TINYBLOB NOT NULL,
+            unlock_bytes        TINYBLOB NOT NULL,
+            unlock_age          INTEGER  NOT NULL,
+            PRIMARY KEY(block_height, tx_index, in_index, utxo(64))
         );
 
         CREATE TABLE IF NOT EXISTS tx_outputs
         (
-            block_height        INTEGER NOT NULL,
-            tx_index            INTEGER NOT NULL,
-            output_index        INTEGER NOT NULL,
-            tx_hash             BLOB    NOT NULL,
-            utxo_key            BLOB    NOT NULL,
-            amount              DECIMAL(65) NOT NULL,
+            block_height        INTEGER     NOT NULL,
+            tx_index            INTEGER     NOT NULL,
+            output_index        INTEGER     NOT NULL,
+            tx_hash             TINYBLOB    NOT NULL,
+            utxo_key            TINYBLOB    NOT NULL,
+            amount              BIGINT(20)  UNSIGNED NOT NULL,
             lock_type           INTEGER NOT NULL,
-            lock_bytes          BLOB    NOT NULL,
-            address             TEXT    NOT NULL,
+            lock_bytes          TINYBLOB    NOT NULL,
+            address             TEXT        NOT NULL,
             PRIMARY KEY(block_height, tx_index, output_index)
         );
 
         CREATE TABLE IF NOT EXISTS utxos
         (
-            utxo_key            BLOB    NOT NULL,
-            tx_hash             BLOB    NOT NULL,
-            type                INTEGER NOT NULL,
-            unlock_height       INTEGER NOT NULL,
-            amount              DECIMAL(65) NOT NULL,
-            lock_type           INTEGER NOT NULL,
-            lock_bytes          BLOB    NOT NULL,
-            address             TEXT    NOT NULL,
-            PRIMARY KEY(utxo_key(255))
+            utxo_key            TINYBLOB    NOT NULL,
+            tx_hash             TINYBLOB    NOT NULL,
+            type                INTEGER     NOT NULL,
+            unlock_height       INTEGER     NOT NULL,
+            amount              BIGINT(20)  UNSIGNED NOT NULL,
+            lock_type           INTEGER     NOT NULL,
+            lock_bytes          TINYBLOB    NOT NULL,
+            address             TEXT        NOT NULL,
+            PRIMARY KEY(utxo_key(64))
         );
 
         CREATE TABLE IF NOT EXISTS payloads (
-            tx_hash             BLOB    NOT NULL,
+            tx_hash             TINYBLOB    NOT NULL,
             payload             BLOB    NOT NULL,
-            PRIMARY KEY(tx_hash(255))
+            PRIMARY KEY(tx_hash(64))
         );
 
         CREATE TABLE IF NOT EXISTS validators
         (
-            enrolled_at         INTEGER NOT NULL,
-            utxo_key            BLOB    NOT NULL,
-            address             TEXT    NOT NULL,
-            amount              NUMERIC NOT NULL,
-            preimage_height     INTEGER NOT NULL,
-            preimage_hash       BLOB    NOT NULL,
-            PRIMARY KEY(enrolled_at, utxo_key(255))
+            enrolled_at         INTEGER     NOT NULL,
+            utxo_key            TINYBLOB    NOT NULL,
+            address             TEXT        NOT NULL,
+            amount              BIGINT(20)  UNSIGNED NOT NULL,
+            preimage_distance   INTEGER NOT NULL,
+            preimage_hash       TINYBLOB    NOT NULL,
+            PRIMARY KEY(enrolled_at, utxo_key(64))
         );
 
         CREATE TABLE IF NOT EXISTS merkle_trees
         (
-            block_height        INTEGER NOT NULL,
-            merkle_index        INTEGER NOT NULL,
-            merkle_hash         BLOB    NOT NULL,
+            block_height        INTEGER     NOT NULL,
+            merkle_index        INTEGER     NOT NULL,
+            merkle_hash         TINYBLOB    NOT NULL,
             PRIMARY KEY(block_height, merkle_index)
         );
 
         CREATE TABLE IF NOT EXISTS information
         (
-            keyname             TEXT    NOT NULL,
-            value               TEXT    NOT NULL,
-            PRIMARY KEY(keyname(255))
+            keyname             TEXT       NOT NULL,
+            value               TEXT       NOT NULL,
+            PRIMARY KEY(keyname(64))
         );
 
         CREATE TABLE IF NOT EXISTS transaction_pool (
-            tx_hash             BLOB    NOT NULL,
-            type                INTEGER NOT NULL,
-            payload             BLOB    NOT NULL,
-            lock_height         INTEGER NOT NULL,
-            received_height     INTEGER NOT NULL,
-            time                INTEGER NOT NULL,
-            tx_fee              INTEGER NOT NULL,
-            payload_fee         INTEGER NOT NULL,
-            tx_size             INTEGER NOT NULL,
-            PRIMARY KEY(tx_hash(255))
+            tx_hash             TINYBLOB   NOT NULL,
+            type                INTEGER    NOT NULL,
+            payload             BLOB   NOT NULL,
+            lock_height         INTEGER    NOT NULL,
+            received_height     INTEGER    NOT NULL,
+            time                INTEGER    NOT NULL,
+            tx_fee              INTEGER    NOT NULL,
+            payload_fee         INTEGER    NOT NULL,
+            tx_size             INTEGER    NOT NULL,
+            PRIMARY KEY(tx_hash(64))
         );
 
         CREATE TABLE IF NOT EXISTS tx_input_pool (
-            tx_hash             BLOB    NOT NULL,
-            input_index         INTEGER NOT NULL,
-            utxo                BLOB    NOT NULL,
-            unlock_bytes        BLOB    NOT NULL,
-            unlock_age          INTEGER NOT NULL,
-            PRIMARY KEY(tx_hash(255), input_index)
+            tx_hash             TINYBLOB   NOT NULL,
+            input_index         INTEGER    NOT NULL,
+            utxo                TINYBLOB   NOT NULL,
+            unlock_bytes        TINYBLOB   NOT NULL,
+            unlock_age          INTEGER    NOT NULL,
+            PRIMARY KEY(tx_hash(64), input_index)
         );
 
         CREATE TABLE IF NOT EXISTS tx_output_pool (
-            tx_hash             BLOB    NOT NULL,
-            output_index        INTEGER NOT NULL,
-            amount              DECIMAL(65) NOT NULL,
-            lock_type           INTEGER NOT NULL,
-            lock_bytes          BLOB    NOT NULL,
-            address             TEXT    NOT NULL,
-            PRIMARY KEY(tx_hash(255), output_index)
+            tx_hash             TINYBLOB   NOT NULL,
+            output_index        INTEGER    NOT NULL,
+            amount              BIGINT(20) UNSIGNED NOT NULL,
+            lock_type           INTEGER    NOT NULL,
+            lock_bytes          TINYBLOB   NOT NULL,
+            address             TEXT       NOT NULL,
+            PRIMARY KEY(tx_hash(64), output_index)
         );
 
        CREATE TABLE IF NOT EXISTS blocks_stats(
-            block_height INT,
-            total_sent DECIMAL(65) NOT NULL,
-            total_recieved DECIMAL(65) NOT NULL,
-            total_reward DECIMAL(65) NOT NULL,
-            total_fee DECIMAL(65) NOT NULL,
-            total_size DECIMAL(65) NOT NULL,
+            block_height        INT,
+            total_sent          BIGINT(20)  UNSIGNED NOT NULL,
+            total_recieved      BIGINT(20)  UNSIGNED NOT NULL,
+            total_reward        BIGINT(20)  UNSIGNED NOT NULL,
+            total_fee           BIGINT(20)  UNSIGNED NOT NULL,
+            total_size          BIGINT(20)  UNSIGNED NOT NULL,
 
             PRIMARY KEY(block_height)
             );
