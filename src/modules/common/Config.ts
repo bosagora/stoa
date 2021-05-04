@@ -199,27 +199,33 @@ export class DatabaseConfig implements IDatabaseConfig
      * The host of mysql
      */
     host: string
+
     /**
      * The user of mysql
      */
     user: string
+
     /**
      * The pasword of mysql
      */
     password: string
+
     /**
      * The database name
      */
     database?: string
+
     /**
      * The host database port
      */
-     port: number
+    port: number
+
     /** 
      * multiple Statements exec config
     */
-    multipleStatements: boolean
 
+    multipleStatements: boolean
+    
     /**
      * Constructor
      * @param host Mysql database host
