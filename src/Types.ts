@@ -239,30 +239,36 @@ export interface IBlockOverview
      * Transaction hash
      */
     time: number;
+    
     /**
      * total amount sent in block
      */
-    total_sent : string;
+    total_sent: string;
+    
     /**
      * total recieved amount
      */
-    total_recieved :string;
+    total_recieved: string;
+   
     /**
      * total rewards
      */
-    total_reward :string
+    total_reward: string
+   
     /**
      * total fee for the block
      */
     total_fee :string
+    
     /**
      * total size of the block
      */
-    total_size : string
+    total_size: number
+    
     /**
      * Agora version
      */
-    version : string
+    version: string
 }
 
 /**
@@ -728,6 +734,7 @@ export interface ITransaction
     */
     time_stamp: string
 }
+
 /**
  * Interface for boascan pagination
  */
