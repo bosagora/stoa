@@ -728,3 +728,20 @@ export interface ITransaction
     */
     time_stamp: string
 }
+/**
+ * Interface for boascan pagination
+ */
+
+export interface IPagination
+{
+    /**
+     * page size 
+     */
+    pageSize:number,
+    
+    /**
+     * page number
+     */
+     page :number
+}
+
