@@ -928,6 +928,42 @@ describe ('Test of Stoa API Server', () =>
             tx: [
               {
                 height: '0',
+                tx_hash: '0xb8f5a5f4544e75b5837a370d0070361aaaf97d3b02070d3d9845598c5f55105b6bd9ac8e9c53e74679db77cb512ffd88a9916754744f6b5eb2a812929651f84f',
+                amount: '120000000000000',
+                type: 1,
+                fee: 0,
+                size: 255,
+                time: 1609459200,
+                sender_address: null,
+                receiver: [
+                    {
+                      amount: 20000000000000,
+                      address: 'boa1xrdwry6fpk7a57k4gwyj3mwnf59w808nygtuxsgdrpmv4p7ua2hqx78z5en'
+                    },
+                    {
+                      amount: 20000000000000,
+                      address: 'boa1xrdwrymw40ae7kdumk5uf24rf7wj6kxeem0t3mh9yclz6j46rnen6htq9ju'
+                    },
+                    {
+                      amount: 20000000000000,
+                      address: 'boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp'
+                    },
+                    {
+                      amount: 20000000000000,
+                      address: 'boa1xrdwryayr9r3nacx26vwe6ymy2kl7zp7dc03q5h6zk65vnu6mtkkzdqg39f'
+                    },
+                    {
+                      amount: 20000000000000,
+                      address: 'boa1xrdwry7vltf9mrzf62qgpdh282grqn9nlnvhzp0yt8y0y9zedmgh64s2qjg'
+                    },
+                    {
+                      amount: 20000000000000,
+                      address: 'boa1xrdwryl0ajdd86c45w4zrjf8spmrt7u4l7s5jy64ac3dc78x2ucd7wkakac'
+                    }
+                  ]
+              },
+              {
+                height: '0',
                 tx_hash: '0x4ef4f7195db2e20f36b46cb3cda1f529b77e2cd8423241d1a4a779f3d7845d4f6543a6147956bf4fe52d5f5925a04102de59b2854f90fb3e8cc1a0e85fe9b11d',
                 amount: '4880000000000000',
                 type: 0,
@@ -967,42 +1003,6 @@ describe ('Test of Stoa API Server', () =>
                     {
                       amount: 610000000000000,
                       address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    }
-                  ]
-              },
-              {
-                height: '0',
-                tx_hash: '0xb8f5a5f4544e75b5837a370d0070361aaaf97d3b02070d3d9845598c5f55105b6bd9ac8e9c53e74679db77cb512ffd88a9916754744f6b5eb2a812929651f84f',
-                amount: '120000000000000',
-                type: 1,
-                fee: 0,
-                size: 255,
-                time: 1609459200,
-                sender_address: null,
-                receiver: [
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwry6fpk7a57k4gwyj3mwnf59w808nygtuxsgdrpmv4p7ua2hqx78z5en'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwrymw40ae7kdumk5uf24rf7wj6kxeem0t3mh9yclz6j46rnen6htq9ju'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwryayr9r3nacx26vwe6ymy2kl7zp7dc03q5h6zk65vnu6mtkkzdqg39f'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwry7vltf9mrzf62qgpdh282grqn9nlnvhzp0yt8y0y9zedmgh64s2qjg'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwryl0ajdd86c45w4zrjf8spmrt7u4l7s5jy64ac3dc78x2ucd7wkakac'
                     }
                   ]
               }
@@ -1023,6 +1023,42 @@ describe ('Test of Stoa API Server', () =>
             tx: [
               {
                 height: '0',
+                tx_hash: '0xb8f5a5f4544e75b5837a370d0070361aaaf97d3b02070d3d9845598c5f55105b6bd9ac8e9c53e74679db77cb512ffd88a9916754744f6b5eb2a812929651f84f',
+                amount: '120000000000000',
+                type: 1,
+                fee: 0,
+                size: 255,
+                time: 1609459200,
+                sender_address: null,
+                receiver: [
+                    {
+                      amount: 20000000000000,
+                      address: 'boa1xrdwry6fpk7a57k4gwyj3mwnf59w808nygtuxsgdrpmv4p7ua2hqx78z5en'
+                    },
+                    {
+                      amount: 20000000000000,
+                      address: 'boa1xrdwrymw40ae7kdumk5uf24rf7wj6kxeem0t3mh9yclz6j46rnen6htq9ju'
+                    },
+                    {
+                      amount: 20000000000000,
+                      address: 'boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp'
+                    },
+                    {
+                      amount: 20000000000000,
+                      address: 'boa1xrdwryayr9r3nacx26vwe6ymy2kl7zp7dc03q5h6zk65vnu6mtkkzdqg39f'
+                    },
+                    {
+                      amount: 20000000000000,
+                      address: 'boa1xrdwry7vltf9mrzf62qgpdh282grqn9nlnvhzp0yt8y0y9zedmgh64s2qjg'
+                    },
+                    {
+                      amount: 20000000000000,
+                      address: 'boa1xrdwryl0ajdd86c45w4zrjf8spmrt7u4l7s5jy64ac3dc78x2ucd7wkakac'
+                    }
+                  ]
+              },
+              {
+                height: '0',
                 tx_hash: '0x4ef4f7195db2e20f36b46cb3cda1f529b77e2cd8423241d1a4a779f3d7845d4f6543a6147956bf4fe52d5f5925a04102de59b2854f90fb3e8cc1a0e85fe9b11d',
                 amount: '4880000000000000',
                 type: 0,
@@ -1062,42 +1098,6 @@ describe ('Test of Stoa API Server', () =>
                     {
                       amount: 610000000000000,
                       address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    }
-                  ]
-              },
-              {
-                height: '0',
-                tx_hash: '0xb8f5a5f4544e75b5837a370d0070361aaaf97d3b02070d3d9845598c5f55105b6bd9ac8e9c53e74679db77cb512ffd88a9916754744f6b5eb2a812929651f84f',
-                amount: '120000000000000',
-                type: 1,
-                fee: 0,
-                size: 255,
-                time: 1609459200,
-                sender_address: null,
-                receiver: [
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwry6fpk7a57k4gwyj3mwnf59w808nygtuxsgdrpmv4p7ua2hqx78z5en'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwrymw40ae7kdumk5uf24rf7wj6kxeem0t3mh9yclz6j46rnen6htq9ju'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwryayr9r3nacx26vwe6ymy2kl7zp7dc03q5h6zk65vnu6mtkkzdqg39f'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwry7vltf9mrzf62qgpdh282grqn9nlnvhzp0yt8y0y9zedmgh64s2qjg'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwryl0ajdd86c45w4zrjf8spmrt7u4l7s5jy64ac3dc78x2ucd7wkakac'
                     }
                   ]
               }

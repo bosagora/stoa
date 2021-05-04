@@ -1928,9 +1928,12 @@ export class LedgerStorage extends Storages
     public getLatestBlocks(limit: number, page: number): Promise<any[]> {
         let sql =
             `SELECT
-                height, hash , merkle_root , signature , validators , tx_count, enrollment_count ,time_stamp 
+                height, hash , merkle_root , signature , validators , tx_count,
+                enrollment_count ,time_stamp 
             FROM
-                blocks ORDER BY height DESC LIMIT ? OFFSET ?`
+                blocks 
+            ORDER BY height DESC 
+            LIMIT ? OFFSET ?`
 
         return this.query(sql, [limit, limit * (page - 1)]);
     }
@@ -1945,13 +1948,15 @@ export class LedgerStorage extends Storages
     public getLatestTransactions(limit: number, page: number): Promise<any[]> {
         let sql =
             `SELECT 
-             T.block_height, T.tx_hash , type,tx_fee ,tx_size,Sum(O.amount) as amount,B.time_stamp 
-             From
-             transactions T INNER JOIN tx_outputs O INNER JOIN blocks B
-             ON 
-             ( T.tx_hash = O.tx_hash AND T.block_height = O.block_height ) AND B.height = T.block_height 
-             GROUP BY O.tx_hash ORDER BY T.block_height DESC LIMIT ? OFFSET ?;
-            `
+             T.block_height, T.tx_hash, type, tx_fee, tx_size, 
+             Sum(IFNULL(O.amount,0)) as amount, B.time_stamp 
+             FROM
+                 tx_outputs O 
+                 INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
+                 INNER JOIN blocks B ON (B.height = T.block_height) 
+             GROUP BY O.tx_hash 
+             ORDER BY T.block_height DESC
+             LIMIT ? OFFSET ?;`
         return this.query(sql, [limit, limit * (page - 1)]);
     }
     /**
@@ -1985,25 +1990,28 @@ export class LedgerStorage extends Storages
     public getBlockEnrollments(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
         let sql =
             `SELECT
-                e.block_height, e.utxo_key, e.commitment, e.cycle_length, e.enroll_sig 
+                E.block_height, E.utxo_key, E.commitment, E.cycle_length, E.enroll_sig 
             FROM
-                blocks b INNER JOIN enrollments e
-            ON
-                e.block_height = b.height AND b.${field} = ?
-                LIMIT ? OFFSET ?;`;
+                blocks B 
+                INNER JOIN enrollments E ON (E.block_height = B.height) 
+                AND B.${field} = ?
+            ORDER BY E.enrollment_index ASC
+            LIMIT ? OFFSET ?;`;
         let countsql =
-                `select count(*) as total_records from  
-                blocks b INNER JOIN enrollments e ON
-                e.block_height = b.height AND b.${field} = ?`;
+                `SELECT IFNULL(count(*),0) as total_records
+                FROM  
+                    blocks B 
+                    INNER JOIN enrollments E ON (E.block_height = B.height)
+                    AND B.${field} = ?`;
 
         let result: any = {};  
         return new Promise<any[]>((resolve, reject) => {      
         this.query(sql, [value, limit, limit*(page-1)])
-        .then((rows :any [])=>{
+        .then((rows : any[])=>{
             result.enrollments = rows;
             return this.query(countsql,[value]);
         })
-        .then((rows :any [])=>{
+        .then((rows : any[])=>{
             result.total_records = rows[0].total_records
             resolve(result); 
         });
@@ -2020,31 +2028,34 @@ export class LedgerStorage extends Storages
     public getBlockTransactions(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
         let sql_tx =
             `SELECT 
-                T.block_height, T.tx_hash, SUM(O.amount) as amount, type,
-                tx_fee, tx_size, B.time_stamp,
+                T.block_height, T.tx_hash, SUM(IFNULL(O.amount,0)) as amount, T.type,
+                T.tx_fee, T.tx_size, B.time_stamp,
                 JSON_ARRAYAGG(JSON_OBJECT("address", O.address, "amount", O.amount)) as receiver,
-            (SELECT
-                    s.address
+                (SELECT
+                    S.address
                 FROM
-                    blocks b
-                    INNER JOIN transactions t ON b.height = t.block_height
-                    INNER JOIN tx_inputs i ON t.tx_hash = i.tx_hash
-                    INNER JOIN tx_outputs s ON i.utxo = s.utxo_key
+                    blocks B
+                    INNER JOIN transactions T ON (B.height = T.block_height)
+                    INNER JOIN tx_inputs I ON (T.tx_hash = I.tx_hash)
+                    INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key)
                 WHERE
-                    ${field} = ? ) as sender_address
+                    B.${field} = ? ) as sender_address
             FROM    
-                tx_outputs O INNER JOIN transactions T  ON ( T.tx_hash = O.tx_hash AND T.block_height = O.block_height) 
-                INNER JOIN blocks B ON  B.height = T.block_height
+                tx_outputs O 
+                INNER JOIN transactions T ON (T.tx_hash = O.tx_hash) 
+                INNER JOIN blocks B ON  (B.height = T.block_height)
             WHERE
-                ${field} = ?
+                B.${field} = ?
             GROUP BY T.tx_hash
+            ORDER BY T.tx_index ASC
             LIMIT ? OFFSET ?;`;
         
         let sql_count =
                `SELECT
-                    count(*) as total_records
+                    IFNULL(count(*),0) as total_records
                 FROM
-                    transactions t INNER JOIN blocks b ON b.height = t.block_height
+                    transactions T 
+                    INNER JOIN blocks B ON (B.height = T.block_height)
                 WHERE
                     ${field} = ?;`;
 
