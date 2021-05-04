@@ -10,7 +10,7 @@ import { ValidatorData, IPreimage, IUnspentTxOutput, ITxStatus,
     ITxHistoryElement, ITxOverview, ConvertTypes, DisplayTxType,
     IPendingTxs, ISPVStatus, ITransactionFee, IBlock, ITransaction,
     IBlockOverview, IBlockEnrollmentElements, IBlockEnrollment, IBlockTransactions, IBlockTransactionElements,
-    IBOAStats} from './Types';
+    IBOAStats, IPagination} from './Types';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -26,6 +26,10 @@ class Stoa extends WebService
      * Network client to interact with Agora
      */
     private readonly agora: AgoraClient;
+    /**
+     * Stoa page size limit
+     */
+    private readonly limit_page_size: number = 100;
 
     /**
      * Chain of pending store operations
@@ -596,7 +600,7 @@ class Stoa extends WebService
      * Returns a set of transactions history of the addresses.
      * ```
      */
-    private getWalletTransactionsHistory (req: express.Request, res: express.Response)
+    private async getWalletTransactionsHistory(req: express.Request, res: express.Response)
     {
         let address: string = String(req.params.address);
 
@@ -647,38 +651,6 @@ class Stoa extends WebService
             filter_begin = undefined;
             filter_end = undefined;
         }
-
-        // Validating Parameter - pageSize
-        if (req.query.pageSize !== undefined)
-        {
-            if (!Utils.isPositiveInteger(req.query.pageSize.toString()))
-            {
-                res.status(400).send(`Invalid value for parameter 'pageSize': ${req.query.pageSize.toString()}`);
-                return;
-            }
-            page_size = Number(req.query.pageSize.toString());
-            if (page_size > 30)
-            {
-                res.status(400).send(`Page size cannot be a number greater than 30: ${page_size}`);
-                return;
-            }
-        }
-        else
-            page_size = 10;
-
-        // Validating Parameter - page
-        if (req.query.page !== undefined)
-        {
-            if (!Utils.isPositiveInteger(req.query.page.toString()))
-            {
-                res.status(400).send(`Invalid value for parameter 'page': ${req.query.page.toString()}`);
-                return;
-            }
-            page = Number(req.query.page.toString());
-        }
-        else
-            page = 1;
-
         filter_type = (req.query.type !== undefined)
             ? req.query.type.toString().split(',').map((m) => ConvertTypes.toDisplayTxType(m))
             : [0, 1, 2, 3];
@@ -692,8 +664,8 @@ class Stoa extends WebService
         let filter_peer = (req.query.peer !== undefined)
             ? req.query.peer.toString()
             : undefined;
-
-        this.ledger_storage.getWalletTransactionsHistory(address, page_size, page,
+        let pagination: IPagination = await this.paginate(req, res);
+        this.ledger_storage.getWalletTransactionsHistory(address, pagination.pageSize, pagination.page,
             filter_type, filter_begin, filter_end, filter_peer)
             .then((rows: any[]) => {
                 if (!rows.length)
@@ -850,18 +822,18 @@ class Stoa extends WebService
                 let overview: IBlockOverview = {
                     height: JSBI.BigInt(data[0].height).toString(),
                     total_transactions: data[0].tx_count,
-                    hash:  new Hash(data[0].hash, Endian.Little).toString(),
-                    prev_hash:  new Hash(data[0].prev_block, Endian.Little).toString(),
-                    merkle_root:  new Hash(data[0].merkle_root, Endian.Little).toString(),
-                    signature:  new Hash(data[0].signature, Endian.Little).toString(),
-                    random_seed:  new Hash(data[0].random_seed, Endian.Little).toString(),
+                    hash: new Hash(data[0].hash, Endian.Little).toString(),
+                    prev_hash: new Hash(data[0].prev_block, Endian.Little).toString(),
+                    merkle_root: new Hash(data[0].merkle_root, Endian.Little).toString(),
+                    signature: new Hash(data[0].signature, Endian.Little).toString(),
+                    random_seed: new Hash(data[0].random_seed, Endian.Little).toString(),
                     time: data[0].time_stamp,
                     version: "v0.x.x",
-                    total_sent : data[0].total_sent,
-                    total_recieved :data[0].total_recieved,
-                    total_reward : data[0].total_reward,
-                    total_fee : data[0].total_fee,
-                    total_size : data[0].total_size
+                    total_sent: data[0].total_sent,
+                    total_recieved: data[0].total_recieved,
+                    total_reward: data[0].total_reward,
+                    total_fee: data[0].total_fee,
+                    total_size: data[0].total_size
                     };
                 res.status(200).send(JSON.stringify(overview));
             }
@@ -880,12 +852,10 @@ class Stoa extends WebService
      *
      *@returns Returns enrolled validators of block.
      */
-     private getBlockEnrollments(req: express.Request, res: express.Response) {
+    private async getBlockEnrollments(req: express.Request, res: express.Response) {
         
         let field: string;
         let value: string | Buffer;
-        let limit: number;
-        let page: number;
 
         logger.http(`GET /block-enrollments/`);
 
@@ -912,34 +882,8 @@ class Stoa extends WebService
             res.status(400).send(`Invalid value for parameter 'height': ${req.query.height} and 'hash': ${req.query.hash}`);
             return;
         }
-        
-        // Validating Parameter - limit
-        if (req.query.limit !== undefined) {
-            if (!Utils.isPositiveInteger(req.query.limit.toString())) {
-                res.status(400).send(`Invalid value for parameter 'pageSize': ${req.query.limit.toString()}`);
-                return;
-            }
-            limit = Number(req.query.limit.toString());
-            if (limit > 10) {
-                res.status(400).send(`Limit cannot be a number greater than 10: ${limit}`);
-                return;
-            }
-        }
-        else
-            limit = 10;
-
-        // Validating Parameter - page
-        if (req.query.page !== undefined) {
-            if (!Utils.isPositiveInteger(req.query.page.toString())) {
-                res.status(400).send(`Invalid value for parameter 'page': ${req.query.page.toString()}`);
-                return;
-            }
-            page = Number(req.query.page.toString());
-        }
-        else
-            page = 1;
-
-        this.ledger_storage.getBlockEnrollments(field, value, limit, page)
+        let pagination: IPagination = await this.paginate(req, res);
+        this.ledger_storage.getBlockEnrollments(field, value, pagination.pageSize, pagination.page)
         .then((data: any) => {
             if ((data === undefined)) {
                 res.status(500).send("Failed to data lookup");
@@ -954,14 +898,14 @@ class Stoa extends WebService
                     enrollmentElementList.push(
                         {
                             height: JSBI.BigInt(row.block_height).toString(),
-                            utxo:  new Hash(row.utxo_key, Endian.Little).toString(),
-                            enroll_sig:  new Hash(row.enroll_sig, Endian.Little).toString(),
-                            commitment:  new Hash(row.commitment, Endian.Little).toString(),
+                            utxo: new Hash(row.utxo_key, Endian.Little).toString(),
+                            enroll_sig: new Hash(row.enroll_sig, Endian.Little).toString(),
+                            commitment: new Hash(row.commitment, Endian.Little).toString(),
                             cycle_length: row.cycle_length,
                         }
                     );
                 }
-                let enrollmentList: IBlockEnrollment =  {
+                let enrollmentList: IBlockEnrollment = {
                     enrollmentElementList,
                     total_data: data.total_records
                 };
@@ -982,7 +926,7 @@ class Stoa extends WebService
      *
      * @returns Returns transactions of block.
      */
-     private getBlockTransactions(req: express.Request, res: express.Response) {
+    private async getBlockTransactions(req: express.Request, res: express.Response) {
         
         let field: string;
         let value: string | Buffer;
@@ -1015,33 +959,8 @@ class Stoa extends WebService
             return;
         }
         
-        // Validating Parameter - limit
-        if (req.query.limit !== undefined) {
-            if (!Utils.isPositiveInteger(req.query.limit.toString())) {
-                res.status(400).send(`Invalid value for parameter 'pageSize': ${req.query.limit.toString()}`);
-                return;
-            }
-            limit = Number(req.query.limit.toString());
-            if (limit > 10) {
-                res.status(400).send(`Limit cannot be a number greater than 10: ${limit}`);
-                return;
-            }
-        }
-        else
-            limit = 10;
-
-        // Validating Parameter - page
-        if (req.query.page !== undefined) {
-            if (!Utils.isPositiveInteger(req.query.page.toString())) {
-                res.status(400).send(`Invalid value for parameter 'page': ${req.query.page.toString()}`);
-                return;
-            }
-            page = Number(req.query.page.toString());
-        }
-        else
-            page = 1;
-
-        this.ledger_storage.getBlockTransactions(field, value, limit, page)
+        let pagination: IPagination = await this.paginate(req, res);
+        this.ledger_storage.getBlockTransactions(field, value, pagination.pageSize, pagination.page)
         .then((data: any) => {
             if ((data === undefined)) {
                 res.status(500).send("Failed to data lookup");
@@ -1063,7 +982,7 @@ class Stoa extends WebService
                             size: row.tx_size,
                             time: row.time_stamp,
                             sender_address: row.sender_address,
-                            receiver:row.receiver,
+                            receiver: row.receiver,
                         }
                     ); 
                 }
@@ -1390,34 +1309,10 @@ class Stoa extends WebService
     * @param res 
     * @returns Return Latest blocks of the ledeger
     */
-    public getLatestBlocks(req: express.Request, res: express.Response) {
-        let page: number;
-        let limit: number;
+    public async getLatestBlocks(req: express.Request, res: express.Response) {
 
-        if (req.query.page !== undefined) {
-            if (!Utils.isPositiveInteger(req.query.page.toString())) {
-                res.status(400).send(`Invalid value for parameter 'page': ${req.query.page.toString()}`);
-                return;
-            }
-            page = Number(req.query.page.toString());
-        }
-        else
-            page = 1;
-
-        if (req.query.limit !== undefined) {
-            if (!Utils.isPositiveInteger(req.query.limit.toString())) {
-                res.status(400).send(`Invalid value for parameter 'pageSize': ${req.query.limit.toString()}`);
-                return;
-            }
-            limit = Number(req.query.limit.toString());
-            if (limit > 100) {
-                res.status(400).send(`Page size cannot be a number greater than 100: ${limit}`);
-                return;
-            }
-        }
-        else
-            limit = 10;
-        this.ledger_storage.getLatestBlocks(limit, page)
+        let pagination: IPagination = await this.paginate(req, res);
+        this.ledger_storage.getLatestBlocks(pagination.pageSize, pagination.page)
             .then((data: any) => {
                 if ((data === undefined)) {
                     res.status(500).send("Failed to data lookup");
@@ -1442,7 +1337,7 @@ class Stoa extends WebService
                             }
                         )
                     }
-                  return  res.status(200).send(JSON.stringify(blocklist));
+                return res.status(200).send(JSON.stringify(blocklist));
 
                 }
             })
@@ -1453,34 +1348,10 @@ class Stoa extends WebService
       * @param res 
       * @returns Returns Latest transactions of the ledger.
       */
-    public getLatestTransactions(req: express.Request, res: express.Response) {
-        let page: number;
-        let limit: number;
+    public async getLatestTransactions(req: express.Request, res: express.Response) {
 
-        if (req.query.page !== undefined) {
-            if (!Utils.isPositiveInteger(req.query.page.toString())) {
-                res.status(400).send(`Invalid value for parameter 'page': ${req.query.page.toString()}`);
-                return;
-            }
-            page = Number(req.query.page.toString());
-        }
-        else
-            page = 1;
-
-        if (req.query.limit !== undefined) {
-            if (!Utils.isPositiveInteger(req.query.limit.toString())) {
-                res.status(400).send(`Invalid value for parameter 'limit': ${req.query.limit.toString()}`);
-                return;
-            }
-            limit = Number(req.query.limit.toString());
-            if (limit > 100) {
-                res.status(400).send(`Page size cannot be a number greater than 100: ${limit}`);
-                return;
-            }
-        }
-        else
-            limit = 10;
-        this.ledger_storage.getLatestTransactions(limit, page)
+        let pagination: IPagination = await this.paginate(req, res);
+        this.ledger_storage.getLatestTransactions(pagination.pageSize, pagination.page)
             .then((data: any) => {
                 if ((data === undefined)) {
                     res.status(500).send("Failed to data lookup");
@@ -1707,6 +1578,39 @@ class Stoa extends WebService
                 logger.error("Failed to catch up to block height of Agora: " + err);
                 reject(err);
             }
+        });
+    }
+
+    private paginate(req: express.Request, res: express.Response): Promise<IPagination> {
+        return new Promise<IPagination>((resolve, reject) => {
+            let page: number;
+            let pageSize: number;
+
+            if (req.query.page !== undefined && Number(req.query.page) !== 0) {
+                if (!Utils.isPositiveInteger(req.query.page.toString())) {
+                    res.status(400).send(`Invalid value for parameter 'page': ${req.query.page.toString()}`);
+                    return;
+                }
+                page = Number(req.query.page.toString());
+            }
+            else
+                page = 1;
+
+            if (req.query.pageSize !== undefined) {
+                if (!Utils.isPositiveInteger(req.query.pageSize.toString())) {
+                    res.status(400).send(`Invalid value for parameter 'limit': ${req.query.pageSize.toString()}`);
+                    return;
+                }
+                pageSize = Number(req.query.pageSize.toString());
+                if (pageSize > this.limit_page_size) {
+                    res.status(400).send(`Page size cannot be a number greater than 100: ${pageSize}`);
+                    return;
+                }
+            }
+            else
+                pageSize = 10;
+
+            return resolve({ page, pageSize });
         });
     }
 
