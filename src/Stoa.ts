@@ -532,12 +532,6 @@ class Stoa extends WebService
 
         this.ledger_storage.getUTXO(address)
             .then((rows: any[]) => {
-                if (!rows.length)
-                {
-                    res.status(204).send(`The UTXO not found. address': (${address})`);
-                    return;
-                }
-
                 let utxo_array: Array<IUnspentTxOutput> = [];
                 for (const row of rows)
                 {
@@ -689,12 +683,6 @@ class Stoa extends WebService
         this.ledger_storage.getWalletTransactionsHistory(address, page_size, page,
             filter_type, filter_begin, filter_end, filter_peer)
             .then((rows: any[]) => {
-                if (!rows.length)
-                {
-                    res.status(204).send(`The data does not exist. 'addresses': (${address})`);
-                    return;
-                }
-
                 let out_put: Array<ITxHistoryElement> = [];
                 for (const row of rows)
                 {
