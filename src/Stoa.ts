@@ -111,9 +111,9 @@ class Stoa extends WebService
         // Prepare middleware
 
         // parse application/x-www-form-urlencoded
-        this.app.use(bodyParser.urlencoded({ extended: false }))
+        this.app.use(bodyParser.urlencoded({ extended: false, limit: '1mb' }))
         // parse application/json
-        this.app.use(bodyParser.json())
+        this.app.use(bodyParser.json({ limit: '1mb' }))
         this.app.use(cors(cors_options));
 
         // Prepare routes
