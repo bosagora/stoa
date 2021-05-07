@@ -519,7 +519,7 @@ export class LedgerStorage extends Storages
      */
       public putBlockstats (block: Block): Promise<void>
       {
-          function save_blockstats (storage :LedgerStorage, height :Height, total_sent :JSBI, total_recieved: JSBI, total_size :JSBI, total_fee :JSBI): Promise<void>
+          function save_blockstats (storage: LedgerStorage, height: Height, total_sent: JSBI, total_recieved: JSBI, total_size: JSBI, total_fee: JSBI): Promise<void>
           {
               return new Promise<void>((resolve, reject) =>
               {
@@ -555,13 +555,21 @@ export class LedgerStorage extends Storages
                   let total_sent = JSBI.BigInt(0);
                   let total_fee = JSBI.BigInt(0);
                   let total_size = JSBI.BigInt(0);
-                  let total_recieved_sql = `select SUM(O.amount) as total_recieved from 
-                  tx_outputs O Inner join blocks B ON (O.block_height = B.height)
-                  where block_height = ?;`;
-                  let transaction_stats = `select  SUM(T.tx_fee) as tx_fee, SUM(T.payload_fee) as payload_fee, SUM(T.tx_size) as total_size 
-                  from 
-                  transactions T Inner join blocks B ON (T.block_height = B.height)
-                  where block_height =?;`;
+                  let total_recieved_sql = `SELECT 
+                                                SUM(IFNULL(O.amount,0)) as total_recieved
+                                                FROM 
+                                                tx_outputs O
+                                                    INNER JOIN blocks B ON (O.block_height = B.height)
+                                                WHERE
+                                                    block_height = ?;`;
+                  let transaction_stats = `SELECT 
+                                                SUM(IFNULL(T.tx_fee,0)) as tx_fee,
+                                            SUM(IFNULL(T.payload_fee,0)) as payload_fee, SUM(IFNULL(T.tx_size,0)) as total_size 
+                                            FROM 
+                                            transactions T 
+                                                Inner join blocks B ON (T.block_height = B.height)
+                                            WHERE 
+                                                block_height =?;`;
 
                   this.query(total_recieved_sql,[block.header.height.toString()])
                   .then(async(row :any)=>{
@@ -1928,8 +1936,8 @@ export class LedgerStorage extends Storages
     public getLatestBlocks(limit: number, page: number): Promise<any[]> {
         let sql =
             `SELECT
-                height, hash , merkle_root , signature , validators , tx_count,
-                enrollment_count ,time_stamp 
+                height, hash, merkle_root, signature, validators, tx_count,
+                enrollment_count, time_stamp 
             FROM
                 blocks 
             ORDER BY height DESC 
@@ -1948,7 +1956,7 @@ export class LedgerStorage extends Storages
     public getLatestTransactions(limit: number, page: number): Promise<any[]> {
         let sql =
             `SELECT 
-             T.block_height, T.tx_hash, type, tx_fee, tx_size, 
+                T.block_height, T.tx_hash, type, T.tx_fee, T.tx_size, 
              Sum(IFNULL(O.amount,0)) as amount, B.time_stamp 
              FROM
                  tx_outputs O 

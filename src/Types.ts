@@ -258,7 +258,7 @@ export interface IBlockOverview
     /**
      * total fee for the block
      */
-    total_fee :string
+    total_fee: string
     
     /**
      * total size of the block
@@ -289,7 +289,7 @@ export interface IBlockEnrollmentElements
     /**
      * Random seed
      */
-     commitment: string,
+    commitment: string,
      
     /**
      * Enroll signature
@@ -749,6 +749,6 @@ export interface IPagination
     /**
      * page number
      */
-     page :number
+    page :number
 }
 

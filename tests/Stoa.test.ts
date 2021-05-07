@@ -1106,6 +1106,21 @@ describe ('Test of Stoa API Server', () =>
           }
         assert.deepStrictEqual(response.data, expected);
     });
+    it('Test of the path /boa-stats', async () => {
+        let uri = URI(host)
+            .port(port)
+            .directory("boa-stats");
+        let response = await client.get(uri.toString());
+        let expected = {
+                    height: 1,
+                    transactions: 10,
+                    validators: 7,
+                    frozen_coin: 5283595,
+                    circulating_supply: 5283535,
+                    active_validators: 155055
+                }
+        assert.deepStrictEqual(response.data, expected);
+    });
 
 });
 
