@@ -61,7 +61,7 @@ export class Storages
                     });
             }).catch((err)=>{
                 if (callback != null)
-                callback(err);
+                    callback(err);
             });
     }
 

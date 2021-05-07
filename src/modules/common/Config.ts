@@ -223,7 +223,6 @@ export class DatabaseConfig implements IDatabaseConfig
     /** 
      * multiple Statements exec config
     */
-
     multipleStatements: boolean
     
     /**
@@ -237,7 +236,7 @@ export class DatabaseConfig implements IDatabaseConfig
     constructor(host?: string, user?: string, password?: string, database?: string, port?: number, multipleStatements?: boolean
     ) {
         let conf = extend(true, {}, DatabaseConfig.defaultValue());
-        extend(true, conf, { host: host, user: user, password: password, database: database, port : port, multipleStatements: multipleStatements });
+        extend(true, conf, { host: host, user: user, password: password, database: database, port: port, multipleStatements: multipleStatements });
         this.host = conf.host;
         this.user = conf.user;
         this.password = conf.password;

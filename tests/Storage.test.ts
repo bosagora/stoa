@@ -24,7 +24,7 @@ import { MockDBConfig } from "./TestConfig"
 describe ('Test ledger storage and inquiry function.', () =>
 {
     let ledger_storage: LedgerStorage;
-    let testDBConfig : IDatabaseConfig;
+    let testDBConfig: IDatabaseConfig;
 
     before('Wait for the package libsodium to finish loading', async () =>
     {
@@ -223,7 +223,7 @@ describe ('Test ledger storage and inquiry function.', () =>
 describe ('Test for storing block data in the database', () =>
 {
     let ledger_storage: LedgerStorage;
-    let testDBConfig : IDatabaseConfig;
+    let testDBConfig: IDatabaseConfig;
 
     before('Wait for the package libsodium to finish loading', async () =>
     {
@@ -312,7 +312,7 @@ describe ('Test for storing block data in the database', () =>
 describe ('Tests that sending a pre-image', () =>
 {
     let ledger_storage: LedgerStorage;
-    let testDBConfig : IDatabaseConfig;
+    let testDBConfig: IDatabaseConfig;
     const height = new Height("0");
 
     before('Wait for the package libsodium to finish loading', async () =>
@@ -382,7 +382,7 @@ describe ('Tests that sending a pre-image', () =>
 describe ('Tests storing transaction pools of a transaction', () =>
 {
     let ledger_storage: LedgerStorage;
-    let testDBConfig : IDatabaseConfig;
+    let testDBConfig: IDatabaseConfig;
 
     before('Wait for the package libsodium to finish loading', async () =>
     {
