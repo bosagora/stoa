@@ -27,7 +27,7 @@ describe ('Test of Stoa API for the wallet', () =>
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     let client = new TestClient();
-    let testDBConfig : IDatabaseConfig;
+    let testDBConfig: IDatabaseConfig;
 
     before('Wait for the package libsodium to finish loading', async () =>
     {
