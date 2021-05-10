@@ -626,7 +626,7 @@ class Stoa extends WebService
 
             if (filter_begin > filter_end)
             {
-                res.status(204).send(`Parameter beginDate must be less than a parameter endDate. 'beginDate': (${filter_begin}), 'endDate': (${filter_end})`);
+                res.status(400).send(`Parameter beginDate must be less than a parameter endDate. 'beginDate': (${filter_begin}), 'endDate': (${filter_end})`);
                 return;
             }
         }
