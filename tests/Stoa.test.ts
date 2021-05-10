@@ -110,7 +110,7 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get (uri.toString());
         assert.strictEqual(response.data.length, 6);
         assert.strictEqual(response.data[0].address,
-            "boa1xrdwry6fpk7a57k4gwyj3mwnf59w808nygtuxsgdrpmv4p7ua2hqx78z5en");
+            "boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn");
         assert.strictEqual(response.data[0].preimage.distance, null);
     });
 
@@ -119,24 +119,24 @@ describe ('Test of Stoa API Server', () =>
         let uri = URI(host)
             .port(port)
             .directory("validator")
-            .filename("boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp")
+            .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
             .setSearch("height", "10");
 
         let fail_uri = URI(host)
             .port(port)
             .directory("validator")
-            .filename("boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp")
+            .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
             .setSearch("height", "99");
 
         await assert.rejects(
             client.get(fail_uri.toString()),
-            {statusMessage: "The validator data not found.'address': (boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp), 'height': (99)"}
+            {statusMessage: "The validator data not found.'address': (boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku), 'height': (99)"}
         );
 
         let response = await client.get (uri.toString());
         assert.strictEqual(response.data.length, 1);
         assert.strictEqual(response.data[0].address,
-            "boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp");
+            "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku");
         assert.strictEqual(response.data[0].preimage.distance, null);
     });
 
@@ -154,7 +154,7 @@ describe ('Test of Stoa API Server', () =>
             let uri1 = URI(host)
             .port(port)
             .directory("validator")
-            .filename("boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp")
+            .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
             .setSearch("height", "0");
 
             let response = await client.get (uri1.toString());
@@ -167,7 +167,7 @@ describe ('Test of Stoa API Server', () =>
             let uri2 = URI(host)
                 .port(port)
                 .directory("validator")
-                .filename("boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp")
+                .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
                 .setSearch("height", "6");
 
             response = await client.get (uri2.toString());
@@ -179,7 +179,7 @@ describe ('Test of Stoa API Server', () =>
             let uri3 = URI(host)
                 .port(port)
                 .directory("validator")
-                .filename("boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp")
+                .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
                 .setSearch("height", "1");
             response = await client.get (uri3.toString());
             assert.strictEqual(response.data.length, 1);
@@ -190,7 +190,7 @@ describe ('Test of Stoa API Server', () =>
             let uri4 = URI(host)
                 .port(port)
                 .directory("validator")
-                .filename("boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp")
+                .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
                 .setSearch("height", "8");
             response = await client.get (uri4.toString());
             assert.strictEqual(response.data.length, 1);
@@ -203,7 +203,7 @@ describe ('Test of Stoa API Server', () =>
             response = await client.get (uri5.toString());
             let validators: Array<any> = response.data;
             assert.strictEqual(response.data.length, 6);
-            let validator = validators.find(n => n.address === "boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp");
+            let validator = validators.find(n => n.address === "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku");
             assert.ok(validator !== undefined);
             assert.strictEqual(validator.preimage.distance, 1);
             assert.strictEqual(validator.preimage.hash,
@@ -213,10 +213,10 @@ describe ('Test of Stoa API Server', () =>
             const enroll_sig =
                 new Signature("0x0c48e78972e1b138a37e37ae27a01d5ebdea193088ddef2d9883446efe63086925e8803400d7b93d22b1eef5c475098ce08a5b47e8125cf6b04274cc4db34bfd");
             const utxo_key =
-                new Hash("0x6100ee7a7e00e18e06b743a7ae90e91781c09e0f1791ee2849ce15caf4c6ee1f3aebc23768f98153d8e3fb10ac66267e06acc31dccbfdbe671294a7fded22432");
-            const random_seed =
+                new Hash("0x2f8b231aa4fd35c6a5c68a97fed32120da48cf6d40ccffc93d8dc41a3016eb56434b2c44144a38efe459f98ddc2660b168f1c92a48fe65711173385fb4a269e1");
+            const commitment =
                 new Hash("0xe0c04a5bd47ffc5b065b7d397e251016310c43dc77220bf803b73f1183da00b0e67602b1f95cb18a0059aa1cdf2f9adafe979998364b38cd5c15d92b9b8fd815");
-            const enrollment = new Enrollment(utxo_key, random_seed, 20, enroll_sig);
+            const enrollment = new Enrollment(utxo_key, commitment, 20, enroll_sig);
             const header = new BlockHeader(
                 new Hash(Buffer.alloc(Hash.Width)), new Height("19"), new Hash(Buffer.alloc(Hash.Width)), new BitField([]),
                 new Signature(Buffer.alloc(Signature.Width)), [ enrollment ], new Hash(Buffer.alloc(Hash.Width)), [], 0);
@@ -234,7 +234,7 @@ describe ('Test of Stoa API Server', () =>
             validators = response.data;
             assert.strictEqual(response.data.length, 6);
 
-            validator = validators.find(n => n.address === "boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp");
+            validator = validators.find(n => n.address === "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku");
             assert.ok(validator !== undefined);
             assert.strictEqual(validator.stake, enrollment.utxo_key.toString());
             assert.strictEqual(validator.enrolled_at, "19");
@@ -315,11 +315,11 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get (uri.toString())
         assert.strictEqual(response.data.height, '1');
         assert.strictEqual(response.data.hash,
-            '0xc4d0f4a5734c90e13b90635aeca16b06accfad3161fc77207b5d7cb21d4a428' +
-            '6da3f033fa4692091880e6b0b1b1a4253f69fa372e3492a987253dc203e62e4b8');
+            '0xe0609c900848dffd7bbf7112301b4a3ce47fc9ea4810bb7ce6d4ad4d9f0f0ad' +
+            '18c324b822127f3564f33efee8228662e02755ea49452f6a5832447e5cf495a8f');
         assert.strictEqual(response.data.merkle_root,
-            '0x1d3d908cb9bab19fcb6ac006b6eff772969a1b822cb0acbe9cadabce8b9fcb3' +
-            '34f2d3867239a80da7a3172193589469e4fe1fb9bbf472b82709ffa50f7cc46cd');
+            '0x928f5789a97f75dff9aa070cb761d2ae70c6566556739509b495c2d7b899181' +
+            '119d31f37160212f7ea38358eb671520595178a8aad17f12e00f4119d0b662888');
         assert.strictEqual(response.data.time_stamp, 1609459800);
 
         uri = URI(host)
@@ -330,11 +330,11 @@ describe ('Test of Stoa API Server', () =>
         response = await client.get (uri.toString())
         assert.strictEqual(response.data.height, '0');
         assert.strictEqual(response.data.hash,
-            '0xe2357870cef6f690c5672293aba4e910dc3e120ab83cbfff24cf6b824af0588' +
-            'caa294900abdd46f3453229dea8680343e89f7ef06f47a2db1ec2a214553f4281');
+            '0x8ea91eafb2555f93ce0b0335d8454cdd052646dd1ef4a9029f026d08cdd081b' +
+            '9fb3e736903a119cce4beec1814b05c29b70243e0d1bbc096cf99c90b93f0b9a2');
         assert.strictEqual(response.data.merkle_root,
-            '0x0d453b87856c9faaf75cfac3dc993cd75c34fc1d5329d3c38e8b4757586fd54' +
-            '40cd9ed466f7c2259e5af4f8fe7f45cb997504542efd56d6bd7853fa9596d6bc2');
+            '0x94747147a0ca093d1099d1b2e0d9e2de9d89e0b887a56ffafb17f473cd0317d' +
+            'e36ab7ecd2bdc1148d542bce9501aa1b978c722822a281e45034088286700059e');
         assert.strictEqual(response.data.time_stamp, 1609459200);
     });
 
@@ -355,14 +355,20 @@ describe ('Test of Stoa API Server', () =>
         let uri = URI(host)
             .port(port)
             .directory("/wallet/transactions/pending")
-            .filename("boa1xrqx366yn8xktzhtsj83gj0nnj35cv8lrk7xhszj0dfemlacumgujs595mr");
+            .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
 
         let response = await client.get (uri.toString())
         assert.strictEqual(response.data.length, 2);
         assert.strictEqual(response.data[0].tx_hash,
+<<<<<<< HEAD
             '0x5faca8a9851cf3a6229c9b7998d26cacb26a2483efa209aaf94ce95d34ca93e' +
             'fa24f4d9d0c00bf158f43c597facb2aa71c725a670332cc3608bd470ec6420edc');
         assert.strictEqual(response.data[0].address, 'boa1xrzwvvw6l6d9k84ansqgs9yrtsetpv44wfn8zm9a7lehuej3ssskxth867s');
+=======
+            '0xa2073ce83b58f87d3c684bd62c1d037531edd85f7ed11d006f97af95ca65f8a' +
+            'e2ed8cf10f5843c8cc3f4295b787f1413acc92f449d42a587df608f5ef6d1fb7f');
+        assert.strictEqual(response.data[0].address, 'boa1xqcmmns5swnm03zay5wjplgupe65uw4w0dafzsdsqtwq6gv3h3lcz24a8ch');
+>>>>>>> Change sample data according to a well-known key change.
         assert.strictEqual(response.data[0].amount, '1663400000');
         assert.strictEqual(response.data[0].fee, '0');
         assert.strictEqual(response.data[0].block_delay, 0);
@@ -373,27 +379,27 @@ describe ('Test of Stoa API Server', () =>
         let uri = URI(host)
             .port(port)
             .directory("/transaction/status")
-            .filename("0x5faca8a9851cf3a6229c9b7998d26cacb26a2483efa209aaf94ce95d34ca93efa24f4d9d0c00bf158f43c597facb2aa71c725a670332cc3608bd470ec6420edc");
+            .filename("0xa2073ce83b58f87d3c684bd62c1d037531edd85f7ed11d006f97af95ca65f8ae2ed8cf10f5843c8cc3f4295b787f1413acc92f449d42a587df608f5ef6d1fb7f");
 
         let response_pending = await client.get(uri.toString());
         let expected_pending = {
             status: 'pending',
-            tx_hash: '0x5faca8a9851cf3a6229c9b7998d26cacb26a2483efa209aaf94ce95d34ca93efa24f4d9d0c00bf158f43c597facb2aa71c725a670332cc3608bd470ec6420edc'
+            tx_hash: '0xa2073ce83b58f87d3c684bd62c1d037531edd85f7ed11d006f97af95ca65f8ae2ed8cf10f5843c8cc3f4295b787f1413acc92f449d42a587df608f5ef6d1fb7f'
         }
         assert.deepStrictEqual(response_pending.data, expected_pending);
 
         uri = URI(host)
             .port(port)
             .directory("/transaction/status")
-            .filename("0xbbcdd3a1fe3c8942ad1523068d3cdf0fb0e29a50f96e89a1e75efc42654835552a4fe6d15648a1cb48b4ab376270374579d32a1b167df4334f668289e61e85ef");
+            .filename("0x74c2caf013ffd47440c46536403c1116dbf5276ee736a82db7e2cd9a5b827f7f24dca30951983e0aba92b8d5b813254b447616d2d060845fa0eca3d6b46a09b2");
 
         let response_confirmed = await client.get(uri.toString());
         let expected_confirmed = {
             status: "confirmed",
-            tx_hash: "0xbbcdd3a1fe3c8942ad1523068d3cdf0fb0e29a50f96e89a1e75efc42654835552a4fe6d15648a1cb48b4ab376270374579d32a1b167df4334f668289e61e85ef",
+            tx_hash: "0x74c2caf013ffd47440c46536403c1116dbf5276ee736a82db7e2cd9a5b827f7f24dca30951983e0aba92b8d5b813254b447616d2d060845fa0eca3d6b46a09b2",
             block: {
                 height: 1,
-                hash: "0xc4d0f4a5734c90e13b90635aeca16b06accfad3161fc77207b5d7cb21d4a4286da3f033fa4692091880e6b0b1b1a4253f69fa372e3492a987253dc203e62e4b8"
+                hash: "0xe0609c900848dffd7bbf7112301b4a3ce47fc9ea4810bb7ce6d4ad4d9f0f0ad18c324b822127f3564f33efee8228662e02755ea49452f6a5832447e5cf495a8f"
             }
         };
         assert.deepStrictEqual(response_confirmed.data, expected_confirmed);
@@ -404,16 +410,16 @@ describe ('Test of Stoa API Server', () =>
         let uri = URI(host)
             .port(port)
             .directory("/transaction/pending")
-            .filename("0x5faca8a9851cf3a6229c9b7998d26cacb26a2483efa209aaf94ce95d34ca93efa24f4d9d0c00bf158f43c597facb2aa71c725a670332cc3608bd470ec6420edc");
+            .filename("0xa2073ce83b58f87d3c684bd62c1d037531edd85f7ed11d006f97af95ca65f8ae2ed8cf10f5843c8cc3f4295b787f1413acc92f449d42a587df608f5ef6d1fb7f");
 
         let response = await client.get (uri.toString());
         let expected = {
             "type": 0,
             "inputs": [
                 {
-                    "utxo": "0x79170f924260def767d30e9eb606379c59b26ab5b575097f760507e889ba097e458a19aead724e10cf15313a1da7094c5c7e708c12e91a58f1f922bd6a5da0a5",
+                    "utxo": "0x2cf1caaeff65a7e2b2f7edff1023881564f2f0cad30161cf42279826e6919d77347df68de6d8eb0da58ebdc6e4f28da7569113002044467fc5cbf599a7ea9037",
                     "unlock": {
-                        "bytes": "NdOAVgrduZXM4DZrhCz3/g5H9UJtQcIpd+kj6pVJ0KlxyFfuDj6Cp7bSP14qJ1dO9RpsBG7MqbRoS+6rYKHbAg=="
+                        "bytes": "oNZEIXHc3etqnwHF/GFzst+9UKbA50RP9WY6WgNgbgdooqXHZqRlT8Zgn/wTpTXuIkXgTyj3IewYygldoAMr4Q=="
                     },
                     "unlock_age": 0
                 }
@@ -423,14 +429,14 @@ describe ('Test of Stoa API Server', () =>
                     "value": "1663400000",
                     "lock": {
                         "type": 0,
-                        "bytes": "xOYx2v6aWx69nACIFINcMrCytXJmcWy99/N+ZlGEIWM="
+                        "bytes": "Mb3OFIOnt8RdJR0g/RwOdU46rnt6kUGwAtwNIZG8f4E="
                     }
                 },
                 {
                     "value": "24398336600000",
                     "lock": {
                         "type": 0,
-                        "bytes": "0D1pDd0lnVdG8/9Oj0C1+TfdESEVm/lpOY39/WVKJNU="
+                        "bytes": "/ye9nnESViX42pd20OsHAGDIpltHdV7pIPfUVw228yo="
                     }
                 }
             ],
@@ -445,16 +451,16 @@ describe ('Test of Stoa API Server', () =>
         let uri = URI(host)
             .port(port)
             .directory("/transaction")
-            .filename("0xbbcdd3a1fe3c8942ad1523068d3cdf0fb0e29a50f96e89a1e75efc42654835552a4fe6d15648a1cb48b4ab376270374579d32a1b167df4334f668289e61e85ef");
+            .filename("0x74c2caf013ffd47440c46536403c1116dbf5276ee736a82db7e2cd9a5b827f7f24dca30951983e0aba92b8d5b813254b447616d2d060845fa0eca3d6b46a09b2");
 
         let response = await client.get (uri.toString());
         let expected = {
             "type": 0,
             "inputs": [
                 {
-                    "utxo": "0x0db044a4bd0df5e6e31ddc2b5878b0da5c4c651a1efb74747254823107ce8f420f2fe9a53a7bc547974f7d4b7b2413a0d5d574862420294102ef426e775f83ef",
+                    "utxo": "0x14f9627aac2ca6fea7c8ee66c8967c68aaf524f6d5b120bc80014e505f5c723501215d715fa64295aa2baa8647e4c1776e3fa50a2d644a346630e57cd59eb522",
                     "unlock": {
-                        "bytes": "0fRuFuz34sG1TQvLXONVDjUvQ8FPCzR88uWgp1vvNPkR51NZWEU7kHeqsqwNCYMkexUyx/519fLjdGJlUngECw=="
+                        "bytes": "XMSIGh0fNmGPFZw9+jM+UvTsKSabXBUeSmm8LS0e9wG+MsmEclqIIabSZHydmnycoKBAeh/lld9YODAbf/AhiA=="
                     },
                     "unlock_age": 0
                 }
@@ -464,175 +470,175 @@ describe ('Test of Stoa API Server', () =>
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wGjrRJnNZYrrhI8USfOco0ww/x28a8BSe1Od/7jm0ck="
+                        "bytes": "ejw94GMKeuLPesbtpNxgN7+6BnCTHv3rgCllDdrrqq8="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wGlrWqlGoU9MQUB3prLJ5qodlJE71cStwPMgOfCQF88="
+                        "bytes": "+ja9+iX6EamiWvodERH7xsoRJa3bPe0yoKzr3I474S8="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wGnrUsPwhONyTthG3B9Fma7hSQcLdjdyoVE/TZfR3vM="
+                        "bytes": "+jy99QRsbfDR6l/NzPF2cICQ2uYXpzzh54KU7XbfQhk="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wGprRx3N5zamxgowEcce7NjUVvg6Fzv69pqMasf1s90="
+                        "bytes": "ujS989FoU5AN3sVNiTxtO0VJ75IS03mXraj6yZ47ixE="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wGrrS9h77jSNyovwURQqsd9pYD5H8k2qKew9dgTgHBE="
+                        "bytes": "ujQ95gz90DDVs6WlhtMlFsQOmEGu44BLTT9BHyVR3dE="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wGtrR30uw7pjLZBFxqcug7JxaFgc3E+J1JK695XsKbo="
+                        "bytes": "Oju9/YiKHC70YvTKMXbeqIujoLe+deR16FlKxIJOAIw="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wGvrS/fbcHPDPdK8bQqfwQJbsxhhGgHNddf0ZaHeBz8="
+                        "bytes": "Ojk96+0F1fNfmtl039XW7LafwCw77dYDvo7G7NIFnLs="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wGxrX4Lrf3VRCr/uVmNeTxL3XsoPZbzikfIBlrOxWPM="
+                        "bytes": "+js9+6BmXaLLEIfa1QuhF75/wviB9cXlHq6jFk33vGk="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wGzrVr7AhXpk/Kt9i7ugbNkafe7rO+Q2Deqc+rcEcxE="
+                        "bytes": "ej+96L75IWIDWeXcSfqDQPeqEYV5+WMgmU/XMJVkCdo="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wHBrV2j/6od9XCuzR+iLcShjy2heW6FsLmyuuVVeCqY="
+                        "bytes": "ej295eI1Empe2oz1Sx4EtYKtyyHkyGyXu1myj6BBbMw="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wHDrVwHJFzCbGU0dj4NCb+VN5zyDCOMz/60Ix6TdNNM="
+                        "bytes": "+jm9+y2/Uj+Kzu2J3v0S/ccaIAt/SVdLNlw7Cjk/xbs="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wHFrVTSm3Y5qjJJVytL33eZPEj3/AX/qqQFk19qplYk="
+                        "bytes": "+jC98n7qANALrxKKKHyuisgsOjhz+Y5mAMsKfLSK/h0="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wHHrVk01Z83OmTipdReCQHznwBnx4Gq0Hef+OCurST0="
+                        "bytes": "+jA99UOtdwtOBmftagyTGmnOJdNHEj27r+ys/cdyRvw="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wHJrUPh22DnCj57JSE5J76Y9pgIDJ1ndwTQIhKlKSto="
+                        "bytes": "OjG98m16c26s8H7QSu3taAZmpkXXldHS35/RN1PJI0E="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wHLrWwjKZ6ltVjIRslnqv3Z/H4w+2jzjwilZDxj4cPs="
+                        "bytes": "+jg95K/C2cKhYo+ORjdoFubre9be/Cd+wQNHIixGokw="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wHNrTn7xHDTc/7Z38ExANbk0GxAWwxRfD67iuR05dTs="
+                        "bytes": "ejW9+kZ1tu6JdMV3LRzEYY9cD5tAjnnO4nGYF6+zam4="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wHPrUL9XFGZiFEh+8TZSN2r8Qhdgo4uvZSGpfSFgMs4="
+                        "bytes": "uj496a3T/CmS/lSA+eBLsnBTWYOU6tH3oaUL0HDKoQw="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wHRrRkN0rCu7soCou/draapYwRdbv25tvp3OkHyt7so="
+                        "bytes": "+jY9+XHS4Nj510Ezlw2bIG91kR9x+jLUH4tuLl6jZSY="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wHTrR8mOre/mL3d0eatso4i0uIv3sRC9aZcwZsg2DJs="
+                        "bytes": "ejc98/bE1PYSXYLssjNOFJ5wxMgCZlhe1UHVrZQtecs="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wHVrUSmlC/RcC6j3J6LsJnIWk5EK5WKYlBEiDWGXAC0="
+                        "bytes": "ujM9/CrfXmdQsQuC4ji1APZB1yWvRL+W0XExjfCmB/c="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wHXrWdJNnhuUr/m2iP+sjo/8ONpUzuzkbAm5M7Bd5+c="
+                        "bytes": "ejI9/X5zwED6yXnwiZ0dhihufi8wqU+iRPaACqGcsP8="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wHZrQidEWjiE1C8dj8MSzvIAhR28JI56RU0yI2WG75U="
+                        "bytes": "+jE95blgPL0nc3KT9gXlXV1q4VWgZnvy64gzUZoJkLs="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wHbrWPkA+u4mOKsGwnOwydjpj3BE5CRxQCcWt/09Cec="
+                        "bytes": "ew699nDzRZB+ACW4a70WakpM2RX8RaZ6Yw6BXu7073M="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wHdrQNUsHL9NM0fNfqQu95dMTu65sDUYFkS1G5mp6Gs="
+                        "bytes": "eww9+9QkOYbvvLSy6hQedwcPqncK+a3mSHPdr+lJyEw="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "wHfrR7XwBCK1GWWLu4fkULHa9qOEaoVtm/n5oHk3x88="
+                        "bytes": "ewa97U1wMlSffch4BHNpepAZ2bNMrkb3mRjjwfp6P5Y="
                     }
                 }
             ],
@@ -1176,19 +1182,19 @@ describe ('Test of the path /utxo', () =>
         let uri = URI(host)
             .port(port)
             .directory("utxo")
-            .filename("boa1xrqx366yn8xktzhtsj83gj0nnj35cv8lrk7xhszj0dfemlacumgujs595mr");
+            .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
 
         let response = await client.get (uri.toString());
         let expected = [
             {
+                utxo: '0x2cf1caaeff65a7e2b2f7edff1023881564f2f0cad30161cf42279826e6919d77347df68de6d8eb0da58ebdc6e4f28da7569113002044467fc5cbf599a7ea9037',
                 type: 0,
-                utxo: '0x79170f924260def767d30e9eb606379c59b26ab5b575097f760507e889ba097e458a19aead724e10cf15313a1da7094c5c7e708c12e91a58f1f922bd6a5da0a5',
+                unlock_height: '2',
                 amount: '24400000000000',
                 height: '1',
-                lock_bytes: "wGjrRJnNZYrrhI8USfOco0ww/x28a8BSe1Od/7jm0ck=",
-                lock_type: 0,
                 time: 1609459800,
-                unlock_height: '2'
+                lock_type: 0,
+                lock_bytes: 'ejw94GMKeuLPesbtpNxgN7+6BnCTHv3rgCllDdrrqq8='
             }];
         assert.deepStrictEqual(response.data, expected);
     });
@@ -1209,7 +1215,7 @@ describe ('Test of the path /utxo', () =>
         let uri = URI(host)
             .port(port)
             .directory("utxo")
-            .filename("boa1xrqx366yn8xktzhtsj83gj0nnj35cv8lrk7xhszj0dfemlacumgujs595mr");
+            .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
 
         let response = await client.get (uri.toString());
         assert.strictEqual(response.data.length, 0);
@@ -1286,7 +1292,7 @@ describe ('Test of the path /utxo for freezing', () =>
         let uri = URI(host)
             .port(port)
             .directory("utxo")
-            .filename("boa1xrqx366yn8xktzhtsj83gj0nnj35cv8lrk7xhszj0dfemlacumgujs595mr");
+            .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
 
         let response = await client.get (uri.toString());
 
@@ -1299,8 +1305,8 @@ describe ('Test of the path /utxo for freezing', () =>
                 new TxInput(new Hash(response.data[0].utxo))
             ],
             [
-                new TxOutput(JSBI.BigInt(  "100000000000"), new PublicKey("boa1xrqx366yn8xktzhtsj83gj0nnj35cv8lrk7xhszj0dfemlacumgujs595mr")),
-                new TxOutput(JSBI.BigInt("24300000000000"), new PublicKey("boa1xrqx366yn8xktzhtsj83gj0nnj35cv8lrk7xhszj0dfemlacumgujs595mr"))
+                new TxOutput(JSBI.BigInt(  "100000000000"), new PublicKey("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj")),
+                new TxOutput(JSBI.BigInt("24300000000000"), new PublicKey("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj"))
             ],
             DataPayload.init
         );
@@ -1308,7 +1314,7 @@ describe ('Test of the path /utxo for freezing', () =>
         uri = URI(host)
             .port(port)
             .directory("utxo")
-            .filename("boa1xrqxj66649r2zn6vg9q80f4je8n258v5jyaat39dcrejqw0sjqtu7xfsxn9");
+            .filename("boa1xrard006yhapr2dzttap6yg3l0rv5yf94hdnmmfj5zkwhhyw80sj785segs");
 
         response = await client.get (uri.toString());
 
@@ -1321,8 +1327,8 @@ describe ('Test of the path /utxo for freezing', () =>
                 new TxInput(new Hash(response.data[0].utxo))
             ],
             [
-                new TxOutput(JSBI.BigInt(  "400000000000"), new PublicKey("boa1xrqxj66649r2zn6vg9q80f4je8n258v5jyaat39dcrejqw0sjqtu7xfsxn9")),
-                new TxOutput(JSBI.BigInt("24000000000000"), new PublicKey("boa1xrqxj66649r2zn6vg9q80f4je8n258v5jyaat39dcrejqw0sjqtu7xfsxn9"))
+                new TxOutput(JSBI.BigInt(  "400000000000"), new PublicKey("boa1xrard006yhapr2dzttap6yg3l0rv5yf94hdnmmfj5zkwhhyw80sj785segs")),
+                new TxOutput(JSBI.BigInt("24000000000000"), new PublicKey("boa1xrard006yhapr2dzttap6yg3l0rv5yf94hdnmmfj5zkwhhyw80sj785segs"))
             ],
             DataPayload.init
         );
@@ -1351,7 +1357,7 @@ describe ('Test of the path /utxo for freezing', () =>
         let uri = URI(host)
             .port(port)
             .directory("utxo")
-            .filename("boa1xrqx366yn8xktzhtsj83gj0nnj35cv8lrk7xhszj0dfemlacumgujs595mr");
+            .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
 
         let response = await client.get (uri.toString());
         let utxo_array: Array<any> = response.data;
@@ -1370,7 +1376,7 @@ describe ('Test of the path /utxo for freezing', () =>
         let uri = URI(host)
             .port(port)
             .directory("utxo")
-            .filename("boa1xrqxj66649r2zn6vg9q80f4je8n258v5jyaat39dcrejqw0sjqtu7xfsxn9");
+            .filename("boa1xrard006yhapr2dzttap6yg3l0rv5yf94hdnmmfj5zkwhhyw80sj785segs");
 
         let response = await client.get(uri.toString());
         let utxo_array: Array<any> = response.data;
@@ -1429,15 +1435,15 @@ describe ('Test of the path /merkle_path', () =>
             .port(agora_port)
             .directory("merkle_path")
             .setSearch("height", "1")
-            .setSearch("hash", "0xbbcdd3a1fe3c8942ad1523068d3cdf0fb0e29a50f96e89a1e75efc42654835552a4fe6d15648a1cb48b4ab376270374579d32a1b167df4334f668289e61e85ef");
+            .setSearch("hash", "0x74c2caf013ffd47440c46536403c1116dbf5276ee736a82db7e2cd9a5b827f7f24dca30951983e0aba92b8d5b813254b447616d2d060845fa0eca3d6b46a09b2");
 
         let response = await client.get(uri.toString());
 
         let expected =
             [
-                "0x161c713d23d71a0cf54f35b5fe5fb7423aefbd11de4ece83efde37ed1a0bc5d25a6c25a3535c2e4e35993b56120fbd0e021500e2111c7bee22162f487a5c633e",
-                "0xd4adadb3d59cb56ba050efd03c5c06243158242fd19a5d2481f6f6d75bd9702bb57ed023035f070e993de7a01f0537bb6a0da75a652184474ed1b966bb93c6ef",
-                "0xc7cb35254606aad46756d1cf297242c42965a1849b1eb70c408d30c6568f438de604c069cea2751229ee34002d60d2cb4a17724d5bff3ab86b66ce79db7c3889",
+                "0x59336788adcb9eb8c7bfbbd40162a74bef6972d1bcd3fdb8f8eb7f464ff11094c3000c08e8da33595482ff4223167f079ce96c8f849ee640f5eb556ab5406839",
+                "0x9f64d5d3e951a2a111fb414dd3d8a2dded75cfe953c7502c76682dd8b81f8d8a84cd3cff56c791fe2bbcfdeba23f894f2e0ad7ef7659e0d1ae785b092d2a9302",
+                "0xed63eaefef428595e36a38ff8c96d514d9f57968928cebe8ba0161ab434262f2e5099e3942d17d67562428dfa43e98cb5099ca0f4482274dbc6d6b2012b38c85",
             ];
 
         assert.deepStrictEqual(response.data, expected);
@@ -1448,13 +1454,13 @@ describe ('Test of the path /merkle_path', () =>
         const agora_addr: URL = new URL('http://localhost:2826');
         let agora_client = new AgoraClient(agora_addr);
         let merkle_path: Array<Hash> = await agora_client.getMerklePath(new Height("1"),
-            new Hash("0xbbcdd3a1fe3c8942ad1523068d3cdf0fb0e29a50f96e89a1e75efc42654835552a4fe6d15648a1cb48b4ab376270374579d32a1b167df4334f668289e61e85ef"))
+            new Hash("0x74c2caf013ffd47440c46536403c1116dbf5276ee736a82db7e2cd9a5b827f7f24dca30951983e0aba92b8d5b813254b447616d2d060845fa0eca3d6b46a09b2"))
 
         let expected =
             [
-                new Hash("0x161c713d23d71a0cf54f35b5fe5fb7423aefbd11de4ece83efde37ed1a0bc5d25a6c25a3535c2e4e35993b56120fbd0e021500e2111c7bee22162f487a5c633e"),
-                new Hash("0xd4adadb3d59cb56ba050efd03c5c06243158242fd19a5d2481f6f6d75bd9702bb57ed023035f070e993de7a01f0537bb6a0da75a652184474ed1b966bb93c6ef"),
-                new Hash("0xc7cb35254606aad46756d1cf297242c42965a1849b1eb70c408d30c6568f438de604c069cea2751229ee34002d60d2cb4a17724d5bff3ab86b66ce79db7c3889"),
+                new Hash("0x59336788adcb9eb8c7bfbbd40162a74bef6972d1bcd3fdb8f8eb7f464ff11094c3000c08e8da33595482ff4223167f079ce96c8f849ee640f5eb556ab5406839"),
+                new Hash("0x9f64d5d3e951a2a111fb414dd3d8a2dded75cfe953c7502c76682dd8b81f8d8a84cd3cff56c791fe2bbcfdeba23f894f2e0ad7ef7659e0d1ae785b092d2a9302"),
+                new Hash("0xed63eaefef428595e36a38ff8c96d514d9f57968928cebe8ba0161ab434262f2e5099e3942d17d67562428dfa43e98cb5099ca0f4482274dbc6d6b2012b38c85"),
             ];
 
         assert.deepStrictEqual(merkle_path, expected);
@@ -1465,7 +1471,7 @@ describe ('Test of the path /merkle_path', () =>
         let uri = URI(host)
             .port(port)
             .directory("spv")
-            .filename("0xbbcdd3a1fe3c8942ad1523068d3cdf0fb0e29a50f96e89a1e75efc42654835552a4fe6d15648a1cb48b4ab376270374579d32a1b167df4334f668289e61e85ef");
+            .filename("0x74c2caf013ffd47440c46536403c1116dbf5276ee736a82db7e2cd9a5b827f7f24dca30951983e0aba92b8d5b813254b447616d2d060845fa0eca3d6b46a09b2");
 
         let response = await client.get(uri.toString());
 
@@ -1482,7 +1488,7 @@ describe ('Test of the path /merkle_path', () =>
         let uri = URI(host)
             .port(port)
             .directory("spv")
-            .filename("0x161c713d23d71a0cf54f35b5fe5fb7423aefbd11de4ece83efde37ed1a0bc5d25a6c25a3535c2e4e35993b56120fbd0e021500e2111c7bee22162f487a5c633e");
+            .filename("0x59336788adcb9eb8c7bfbbd40162a74bef6972d1bcd3fdb8f8eb7f464ff11094c3000c08e8da33595482ff4223167f079ce96c8f849ee640f5eb556ab5406839");
 
         let response = await client.get(uri.toString());
 
