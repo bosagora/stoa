@@ -121,7 +121,7 @@ describe ('Test ledger storage and inquiry function.', () =>
         assert.ok(validator !== undefined);
         assert.strictEqual(validator.address, address);
         assert.strictEqual(validator.enrolled_at, 0);
-        assert.strictEqual(validator.distance, undefined);
+        assert.strictEqual(validator.height, 1);
 
         rows = await ledger_storage.getValidatorsAPI(new Height("1"), address);
         assert.strictEqual(rows.length, 1);
@@ -132,7 +132,7 @@ describe ('Test ledger storage and inquiry function.', () =>
 
         rows = await ledger_storage.getValidatorsAPI(null, null);
         assert.strictEqual(rows.length, 6);
-        assert.strictEqual(rows[0].distance, undefined);
+        assert.strictEqual(rows[0].height, 1);
     });
 
     it ('Test for merkle tree', async () =>
@@ -341,7 +341,7 @@ describe ('Tests that sending a pre-image', () =>
     });
 
 
-    it ('Tests that sending a pre-image with a distance of 6 works', async () =>
+    it ('Tests that sending a pre-image with a height of 6 works', async () =>
     {
         let pre_image: PreImageInfo = PreImageInfo.reviver("", sample_preImageInfo);
         return ledger_storage.updatePreImage(pre_image);
@@ -350,13 +350,13 @@ describe ('Tests that sending a pre-image', () =>
         assert.strictEqual(rows.length, 6);
         let validator = rows.find(n => n.address === "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku");
         assert.ok(validator !== undefined);
-        assert.strictEqual(validator.preimage_distance, 6);
+        assert.strictEqual(validator.preimage_height, '6');
         assert.strictEqual(new Hash(validator.preimage_hash, Endian.Little).toString(), sample_preImageInfo.hash);
     });
 
-    it ('Fail tests that sending a pre-image with a distance of 5 works', async () =>
+    it ('Fail tests that sending a pre-image with a height of 5 works', async () =>
     {
-        sample_preImageInfo.distance = 5;
+        sample_preImageInfo.height = "5";
         let pre_image: PreImageInfo = PreImageInfo.reviver("", sample_preImageInfo);
         await ledger_storage.updatePreImage(pre_image);
 
@@ -364,14 +364,14 @@ describe ('Tests that sending a pre-image', () =>
         assert.strictEqual(rows.length, 6);
         let validator = rows.find(n => n.address === "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku");
         assert.ok(validator !== undefined);
-        assert.strictEqual(validator.preimage_distance, 6);
+        assert.strictEqual(validator.preimage_height, 6);
         assert.strictEqual(new Hash(validator.preimage_hash, Endian.Little).toString(), sample_preImageInfo.hash);
     });
 
-    it ('Fail tests that sending a pre-image with a distance of 1008 works', async () =>
+    it ('Fail tests that sending a pre-image with a height of 1008 works', async () =>
     {
-        // Distance test out of cycle_length range Test
-        sample_preImageInfo.distance = 1008;
+        // Pre-image height test out of cycle_length range Test
+        sample_preImageInfo.height = "1008";
         let pre_image: PreImageInfo = PreImageInfo.reviver("", sample_preImageInfo);
         await ledger_storage.updatePreImage(pre_image);
 
@@ -379,7 +379,7 @@ describe ('Tests that sending a pre-image', () =>
         assert.strictEqual(rows.length, 6);
         let validator = rows.find(n => n.address === "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku");
         assert.ok(validator !== undefined);
-        assert.strictEqual(validator.preimage_distance, 6);
+        assert.strictEqual(validator.preimage_height, 6);
         assert.strictEqual(new Hash(validator.preimage_hash, Endian.Little).toString(), sample_preImageInfo.hash);
     });
 });

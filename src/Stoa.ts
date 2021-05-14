@@ -210,39 +210,41 @@ class Stoa extends WebService
                 for (const row of rows)
                 {
                     let preimage_hash: Buffer = row.preimage_hash;
-                    let preimage_distance: number = row.preimage_distance;
+                    let preimage_height: JSBI = JSBI.BigInt(row.preimage_height);
                     let target_height: Height = new Height(row.height);
                     let result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
                     let avail_height = JSBI.BigInt(row.avail_height);
-
+                    let preimage_height_str: string;
+                    
                     // Hashing preImage
                     if (JSBI.greaterThanOrEqual(target_height.value, avail_height) &&
-                        JSBI.greaterThanOrEqual(JSBI.add(avail_height, JSBI.BigInt(preimage_distance)), target_height.value))
+                        JSBI.greaterThanOrEqual(JSBI.add(avail_height, JSBI.BigInt(preimage_height)), target_height.value))
                     {
                         result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                        let count = JSBI.toNumber(JSBI.subtract(JSBI.add(avail_height, JSBI.BigInt(preimage_distance)), target_height.value));
+                        let count = JSBI.toNumber(JSBI.subtract(JSBI.add(avail_height, JSBI.BigInt(preimage_height)), target_height.value));
                         for (let i = 0; i < count; i++)
                         {
                             result_preimage_hash = hash(result_preimage_hash.data);
-                            preimage_distance--;
+                            preimage_height = JSBI.subtract(preimage_height, JSBI.BigInt(1));
                         }
+                        preimage_height_str = preimage_height.toString();
                     }
                     else
                     {
                         if (JSBI.equal(target_height.value, JSBI.BigInt(row.enrolled_at)))
                         {
-                            preimage_distance = 0;
+                            preimage_height_str = "0";
                             result_preimage_hash.fromBinary(row.commitment, Endian.Little);
                         }
                         else
                         {
-                            preimage_distance = NaN;
+                            preimage_height_str = "";
                             result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
                         }
                     }
 
                     let preimage: IPreimage = {
-                        distance: Number(preimage_distance),
+                        height: preimage_height_str,
                         hash: result_preimage_hash.toString()
                     } as IPreimage;
 
@@ -305,38 +307,41 @@ class Stoa extends WebService
                 for (const row of rows)
                 {
                     let preimage_hash: Buffer = row.preimage_hash;
-                    let preimage_distance: number = row.preimage_distance;
-                    let target_height: Height = new Height(JSBI.BigInt(row.height));
+                    let preimage_height: JSBI = JSBI.BigInt(row.preimage_height);
+                    let target_height: Height = new Height(row.height);
                     let result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
                     let avail_height = JSBI.BigInt(row.avail_height);
+                    let preimage_height_str: string;
+    
                     // Hashing preImage
                     if (JSBI.greaterThanOrEqual(target_height.value, avail_height) &&
-                        JSBI.greaterThanOrEqual(JSBI.add(avail_height, JSBI.BigInt(preimage_distance)), target_height.value))
+                        JSBI.greaterThanOrEqual(JSBI.add(avail_height, JSBI.BigInt(preimage_height)), target_height.value))
                     {
                         result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                        let count = JSBI.toNumber(JSBI.subtract(JSBI.add(avail_height, JSBI.BigInt(preimage_distance)), target_height.value));
+                        let count = JSBI.toNumber(JSBI.subtract(JSBI.add(avail_height, JSBI.BigInt(preimage_height)), target_height.value));
                         for (let i = 0; i < count; i++)
                         {
                             result_preimage_hash = hash(result_preimage_hash.data);
-                            preimage_distance--;
+                            preimage_height = JSBI.subtract(preimage_height, JSBI.BigInt(1));
                         }
+                        preimage_height_str = preimage_height.toString();
                     }
                     else
                     {
                         if (JSBI.equal(target_height.value, JSBI.BigInt(row.enrolled_at)))
                         {
-                            preimage_distance = 0;
+                            preimage_height_str = "0";
                             result_preimage_hash.fromBinary(row.commitment, Endian.Little);
                         }
                         else
                         {
-                            preimage_distance = NaN;
+                            preimage_height_str = "";
                             result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
                         }
                     }
 
                     let preimage: IPreimage = {
-                        distance: preimage_distance,
+                        height: preimage_height_str,
                         hash: result_preimage_hash.toString()
                     } as IPreimage;
 
@@ -1504,7 +1509,7 @@ class Stoa extends WebService
 
                     if (changes)
                         logger.info(`Saved a pre-image utxo : ${pre_image.utxo.toString().substr(0, 18)}, ` +
-                        `hash : ${pre_image.hash.toString().substr(0, 18)}, distance : ${pre_image.distance}`);
+                        `hash : ${pre_image.hash.toString().substr(0, 18)}, pre-image height : ${pre_image.height}`);
                     resolve();
                 }
                 catch(err)
