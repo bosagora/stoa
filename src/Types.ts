@@ -29,7 +29,7 @@ export interface IValidator
  */
 export interface IPreimage
 {
-    distance?: number;
+    height?: string;
     hash?: string;
 }
 

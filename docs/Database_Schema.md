@@ -214,7 +214,7 @@ CREATE TABLE IF NOT EXISTS "utxos" (
 |  utxo_key         | BLOB      | Y  | Y        |          | The hash of the UTXO|
 |  address          | TEXT      |    | Y        |          | The public key that can redeem this UTXO|
 |  stake            | NUMERIC   |    | Y        |          | The amount of the UTXO|
-|  preimage_distance| INTEGER   |    | Y        |          | The distance of the preimage|
+|  preimage_height  | INTEGER   |    | Y        |          | The height of the preimage|
 |  preimage_hash    | BLOB      |    | Y        |          | The hash of the preimage|
 
 ### _Create Script_
@@ -225,7 +225,7 @@ CREATE TABLE IF NOT EXISTS "validators" (
     "utxo_key"              BLOB    NOT NULL,
     "address"               TEXT    NOT NULL,
     "stake"                 NUMERIC NOT NULL,
-    "preimage_distance"     INTEGER NOT NULL,
+    "preimage_height"       INTEGER NOT NULL,
     "preimage_hash"         BLOB    NOT NULL,
     PRIMARY KEY("enrolled_at","utxo_key")
 )
