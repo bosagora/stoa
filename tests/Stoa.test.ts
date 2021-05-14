@@ -111,7 +111,7 @@ describe ('Test of Stoa API Server', () =>
         assert.strictEqual(response.data.length, 6);
         assert.strictEqual(response.data[0].address,
             "boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn");
-        assert.strictEqual(response.data[0].preimage.distance, null);
+        assert.strictEqual(response.data[0].preimage.height, '');
     });
 
     it ('Test of the path /validator', async () =>
@@ -137,7 +137,7 @@ describe ('Test of Stoa API Server', () =>
         assert.strictEqual(response.data.length, 1);
         assert.strictEqual(response.data[0].address,
             "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku");
-        assert.strictEqual(response.data[0].preimage.distance, null);
+        assert.strictEqual(response.data[0].preimage.height, '');
     });
 
     it ('Tests that sending a pre-image with get /validator and /validators', async () =>
@@ -160,7 +160,7 @@ describe ('Test of Stoa API Server', () =>
             let response = await client.get (uri1.toString());
            
             assert.strictEqual(response.data.length, 1);
-            assert.strictEqual(response.data[0].preimage.distance, 0);
+            assert.strictEqual(response.data[0].preimage.height, '0');
             assert.strictEqual(response.data[0].preimage.hash,
             "0x0a8201f9f5096e1ce8e8de4147694940a57a188b78293a55144fc8777a774f2349b3a910fb1fb208514fb16deaf49eb05882cdb6796a81f913c6daac3eb74328");
 
@@ -172,7 +172,7 @@ describe ('Test of Stoa API Server', () =>
 
             response = await client.get (uri2.toString());
             assert.strictEqual(response.data.length, 1);
-            assert.strictEqual(response.data[0].preimage.distance, 6);
+            assert.strictEqual(response.data[0].preimage.height, '6');
             assert.strictEqual(response.data[0].preimage.hash,
                 "0x790ab7c8f8ddbf012561e70c944c1835fd1a873ca55c973c828164906f8b35b924df7bddcafade688ad92cfb4414b2cf69a02d115dc214bbd00d82167f645e7e");
 
@@ -183,7 +183,7 @@ describe ('Test of Stoa API Server', () =>
                 .setSearch("height", "1");
             response = await client.get (uri3.toString());
             assert.strictEqual(response.data.length, 1);
-            assert.strictEqual(response.data[0].preimage.distance, 1);
+            assert.strictEqual(response.data[0].preimage.height, '1');
             assert.strictEqual(response.data[0].preimage.hash,
                 "0x314e30482fd0b498361e8537961d875e52b7e82edb8260cd548d3edacb451c80f41dd0ba9c5700adfb646066d41b0031120b65cba2df91def9bd83263fb306bd");
 
@@ -194,7 +194,7 @@ describe ('Test of Stoa API Server', () =>
                 .setSearch("height", "8");
             response = await client.get (uri4.toString());
             assert.strictEqual(response.data.length, 1);
-            assert.strictEqual(response.data[0].preimage.distance, null);
+            assert.strictEqual(response.data[0].preimage.height, '');
             assert.strictEqual(response.data[0].preimage.hash, new Hash(Buffer.alloc(Hash.Width)).toString());
 
             let uri5 = URI(host)
@@ -205,7 +205,7 @@ describe ('Test of Stoa API Server', () =>
             assert.strictEqual(response.data.length, 6);
             let validator = validators.find(n => n.address === "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku");
             assert.ok(validator !== undefined);
-            assert.strictEqual(validator.preimage.distance, 1);
+            assert.strictEqual(validator.preimage.height, '1');
             assert.strictEqual(validator.preimage.hash,
                 "0x314e30482fd0b498361e8537961d875e52b7e82edb8260cd548d3edacb451c80f41dd0ba9c5700adfb646066d41b0031120b65cba2df91def9bd83263fb306bd");
 
@@ -299,7 +299,7 @@ describe ('Test of Stoa API Server', () =>
             let response = await client.get (uri11.toString());
             assert.strictEqual(response.data.length, 1);
             console.log(response.data);
-            assert.strictEqual(response.data[0].preimage.distance, 1);
+            assert.strictEqual(response.data[0].preimage.height, 1);
             assert.strictEqual(response.data[0].preimage.hash, sample_reEnroll_preImageInfo.hash);
         }, 300);
         **/

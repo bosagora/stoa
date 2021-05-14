@@ -396,7 +396,7 @@ export class LedgerStorage extends Storages
             {
                 storage.run(
                     `INSERT INTO validators
-                        (enrolled_at, utxo_key, address, amount, preimage_distance, preimage_hash)
+                        (enrolled_at, utxo_key, address, amount, preimage_height, preimage_hash)
                     SELECT ?, utxo_key, address, amount, ?, ?
                         FROM tx_outputs
                     WHERE
@@ -596,7 +596,7 @@ export class LedgerStorage extends Storages
         {
             this.run(
                 `UPDATE validators
-                    SET preimage_distance = ?,
+                    SET preimage_height = ?,
                         preimage_hash = ?
                     WHERE
                     EXISTS
@@ -613,15 +613,15 @@ export class LedgerStorage extends Storages
                             AND ? < enrollments.cycle_length
                         ORDER BY block_height DESC
                         LIMIT 1)
-                    AND ? > validators.preimage_distance`,
+                    AND ? > validators.preimage_height`,
                 [
-                    pre_image.distance,
+                    pre_image.height.toString(),
                     pre_image.hash.toBinary(Endian.Little),
                     enroll_key,
                     enroll_key,
                     enroll_key,
-                    pre_image.distance,
-                    pre_image.distance
+                    pre_image.height.toString(),
+                    pre_image.height.toString()
                 ])
                 .then((result) =>
                 {
@@ -663,7 +663,7 @@ export class LedgerStorage extends Storages
     {
         let sql =
         `SELECT
-            enrolled_at, utxo_key, address, amount, preimage_distance, preimage_hash
+            enrolled_at, utxo_key, address, amount, preimage_height, preimage_hash
         FROM
             validators
         WHERE enrolled_at = ?`;
@@ -1307,13 +1307,13 @@ export class LedgerStorage extends Storages
             cur_height = `(SELECT MAX(height) as height FROM blocks)`;
 
         let sql =
-        `SELECT utxos.address,
+        `SELECT validators.address,
                 enrollments.enrolled_at,
                 enrollments.utxo_key as stake,
                 enrollments.commitment,
                 enrollments.avail_height,
                 ` + cur_height + ` as height,
-                validators.preimage_distance,
+                validators.preimage_height,
                 validators.preimage_hash
         FROM (SELECT MAX(block_height) as enrolled_at,
                 (CASE WHEN block_height = 0 THEN
@@ -1338,7 +1338,7 @@ export class LedgerStorage extends Storages
         `;
 
         if (address != null)
-            sql += ` AND utxos.address = '` + address + `'`;
+            sql += ` AND validators.address = '` + address + `'`;
 
         sql += ` ORDER BY enrollments.enrolled_at ASC, enrollments.utxo_key ASC;`;
 
