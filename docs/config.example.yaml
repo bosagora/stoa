@@ -14,7 +14,11 @@ server:
 ##                               Database options                             ##
 ################################################################################
 database:
-  filename: data/main.db
+   host : 127.0.0.1
+   user : root
+   database : root
+   password : "root"
+   port : 3306
 
 ################################################################################
 ##                               Logging options                              ##

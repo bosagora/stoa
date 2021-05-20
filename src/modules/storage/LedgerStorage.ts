@@ -17,6 +17,7 @@ import {
     Utils, Endian, Lock, Unlock, PublicKey, DataPayload, TxPayloadFee
 } from 'boa-sdk-ts';
 import { Storages } from './Storages';
+import { IDatabaseConfig } from '../common/Config';
 
 import JSBI from 'jsbi';
 
@@ -33,19 +34,19 @@ export class LedgerStorage extends Storages
     /**
      * Construct an instance of `LedgerStorage`, exposes callback API.
      */
-    constructor (filename: string, genesis_timestamp: number, callback: (err: Error | null) => void)
+    constructor (databaseConfig: IDatabaseConfig, genesis_timestamp: number, callback: (err: Error | null) => void)
     {
-        super(filename, callback);
+        super(databaseConfig, callback);
         this.genesis_timestamp = genesis_timestamp;
     }
 
     /**
      * Construct an instance of `LedgerStorage` using `Promise` API.
      */
-    public static make (filename: string, genesis_timestamp: number): Promise<LedgerStorage>
+    public static make (databaseConfig: IDatabaseConfig, genesis_timestamp: number): Promise<LedgerStorage>
     {
         return new Promise<LedgerStorage>((resolve, reject) => {
-            let result = new LedgerStorage(filename, genesis_timestamp, (err: Error | null) => {
+            let result = new LedgerStorage(databaseConfig, genesis_timestamp, (err: Error | null) => {
                 if (err)
                     reject(err);
                 else
@@ -66,153 +67,167 @@ export class LedgerStorage extends Storages
         let sql =
         `CREATE TABLE IF NOT EXISTS blocks
         (
-            height              INTEGER NOT NULL,
-            hash                BLOB    NOT NULL,
-            prev_block          BLOB    NOT NULL,
-            validators          TEXT    NOT NULL,
-            merkle_root         BLOB    NOT NULL,
-            signature           BLOB    NOT NULL,
-            random_seed         BLOB    NOT NULL,
-            missing_validators  TEXT    NULL,
-            tx_count            INTEGER NOT NULL,
-            enrollment_count    INTEGER NOT NULL,
-            time_offset         INTEGER NOT NULL,
-            time_stamp          INTEGER NOT NULL,
+            height              INTEGER  NOT NULL,
+            hash                TINYBLOB NOT NULL,
+            prev_block          TINYBLOB NOT NULL,
+            validators          TEXT     NOT NULL,
+            merkle_root         TINYBLOB NOT NULL,
+            signature           TINYBLOB NOT NULL,
+            random_seed         TINYBLOB NOT NULL,
+            missing_validators  TEXT     NULL,
+            tx_count            INTEGER  NOT NULL,
+            enrollment_count    INTEGER  NOT NULL,
+            time_offset         INTEGER  NOT NULL,
+            time_stamp          INTEGER  NOT NULL,
             PRIMARY KEY(height)
         );
 
         CREATE TABLE IF NOT EXISTS enrollments
         (
-            block_height        INTEGER NOT NULL,
-            enrollment_index    INTEGER NOT NULL,
-            utxo_key            BLOB    NOT NULL,
-            commitment          BLOB    NOT NULL,
-            cycle_length        INTEGER NOT NULL,
-            enroll_sig          BLOB    NOT NULL,
+            block_height        INTEGER  NOT NULL,
+            enrollment_index    INTEGER  NOT NULL,
+            utxo_key            TINYBLOB NOT NULL,
+            commitment          TINYBLOB NOT NULL,
+            cycle_length        INTEGER  NOT NULL,
+            enroll_sig          TINYBLOB NOT NULL,
             PRIMARY KEY(block_height, enrollment_index)
         );
 
         CREATE TABLE IF NOT EXISTS transactions
         (
-            block_height        INTEGER NOT NULL,
-            tx_index            INTEGER NOT NULL,
-            tx_hash             BLOB    NOT NULL,
-            type                INTEGER NOT NULL,
-            unlock_height       INTEGER NOT NULL,
-            lock_height         INTEGER NOT NULL,
-            tx_fee              INTEGER NOT NULL,
-            payload_fee         INTEGER NOT NULL,
-            tx_size             INTEGER NOT NULL,
-            inputs_count        INTEGER NOT NULL,
-            outputs_count       INTEGER NOT NULL,
-            payload_size        INTEGER NOT NULL,
+            block_height        INTEGER  NOT NULL,
+            tx_index            INTEGER  NOT NULL,
+            tx_hash             TINYBLOB NOT NULL,
+            type                INTEGER  NOT NULL,
+            unlock_height       INTEGER  NOT NULL,
+            lock_height         INTEGER  NOT NULL,
+            tx_fee              INTEGER  NOT NULL,
+            payload_fee         INTEGER  NOT NULL,
+            tx_size             INTEGER  NOT NULL,
+            inputs_count        INTEGER  NOT NULL,
+            outputs_count       INTEGER  NOT NULL,
+            payload_size        INTEGER  NOT NULL,
             PRIMARY KEY(block_height, tx_index)
         );
 
         CREATE TABLE IF NOT EXISTS tx_inputs
         (
-            block_height        INTEGER NOT NULL,
-            tx_index            INTEGER NOT NULL,
-            in_index            INTEGER NOT NULL,
-            tx_hash             BLOB    NOT NULL,
-            utxo                BLOB    NOT NULL,
-            unlock_bytes        BLOB    NOT NULL,
-            unlock_age          INTEGER NOT NULL,
-            PRIMARY KEY(block_height, tx_index, in_index, utxo)
+            block_height        INTEGER  NOT NULL,
+            tx_index            INTEGER  NOT NULL,
+            in_index            INTEGER  NOT NULL,
+            tx_hash             TINYBLOB NOT NULL,
+            utxo                TINYBLOB NOT NULL,
+            unlock_bytes        TINYBLOB NOT NULL,
+            unlock_age          INTEGER  NOT NULL,
+            PRIMARY KEY(block_height, tx_index, in_index, utxo(64))
         );
 
         CREATE TABLE IF NOT EXISTS tx_outputs
         (
-            block_height        INTEGER NOT NULL,
-            tx_index            INTEGER NOT NULL,
-            output_index        INTEGER NOT NULL,
-            tx_hash             BLOB    NOT NULL,
-            utxo_key            BLOB    NOT NULL,
-            amount              NUMERIC NOT NULL,
+            block_height        INTEGER     NOT NULL,
+            tx_index            INTEGER     NOT NULL,
+            output_index        INTEGER     NOT NULL,
+            tx_hash             TINYBLOB    NOT NULL,
+            utxo_key            TINYBLOB    NOT NULL,
+            amount              BIGINT(20)  UNSIGNED NOT NULL,
             lock_type           INTEGER NOT NULL,
-            lock_bytes          BLOB    NOT NULL,
-            address             TEXT    NOT NULL,
+            lock_bytes          TINYBLOB    NOT NULL,
+            address             TEXT        NOT NULL,
             PRIMARY KEY(block_height, tx_index, output_index)
         );
 
         CREATE TABLE IF NOT EXISTS utxos
         (
-            utxo_key            BLOB    NOT NULL,
-            tx_hash             BLOB    NOT NULL,
-            type                INTEGER NOT NULL,
-            unlock_height       INTEGER NOT NULL,
-            amount              NUMERIC NOT NULL,
-            lock_type           INTEGER NOT NULL,
-            lock_bytes          BLOB    NOT NULL,
-            address             TEXT    NOT NULL,
-            PRIMARY KEY(utxo_key)
+            utxo_key            TINYBLOB    NOT NULL,
+            tx_hash             TINYBLOB    NOT NULL,
+            type                INTEGER     NOT NULL,
+            unlock_height       INTEGER     NOT NULL,
+            amount              BIGINT(20)  UNSIGNED NOT NULL,
+            lock_type           INTEGER     NOT NULL,
+            lock_bytes          TINYBLOB    NOT NULL,
+            address             TEXT        NOT NULL,
+            PRIMARY KEY(utxo_key(64))
         );
 
         CREATE TABLE IF NOT EXISTS payloads (
-            tx_hash             BLOB    NOT NULL,
+            tx_hash             TINYBLOB    NOT NULL,
             payload             BLOB    NOT NULL,
-            PRIMARY KEY("tx_hash")
+            PRIMARY KEY(tx_hash(64))
         );
 
         CREATE TABLE IF NOT EXISTS validators
         (
-            enrolled_at         INTEGER NOT NULL,
-            utxo_key            BLOB    NOT NULL,
-            address             TEXT    NOT NULL,
-            amount              NUMERIC NOT NULL,
-            preimage_height     INTEGER NOT NULL,
-            preimage_hash       BLOB    NOT NULL,
-            PRIMARY KEY(enrolled_at, utxo_key)
+            enrolled_at         INTEGER     NOT NULL,
+            utxo_key            TINYBLOB    NOT NULL,
+            address             TEXT        NOT NULL,
+            amount              BIGINT(20)  UNSIGNED NOT NULL,
+            preimage_height   INTEGER NOT NULL,
+            preimage_hash       TINYBLOB    NOT NULL,
+            PRIMARY KEY(enrolled_at, utxo_key(64))
         );
 
         CREATE TABLE IF NOT EXISTS merkle_trees
         (
-            block_height        INTEGER NOT NULL,
-            merkle_index        INTEGER NOT NULL,
-            merkle_hash         BLOB    NOT NULL,
+            block_height        INTEGER     NOT NULL,
+            merkle_index        INTEGER     NOT NULL,
+            merkle_hash         TINYBLOB    NOT NULL,
             PRIMARY KEY(block_height, merkle_index)
         );
 
         CREATE TABLE IF NOT EXISTS information
         (
-            key                 TEXT    NOT NULL,
-            value               TEXT    NOT NULL,
-            PRIMARY KEY(key)
+            keyname             TEXT       NOT NULL,
+            value               TEXT       NOT NULL,
+            PRIMARY KEY(keyname(64))
         );
 
         CREATE TABLE IF NOT EXISTS transaction_pool (
-            tx_hash             BLOB    NOT NULL,
-            type                INTEGER NOT NULL,
-            payload             BLOB    NOT NULL,
-            lock_height         INTEGER NOT NULL,
-            received_height     INTEGER NOT NULL,
-            time                INTEGER NOT NULL,
-            tx_fee              INTEGER NOT NULL,
-            payload_fee         INTEGER NOT NULL,
-            tx_size             INTEGER NOT NULL,
-            PRIMARY KEY(tx_hash)
+            tx_hash             TINYBLOB   NOT NULL,
+            type                INTEGER    NOT NULL,
+            payload             BLOB   NOT NULL,
+            lock_height         INTEGER    NOT NULL,
+            received_height     INTEGER    NOT NULL,
+            time                INTEGER    NOT NULL,
+            tx_fee              INTEGER    NOT NULL,
+            payload_fee         INTEGER    NOT NULL,
+            tx_size             INTEGER    NOT NULL,
+            PRIMARY KEY(tx_hash(64))
         );
 
         CREATE TABLE IF NOT EXISTS tx_input_pool (
-            tx_hash             BLOB    NOT NULL,
-            input_index         INTEGER NOT NULL,
-            utxo                BLOB    NOT NULL,
-            unlock_bytes        BLOB    NOT NULL,
-            unlock_age          INTEGER NOT NULL,
-            PRIMARY KEY(tx_hash, input_index)
+            tx_hash             TINYBLOB   NOT NULL,
+            input_index         INTEGER    NOT NULL,
+            utxo                TINYBLOB   NOT NULL,
+            unlock_bytes        TINYBLOB   NOT NULL,
+            unlock_age          INTEGER    NOT NULL,
+            PRIMARY KEY(tx_hash(64), input_index)
         );
 
         CREATE TABLE IF NOT EXISTS tx_output_pool (
-            tx_hash             BLOB    NOT NULL,
-            output_index        INTEGER NOT NULL,
-            amount              NUMERIC NOT NULL,
-            lock_type           INTEGER NOT NULL,
-            lock_bytes          BLOB    NOT NULL,
-            address             TEXT    NOT NULL,
-            PRIMARY KEY(tx_hash, output_index)
+            tx_hash             TINYBLOB   NOT NULL,
+            output_index        INTEGER    NOT NULL,
+            amount              BIGINT(20) UNSIGNED NOT NULL,
+            lock_type           INTEGER    NOT NULL,
+            lock_bytes          TINYBLOB   NOT NULL,
+            address             TEXT       NOT NULL,
+            PRIMARY KEY(tx_hash(64), output_index)
         );
 
-        CREATE TRIGGER IF NOT EXISTS tx_trigger AFTER INSERT ON transactions
+       CREATE TABLE IF NOT EXISTS blocks_stats(
+            block_height        INT,
+            total_sent          BIGINT(20)  UNSIGNED NOT NULL,
+            total_recieved      BIGINT(20)  UNSIGNED NOT NULL,
+            total_reward        BIGINT(20)  UNSIGNED NOT NULL,
+            total_fee           BIGINT(20)  UNSIGNED NOT NULL,
+            total_size          BIGINT(20)  UNSIGNED NOT NULL,
+
+            PRIMARY KEY(block_height)
+            );
+       
+       DROP TRIGGER IF EXISTS tx_trigger;
+       CREATE TRIGGER tx_trigger AFTER INSERT 
+       ON transactions
+       FOR EACH ROW
         BEGIN
             DELETE FROM transaction_pool WHERE tx_hash = NEW.tx_hash;
             DELETE FROM tx_input_pool WHERE tx_hash = NEW.tx_hash;
@@ -282,6 +297,7 @@ export class LedgerStorage extends Storages
                     await this.putEnrollments(block);
                     await this.putBlockHeight(block.header.height);
                     await this.putMerkleTree(block);
+                    await this.putBlockstats(block);
                     await this.commit();
                 }
                 catch (error)
@@ -497,6 +513,79 @@ export class LedgerStorage extends Storages
         });
     }
 
+     /**
+     * Puts merkle tree
+     * @param block: The instance of the `Block`
+     */
+      public putBlockstats (block: Block): Promise<void>
+      {
+          function save_blockstats (storage: LedgerStorage, height: Height, total_sent: JSBI, total_recieved: JSBI, total_size: JSBI, total_fee: JSBI): Promise<void>
+          {
+              return new Promise<void>((resolve, reject) =>
+              {
+                storage.query(
+                    `INSERT INTO blocks_stats
+                        (block_height, total_sent, total_recieved, total_size, total_fee,total_reward)
+                    VALUES
+                        (?, ?, ?, ?, ?, ?)`,
+                    [
+                        height.toString(),
+                        total_sent.toString(),
+                        total_recieved.toString(),
+                        total_size.toString(),
+                        total_fee.toString(),
+                        "0"
+                    ])
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch((err) =>
+                    {
+                        reject(err);
+                    });
+                 
+              });
+          }
+  
+          return new Promise<void>((resolve, reject) =>
+          {
+              (async () =>
+              { 
+                  let total_recieved = JSBI.BigInt(0);
+                  let total_sent = JSBI.BigInt(0);
+                  let total_fee = JSBI.BigInt(0);
+                  let total_size = JSBI.BigInt(0);
+                  let total_recieved_sql = `SELECT 
+                                                SUM(IFNULL(O.amount,0)) as total_recieved
+                                                FROM 
+                                                tx_outputs O
+                                                    INNER JOIN blocks B ON (O.block_height = B.height)
+                                                WHERE
+                                                    block_height = ?;`;
+                  let transaction_stats = `SELECT 
+                                                SUM(IFNULL(T.tx_fee,0)) as tx_fee,
+                                            SUM(IFNULL(T.payload_fee,0)) as payload_fee, SUM(IFNULL(T.tx_size,0)) as total_size 
+                                            FROM 
+                                            transactions T 
+                                                Inner join blocks B ON (T.block_height = B.height)
+                                            WHERE 
+                                                block_height =?;`;
+
+                  this.query(total_recieved_sql,[block.header.height.toString()])
+                  .then(async(row :any)=>{
+                      total_recieved = JSBI.BigInt(row[0].total_recieved);
+                     return this.query(transaction_stats,[block.header.height.toString()]);
+                  }).then((row: any)=>{
+                      total_fee = JSBI.ADD( JSBI.BigInt(row[0].tx_fee) ,JSBI.BigInt(row[0].payload_fee));
+                      total_size = JSBI.BigInt(row[0].total_size);
+                      total_sent = JSBI.ADD(total_recieved,total_fee);
+                      save_blockstats(this,block.header.height,total_sent,total_recieved,total_size,total_fee)
+                      resolve();
+                    });
+              })();
+          });
+      }
+
     /**
      * Update a preImage to database
      */
@@ -536,7 +625,7 @@ export class LedgerStorage extends Storages
                 ])
                 .then((result) =>
                 {
-                    resolve(result.changes);
+                    resolve(result.affectedRows);
                 })
                 .catch((err) =>
                 {
@@ -984,7 +1073,7 @@ export class LedgerStorage extends Storages
                     `INSERT INTO transaction_pool
                         (tx_hash, type, payload, lock_height, received_height, time, tx_fee, payload_fee, tx_size)
                     VALUES
-                        (?, ?, ?, ?, (SELECT IFNULL(MAX(height), 0) as height FROM blocks), strftime('%s', 'now', 'UTC'), ?, ?, ?)`,
+                        (?, ?, ?, ?, (SELECT IFNULL(MAX(height), 0) as height FROM blocks), DATE_FORMAT(now(),'%s'), ?, ?, ?)`,
                     [
                         hash.toBinary(Endian.Little),
                         tx.type,
@@ -996,7 +1085,7 @@ export class LedgerStorage extends Storages
                     ])
                     .then((result) =>
                     {
-                        resolve(result.changes);
+                        resolve(result.affectedRows);
                     })
                     .catch((err) =>
                     {
@@ -1025,7 +1114,7 @@ export class LedgerStorage extends Storages
                 )
                     .then((result) =>
                     {
-                        resolve(result.changes);
+                        resolve(result.affectedRows);
                     })
                     .catch((err) =>
                     {
@@ -1059,7 +1148,7 @@ export class LedgerStorage extends Storages
                 )
                     .then((result) =>
                     {
-                        resolve(result.changes);
+                        resolve(result.affectedRows);
                     })
                     .catch((err) =>
                     {
@@ -1238,9 +1327,10 @@ export class LedgerStorage extends Storages
                 cycle_length,
                 enroll_sig
              FROM enrollments
-             WHERE avail_height <= ` + cur_height + `
-               AND ` + cur_height + ` < (avail_height + cycle_length)
-             GROUP BY utxo_key) as enrollments
+       GROUP BY utxo_key HAVING avail_height <= ` + cur_height + `
+         AND ` + cur_height + ` < (avail_height + cycle_length)) as enrollments
+        INNER JOIN utxos
+            ON enrollments.utxo_key = utxos.utxo_key
         LEFT JOIN validators
             ON enrollments.enrolled_at = validators.enrolled_at
             AND enrollments.utxo_key = validators.utxo_key
@@ -1266,7 +1356,8 @@ export class LedgerStorage extends Storages
     {
         return new Promise<void>((resolve, reject) =>
         {
-            let sql = `INSERT OR REPLACE INTO information (key, value) VALUES (?, ?);`;
+            let sql = `INSERT INTO information (keyname, value) VALUES (?, ?) 
+            ON DUPLICATE KEY UPDATE keyname = VALUES(keyname) , value = VALUES(value);`;
             this.run(sql, ["height", height.toString()])
                 .then(() =>
                 {
@@ -1289,7 +1380,7 @@ export class LedgerStorage extends Storages
     {
         return new Promise<Height>((resolve, reject) =>
         {
-            let sql = `SELECT value FROM information WHERE key = 'height';`;
+            let sql = `SELECT value FROM information WHERE keyname = 'height';`;
             this.query(sql, [])
                 .then((rows: any[]) =>
                 {
@@ -1534,8 +1625,10 @@ export class LedgerStorage extends Storages
                 T.block_height as height,
                 B.time_stamp as block_time,
                 T.tx_hash,
+                T.tx_size,
                 T.type,
                 T.unlock_height,
+                T.lock_height,
                 (B.time_stamp + (T.unlock_height - T.block_height) * 10 * 60) as unlock_time,
                 P.payload,
                 T.tx_fee,
@@ -1549,7 +1642,11 @@ export class LedgerStorage extends Storages
             `SELECT
                 S.address,
                 S.amount,
-                S.utxo_key as utxo
+                S.utxo_key as utxo,
+				B.signature,
+				I.in_index,
+				I.unlock_age,
+				I.unlock_bytes as bytes
             FROM
                 blocks B
                 INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
@@ -1558,9 +1655,12 @@ export class LedgerStorage extends Storages
 
         let sql_receiver =
             `SELECT
-                O.address,
+                O.output_index,
                 O.amount,
-                O.utxo_key as utxo
+				O.lock_type,
+				O.lock_bytes as bytes,
+                O.utxo_key as utxo,
+                O.address
             FROM
                 blocks B
                 INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
@@ -1824,5 +1924,187 @@ export class LedgerStorage extends Storages
             T.tx_hash = ?`;
 
         return this.query(sql, [tx_hash.toBinary(Endian.Little)]);
+    }
+    /**
+     *  Get the Latest Blocks 
+     * @param limit Maximum record count that can be obtained from one query
+     * @param page The number on the page, this value begins with 1
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getLatestBlocks(limit: number, page: number): Promise<any[]> {
+        let sql =
+            `SELECT
+                height, hash, merkle_root, signature, validators, tx_count,
+                enrollment_count, time_stamp 
+            FROM
+                blocks 
+            ORDER BY height DESC 
+            LIMIT ? OFFSET ?`
+
+        return this.query(sql, [limit, limit * (page - 1)]);
+    }
+     /**
+      * Get the Latest transactions 
+      * @param limit Maximum record count that can be obtained from one query
+      * @param page The number on the page, this value begins with 1
+      * @returns Returns the Promise. If it is finished successfully the `.then`
+      * of the returned Promise is called with the records
+      * and if an error occurs the `.catch` is called with an error.
+      */
+    public getLatestTransactions(limit: number, page: number): Promise<any[]> {
+        let sql =
+            `SELECT 
+                T.block_height, T.tx_hash, type, T.tx_fee, T.tx_size, 
+             Sum(IFNULL(O.amount,0)) as amount, B.time_stamp 
+             FROM
+                 tx_outputs O 
+                 INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
+                 INNER JOIN blocks B ON (B.height = T.block_height) 
+             GROUP BY O.tx_hash 
+             ORDER BY T.block_height DESC
+             LIMIT ? OFFSET ?;`
+        return this.query(sql, [limit, limit * (page - 1)]);
+    }
+    /**
+     * Get the block overview
+     * @param limit Maximum record count that can be obtained from one query
+     * @param page The number on the page, this value begins with 1
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     *  
+     */
+    public getBlockSummary(field: string, value: string | Buffer): Promise<any[]> {
+        let sql =
+            `SELECT B.height, B.hash, B.merkle_root, B.signature, B.prev_block, B.random_seed,
+             B.time_stamp, B.tx_count,
+             BS.total_sent, BS.total_recieved, BS.total_reward, BS.total_fee, BS.total_size
+             FROM blocks B 
+             INNER JOIN blocks_stats BS ON (B.height = BS.block_height)
+             WHERE ${field} = ?`;
+
+        return this.query(sql, [value]);
+    }
+    /**
+     * Get enrolled validators of a block 
+     * @param limit Maximum record count that can be obtained from one query
+     * @param page The number on the page, this value begins with 1
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getBlockEnrollments(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
+        let sql =
+            `SELECT
+                E.block_height, E.utxo_key, E.commitment, E.cycle_length, E.enroll_sig 
+            FROM
+                blocks B 
+                INNER JOIN enrollments E ON (E.block_height = B.height) 
+                AND B.${field} = ?
+            ORDER BY E.enrollment_index ASC
+            LIMIT ? OFFSET ?;`;
+        let countsql =
+                `SELECT IFNULL(count(*),0) as total_records
+                FROM  
+                    blocks B 
+                    INNER JOIN enrollments E ON (E.block_height = B.height)
+                    AND B.${field} = ?`;
+
+        let result: any = {};  
+        return new Promise<any[]>((resolve, reject) => {      
+        this.query(sql, [value, limit, limit*(page-1)])
+        .then((rows : any[])=>{
+            result.enrollments = rows;
+            return this.query(countsql,[value]);
+        })
+        .then((rows : any[])=>{
+            result.total_records = rows[0].total_records
+            resolve(result); 
+        });
+       });
+    }
+    /**
+     * Get transactions of a block
+     * @param limit Maximum record count that can be obtained from one query
+     * @param page The number on the page, this value begins with 1
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error. 
+     */
+    public getBlockTransactions(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
+        let sql_tx =
+            `SELECT 
+                T.block_height, T.tx_hash, SUM(IFNULL(O.amount,0)) as amount, T.type,
+                T.tx_fee, T.tx_size, B.time_stamp,
+                JSON_ARRAYAGG(JSON_OBJECT("address", O.address, "amount", O.amount)) as receiver,
+                (SELECT
+                    S.address
+                FROM
+                    blocks B
+                    INNER JOIN transactions T ON (B.height = T.block_height)
+                    INNER JOIN tx_inputs I ON (T.tx_hash = I.tx_hash)
+                    INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key)
+                WHERE
+                    B.${field} = ? ) as sender_address
+            FROM    
+                tx_outputs O 
+                INNER JOIN transactions T ON (T.tx_hash = O.tx_hash) 
+                INNER JOIN blocks B ON  (B.height = T.block_height)
+            WHERE
+                B.${field} = ?
+            GROUP BY T.tx_hash
+            ORDER BY T.tx_index ASC
+            LIMIT ? OFFSET ?;`;
+        
+        let sql_count =
+               `SELECT
+                    IFNULL(count(*),0) as total_records
+                FROM
+                    transactions T 
+                    INNER JOIN blocks B ON (B.height = T.block_height)
+                WHERE
+                    ${field} = ?;`;
+
+        let result: any = {};
+        return new Promise<any[]>((resolve, reject) => {
+            this.query(sql_tx, [value, value, limit, limit*(page-1)])
+                .then((rows: any[]) => {
+                    result.tx = rows;
+                    return this.query(sql_count, [value]);
+                })
+                .then((rows: any[]) => {
+                    result.total_data = rows[0].total_records;
+                    resolve(result);
+                })
+                .catch(reject);
+        });
+    }
+    
+    /**
+     * Get statistics of BOA coin
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error. 
+     */
+    public getBOAStats(): Promise<any[]> {
+        let sql =
+            `SELECT max(height) as height, 
+             (SELECT count(*) from transactions) as transactions,
+             (SELECT count(*) from validators) as validators
+            FROM
+                blocks;`;
+
+        return this.query(sql, []);
+    }
+    /**
+     * Drop Database 
+     * @param database The name of database 
+     */
+    public async dropTestDB(database : any): Promise<any[]> {
+        let sql =
+            `DROP DATABASE ${database}`;
+       return this.run(sql, []);;
     }
 }
