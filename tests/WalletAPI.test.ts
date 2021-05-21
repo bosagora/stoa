@@ -103,11 +103,11 @@ describe ('Test of Stoa API for the wallet', () =>
             .filename("0xbd83d11bfbc2d77281d1435774990e587c871cc53564f527bb07865b31c3cb3cf5c3e235843ad7b967f7f17db5b691d3cc307983d470dd07d3347d3230cf7689")
 
         let response = await client.get (uri.toString());
-        let expected ={
+        let expected = {
             status: 'Confirmed',
             height: '9',
             time: 1609464600,
-            tx_hash: '0xf5daf67967631d93da1b2453c84708632daa43cebd49a4b170929eeb3f7a636688189dd3d79b993e9d31f3f8b80dfa83d5b6a44e4ccc7984de211000eef9a74a',
+            tx_hash: '0xbd83d11bfbc2d77281d1435774990e587c871cc53564f527bb07865b31c3cb3cf5c3e235843ad7b967f7f17db5b691d3cc307983d470dd07d3347d3230cf7689',
             tx_type: 'payment',
             tx_size: 182,
             unlock_height: '10',
@@ -115,28 +115,28 @@ describe ('Test of Stoa API for the wallet', () =>
             unlock_time: 1609465200,
             payload: '',
             senders: [
-              {
-                address: 'boa1xrg66j9mgk20kflzdzrq4p3k4gw8tg6vk3pa3fgm3twsagyaxa8luz7e3vu',
-                amount: 610000000000000,
-                utxo: '0xff4b4812d0e8e513de683cec8546a92e503f04a83340c9dd96f7897438abdc6cea69639df8703299a181d7083db2c18a753f4b20d10fafb68be54b1cc85b7b7d',
-                signature: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
-                index: 0,
-                unlock_age: 0,
-                bytes: '0x275c6e592ff90f41244520adcb6a28e4d78498fd4842a1e2e2ec6e916fcb6a95ad266027ef8d9891f1d1af3b68c1c3d44f5fe1586e06ada84e361d847712870b'
-              }
+                {
+                    address: 'boa1xrk00cupup5vxwpz09kl9rau78cwag28us4vuctr6zdxvwfzaht9v6tms8q',
+                    amount: 610000000000000,
+                    utxo: '0xf524c2acd5c95eebc1578dedd3f35e32cfeb6fd7181ceee4839b70745fd8eaa12442762c5d688bb9e15a2c666bccf6bc7ec8456a62daff1ebf4945a76402b6cb',
+                    signature: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+                    index: 0,
+                    unlock_age: 0,
+                    bytes: '0x93a04dcfec5a26e7644478395a49a1d6ee8d827412b26740ed000543a8ebfd0358aed9afa91d22c35cede55ec3062e5c4076818b1e3ecbefe9a6dcb88f576d7a'
+                }
             ],
             receivers: [
-              {
-                address: 'boa1xrq66nug6wnen9sp5cm7xhfw03yea8e9x63ggay3v5dhe6d9jerqz50eld0',
-                lock_type: 0,
-                amount: 610000000000000,
-                utxo: '0x435f19a00fdcb41847588c275e1dd82a867f2a56595265f92ad3bc573d5f0bb52e8546f215c853e68c6aaddc82e91043af73e8279609b822b5fd8ea7b946483c',
-                index: 0,
-                bytes: '0x05e7e9c06eebd0d925078eadb875fed18f504470017a01b54d80d4b00652fd3d7a43d8b82cfc65d27e11cdcc195b2eca881dc56c9b97dcb7923382c595406068'
-              }
+                {
+                    address: 'boa1xza007gllhzdawnr727hds36guc0frnjsqscgf4k08zqesapcg3uujh9g93',
+                    lock_type: 0,
+                    amount: 610000000000000,
+                    utxo: '0x718c57bc74ef0ded4311e7013e146834c58b20c5525919947c37482be7778b95bb7e57faacde1fc5638f6f41d30b8a790a1effffd8385e112ee1e539c41e6ecf',
+                    index: 0,
+                    bytes: '0x5f21dbacbd82f3f86006b1237f1bfc4b24b857d5e8bd8616a20d1feb09be640c9d096839324b36f8dd5457f4bef618261fe62c8e15a411495cca216a3bc94397'
+                }
             ],
             fee: '0'
-          }
+        }
         assert.deepStrictEqual(response.data, expected);
     });
 
@@ -294,7 +294,7 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
             status: 'Confirmed',
             height: '2',
             time: 1609460400,
-            tx_hash: '0x5faca8a9851cf3a6229c9b7998d26cacb26a2483efa209aaf94ce95d34ca93efa24f4d9d0c00bf158f43c597facb2aa71c725a670332cc3608bd470ec6420edc',
+            tx_hash: '0xa2073ce83b58f87d3c684bd62c1d037531edd85f7ed11d006f97af95ca65f8ae2ed8cf10f5843c8cc3f4295b787f1413acc92f449d42a587df608f5ef6d1fb7f',
             tx_type: 'payment',
             tx_size: 1247,
             unlock_height: '3',
@@ -302,36 +302,36 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
             unlock_time: 1609461000,
             payload: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gIGCg4SFhoeIiYqLjI2Oj5CRkpOUlZaXmJmam5ydnp+goaKjpKWmp6ipqqusra6vsLGys7S1tre4ubq7vL2+v8DBwsPExcbHyMnKy8zNzs/Q0dLT1NXW19jZ2tvc3d7f4OHi4+Tl5ufo6err7O3u7/Dx8vP09fb3+Pn6+/z9/v8AAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+f4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7/AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/w==',
             senders: [
-              {
-                address: 'boa1xrqx366yn8xktzhtsj83gj0nnj35cv8lrk7xhszj0dfemlacumgujs595mr',
-                amount: 24400000000000,
-                utxo: '0x79170f924260def767d30e9eb606379c59b26ab5b575097f760507e889ba097e458a19aead724e10cf15313a1da7094c5c7e708c12e91a58f1f922bd6a5da0a5',
-                signature: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
-                index: 0,
-                unlock_age: 0,
-                bytes: '0x35d380560addb995cce0366b842cf7fe0e47f5426d41c22977e923ea9549d0a971c857ee0e3e82a7b6d23f5e2a27574ef51a6c046ecca9b4684beeab60a1db02'
-              }
+                {
+                    address: 'boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj',
+                    amount: 24400000000000,
+                    utxo: '0x2cf1caaeff65a7e2b2f7edff1023881564f2f0cad30161cf42279826e6919d77347df68de6d8eb0da58ebdc6e4f28da7569113002044467fc5cbf599a7ea9037',
+                    signature: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+                    index: 0,
+                    unlock_age: 0,
+                    bytes: '0xa0d6442171dcddeb6a9f01c5fc6173b2dfbd50a6c0e7444ff5663a5a03606e0768a2a5c766a4654fc6609ffc13a535ee2245e04f28f721ec18ca095da0032be1'
+                }
             ],
             receivers: [
-              {
-                address: 'boa1xrzwvvw6l6d9k84ansqgs9yrtsetpv44wfn8zm9a7lehuej3ssskxth867s',
-                lock_type: 0,
-                amount: 1663400000,
-                utxo: '0x695ebd4843c0bab6966d4457648f0d85371361647af9bfb9dd7a7a553257efdc0be38700032cb362e614933d2d00590a98d03679a94edf573b6d574158b201cc',
-                index: 0,
-                bytes: '0x39473b67e1718801a9006a4b620aef82e06d372e2a519c16efdd7ecf8c66b907c1917b358ce17af16552ef572d19ee4000ba6cb0c8419580b898718bfecf7737'
-              },
-              {
-                address: 'boa1xrgr66gdm5je646x70l5ar6qkhun0hg3yy2eh7tf8xxlmlt9fgjd2q0uj8p',
-                lock_type: 0,
-                amount: 24398336600000,
-                utxo: '0xba8a96eb3bcbc673f61652e3b6ba1c29c3f6fb996af95bcb2afe7e0d347bf1100a1bce76e64aa60f0a50bf1587b5dc01a03d32a45746656d46cfe8b073bce9a3',
-                index: 1,
-                bytes: '0xe27c7cefbec8f06175847c7f4cf45e5b017c575ede2e50eabffe4598d2d770dbe1446c0ba4e77ef2225b97c30ffe1c81f92a4359bf541e65bf0376057fb5ef82'
-              }
+                {
+                    address: 'boa1xqcmmns5swnm03zay5wjplgupe65uw4w0dafzsdsqtwq6gv3h3lcz24a8ch',
+                    lock_type: 0,
+                    amount: 1663400000,
+                    utxo: '0xcc7cd566eedab17b3fc91e06f34e02106adda4d6080b04cb8cd6eb4d2ff50d953320aa0d2c5a376ba3029d773e77403bfbe8cbe9108e1c61553fd7a0be98feca',
+                    index: 0,
+                    bytes: '0x178f01a58740ab687b82c61fea00ed740de5bac97ada2599300bfbb1e5b244e945c9b78412864341f96f537a993cf011a15a2affc95f944fdc937aa8ce303f2c'
+                },
+                {
+                    address: 'boa1xrlj00v7wyf9vf0cm2thd58tquqxpj9xtdrh2hhfyrmag4cdkmej5nystea',
+                    lock_type: 0,
+                    amount: 24398336600000,
+                    utxo: '0xf1e7a43bc07341ee75e133476ff12df3f900a942795804ff16bcda6ec7a7e05c92b536a91ce3ee5aa22d40bff001cffdf4dae005eac00a0d7c1d1d39d3c6472e',
+                    index: 1,
+                    bytes: '0xe3dd9e0f4d5b39dfd3a0c656a12179f627da5298c2d9f668099db5dc33e6a9f8dfbbb5f7d9a974a2e2eb27e34ce33582948902c73aca315adc1c2e4025595b0f'
+                }
             ],
             fee: '0'
-          }
+        }
         assert.deepStrictEqual(response.data, expected);
     });
 
