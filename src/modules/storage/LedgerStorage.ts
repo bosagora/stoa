@@ -151,7 +151,7 @@ export class LedgerStorage extends Storages
 
         CREATE TABLE IF NOT EXISTS payloads (
             tx_hash             TINYBLOB    NOT NULL,
-            payload             BLOB    NOT NULL,
+            payload             BLOB        NOT NULL,
             PRIMARY KEY(tx_hash(64))
         );
 
@@ -161,7 +161,7 @@ export class LedgerStorage extends Storages
             utxo_key            TINYBLOB    NOT NULL,
             address             TEXT        NOT NULL,
             amount              BIGINT(20)  UNSIGNED NOT NULL,
-            preimage_distance   INTEGER NOT NULL,
+            preimage_height     INTEGER      NOT NULL,
             preimage_hash       TINYBLOB    NOT NULL,
             PRIMARY KEY(enrolled_at, utxo_key(64))
         );
