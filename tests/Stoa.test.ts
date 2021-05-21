@@ -653,26 +653,26 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get(uri.toString());
         let expected = [
             {
-              height: '1',
-              hash: '0xc4d0f4a5734c90e13b90635aeca16b06accfad3161fc77207b5d7cb21d4a4286da3f033fa4692091880e6b0b1b1a4253f69fa372e3492a987253dc203e62e4b8',
-              merkle_root: '0x1d3d908cb9bab19fcb6ac006b6eff772969a1b822cb0acbe9cadabce8b9fcb334f2d3867239a80da7a3172193589469e4fe1fb9bbf472b82709ffa50f7cc46cd',
-              signature: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
-              validators: '[252]',
-              tx_count: '8',
-              enrollment_count: '0',
-              time_stamp: 1609459800
+                height: '1',
+                hash: '0xe0609c900848dffd7bbf7112301b4a3ce47fc9ea4810bb7ce6d4ad4d9f0f0ad18c324b822127f3564f33efee8228662e02755ea49452f6a5832447e5cf495a8f',
+                merkle_root: '0x928f5789a97f75dff9aa070cb761d2ae70c6566556739509b495c2d7b899181119d31f37160212f7ea38358eb671520595178a8aad17f12e00f4119d0b662888',
+                signature: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+                validators: '[252]',
+                tx_count: '8',
+                enrollment_count: '0',
+                time_stamp: 1609459800
             },
             {
-              height: '0',
-              hash: '0xe2357870cef6f690c5672293aba4e910dc3e120ab83cbfff24cf6b824af0588caa294900abdd46f3453229dea8680343e89f7ef06f47a2db1ec2a214553f4281',
-              merkle_root: '0x0d453b87856c9faaf75cfac3dc993cd75c34fc1d5329d3c38e8b4757586fd5440cd9ed466f7c2259e5af4f8fe7f45cb997504542efd56d6bd7853fa9596d6bc2',
-              signature: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
-              validators: '[0]',
-              tx_count: '2',
-              enrollment_count: '6',
-              time_stamp: 1609459200
+                height: '0',
+                hash: '0x8ea91eafb2555f93ce0b0335d8454cdd052646dd1ef4a9029f026d08cdd081b9fb3e736903a119cce4beec1814b05c29b70243e0d1bbc096cf99c90b93f0b9a2',
+                merkle_root: '0x94747147a0ca093d1099d1b2e0d9e2de9d89e0b887a56ffafb17f473cd0317de36ab7ecd2bdc1148d542bce9501aa1b978c722822a281e45034088286700059e',
+                signature: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+                validators: '[0]',
+                tx_count: '2',
+                enrollment_count: '6',
+                time_stamp: 1609459200
             }
-          ]
+        ]
         assert.deepStrictEqual(response.data, expected);
     });
     it('Test of the path /latest-transactions', async () => {
@@ -685,96 +685,96 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get(uri.toString());
         let expected = [
             {
-              height: '1',
-              tx_hash: '0xbbcdd3a1fe3c8942ad1523068d3cdf0fb0e29a50f96e89a1e75efc42654835552a4fe6d15648a1cb48b4ab376270374579d32a1b167df4334f668289e61e85ef',
-              type: 0,
-              amount: '610000000000000',
-              tx_fee: '0',
-              tx_size: '0',
-              time_stamp: 1609459800
+                height: '1',
+                tx_hash: '0x74c2caf013ffd47440c46536403c1116dbf5276ee736a82db7e2cd9a5b827f7f24dca30951983e0aba92b8d5b813254b447616d2d060845fa0eca3d6b46a09b2',
+                type: 0,
+                amount: '610000000000000',
+                tx_fee: '0',
+                tx_size: '0',
+                time_stamp: 1609459800
             },
             {
-              height: '1',
-              tx_hash: '0x161c713d23d71a0cf54f35b5fe5fb7423aefbd11de4ece83efde37ed1a0bc5d25a6c25a3535c2e4e35993b56120fbd0e021500e2111c7bee22162f487a5c633e',
-              type: 0,
-              amount: '610000000000000',
-              tx_fee: '0',
-              tx_size: '0',
-              time_stamp: 1609459800
+                height: '1',
+                tx_hash: '0x59336788adcb9eb8c7bfbbd40162a74bef6972d1bcd3fdb8f8eb7f464ff11094c3000c08e8da33595482ff4223167f079ce96c8f849ee640f5eb556ab5406839',
+                type: 0,
+                amount: '610000000000000',
+                tx_fee: '0',
+                tx_size: '0',
+                time_stamp: 1609459800
             },
             {
-              height: '1',
-              tx_hash: '0xd5945117a83d6660d7f9d6baa8eb36e2613d8cc2f28dc04753121d6c5142d4c1e4f47e00b1dc4b34fb956a2ab74d8abc8f91474b4fae5aa458ae2c56438fd53a',
-              type: 0,
-              amount: '610000000000000',
-              tx_fee: '0',
-              tx_size: '0',
-              time_stamp: 1609459800
+                height: '1',
+                tx_hash: '0x5001ae8900de1a2b54aab1b5fd8529129b20f51db188016d7429168b08ca6b48ca450cd82f4a3643f6a97d06ddd0671d5c533f3a2a40cea6a516290d0775bf1a',
+                type: 0,
+                amount: '610000000000000',
+                tx_fee: '0',
+                tx_size: '0',
+                time_stamp: 1609459800
             },
             {
-              height: '1',
-              tx_hash: '0xfb2636847032202491dcb78cf04040a340a213cc9657cc2b9f74931d3d269540e9db50f6041c7e6c32fb9dc439b9008a1d2f51d1eb2e3de189a8325ee88101cd',
-              type: 0,
-              amount: '610000000000000',
-              tx_fee: '0',
-              tx_size: '0',
-              time_stamp: 1609459800
+                height: '1',
+                tx_hash: '0xc0060e586a5f3b076e590086c3f9c144667852cb86cd2b30135e44aacfa4deb7235fdd860780600fb3dfbd3228c0fad2b4bbe933b5a44205ca13ed340d4e6679',
+                type: 0,
+                amount: '610000000000000',
+                tx_fee: '0',
+                tx_size: '0',
+                time_stamp: 1609459800
             },
             {
-              height: '1',
-              tx_hash: '0xa4e0286cdcade13788d63bc8aa178ec5e97c65e62f7aa731a74a7b60867a1e7bd9abf0d964ad426fea90babfc65d67cfcc382f09b61a2c359b4b6e8021beaf30',
-              type: 0,
-              amount: '610000000000000',
-              tx_fee: '0',
-              tx_size: '0',
-              time_stamp: 1609459800
+                height: '1',
+                tx_hash: '0x20fcd96646d8cc15a55d74848d57467985d85b2ca1bf3838d9b92466fd76513025f2857e3ad79b3e365e7170a890cebb7a9bff85ec8ed0ea17bd441ac71edd14',
+                type: 0,
+                amount: '610000000000000',
+                tx_fee: '0',
+                tx_size: '0',
+                time_stamp: 1609459800
             },
             {
-              height: '1',
-              tx_hash: '0xfe64dddee486f417b76da9ed1edea75829f5be8197b29e4984f1bd6d3b681e52e8f9f06eda825e2445deccefa8fe51900944a0b1c71be7f022dee92e12d3e8fd',
-              type: 0,
-              amount: '610000000000000',
-              tx_fee: '0',
-              tx_size: '0',
-              time_stamp: 1609459800
+                height: '1',
+                tx_hash: '0x06c2e8b1098afe7dc264703fd72ae86c6dc109123491a69b1799166a95fcc9b8795d80e84778cd3d81964467798b8d6a3c1ff54d42c3f8b415e05f39a645b9e4',
+                type: 0,
+                amount: '610000000000000',
+                tx_fee: '0',
+                tx_size: '0',
+                time_stamp: 1609459800
             },
             {
-              height: '1',
-              tx_hash: '0x627b49d69d2ad4fc4f75e4b75368302f50b1906bbce9943dd4de6a55c096673c67b16c30894fcbd9a8218d7696909dc12c7970d27902f8d8af90e0a7f0694f57',
-              type: 0,
-              amount: '610000000000000',
-              tx_fee: '0',
-              tx_size: '0',
-              time_stamp: 1609459800
+                height: '1',
+                tx_hash: '0xb540ef8398c16cf67fc9c5e025348c6f7153f9bd726b36a74f0fc64a2850a77888ec4c2ded5da62ef2ac4b2f0434baa4e5aee326b3d033c454b60cb45991bf27',
+                type: 0,
+                amount: '610000000000000',
+                tx_fee: '0',
+                tx_size: '0',
+                time_stamp: 1609459800
             },
             {
-              height: '1',
-              tx_hash: '0x6d19e35742f9348765a34e083e20ceb5b5cce5afb51a18154f13bd93e49ecf5d555f07b59adf0b843d70f85dbc9721d36647c526d18e32926fa9544bbc93afc3',
-              type: 0,
-              amount: '610000000000000',
-              tx_fee: '0',
-              tx_size: '0',
-              time_stamp: 1609459800
+                height: '1',
+                tx_hash: '0xce81424e787d931807cf3723e164b21ad56bd848ee7b24cf5415ed58c450c5477d76aba3fa789f36f488e12612b2fe3912c17adfd4bc17f1c3042a64a018f76d',
+                type: 0,
+                amount: '610000000000000',
+                tx_fee: '0',
+                tx_size: '0',
+                time_stamp: 1609459800
             },
             {
-              height: '0',
-              tx_hash: '0xb8f5a5f4544e75b5837a370d0070361aaaf97d3b02070d3d9845598c5f55105b6bd9ac8e9c53e74679db77cb512ffd88a9916754744f6b5eb2a812929651f84f',
-              type: 1,
-              amount: '120000000000000',
-              tx_fee: '0',
-              tx_size: '0',
-              time_stamp: 1609459200
+                height: '0',
+                tx_hash: '0xd37793e642273aeccbcbfc6be8e19a6007c5147e1116123e44a5e42e4be11495561e535484a2922120c556161f7ae55433bd124bedbf935f3f5b9a414b7af34e',
+                type: 1,
+                amount: '120000000000000',
+                tx_fee: '0',
+                tx_size: '0',
+                time_stamp: 1609459200
             },
             {
-              height: '0',
-              tx_hash: '0x4ef4f7195db2e20f36b46cb3cda1f529b77e2cd8423241d1a4a779f3d7845d4f6543a6147956bf4fe52d5f5925a04102de59b2854f90fb3e8cc1a0e85fe9b11d',
-              type: 0,
-              amount: '4880000000000000',
-              tx_fee: '0',
-              tx_size: '0',
-              time_stamp: 1609459200
+                height: '0',
+                tx_hash: '0xd4b2011f46b7de32e6a3f51eae35c97440b7adf427df7725d19575b8a9a8256552939656f8b5d4087b9bcbbe9219504e31f91a85fb1709683cbefc3962639ecd',
+                type: 0,
+                amount: '4880000000000000',
+                tx_fee: '0',
+                tx_size: '0',
+                time_stamp: 1609459200
             }
-          ];
+        ]
         assert.deepStrictEqual(response.data, expected);
     });
     it('Test of the path /block-summary with block height', async () => {
@@ -787,9 +787,9 @@ describe ('Test of Stoa API Server', () =>
         let expected = {
             height: '1',
             total_transactions: 8,
-            hash: '0xc4d0f4a5734c90e13b90635aeca16b06accfad3161fc77207b5d7cb21d4a4286da3f033fa4692091880e6b0b1b1a4253f69fa372e3492a987253dc203e62e4b8',
-            prev_hash: '0xe2357870cef6f690c5672293aba4e910dc3e120ab83cbfff24cf6b824af0588caa294900abdd46f3453229dea8680343e89f7ef06f47a2db1ec2a214553f4281',
-            merkle_root: '0x1d3d908cb9bab19fcb6ac006b6eff772969a1b822cb0acbe9cadabce8b9fcb334f2d3867239a80da7a3172193589469e4fe1fb9bbf472b82709ffa50f7cc46cd',
+            hash: '0xe0609c900848dffd7bbf7112301b4a3ce47fc9ea4810bb7ce6d4ad4d9f0f0ad18c324b822127f3564f33efee8228662e02755ea49452f6a5832447e5cf495a8f',
+            prev_hash: '0x8ea91eafb2555f93ce0b0335d8454cdd052646dd1ef4a9029f026d08cdd081b9fb3e736903a119cce4beec1814b05c29b70243e0d1bbc096cf99c90b93f0b9a2',
+            merkle_root: '0x928f5789a97f75dff9aa070cb761d2ae70c6566556739509b495c2d7b899181119d31f37160212f7ea38358eb671520595178a8aad17f12e00f4119d0b662888',
             signature: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
             random_seed: '0x691775809b9498f45a2c5ef8b8d552e318ebaf0b1b2fb15dcc39e0ec962ae9812d7edffa5f053590a895c9ff72c1b0838ce8f5c709579d4529f9f4caf0fab13d',
             time: 1609459800,
@@ -799,7 +799,7 @@ describe ('Test of Stoa API Server', () =>
             total_reward: 0,
             total_fee: 0,
             total_size: 9328
-          }
+        }
         assert.deepStrictEqual(response.data, expected);
     });
     it('Test of the path /block-enrollments with block height', async () => {
@@ -812,108 +812,108 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get(uri.toString());
         let expected = {
             enrollmentElementList: [
-              {
-                height: '0',
-                utxo: '0x6100ee7a7e00e18e06b743a7ae90e91781c09e0f1791ee2849ce15caf4c6ee1f3aebc23768f98153d8e3fb10ac66267e06acc31dccbfdbe671294a7fded22432',
-                enroll_sig: '0x0cab27862571d2d2e33d6480e1eab4c82195a508b72672d609610d01f23b0beedc8b89135fe3f5df9e2815b9bdb763c41b8b2dab5911e313acc82470c2147422',
-                commitment: '0x0a8201f9f5096e1ce8e8de4147694940a57a188b78293a55144fc8777a774f2349b3a910fb1fb208514fb16deaf49eb05882cdb6796a81f913c6daac3eb74328',
-                cycle_length: 20
-              },
-              {
-                height: '0',
-                utxo: '0xac296969fc6c59a53beb080d1d4f62d344779d9877aca1d374918815a424d50176e0c1bd79355ffb0424c43db050ad97bf799027639f1c65a2f44ae5326f5b8a',
-                enroll_sig: '0x0ed498b867c33d316b468d817ba8238aec68541abd912cecc499f8e780a8cdaf2692d0b8b04133a34716169a4b1d33d77c3e585357d8a2a2c48a772275255c01',
-                commitment: '0xd0348a88f9b7456228e4df5689a57438766f4774d760776ec450605c82348c461db84587c2c9b01c67c8ed17f297ee4008424ad3e0e5039179719d7e9df297c1',
-                cycle_length: 20
-              },
-              {
-                height: '0',
-                utxo: '0xf86b2a5c800d872737b925df21923eee6eb998c705135e3165f3afd95131e39ec4d74a1b33eb3ea7a54524c183338d01bc79391f44bc6604a8f9e2cd0e324411',
-                enroll_sig: '0x09474f489579c930dbac46f638f3202ac24407f1fa419c1d95be38ab474da29d7e3d4753b6b4ccdb35c2864be4195e83b7b8433ca1d27a57fb9f48a631001304',
-                commitment: '0xaf43c67d9dd0f53de3eaede63cdcda8643422d62205df0b5af65706ec28b372adb785ce681d559d7a7137a4494ccbab4658ce11ec75a8ec84be5b73590bffceb',
-                cycle_length: 20
-              },
-              {
-                height: '0',
-                utxo: '0x3764508f77003808ba8b27ec0c8706ea7b4efdc8211e132dd8f1509643859af5489292694ef14ce1a77f56fd21f7ef3d57e4b013458aea2d915a82ecd4cf3533',
-                enroll_sig: '0x0e4566eca30feb9ad47a65e7ff7e7ce1a7555ccedcf61e1143c2e5fddbec6866fd787c4518b78ab9ed73a3760741d557ac2aca631fc2796be86fcf391d3a6634',
-                commitment: '0xa24b7e6843220d3454523ceb7f9b43f037e56a01d2bee82958b080dc6350ebac2da12b561cbd96c6fb3f5ae5a3c8df0ac2c559ae1c45b11d42fdf866558112bc',
-                cycle_length: 20
-              },
-              {
-                height: '0',
-                utxo: '0x1da29910b5ed5b9ea3bd4207016f485f763b44bd289444a4cef77faa96480d6833ce0b215c3ed6e00e9119352e49bb3e04054e0fca5fef35aeb47a9e425d7ddf',
-                enroll_sig: '0x052ee1d975c49f19fd26b077740dcac399f174f40b5df1aba5f09ebea11faacfd79a36ace4d3097869dc009b8939fc83bdf940c8822c6931d5c09326aa746b31',
-                commitment: '0xa0502960ddbe816729f60aeaa480c7924fb020d864deec6a9db778b8e56dd2ff8e987be748ff6ca0a43597ecb575da5d532696e376dc70bb4567b5b1fa512cb4',
-                cycle_length: 20
-              },
-              {
-                height: '0',
-                utxo: '0x740c6279bb59d9d6e098dab2485f5914aa5cea9ba39639f62c81041dacaf12e887de30089d1d887bc6e96eaecd076be9aac5f158af94c73def6ce255d6aad4f1',
-                enroll_sig: '0x0e0070e5951ef5be897cb593c4c57ce28b7529463f7e5644b1314ab7cc69fd625c71e74382a24b7e644d32b0306fe3cf14ecd7de5635c70aa592f4721aa74fe2',
-                commitment: '0xdd1b9c62d4c62246ea124e5422d5a2e23d3ca9accb0eba0e46cd46708a4e7b417f46df34dc2e3cba9a57b1dc35a66dfc2d5ef239ebeaaa00299232bc7e3b7bfa',
-                cycle_length: 20
-              }
+                {
+                    height: '0',
+                    utxo: '0x2f8b231aa4fd35c6a5c68a97fed32120da48cf6d40ccffc93d8dc41a3016eb56434b2c44144a38efe459f98ddc2660b168f1c92a48fe65711173385fb4a269e1',
+                    enroll_sig: '0x0cab27862571d2d2e33d6480e1eab4c82195a508b72672d609610d01f23b0beedc8b89135fe3f5df9e2815b9bdb763c41b8b2dab5911e313acc82470c2147422',
+                    commitment: '0x0a8201f9f5096e1ce8e8de4147694940a57a188b78293a55144fc8777a774f2349b3a910fb1fb208514fb16deaf49eb05882cdb6796a81f913c6daac3eb74328',
+                    cycle_length: 20
+                },
+                {
+                    height: '0',
+                    utxo: '0x47a38b066ca55ef3e855b0c741ebd301b3fa38a86f9ed3507ab08794f24eddbd279eeb5bddde331cdaaf44401fcedb0f2f23d117607864c43bdb0cf587df13d7',
+                    enroll_sig: '0x0ed498b867c33d316b468d817ba8238aec68541abd912cecc499f8e780a8cdaf2692d0b8b04133a34716169a4b1d33d77c3e585357d8a2a2c48a772275255c01',
+                    commitment: '0xd0348a88f9b7456228e4df5689a57438766f4774d760776ec450605c82348c461db84587c2c9b01c67c8ed17f297ee4008424ad3e0e5039179719d7e9df297c1',
+                    cycle_length: 20
+                },
+                {
+                    height: '0',
+                    utxo: '0x53b6a6da4ee9cd2bc803ccfe06db19b8e557f68ff23d05ea691ebabcd50f10c30cb658f8c0e72141263377d00d481a9b514b92c07aacf80e8642881cffdd5381',
+                    enroll_sig: '0x09474f489579c930dbac46f638f3202ac24407f1fa419c1d95be38ab474da29d7e3d4753b6b4ccdb35c2864be4195e83b7b8433ca1d27a57fb9f48a631001304',
+                    commitment: '0xaf43c67d9dd0f53de3eaede63cdcda8643422d62205df0b5af65706ec28b372adb785ce681d559d7a7137a4494ccbab4658ce11ec75a8ec84be5b73590bffceb',
+                    cycle_length: 20
+                },
+                {
+                    height: '0',
+                    utxo: '0x1f855b74bc623e9767e228362a7517c30d123bbeeae98d85fa933e5d24762f3040a220e327f023b23c562e36f673e9fa972e846efd6326dcafb9784b94937dbe',
+                    enroll_sig: '0x0e4566eca30feb9ad47a65e7ff7e7ce1a7555ccedcf61e1143c2e5fddbec6866fd787c4518b78ab9ed73a3760741d557ac2aca631fc2796be86fcf391d3a6634',
+                    commitment: '0xa24b7e6843220d3454523ceb7f9b43f037e56a01d2bee82958b080dc6350ebac2da12b561cbd96c6fb3f5ae5a3c8df0ac2c559ae1c45b11d42fdf866558112bc',
+                    cycle_length: 20
+                },
+                {
+                    height: '0',
+                    utxo: '0x096b57f1c92133073e432102d24b00148f5874fbb63f7fff216d832cb3cbed2b26d8017ba878c9d191bc2934ad742fd7830fe90a42c12faba550de4c25f77e64',
+                    enroll_sig: '0x052ee1d975c49f19fd26b077740dcac399f174f40b5df1aba5f09ebea11faacfd79a36ace4d3097869dc009b8939fc83bdf940c8822c6931d5c09326aa746b31',
+                    commitment: '0xa0502960ddbe816729f60aeaa480c7924fb020d864deec6a9db778b8e56dd2ff8e987be748ff6ca0a43597ecb575da5d532696e376dc70bb4567b5b1fa512cb4',
+                    cycle_length: 20
+                },
+                {
+                    height: '0',
+                    utxo: '0xb25467a2a15176ae3d293051e01d1e402036a9fbbbbea0d49878ccf4244bd8546c2d42622309efccf884901e3e27b12f4fef3fb2a8f81317d7e375a0f648c2ad',
+                    enroll_sig: '0x0e0070e5951ef5be897cb593c4c57ce28b7529463f7e5644b1314ab7cc69fd625c71e74382a24b7e644d32b0306fe3cf14ecd7de5635c70aa592f4721aa74fe2',
+                    commitment: '0xdd1b9c62d4c62246ea124e5422d5a2e23d3ca9accb0eba0e46cd46708a4e7b417f46df34dc2e3cba9a57b1dc35a66dfc2d5ef239ebeaaa00299232bc7e3b7bfa',
+                    cycle_length: 20
+                }
             ],
             total_data: 6
-          }
+        }
         assert.deepStrictEqual(response.data, expected);
     });
     it('Test of the path /block-enrollments with block hash', async () => {
         let uri = URI(host)
             .port(port)
             .directory("block-enrollments")
-            .addSearch("hash", "0xe2357870cef6f690c5672293aba4e910dc3e120ab83cbfff24cf6b824af0588caa294900abdd46f3453229dea8680343e89f7ef06f47a2db1ec2a214553f4281")
+            .addSearch("hash", "0x8ea91eafb2555f93ce0b0335d8454cdd052646dd1ef4a9029f026d08cdd081b9fb3e736903a119cce4beec1814b05c29b70243e0d1bbc096cf99c90b93f0b9a2")
             .addSearch("page", "1")
             .addSearch("page_size", "10");
         let response = await client.get(uri.toString());
-        let expected = {
+        let expected =  {
             enrollmentElementList: [
-              {
-                height: '0',
-                utxo: '0x6100ee7a7e00e18e06b743a7ae90e91781c09e0f1791ee2849ce15caf4c6ee1f3aebc23768f98153d8e3fb10ac66267e06acc31dccbfdbe671294a7fded22432',
-                enroll_sig: '0x0cab27862571d2d2e33d6480e1eab4c82195a508b72672d609610d01f23b0beedc8b89135fe3f5df9e2815b9bdb763c41b8b2dab5911e313acc82470c2147422',
-                commitment: '0x0a8201f9f5096e1ce8e8de4147694940a57a188b78293a55144fc8777a774f2349b3a910fb1fb208514fb16deaf49eb05882cdb6796a81f913c6daac3eb74328',
-                cycle_length: 20
-              },
-              {
-                height: '0',
-                utxo: '0xac296969fc6c59a53beb080d1d4f62d344779d9877aca1d374918815a424d50176e0c1bd79355ffb0424c43db050ad97bf799027639f1c65a2f44ae5326f5b8a',
-                enroll_sig: '0x0ed498b867c33d316b468d817ba8238aec68541abd912cecc499f8e780a8cdaf2692d0b8b04133a34716169a4b1d33d77c3e585357d8a2a2c48a772275255c01',
-                commitment: '0xd0348a88f9b7456228e4df5689a57438766f4774d760776ec450605c82348c461db84587c2c9b01c67c8ed17f297ee4008424ad3e0e5039179719d7e9df297c1',
-                cycle_length: 20
-              },
-              {
-                height: '0',
-                utxo: '0xf86b2a5c800d872737b925df21923eee6eb998c705135e3165f3afd95131e39ec4d74a1b33eb3ea7a54524c183338d01bc79391f44bc6604a8f9e2cd0e324411',
-                enroll_sig: '0x09474f489579c930dbac46f638f3202ac24407f1fa419c1d95be38ab474da29d7e3d4753b6b4ccdb35c2864be4195e83b7b8433ca1d27a57fb9f48a631001304',
-                commitment: '0xaf43c67d9dd0f53de3eaede63cdcda8643422d62205df0b5af65706ec28b372adb785ce681d559d7a7137a4494ccbab4658ce11ec75a8ec84be5b73590bffceb',
-                cycle_length: 20
-              },
-              {
-                height: '0',
-                utxo: '0x3764508f77003808ba8b27ec0c8706ea7b4efdc8211e132dd8f1509643859af5489292694ef14ce1a77f56fd21f7ef3d57e4b013458aea2d915a82ecd4cf3533',
-                enroll_sig: '0x0e4566eca30feb9ad47a65e7ff7e7ce1a7555ccedcf61e1143c2e5fddbec6866fd787c4518b78ab9ed73a3760741d557ac2aca631fc2796be86fcf391d3a6634',
-                commitment: '0xa24b7e6843220d3454523ceb7f9b43f037e56a01d2bee82958b080dc6350ebac2da12b561cbd96c6fb3f5ae5a3c8df0ac2c559ae1c45b11d42fdf866558112bc',
-                cycle_length: 20
-              },
-              {
-                height: '0',
-                utxo: '0x1da29910b5ed5b9ea3bd4207016f485f763b44bd289444a4cef77faa96480d6833ce0b215c3ed6e00e9119352e49bb3e04054e0fca5fef35aeb47a9e425d7ddf',
-                enroll_sig: '0x052ee1d975c49f19fd26b077740dcac399f174f40b5df1aba5f09ebea11faacfd79a36ace4d3097869dc009b8939fc83bdf940c8822c6931d5c09326aa746b31',
-                commitment: '0xa0502960ddbe816729f60aeaa480c7924fb020d864deec6a9db778b8e56dd2ff8e987be748ff6ca0a43597ecb575da5d532696e376dc70bb4567b5b1fa512cb4',
-                cycle_length: 20
-              },
-              {
-                height: '0',
-                utxo: '0x740c6279bb59d9d6e098dab2485f5914aa5cea9ba39639f62c81041dacaf12e887de30089d1d887bc6e96eaecd076be9aac5f158af94c73def6ce255d6aad4f1',
-                enroll_sig: '0x0e0070e5951ef5be897cb593c4c57ce28b7529463f7e5644b1314ab7cc69fd625c71e74382a24b7e644d32b0306fe3cf14ecd7de5635c70aa592f4721aa74fe2',
-                commitment: '0xdd1b9c62d4c62246ea124e5422d5a2e23d3ca9accb0eba0e46cd46708a4e7b417f46df34dc2e3cba9a57b1dc35a66dfc2d5ef239ebeaaa00299232bc7e3b7bfa',
-                cycle_length: 20
-              }
+                {
+                    height: '0',
+                    utxo: '0x2f8b231aa4fd35c6a5c68a97fed32120da48cf6d40ccffc93d8dc41a3016eb56434b2c44144a38efe459f98ddc2660b168f1c92a48fe65711173385fb4a269e1',
+                    enroll_sig: '0x0cab27862571d2d2e33d6480e1eab4c82195a508b72672d609610d01f23b0beedc8b89135fe3f5df9e2815b9bdb763c41b8b2dab5911e313acc82470c2147422',
+                    commitment: '0x0a8201f9f5096e1ce8e8de4147694940a57a188b78293a55144fc8777a774f2349b3a910fb1fb208514fb16deaf49eb05882cdb6796a81f913c6daac3eb74328',
+                    cycle_length: 20
+                },
+                {
+                    height: '0',
+                    utxo: '0x47a38b066ca55ef3e855b0c741ebd301b3fa38a86f9ed3507ab08794f24eddbd279eeb5bddde331cdaaf44401fcedb0f2f23d117607864c43bdb0cf587df13d7',
+                    enroll_sig: '0x0ed498b867c33d316b468d817ba8238aec68541abd912cecc499f8e780a8cdaf2692d0b8b04133a34716169a4b1d33d77c3e585357d8a2a2c48a772275255c01',
+                    commitment: '0xd0348a88f9b7456228e4df5689a57438766f4774d760776ec450605c82348c461db84587c2c9b01c67c8ed17f297ee4008424ad3e0e5039179719d7e9df297c1',
+                    cycle_length: 20
+                },
+                {
+                    height: '0',
+                    utxo: '0x53b6a6da4ee9cd2bc803ccfe06db19b8e557f68ff23d05ea691ebabcd50f10c30cb658f8c0e72141263377d00d481a9b514b92c07aacf80e8642881cffdd5381',
+                    enroll_sig: '0x09474f489579c930dbac46f638f3202ac24407f1fa419c1d95be38ab474da29d7e3d4753b6b4ccdb35c2864be4195e83b7b8433ca1d27a57fb9f48a631001304',
+                    commitment: '0xaf43c67d9dd0f53de3eaede63cdcda8643422d62205df0b5af65706ec28b372adb785ce681d559d7a7137a4494ccbab4658ce11ec75a8ec84be5b73590bffceb',
+                    cycle_length: 20
+                },
+                {
+                    height: '0',
+                    utxo: '0x1f855b74bc623e9767e228362a7517c30d123bbeeae98d85fa933e5d24762f3040a220e327f023b23c562e36f673e9fa972e846efd6326dcafb9784b94937dbe',
+                    enroll_sig: '0x0e4566eca30feb9ad47a65e7ff7e7ce1a7555ccedcf61e1143c2e5fddbec6866fd787c4518b78ab9ed73a3760741d557ac2aca631fc2796be86fcf391d3a6634',
+                    commitment: '0xa24b7e6843220d3454523ceb7f9b43f037e56a01d2bee82958b080dc6350ebac2da12b561cbd96c6fb3f5ae5a3c8df0ac2c559ae1c45b11d42fdf866558112bc',
+                    cycle_length: 20
+                },
+                {
+                    height: '0',
+                    utxo: '0x096b57f1c92133073e432102d24b00148f5874fbb63f7fff216d832cb3cbed2b26d8017ba878c9d191bc2934ad742fd7830fe90a42c12faba550de4c25f77e64',
+                    enroll_sig: '0x052ee1d975c49f19fd26b077740dcac399f174f40b5df1aba5f09ebea11faacfd79a36ace4d3097869dc009b8939fc83bdf940c8822c6931d5c09326aa746b31',
+                    commitment: '0xa0502960ddbe816729f60aeaa480c7924fb020d864deec6a9db778b8e56dd2ff8e987be748ff6ca0a43597ecb575da5d532696e376dc70bb4567b5b1fa512cb4',
+                    cycle_length: 20
+                },
+                {
+                    height: '0',
+                    utxo: '0xb25467a2a15176ae3d293051e01d1e402036a9fbbbbea0d49878ccf4244bd8546c2d42622309efccf884901e3e27b12f4fef3fb2a8f81317d7e375a0f648c2ad',
+                    enroll_sig: '0x0e0070e5951ef5be897cb593c4c57ce28b7529463f7e5644b1314ab7cc69fd625c71e74382a24b7e644d32b0306fe3cf14ecd7de5635c70aa592f4721aa74fe2',
+                    commitment: '0xdd1b9c62d4c62246ea124e5422d5a2e23d3ca9accb0eba0e46cd46708a4e7b417f46df34dc2e3cba9a57b1dc35a66dfc2d5ef239ebeaaa00299232bc7e3b7bfa',
+                    cycle_length: 20
+                }
             ],
             total_data: 6
-          }
+        }
         assert.deepStrictEqual(response.data, expected);
     });
     it('Test of the path /block-transactions with block height', async () => {
@@ -924,186 +924,186 @@ describe ('Test of Stoa API Server', () =>
             .addSearch("page", "1")
             .addSearch("page_size", "10");
         let response = await client.get(uri.toString());
-        let expected = {
+        let expected =  {
             tx: [
-              {
-                height: '0',
-                tx_hash: '0xb8f5a5f4544e75b5837a370d0070361aaaf97d3b02070d3d9845598c5f55105b6bd9ac8e9c53e74679db77cb512ffd88a9916754744f6b5eb2a812929651f84f',
-                amount: '120000000000000',
-                type: 1,
-                fee: 0,
-                size: 255,
-                time: 1609459200,
-                sender_address: null,
-                receiver: [
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwry6fpk7a57k4gwyj3mwnf59w808nygtuxsgdrpmv4p7ua2hqx78z5en'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwrymw40ae7kdumk5uf24rf7wj6kxeem0t3mh9yclz6j46rnen6htq9ju'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwryayr9r3nacx26vwe6ymy2kl7zp7dc03q5h6zk65vnu6mtkkzdqg39f'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwry7vltf9mrzf62qgpdh282grqn9nlnvhzp0yt8y0y9zedmgh64s2qjg'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwryl0ajdd86c45w4zrjf8spmrt7u4l7s5jy64ac3dc78x2ucd7wkakac'
-                    }
-                  ]
-              },
-              {
-                height: '0',
-                tx_hash: '0x4ef4f7195db2e20f36b46cb3cda1f529b77e2cd8423241d1a4a779f3d7845d4f6543a6147956bf4fe52d5f5925a04102de59b2854f90fb3e8cc1a0e85fe9b11d',
-                amount: '4880000000000000',
-                type: 0,
-                fee: 0,
-                size: 337,
-                time: 1609459200,
-                sender_address: null,
-                receiver: [
-                    {
-                      amount: 610000000000000,
-                      address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    },
-                    {
-                      amount: 610000000000000,
-                      address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    },
-                    {
-                      amount: 610000000000000,
-                      address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    },
-                    {
-                      amount: 610000000000000,
-                      address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    },
-                    {
-                      amount: 610000000000000,
-                      address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    },
-                    {
-                      amount: 610000000000000,
-                      address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    },
-                    {
-                      amount: 610000000000000,
-                      address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    },
-                    {
-                      amount: 610000000000000,
-                      address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    }
-                  ]
-              }
+                {
+                    height: '0',
+                    tx_hash: '0xd37793e642273aeccbcbfc6be8e19a6007c5147e1116123e44a5e42e4be11495561e535484a2922120c556161f7ae55433bd124bedbf935f3f5b9a414b7af34e',
+                    amount: '120000000000000',
+                    type: 1,
+                    fee: 0,
+                    size: 255,
+                    time: 1609459200,
+                    sender_address: null,
+                    receiver: [
+                        {
+                            amount: 20000000000000,
+                            address: 'boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn'
+                        },
+                        {
+                            amount: 20000000000000,
+                            address: 'boa1xrvald3zmehvpcmxqm0kn6wkaqyry7yj3cd8h975ypzlyz00sczpzhsk308'
+                        },
+                        {
+                            amount: 20000000000000,
+                            address: 'boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku'
+                        },
+                        {
+                            amount: 20000000000000,
+                            address: 'boa1xzvald5dvy54j7yt2h5yzs2432h07rcn66j84t3lfdrlrwydwq78cz0nckq'
+                        },
+                        {
+                            amount: 20000000000000,
+                            address: 'boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t'
+                        },
+                        {
+                            amount: 20000000000000,
+                            address: 'boa1xzvald7hxvgnzk50sy04ha7ezgyytxt5sgw323zy8dlj3ya2q40e6elltwq'
+                        }
+                    ]
+                },
+                {
+                    height: '0',
+                    tx_hash: '0xd4b2011f46b7de32e6a3f51eae35c97440b7adf427df7725d19575b8a9a8256552939656f8b5d4087b9bcbbe9219504e31f91a85fb1709683cbefc3962639ecd',
+                    amount: '4880000000000000',
+                    type: 0,
+                    fee: 0,
+                    size: 337,
+                    time: 1609459200,
+                    sender_address: null,
+                    receiver: [
+                        {
+                            amount: 610000000000000,
+                            address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67'
+                        },
+                        {
+                            amount: 610000000000000,
+                            address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67'
+                        },
+                        {
+                            amount: 610000000000000,
+                            address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67'
+                        },
+                        {
+                            amount: 610000000000000,
+                            address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67'
+                        },
+                        {
+                            amount: 610000000000000,
+                            address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67'
+                        },
+                        {
+                            amount: 610000000000000,
+                            address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67'
+                        },
+                        {
+                            amount: 610000000000000,
+                            address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67'
+                        },
+                        {
+                            amount: 610000000000000,
+                            address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67'
+                        }
+                    ]
+                }
             ],
             total_data: 2
-          }
+        }
         assert.deepStrictEqual(response.data, expected);
     });
     it('Test of the path /block-transactions with block hash', async () => {
         let uri = URI(host)
             .port(port)
             .directory("block-transactions")
-            .addSearch("hash", "0xe2357870cef6f690c5672293aba4e910dc3e120ab83cbfff24cf6b824af0588caa294900abdd46f3453229dea8680343e89f7ef06f47a2db1ec2a214553f4281")
+            .addSearch("hash", "0x8ea91eafb2555f93ce0b0335d8454cdd052646dd1ef4a9029f026d08cdd081b9fb3e736903a119cce4beec1814b05c29b70243e0d1bbc096cf99c90b93f0b9a2")
             .addSearch("page", "1")
             .addSearch("page_size", "10");
         let response = await client.get(uri.toString());
-        let expected = {
+        let expected =  {
             tx: [
-              {
-                height: '0',
-                tx_hash: '0xb8f5a5f4544e75b5837a370d0070361aaaf97d3b02070d3d9845598c5f55105b6bd9ac8e9c53e74679db77cb512ffd88a9916754744f6b5eb2a812929651f84f',
-                amount: '120000000000000',
-                type: 1,
-                fee: 0,
-                size: 255,
-                time: 1609459200,
-                sender_address: null,
-                receiver: [
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwry6fpk7a57k4gwyj3mwnf59w808nygtuxsgdrpmv4p7ua2hqx78z5en'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwrymw40ae7kdumk5uf24rf7wj6kxeem0t3mh9yclz6j46rnen6htq9ju'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwryuhc2tw2j97wqe3ahh37qnjya59n5etz88n9fvwyyt9jyvrvfq5ecp'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwryayr9r3nacx26vwe6ymy2kl7zp7dc03q5h6zk65vnu6mtkkzdqg39f'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwry7vltf9mrzf62qgpdh282grqn9nlnvhzp0yt8y0y9zedmgh64s2qjg'
-                    },
-                    {
-                      amount: 20000000000000,
-                      address: 'boa1xrdwryl0ajdd86c45w4zrjf8spmrt7u4l7s5jy64ac3dc78x2ucd7wkakac'
-                    }
-                  ]
-              },
-              {
-                height: '0',
-                tx_hash: '0x4ef4f7195db2e20f36b46cb3cda1f529b77e2cd8423241d1a4a779f3d7845d4f6543a6147956bf4fe52d5f5925a04102de59b2854f90fb3e8cc1a0e85fe9b11d',
-                amount: '4880000000000000',
-                type: 0,
-                fee: 0,
-                size: 337,
-                time: 1609459200,
-                sender_address: null,
-                receiver: [
-                    {
-                      amount: 610000000000000,
-                      address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    },
-                    {
-                      amount: 610000000000000,
-                      address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    },
-                    {
-                      amount: 610000000000000,
-                      address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    },
-                    {
-                      amount: 610000000000000,
-                      address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    },
-                    {
-                      amount: 610000000000000,
-                      address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    },
-                    {
-                      amount: 610000000000000,
-                      address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    },
-                    {
-                      amount: 610000000000000,
-                      address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    },
-                    {
-                      amount: 610000000000000,
-                      address: 'boa1xrxydyju2h8l3sfytnwd3l8j4gj4jsa0wj4pykt37yyggtl686ugy5wj2yt'
-                    }
-                  ]
-              }
+                {
+                    height: '0',
+                    tx_hash: '0xd37793e642273aeccbcbfc6be8e19a6007c5147e1116123e44a5e42e4be11495561e535484a2922120c556161f7ae55433bd124bedbf935f3f5b9a414b7af34e',
+                    amount: '120000000000000',
+                    type: 1,
+                    fee: 0,
+                    size: 255,
+                    time: 1609459200,
+                    sender_address: null,
+                    receiver: [
+                        {
+                            amount: 20000000000000,
+                            address: 'boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn'
+                        },
+                        {
+                            amount: 20000000000000,
+                            address: 'boa1xrvald3zmehvpcmxqm0kn6wkaqyry7yj3cd8h975ypzlyz00sczpzhsk308'
+                        },
+                        {
+                            amount: 20000000000000,
+                            address: 'boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku'
+                        },
+                        {
+                            amount: 20000000000000,
+                            address: 'boa1xzvald5dvy54j7yt2h5yzs2432h07rcn66j84t3lfdrlrwydwq78cz0nckq'
+                        },
+                        {
+                            amount: 20000000000000,
+                            address: 'boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t'
+                        },
+                        {
+                            amount: 20000000000000,
+                            address: 'boa1xzvald7hxvgnzk50sy04ha7ezgyytxt5sgw323zy8dlj3ya2q40e6elltwq'
+                        }
+                    ]
+                },
+                {
+                    height: '0',
+                    tx_hash: '0xd4b2011f46b7de32e6a3f51eae35c97440b7adf427df7725d19575b8a9a8256552939656f8b5d4087b9bcbbe9219504e31f91a85fb1709683cbefc3962639ecd',
+                    amount: '4880000000000000',
+                    type: 0,
+                    fee: 0,
+                    size: 337,
+                    time: 1609459200,
+                    sender_address: null,
+                    receiver: [
+                        {
+                            amount: 610000000000000,
+                            address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67'
+                        },
+                        {
+                            amount: 610000000000000,
+                            address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67'
+                        },
+                        {
+                            amount: 610000000000000,
+                            address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67'
+                        },
+                        {
+                            amount: 610000000000000,
+                            address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67'
+                        },
+                        {
+                            amount: 610000000000000,
+                            address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67'
+                        },
+                        {
+                            amount: 610000000000000,
+                            address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67'
+                        },
+                        {
+                            amount: 610000000000000,
+                            address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67'
+                        },
+                        {
+                            amount: 610000000000000,
+                            address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67'
+                        }
+                    ]
+                }
             ],
             total_data: 2
-          }
+        }
         assert.deepStrictEqual(response.data, expected);
     });
     it('Test of the path /boa-stats', async () => {
@@ -1121,7 +1121,6 @@ describe ('Test of Stoa API Server', () =>
                 }
         assert.deepStrictEqual(response.data, expected);
     });
-
 });
 
 describe ('Test of the path /utxo', () =>
