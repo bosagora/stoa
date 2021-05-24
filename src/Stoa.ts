@@ -2,6 +2,7 @@ import { AgoraClient } from './modules/agora/AgoraClient';
 import { cors_options } from './cors';
 import { IDatabaseConfig } from './modules/common/Config';
 import { LedgerStorage } from './modules/storage/LedgerStorage';
+import { CoinMarketService } from './modules/service/CoinMaketService';
 import { logger } from './modules/common/Logger';
 import { Height, PreImageInfo, Hash, hash, Block, Utils,
     Endian, Transaction, hashFull, DataPayload } from 'boa-sdk-ts';
@@ -10,7 +11,7 @@ import { ValidatorData, IPreimage, IUnspentTxOutput, ITxStatus,
     ITxHistoryElement, ITxOverview, ConvertTypes, DisplayTxType,
     IPendingTxs, ISPVStatus, ITransactionFee, IBlock, ITransaction,
     IBlockOverview, IBlockEnrollmentElements, IBlockEnrollment, IBlockTransactions, IBlockTransactionElements,
-    IBOAStats, IPagination} from './Types';
+    IBOAStats, IPagination, IMarketCap} from './Types';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -30,6 +31,11 @@ class Stoa extends WebService
      * Stoa page size limit
      */
     private readonly limit_page_size: number = 100;
+
+    /**
+     * Instance of coin Market for stoa
+     */
+    public coinMarketService : CoinMarketService;
 
     /**
      * Chain of pending store operations
@@ -64,16 +70,15 @@ class Stoa extends WebService
      * @param address The network address of Stoa
      * @param genesis_timestamp The genesis timestamp
      */
-    constructor(databaseConfig:IDatabaseConfig, agora_endpoint: URL, port: number | string, address: string, genesis_timestamp: number) {
+    constructor(databaseConfig:IDatabaseConfig, agora_endpoint: URL, port: number | string, address: string, genesis_timestamp: number, coinMarketService: CoinMarketService) {
         super(port, address);
 
         this.genesis_timestamp = genesis_timestamp;
         this._ledger_storage = null;
         this.databaseConfig = databaseConfig;
-
+        this.coinMarketService = coinMarketService;
         // Instantiate a dummy promise for chaining
         this.pending = new Promise<void>(function (resolve, reject) { resolve() });
-
         // Do this last, as it is possible it will fail, and we only want failure
         // to happen after we checked that our own state is correct.
         this.agora = new AgoraClient(agora_endpoint);
@@ -141,6 +146,7 @@ class Stoa extends WebService
         this.app.get("/block-transactions", this.getBlockTransactions.bind(this));
         this.app.get("/boa-stats", this.getBOAStats.bind(this));
         this.app.get("/spv/:hash", this.verifyPayment.bind(this));
+        this.app.get("/coinmarketcap", this.getcoinMaketCap.bind(this));
         this.app.post("/block_externalized", this.postBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
         this.app.post("/transaction_received", this.putTransaction.bind(this));
@@ -162,6 +168,9 @@ class Stoa extends WebService
             .then(
                 () =>
                 {
+                    this.coinMarketService.start(this).catch((err)=>{
+                    logger.error(`Error: Could not connect to marketcap Client: ${err.toString()}`);
+                    });
                     return this.pending = this.pending.then(() => { return this.catchup(height); });
                 });
     }
@@ -1145,6 +1154,27 @@ class Stoa extends WebService
         res.status(200).send();
     }
 
+     /**
+     * Put Coin market data to database
+     *
+     * This method Store the Coin market data to database. 
+     */
+    public putCoinMarketStats(data : IMarketCap): Promise<any>
+    {
+       return new Promise<any>((resolve, reject)=>{
+       this.ledger_storage.storeCoinMarket(data).then((result: any)=>{
+            if(result.affectedRows)
+            {
+             logger.info(`CoinMarket: Data Update Completed`);
+             resolve (result);
+            }
+       }).catch((err) => {
+                logger.error("Failed to Store coin market cap data." + err);
+                reject(err);
+        });
+       });
+    }
+
     /**
      * POST /transaction_received
      *
@@ -1372,6 +1402,28 @@ class Stoa extends WebService
 
                 }
             })
+    }
+        /**
+      * Get Coin Market Cap for BOA.
+      * @param req 
+      * @param res 
+      * @returns Returns Coin market cap.
+      */
+    private async getcoinMaketCap(req: express.Request, res: express.Response) {
+
+         this.ledger_storage.getCoinMarketcap().then((rows:any)=>{
+             if(rows[0])
+             {
+              return res.status(200).send(rows[0]);
+             }
+             else{
+                 return res.status(204).send(`The data does not exist.`)
+             }
+
+         }).catch((err)=>{
+              logger.error("Failed to data lookup to the DB: " + err);
+                res.status(500).send("Failed to data lookup");
+         })
     }
 
 
