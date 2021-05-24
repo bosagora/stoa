@@ -389,3 +389,27 @@ CREATE TABLE IF NOT EXISTS "tx_output_pool" (
 )
 ```
 ----
+## 14. Table **marketcap**
+
+### _Schema_
+
+| Column                 | Data Type | PK | Not NULL | Default  |Description|
+|:-----------------------|:--------- |:--:|:--------:| -------- | --------- |
+|  last_updated_at       | INTEGER   | Y  | Y        |          | Time of last update  |
+|  price                 | BIGINT(20)|    | Y        |          | Price of BOA in USD  |
+|  vol_24h               | BIGINT(20)|    | Y        |          | 24 hours Volume  |
+|  change_24h            | BIGINT(20)|    | Y        |          | Market cap change for last 24 hours 
+|  market_cap            | BIGINT(20)|    | Y        |          | Market cap 24 hour amount  |
+
+### _Create Script_
+
+```sql
+Create TABLE IF NOT EXISTS "marketcap" (
+    "last_updated_at"        INTEGER     NOT NULL,
+    "price"                  BIGINT(20)  NOT NULL,
+    "market_cap"             BIGINT(20)  NOT NULL,
+    "vol_24h"                BIGINT(20)  NOT NULL,
+    "change_24h"             BIGINT(20)  NOT NULL,
+    PRIMARY KEY ("last_updated_at")
+);
+```

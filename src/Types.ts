@@ -744,11 +744,43 @@ export interface IPagination
     /**
      * page size 
      */
-    pageSize:number,
+    pageSize: number,
     
     /**
      * page number
      */
-    page :number
+    page: number
 }
 
+/**
+ * Interface for MarketCap
+ */
+
+export interface IMarketCap
+{
+    /**
+     * Price of BOA in usd
+     */
+    price: number
+
+    /**
+     * market cap of BOA
+     */
+    market_cap: number
+
+    /**
+     * Change percentage in 24h
+     */
+    change_24h: number
+
+    /**
+     * 24 hour volumne
+     */
+    vol_24h: number
+    
+    /**
+     * Last updated time
+     */
+    last_updated_at: number
+    
+}

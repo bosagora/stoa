@@ -12,7 +12,7 @@
 *******************************************************************************/
 
 import { SodiumHelper } from 'boa-sdk-ts';
-import { TestAgora, TestStoa, TestClient, sample_data, sample_data2, recovery_sample_data, delay } from './Utils';
+import { TestAgora, TestStoa, TestClient, market_cap_sample_data, sample_data, sample_data2, recovery_sample_data, delay, TestCoinGecko } from './Utils';
 
 import * as assert from 'assert';
 import URI from 'urijs';
@@ -20,6 +20,7 @@ import { URL } from 'url';
 import { IDatabaseConfig } from '../src/modules/common/Config';
 import { MockDBConfig } from './TestConfig';
 import { BOASodium } from 'boa-sodium-ts';
+import { CoinMarketService } from '../src/modules/service/CoinMaketService';
 
 describe ('Test of Stoa API for the wallet', () =>
 {
@@ -29,6 +30,8 @@ describe ('Test of Stoa API for the wallet', () =>
     let agora_server: TestAgora;
     let client = new TestClient();
     let testDBConfig: IDatabaseConfig;
+    let testCoinGecko: TestCoinGecko;
+    let coinMarketService: CoinMarketService;
 
     before('Wait for the package libsodium to finish loading', async () =>
     {
@@ -42,19 +45,28 @@ describe ('Test of Stoa API for the wallet', () =>
             agora_server = new TestAgora("2826", [], resolve);
         });
     });
-
+    before('Start a fake TestCoinGecko', () => {
+        return new Promise<void>((resolve, reject) => {
+             testCoinGecko = new TestCoinGecko("7876", market_cap_sample_data, resolve)
+        });
+    });
+    before('Start a fake coinMarketService', () => {
+             coinMarketService = new CoinMarketService(testCoinGecko)
+    });
     before ('Create TestStoa', async () =>
     {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig,new URL("http://127.0.0.1:2826"), port);
+        stoa_server = new TestStoa(testDBConfig,new URL("http://127.0.0.1:2826"), port, coinMarketService);
         await stoa_server.createStorage();
         await stoa_server.start();
     });
     after ('Stop Stoa and Agora server instances', async () =>
     {
+        coinMarketService.stop();
         await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
         await stoa_server.stop();
         await agora_server.stop();
+        await testCoinGecko.stop();
     });
 
     it ('Store blocks', async () =>
@@ -243,6 +255,9 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
     let agora_server: TestAgora;
     let client = new TestClient();
     let testDBConfig : IDatabaseConfig;
+    let testCoinGecko: TestCoinGecko;
+    let coinMarketService: CoinMarketService;
+
 
     before('Wait for the package libsodium to finish loading', async () =>
     {
@@ -255,17 +270,26 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
             agora_server = new TestAgora("2826", [], resolve);
         });
     });
-
+    before('Start a fake TestCoinGecko', () => {
+        return new Promise<void>((resolve, reject) => {
+             testCoinGecko = new TestCoinGecko("7876", market_cap_sample_data, resolve)
+        });
+    });
+    before('Start a fake coinMarketService', () => {
+             coinMarketService = new CoinMarketService(testCoinGecko)
+    });
     before ('Create TestStoa', async () =>
     {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig,new URL("http://127.0.0.1:2826"), port);
+        stoa_server = new TestStoa(testDBConfig,new URL("http://127.0.0.1:2826"), port, coinMarketService);
         await stoa_server.createStorage();
         await stoa_server.start();
     });
     after('Stop Stoa and Agora server instances', () => {
         return stoa_server.stop().then(async() => {
+            await coinMarketService.stop();
             await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
+            await testCoinGecko.stop()
             return agora_server.stop()
         });
     });

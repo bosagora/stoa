@@ -4,6 +4,8 @@ import { logger, Logger } from './modules/common/Logger';
 import { BOASodium } from "boa-sodium-ts";
 import { SodiumHelper } from "boa-sdk-ts";
 import Stoa from './Stoa';
+import { CoinMarketService } from './modules/service/CoinMaketService';
+import { CoinGeckoMaket } from './modules/coinmarket/coinMarketClient'
 
 // Create with the arguments and read from file
 let config = Config.createWithArgument();
@@ -36,6 +38,7 @@ const stoa: Stoa = new Stoa(config.database,
     config.server.port,
     config.server.address,
     config.consensus.genesis_timestamp,
+    new CoinMarketService(new CoinGeckoMaket())
     );
 
 SodiumHelper.assign(new BOASodium());

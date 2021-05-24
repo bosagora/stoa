@@ -18,6 +18,7 @@ import {
 } from 'boa-sdk-ts';
 import { Storages } from './Storages';
 import { IDatabaseConfig } from '../common/Config';
+import { IMarketCap } from '../../Types'
 
 import JSBI from 'jsbi';
 
@@ -222,6 +223,14 @@ export class LedgerStorage extends Storages
             total_size          BIGINT(20)  UNSIGNED NOT NULL,
 
             PRIMARY KEY(block_height)
+            );
+       Create TABLE IF NOT EXISTS marketcap (
+            last_updated_at     INTEGER NOT NULL,
+            price           BIGINT(20) UNSIGNED NOT NULL,
+            market_cap      BIGINT(20) UNSIGNED NOT NULL,
+            vol_24h         BIGINT(20) UNSIGNED NOT NULL,
+            change_24h      BIGINT(20) NOT NULL,
+            PRIMARY KEY (last_updated_at)
             );
        
        DROP TRIGGER IF EXISTS tx_trigger;
@@ -631,6 +640,30 @@ export class LedgerStorage extends Storages
                 {
                     reject(err);
                 });
+        });
+    }
+    /**
+     * Store the CoinMarketcap data
+     * @param data IMarketCap
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     *  
+     */
+    public storeCoinMarket(data: IMarketCap): Promise<any> {
+
+        return new Promise<void>((resolve, reject) => {
+            let sql =
+                `INSERT IGNORE INTO marketcap (last_updated_at, price, market_cap, change_24h, vol_24h) 
+            VALUES (?, ?, ?, ?, ?) 
+            `;
+
+            this.run(sql, [data.last_updated_at, data.price, data.market_cap, data.change_24h, data.vol_24h])
+                .then((result:any) => {
+                    resolve(result);
+                }).catch((err) => {
+                    reject(err);
+                })
         });
     }
 
@@ -2095,6 +2128,19 @@ export class LedgerStorage extends Storages
              (SELECT count(*) from validators) as validators
             FROM
                 blocks;`;
+
+        return this.query(sql, []);
+    }
+
+    /**
+     * Get the latest Coin Market cap data of BOA coin
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error. 
+     */
+    public getCoinMarketcap(): Promise<any[]> {
+        let sql =
+            `SELECT * FROM marketcap WHERE last_updated_at = (SELECT MAX(last_updated_at) as time FROM marketcap)`;
 
         return this.query(sql, []);
     }
