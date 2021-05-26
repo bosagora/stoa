@@ -224,7 +224,7 @@ class Stoa extends WebService
                     let result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
                     let avail_height = JSBI.BigInt(row.avail_height);
                     let preimage_height_str: string;
-                    
+
                     // Hashing preImage
                     if (JSBI.greaterThanOrEqual(target_height.value, avail_height) &&
                         JSBI.greaterThanOrEqual(JSBI.add(avail_height, JSBI.BigInt(preimage_height)), target_height.value))
@@ -321,7 +321,7 @@ class Stoa extends WebService
                     let result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
                     let avail_height = JSBI.BigInt(row.avail_height);
                     let preimage_height_str: string;
-    
+
                     // Hashing preImage
                     if (JSBI.greaterThanOrEqual(target_height.value, avail_height) &&
                         JSBI.greaterThanOrEqual(JSBI.add(avail_height, JSBI.BigInt(preimage_height)), target_height.value))
@@ -780,7 +780,7 @@ class Stoa extends WebService
      * Returns a block overview.
      */
      private getBlockSummary(req: express.Request, res: express.Response) {
-        
+
         let field: string;
         let value: string | Buffer;
 
@@ -855,7 +855,7 @@ class Stoa extends WebService
      *@returns Returns enrolled validators of block.
      */
     private async getBlockEnrollments(req: express.Request, res: express.Response) {
-        
+
         let field: string;
         let value: string | Buffer;
 
@@ -929,7 +929,7 @@ class Stoa extends WebService
      * @returns Returns transactions of block.
      */
     private async getBlockTransactions(req: express.Request, res: express.Response) {
-        
+
         let field: string;
         let value: string | Buffer;
         let limit: number;
@@ -960,7 +960,7 @@ class Stoa extends WebService
             res.status(400).send(`Invalid value for parameter 'height': ${req.query.height} and 'hash': ${req.query.hash}`);
             return;
         }
-        
+
         let pagination: IPagination = await this.paginate(req, res);
         this.ledger_storage.getBlockTransactions(field, value, pagination.pageSize, pagination.page)
         .then((data: any) => {
@@ -986,7 +986,7 @@ class Stoa extends WebService
                             sender_address: row.sender_address,
                             receiver: row.receiver,
                         }
-                    ); 
+                    );
                 }
 
                 let transactionList: IBlockTransactions = {
@@ -1010,7 +1010,7 @@ class Stoa extends WebService
      * @returns Returns statistics of BOA coin.
      */
     private getBOAStats(req: express.Request, res: express.Response) {
-        
+
         logger.http(`GET /boa-stats/`);
 
         this.ledger_storage.getBOAStats()
@@ -1157,7 +1157,7 @@ class Stoa extends WebService
      /**
      * Put Coin market data to database
      *
-     * This method Store the Coin market data to database. 
+     * This method Store the Coin market data to database.
      */
     public putCoinMarketStats(data : IMarketCap): Promise<any>
     {
@@ -1328,8 +1328,8 @@ class Stoa extends WebService
     };
     /**
     * Get latest blocks
-    * @param req 
-    * @param res 
+    * @param req
+    * @param res
     * @returns Return Latest blocks of the ledeger
     */
     public async getLatestBlocks(req: express.Request, res: express.Response) {
@@ -1367,8 +1367,8 @@ class Stoa extends WebService
     }
     /**
       * Get Latest transactions
-      * @param req 
-      * @param res 
+      * @param req
+      * @param res
       * @returns Returns Latest transactions of the ledger.
       */
     public async getLatestTransactions(req: express.Request, res: express.Response) {
@@ -1405,8 +1405,8 @@ class Stoa extends WebService
     }
         /**
       * Get Coin Market Cap for BOA.
-      * @param req 
-      * @param res 
+      * @param req
+      * @param res
       * @returns Returns Coin market cap.
       */
     private async getcoinMaketCap(req: express.Request, res: express.Response) {

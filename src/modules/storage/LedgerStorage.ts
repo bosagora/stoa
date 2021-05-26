@@ -102,7 +102,7 @@ export class LedgerStorage extends Storages
             type                INTEGER  NOT NULL,
             unlock_height       INTEGER  NOT NULL,
             lock_height         INTEGER  NOT NULL,
-            tx_fee              INTEGER  NOT NULL,
+            tx_fee              BIGINT(20)  NOT NULL,
             payload_fee         INTEGER  NOT NULL,
             tx_size             INTEGER  NOT NULL,
             inputs_count        INTEGER  NOT NULL,
@@ -189,7 +189,7 @@ export class LedgerStorage extends Storages
             lock_height         INTEGER    NOT NULL,
             received_height     INTEGER    NOT NULL,
             time                INTEGER    NOT NULL,
-            tx_fee              INTEGER    NOT NULL,
+            tx_fee              BIGINT(20)    NOT NULL,
             payload_fee         INTEGER    NOT NULL,
             tx_size             INTEGER    NOT NULL,
             PRIMARY KEY(tx_hash(64))
@@ -219,7 +219,7 @@ export class LedgerStorage extends Storages
             total_sent          BIGINT(20)  UNSIGNED NOT NULL,
             total_recieved      BIGINT(20)  UNSIGNED NOT NULL,
             total_reward        BIGINT(20)  UNSIGNED NOT NULL,
-            total_fee           BIGINT(20)  UNSIGNED NOT NULL,
+            total_fee           BIGINT(20)  NOT NULL,
             total_size          BIGINT(20)  UNSIGNED NOT NULL,
 
             PRIMARY KEY(block_height)
@@ -232,9 +232,9 @@ export class LedgerStorage extends Storages
             change_24h      BIGINT(20) NOT NULL,
             PRIMARY KEY (last_updated_at)
             );
-       
+
        DROP TRIGGER IF EXISTS tx_trigger;
-       CREATE TRIGGER tx_trigger AFTER INSERT 
+       CREATE TRIGGER tx_trigger AFTER INSERT
        ON transactions
        FOR EACH ROW
         BEGIN
@@ -552,32 +552,32 @@ export class LedgerStorage extends Storages
                     {
                         reject(err);
                     });
-                 
+
               });
           }
-  
+
           return new Promise<void>((resolve, reject) =>
           {
               (async () =>
-              { 
+              {
                   let total_recieved = JSBI.BigInt(0);
                   let total_sent = JSBI.BigInt(0);
                   let total_fee = JSBI.BigInt(0);
                   let total_size = JSBI.BigInt(0);
-                  let total_recieved_sql = `SELECT 
+                  let total_recieved_sql = `SELECT
                                                 SUM(IFNULL(O.amount,0)) as total_recieved
-                                                FROM 
+                                                FROM
                                                 tx_outputs O
                                                     INNER JOIN blocks B ON (O.block_height = B.height)
                                                 WHERE
                                                     block_height = ?;`;
-                  let transaction_stats = `SELECT 
+                  let transaction_stats = `SELECT
                                                 SUM(IFNULL(T.tx_fee,0)) as tx_fee,
-                                            SUM(IFNULL(T.payload_fee,0)) as payload_fee, SUM(IFNULL(T.tx_size,0)) as total_size 
-                                            FROM 
-                                            transactions T 
+                                            SUM(IFNULL(T.payload_fee,0)) as payload_fee, SUM(IFNULL(T.tx_size,0)) as total_size
+                                            FROM
+                                            transactions T
                                                 Inner join blocks B ON (T.block_height = B.height)
-                                            WHERE 
+                                            WHERE
                                                 block_height =?;`;
 
                   this.query(total_recieved_sql,[block.header.height.toString()])
@@ -648,14 +648,14 @@ export class LedgerStorage extends Storages
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
-     *  
+     *
      */
     public storeCoinMarket(data: IMarketCap): Promise<any> {
 
         return new Promise<void>((resolve, reject) => {
             let sql =
-                `INSERT IGNORE INTO marketcap (last_updated_at, price, market_cap, change_24h, vol_24h) 
-            VALUES (?, ?, ?, ?, ?) 
+                `INSERT IGNORE INTO marketcap (last_updated_at, price, market_cap, change_24h, vol_24h)
+            VALUES (?, ?, ?, ?, ?)
             `;
 
             this.run(sql, [data.last_updated_at, data.price, data.market_cap, data.change_24h, data.vol_24h])
@@ -1389,7 +1389,7 @@ export class LedgerStorage extends Storages
     {
         return new Promise<void>((resolve, reject) =>
         {
-            let sql = `INSERT INTO information (keyname, value) VALUES (?, ?) 
+            let sql = `INSERT INTO information (keyname, value) VALUES (?, ?)
             ON DUPLICATE KEY UPDATE keyname = VALUES(keyname) , value = VALUES(value);`;
             this.run(sql, ["height", height.toString()])
                 .then(() =>
@@ -1959,7 +1959,7 @@ export class LedgerStorage extends Storages
         return this.query(sql, [tx_hash.toBinary(Endian.Little)]);
     }
     /**
-     *  Get the Latest Blocks 
+     *  Get the Latest Blocks
      * @param limit Maximum record count that can be obtained from one query
      * @param page The number on the page, this value begins with 1
      * @returns Returns the Promise. If it is finished successfully the `.then`
@@ -1970,16 +1970,16 @@ export class LedgerStorage extends Storages
         let sql =
             `SELECT
                 height, hash, merkle_root, signature, validators, tx_count,
-                enrollment_count, time_stamp 
+                enrollment_count, time_stamp
             FROM
-                blocks 
-            ORDER BY height DESC 
+                blocks
+            ORDER BY height DESC
             LIMIT ? OFFSET ?`
 
         return this.query(sql, [limit, limit * (page - 1)]);
     }
      /**
-      * Get the Latest transactions 
+      * Get the Latest transactions
       * @param limit Maximum record count that can be obtained from one query
       * @param page The number on the page, this value begins with 1
       * @returns Returns the Promise. If it is finished successfully the `.then`
@@ -1988,14 +1988,14 @@ export class LedgerStorage extends Storages
       */
     public getLatestTransactions(limit: number, page: number): Promise<any[]> {
         let sql =
-            `SELECT 
-                T.block_height, T.tx_hash, type, T.tx_fee, T.tx_size, 
-             Sum(IFNULL(O.amount,0)) as amount, B.time_stamp 
+            `SELECT
+                T.block_height, T.tx_hash, type, T.tx_fee, T.tx_size,
+             Sum(IFNULL(O.amount,0)) as amount, B.time_stamp
              FROM
-                 tx_outputs O 
+                 tx_outputs O
                  INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
-                 INNER JOIN blocks B ON (B.height = T.block_height) 
-             GROUP BY O.tx_hash 
+                 INNER JOIN blocks B ON (B.height = T.block_height)
+             GROUP BY O.tx_hash
              ORDER BY T.block_height DESC
              LIMIT ? OFFSET ?;`
         return this.query(sql, [limit, limit * (page - 1)]);
@@ -2007,21 +2007,21 @@ export class LedgerStorage extends Storages
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
-     *  
+     *
      */
     public getBlockSummary(field: string, value: string | Buffer): Promise<any[]> {
         let sql =
             `SELECT B.height, B.hash, B.merkle_root, B.signature, B.prev_block, B.random_seed,
              B.time_stamp, B.tx_count,
              BS.total_sent, BS.total_recieved, BS.total_reward, BS.total_fee, BS.total_size
-             FROM blocks B 
+             FROM blocks B
              INNER JOIN blocks_stats BS ON (B.height = BS.block_height)
              WHERE ${field} = ?`;
 
         return this.query(sql, [value]);
     }
     /**
-     * Get enrolled validators of a block 
+     * Get enrolled validators of a block
      * @param limit Maximum record count that can be obtained from one query
      * @param page The number on the page, this value begins with 1
      * @returns Returns the Promise. If it is finished successfully the `.then`
@@ -2031,22 +2031,22 @@ export class LedgerStorage extends Storages
     public getBlockEnrollments(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
         let sql =
             `SELECT
-                E.block_height, E.utxo_key, E.commitment, E.cycle_length, E.enroll_sig 
+                E.block_height, E.utxo_key, E.commitment, E.cycle_length, E.enroll_sig
             FROM
-                blocks B 
-                INNER JOIN enrollments E ON (E.block_height = B.height) 
+                blocks B
+                INNER JOIN enrollments E ON (E.block_height = B.height)
                 AND B.${field} = ?
             ORDER BY E.enrollment_index ASC
             LIMIT ? OFFSET ?;`;
         let countsql =
                 `SELECT IFNULL(count(*),0) as total_records
-                FROM  
-                    blocks B 
+                FROM
+                    blocks B
                     INNER JOIN enrollments E ON (E.block_height = B.height)
                     AND B.${field} = ?`;
 
-        let result: any = {};  
-        return new Promise<any[]>((resolve, reject) => {      
+        let result: any = {};
+        return new Promise<any[]>((resolve, reject) => {
         this.query(sql, [value, limit, limit*(page-1)])
         .then((rows : any[])=>{
             result.enrollments = rows;
@@ -2054,7 +2054,7 @@ export class LedgerStorage extends Storages
         })
         .then((rows : any[])=>{
             result.total_records = rows[0].total_records
-            resolve(result); 
+            resolve(result);
         });
        });
     }
@@ -2064,11 +2064,11 @@ export class LedgerStorage extends Storages
      * @param page The number on the page, this value begins with 1
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called with the records
-     * and if an error occurs the `.catch` is called with an error. 
+     * and if an error occurs the `.catch` is called with an error.
      */
     public getBlockTransactions(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
         let sql_tx =
-            `SELECT 
+            `SELECT
                 T.block_height, T.tx_hash, SUM(IFNULL(O.amount,0)) as amount, T.type,
                 T.tx_fee, T.tx_size, B.time_stamp,
                 JSON_ARRAYAGG(JSON_OBJECT("address", O.address, "amount", O.amount)) as receiver,
@@ -2081,21 +2081,21 @@ export class LedgerStorage extends Storages
                     INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key)
                 WHERE
                     B.${field} = ? ) as sender_address
-            FROM    
-                tx_outputs O 
-                INNER JOIN transactions T ON (T.tx_hash = O.tx_hash) 
+            FROM
+                tx_outputs O
+                INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
                 INNER JOIN blocks B ON  (B.height = T.block_height)
             WHERE
                 B.${field} = ?
             GROUP BY T.tx_hash
             ORDER BY T.tx_index ASC
             LIMIT ? OFFSET ?;`;
-        
+
         let sql_count =
                `SELECT
                     IFNULL(count(*),0) as total_records
                 FROM
-                    transactions T 
+                    transactions T
                     INNER JOIN blocks B ON (B.height = T.block_height)
                 WHERE
                     ${field} = ?;`;
@@ -2114,16 +2114,16 @@ export class LedgerStorage extends Storages
                 .catch(reject);
         });
     }
-    
+
     /**
      * Get statistics of BOA coin
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called with the records
-     * and if an error occurs the `.catch` is called with an error. 
+     * and if an error occurs the `.catch` is called with an error.
      */
     public getBOAStats(): Promise<any[]> {
         let sql =
-            `SELECT max(height) as height, 
+            `SELECT max(height) as height,
              (SELECT count(*) from transactions) as transactions,
              (SELECT count(*) from validators) as validators
             FROM
@@ -2136,7 +2136,7 @@ export class LedgerStorage extends Storages
      * Get the latest Coin Market cap data of BOA coin
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called with the records
-     * and if an error occurs the `.catch` is called with an error. 
+     * and if an error occurs the `.catch` is called with an error.
      */
     public getCoinMarketcap(): Promise<any[]> {
         let sql =
@@ -2145,8 +2145,8 @@ export class LedgerStorage extends Storages
         return this.query(sql, []);
     }
     /**
-     * Drop Database 
-     * @param database The name of database 
+     * Drop Database
+     * @param database The name of database
      */
     public async dropTestDB(database : any): Promise<any[]> {
         let sql =

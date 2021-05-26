@@ -61,7 +61,7 @@ describe('Test of Config', () => {
         assert.strictEqual(config.database.host, "127.0.0.1");
         assert.strictEqual(config.database.user, "root");
         assert.strictEqual(config.database.database, "root");
-        assert.strictEqual(config.database.password.toString(), "root");
+        assert.strictEqual(config.database.password.toString(), "12345678");
         assert.strictEqual(config.database.port.toString(), "3306");
         assert.strictEqual(config.logging.folder, path.resolve(Utils.getInitCWD(), "logs/"));
         assert.strictEqual(config.logging.level, "http");
