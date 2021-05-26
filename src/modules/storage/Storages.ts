@@ -263,4 +263,9 @@ export class Storages
             });
         });
     }
+
+    public get connection (): mysql.Connection
+    {
+        return this.db;
+    }
 }
