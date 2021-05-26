@@ -448,3 +448,22 @@ Create TABLE IF NOT EXISTS "marketcap" (
     PRIMARY KEY ("last_updated_at")
 );
 ```
+
+## 16. Table **tx_pool**
+
+### _Schema_
+
+| Column            | Data Type | PK | Not NULL | Default  |Description|
+|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
+| key               | TINYBLOB  | Y  | Y        |          | The hash of transaction |
+| val               | BLOB      |    | Y        |          | The transaction serialized to binary |
+
+### _Create Script_
+
+```sql
+CREATE TABLE IF NOT EXISTS tx_pool (
+    `key`   TINYBLOB    NOT NULL,
+    `val`   BLOB        NOT NULL,
+    PRIMARY KEY (`key`(64))
+)
+```

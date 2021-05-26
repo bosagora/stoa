@@ -234,7 +234,14 @@ export class LedgerStorage extends Storages
             change_24h      BIGINT(20),
             PRIMARY KEY (last_updated_at)
         );
-
+        
+        CREATE TABLE IF NOT EXISTS tx_pool
+        (
+            \`key\`     TINYBLOB    NOT NULL,
+            \`val\`     BLOB        NOT NULL,
+            PRIMARY KEY(\`key\`(64))
+        );
+        
        DROP TRIGGER IF EXISTS tx_trigger;
        CREATE TRIGGER tx_trigger AFTER INSERT
        ON transactions
