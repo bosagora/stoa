@@ -55,14 +55,14 @@ export const recovery_sample_data =
 
 export const sample_preImageInfo =
     {
-        "utxo": "0x2f8b231aa4fd35c6a5c68a97fed32120da48cf6d40ccffc93d8dc41a3016eb56434b2c44144a38efe459f98ddc2660b168f1c92a48fe65711173385fb4a269e1",
+        "utxo": "0xd68cfa6d0457b404d74a0367ace0bd3784110fb55d94692e0859f3b5a15b33f990f33e3b4e4b4030945ee0303fabf7b2702f48a31ffdc3d1d6985e3e3dfcc8d7",
         "hash": "0x790ab7c8f8ddbf012561e70c944c1835fd1a873ca55c973c828164906f8b35b924df7bddcafade688ad92cfb4414b2cf69a02d115dc214bbd00d82167f645e7e",
         "height": "6"
     };
 
 export const sample_reEnroll_preImageInfo =
     {
-        "utxo": "0x2f8b231aa4fd35c6a5c68a97fed32120da48cf6d40ccffc93d8dc41a3016eb56434b2c44144a38efe459f98ddc2660b168f1c92a48fe65711173385fb4a269e1",
+        "utxo": "0xd68cfa6d0457b404d74a0367ace0bd3784110fb55d94692e0859f3b5a15b33f990f33e3b4e4b4030945ee0303fabf7b2702f48a31ffdc3d1d6985e3e3dfcc8d7",
         "hash": "0xe51e1cc8dfdcdcd02586c9648c6977504eade2dffc8f3289e7ae7e501c2879f99af6a199ccad499be02a66d409ca4ab51b35f1c3a06a82464ce4efcfeb3ade33",
         "height": "12"
     };

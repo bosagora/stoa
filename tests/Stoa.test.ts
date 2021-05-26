@@ -105,7 +105,7 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get (uri.toString());
         assert.strictEqual(response.data.length, 6);
         assert.strictEqual(response.data[0].address,
-            "boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn");
+            "boa1xzvald5dvy54j7yt2h5yzs2432h07rcn66j84t3lfdrlrwydwq78cz0nckq");
         assert.strictEqual(response.data[0].preimage.height, '');
     });
 
@@ -207,7 +207,7 @@ describe ('Test of Stoa API Server', () =>
             const enroll_sig =
                 new Signature("0x0c48e78972e1b138a37e37ae27a01d5ebdea193088ddef2d9883446efe63086925e8803400d7b93d22b1eef5c475098ce08a5b47e8125cf6b04274cc4db34bfd");
             const utxo_key =
-                new Hash("0x2f8b231aa4fd35c6a5c68a97fed32120da48cf6d40ccffc93d8dc41a3016eb56434b2c44144a38efe459f98ddc2660b168f1c92a48fe65711173385fb4a269e1");
+                new Hash("0xd68cfa6d0457b404d74a0367ace0bd3784110fb55d94692e0859f3b5a15b33f990f33e3b4e4b4030945ee0303fabf7b2702f48a31ffdc3d1d6985e3e3dfcc8d7");
             const commitment =
                 new Hash("0xe0c04a5bd47ffc5b065b7d397e251016310c43dc77220bf803b73f1183da00b0e67602b1f95cb18a0059aa1cdf2f9adafe979998364b38cd5c15d92b9b8fd815");
             const enrollment = new Enrollment(utxo_key, commitment, 20, enroll_sig);
@@ -308,11 +308,11 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get (uri.toString())
         assert.strictEqual(response.data.height, '1');
         assert.strictEqual(response.data.hash,
-            '0xe0609c900848dffd7bbf7112301b4a3ce47fc9ea4810bb7ce6d4ad4d9f0f0ad' +
-            '18c324b822127f3564f33efee8228662e02755ea49452f6a5832447e5cf495a8f');
+            '0x1b272e34c3df561450a52cf9e2eab4b1dbff4d710cba755ad76e1b2a906645e' +
+            '0f2b6650e62369f3f56b04a51c82fb36d33c5ef88b59949d37a81ca614902ff8e');
         assert.strictEqual(response.data.merkle_root,
-            '0x928f5789a97f75dff9aa070cb761d2ae70c6566556739509b495c2d7b899181' +
-            '119d31f37160212f7ea38358eb671520595178a8aad17f12e00f4119d0b662888');
+            '0xc8f96bf274187b0b6fb73c5b609a3fff28bd1fe9e6b712aaa3d9f92351100d7' +
+            'ca718a6c85f5f020cdeb13753179432e710576627399a3235ae472e7fe56b27e6');
         assert.strictEqual(response.data.time_stamp, 1609459800);
 
         uri = URI(host)
@@ -323,11 +323,11 @@ describe ('Test of Stoa API Server', () =>
         response = await client.get (uri.toString())
         assert.strictEqual(response.data.height, '0');
         assert.strictEqual(response.data.hash,
-            '0x8ea91eafb2555f93ce0b0335d8454cdd052646dd1ef4a9029f026d08cdd081b' +
-            '9fb3e736903a119cce4beec1814b05c29b70243e0d1bbc096cf99c90b93f0b9a2');
+            '0x217f5b3f53a52c396c3418c0245c2435a90c53978564efac448e1162ec8647d' +
+            'de9e5c13263390f73f5d5b74e059b79b5286cf292f3121e6f1654ff452f9296f5');
         assert.strictEqual(response.data.merkle_root,
-            '0x94747147a0ca093d1099d1b2e0d9e2de9d89e0b887a56ffafb17f473cd0317d' +
-            'e36ab7ecd2bdc1148d542bce9501aa1b978c722822a281e45034088286700059e');
+            '0x8ac592615f23ee726577eb8c305c67558fd08f14120e0f23c2969a3b1d37089' +
+            '009159bd42c1d7af53d601b53ccbbad0ebaa54f36f4bc13d473790921ae3dc7fa');
         assert.strictEqual(response.data.time_stamp, 1609459200);
     });
 
@@ -353,8 +353,8 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get (uri.toString())
         assert.strictEqual(response.data.length, 2);
         assert.strictEqual(response.data[0].tx_hash,
-            '0xa2073ce83b58f87d3c684bd62c1d037531edd85f7ed11d006f97af95ca65f8a' +
-            'e2ed8cf10f5843c8cc3f4295b787f1413acc92f449d42a587df608f5ef6d1fb7f');
+            '0x66b6a0e5f58514ccdc0164598bd0b476e0b93294f9eb5b938e006028ebccda7' +
+            '78a36e7f141679c0b101bb6f74befc9a4b09d2d9203bf041409aaa206989bed4e');
         assert.strictEqual(response.data[0].address, 'boa1xqcmmns5swnm03zay5wjplgupe65uw4w0dafzsdsqtwq6gv3h3lcz24a8ch');
         assert.strictEqual(response.data[0].amount, '1663400000');
         assert.strictEqual(response.data[0].fee, '0');
@@ -366,27 +366,27 @@ describe ('Test of Stoa API Server', () =>
         let uri = URI(host)
             .port(port)
             .directory("/transaction/status")
-            .filename("0xa2073ce83b58f87d3c684bd62c1d037531edd85f7ed11d006f97af95ca65f8ae2ed8cf10f5843c8cc3f4295b787f1413acc92f449d42a587df608f5ef6d1fb7f");
+            .filename("0x66b6a0e5f58514ccdc0164598bd0b476e0b93294f9eb5b938e006028ebccda778a36e7f141679c0b101bb6f74befc9a4b09d2d9203bf041409aaa206989bed4e");
 
         let response_pending = await client.get(uri.toString());
         let expected_pending = {
             status: 'pending',
-            tx_hash: '0xa2073ce83b58f87d3c684bd62c1d037531edd85f7ed11d006f97af95ca65f8ae2ed8cf10f5843c8cc3f4295b787f1413acc92f449d42a587df608f5ef6d1fb7f'
+            tx_hash: '0x66b6a0e5f58514ccdc0164598bd0b476e0b93294f9eb5b938e006028ebccda778a36e7f141679c0b101bb6f74befc9a4b09d2d9203bf041409aaa206989bed4e'
         }
         assert.deepStrictEqual(response_pending.data, expected_pending);
 
         uri = URI(host)
             .port(port)
             .directory("/transaction/status")
-            .filename("0x74c2caf013ffd47440c46536403c1116dbf5276ee736a82db7e2cd9a5b827f7f24dca30951983e0aba92b8d5b813254b447616d2d060845fa0eca3d6b46a09b2");
+            .filename("0xa4ce8dd85f51340bdae780db580e21acacfc94eec3305d83275ff2ea2d5583d75b8c400e1807952e04f243c4ef80d821e2537a59f20e12857c910bc2e4028bf7");
 
         let response_confirmed = await client.get(uri.toString());
         let expected_confirmed = {
             status: "confirmed",
-            tx_hash: "0x74c2caf013ffd47440c46536403c1116dbf5276ee736a82db7e2cd9a5b827f7f24dca30951983e0aba92b8d5b813254b447616d2d060845fa0eca3d6b46a09b2",
+            tx_hash: "0xa4ce8dd85f51340bdae780db580e21acacfc94eec3305d83275ff2ea2d5583d75b8c400e1807952e04f243c4ef80d821e2537a59f20e12857c910bc2e4028bf7",
             block: {
                 height: 1,
-                hash: "0xe0609c900848dffd7bbf7112301b4a3ce47fc9ea4810bb7ce6d4ad4d9f0f0ad18c324b822127f3564f33efee8228662e02755ea49452f6a5832447e5cf495a8f"
+                hash: "0x1b272e34c3df561450a52cf9e2eab4b1dbff4d710cba755ad76e1b2a906645e0f2b6650e62369f3f56b04a51c82fb36d33c5ef88b59949d37a81ca614902ff8e"
             }
         };
         assert.deepStrictEqual(response_confirmed.data, expected_confirmed);
@@ -397,16 +397,16 @@ describe ('Test of Stoa API Server', () =>
         let uri = URI(host)
             .port(port)
             .directory("/transaction/pending")
-            .filename("0xa2073ce83b58f87d3c684bd62c1d037531edd85f7ed11d006f97af95ca65f8ae2ed8cf10f5843c8cc3f4295b787f1413acc92f449d42a587df608f5ef6d1fb7f");
+            .filename("0x66b6a0e5f58514ccdc0164598bd0b476e0b93294f9eb5b938e006028ebccda778a36e7f141679c0b101bb6f74befc9a4b09d2d9203bf041409aaa206989bed4e");
 
         let response = await client.get (uri.toString());
         let expected = {
             "type": 0,
             "inputs": [
                 {
-                    "utxo": "0x2cf1caaeff65a7e2b2f7edff1023881564f2f0cad30161cf42279826e6919d77347df68de6d8eb0da58ebdc6e4f28da7569113002044467fc5cbf599a7ea9037",
+                    "utxo": "0x0b640f95cec0159edc603291d9e519cf7ab3b141e4be9ae34770a89eb3937ed9a7ad9b601be47683c0b491ca21a67c6d43aca5d603b7489378fb6dafe19391b5",
                     "unlock": {
-                        "bytes": "oNZEIXHc3etqnwHF/GFzst+9UKbA50RP9WY6WgNgbgdooqXHZqRlT8Zgn/wTpTXuIkXgTyj3IewYygldoAMr4Q=="
+                        "bytes": "lqAIaXCIgcpqhrWHGDyYB7EdArgM9Xc+K9msM5g0pQGj5t7/J1pEEKKHAppCDLQ7lBUHrCjKE9qBNKGrvQ4bAw=="
                     },
                     "unlock_age": 0
                 }
@@ -440,16 +440,16 @@ describe ('Test of Stoa API Server', () =>
         let uri = URI(host)
             .port(port)
             .directory("/transaction")
-            .filename("0x74c2caf013ffd47440c46536403c1116dbf5276ee736a82db7e2cd9a5b827f7f24dca30951983e0aba92b8d5b813254b447616d2d060845fa0eca3d6b46a09b2");
+            .filename("0xa4ce8dd85f51340bdae780db580e21acacfc94eec3305d83275ff2ea2d5583d75b8c400e1807952e04f243c4ef80d821e2537a59f20e12857c910bc2e4028bf7");
 
         let response = await client.get (uri.toString());
         let expected = {
             "type": 0,
             "inputs": [
                 {
-                    "utxo": "0x14f9627aac2ca6fea7c8ee66c8967c68aaf524f6d5b120bc80014e505f5c723501215d715fa64295aa2baa8647e4c1776e3fa50a2d644a346630e57cd59eb522",
+                    "utxo": "0x6313b9c616f9eac76b11c50885ff32076f49eaca3c58f30eca846a365bc006e5afa0521787d0f984306c1cc8d48a918a8885ea2d4d3449538445f7b25411dcd4",
                     "unlock": {
-                        "bytes": "XMSIGh0fNmGPFZw9+jM+UvTsKSabXBUeSmm8LS0e9wG+MsmEclqIIabSZHydmnycoKBAeh/lld9YODAbf/AhiA=="
+                        "bytes": "QQDjCceIQtRE9ku/5AEXdHeZQP2KIyAKrxFGPogE5gZ+2bW3qMZUGtX1EhDGXebQmK34LylsRrc9W+CwnYQbbQ=="
                     },
                     "unlock_age": 0
                 }
@@ -459,42 +459,7 @@ describe ('Test of Stoa API Server', () =>
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "ejw94GMKeuLPesbtpNxgN7+6BnCTHv3rgCllDdrrqq8="
-                    }
-                },
-                {
-                    "value": "24400000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "+ja9+iX6EamiWvodERH7xsoRJa3bPe0yoKzr3I474S8="
-                    }
-                },
-                {
-                    "value": "24400000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "+jy99QRsbfDR6l/NzPF2cICQ2uYXpzzh54KU7XbfQhk="
-                    }
-                },
-                {
-                    "value": "24400000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "ujS989FoU5AN3sVNiTxtO0VJ75IS03mXraj6yZ47ixE="
-                    }
-                },
-                {
-                    "value": "24400000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "ujQ95gz90DDVs6WlhtMlFsQOmEGu44BLTT9BHyVR3dE="
-                    }
-                },
-                {
-                    "value": "24400000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "Oju9/YiKHC70YvTKMXbeqIujoLe+deR16FlKxIJOAIw="
+                        "bytes": "OjG98m16c26s8H7QSu3taAZmpkXXldHS35/RN1PJI0E="
                     }
                 },
                 {
@@ -508,91 +473,7 @@ describe ('Test of Stoa API Server', () =>
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "+js9+6BmXaLLEIfa1QuhF75/wviB9cXlHq6jFk33vGk="
-                    }
-                },
-                {
-                    "value": "24400000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "ej+96L75IWIDWeXcSfqDQPeqEYV5+WMgmU/XMJVkCdo="
-                    }
-                },
-                {
-                    "value": "24400000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "ej295eI1Empe2oz1Sx4EtYKtyyHkyGyXu1myj6BBbMw="
-                    }
-                },
-                {
-                    "value": "24400000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "+jm9+y2/Uj+Kzu2J3v0S/ccaIAt/SVdLNlw7Cjk/xbs="
-                    }
-                },
-                {
-                    "value": "24400000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "+jC98n7qANALrxKKKHyuisgsOjhz+Y5mAMsKfLSK/h0="
-                    }
-                },
-                {
-                    "value": "24400000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "+jA99UOtdwtOBmftagyTGmnOJdNHEj27r+ys/cdyRvw="
-                    }
-                },
-                {
-                    "value": "24400000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "OjG98m16c26s8H7QSu3taAZmpkXXldHS35/RN1PJI0E="
-                    }
-                },
-                {
-                    "value": "24400000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "+jg95K/C2cKhYo+ORjdoFubre9be/Cd+wQNHIixGokw="
-                    }
-                },
-                {
-                    "value": "24400000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "ejW9+kZ1tu6JdMV3LRzEYY9cD5tAjnnO4nGYF6+zam4="
-                    }
-                },
-                {
-                    "value": "24400000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "uj496a3T/CmS/lSA+eBLsnBTWYOU6tH3oaUL0HDKoQw="
-                    }
-                },
-                {
-                    "value": "24400000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "+jY9+XHS4Nj510Ezlw2bIG91kR9x+jLUH4tuLl6jZSY="
-                    }
-                },
-                {
-                    "value": "24400000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "ejc98/bE1PYSXYLssjNOFJ5wxMgCZlhe1UHVrZQtecs="
-                    }
-                },
-                {
-                    "value": "24400000000000",
-                    "lock": {
-                        "type": 0,
-                        "bytes": "ujM9/CrfXmdQsQuC4ji1APZB1yWvRL+W0XExjfCmB/c="
+                        "bytes": "Oju9/YiKHC70YvTKMXbeqIujoLe+deR16FlKxIJOAIw="
                     }
                 },
                 {
@@ -606,14 +487,42 @@ describe ('Test of Stoa API Server', () =>
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "+jE95blgPL0nc3KT9gXlXV1q4VWgZnvy64gzUZoJkLs="
+                        "bytes": "ejW9+kZ1tu6JdMV3LRzEYY9cD5tAjnnO4nGYF6+zam4="
                     }
                 },
                 {
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "ew699nDzRZB+ACW4a70WakpM2RX8RaZ6Yw6BXu7073M="
+                        "bytes": "ejc98/bE1PYSXYLssjNOFJ5wxMgCZlhe1UHVrZQtecs="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "ejw94GMKeuLPesbtpNxgN7+6BnCTHv3rgCllDdrrqq8="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "ej295eI1Empe2oz1Sx4EtYKtyyHkyGyXu1myj6BBbMw="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "ej+96L75IWIDWeXcSfqDQPeqEYV5+WMgmU/XMJVkCdo="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "ewa97U1wMlSffch4BHNpepAZ2bNMrkb3mRjjwfp6P5Y="
                     }
                 },
                 {
@@ -627,11 +536,104 @@ describe ('Test of Stoa API Server', () =>
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "ewa97U1wMlSffch4BHNpepAZ2bNMrkb3mRjjwfp6P5Y="
+                        "bytes": "ew699nDzRZB+ACW4a70WakpM2RX8RaZ6Yw6BXu7073M="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "ujM9/CrfXmdQsQuC4ji1APZB1yWvRL+W0XExjfCmB/c="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "ujQ95gz90DDVs6WlhtMlFsQOmEGu44BLTT9BHyVR3dE="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "ujS989FoU5AN3sVNiTxtO0VJ75IS03mXraj6yZ47ixE="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "uj496a3T/CmS/lSA+eBLsnBTWYOU6tH3oaUL0HDKoQw="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "+jA99UOtdwtOBmftagyTGmnOJdNHEj27r+ys/cdyRvw="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "+jC98n7qANALrxKKKHyuisgsOjhz+Y5mAMsKfLSK/h0="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "+jE95blgPL0nc3KT9gXlXV1q4VWgZnvy64gzUZoJkLs="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "+jY9+XHS4Nj510Ezlw2bIG91kR9x+jLUH4tuLl6jZSY="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "+ja9+iX6EamiWvodERH7xsoRJa3bPe0yoKzr3I474S8="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "+jg95K/C2cKhYo+ORjdoFubre9be/Cd+wQNHIixGokw="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "+jm9+y2/Uj+Kzu2J3v0S/ccaIAt/SVdLNlw7Cjk/xbs="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "+js9+6BmXaLLEIfa1QuhF75/wviB9cXlHq6jFk33vGk="
+                    }
+                },
+                {
+                    "value": "24400000000000",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "+jy99QRsbfDR6l/NzPF2cICQ2uYXpzzh54KU7XbfQhk="
                     }
                 }
             ],
-            "payload": {"bytes": ""},
+            "payload": {
+                "bytes": ""
+            },
             "lock_height": "0"
         };
         assert.deepStrictEqual(response.data, expected);
@@ -697,7 +699,7 @@ describe ('Test of the path /utxo', () =>
         let response = await client.get (uri.toString());
         let expected = [
             {
-                utxo: '0x2cf1caaeff65a7e2b2f7edff1023881564f2f0cad30161cf42279826e6919d77347df68de6d8eb0da58ebdc6e4f28da7569113002044467fc5cbf599a7ea9037',
+                utxo: '0x0b640f95cec0159edc603291d9e519cf7ab3b141e4be9ae34770a89eb3937ed9a7ad9b601be47683c0b491ca21a67c6d43aca5d603b7489378fb6dafe19391b5',
                 type: 0,
                 unlock_height: '2',
                 amount: '24400000000000',
@@ -948,15 +950,15 @@ describe ('Test of the path /merkle_path', () =>
             .port(agora_port)
             .directory("merkle_path")
             .setSearch("height", "1")
-            .setSearch("hash", "0x74c2caf013ffd47440c46536403c1116dbf5276ee736a82db7e2cd9a5b827f7f24dca30951983e0aba92b8d5b813254b447616d2d060845fa0eca3d6b46a09b2");
+            .setSearch("hash", "0xa4ce8dd85f51340bdae780db580e21acacfc94eec3305d83275ff2ea2d5583d75b8c400e1807952e04f243c4ef80d821e2537a59f20e12857c910bc2e4028bf7");
 
         let response = await client.get(uri.toString());
 
         let expected =
             [
-                "0x59336788adcb9eb8c7bfbbd40162a74bef6972d1bcd3fdb8f8eb7f464ff11094c3000c08e8da33595482ff4223167f079ce96c8f849ee640f5eb556ab5406839",
-                "0x9f64d5d3e951a2a111fb414dd3d8a2dded75cfe953c7502c76682dd8b81f8d8a84cd3cff56c791fe2bbcfdeba23f894f2e0ad7ef7659e0d1ae785b092d2a9302",
-                "0xed63eaefef428595e36a38ff8c96d514d9f57968928cebe8ba0161ab434262f2e5099e3942d17d67562428dfa43e98cb5099ca0f4482274dbc6d6b2012b38c85",
+                "0x63f299f3af18e0f333f2dbfe4a13377fbc7d11e3fb9ba0b899b4acd7219ad4c47b56481fc59979b933b33240b36aa4c090bf0440bd18e7a2e6d5405caa885794",
+                "0x1525eddbf962c0b4212701494de724c2e4643387e4b146d4e1731be27b87b2a995b393c5ca9ddacf621dfd4f149194f96cff25e35dbcf2f6c15d732652328c3f",
+                "0xd094b29fedcca586aa70fbdfc40fadf3f68e6244c8565edbd193f057c9639c489aff949b5175883e6868166d156600b56c62fe209089c66b70b5863a598ec85a",
             ];
 
         assert.deepStrictEqual(response.data, expected);
@@ -967,13 +969,13 @@ describe ('Test of the path /merkle_path', () =>
         const agora_addr: URL = new URL('http://localhost:2826');
         let agora_client = new AgoraClient(agora_addr);
         let merkle_path: Array<Hash> = await agora_client.getMerklePath(new Height("1"),
-            new Hash("0x74c2caf013ffd47440c46536403c1116dbf5276ee736a82db7e2cd9a5b827f7f24dca30951983e0aba92b8d5b813254b447616d2d060845fa0eca3d6b46a09b2"))
+            new Hash("0xa4ce8dd85f51340bdae780db580e21acacfc94eec3305d83275ff2ea2d5583d75b8c400e1807952e04f243c4ef80d821e2537a59f20e12857c910bc2e4028bf7"))
 
         let expected =
             [
-                new Hash("0x59336788adcb9eb8c7bfbbd40162a74bef6972d1bcd3fdb8f8eb7f464ff11094c3000c08e8da33595482ff4223167f079ce96c8f849ee640f5eb556ab5406839"),
-                new Hash("0x9f64d5d3e951a2a111fb414dd3d8a2dded75cfe953c7502c76682dd8b81f8d8a84cd3cff56c791fe2bbcfdeba23f894f2e0ad7ef7659e0d1ae785b092d2a9302"),
-                new Hash("0xed63eaefef428595e36a38ff8c96d514d9f57968928cebe8ba0161ab434262f2e5099e3942d17d67562428dfa43e98cb5099ca0f4482274dbc6d6b2012b38c85"),
+                new Hash("0x63f299f3af18e0f333f2dbfe4a13377fbc7d11e3fb9ba0b899b4acd7219ad4c47b56481fc59979b933b33240b36aa4c090bf0440bd18e7a2e6d5405caa885794"),
+                new Hash("0x1525eddbf962c0b4212701494de724c2e4643387e4b146d4e1731be27b87b2a995b393c5ca9ddacf621dfd4f149194f96cff25e35dbcf2f6c15d732652328c3f"),
+                new Hash("0xd094b29fedcca586aa70fbdfc40fadf3f68e6244c8565edbd193f057c9639c489aff949b5175883e6868166d156600b56c62fe209089c66b70b5863a598ec85a"),
             ];
 
         assert.deepStrictEqual(merkle_path, expected);
@@ -984,7 +986,7 @@ describe ('Test of the path /merkle_path', () =>
         let uri = URI(host)
             .port(port)
             .directory("spv")
-            .filename("0x74c2caf013ffd47440c46536403c1116dbf5276ee736a82db7e2cd9a5b827f7f24dca30951983e0aba92b8d5b813254b447616d2d060845fa0eca3d6b46a09b2");
+            .filename("0xa4ce8dd85f51340bdae780db580e21acacfc94eec3305d83275ff2ea2d5583d75b8c400e1807952e04f243c4ef80d821e2537a59f20e12857c910bc2e4028bf7");
 
         let response = await client.get(uri.toString());
 
@@ -1001,7 +1003,7 @@ describe ('Test of the path /merkle_path', () =>
         let uri = URI(host)
             .port(port)
             .directory("spv")
-            .filename("0x59336788adcb9eb8c7bfbbd40162a74bef6972d1bcd3fdb8f8eb7f464ff11094c3000c08e8da33595482ff4223167f079ce96c8f849ee640f5eb556ab5406839");
+            .filename("0x63f299f3af18e0f333f2dbfe4a13377fbc7d11e3fb9ba0b899b4acd7219ad4c47b56481fc59979b933b33240b36aa4c090bf0440bd18e7a2e6d5405caa885794 ");
 
         let response = await client.get(uri.toString());
 
