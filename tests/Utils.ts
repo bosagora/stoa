@@ -333,11 +333,11 @@ export class TestCoinGecko implements CoinMarket
         return new Promise<any>((resolve, reject)=>{
         let coinMarketStat: IMarketCap =
             {
-                    price: this.coinMarketCap.boa.usd,
-                    market_cap: this.coinMarketCap.boa.market_cap,
-                    vol_24h: this.coinMarketCap.boa.vol_24h,
-                    change_24h: this.coinMarketCap.boa.change_24h,
-                    last_updated_at: this.coinMarketCap.boa.last_updated_at
+                    price: this.coinMarketCap.bosagora.usd,
+                    market_cap: this.coinMarketCap.bosagora.market_cap,
+                    vol_24h: this.coinMarketCap.bosagora.vol_24h,
+                    change_24h: this.coinMarketCap.bosagora.change_24h,
+                    last_updated_at: this.coinMarketCap.bosagora.last_updated_at
             }
          resolve (coinMarketStat)
         });

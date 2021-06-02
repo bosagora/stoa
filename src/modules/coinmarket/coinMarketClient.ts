@@ -65,17 +65,17 @@ export class CoinGeckoMaket implements CoinMarket {
      */
     public fetch(): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
-            let marketCap = await this.coinMarketClient.simplePrice({ ids: "boa", vs_currencies: "usd", include_market_cap: true, include_24hr_vol: true, include_24hr_change: true, include_last_updated_at: true })
+            let marketCap = await this.coinMarketClient.simplePrice({ ids: "bosagora", vs_currencies: "usd", include_market_cap: true, include_24hr_vol: true, include_24hr_change: true, include_last_updated_at: true })
             if (marketCap) {
                 let coinMarketStat: IMarketCap =
                 {
-                    price: marketCap.boa.usd,
-                    market_cap: marketCap.boa.usd_market_cap,
-                    vol_24h: marketCap.boa.usd_24h_vol,
-                    change_24h: marketCap.boa.usd_24h_change,
-                    last_updated_at: marketCap.boa.last_updated_at
+                    price: marketCap.bosagora.usd,
+                    market_cap: marketCap.bosagora.usd_market_cap,
+                    vol_24h: marketCap.bosagora.usd_24h_vol,
+                    change_24h: marketCap.bosagora.usd_24h_change,
+                    last_updated_at: marketCap.bosagora.last_updated_at
                 }
-                logger.info(`CoinMarket: Data Fetch Completed at ${marketCap.boa.last_updated_at}`);
+                logger.info(`CoinMarket: Data Fetch Completed at ${marketCap.bosagora.last_updated_at}`);
                 return resolve(coinMarketStat);
             }
             else {
