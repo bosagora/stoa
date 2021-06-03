@@ -28,7 +28,7 @@ describe('Test of Config', () => {
                 "database:",
                 "   host : 127.0.0.1",
                 "   user : root",
-                "   database : test",
+                "   database : stoa",
                 "   password : 12345678",
                 "   port : 3306",
                 "logging:",
@@ -44,27 +44,11 @@ describe('Test of Config', () => {
         assert.strictEqual(config.server.agora_endpoint.toString(), "http://127.0.0.1:2826");
         assert.strictEqual(config.database.host, "127.0.0.1");
         assert.strictEqual(config.database.user, "root");
-        assert.strictEqual(config.database.database, "test");
+        assert.strictEqual(config.database.database, "stoa");
         assert.strictEqual(config.database.port.toString(), "3306");
         assert.strictEqual(config.database.password.toString(), "12345678");
         assert.strictEqual(config.logging.folder, "/stoa/logs");
         assert.strictEqual(config.logging.level, "debug");
-        assert.strictEqual(config.consensus.genesis_timestamp, 1609459200);
-    });
-
-    it ('Test parsing the settings of a file', () => {
-        let config: Config = new Config();
-        config.readFromFile(path.resolve(process.cwd(), "docs/config.example.yaml"));
-        assert.strictEqual(config.server.address, "0.0.0.0");
-        assert.strictEqual(config.server.port.toString(), "4242");
-        assert.strictEqual(config.server.agora_endpoint.toString(), "http://127.1.1.1:4567");
-        assert.strictEqual(config.database.host, "127.0.0.1");
-        assert.strictEqual(config.database.user, "root");
-        assert.strictEqual(config.database.database, "root");
-        assert.strictEqual(config.database.password.toString(), "12345678");
-        assert.strictEqual(config.database.port.toString(), "3306");
-        assert.strictEqual(config.logging.folder, path.resolve(Utils.getInitCWD(), "logs/"));
-        assert.strictEqual(config.logging.level, "http");
         assert.strictEqual(config.consensus.genesis_timestamp, 1609459200);
     });
 });

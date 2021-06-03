@@ -1360,10 +1360,8 @@ export class LedgerStorage extends Storages
                 cycle_length,
                 enroll_sig
              FROM enrollments
-       GROUP BY utxo_key HAVING avail_height <= ` + cur_height + `
+        GROUP BY utxo_key HAVING avail_height <= ` + cur_height + `
          AND ` + cur_height + ` < (avail_height + cycle_length)) as enrollments
-        INNER JOIN utxos
-            ON enrollments.utxo_key = utxos.utxo_key
         LEFT JOIN validators
             ON enrollments.enrolled_at = validators.enrolled_at
             AND enrollments.utxo_key = validators.utxo_key

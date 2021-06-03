@@ -16,7 +16,7 @@ server:
 database:
    host : 127.0.0.1
    user : root
-   database : root
+   database : stoa
    password : "12345678"
    port : 3306
 

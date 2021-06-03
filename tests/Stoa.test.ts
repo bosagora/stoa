@@ -174,7 +174,7 @@ describe ('Test of Stoa API Server', () =>
             .setSearch("height", "0");
 
             let response = await client.get (uri1.toString());
-           
+
             assert.strictEqual(response.data.length, 1);
             assert.strictEqual(response.data[0].preimage.height, '0');
             assert.strictEqual(response.data[0].preimage.hash,
@@ -661,7 +661,7 @@ describe ('Test of Stoa API Server', () =>
         };
         assert.deepStrictEqual(response.data, expected);
     });
-   
+
 });
 
 describe ('Test of the path /utxo', () =>
@@ -701,7 +701,7 @@ describe ('Test of the path /utxo', () =>
         await stoa_server.createStorage();
         await stoa_server.start();
     });
-    
+
     after('Stop Stoa and Agora server instances', async () => {
         await coinMarketService.stop();
         await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);

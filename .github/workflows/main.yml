@@ -24,8 +24,8 @@ jobs:
       with:
         mysql version: 8.0
         mysql database: root
-        mysql root password: root
-        
+        mysql root password: 12345678
+
     - name: npm install, build, and test
       run: |
         npm install

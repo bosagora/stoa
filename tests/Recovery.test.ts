@@ -116,7 +116,7 @@ describe ('Test of Recovery', () =>
         coinMarketService = new CoinMarketService(testCoinGecko);
     });
     before ('Create TestStoa and start it', async () =>
-    {   
+    {
         testDBConfig = await MockDBConfig();
         stoa_server = new TestRecoveryStoa(testDBConfig,agora_addr, stoa_addr.port, coinMarketService);
         await stoa_server.createStorage();
