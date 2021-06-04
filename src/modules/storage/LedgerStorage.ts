@@ -102,7 +102,7 @@ export class LedgerStorage extends Storages
             type                INTEGER  NOT NULL,
             unlock_height       INTEGER  NOT NULL,
             lock_height         INTEGER  NOT NULL,
-            tx_fee              BIGINT(20)  NOT NULL,
+            tx_fee              INTEGER  NOT NULL,
             payload_fee         INTEGER  NOT NULL,
             tx_size             INTEGER  NOT NULL,
             inputs_count        INTEGER  NOT NULL,
@@ -189,7 +189,7 @@ export class LedgerStorage extends Storages
             lock_height         INTEGER    NOT NULL,
             received_height     INTEGER    NOT NULL,
             time                INTEGER    NOT NULL,
-            tx_fee              BIGINT(20)    NOT NULL,
+            tx_fee              INTEGER    NOT NULL,
             payload_fee         INTEGER    NOT NULL,
             tx_size             INTEGER    NOT NULL,
             PRIMARY KEY(tx_hash(64))
@@ -734,9 +734,22 @@ export class LedgerStorage extends Storages
                             return JSBI.add(sum, n.value);
                         }, JSBI.BigInt(0));
 
-                        let total_fee = JSBI.subtract(SumOfInput, SumOfOutput);
-                        let payload_fee = TxPayloadFee.getFee(tx.payload.data.length);
-                        let tx_fee = JSBI.subtract(total_fee, payload_fee);
+                        let total_fee: JSBI;
+                        let payload_fee: JSBI;
+                        let tx_fee: JSBI;
+
+                        if (JSBI.equal(SumOfInput, JSBI.BigInt(0)))
+                        {
+                            total_fee = JSBI.BigInt(0);
+                            payload_fee = JSBI.BigInt(0);
+                            tx_fee = JSBI.BigInt(0);
+                        }
+                        else
+                        {
+                            total_fee = JSBI.subtract(SumOfInput, SumOfOutput);
+                            payload_fee = TxPayloadFee.getFee(tx.payload.data.length);
+                            tx_fee = JSBI.subtract(total_fee, payload_fee);
+                        }
 
                         resolve([total_fee, tx_fee, payload_fee]);
                     }
