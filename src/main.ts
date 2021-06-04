@@ -6,6 +6,7 @@ import { SodiumHelper } from "boa-sdk-ts";
 import Stoa from './Stoa';
 import { CoinMarketService } from './modules/service/CoinMaketService';
 import { CoinGeckoMaket } from './modules/coinmarket/coinMarketClient'
+import { Storages } from './modules/storage/Storages';
 
 // Create with the arguments and read from file
 let config = Config.createWithArgument();
@@ -44,8 +45,9 @@ const stoa: Stoa = new Stoa(config.database,
 SodiumHelper.assign(new BOASodium());
 SodiumHelper.init()
     .then(
-        () => {
-            return stoa.createStorage().catch((error:any) =>
+        async () => {
+            await Storages.waiteForConnection(config.database);
+            return await stoa.createStorage().catch((error:any) =>
             {
                 logger.error(`Failed to create LedgerStorage: ${error}`);
                 process.exit(1);
