@@ -137,8 +137,8 @@ describe('Test of Stoa API Server', () => {
                 tx_hash: '0x63f299f3af18e0f333f2dbfe4a13377fbc7d11e3fb9ba0b899b4acd7219ad4c47b56481fc59979b933b33240b36aa4c090bf0440bd18e7a2e6d5405caa885794',
                 type: 0,
                 amount: '610000000000000',
-                tx_fee: '-610000000000000',
-                tx_size: '-610000000000000',
+                tx_fee: '0',
+                tx_size: '0',
                 time_stamp: 1609459800
             },
             {
@@ -146,8 +146,8 @@ describe('Test of Stoa API Server', () => {
                 tx_hash: '0xdcc5ba48d932f9681028f6aad42ac77ec2363a2279c0441aebbf419b32c81a445f2d4ffe5d1e72f86e7c3750b5ef56e1054ca84d8578ddaa88659b7bd829404e',
                 type: 0,
                 amount: '610000000000000',
-                tx_fee: '-610000000000000',
-                tx_size: '-610000000000000',
+                tx_fee: '0',
+                tx_size: '0',
                 time_stamp: 1609459800
             },
             {
@@ -155,8 +155,8 @@ describe('Test of Stoa API Server', () => {
                 tx_hash: '0x9823f761a9f55d222861aa6702ad79cf76869552038dfe8ec601c34b3e8c600320febba7aaa44028681e6e039b18508c2d1daf999ef606d11d69f6494bd0ce88',
                 type: 0,
                 amount: '610000000000000',
-                tx_fee: '-610000000000000',
-                tx_size: '-610000000000000',
+                tx_fee: '0',
+                tx_size: '0',
                 time_stamp: 1609459800
             },
             {
@@ -164,8 +164,8 @@ describe('Test of Stoa API Server', () => {
                 tx_hash: '0x21f88b970256eb38f347322b07fcfdfb03eb5ba10bda3a2c2d2eac3feeaf8f073d66e3802922385a883fa2fa1dc3e1e5535ef0024eb69f839d8af23c2fa0e7af',
                 type: 0,
                 amount: '610000000000000',
-                tx_fee: '-610000000000000',
-                tx_size: '-610000000000000',
+                tx_fee: '0',
+                tx_size: '0',
                 time_stamp: 1609459800
             },
             {
@@ -173,8 +173,8 @@ describe('Test of Stoa API Server', () => {
                 tx_hash: '0x3d04887353ad6eed2b61f0be74972d078eb432c5d37555b7e87aefb15a04815e4b1bea6b78c566936cbfebf5b4a8d412804881570f87555e423c1b99919c609d',
                 type: 0,
                 amount: '610000000000000',
-                tx_fee: '-610000000000000',
-                tx_size: '-610000000000000',
+                tx_fee: '0',
+                tx_size: '0',
                 time_stamp: 1609459800
             },
             {
@@ -182,8 +182,8 @@ describe('Test of Stoa API Server', () => {
                 tx_hash: '0xbc5d1308b9e2c0e32c6b6fbbbd8f955393fa190a81307d37d82e6bd4608621f8227da1c071b35edf42608c734a694946822c2d0dc6d7c8e2b697beb58888b9aa',
                 type: 0,
                 amount: '610000000000000',
-                tx_fee: '-610000000000000',
-                tx_size: '-610000000000000',
+                tx_fee: '0',
+                tx_size: '0',
                 time_stamp: 1609459800
             },
             {
@@ -191,8 +191,8 @@ describe('Test of Stoa API Server', () => {
                 tx_hash: '0xabf0830cc549d3a1be744a8b484b69236b27e8bd4f7950b1edb8fb5bd9eff31fc58bc5a645ab3a81fbd48fddb38e4677539924036de415e1a96b9a440ed4fa3d',
                 type: 0,
                 amount: '610000000000000',
-                tx_fee: '-610000000000000',
-                tx_size: '-610000000000000',
+                tx_fee: '0',
+                tx_size: '0',
                 time_stamp: 1609459800
             },
             {
@@ -233,10 +233,10 @@ describe('Test of Stoa API Server', () => {
             random_seed: '0x691775809b9498f45a2c5ef8b8d552e318ebaf0b1b2fb15dcc39e0ec962ae9812d7edffa5f053590a895c9ff72c1b0838ce8f5c709579d4529f9f4caf0fab13d',
             time: 1609459800,
             version: 'v0.x.x',
-            total_sent: 610000000000000,
+            total_sent: 4880000000000000,
             total_recieved: 4880000000000000,
             total_reward: 0,
-            total_fee: -4270000000000000,
+            total_fee: 0,
             total_size: 9328
         }
         assert.deepStrictEqual(response.data, expected);
