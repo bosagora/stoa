@@ -224,7 +224,7 @@ class Stoa extends WebService
                     let result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
                     let avail_height = JSBI.BigInt(row.avail_height);
                     let preimage_height_str: string;
-                  
+
                     // Hashing preImage
                     if (JSBI.greaterThanOrEqual(target_height.value, avail_height) &&
                         JSBI.greaterThanOrEqual(JSBI.add(avail_height, JSBI.BigInt(preimage_height)), target_height.value))
@@ -1393,7 +1393,7 @@ class Stoa extends WebService
                                 type: row.type,
                                 amount: JSBI.BigInt(row.amount).toString(),
                                 tx_fee: JSBI.BigInt(row.tx_fee).toString(),
-                                tx_size: JSBI.BigInt(row.tx_fee).toString(),
+                                tx_size: JSBI.BigInt(row.tx_size).toString(),
                                 time_stamp: row.time_stamp,
                             }
                         )
