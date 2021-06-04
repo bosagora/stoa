@@ -4,6 +4,8 @@ import { logger, Logger } from './modules/common/Logger';
 import { BOASodium } from "boa-sodium-ts";
 import { SodiumHelper } from "boa-sdk-ts";
 import Stoa from './Stoa';
+import { CoinMarketService } from './modules/service/CoinMaketService';
+import { CoinGeckoMaket } from './modules/coinmarket/coinMarketClient'
 
 // Create with the arguments and read from file
 let config = Config.createWithArgument();
@@ -29,13 +31,14 @@ switch (process.env.NODE_ENV) {
 logger.transports.forEach((tp) => { tp.level = config.logging.level });
 
 logger.info(`Agora endpoint: ${config.server.agora_endpoint.toString()}`);
-logger.info(`sqlite3 database filename: ${config.database.filename}`);
+logger.info(`mysql database host: ${config.database.database}`);
 
-const stoa: Stoa = new Stoa(config.database.filename,
+const stoa: Stoa = new Stoa(config.database,
     config.server.agora_endpoint,
     config.server.port,
     config.server.address,
     config.consensus.genesis_timestamp,
+    new CoinMarketService(new CoinGeckoMaket())
     );
 
 SodiumHelper.assign(new BOASodium());

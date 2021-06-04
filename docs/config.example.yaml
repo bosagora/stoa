@@ -14,7 +14,11 @@ server:
 ##                               Database options                             ##
 ################################################################################
 database:
-  filename: data/main.db
+   host : 127.0.0.1
+   user : root
+   database : stoa
+   password : "12345678"
+   port : 3306
 
 ################################################################################
 ##                               Logging options                              ##
