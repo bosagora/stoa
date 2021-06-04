@@ -66,6 +66,53 @@ export class Storages
     }
 
     /**
+     * The main thread waits until the database is accessed.
+     * The maximum waiting time is about 50 seconds.
+     * @param databaseConfig Valid value is of type IDatabaseConfig,
+     */
+    public static waiteForConnection (databaseConfig: IDatabaseConfig)
+    {
+        let connection_config: mysql.ConnectionOptions = {
+            host: databaseConfig.host,
+            user: databaseConfig.user,
+            password: databaseConfig.password,
+            multipleStatements: databaseConfig.multipleStatements,
+            port: Number(databaseConfig.port)
+        }
+
+        return new Promise<void>((resolve) =>
+        {
+            let try_count = 0;
+            let check_connection = () =>
+            {
+                try_count++;
+                const connection = mysql.createConnection(connection_config);
+                connection.connect(function (err)
+                {
+                    if (!err)
+                    {
+                        return resolve();
+                    }
+                    else
+                    {
+                        if (try_count < 10)
+                        {
+                            setTimeout(() => {
+                                check_connection();
+                            }, 5000);
+                        }
+                        else
+                        {
+                            return resolve();
+                        }
+                    }
+                });
+            };
+            check_connection();
+        });
+    }
+
+    /**
      * Creates tables.
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called and if an error occurs the `.catch`
