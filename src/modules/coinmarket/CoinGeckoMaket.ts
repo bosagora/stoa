@@ -12,7 +12,6 @@
 
 *******************************************************************************/
 
-import { CoinGeckoClient } from "coingecko-api-v3";
 import { logger, Logger } from '../common/Logger';
 import { IMarketCap } from "../../Types";
 
@@ -31,13 +30,10 @@ export class CoinGeckoMaket implements CoinMarket {
     /**
      * Market Client i.e Gecko_coin_market 
      */
-    private coinMarketClient: CoinGeckoClient;
+    private coinMarketClient: any;
 
-    constructor() {
-        this.coinMarketClient = new CoinGeckoClient({
-            timeout: 10000,
-            autoRetry: true,
-        });
+    constructor(GeckoClient: any) {
+        this.coinMarketClient = GeckoClient;
     }
     /**
      *  This method ping the GecoCoinMarket
@@ -47,13 +43,13 @@ export class CoinGeckoMaket implements CoinMarket {
      */
     public ping(): Promise<boolean> {
         return new Promise<boolean>(async (resolve, reject) => {
-            let data = await this.coinMarketClient.ping().then((data) => {
+            await this.coinMarketClient.ping().then((data: any) => {
                 if (data.gecko_says) {
                     resolve(true);
                 }
-            }).catch((err)=>{
+            }).catch((err: any) => {
                 logger.error(`Stoa is unable to ping gecko coin market`);
-                resolve(false)  
+                resolve(false)
             })
         })
     }
@@ -96,7 +92,7 @@ export class CoinGeckoMaket implements CoinMarket {
             let marketCapChartRange = await this.coinMarketClient.coinIdMarketChartRange({ id: "bosagora", vs_currency: "usd", from: from, to: to })
             if (marketCapChartRange) {
                 let coinMarketStat: Array<IMarketCap> = [];
-                marketCapChartRange.prices.forEach((price, index) => {
+                marketCapChartRange.prices.forEach((price: any, index: number) => {
                     coinMarketStat.push({
                         price: price[1],
                         last_updated_at: price[0],
@@ -114,4 +110,3 @@ export class CoinGeckoMaket implements CoinMarket {
         });
     }
 }
-

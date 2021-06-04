@@ -170,9 +170,12 @@ class Stoa extends WebService
             .then(
                 () =>
                 {
-                    this.coinMarketService.start(this).catch((err)=>{
-                    logger.error(`Error: Could not connect to marketcap Client: ${err.toString()}`);
-                    });
+                    if(!(process.env.NODE_ENV === 'test'))
+                    {
+                        this.coinMarketService.start(this).catch((err)=>{
+                        logger.error(`Error: Could not connect to marketcap Client: ${err.toString()}`);
+                        });
+                    }
                     return this.pending = this.pending.then(() => { return this.catchup(height); });
                 });
     }
@@ -1662,12 +1665,16 @@ class Stoa extends WebService
         });
     }
     /**
-     * 
+     * GET /coinmarketchart/
+     *
+     * Called when a request is received through the `/utxo/` handler
+     *
+     * Returns BOA statistics of last 24 hours.
      */
     private async getBoaPriceChart(req: express.Request, res: express.Response)
     {
         let to = await Time.msToTime(Date.now());
-        let from = await JSBI.subtract(JSBI.BigInt(to.seconds), JSBI.BigInt(60 * 60 * 48));
+        let from = await JSBI.subtract(JSBI.BigInt(to.seconds), JSBI.BigInt(60 * 60 * 24));
         let num = Number(from.toString());
 
         let dt = new Date(to.seconds * 1000);

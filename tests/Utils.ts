@@ -27,7 +27,6 @@ import { IDatabaseConfig } from '../src/modules/common/Config';
 
 import JSBI from 'jsbi';
 import { CoinMarketService } from '../src/modules/service/CoinMaketService';
-import { CoinMarket } from '../src/modules/coinmarket/coinMarketClient'
 import { IMarketCap } from "../src/Types";
 
 export const sample_data_raw = (() => {
@@ -41,12 +40,24 @@ export const marketcap_sample_data_raw = (() => {
         fs.readFileSync('tests/data/marketcap.sample1.json', 'utf-8'),
     ];
 })();
+export const market_cap_history_sample_data_raw = (() => {
+    return [
+        fs.readFileSync('tests/data/Recovery.marketcap.sample1.json', 'utf-8'),
+    ];
+})();
 
 export const market_cap_sample_data = (()=>{
        let record = [];
         for (let elem of marketcap_sample_data_raw)
             record.push(JSON.parse(elem));
        return record;     
+})();
+
+export const market_cap_history_sample_data = (() => {
+    let record = [];
+    for (let elem of market_cap_history_sample_data_raw)
+        record.push(JSON.parse(elem));
+    return record;
 })();
 
 export const sample_data =
@@ -278,18 +289,17 @@ export class TestAgora implements FullNodeAPI
  * This is an API server for testing and inherited from Stoa.
  * The test code allows the API server to be started and shut down.
  */
-export class TestStoa extends Stoa
-{
-    constructor (testDBConfig :IDatabaseConfig,agora_endpoint: URL, port: number | string, coinMarketService: CoinMarketService)
-    {
-        super(testDBConfig, agora_endpoint, port, "127.0.0.1", 1609459200, coinMarketService);
+export class TestStoa extends Stoa {
+    constructor(testDBConfig: IDatabaseConfig, agora_endpoint: URL, port: number | string, testCoinMarketService: CoinMarketService) {
+        super(testDBConfig, agora_endpoint, port, "127.0.0.1", 1609459200, testCoinMarketService);
     }
 
-    public stop (): Promise<void>
-    {
-        return new Promise<void>((resolve, reject) => {
-            if (this.server != null)
-                this.server.close((err?) => { err === undefined ? resolve() : reject(err); });
+    public stop(): Promise<void> {
+        return new Promise<void>(async(resolve, reject) => {
+            if (this.server != null) {
+                 await this.coinMarketService.stop();
+                 this.server.close((err?) => { err === undefined ? resolve() : reject(err); });
+            }
             else
                 resolve();
         });
@@ -299,52 +309,47 @@ export class TestStoa extends Stoa
  * This is an Agora node for testing.
  * The test code allows the Agora node to be started and shut down.
  */
-export class TestCoinGecko implements CoinMarket
-{
-    public server: http.Server;
+export class TestGeckoServer {
 
-    public testCoinGecko: express.Application;
+    private server: http.Server;
 
-    /**
-     * The blocks that this Agora instance will serve
-     */
-    private coinMarketCap: any;
+    private app: express.Application;
 
-    constructor (port: string, coinMarketCap: any[], done: () => void)
-    {
-        this.testCoinGecko = express();
+    private coinMarketCap: any[];
 
-        this.coinMarketCap = coinMarketCap[0];
+    private latest_data: any
 
-        this.server = this.testCoinGecko.listen(port, () =>
-        {
+    constructor(port: string, latest_data: any [], coinMarketCap: any[], done: () => void) {
+        this.app = express();
+        this.server = http.createServer(this.app);
+        this.latest_data = latest_data[0];
+        this.coinMarketCap = coinMarketCap;
+        this.server.listen(port, () => {
             done();
         });
     }
-    public ping():Promise<boolean>
-    {
-        return new Promise<boolean>((resolve, reject)=>{
-            resolve(true)
+    public ping(): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            if (this.server) {
+               return resolve(true);
+            }
+            reject(`Test gecko server not running`);
+
         });
 
     }
-    public fetch():Promise<any>
-    {
-        return new Promise<any>((resolve, reject)=>{
-        let coinMarketStat: IMarketCap =
-            {
-                price: this.coinMarketCap.bosagora.usd,
-                market_cap: this.coinMarketCap.bosagora.market_cap,
-                vol_24h: this.coinMarketCap.bosagora.vol_24h,
-                change_24h: this.coinMarketCap.bosagora.change_24h,
-                last_updated_at: this.coinMarketCap.bosagora.last_updated_at
-            }
-         resolve (coinMarketStat)
+    public simplePrice(): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+           return resolve(this.latest_data)
+        });
+    }
+    public coinIdMarketChartRange(): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            resolve(this.coinMarketCap);
         });
     }
     // Shut down
-    public stop (): Promise<void>
-    {
+    public stop(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this.server.close((err?) => { err === undefined ? resolve() : reject(err); });
         });

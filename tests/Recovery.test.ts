@@ -30,14 +30,17 @@ import {
     sample_reEnroll_preImageInfo,
     market_cap_sample_data,
     recovery_sample_data,
+    market_cap_history_sample_data,
     TestAgora,
     TestStoa,
     TestClient,
-    TestCoinGecko,
+    TestGeckoServer,
     delay,
     createBlock
 } from './Utils';
 import { CoinMarketService } from '../src/modules/service/CoinMaketService';
+import { CoinGeckoMaket } from '../src/modules/coinmarket/CoinGeckoMaket';
+
 
 /**
  * This is an API server for testing and inherited from Stoa.
@@ -45,7 +48,7 @@ import { CoinMarketService } from '../src/modules/service/CoinMaketService';
  */
 class TestRecoveryStoa extends TestStoa
 {
-    constructor (testDBConfig :IDatabaseConfig,agora_endpoint: URL, port: number | string, coinMarketService :CoinMarketService )
+    constructor (testDBConfig :IDatabaseConfig,agora_endpoint: URL, port: number | string, coinMarketService: CoinMarketService )
     {
         super(testDBConfig,agora_endpoint, port, coinMarketService);
 
@@ -86,8 +89,9 @@ describe ('Test of Recovery', () =>
     let agora_node: TestAgora;
     let stoa_server: TestRecoveryStoa;
     let testDBConfig : IDatabaseConfig;
-    let testCoinGecko: TestCoinGecko;
-    let coinMarketService : CoinMarketService;
+    let gecko_server: TestGeckoServer;
+    let gecko_market: CoinGeckoMaket;
+    let coinMarketService: CoinMarketService;
 
     let client = new TestClient();
 
@@ -109,11 +113,12 @@ describe ('Test of Recovery', () =>
     });
     before('Start a fake TestCoinGecko', () => {
         return new Promise<void>((resolve, reject) => {
-             testCoinGecko = new TestCoinGecko("7876", market_cap_sample_data, resolve)
+                    gecko_server = new TestGeckoServer("7876", market_cap_sample_data, market_cap_history_sample_data, resolve);
+                    gecko_market = new CoinGeckoMaket(gecko_server);
         });
     });
     before('Start a fake TestCoinGecko', () => {
-        coinMarketService = new CoinMarketService(testCoinGecko);
+        coinMarketService = new CoinMarketService(gecko_market);
     });
     before ('Create TestStoa and start it', async () =>
     {   
@@ -124,10 +129,9 @@ describe ('Test of Recovery', () =>
     });
     after ('Stop TestStoa', async () =>
     {
-        await coinMarketService.stop();
         await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
         await stoa_server.stop();
-        await testCoinGecko.stop();
+        await gecko_server.stop();
     });
     it ('Test `getBlocksFrom`', async () =>
     {

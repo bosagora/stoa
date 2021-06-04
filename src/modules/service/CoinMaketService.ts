@@ -15,7 +15,6 @@ import { logger, Logger } from '../common/Logger';
 import * as cron from "node-cron";
 import Stoa from "../../Stoa";
 import { IMarketCap } from "../../Types";
-import { CoinGeckoMaket } from '../coinmarket/coinMarketClient';
 import JSBI from 'jsbi';
 import { Time } from '../common/Time';
 
@@ -32,7 +31,7 @@ export class CoinMarketService {
     private job: cron.ScheduledTask | null = null;
 
     /**
-     *  
+     * Job exection status 
      */
     private status: boolean;
 
@@ -58,6 +57,13 @@ export class CoinMarketService {
 
         });
     }
+
+    /**
+     * This method prefrom bosagora coin market cap recovery and handle 
+     * the execution order of cron job
+     * @param stoaInstance 
+     * @returns 
+     */
     public scheduler(stoaInstance: Stoa): Promise<boolean> {
         return new Promise<boolean>(async (resolve, reject) => {
             if (this.status === true) {
@@ -91,6 +97,7 @@ export class CoinMarketService {
             }
         });
     }
+    
     /**
      * @param StoaInstance 
      * Asynchronously recover 24 hour CoinMarket Data
@@ -112,8 +119,8 @@ export class CoinMarketService {
                 resolve(true)
             }
             catch (err) {
-                logger.error(`Error: while 24 hour coin maket recovery`);
-                reject(`Error: while 24 hour coin maket recovery`);
+                logger.error(`Failed to 24-hour coin market data recovery: ${err}`);
+                reject(`Failed to 24-hour coin market data recovery`);
             }
         });
     }
@@ -145,8 +152,8 @@ export class CoinMarketService {
                 }
             }
             catch (err) {
-                logger.error(`Error: while coin maket recovery`)
-                reject(`Error: while coin maket recovery`)
+                logger.error(`Failed to coin market data recovery: ${err}`)
+                reject(`Failed to coin market data recovery`)
             }
         });
     }
@@ -154,7 +161,11 @@ export class CoinMarketService {
     * Stop CoinMarket Data sync service
     */
     public async stop() {
-        if (this.job)
-            await this.job.stop();
+        if (this.job) {
+            this.job.stop();
+            return;
+        }
+        else
+            return;
     }
 }
