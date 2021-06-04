@@ -129,7 +129,7 @@ describe('Test of Stoa API Server', () => {
                 type: 0,
                 amount: '610000000000000',
                 tx_fee: '0',
-                tx_size: '0',
+                tx_size: '1166',
                 time_stamp: 1609459800
             },
             {
@@ -138,7 +138,7 @@ describe('Test of Stoa API Server', () => {
                 type: 0,
                 amount: '610000000000000',
                 tx_fee: '0',
-                tx_size: '0',
+                tx_size: '1166',
                 time_stamp: 1609459800
             },
             {
@@ -147,7 +147,7 @@ describe('Test of Stoa API Server', () => {
                 type: 0,
                 amount: '610000000000000',
                 tx_fee: '0',
-                tx_size: '0',
+                tx_size: '1166',
                 time_stamp: 1609459800
             },
             {
@@ -156,7 +156,7 @@ describe('Test of Stoa API Server', () => {
                 type: 0,
                 amount: '610000000000000',
                 tx_fee: '0',
-                tx_size: '0',
+                tx_size: '1166',
                 time_stamp: 1609459800
             },
             {
@@ -165,7 +165,7 @@ describe('Test of Stoa API Server', () => {
                 type: 0,
                 amount: '610000000000000',
                 tx_fee: '0',
-                tx_size: '0',
+                tx_size: '1166',
                 time_stamp: 1609459800
             },
             {
@@ -174,7 +174,7 @@ describe('Test of Stoa API Server', () => {
                 type: 0,
                 amount: '610000000000000',
                 tx_fee: '0',
-                tx_size: '0',
+                tx_size: '1166',
                 time_stamp: 1609459800
             },
             {
@@ -183,7 +183,7 @@ describe('Test of Stoa API Server', () => {
                 type: 0,
                 amount: '610000000000000',
                 tx_fee: '0',
-                tx_size: '0',
+                tx_size: '1166',
                 time_stamp: 1609459800
             },
             {
@@ -192,7 +192,7 @@ describe('Test of Stoa API Server', () => {
                 type: 0,
                 amount: '610000000000000',
                 tx_fee: '0',
-                tx_size: '0',
+                tx_size: '1166',
                 time_stamp: 1609459800
             },
             {
@@ -201,7 +201,7 @@ describe('Test of Stoa API Server', () => {
                 type: 1,
                 amount: '120000000000000',
                 tx_fee: '0',
-                tx_size: '0',
+                tx_size: '255',
                 time_stamp: 1609459200
             },
             {
@@ -210,7 +210,7 @@ describe('Test of Stoa API Server', () => {
                 type: 0,
                 amount: '4880000000000000',
                 tx_fee: '0',
-                tx_size: '0',
+                tx_size: '337',
                 time_stamp: 1609459200
             }
         ]
