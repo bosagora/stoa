@@ -11,7 +11,8 @@ import { ValidatorData, IPreimage, IUnspentTxOutput, ITxStatus,
     ITxHistoryElement, ITxOverview, ConvertTypes, DisplayTxType,
     IPendingTxs, ISPVStatus, ITransactionFee, IBlock, ITransaction,
     IBlockOverview, IBlockEnrollmentElements, IBlockEnrollment, IBlockTransactions, IBlockTransactionElements,
-    IBOAStats, IPagination, IMarketCap} from './Types';
+    IBOAStats, IPagination, IMarketCap, IMarketChart} from './Types';
+import { Time } from './modules/common/Time';    
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -147,6 +148,7 @@ class Stoa extends WebService
         this.app.get("/boa-stats", this.getBOAStats.bind(this));
         this.app.get("/spv/:hash", this.verifyPayment.bind(this));
         this.app.get("/coinmarketcap", this.getcoinMaketCap.bind(this));
+        this.app.get("/coinmarketchart", this.getBoaPriceChart.bind(this));
         this.app.post("/block_externalized", this.postBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
         this.app.post("/transaction_received", this.putTransaction.bind(this));
@@ -168,9 +170,12 @@ class Stoa extends WebService
             .then(
                 () =>
                 {
-                    this.coinMarketService.start(this).catch((err)=>{
-                    logger.error(`Error: Could not connect to marketcap Client: ${err.toString()}`);
-                    });
+                    if(!(process.env.NODE_ENV === 'test'))
+                    {
+                        this.coinMarketService.start(this).catch((err)=>{
+                        logger.error(`Error: Could not connect to marketcap Client: ${err.toString()}`);
+                        });
+                    }
                     return this.pending = this.pending.then(() => { return this.catchup(height); });
                 });
     }
@@ -1657,6 +1662,47 @@ class Stoa extends WebService
 
             return resolve({ page, pageSize });
         });
+    }
+    /**
+     * GET /coinmarketchart/
+     *
+     * Called when a request is received through the `/utxo/` handler
+     *
+     * Returns BOA statistics of last 24 hours.
+     */
+    private async getBoaPriceChart(req: express.Request, res: express.Response)
+    {
+        let to = await Time.msToTime(Date.now());
+        let from = await JSBI.subtract(JSBI.BigInt(to.seconds), JSBI.BigInt(60 * 60 * 24));
+        let num = Number(from.toString());
+
+        let dt = new Date(to.seconds * 1000);
+        let df = new Date((num)* 1000 )
+
+        logger.info(`Price chart from: ${df}, to: ${dt} `)
+
+        this.ledger_storage.getCoinMarketChart(Number(from.toString()), to.seconds)
+            .then(async(rows :any [])=>{
+                 if(rows.length === 0)
+                 {
+                    res.status(204).send("The data does not exist")
+                 }
+                 else{
+                    let marketCapChart : Array<IMarketChart> = [];
+                    await rows.forEach((element, index)=> {
+                         marketCapChart.push({
+                            usd_price: element.price,
+                            last_updated_at: element.last_updated_at
+                         });
+                     });
+                    res.status(200).send(marketCapChart);
+                 }
+                
+            })
+            .catch((err)=>{
+                logger.error("Failed to data lookup to the DB: " + err);
+                res.send(500).send("Failed to data lookup")
+            })
     }
 
     /**
