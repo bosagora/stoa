@@ -13,8 +13,8 @@
 
 import {
     Block, Enrollment, Hash, Height, PreImageInfo, Transaction,
-    TxInput, TxOutput, makeUTXOKey, hashFull, TxType,
-    Utils, Endian, Lock, Unlock, PublicKey, DataPayload, TxPayloadFee
+    TxInput, TxOutput, makeUTXOKey, hashFull,
+    Utils, Endian, Lock, Unlock, PublicKey, DataPayload, TxPayloadFee, OutputType
 } from 'boa-sdk-ts';
 import { Storages } from './Storages';
 import { IDatabaseConfig } from '../common/Config';
@@ -130,6 +130,7 @@ export class LedgerStorage extends Storages
             output_index        INTEGER     NOT NULL,
             tx_hash             TINYBLOB    NOT NULL,
             utxo_key            TINYBLOB    NOT NULL,
+            type                INTEGER     NOT NULL,
             amount              BIGINT(20)  UNSIGNED NOT NULL,
             lock_type           INTEGER NOT NULL,
             lock_bytes          TINYBLOB    NOT NULL,
@@ -207,6 +208,7 @@ export class LedgerStorage extends Storages
         CREATE TABLE IF NOT EXISTS tx_output_pool (
             tx_hash             TINYBLOB   NOT NULL,
             output_index        INTEGER    NOT NULL,
+            type                INTEGER    NOT NULL,
             amount              BIGINT(20) UNSIGNED NOT NULL,
             lock_type           INTEGER    NOT NULL,
             lock_bytes          TINYBLOB   NOT NULL,
@@ -387,7 +389,7 @@ export class LedgerStorage extends Storages
                         enroll.utxo_key.toBinary(Endian.Little),
                         enroll.commitment.toBinary(Endian.Little),
                         enroll.cycle_length,
-                        enroll.enroll_sig.toBinary(Endian.Little)
+                        enroll.enroll_sig.toSignature().toBinary(Endian.Little)
                     ])
                     .then(() => {
                         resolve();
@@ -782,7 +784,7 @@ export class LedgerStorage extends Storages
                 let tx_size = tx.getNumberOfBytes();
 
                 let unlock_height_query: string;
-                if ((tx.type == TxType.Payment) && (tx.inputs.length > 0))
+                if (tx.isPayment() && (tx.inputs.length > 0))
                 {
                     let utxo = tx.inputs
                         .map(m => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
@@ -798,7 +800,7 @@ export class LedgerStorage extends Storages
                                     transactions AS b
                                 WHERE
                                     a.tx_hash = b.tx_hash
-                                    and b.type = 1
+                                    and a.type = 1
                                     and a.utxo_key in (${utxo.join(',')})
                             )
                             UNION ALL
@@ -811,6 +813,14 @@ export class LedgerStorage extends Storages
                     unlock_height_query = `( SELECT '${JSBI.add(height.value, JSBI.BigInt(1)).toString()}' AS unlock_height )`;
                 }
 
+                let tx_type: number;
+                if (tx.isFreeze())
+                    tx_type = OutputType.Freeze;
+                else if (tx.isCoinbase())
+                    tx_type = OutputType.Coinbase;
+                else
+                    tx_type = OutputType.Payment;
+
                 storage.run(
                     `INSERT INTO transactions
                         (block_height, tx_index, tx_hash, type, unlock_height, lock_height, tx_fee, payload_fee, tx_size, inputs_count, outputs_count, payload_size)
@@ -820,7 +830,7 @@ export class LedgerStorage extends Storages
                         height.toString(),
                         tx_idx,
                         hash.toBinary(Endian.Little),
-                        tx.type,
+                        tx_type,
                         tx.lock_height.toString(),
                         fees[1].toString(),
                         fees[2].toString(),
@@ -903,9 +913,9 @@ export class LedgerStorage extends Storages
 
                 storage.run(
                     `INSERT INTO tx_outputs
-                        (block_height, tx_index, output_index, tx_hash, utxo_key, address, amount, lock_type, lock_bytes)
+                        (block_height, tx_index, output_index, tx_hash, utxo_key, address, type, amount, lock_type, lock_bytes)
                     VALUES
-                        (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         height.toString(),
                         tx_idx,
@@ -913,6 +923,7 @@ export class LedgerStorage extends Storages
                         hash.toBinary(Endian.Little),
                         utxo_key.toBinary(Endian.Little),
                         address,
+                        output.type,
                         output.value.toString(),
                         output.lock.type,
                         output.lock.bytes
@@ -933,7 +944,7 @@ export class LedgerStorage extends Storages
         {
             return new Promise<boolean>((resolve, reject) =>
             {
-                if ((tx.type == TxType.Payment) && (tx.inputs.length > 0))
+                if (tx.isPayment() && (tx.inputs.length > 0))
                 {
                     let utxo = tx.inputs
                         .map(m => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
@@ -975,21 +986,12 @@ export class LedgerStorage extends Storages
                     : "";
 
                 let unlock_height: JSBI;
-                let tx_type: TxType;
                 if (melting && address != TxPayloadFee.CommonsBudgetAddress)
                 {
-                    tx_type = tx.type;
                     unlock_height = JSBI.add(height.value, JSBI.BigInt(2016));
-                }
-                else if (tx.type == TxType.Freeze && tx.outputs.length >= 2 &&
-                    (out_idx == 0 && JSBI.lessThan(output.value, JSBI.BigInt(400_000_000_000))))
-                {
-                    tx_type = TxType.Payment;
-                    unlock_height = JSBI.add(height.value, JSBI.BigInt(1));
                 }
                 else
                 {
-                    tx_type = tx.type;
                     unlock_height = JSBI.add(height.value, JSBI.BigInt(1));
                 }
 
@@ -1010,7 +1012,7 @@ export class LedgerStorage extends Storages
                     [
                         utxo_key.toBinary(Endian.Little),
                         tx_hash.toBinary(Endian.Little),
-                        tx_type,
+                        output.type,
                         unlock_height.toString(),
                         output.value.toString(),
                         output.lock.type,
@@ -1115,6 +1117,14 @@ export class LedgerStorage extends Storages
                 let fees = await storage.getTransactionFee(tx);
                 let tx_size = tx.getNumberOfBytes();
 
+                let tx_type: number;
+                if (tx.isFreeze())
+                    tx_type = OutputType.Freeze;
+                else if (tx.isCoinbase())
+                    tx_type = OutputType.Coinbase;
+                else
+                    tx_type = OutputType.Payment;
+
                 storage.run(
                     `INSERT INTO transaction_pool
                         (tx_hash, type, payload, lock_height, received_height, time, tx_fee, payload_fee, tx_size)
@@ -1122,7 +1132,7 @@ export class LedgerStorage extends Storages
                         (?, ?, ?, ?, (SELECT IFNULL(MAX(height), 0) as height FROM blocks), DATE_FORMAT(now(),'%s'), ?, ?, ?)`,
                     [
                         hash.toBinary(Endian.Little),
-                        tx.type,
+                        tx_type,
                         tx.payload.toBinary(Endian.Little),
                         tx.lock_height.toString(),
                         fees[1].toString(),
@@ -1180,12 +1190,13 @@ export class LedgerStorage extends Storages
 
                 storage.run(
                     `INSERT INTO tx_output_pool
-                        (tx_hash, output_index, amount, address, lock_type, lock_bytes)
+                        (tx_hash, output_index, type, amount, address, lock_type, lock_bytes)
                     VALUES
-                        (?, ?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?, ?, ?)`,
                     [
                         hash.toBinary(Endian.Little),
                         out_idx,
+                        output.type,
                         output.value.toString(),
                         address,
                         output.lock.type,
@@ -1700,6 +1711,7 @@ export class LedgerStorage extends Storages
         let sql_receiver =
             `SELECT
                 O.output_index,
+                O.type,
                 O.amount,
 				O.lock_type,
 				O.lock_bytes as bytes,
@@ -1846,16 +1858,15 @@ export class LedgerStorage extends Storages
                 if (rows.length > 0)
                 {
                     let input_rows = await this.query("SELECT tx_hash, utxo, unlock_bytes, unlock_age FROM tx_input_pool WHERE tx_hash = ? ORDER BY input_index;", [hash]);
-                    let output_rows = await this.query("SELECT tx_hash, amount, lock_type, lock_bytes FROM tx_output_pool WHERE tx_hash = ? ORDER BY output_index;", [hash]);
+                    let output_rows = await this.query("SELECT tx_hash, type, amount, lock_type, lock_bytes FROM tx_output_pool WHERE tx_hash = ? ORDER BY output_index;", [hash]);
 
                     let inputs:Array<TxInput> = [];
                     for (let input_row of input_rows)
                         inputs.push(new TxInput(new Hash(input_row.utxo, Endian.Little), new Unlock(input_row.unlock_bytes), input_row.unlock_age));
                     let outputs:Array<TxOutput> = [];
                     for (let output_row of output_rows)
-                        outputs.push(new TxOutput(output_row.amount, new Lock(output_row.lock_type, output_row.lock_bytes)));
+                        outputs.push(new TxOutput(output_row.type, output_row.amount, new Lock(output_row.lock_type, output_row.lock_bytes)));
                     resolve(new Transaction(
-                        rows[0].type,
                         inputs,
                         outputs,
                         new DataPayload((rows[0].payload !== null) ? (rows[0].payload) : Buffer.alloc(0), Endian.Little),
@@ -1888,7 +1899,7 @@ export class LedgerStorage extends Storages
                 let hash = tx_hash.toBinary(Endian.Little);
                 let rows = await this.query(
                     `SELECT
-                        T.tx_hash, T.type, T.lock_height, P.payload FROM
+                        T.tx_hash, T.lock_height, P.payload FROM
                     transactions T
                     LEFT JOIN payloads P ON (T.tx_hash = P.tx_hash)
                     WHERE
@@ -1896,16 +1907,15 @@ export class LedgerStorage extends Storages
                 if (rows.length > 0)
                 {
                     let input_rows = await this.query("SELECT tx_hash, utxo, unlock_bytes, unlock_age FROM tx_inputs WHERE tx_hash = ? ORDER BY in_index;", [hash]);
-                    let output_rows = await this.query("SELECT tx_hash, amount, lock_type, lock_bytes FROM tx_outputs WHERE tx_hash = ? ORDER BY output_index;", [hash]);
+                    let output_rows = await this.query("SELECT tx_hash, type, amount, lock_type, lock_bytes FROM tx_outputs WHERE tx_hash = ? ORDER BY output_index;", [hash]);
 
                     let inputs:Array<TxInput> = [];
                     for (let input_row of input_rows)
                         inputs.push(new TxInput(new Hash(input_row.utxo, Endian.Little), new Unlock(input_row.unlock_bytes), input_row.unlock_age));
                     let outputs:Array<TxOutput> = [];
                     for (let output_row of output_rows)
-                        outputs.push(new TxOutput(output_row.amount, new Lock(output_row.lock_type, output_row.lock_bytes)));
+                        outputs.push(new TxOutput(output_row.type, output_row.amount, new Lock(output_row.lock_type, output_row.lock_bytes)));
                     resolve(new Transaction(
-                        rows[0].type,
                         inputs,
                         outputs,
                         new DataPayload((rows[0].payload !== null) ? (rows[0].payload) : Buffer.alloc(0), Endian.Little),
@@ -2000,7 +2010,7 @@ export class LedgerStorage extends Storages
     public getLatestTransactions(limit: number, page: number): Promise<any[]> {
         let sql =
             `SELECT
-                T.block_height, T.tx_hash, type, T.tx_fee, T.tx_size,
+                T.block_height, T.tx_hash, T.tx_fee, T.tx_size,
              Sum(IFNULL(O.amount,0)) as amount, B.time_stamp
              FROM
                  tx_outputs O
@@ -2080,9 +2090,9 @@ export class LedgerStorage extends Storages
     public getBlockTransactions(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
         let sql_tx =
             `SELECT
-                T.block_height, T.tx_hash, SUM(IFNULL(O.amount,0)) as amount, T.type,
+                T.block_height, T.tx_hash, SUM(IFNULL(O.amount,0)) as amount,
                 T.tx_fee, T.tx_size, B.time_stamp,
-                JSON_ARRAYAGG(JSON_OBJECT("address", O.address, "amount", O.amount)) as receiver,
+                JSON_ARRAYAGG(JSON_OBJECT("type", O.type, "address", O.address, "amount", O.amount)) as receiver,
                 (SELECT
                     S.address
                 FROM

@@ -1,8 +1,8 @@
 {
     "header": {
-        "prev_block": "0x1b272e34c3df561450a52cf9e2eab4b1dbff4d710cba755ad76e1b2a906645e0f2b6650e62369f3f56b04a51c82fb36d33c5ef88b59949d37a81ca614902ff8e",
+        "prev_block": "0x04348b962dac4423cd9ae48b4932ee1607fb1101a690d2583bbad909e8c3f22b12a6d65d1e1494d38681afc7bea61c3d81251800b8adbf1d31f52889df6d7e09",
         "height": "2",
-        "merkle_root": "0x5164e81fb8cf09aaff7ffac86e3d167318fbd6de035057dbeae2d380edd3d4fd491852c426d62766ad53a26294bf1cd0efb8e9140418e343b502975c29623f91",
+        "merkle_root": "0x2c7f07ca5e9d17e6e72502d0937e48f7e5cfad8378fdc08acb7a3a6753ea5c999e505133c139d5e0f31ce9d944fc4d09450ba782f0aa767e75db98f9dc70ffc1",
         "validators": "[252]",
         "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
         "enrollments": [],
@@ -12,18 +12,18 @@
     },
     "txs": [
         {
-            "type": 0,
             "inputs": [
                 {
-                    "utxo": "0x0b640f95cec0159edc603291d9e519cf7ab3b141e4be9ae34770a89eb3937ed9a7ad9b601be47683c0b491ca21a67c6d43aca5d603b7489378fb6dafe19391b5",
+                    "utxo": "0xf180e8aede3ea3f6db7872b2af4225f186abc4835e2f1108ea6ee1c56a8edb79c6460de4968696ec1f9a7fe5ab0008d33781a0031d79409825f2ea45df6f7fbd",
                     "unlock": {
-                        "bytes": "lqAIaXCIgcpqhrWHGDyYB7EdArgM9Xc+K9msM5g0pQGj5t7/J1pEEKKHAppCDLQ7lBUHrCjKE9qBNKGrvQ4bAw=="
+                        "bytes": "eZid7mkGwHQGiXW9PybWvZ/mwHRp/mxmDx8I32rrYgKXGWDiGjVM0a/DO4NC2I/2rV4YzR1XEMr8RH5XmaVqKA=="
                     },
                     "unlock_age": 0
                 }
             ],
             "outputs": [
                 {
+                    "type": 0,
                     "value": "1663400000",
                     "lock": {
                         "type": 0,
@@ -31,6 +31,7 @@
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24398336600000",
                     "lock": {
                         "type": 0,
@@ -44,18 +45,18 @@
             "lock_height": "0"
         },
         {
-            "type": 0,
             "inputs": [
                 {
-                    "utxo": "0x7f6e35961dbaae3cad2efa0582a6ff2c992973bdd987c41c6d4f4b0e1289158c98b2858b4731c36744ebf92edcb05b3f68838432479aaf1373d123e60ad3448b",
+                    "utxo": "0x896240cd0ef51fdfdff645bb146737f889b70a7d72f9ebb842f9a0c4705de884209c451ccdc15aace878d12dac85f0b5522bf2642204937c5e44944741a1928f",
                     "unlock": {
-                        "bytes": "Z0ljMy9wWCqkXQ3O7yCyICHO5jP0dJq/8nr+VLET5AoFQHW4hvf1P/JFzIXPYtOQWP/avAa3s52aWvBFKIDLKg=="
+                        "bytes": "+FBRLUJHf6RdE3insW75WsUVDqFEi4lk4NSKEW/0FQKJgt5SItIG6TF1JVzPGgpQZd9YqU6LSaGKmAVdFIsfog=="
                     },
                     "unlock_age": 0
                 }
             ],
             "outputs": [
                 {
+                    "type": 0,
                     "value": "4000000000000",
                     "lock": {
                         "type": 0,
@@ -63,6 +64,7 @@
                     }
                 },
                 {
+                    "type": 0,
                     "value": "4000000000000",
                     "lock": {
                         "type": 0,
@@ -70,6 +72,7 @@
                     }
                 },
                 {
+                    "type": 0,
                     "value": "4000000000000",
                     "lock": {
                         "type": 0,
@@ -77,6 +80,7 @@
                     }
                 },
                 {
+                    "type": 0,
                     "value": "4000000000000",
                     "lock": {
                         "type": 0,
@@ -84,6 +88,7 @@
                     }
                 },
                 {
+                    "type": 0,
                     "value": "4000000000000",
                     "lock": {
                         "type": 0,
@@ -98,8 +103,8 @@
         }
     ],
     "merkle_tree": [
-        "0x66b6a0e5f58514ccdc0164598bd0b476e0b93294f9eb5b938e006028ebccda778a36e7f141679c0b101bb6f74befc9a4b09d2d9203bf041409aaa206989bed4e",
-        "0xcbbc1f9eb9db56c846b34a5861d14b6726d567ed65223601c261a618dcf183b14469a5105ed77a6a090d63e3a1996f3f41923808e867da84c432f947571fab62",
-        "0x5164e81fb8cf09aaff7ffac86e3d167318fbd6de035057dbeae2d380edd3d4fd491852c426d62766ad53a26294bf1cd0efb8e9140418e343b502975c29623f91"
+        "0xfbe8c9c8544ed673672607552274aa1f1255375f8bf5f20bb1b7f6fe037a90ffbb84c70d0fd089afe5e6db9f68c5f6456b92f802fbb7a91a1b24353d2c625638",
+        "0x6bb2d19aff6bcd102b0dc98abe1bc8d7e494cc61ccb761890160db9b589553c4b43d50dde6f8d3a0f05a8427180d4a30cea0e357a3d974c688e7def488de45b2",
+        "0x2c7f07ca5e9d17e6e72502d0937e48f7e5cfad8378fdc08acb7a3a6753ea5c999e505133c139d5e0f31ce9d944fc4d09450ba782f0aa767e75db98f9dc70ffc1"
     ]
 }

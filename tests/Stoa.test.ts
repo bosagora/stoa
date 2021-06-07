@@ -13,7 +13,7 @@
 
 import {
     BitField, Block, BlockHeader, Enrollment, Height, Hash, Signature, SodiumHelper,
-    Transaction, TxType, TxInput, TxOutput, DataPayload, PublicKey, JSBI
+    Transaction, OutputType, TxInput, TxOutput, DataPayload, PublicKey, JSBI, Sig
 } from 'boa-sdk-ts';
 import {
     sample_data,
@@ -128,7 +128,7 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get (uri.toString());
         assert.strictEqual(response.data.length, 6);
         assert.strictEqual(response.data[0].address,
-            "boa1xzvald5dvy54j7yt2h5yzs2432h07rcn66j84t3lfdrlrwydwq78cz0nckq");
+            "boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn");
         assert.strictEqual(response.data[0].preimage.height, '');
     });
 
@@ -231,10 +231,10 @@ describe ('Test of Stoa API Server', () =>
             const enroll_sig =
                 new Signature("0x0c48e78972e1b138a37e37ae27a01d5ebdea193088ddef2d9883446efe63086925e8803400d7b93d22b1eef5c475098ce08a5b47e8125cf6b04274cc4db34bfd");
             const utxo_key =
-                new Hash("0xd68cfa6d0457b404d74a0367ace0bd3784110fb55d94692e0859f3b5a15b33f990f33e3b4e4b4030945ee0303fabf7b2702f48a31ffdc3d1d6985e3e3dfcc8d7");
+                new Hash("0xf8751862d61a28fb878cd4b583ceaf39a59a5f2ff1fa78a169e56811c33b5c3eed80f83074cfb98ab5095ed563ebc6a96320ef59080628c4961f586dbf2e7d2f");
             const commitment =
                 new Hash("0xe0c04a5bd47ffc5b065b7d397e251016310c43dc77220bf803b73f1183da00b0e67602b1f95cb18a0059aa1cdf2f9adafe979998364b38cd5c15d92b9b8fd815");
-            const enrollment = new Enrollment(utxo_key, commitment, 20, enroll_sig);
+            const enrollment = new Enrollment(utxo_key, commitment, 20, Sig.fromSignature(enroll_sig));
             const header = new BlockHeader(
                 new Hash(Buffer.alloc(Hash.Width)), new Height("19"), new Hash(Buffer.alloc(Hash.Width)), new BitField([]),
                 new Signature(Buffer.alloc(Signature.Width)), [ enrollment ], new Hash(Buffer.alloc(Hash.Width)), [], 0);
@@ -333,11 +333,11 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get (uri.toString())
         assert.strictEqual(response.data.height, '1');
         assert.strictEqual(response.data.hash,
-            '0x1b272e34c3df561450a52cf9e2eab4b1dbff4d710cba755ad76e1b2a906645e' +
-            '0f2b6650e62369f3f56b04a51c82fb36d33c5ef88b59949d37a81ca614902ff8e');
+            '0x04348b962dac4423cd9ae48b4932ee1607fb1101a690d2583bbad909e8c3f22' +
+            'b12a6d65d1e1494d38681afc7bea61c3d81251800b8adbf1d31f52889df6d7e09');
         assert.strictEqual(response.data.merkle_root,
-            '0xc8f96bf274187b0b6fb73c5b609a3fff28bd1fe9e6b712aaa3d9f92351100d7' +
-            'ca718a6c85f5f020cdeb13753179432e710576627399a3235ae472e7fe56b27e6');
+            '0xa82a2d19ae115b521f0d65690e78f66260f5886da76508b72eee62a45cb8cfb' +
+            '5a7b8e300e0042faeb7b28fffc050cceb6c00ef4a326d992ef182969b1857f3d0');
         assert.strictEqual(response.data.time_stamp, 1609459800);
 
         uri = URI(host)
@@ -348,11 +348,11 @@ describe ('Test of Stoa API Server', () =>
         response = await client.get (uri.toString())
         assert.strictEqual(response.data.height, '0');
         assert.strictEqual(response.data.hash,
-            '0x217f5b3f53a52c396c3418c0245c2435a90c53978564efac448e1162ec8647d' +
-            'de9e5c13263390f73f5d5b74e059b79b5286cf292f3121e6f1654ff452f9296f5');
+            '0xba54155d042d03a722dc9234f7de5b304e9efbc896091e28fb3b19b908ee782' +
+            '653b5e6ef44566e19c728ff0eebf65ede6cc485337d5a473b819e86eeb2f7baf8');
         assert.strictEqual(response.data.merkle_root,
-            '0x8ac592615f23ee726577eb8c305c67558fd08f14120e0f23c2969a3b1d37089' +
-            '009159bd42c1d7af53d601b53ccbbad0ebaa54f36f4bc13d473790921ae3dc7fa');
+            '0x4cadc4d240a26ebf8a01ae1c53a4793fec40c92d36d9f8755311420c9594a9f' +
+            'bb827fb974b75774723acbd13b4d0589e957bf8f14da24633be6ae299446ddca7');
         assert.strictEqual(response.data.time_stamp, 1609459200);
     });
 
@@ -378,8 +378,8 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get (uri.toString())
         assert.strictEqual(response.data.length, 2);
         assert.strictEqual(response.data[0].tx_hash,
-            '0x66b6a0e5f58514ccdc0164598bd0b476e0b93294f9eb5b938e006028ebccda7' +
-            '78a36e7f141679c0b101bb6f74befc9a4b09d2d9203bf041409aaa206989bed4e');
+            '0xfbe8c9c8544ed673672607552274aa1f1255375f8bf5f20bb1b7f6fe037a90f' +
+            'fbb84c70d0fd089afe5e6db9f68c5f6456b92f802fbb7a91a1b24353d2c625638');
         assert.strictEqual(response.data[0].address, 'boa1xqcmmns5swnm03zay5wjplgupe65uw4w0dafzsdsqtwq6gv3h3lcz24a8ch');
         assert.strictEqual(response.data[0].amount, '1663400000');
         assert.strictEqual(response.data[0].fee, '0');
@@ -391,27 +391,27 @@ describe ('Test of Stoa API Server', () =>
         let uri = URI(host)
             .port(port)
             .directory("/transaction/status")
-            .filename("0x66b6a0e5f58514ccdc0164598bd0b476e0b93294f9eb5b938e006028ebccda778a36e7f141679c0b101bb6f74befc9a4b09d2d9203bf041409aaa206989bed4e");
+            .filename("0xfbe8c9c8544ed673672607552274aa1f1255375f8bf5f20bb1b7f6fe037a90ffbb84c70d0fd089afe5e6db9f68c5f6456b92f802fbb7a91a1b24353d2c625638");
 
         let response_pending = await client.get(uri.toString());
         let expected_pending = {
             status: 'pending',
-            tx_hash: '0x66b6a0e5f58514ccdc0164598bd0b476e0b93294f9eb5b938e006028ebccda778a36e7f141679c0b101bb6f74befc9a4b09d2d9203bf041409aaa206989bed4e'
+            tx_hash: '0xfbe8c9c8544ed673672607552274aa1f1255375f8bf5f20bb1b7f6fe037a90ffbb84c70d0fd089afe5e6db9f68c5f6456b92f802fbb7a91a1b24353d2c625638'
         }
         assert.deepStrictEqual(response_pending.data, expected_pending);
 
         uri = URI(host)
             .port(port)
             .directory("/transaction/status")
-            .filename("0xa4ce8dd85f51340bdae780db580e21acacfc94eec3305d83275ff2ea2d5583d75b8c400e1807952e04f243c4ef80d821e2537a59f20e12857c910bc2e4028bf7");
+            .filename("0xdd75be9a8b2778deb99734dfb17f70c3635afff654342cc1c306ba0fc69eb72494c9e3c4543eaa6974757204ff19a521989b6ab4c6d41de535b8e634faf66183");
 
         let response_confirmed = await client.get(uri.toString());
         let expected_confirmed = {
             status: "confirmed",
-            tx_hash: "0xa4ce8dd85f51340bdae780db580e21acacfc94eec3305d83275ff2ea2d5583d75b8c400e1807952e04f243c4ef80d821e2537a59f20e12857c910bc2e4028bf7",
+            tx_hash: "0xdd75be9a8b2778deb99734dfb17f70c3635afff654342cc1c306ba0fc69eb72494c9e3c4543eaa6974757204ff19a521989b6ab4c6d41de535b8e634faf66183",
             block: {
                 height: 1,
-                hash: "0x1b272e34c3df561450a52cf9e2eab4b1dbff4d710cba755ad76e1b2a906645e0f2b6650e62369f3f56b04a51c82fb36d33c5ef88b59949d37a81ca614902ff8e"
+                hash: "0x04348b962dac4423cd9ae48b4932ee1607fb1101a690d2583bbad909e8c3f22b12a6d65d1e1494d38681afc7bea61c3d81251800b8adbf1d31f52889df6d7e09"
             }
         };
         assert.deepStrictEqual(response_confirmed.data, expected_confirmed);
@@ -422,22 +422,22 @@ describe ('Test of Stoa API Server', () =>
         let uri = URI(host)
             .port(port)
             .directory("/transaction/pending")
-            .filename("0x66b6a0e5f58514ccdc0164598bd0b476e0b93294f9eb5b938e006028ebccda778a36e7f141679c0b101bb6f74befc9a4b09d2d9203bf041409aaa206989bed4e");
+            .filename("0xfbe8c9c8544ed673672607552274aa1f1255375f8bf5f20bb1b7f6fe037a90ffbb84c70d0fd089afe5e6db9f68c5f6456b92f802fbb7a91a1b24353d2c625638");
 
         let response = await client.get (uri.toString());
         let expected = {
-            "type": 0,
             "inputs": [
                 {
-                    "utxo": "0x0b640f95cec0159edc603291d9e519cf7ab3b141e4be9ae34770a89eb3937ed9a7ad9b601be47683c0b491ca21a67c6d43aca5d603b7489378fb6dafe19391b5",
+                    "utxo": "0xf180e8aede3ea3f6db7872b2af4225f186abc4835e2f1108ea6ee1c56a8edb79c6460de4968696ec1f9a7fe5ab0008d33781a0031d79409825f2ea45df6f7fbd",
                     "unlock": {
-                        "bytes": "lqAIaXCIgcpqhrWHGDyYB7EdArgM9Xc+K9msM5g0pQGj5t7/J1pEEKKHAppCDLQ7lBUHrCjKE9qBNKGrvQ4bAw=="
+                        "bytes": "eZid7mkGwHQGiXW9PybWvZ/mwHRp/mxmDx8I32rrYgKXGWDiGjVM0a/DO4NC2I/2rV4YzR1XEMr8RH5XmaVqKA=="
                     },
                     "unlock_age": 0
                 }
             ],
             "outputs": [
                 {
+                    "type": 0,
                     "value": "1663400000",
                     "lock": {
                         "type": 0,
@@ -445,6 +445,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24398336600000",
                     "lock": {
                         "type": 0,
@@ -465,22 +466,22 @@ describe ('Test of Stoa API Server', () =>
         let uri = URI(host)
             .port(port)
             .directory("/transaction")
-            .filename("0xa4ce8dd85f51340bdae780db580e21acacfc94eec3305d83275ff2ea2d5583d75b8c400e1807952e04f243c4ef80d821e2537a59f20e12857c910bc2e4028bf7");
+            .filename("0xdd75be9a8b2778deb99734dfb17f70c3635afff654342cc1c306ba0fc69eb72494c9e3c4543eaa6974757204ff19a521989b6ab4c6d41de535b8e634faf66183");
 
         let response = await client.get (uri.toString());
         let expected = {
-            "type": 0,
             "inputs": [
                 {
-                    "utxo": "0x6313b9c616f9eac76b11c50885ff32076f49eaca3c58f30eca846a365bc006e5afa0521787d0f984306c1cc8d48a918a8885ea2d4d3449538445f7b25411dcd4",
+                    "utxo": "0x57d4bdc5e60ac4b25f7a6502b15b66394ce4d45b48694518e09d382b9fbc9905be211e45973102609621773daac68357fe0dc0a6092a28920d33ef3194c9aed5",
                     "unlock": {
-                        "bytes": "QQDjCceIQtRE9ku/5AEXdHeZQP2KIyAKrxFGPogE5gZ+2bW3qMZUGtX1EhDGXebQmK34LylsRrc9W+CwnYQbbQ=="
+                        "bytes": "yuH5/OkqydVRZNQJSu4GJIOQxGVKCUSDzFJTVYXp5A2+oenm8a9vTdftxTgKxlXJsbLdHw4CLUGKGKY+SA8xaA=="
                     },
                     "unlock_age": 0
                 }
             ],
             "outputs": [
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -488,6 +489,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -495,6 +497,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -502,6 +505,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -509,6 +513,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -516,6 +521,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -523,6 +529,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -530,6 +537,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -537,6 +545,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -544,6 +553,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -551,6 +561,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -558,6 +569,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -565,6 +577,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -572,6 +585,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -579,6 +593,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -586,6 +601,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -593,6 +609,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -600,6 +617,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -607,6 +625,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -614,6 +633,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -621,6 +641,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -628,6 +649,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -635,6 +657,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -642,6 +665,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -649,6 +673,7 @@ describe ('Test of Stoa API Server', () =>
                     }
                 },
                 {
+                    "type": 0,
                     "value": "24400000000000",
                     "lock": {
                         "type": 0,
@@ -736,7 +761,7 @@ describe ('Test of the path /utxo', () =>
         let response = await client.get (uri.toString());
         let expected = [
             {
-                utxo: '0x0b640f95cec0159edc603291d9e519cf7ab3b141e4be9ae34770a89eb3937ed9a7ad9b601be47683c0b491ca21a67c6d43aca5d603b7489378fb6dafe19391b5',
+                utxo: '0xf180e8aede3ea3f6db7872b2af4225f186abc4835e2f1108ea6ee1c56a8edb79c6460de4968696ec1f9a7fe5ab0008d33781a0031d79409825f2ea45df6f7fbd',
                 type: 0,
                 unlock_height: '2',
                 amount: '24400000000000',
@@ -797,13 +822,14 @@ describe ('Test of the path /utxo for freezing', () =>
     let coinMarketService: CoinMarketService;
 
     let blocks: Array<Block> = [];
-    blocks.push(Block.reviver("", sample_data[0]));
-    blocks.push(Block.reviver("", sample_data[1]));
 
     before ('Wait for the package libsodium to finish loading', async () =>
     {
         SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
+
+        blocks.push(Block.reviver("", sample_data[0]));
+        blocks.push(Block.reviver("", sample_data[1]));
     });
 
     before('Start a fake Agora', () => {
@@ -860,13 +886,12 @@ describe ('Test of the path /utxo for freezing', () =>
         //  Refund amount is      10,000 BOA
         //  Freezing amount is 2,430,000 BOA
         let tx1 = new Transaction(
-            TxType.Freeze,
             [
                 new TxInput(new Hash(response.data[0].utxo))
             ],
             [
-                new TxOutput(JSBI.BigInt(  "100000000000"), new PublicKey("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj")),
-                new TxOutput(JSBI.BigInt("24300000000000"), new PublicKey("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj"))
+                new TxOutput(OutputType.Payment, JSBI.BigInt(  "100000000000"), new PublicKey("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj")),
+                new TxOutput(OutputType.Freeze, JSBI.BigInt("24300000000000"), new PublicKey("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj"))
             ],
             DataPayload.init
         );
@@ -882,13 +907,12 @@ describe ('Test of the path /utxo for freezing', () =>
         //  Refund amount is      40,000 BOA
         //  Freezing amount is 2,400,000 BOA
         let tx2 = new Transaction(
-            TxType.Freeze,
             [
                 new TxInput(new Hash(response.data[0].utxo))
             ],
             [
-                new TxOutput(JSBI.BigInt(  "400000000000"), new PublicKey("boa1xrard006yhapr2dzttap6yg3l0rv5yf94hdnmmfj5zkwhhyw80sj785segs")),
-                new TxOutput(JSBI.BigInt("24000000000000"), new PublicKey("boa1xrard006yhapr2dzttap6yg3l0rv5yf94hdnmmfj5zkwhhyw80sj785segs"))
+                new TxOutput(OutputType.Payment, JSBI.BigInt(  "400000000000"), new PublicKey("boa1xrard006yhapr2dzttap6yg3l0rv5yf94hdnmmfj5zkwhhyw80sj785segs")),
+                new TxOutput(OutputType.Freeze, JSBI.BigInt("24000000000000"), new PublicKey("boa1xrard006yhapr2dzttap6yg3l0rv5yf94hdnmmfj5zkwhhyw80sj785segs"))
             ],
             DataPayload.init
         );
@@ -924,11 +948,11 @@ describe ('Test of the path /utxo for freezing', () =>
         assert.strictEqual(utxo_array.length, 2);
 
         let freeze_utxo = utxo_array.find(m => (m.amount === "24300000000000"));
-        assert.strictEqual(freeze_utxo.type, TxType.Freeze);
+        assert.strictEqual(freeze_utxo.type, OutputType.Freeze);
 
         // It was not frozen because the amount of the refund was less than 40,000 BOA.
         let refund_utxo = utxo_array.find(m => (m.amount === "100000000000"));
-        assert.strictEqual(refund_utxo.type, TxType.Payment);
+        assert.strictEqual(refund_utxo.type, OutputType.Payment);
     });
 
     it ('Check the UTXO included in the freeze transaction, when refund amount greater or equal then 40,000 BOA', async () =>
@@ -943,11 +967,11 @@ describe ('Test of the path /utxo for freezing', () =>
         assert.strictEqual(utxo_array.length, 2);
 
         let freeze_utxo = utxo_array.find(m => (m.amount === "24000000000000"));
-        assert.strictEqual(freeze_utxo.type, TxType.Freeze);
+        assert.strictEqual(freeze_utxo.type, OutputType.Freeze);
 
         // It was frozen because the amount of the refund was larger than 40,000 BOA.
         let refund_utxo = utxo_array.find(m => (m.amount === "400000000000"));
-        assert.strictEqual(refund_utxo.type, TxType.Freeze);
+        assert.strictEqual(refund_utxo.type, OutputType.Payment);
     });
 });
 
@@ -1013,9 +1037,9 @@ describe ('Test of the path /merkle_path', () =>
 
         let expected =
             [
-                "0x63f299f3af18e0f333f2dbfe4a13377fbc7d11e3fb9ba0b899b4acd7219ad4c47b56481fc59979b933b33240b36aa4c090bf0440bd18e7a2e6d5405caa885794",
-                "0x1525eddbf962c0b4212701494de724c2e4643387e4b146d4e1731be27b87b2a995b393c5ca9ddacf621dfd4f149194f96cff25e35dbcf2f6c15d732652328c3f",
-                "0xd094b29fedcca586aa70fbdfc40fadf3f68e6244c8565edbd193f057c9639c489aff949b5175883e6868166d156600b56c62fe209089c66b70b5863a598ec85a",
+                "0x7989e23b6797d654499784cf70a97990b399948c7ed66663f6df31ea279c9200f770e39e72be7670b4daef64f6468b78891c29dad30c4c0a02d0b874ace16a23",
+                "0xbf807606597e0042db589a4e7ee9d01b9f79bc2132f0adc46b9548d51a61964a38b9e21bc9ff20e39793edd9c5c64067f451e30f2366d3c1a95bbffd61829a0c",
+                "0xf7358d0981428c3db379561c7446159c73465308dc2c815520cc875cbfe8c82a3f318e69631efde59fb9559f29df9f6ff237922eb369d76c6f0c812a6c81e8c2",
             ];
 
         assert.deepStrictEqual(response.data, expected);
@@ -1026,13 +1050,13 @@ describe ('Test of the path /merkle_path', () =>
         const agora_addr: URL = new URL('http://localhost:2826');
         let agora_client = new AgoraClient(agora_addr);
         let merkle_path: Array<Hash> = await agora_client.getMerklePath(new Height("1"),
-            new Hash("0xa4ce8dd85f51340bdae780db580e21acacfc94eec3305d83275ff2ea2d5583d75b8c400e1807952e04f243c4ef80d821e2537a59f20e12857c910bc2e4028bf7"))
+            new Hash("0xdd75be9a8b2778deb99734dfb17f70c3635afff654342cc1c306ba0fc69eb72494c9e3c4543eaa6974757204ff19a521989b6ab4c6d41de535b8e634faf66183"))
 
         let expected =
             [
-                new Hash("0x63f299f3af18e0f333f2dbfe4a13377fbc7d11e3fb9ba0b899b4acd7219ad4c47b56481fc59979b933b33240b36aa4c090bf0440bd18e7a2e6d5405caa885794"),
-                new Hash("0x1525eddbf962c0b4212701494de724c2e4643387e4b146d4e1731be27b87b2a995b393c5ca9ddacf621dfd4f149194f96cff25e35dbcf2f6c15d732652328c3f"),
-                new Hash("0xd094b29fedcca586aa70fbdfc40fadf3f68e6244c8565edbd193f057c9639c489aff949b5175883e6868166d156600b56c62fe209089c66b70b5863a598ec85a"),
+                new Hash("0x7989e23b6797d654499784cf70a97990b399948c7ed66663f6df31ea279c9200f770e39e72be7670b4daef64f6468b78891c29dad30c4c0a02d0b874ace16a23"),
+                new Hash("0xbf807606597e0042db589a4e7ee9d01b9f79bc2132f0adc46b9548d51a61964a38b9e21bc9ff20e39793edd9c5c64067f451e30f2366d3c1a95bbffd61829a0c"),
+                new Hash("0xf7358d0981428c3db379561c7446159c73465308dc2c815520cc875cbfe8c82a3f318e69631efde59fb9559f29df9f6ff237922eb369d76c6f0c812a6c81e8c2"),
             ];
 
         assert.deepStrictEqual(merkle_path, expected);
@@ -1043,7 +1067,7 @@ describe ('Test of the path /merkle_path', () =>
         let uri = URI(host)
             .port(port)
             .directory("spv")
-            .filename("0xa4ce8dd85f51340bdae780db580e21acacfc94eec3305d83275ff2ea2d5583d75b8c400e1807952e04f243c4ef80d821e2537a59f20e12857c910bc2e4028bf7");
+            .filename("0xdd75be9a8b2778deb99734dfb17f70c3635afff654342cc1c306ba0fc69eb72494c9e3c4543eaa6974757204ff19a521989b6ab4c6d41de535b8e634faf66183");
 
         let response = await client.get(uri.toString());
 
@@ -1060,7 +1084,7 @@ describe ('Test of the path /merkle_path', () =>
         let uri = URI(host)
             .port(port)
             .directory("spv")
-            .filename("0x63f299f3af18e0f333f2dbfe4a13377fbc7d11e3fb9ba0b899b4acd7219ad4c47b56481fc59979b933b33240b36aa4c090bf0440bd18e7a2e6d5405caa885794 ");
+            .filename("0x7989e23b6797d654499784cf70a97990b399948c7ed66663f6df31ea279c9200f770e39e72be7670b4daef64f6468b78891c29dad30c4c0a02d0b874ace16a23 ");
 
         let response = await client.get(uri.toString());
 
