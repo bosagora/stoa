@@ -21,14 +21,14 @@ import {
     sample_preImageInfo,
     sample_reEnroll_preImageInfo,
     market_cap_sample_data,
+    market_cap_history_sample_data,
     TestAgora,
     TestStoa,
     TestClient,
-    TestCoinGecko,
+    TestGeckoServer,
     delay,
     createBlock
 } from './Utils';
-import { CoinMarketService } from '../src/modules/service/CoinMaketService'
 import * as assert from 'assert';
 import URI from 'urijs';
 import { URL } from 'url';
@@ -36,6 +36,8 @@ import { IDatabaseConfig } from '../src/modules/common/Config';
 import { MockDBConfig } from "./TestConfig"
 import { BOASodium } from 'boa-sodium-ts';
 import { IMarketCap } from '../src/Types';
+import { CoinMarketService } from '../src/modules/service/CoinMaketService';
+import { CoinGeckoMaket } from '../src/modules/coinmarket/CoinGeckoMaket';
 
 describe('Test of Stoa API Server', () => {
     let host: string = 'http://localhost';
@@ -44,7 +46,8 @@ describe('Test of Stoa API Server', () => {
     let agora_server: TestAgora;
     let client = new TestClient();
     let testDBConfig: IDatabaseConfig;
-    let testCoinGecko: TestCoinGecko;
+    let gecko_server: TestGeckoServer;
+    let gecko_market: CoinGeckoMaket;
     let coinMarketService: CoinMarketService;
 
     before('Wait for the package libsodium to finish loading', async () => {
@@ -57,13 +60,14 @@ describe('Test of Stoa API Server', () => {
             agora_server = new TestAgora("2826", sample_data, resolve);
         });
     });
-    before('Start a fake TestCoinGecko', () => {
+    before('Start a fake TestCoinGeckoServer', () => {
         return new Promise<void>(async (resolve, reject) => {
-            testCoinGecko = new TestCoinGecko("7876", market_cap_sample_data, resolve);
+            gecko_server = new TestGeckoServer("7876", market_cap_sample_data, market_cap_history_sample_data, resolve);
+            gecko_market = new CoinGeckoMaket(gecko_server);
         });
     });
     before('Start a fake TestCoinGecko', () => {
-        coinMarketService = new CoinMarketService(testCoinGecko);
+        coinMarketService = new CoinMarketService(gecko_market);
     });
     before('Create TestStoa', async () => {
         testDBConfig = await MockDBConfig();
@@ -76,11 +80,10 @@ describe('Test of Stoa API Server', () => {
     });
 
     after('Stop Stoa and Agora server instances', async () => {
-        await coinMarketService.stop();
         await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
         await stoa_server.stop();
+        await gecko_server.stop();
         await agora_server.stop();
-        await testCoinGecko.stop();
     });
     it('Test of the path /latest-blocks', async () => {
         let uri = URI(host)
@@ -561,7 +564,7 @@ describe('Test of Stoa API Server', () => {
         assert.deepStrictEqual(response.data, expected);
     });
     it('Test for putCoinMarketStats method', async () => {
-        let data: IMarketCap = await testCoinGecko.fetch();
+        let data: IMarketCap = await gecko_market.fetch();
         let response = await stoa_server.putCoinMarketStats(data);
         assert.deepStrictEqual(response.affectedRows, 1)
     });

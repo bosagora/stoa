@@ -20,11 +20,12 @@ import {
     sample_data2,
     sample_preImageInfo,
     sample_reEnroll_preImageInfo,
+    market_cap_history_sample_data,
     market_cap_sample_data,
     TestAgora,
     TestStoa,
     TestClient,
-    TestCoinGecko,
+    TestGeckoServer,
     delay,
     createBlock
 } from './Utils';
@@ -37,6 +38,7 @@ import { IDatabaseConfig } from '../src/modules/common/Config';
 import { MockDBConfig } from "./TestConfig"
 import { BOASodium } from 'boa-sodium-ts';
 import { CoinMarketService } from '../src/modules/service/CoinMaketService';
+import { CoinGeckoMaket } from '../src/modules/coinmarket/CoinGeckoMaket';
 
 describe ('Test of Stoa API Server', () =>
 {
@@ -46,7 +48,8 @@ describe ('Test of Stoa API Server', () =>
     let agora_server: TestAgora;
     let client = new TestClient();
     let testDBConfig : IDatabaseConfig;
-    let testCoinGecko: TestCoinGecko;
+    let gecko_server: TestGeckoServer;
+    let gecko_market: CoinGeckoMaket;
     let coinMarketService: CoinMarketService;
 
     before ('Wait for the package libsodium to finish loading', async () =>
@@ -63,11 +66,12 @@ describe ('Test of Stoa API Server', () =>
     });
      before('Start a fake TestCoinGecko', () => {
         return new Promise<void>((resolve, reject) => {
-             testCoinGecko = new TestCoinGecko("7876", market_cap_sample_data, resolve)
+                gecko_server = new TestGeckoServer("7876", market_cap_sample_data, market_cap_history_sample_data, resolve);
+                gecko_market = new CoinGeckoMaket(gecko_server);
         });
     });
     before('Start a fake coinMarketService', () => {
-             coinMarketService = new CoinMarketService(testCoinGecko)
+             coinMarketService = new CoinMarketService(gecko_market)
     });
 
     before ('Create TestStoa', async () =>
@@ -79,17 +83,15 @@ describe ('Test of Stoa API Server', () =>
 
     before ('Start TestStoa', async () =>
     {
-        coinMarketService.stop();
         await stoa_server.start();
     });
 
     after ('Stop Stoa and Agora server instances', async () =>
     {
-        await coinMarketService.stop();
         await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
         await stoa_server.stop();
         await agora_server.stop();
-        await testCoinGecko.stop();
+        await gecko_server.stop();
     });
 
     it ('Test of the path /block_externalized', async () =>
@@ -672,8 +674,9 @@ describe ('Test of the path /utxo', () =>
     let agora_server: TestAgora;
     let client = new TestClient();
     let testDBConfig : IDatabaseConfig;
-    let testCoinGecko: TestCoinGecko;
-    let coinMarketService : CoinMarketService
+    let gecko_server: TestGeckoServer;
+    let gecko_market: CoinGeckoMaket;
+    let coinMarketService: CoinMarketService;
 
     before ('Wait for the package libsodium to finish loading', async () =>
     {
@@ -688,11 +691,12 @@ describe ('Test of the path /utxo', () =>
     });
     before('Start a fake TestCoinGecko', () => {
         return new Promise<void>((resolve, reject) => {
-             testCoinGecko = new TestCoinGecko("7876", market_cap_sample_data, resolve)
+                    gecko_server = new TestGeckoServer("7876", market_cap_sample_data, market_cap_history_sample_data, resolve);
+                    gecko_market = new CoinGeckoMaket(gecko_server);
         });
     });
     before('Start a fake coinMarketService', () => {
-             coinMarketService = new CoinMarketService(testCoinGecko)
+             coinMarketService = new CoinMarketService(gecko_server)
     });
     before ('Create TestStoa', async () =>
     {
@@ -703,11 +707,10 @@ describe ('Test of the path /utxo', () =>
     });
 
     after('Stop Stoa and Agora server instances', async () => {
-        await coinMarketService.stop();
         await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
         await stoa_server.stop();
         await agora_server.stop();
-        await testCoinGecko.stop();
+        await gecko_server.stop();
     });
 
     it ('Store two blocks', async () =>
@@ -789,7 +792,8 @@ describe ('Test of the path /utxo for freezing', () =>
     let agora_server: TestAgora;
     let client = new TestClient();
     let testDBConfig : IDatabaseConfig;
-    let testCoinGecko: TestCoinGecko;
+    let gecko_server: TestGeckoServer;
+    let gecko_market: CoinGeckoMaket;
     let coinMarketService: CoinMarketService;
 
     let blocks: Array<Block> = [];
@@ -809,11 +813,12 @@ describe ('Test of the path /utxo for freezing', () =>
     });
     before('Start a fake TestCoinGecko', () => {
         return new Promise<void>((resolve, reject) => {
-             testCoinGecko = new TestCoinGecko("7876", market_cap_sample_data, resolve)
+                gecko_server = new TestGeckoServer("7876", market_cap_sample_data, market_cap_history_sample_data, resolve);
+                gecko_market = new CoinGeckoMaket(gecko_server);
         });
     });
     before('Start a fake coinMarketService', () => {
-             coinMarketService = new CoinMarketService(testCoinGecko)
+             coinMarketService = new CoinMarketService(gecko_market)
     });
     before ('Create TestStoa', async () =>
     {
@@ -823,11 +828,10 @@ describe ('Test of the path /utxo for freezing', () =>
         await stoa_server.start();
     });
     after('Stop Stoa and Agora server instances', async () => {
-        await coinMarketService.stop();
         await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
         await stoa_server.stop();
         await agora_server.stop();
-        await testCoinGecko.stop();
+        await gecko_server.stop();
     });
 
     it ('Store two blocks', async () =>
@@ -957,7 +961,8 @@ describe ('Test of the path /merkle_path', () =>
     let agora_server: TestAgora;
     let client = new TestClient();
     let testDBConfig : IDatabaseConfig;
-    let testCoinGecko: TestCoinGecko;
+    let gecko_server: TestGeckoServer;
+    let gecko_market: CoinGeckoMaket;
     let coinMarketService: CoinMarketService;
 
     before ('Wait for the package libsodium to finish loading', async () =>
@@ -974,11 +979,12 @@ describe ('Test of the path /merkle_path', () =>
     });
     before('Start a fake TestCoinGecko', () => {
         return new Promise<void>((resolve, reject) => {
-             testCoinGecko = new TestCoinGecko("7876", market_cap_sample_data, resolve)
+                gecko_server = new TestGeckoServer("7876", market_cap_sample_data, market_cap_history_sample_data, resolve);
+                gecko_market = new CoinGeckoMaket(gecko_server);
         });
     });
     before('Start a fake coinMarketService', () => {
-             coinMarketService = new CoinMarketService(testCoinGecko)
+            coinMarketService = new CoinMarketService(gecko_market)
     });
     before ('Create TestStoa', async () =>
     {
@@ -989,11 +995,10 @@ describe ('Test of the path /merkle_path', () =>
     });
     after ('Stop Stoa and Agora server instances', async () =>
     {
-        await coinMarketService.stop();
         await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
         await stoa_server.stop();
         await agora_server.stop();
-        await testCoinGecko.stop();
+        await gecko_server.stop();
     });
 
     it ('Test of the path /merkle_path', async () =>

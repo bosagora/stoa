@@ -229,7 +229,7 @@ export class LedgerStorage extends Storages
             price           BIGINT(20) UNSIGNED NOT NULL,
             market_cap      BIGINT(20) UNSIGNED NOT NULL,
             vol_24h         BIGINT(20) UNSIGNED NOT NULL,
-            change_24h      BIGINT(20) NOT NULL,
+            change_24h      BIGINT(20),
             PRIMARY KEY (last_updated_at)
             );
 
@@ -2155,6 +2155,20 @@ export class LedgerStorage extends Storages
 
         return this.query(sql, []);
     }
+    
+    /**
+     * Get the latest Coin Market cap chart of BOA coin
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error. 
+     */
+    public getCoinMarketChart(from: number, to: number): Promise<any[]> {
+        let sql =
+            `SELECT * FROM marketcap WHERE last_updated_at BETWEEN ? AND ?`;
+
+        return this.query(sql, [from, to]);
+    }
+
     /**
      * Drop Database
      * @param database The name of database

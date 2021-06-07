@@ -771,7 +771,7 @@ export interface IMarketCap
     /**
      * Change percentage in 24h
      */
-    change_24h: number
+    change_24h?: number
 
     /**
      * 24 hour volumne
@@ -783,4 +783,20 @@ export interface IMarketCap
      */
     last_updated_at: number
     
+}
+
+/**
+ * Interface for BOA Market Chart
+ */
+export interface IMarketChart
+{
+    /**
+     * Price of BOA in usd
+     */
+    usd_price: number
+
+    /**
+     * Time 
+     */
+    last_updated_at: number
 }

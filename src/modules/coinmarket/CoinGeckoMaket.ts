@@ -12,7 +12,6 @@
 
 *******************************************************************************/
 
-import { CoinGeckoClient } from "coingecko-api-v3";
 import { logger, Logger } from '../common/Logger';
 import { IMarketCap } from "../../Types";
 
@@ -31,13 +30,10 @@ export class CoinGeckoMaket implements CoinMarket {
     /**
      * Market Client i.e Gecko_coin_market 
      */
-    private coinMarketClient: CoinGeckoClient;
+    private coinMarketClient: any;
 
-    constructor() {
-        this.coinMarketClient = new CoinGeckoClient({
-            timeout: 10000,
-            autoRetry: true,
-        });
+    constructor(GeckoClient: any) {
+        this.coinMarketClient = GeckoClient;
     }
     /**
      *  This method ping the GecoCoinMarket
@@ -47,14 +43,14 @@ export class CoinGeckoMaket implements CoinMarket {
      */
     public ping(): Promise<boolean> {
         return new Promise<boolean>(async (resolve, reject) => {
-            let data = await this.coinMarketClient.ping();
-            if (data.gecko_says) {
-                resolve(true);
-            }
-            else {
-                logger.info(`Error: Unable to ping coin market client`);
-                return reject(`Error: Unable to ping coin market client`);
-            }
+            await this.coinMarketClient.ping().then((data: any) => {
+                if (data.gecko_says) {
+                    resolve(true);
+                }
+            }).catch((err: any) => {
+                logger.error(`Stoa is unable to ping gecko coin market`);
+                resolve(false)
+            })
         })
     }
     /**
@@ -84,5 +80,33 @@ export class CoinGeckoMaket implements CoinMarket {
             }
         });
     }
-}
 
+    /**
+     *  This method recover the coin market data
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called and if an error occurs the `.catch`
+     * is called with an error.
+     */
+    public recover(from: number, to: number): Promise<IMarketCap[]> {
+        return new Promise<IMarketCap[]>(async (resolve, reject) => {
+            let marketCapChartRange = await this.coinMarketClient.coinIdMarketChartRange({ id: "bosagora", vs_currency: "usd", from: from, to: to })
+            if (marketCapChartRange) {
+                let coinMarketStat: Array<IMarketCap> = [];
+                marketCapChartRange.prices.forEach((price: any, index: number) => {
+                    coinMarketStat.push({
+                        price: price[1],
+                        last_updated_at: price[0],
+                        market_cap: marketCapChartRange.market_caps[index][1],
+                        vol_24h: marketCapChartRange.total_volumes[index][1],
+                    });
+                });
+                logger.info(`CoinMarket: Data recover Completed: length(${coinMarketStat.length})`);
+                return resolve(coinMarketStat);
+            }
+            else {
+                logger.info(`Fail to fetch CoinMarket data`);
+                reject(`Fail to fetch CoinMarket data`);
+            }
+        });
+    }
+}
