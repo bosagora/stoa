@@ -766,7 +766,7 @@ class Stoa extends WebService
                     overview.senders.push({address: elem.address, amount: elem.amount, utxo: new Hash(elem.utxo, Endian.Little).toString(), signature: new Hash(elem.signature, Endian.Little).toString(), index: elem.in_index, unlock_age: elem.unlock_age, bytes: new Hash(elem.bytes, Endian.Little).toString() });
 
                 for (let elem of data.receivers)
-                    overview.receivers.push({address: elem.address, lock_type: elem.lock_type, amount: elem.amount, utxo: new Hash(elem.utxo, Endian.Little).toString(), index: elem.output_index, bytes: hash(elem.bytes).toString()});
+                    overview.receivers.push({type: elem.type, address: elem.address, lock_type: elem.lock_type, amount: elem.amount, utxo: new Hash(elem.utxo, Endian.Little).toString(), index: elem.output_index, bytes: hash(elem.bytes).toString()});
 
                 res.status(200).send(JSON.stringify(overview));
             })

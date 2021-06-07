@@ -2,42 +2,42 @@
     "header": {
         "prev_block": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
         "height": "0",
-        "merkle_root": "0x8ac592615f23ee726577eb8c305c67558fd08f14120e0f23c2969a3b1d37089009159bd42c1d7af53d601b53ccbbad0ebaa54f36f4bc13d473790921ae3dc7fa",
+        "merkle_root": "0x4cadc4d240a26ebf8a01ae1c53a4793fec40c92d36d9f8755311420c9594a9fbb827fb974b75774723acbd13b4d0589e957bf8f14da24633be6ae299446ddca7",
         "validators": "[0]",
         "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
         "enrollments": [
             {
-                "utxo_key": "0xd68cfa6d0457b404d74a0367ace0bd3784110fb55d94692e0859f3b5a15b33f990f33e3b4e4b4030945ee0303fabf7b2702f48a31ffdc3d1d6985e3e3dfcc8d7",
+                "utxo_key": "0xf8751862d61a28fb878cd4b583ceaf39a59a5f2ff1fa78a169e56811c33b5c3eed80f83074cfb98ab5095ed563ebc6a96320ef59080628c4961f586dbf2e7d2f",
                 "commitment": "0x0a8201f9f5096e1ce8e8de4147694940a57a188b78293a55144fc8777a774f2349b3a910fb1fb208514fb16deaf49eb05882cdb6796a81f913c6daac3eb74328",
                 "cycle_length": 20,
                 "enroll_sig": "0x0cab27862571d2d2e33d6480e1eab4c82195a508b72672d609610d01f23b0beedc8b89135fe3f5df9e2815b9bdb763c41b8b2dab5911e313acc82470c2147422"
             },
             {
-                "utxo_key": "0x7f6e35961dbaae3cad2efa0582a6ff2c992973bdd987c41c6d4f4b0e1289158c98b2858b4731c36744ebf92edcb05b3f68838432479aaf1373d123e60ad3448b",
+                "utxo_key": "0x896240cd0ef51fdfdff645bb146737f889b70a7d72f9ebb842f9a0c4705de884209c451ccdc15aace878d12dac85f0b5522bf2642204937c5e44944741a1928f",
                 "commitment": "0xd0348a88f9b7456228e4df5689a57438766f4774d760776ec450605c82348c461db84587c2c9b01c67c8ed17f297ee4008424ad3e0e5039179719d7e9df297c1",
                 "cycle_length": 20,
                 "enroll_sig": "0x0ed498b867c33d316b468d817ba8238aec68541abd912cecc499f8e780a8cdaf2692d0b8b04133a34716169a4b1d33d77c3e585357d8a2a2c48a772275255c01"
             },
             {
-                "utxo_key": "0xfbb850538245991a7156dc1713535717c530f851554c91de4b21091e88647cc0ee8c296da6fc40b283c048e3ed82cc46abe82cbd5061ba0ea579e1054ab51fcc",
+                "utxo_key": "0xcbb19dfc2c28ea46ffbf962ca4bcb1a11ab6ccc8d83c9357a1d931915b0b8257cbe131e9bda51bed9668972079cf9f0d9ba0fefa01cbdd94aa05a90eb210d4bb",
                 "commitment": "0xaf43c67d9dd0f53de3eaede63cdcda8643422d62205df0b5af65706ec28b372adb785ce681d559d7a7137a4494ccbab4658ce11ec75a8ec84be5b73590bffceb",
                 "cycle_length": 20,
                 "enroll_sig": "0x09474f489579c930dbac46f638f3202ac24407f1fa419c1d95be38ab474da29d7e3d4753b6b4ccdb35c2864be4195e83b7b8433ca1d27a57fb9f48a631001304"
             },
             {
-                "utxo_key": "0x765025088610ec9e6ee82c6373306bfe3c15731234195b9c762859ee3becea85d85de44ca5fef6660bdea5add694e12658ea4060c0ac5c76757829147afcc582",
+                "utxo_key": "0xd08bc4c4a5f3341369f6c628e1cb9f3339ad1376b642f8bd95603a2fad6be0db81fa4fa58dadb5dc8f3bc7a020ad1fe8d2d6643238ea2508a37ee58b0df9e9f8",
                 "commitment": "0xa24b7e6843220d3454523ceb7f9b43f037e56a01d2bee82958b080dc6350ebac2da12b561cbd96c6fb3f5ae5a3c8df0ac2c559ae1c45b11d42fdf866558112bc",
                 "cycle_length": 20,
                 "enroll_sig": "0x0e4566eca30feb9ad47a65e7ff7e7ce1a7555ccedcf61e1143c2e5fddbec6866fd787c4518b78ab9ed73a3760741d557ac2aca631fc2796be86fcf391d3a6634"
             },
             {
-                "utxo_key": "0xe9786bcd4188dbc27f3bcd9f3097355ad056d7518e8ea5a908adaba7229625a195d2073c512849e856ac7f8f7e0ee463e2e2be6373f3fa3f645640d2e1141151",
+                "utxo_key": "0x6c87312f75478d515c5dc2bc8beb3ac5686aacbdedc8219baaf9cb62e41b1b31f00233321b3c42f9966ee47916123191f49caf0dc761d3a7fcd69198aa63f2aa",
                 "commitment": "0xa0502960ddbe816729f60aeaa480c7924fb020d864deec6a9db778b8e56dd2ff8e987be748ff6ca0a43597ecb575da5d532696e376dc70bb4567b5b1fa512cb4",
                 "cycle_length": 20,
                 "enroll_sig": "0x052ee1d975c49f19fd26b077740dcac399f174f40b5df1aba5f09ebea11faacfd79a36ace4d3097869dc009b8939fc83bdf940c8822c6931d5c09326aa746b31"
             },
             {
-                "utxo_key": "0xa551c7d3076f43857913fa1a7de694df9c1ea5606bc084caa4c7cd7868a74c9f80c303ce64324becfadf8e092781a6b5ea9c76ec81bc5f5fa18fd523b333a1a2",
+                "utxo_key": "0xda34f8f20fc231d4c3fe7f0190d5980c748dc82cc213ee7eb60d5c3f21c156b2a8b2113cfb48b3a02c049245e8682ff1da55b59b35abdd3832418675ccf2e29f",
                 "commitment": "0xdd1b9c62d4c62246ea124e5422d5a2e23d3ca9accb0eba0e46cd46708a4e7b417f46df34dc2e3cba9a57b1dc35a66dfc2d5ef239ebeaaa00299232bc7e3b7bfa",
                 "cycle_length": 20,
                 "enroll_sig": "0x0e0070e5951ef5be897cb593c4c57ce28b7529463f7e5644b1314ab7cc69fd625c71e74382a24b7e644d32b0306fe3cf14ecd7de5635c70aa592f4721aa74fe2"
@@ -49,10 +49,10 @@
     },
     "txs": [
         {
-            "type": 1,
             "inputs": [],
             "outputs": [
                 {
+                    "type": 1,
                     "value": "20000000000000",
                     "lock": {
                         "type": 0,
@@ -60,6 +60,7 @@
                     }
                 },
                 {
+                    "type": 1,
                     "value": "20000000000000",
                     "lock": {
                         "type": 0,
@@ -67,6 +68,7 @@
                     }
                 },
                 {
+                    "type": 1,
                     "value": "20000000000000",
                     "lock": {
                         "type": 0,
@@ -74,6 +76,7 @@
                     }
                 },
                 {
+                    "type": 1,
                     "value": "20000000000000",
                     "lock": {
                         "type": 0,
@@ -81,6 +84,7 @@
                     }
                 },
                 {
+                    "type": 1,
                     "value": "20000000000000",
                     "lock": {
                         "type": 0,
@@ -88,6 +92,7 @@
                     }
                 },
                 {
+                    "type": 1,
                     "value": "20000000000000",
                     "lock": {
                         "type": 0,
@@ -101,10 +106,10 @@
             "lock_height": "0"
         },
         {
-            "type": 0,
             "inputs": [],
             "outputs": [
                 {
+                    "type": 0,
                     "value": "610000000000000",
                     "lock": {
                         "type": 0,
@@ -112,6 +117,7 @@
                     }
                 },
                 {
+                    "type": 0,
                     "value": "610000000000000",
                     "lock": {
                         "type": 0,
@@ -119,6 +125,7 @@
                     }
                 },
                 {
+                    "type": 0,
                     "value": "610000000000000",
                     "lock": {
                         "type": 0,
@@ -126,6 +133,7 @@
                     }
                 },
                 {
+                    "type": 0,
                     "value": "610000000000000",
                     "lock": {
                         "type": 0,
@@ -133,6 +141,7 @@
                     }
                 },
                 {
+                    "type": 0,
                     "value": "610000000000000",
                     "lock": {
                         "type": 0,
@@ -140,6 +149,7 @@
                     }
                 },
                 {
+                    "type": 0,
                     "value": "610000000000000",
                     "lock": {
                         "type": 0,
@@ -147,6 +157,7 @@
                     }
                 },
                 {
+                    "type": 0,
                     "value": "610000000000000",
                     "lock": {
                         "type": 0,
@@ -154,6 +165,7 @@
                     }
                 },
                 {
+                    "type": 0,
                     "value": "610000000000000",
                     "lock": {
                         "type": 0,
@@ -168,9 +180,8 @@
         }
     ],
     "merkle_tree": [
-        "0xd7f9204afdc2d41b28a33504d21b3c5384758d851c573dde44da26d7a0c7de06fde6127ec740fbfdfafbed4fb13cff24144054b8ae2ab34582110f0f752316aa",
-        "0xd4b2011f46b7de32e6a3f51eae35c97440b7adf427df7725d19575b8a9a8256552939656f8b5d4087b9bcbbe9219504e31f91a85fb1709683cbefc3962639ecd",
-        "0x8ac592615f23ee726577eb8c305c67558fd08f14120e0f23c2969a3b1d37089009159bd42c1d7af53d601b53ccbbad0ebaa54f36f4bc13d473790921ae3dc7fa"
+        "0xff66ffde4ed3b91c5bce28907dd68f7ecabe776c1dc7d797e5f69fc349d28342348c778cd42c49ef2c29199f374289d44f5b4d2d149f0b8081a1077eca30f7ce",
+        "0x9384e68e59382a256d2598251758d3c44f6b48f9a6aa405272e7b5f536dc0f2d3b3fd76b9352ddbf199a4862b05e4300a484ebd3e591abd1df596854debb4d5e",
+        "0x4cadc4d240a26ebf8a01ae1c53a4793fec40c92d36d9f8755311420c9594a9fbb827fb974b75774723acbd13b4d0589e957bf8f14da24633be6ae299446ddca7"
     ]
 }
-

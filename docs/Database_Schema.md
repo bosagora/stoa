@@ -149,6 +149,7 @@ CREATE TABLE IF NOT EXISTS "tx_inputs" (
 |  output_index     | INTEGER   | Y  | Y        |          | The index of output in the outputs.|
 |  tx_hash          | BLOB      |    | Y        |          | The hash of transaction |
 |  utxo_key         | BLOB      |    | Y        |          | The hash of the UTXO|
+|  type             | INTEGER   |    | Y        |          | The type of transaction output  |
 |  amount           | NUMERIC   |    | Y        |          | The monetary value of this output, in 1/10^7|
 |  lock_type        | INTEGER   |    | Y        |          | (0: Key; 1: Hash of Key; 2: Script; 3: Hash of Script) |
 |  lock_bytes       | BLOB      |    | Y        |          | The bytes of lock |
@@ -163,6 +164,7 @@ CREATE TABLE IF NOT EXISTS "tx_outputs" (
     "output_index"          INTEGER NOT NULL,
     "tx_hash"               BLOB    NOT NULL,
     "utxo_key"              BLOB    NOT NULL,
+    "type"                  INTEGER NOT NULL,
     "amount"                NUMERIC NOT NULL,
     "lock_type"             INTEGER NOT NULL,
     "lock_bytes"            BLOB    NOT NULL,
@@ -370,6 +372,7 @@ CREATE TABLE IF NOT EXISTS "tx_input_pool" (
 |:----------------- |:--------- |:--:|:--------:| -------- | --------- |
 |  tx_hash          | BLOB      | Y  | Y        |          | The hash of transaction|
 |  output_index     | INTEGER   | Y  | Y        |          | The index of output in the outputs|
+|  type             | INTEGER   |    | Y        |          | The type of transaction output |
 |  amount           | NUMERIC   |    | Y        |          | The monetary value of this output, in 1/10^7|
 |  lock_type        | INTEGER   |    | Y        |          | (0: Key; 1: Hash of Key; 2: Script; 3: Hash of Script) |
 |  lock_bytes       | BLOB      |    | Y        |          | The bytes of lock |
@@ -381,6 +384,7 @@ CREATE TABLE IF NOT EXISTS "tx_input_pool" (
 CREATE TABLE IF NOT EXISTS "tx_output_pool" (
     "tx_hash"               BLOB    NOT NULL,
     "output_index"          INTEGER NOT NULL,
+    "type"                  INTEGER NOT NULL,
     "amount"                NUMERIC NOT NULL,
     "lock_type"             INTEGER NOT NULL,
     "lock_bytes"            BLOB    NOT NULL,

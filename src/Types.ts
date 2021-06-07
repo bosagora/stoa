@@ -11,7 +11,7 @@
 
  *******************************************************************************/
 
-import { Height, TxType } from 'boa-sdk-ts';
+import { Height, OutputType } from 'boa-sdk-ts';
 
 /**
  * The interface of the Validator
@@ -457,6 +457,11 @@ export interface ITxOverview
 export interface ITxOverviewOutputElement
 {
     /**
+     * Output type
+     */
+    type: number;
+
+    /**
      * Address, Public key
      */
     address: string;
@@ -591,7 +596,7 @@ export class ConvertTypes
     static tx_types: Array<string> = ["payment", "freeze"];
     static display_tx_type: Array<string> = ["inbound", "outbound", "freeze", "payload"];
 
-    public static DisplayTxTypeToString (type: TxType): string
+    public static DisplayTxTypeToString (type: OutputType): string
     {
         if (type < ConvertTypes.display_tx_type.length)
             return ConvertTypes.display_tx_type[type];
@@ -599,7 +604,7 @@ export class ConvertTypes
             return "";
     }
 
-    public static TxTypeToString (type: TxType): string
+    public static TxTypeToString (type: OutputType): string
     {
         if (type < ConvertTypes.tx_types.length)
             return ConvertTypes.tx_types[type];
@@ -708,7 +713,7 @@ export interface ITransaction
     /**
     * Block height
     */
-    height: string;
+    height: string,
 
    /**
     * Hash of the transaction
