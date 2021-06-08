@@ -100,9 +100,7 @@
                     }
                 }
             ],
-            "payload": {
-                "bytes": ""
-            },
+            "payload": "",
             "lock_height": "0"
         },
         {
@@ -173,9 +171,7 @@
                     }
                 }
             ],
-            "payload": {
-                "bytes": ""
-            },
+            "payload": "",
             "lock_height": "0"
         }
     ],

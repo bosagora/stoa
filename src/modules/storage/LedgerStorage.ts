@@ -14,7 +14,7 @@
 import {
     Block, Enrollment, Hash, Height, PreImageInfo, Transaction,
     TxInput, TxOutput, makeUTXOKey, hashFull,
-    Utils, Endian, Lock, Unlock, PublicKey, DataPayload, TxPayloadFee, OutputType
+    Utils, Endian, Lock, Unlock, PublicKey, TxPayloadFee, OutputType
 } from 'boa-sdk-ts';
 import { Storages } from './Storages';
 import { IDatabaseConfig } from '../common/Config';
@@ -749,7 +749,7 @@ export class LedgerStorage extends Storages
                         else
                         {
                             total_fee = JSBI.subtract(SumOfInput, SumOfOutput);
-                            payload_fee = TxPayloadFee.getFee(tx.payload.data.length);
+                            payload_fee = TxPayloadFee.getFee(tx.payload.length);
                             tx_fee = JSBI.subtract(total_fee, payload_fee);
                         }
 
@@ -837,7 +837,7 @@ export class LedgerStorage extends Storages
                         tx_size,
                         tx.inputs.length,
                         tx.outputs.length,
-                        tx.payload.data.length
+                        tx.payload.length
                     ]
                 )
                     .then(() =>
@@ -1035,7 +1035,7 @@ export class LedgerStorage extends Storages
         {
             return new Promise<void>((resolve, reject) =>
             {
-                if (tx.payload.data.length == 0)
+                if (tx.payload.length == 0)
                     resolve();
 
                 storage.run(
@@ -1045,7 +1045,7 @@ export class LedgerStorage extends Storages
                         (?, ?)`,
                     [
                         tx_hash.toBinary(Endian.Little),
-                        tx.payload.toBinary(Endian.Little)
+                        tx.payload
                     ]
                 )
                     .then(() =>
@@ -1071,7 +1071,7 @@ export class LedgerStorage extends Storages
 
                         await save_transaction(this, block.header.height, tx_idx, block.merkle_tree[tx_idx], block.txs[tx_idx]);
 
-                        if (block.txs[tx_idx].payload.data.length > 0)
+                        if (block.txs[tx_idx].payload.length > 0)
                             await save_payload(this, block.merkle_tree[tx_idx], block.txs[tx_idx]);
 
                         for (let in_idx = 0; in_idx < block.txs[tx_idx].inputs.length; in_idx++)
@@ -1133,7 +1133,7 @@ export class LedgerStorage extends Storages
                     [
                         hash.toBinary(Endian.Little),
                         tx_type,
-                        tx.payload.toBinary(Endian.Little),
+                        tx.payload,
                         tx.lock_height.toString(),
                         fees[1].toString(),
                         fees[2].toString(),
@@ -1869,7 +1869,7 @@ export class LedgerStorage extends Storages
                     resolve(new Transaction(
                         inputs,
                         outputs,
-                        new DataPayload((rows[0].payload !== null) ? (rows[0].payload) : Buffer.alloc(0), Endian.Little),
+                        (rows[0].payload !== null) ? (rows[0].payload) : Buffer.alloc(0),
                         new Height(rows[0].lock_height)));
                 }
                 else
@@ -1918,7 +1918,7 @@ export class LedgerStorage extends Storages
                     resolve(new Transaction(
                         inputs,
                         outputs,
-                        new DataPayload((rows[0].payload !== null) ? (rows[0].payload) : Buffer.alloc(0), Endian.Little),
+                        (rows[0].payload !== null) ? (rows[0].payload) : Buffer.alloc(0),
                         new Height(rows[0].lock_height)));
                 }
                 else
@@ -2165,7 +2165,7 @@ export class LedgerStorage extends Storages
 
         return this.query(sql, []);
     }
-    
+
     /**
      * Get the latest Coin Market cap chart of BOA coin
      * @returns Returns the Promise. If it is finished successfully the `.then`

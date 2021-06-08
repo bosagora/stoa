@@ -5,7 +5,7 @@ import { LedgerStorage } from './modules/storage/LedgerStorage';
 import { CoinMarketService } from './modules/service/CoinMaketService';
 import { logger } from './modules/common/Logger';
 import { Height, PreImageInfo, Hash, hash, Block, Utils,
-    Endian, Transaction, hashFull, DataPayload } from 'boa-sdk-ts';
+    Endian, Transaction, hashFull } from 'boa-sdk-ts';
 import { WebService } from './modules/service/WebService';
 import { ValidatorData, IPreimage, IUnspentTxOutput, ITxStatus,
     ITxHistoryElement, ITxOverview, ConvertTypes, DisplayTxType,
@@ -756,7 +756,7 @@ class Stoa extends WebService
                     unlock_height: JSBI.BigInt(data.tx[0].unlock_height).toString(),
                     lock_height: JSBI.BigInt(data.tx[0].lock_height).toString(),
                     unlock_time: data.tx[0].unlock_time,
-                    payload: (data.tx[0].payload !== null) ? new DataPayload(data.tx[0].payload, Endian.Little).toString() : "",
+                    payload: (data.tx[0].payload !== null) ? data.tx[0].payload.toString("base64") : "",
                     senders: [],
                     receivers: [],
                     fee: JSBI.add(JSBI.BigInt(data.tx[0].tx_fee), JSBI.BigInt(data.tx[0].payload_fee)).toString()
@@ -1697,7 +1697,7 @@ class Stoa extends WebService
                      });
                     res.status(200).send(marketCapChart);
                  }
-                
+
             })
             .catch((err)=>{
                 logger.error("Failed to data lookup to the DB: " + err);
