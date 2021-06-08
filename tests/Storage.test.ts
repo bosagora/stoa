@@ -438,3 +438,60 @@ describe ('Tests storing transaction pools of a transaction', () =>
         assert.deepStrictEqual(after_pool_rows.length, 0);
     });
 });
+//Test BOA holder function
+describe ('Tests BOA Holder', () =>
+{
+    let ledger_storage: LedgerStorage;
+    let testDBConfig: IDatabaseConfig;
+
+    before('Wait for the package libsodium to finish loading', async () =>
+    {
+        SodiumHelper.assign(new BOASodium());
+        await SodiumHelper.init();
+    });
+
+    before ('Preparation the ledgerStorage',async () =>
+    {
+        testDBConfig = await MockDBConfig();
+        return LedgerStorage.make(testDBConfig, 1609459200)
+            .then((result) => { ledger_storage = result })
+    });
+
+    after ('Close Storage', () =>
+    {
+        ledger_storage.dropTestDB(testDBConfig.database)
+        ledger_storage.close();
+    });
+    // get the balance 
+    it ('Get user balance', async () =>
+    {
+        let address = 'boa1xzrf00m4sh4xh7ey8t8zrnknu27yhjrt0qqjffvn3kd3cacp9vm22fc2d2d'
+         await ledger_storage.getBOAHolder(address)
+        .catch((data)=>{
+            let balance = data.balance
+            assert.strictEqual(balance,24400000000000);
+        })
+    });
+    // get the transaction count 
+    it ('Get user transaction count', async () =>
+    {
+        let address = 'boa1xzrf00m4sh4xh7ey8t8zrnknu27yhjrt0qqjffvn3kd3cacp9vm22fc2d2d'
+         await ledger_storage.getBOAHolder(address)
+        .catch((data)=>{
+            let count = data.txs.count
+            assert.strictEqual(count,1);
+        })
+       
+    });
+    // get the freeze amount
+    it ('Get user freeze amount', async () =>
+    {
+        let address = 'boa1xzrf00m4sh4xh7ey8t8zrnknu27yhjrt0qqjffvn3kd3cacp9vm22fc2d2d'
+         await ledger_storage.getBOAHolder(address)
+        .catch((data)=>{
+            let freeze = data.freeze_amount
+            assert.strictEqual(freeze,0);
+        })
+
+    });
+});

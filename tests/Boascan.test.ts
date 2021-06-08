@@ -597,4 +597,63 @@ describe('Test of Stoa API Server', () => {
         }
         assert.deepStrictEqual(response.data, expected)
     });
+    it('Test for /boaholder/:address', async () => {
+        let blocks: Array<Block> = [];
+        blocks.push(Block.reviver("", sample_data[0]));
+        blocks.push(Block.reviver("", sample_data[1]));
+    
+        let uri = URI(host)
+        .port(port)
+        .directory("utxo")
+        .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
+
+    let response = await client.get (uri.toString());
+
+    //  First Transaction
+    //  Refund amount is      10,000 BOA
+    //  Freezing amount is 2,430,000 BOA
+    let tx1 = new Transaction(
+        [
+            new TxInput(new Hash(response.data[0].utxo))
+        ],
+        [
+            new TxOutput(OutputType.Payment, JSBI.BigInt(  "100000000000"), new PublicKey("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj")),
+            new TxOutput(OutputType.Freeze, JSBI.BigInt("24300000000000"), new PublicKey("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj"))
+        ],
+        DataPayload.init
+    );
+
+
+    uri = URI(host)
+        .port(port)
+        .directory("utxo")
+        .filename("boa1xrard006yhapr2dzttap6yg3l0rv5yf94hdnmmfj5zkwhhyw80sj785segs");
+
+    response = await client.get (uri.toString());
+
+    // Create block with one transactions
+    blocks.push(createBlock(blocks[1], [tx1]));
+    uri = URI(host)
+        .port(port)
+        .directory("block_externalized");
+    await client.post(uri.toString(), {block: blocks[2]});
+    await delay(100);
+    
+    //getboaholder with address    
+
+       uri = URI(host)
+            .port(port)
+            .directory("/boaholder/boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
+        response = await client.get(uri.toString());
+        let expected = {
+            balance: '24400000000000',
+            txs_count: 3,
+            freeze_amount: '24300000000000',
+            address: 'boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj',
+            received_rewards: 468768,
+            precentage: '45%',
+            value: '$8468'
+        }        
+        assert.deepStrictEqual(response.data.data, expected)
+    });
 });
