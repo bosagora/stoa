@@ -1672,7 +1672,7 @@ class Stoa extends WebService
      *
      * Returns BOA statistics of last 24 hours.
      */
-         private async getBoaPriceChart(req: express.Request, res: express.Response)
+     private async getBoaPriceChart(req: express.Request, res: express.Response)
          {
              let to = await Time.msToTime(Date.now());
              let from = await JSBI.subtract(JSBI.BigInt(to.seconds), JSBI.BigInt(60 * 60 * 24));
