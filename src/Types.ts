@@ -168,33 +168,33 @@ export interface IBOAStats
      * Latest height of block
      */
     height: number;
-     
+
     /**
      * Total no. of transactions
      */
     transactions: number;
-         
+
     /**
      * Total no. of validators
      */
     validators: number;
-          
+
     /**
      * Total no. of frozen coins
      */
     frozen_coin: number;
-            
+
     /**
      * Total no. of active validators
      */
     active_validators: number;
-             
+
     /**
      * Circulating supply
      */
     circulating_supply: number;
  }
- 
+
 /**
  * The interface of the block overview
  */
@@ -239,32 +239,32 @@ export interface IBlockOverview
      * Transaction hash
      */
     time: number;
-    
+
     /**
      * total amount sent in block
      */
     total_sent: string;
-    
+
     /**
      * total recieved amount
      */
     total_recieved: string;
-   
+
     /**
      * total rewards
      */
     total_reward: string
-   
+
     /**
      * total fee for the block
      */
     total_fee: string
-    
+
     /**
      * total size of the block
      */
     total_size: number
-    
+
     /**
      * Agora version
      */
@@ -285,17 +285,17 @@ export interface IBlockEnrollmentElements
      * The hash of UTXO
      */
     utxo: string;
-    
+
     /**
      * Random seed
      */
     commitment: string,
-     
+
     /**
      * Enroll signature
      */
     enroll_sig: string,
-         
+
     /**
      * Cycle length
      */
@@ -321,12 +321,12 @@ export interface IBlockTransactionElements
      * Transaction hash
      */
     tx_hash: string;
-    
+
     /**
      * Block height
      */
     height: string;
-    
+
     /**
      * Transaction amount
      */
@@ -372,12 +372,12 @@ export interface IBlockTransactionElements
       * Transactions record
       */
      tx: Array<IBlockTransactionElements>;
-     
+
      /**
       * Total record
       */
      total_data: string;
- 
+
  }
 
 /**
@@ -460,6 +460,7 @@ export interface ITxOverviewOutputElement
      * Address, Public key
      */
     address: string;
+
     /**
      * Lock type
      */
@@ -661,36 +662,41 @@ export interface IBlock {
     /**
      * block height
      */
-    height: string,
+    height: string;
+
     /**
      * hash of block
     */
-    hash: string,
+    hash: string;
+
     /**
      * merkle root of block
      */
-    merkle_root: string,
+    merkle_root: string;
 
     /**
-     * validators of block 
+     * validators of block
      */
-    validators: string
+    validators: string;
+
     /**
      * signature of blcok
      */
-    signature: string
+    signature: string;
     /**
      * no of transactions in the block
      */
-    tx_count: number
+    tx_count: number;
+
     /**
      * enrollemnet counts in that block
      */
-    enrollment_count: string
+    enrollment_count: string;
+
     /**
      * timestamp of the block
      */
-    time_stamp: string
+    time_stamp: string;
 }
 
 /**
@@ -702,37 +708,37 @@ export interface ITransaction
     /**
     * Block height
     */
-    height: string,
-  
+    height: string;
+
    /**
     * Hash of the transaction
     */
-    tx_hash: string,
-  
+    tx_hash: string;
+
    /**
     * Type of the transaction
     */
-    type: string,
+    type: string;
 
    /**
     * amount of transaction
     */
-    amount: string
-   
+    amount: string;
+
    /**
-    * tranaction fee 
+    * tranaction fee
     */
-    tx_fee: string
-   
+    tx_fee: string;
+
    /**
     * size of the tranaction
     */
-    tx_size: string
-   
+    tx_size: string;
+
     /**
     * timestamp of the tranasaction
     */
-    time_stamp: string
+    time_stamp: string;
 }
 
 /**
@@ -742,14 +748,14 @@ export interface ITransaction
 export interface IPagination
 {
     /**
-     * page size 
+     * page size
      */
-    pageSize: number,
-    
+    pageSize: number;
+
     /**
      * page number
      */
-    page: number
+    page: number;
 }
 
 /**
@@ -761,28 +767,28 @@ export interface IMarketCap
     /**
      * Price of BOA in usd
      */
-    price: number
+    price: number;
 
     /**
      * market cap of BOA
      */
-    market_cap: number
+    market_cap: number;
 
     /**
      * Change percentage in 24h
      */
-    change_24h?: number
+    change_24h?: number;
 
     /**
      * 24 hour volumne
      */
-    vol_24h: number
-    
+    vol_24h: number;
+
     /**
      * Last updated time
      */
-    last_updated_at: number
-    
+    last_updated_at: number;
+
 }
 
 /**
@@ -796,7 +802,7 @@ export interface IMarketChart
     usd_price: number
 
     /**
-     * Time 
+     * Time
      */
     last_updated_at: number
 }
