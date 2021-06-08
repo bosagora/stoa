@@ -246,9 +246,9 @@ export interface IBlockOverview
     total_sent: string;
 
     /**
-     * total recieved amount
+     * total received amount
      */
-    total_recieved: string;
+    total_received: string;
 
     /**
      * total rewards

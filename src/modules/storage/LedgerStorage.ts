@@ -151,12 +151,6 @@ export class LedgerStorage extends Storages
             PRIMARY KEY(utxo_key(64))
         );
 
-        CREATE TABLE IF NOT EXISTS payloads (
-            tx_hash             TINYBLOB    NOT NULL,
-            payload             BLOB        NOT NULL,
-            PRIMARY KEY(tx_hash(64))
-        );
-
         CREATE TABLE IF NOT EXISTS validators
         (
             enrolled_at         INTEGER     NOT NULL,
@@ -166,6 +160,12 @@ export class LedgerStorage extends Storages
             preimage_height     INTEGER      NOT NULL,
             preimage_hash       TINYBLOB    NOT NULL,
             PRIMARY KEY(enrolled_at, utxo_key(64))
+        );
+
+        CREATE TABLE IF NOT EXISTS payloads (
+            tx_hash             TINYBLOB    NOT NULL,
+            payload             BLOB        NOT NULL,
+            PRIMARY KEY(tx_hash(64))
         );
 
         CREATE TABLE IF NOT EXISTS merkle_trees
@@ -217,23 +217,23 @@ export class LedgerStorage extends Storages
         );
 
        CREATE TABLE IF NOT EXISTS blocks_stats(
-            block_height        INT,
+            block_height        INTEGER,
             total_sent          BIGINT(20)  UNSIGNED NOT NULL,
-            total_recieved      BIGINT(20)  UNSIGNED NOT NULL,
+            total_received      BIGINT(20)  UNSIGNED NOT NULL,
             total_reward        BIGINT(20)  UNSIGNED NOT NULL,
             total_fee           BIGINT(20)  NOT NULL,
             total_size          BIGINT(20)  UNSIGNED NOT NULL,
-
             PRIMARY KEY(block_height)
-            );
-       Create TABLE IF NOT EXISTS marketcap (
+        );
+
+        CREATE TABLE IF NOT EXISTS marketcap (
             last_updated_at     INTEGER NOT NULL,
             price           BIGINT(20) UNSIGNED NOT NULL,
             market_cap      BIGINT(20) UNSIGNED NOT NULL,
             vol_24h         BIGINT(20) UNSIGNED NOT NULL,
             change_24h      BIGINT(20),
             PRIMARY KEY (last_updated_at)
-            );
+        );
 
        DROP TRIGGER IF EXISTS tx_trigger;
        CREATE TRIGGER tx_trigger AFTER INSERT
@@ -530,19 +530,19 @@ export class LedgerStorage extends Storages
      */
       public putBlockstats (block: Block): Promise<void>
       {
-          function save_blockstats (storage: LedgerStorage, height: Height, total_sent: JSBI, total_recieved: JSBI, total_size: JSBI, total_fee: JSBI): Promise<void>
+          function save_blockstats (storage: LedgerStorage, height: Height, total_sent: JSBI, total_received: JSBI, total_size: JSBI, total_fee: JSBI): Promise<void>
           {
               return new Promise<void>((resolve, reject) =>
               {
                 storage.query(
                     `INSERT INTO blocks_stats
-                        (block_height, total_sent, total_recieved, total_size, total_fee,total_reward)
+                        (block_height, total_sent, total_received, total_size, total_fee,total_reward)
                     VALUES
                         (?, ?, ?, ?, ?, ?)`,
                     [
                         height.toString(),
                         total_sent.toString(),
-                        total_recieved.toString(),
+                        total_received.toString(),
                         total_size.toString(),
                         total_fee.toString(),
                         "0"
@@ -562,12 +562,12 @@ export class LedgerStorage extends Storages
           {
               (async () =>
               {
-                  let total_recieved = JSBI.BigInt(0);
+                  let total_received = JSBI.BigInt(0);
                   let total_sent = JSBI.BigInt(0);
                   let total_fee = JSBI.BigInt(0);
                   let total_size = JSBI.BigInt(0);
-                  let total_recieved_sql = `SELECT
-                                                SUM(IFNULL(O.amount,0)) as total_recieved
+                  let total_received_sql = `SELECT
+                                                SUM(IFNULL(O.amount,0)) as total_received
                                                 FROM
                                                 tx_outputs O
                                                     INNER JOIN blocks B ON (O.block_height = B.height)
@@ -582,15 +582,15 @@ export class LedgerStorage extends Storages
                                             WHERE
                                                 block_height =?;`;
 
-                  this.query(total_recieved_sql,[block.header.height.toString()])
+                  this.query(total_received_sql,[block.header.height.toString()])
                   .then(async(row :any)=>{
-                      total_recieved = JSBI.BigInt(row[0].total_recieved);
+                      total_received = JSBI.BigInt(row[0].total_received);
                      return this.query(transaction_stats,[block.header.height.toString()]);
                   }).then((row: any)=>{
                       total_fee = JSBI.ADD( JSBI.BigInt(row[0].tx_fee) ,JSBI.BigInt(row[0].payload_fee));
                       total_size = JSBI.BigInt(row[0].total_size);
-                      total_sent = JSBI.ADD(total_recieved,total_fee);
-                      save_blockstats(this,block.header.height,total_sent,total_recieved,total_size,total_fee)
+                      total_sent = JSBI.ADD(total_received,total_fee);
+                      save_blockstats(this,block.header.height,total_sent,total_received,total_size,total_fee)
                       resolve();
                     });
               })();
@@ -2034,7 +2034,7 @@ export class LedgerStorage extends Storages
         let sql =
             `SELECT B.height, B.hash, B.merkle_root, B.signature, B.prev_block, B.random_seed,
              B.time_stamp, B.tx_count,
-             BS.total_sent, BS.total_recieved, BS.total_reward, BS.total_fee, BS.total_size
+             BS.total_sent, BS.total_received, BS.total_reward, BS.total_fee, BS.total_size
              FROM blocks B
              INNER JOIN blocks_stats BS ON (B.height = BS.block_height)
              WHERE ${field} = ?`;
@@ -2170,7 +2170,7 @@ export class LedgerStorage extends Storages
      * Get the latest Coin Market cap chart of BOA coin
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called with the records
-     * and if an error occurs the `.catch` is called with an error. 
+     * and if an error occurs the `.catch` is called with an error.
      */
     public getCoinMarketChart(from: number, to: number): Promise<any[]> {
         let sql =

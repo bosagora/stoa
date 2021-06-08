@@ -12,7 +12,7 @@ import { ValidatorData, IPreimage, IUnspentTxOutput, ITxStatus,
     IPendingTxs, ISPVStatus, ITransactionFee, IBlock, ITransaction,
     IBlockOverview, IBlockEnrollmentElements, IBlockEnrollment, IBlockTransactions, IBlockTransactionElements,
     IBOAStats, IPagination, IMarketCap, IMarketChart} from './Types';
-import { Time } from './modules/common/Time';    
+import { Time } from './modules/common/Time';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -837,7 +837,7 @@ class Stoa extends WebService
                     time: data[0].time_stamp,
                     version: "v0.x.x",
                     total_sent: data[0].total_sent,
-                    total_recieved: data[0].total_recieved,
+                    total_received: data[0].total_received,
                     total_reward: data[0].total_reward,
                     total_fee: data[0].total_fee,
                     total_size: data[0].total_size
