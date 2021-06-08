@@ -227,7 +227,7 @@ describe('Test of Stoa API Server', () => {
             "time": 1609459800,
             "version": "v0.x.x",
             "total_sent": 4880000000000000,
-            "total_recieved": 4880000000000000,
+            "total_received": 4880000000000000,
             "total_reward": 0,
             "total_fee": 0,
             "total_size": 9520
