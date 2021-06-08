@@ -13,7 +13,7 @@
 
 import {
     BitField, Block, BlockHeader, Enrollment, Height, Hash, Signature, SodiumHelper,
-    Transaction, OutputType, TxInput, TxOutput, DataPayload, PublicKey, JSBI
+    Transaction, OutputType, TxInput, TxOutput, PublicKey, JSBI
 } from 'boa-sdk-ts';
 import {
     sample_data,

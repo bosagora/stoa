@@ -13,7 +13,7 @@
 
 import * as assert from 'assert';
 import { LedgerStorage } from '../src/modules/storage/LedgerStorage';
-import { Block, Hash, Height, DataPayload, PreImageInfo, SodiumHelper, Endian } from 'boa-sdk-ts';
+import { Block, Hash, Height, PreImageInfo, SodiumHelper, Endian } from 'boa-sdk-ts';
 import { sample_data, sample_data2, sample_preImageInfo } from "./Utils";
 
 import * as fs from 'fs';
@@ -183,7 +183,7 @@ describe ('Test ledger storage and inquiry function.', () =>
         await ledger_storage.putBlocks(block);
         let rows = await ledger_storage.getPayload(block.merkle_tree[0]);
         assert.strictEqual(rows.length, 1);
-        assert.deepStrictEqual(new DataPayload(rows[0].payload, Endian.Little), block.txs[0].payload);
+        assert.deepStrictEqual(rows[0].payload, block.txs[0].payload);
     });
 
     it ('Test for UTXO', async () => {

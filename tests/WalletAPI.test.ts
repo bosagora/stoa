@@ -136,7 +136,7 @@ describe ('Test of Stoa API for the wallet', () =>
                     "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
                     "index": 0,
                     "unlock_age": 0,
-                    "bytes": "0xd5dece00b501854a8bae3509e5e314569576c5a082ae8c514db6bc96d5788f0951cece0cef0ab05d53fbc247d4732707d8f5d0e3eca65d92e5d8e86e36b1f8e0"
+                    "bytes": "0x92a70f8a1e99375e305c50269835545711daca7fbe3f97a1a2c94fcb75b67f004a1a9bd6f9d84f9b057b6901e0c93dbeac67a08f447021e31a604b65f1d0bda0"
                 }
             ],
             "receivers": [
