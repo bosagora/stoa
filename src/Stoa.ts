@@ -152,6 +152,8 @@ class Stoa extends WebService
         this.app.post("/block_externalized", this.postBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
         this.app.post("/transaction_received", this.putTransaction.bind(this));
+        this.app.get("/boaholder/:address", this.getBOAHolder.bind(this));
+        this.app.get("/boaholders", this.getBoaHolders.bind(this));
 
         let height: Height = new Height("0");
 
@@ -837,7 +839,7 @@ class Stoa extends WebService
                     time: data[0].time_stamp,
                     version: "v0.x.x",
                     total_sent: data[0].total_sent,
-                    total_received: data[0].total_received,
+                    total_recieved: data[0].total_received,
                     total_reward: data[0].total_reward,
                     total_fee: data[0].total_fee,
                     total_size: data[0].total_size
@@ -1663,45 +1665,101 @@ class Stoa extends WebService
             return resolve({ page, pageSize });
         });
     }
-    /**
+        /**
      * GET /coinmarketchart/
      *
      * Called when a request is received through the `/utxo/` handler
      *
      * Returns BOA statistics of last 24 hours.
      */
-    private async getBoaPriceChart(req: express.Request, res: express.Response)
+     private async getBoaPriceChart(req: express.Request, res: express.Response)
+         {
+             let to = await Time.msToTime(Date.now());
+             let from = await JSBI.subtract(JSBI.BigInt(to.seconds), JSBI.BigInt(60 * 60 * 24));
+             let num = Number(from.toString());
+     
+             let dt = new Date(to.seconds * 1000);
+             let df = new Date((num)* 1000 )
+     
+             logger.info(`Price chart from: ${df}, to: ${dt} `)
+     
+             this.ledger_storage.getCoinMarketChart(Number(from.toString()), to.seconds)
+                 .then(async(rows :any [])=>{
+                      if(rows.length === 0)
+                      {
+                         res.status(204).send("The data does not exist")
+                      }
+                      else{
+                         let marketCapChart : Array<IMarketChart> = [];
+                         await rows.forEach((element, index)=> {
+                              marketCapChart.push({
+                                 usd_price: element.price,
+                                 last_updated_at: element.last_updated_at
+                              });
+                          });
+                         res.status(200).send(marketCapChart);
+                      }
+     
+                 })
+                 .catch((err)=>{
+                     logger.error("Failed to data lookup to the DB: " + err);
+                     res.send(500).send("Failed to data lookup")
+                 })
+         }
+         
+    /**
+     * GET /boaholder:address
+     *
+     * Returns Address, Balance, Freeze Amount, Received Rewards, Percentage, Value.
+     */
+        private getBOAHolder (req: express.Request, res: express.Response)
     {
-        let to = await Time.msToTime(Date.now());
-        let from = await JSBI.subtract(JSBI.BigInt(to.seconds), JSBI.BigInt(60 * 60 * 24));
-        let num = Number(from.toString());
+            let address: string = String(req.params.address);
 
-        let dt = new Date(to.seconds * 1000);
-        let df = new Date((num)* 1000 )
+            logger.http(`GET /boaholder`);
 
-        logger.info(`Price chart from: ${df}, to: ${dt} `)
+            this.ledger_storage.getBOAHolder(address)
+                .then((data:any) => {
 
-        this.ledger_storage.getCoinMarketChart(Number(from.toString()), to.seconds)
-            .then(async(rows :any [])=>{
-                 if(rows.length === 0)
+                    
+                    if (!data)
                  {
-                    res.status(204).send("The data does not exist")
-                 }
-                 else{
-                    let marketCapChart : Array<IMarketChart> = [];
-                    await rows.forEach((element, index)=> {
-                         marketCapChart.push({
-                            usd_price: element.price,
-                            last_updated_at: element.last_updated_at
-                         });
-                     });
-                    res.status(200).send(marketCapChart);
-                 }
+                        res.status(204).send(`No account. address': (${address})`);
+                        return;
+                    }else {
 
-            })
-            .catch((err)=>{
-                logger.error("Failed to data lookup to the DB: " + err);
-                res.send(500).send("Failed to data lookup")
+                        res.status(200).json({data});
+                    }
+                })
+                .catch((err) => {
+                        logger.error("Failed to get data from DB: " + err);
+                        res.status(500).send("Failed to get data");
+                    }
+                );
+        }
+          /**
+      * Get BOA Holders
+      * @param req 
+      * @param res 
+      * @returns Returns Boa Holders of the ledger.
+      */
+    public async getBoaHolders(req: express.Request, res: express.Response) {
+        logger.http(`GET /boaholders`);
+        let pagination: IPagination = await this.paginate(req, res);
+        this.ledger_storage.getBOAHolders(pagination.pageSize, pagination.page)
+            .then((data: any) => {
+                if ((data === undefined)) {
+                    res.status(500).send("Failed to data lookup");
+                    return;
+                 }
+               else if (data.length === 0) {
+                   return res.status(204).send(`The data does not exist.`);
+                 }
+                else {
+                    
+                   return res.status(200).send(JSON.stringify(data));
+                
+                }
             })
     }
 

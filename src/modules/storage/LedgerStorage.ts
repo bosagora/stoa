@@ -233,7 +233,17 @@ export class LedgerStorage extends Storages
             vol_24h         BIGINT(20) UNSIGNED NOT NULL,
             change_24h      BIGINT(20),
             PRIMARY KEY (last_updated_at)
-        );
+            );
+       Create TABLE IF NOT EXISTS account (
+            address         TEXT        NOT NULL,
+            lock_bytes      INTEGER     NOT NULL,
+            txs_count       INTEGER     NOT NULL,
+            total_recieved  BIGINT(20)  UNSIGNED NOT NULL,
+            total_sent      BIGINT(20)  UNSIGNED NOT NULL,
+            total_reward    BIGINT(20)  UNSIGNED NOT NULL,
+            balance         BIGINT(20)  UNSIGNED NOT NULL,
+            PRIMARY KEY (address(64))
+            );
 
        DROP TRIGGER IF EXISTS tx_trigger;
        CREATE TRIGGER tx_trigger AFTER INSERT
@@ -2188,4 +2198,95 @@ export class LedgerStorage extends Storages
             `DROP DATABASE ${database}`;
        return this.run(sql, []);;
     }
+
+    /**
+     * Get Balance, freeze amount, tsx_count for a given address
+     * @returns Returns the Promise with requested data
+     * and if an error occurs the `.catch` is called with an error. 
+     */
+     public getBOAHolder(address:string): Promise<any>{
+        return new Promise<any>((resolve, reject) =>
+        {
+            (async () =>
+            { 
+                let freeze_amount = JSBI.BigInt(0);
+                let txs_count = 0;
+                let balance = JSBI.BigInt(0);
+                let balance_sql  =       `SELECT
+                                              SUM(amount) as amount
+                                              FROM
+                                              utxos 
+                                              WHERE address = ?;`
+                let tx_count_sql  =       `SELECT
+                                              count(address) as tx_count
+                                              FROM
+                                              tx_outputs
+                                              where address = ?;`  
+                 let freeze_sql   =        `SELECT 
+                                               SUM(amount) as freeze_amount
+                                               FROM 
+                                               utxos
+                                               WHERE 
+                                               type = 1 and address = ?;`
+
+                this.query(balance_sql,[address!.toString()])
+                .then(async(amount:any)=>{
+                    balance = amount[0].amount;
+                   return this.query(tx_count_sql,[address!.toString()]);
+                }).then((count: any)=>{
+                   txs_count = count[0].tx_count;
+                   return this.query(freeze_sql,[address!.toString()])
+                }).then((freeze: any)=>{
+                    freeze_amount = freeze[0].freeze_amount;                    
+                   let res = {
+                       balance,
+                       txs_count,
+                       freeze_amount,
+                       address,
+                       received_rewards:468768,
+                       precentage:'45%',
+                       value:'$8468'
 }
+                   resolve(res);
+                  });
+            })();
+        });
+}
+      /**
+     * Get Adresss, Balance, Freeze Amount
+     * @returns returns the Promise with requested data
+     * and if an error occurs the `.catch` is called with an error. 
+     */
+       public getBOAHolders(limit: number, page: number): Promise<any>{
+        return new Promise<any>((resolve, reject) =>
+        {
+            (async () =>    
+            {   
+                let data:any=[];
+                let freeze_amount = JSBI.BigInt(0);
+                let balance = JSBI.BigInt(0);
+                let boaHolder_sql  =       `SELECT address, SUM(amount) as balance,
+                                              (SELECT SUM(amount) from utxos O where O.type = '1' and O.address = U.address) as freeze
+                                              FROM utxos U GROUP BY address
+                                              LIMIT ? OFFSET ?;`
+                                              
+                this.query(boaHolder_sql,[limit, limit * (page - 1)])
+                .then(async(rows:any)=>{
+
+                    for(let i=0;i< rows.length;i++){
+                        let result= {
+                            address:rows[i].address,
+                            balance: rows[i].balance,
+                            freeze_amount:rows[i].freeze,
+                            received_rewards:468768,
+                            precentage:'45%',
+                            value:'$8468'
+                        }
+                        data.push(result)
+                    }
+                   resolve(data);
+                  });
+            })();
+        });
+     }
+}  
