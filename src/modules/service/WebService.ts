@@ -13,7 +13,8 @@
 
 import express from 'express';
 import http  from 'http' ;
-import { logger } from '../common/Logger';
+import { SocketIO } from '../service/Socket'
+import { EventDispatcher } from 'event-dispatch';
 
 export class WebService
 {
@@ -38,6 +39,18 @@ export class WebService
     protected server: http.Server | null = null;
 
     /**
+     * The Event Dispatcher 
+     */
+    protected  eventDispatcher : EventDispatcher;
+
+    /**
+     * Connection
+     * @param port 
+     * @param address 
+     */
+    protected socket : SocketIO
+    
+    /**
      * Constructor
      * @param port The bind port
      * @param address The bind address
@@ -55,6 +68,8 @@ export class WebService
             this.address = "";
 
         this.app = express();
+        this.eventDispatcher = new EventDispatcher();
+        this.socket = new SocketIO(http.createServer(this.app));
     }
 
     /**
@@ -68,6 +83,7 @@ export class WebService
         return new Promise<void>((resolve, reject) => {
             // Create HTTP server.
             this.server = http.createServer(this.app);
+            this.socket = new SocketIO(this.server);
             this.server.on('error', reject);
             this.server.listen(this.port, this.address, () => {
                 resolve();
