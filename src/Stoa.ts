@@ -21,6 +21,9 @@ import cors from 'cors';
 import express from 'express';
 import JSBI from 'jsbi';
 import { URL } from 'url';
+import { Socket } from 'socket.io';
+import "./modules/events/handlers";
+import events from './modules/events/events';
 
 class Stoa extends WebService
 {
@@ -182,6 +185,9 @@ class Stoa extends WebService
                         logger.error(`Error: Could not connect to marketcap Client: ${err.toString()}`, 
                             { operation: Operation.connection, height: HeightManager.height.toString(), success: false });
                         });
+                        this.socket.io.on(events.client.connection, (socket: Socket) => {
+                        this.eventDispatcher.dispatch(events.client.connection, socket);
+                    });
                     }
                     return this.pending = this.pending.then(() => { return this.catchup(height); });
                 });
@@ -1092,13 +1098,10 @@ class Stoa extends WebService
         logger.http(`GET /boa-stats/`);
 
         this.ledger_storage.getBOAStats()
-        .then((data: any) => {
-            if ((data === undefined)) {
-                res.status(500).send("Failed to data lookup");
-                return;
-              }
-           else if (data.length === 0) {
-               return res.status(204).send(`The data does not exist`);
+        .then((data: any [] ) => {
+            if(!data[0])
+            {
+                return res.status(500).send("Failed to data lookup");
             }
             else {
                 let boaStats: IBOAStats = {
@@ -1240,7 +1243,7 @@ class Stoa extends WebService
      *
      * This method Store the Coin market data to database.
      */
-    public putCoinMarketStats(data : IMarketCap): Promise<any>
+    public putCoinMarketStats(data: IMarketCap): Promise<any>
     {
        return new Promise<any>((resolve, reject)=>{
        this.ledger_storage.storeCoinMarket(data).then((result: any)=>{
@@ -1418,7 +1421,7 @@ class Stoa extends WebService
     * @param res
     * @returns Return Latest blocks of the ledeger
     */
-    public async getLatestBlocks(req: express.Request, res: express.Response) {
+    private async getLatestBlocks(req: express.Request, res: express.Response) {
 
         let pagination: IPagination = await this.paginate(req, res);
         this.ledger_storage.getLatestBlocks(pagination.pageSize, pagination.page)
@@ -1457,7 +1460,7 @@ class Stoa extends WebService
       * @param res
       * @returns Returns Latest transactions of the ledger.
       */
-    public async getLatestTransactions(req: express.Request, res: express.Response) {
+    private async getLatestTransactions(req: express.Request, res: express.Response) {
 
         let pagination: IPagination = await this.paginate(req, res);
         this.ledger_storage.getLatestTransactions(pagination.pageSize, pagination.page)
@@ -1489,7 +1492,7 @@ class Stoa extends WebService
                 }
             })
     }
-        /**
+    /**
       * Get Coin Market Cap for BOA.
       * @param req
       * @param res
@@ -1545,6 +1548,8 @@ class Stoa extends WebService
                             if (JSBI.equal(block.header.height.value, expected_height.value))
                             {
                                 await this.ledger_storage.putBlocks(block);
+                                await this.emitBlock(new Height(block.header.height.value));
+                                await this.emitBoaStats();
                                 expected_height.value = JSBI.add(expected_height.value, JSBI.BigInt(1));
                                 HeightManager.height = new Height(block.header.height.toString());
                                 logger.info(`Recovered a block with block height of ${block.header.height.toString()}`,
@@ -1624,6 +1629,8 @@ class Stoa extends WebService
                         HeightManager.height = new Height(height.toString());
                         logger.info(`Saved a block with block height of ${height.toString()}`,
                             { operation: Operation.db, height: HeightManager.height.toString(), success: true });
+                        await this.emitBlock(height);
+                        await this.emitBoaStats();
                     }
                     else if (JSBI.greaterThan(height.value, expected_height.value))
                     {
@@ -1803,6 +1810,136 @@ class Stoa extends WebService
                     { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.send(500).send("Failed to data lookup")
             })
+    }
+    /**
+     *  Stoa emits the latest Boa stats using sockets on new block recieved. 
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public emitBoaStats(): Promise<IBOAStats> {
+        return new Promise<IBOAStats>(async (resolve, reject) => {
+               this.ledger_storage.getBOAStats()
+        .then((data: any[]) => {
+            if (!data[0]) {
+                logger.info("Failed to latest BOA stats");
+                return;
+              }
+            else {
+                let boaStats: IBOAStats = {
+                    height: data[0].height,
+                    transactions: data[0].transactions,
+                    validators: data[0].validators,
+                    frozen_coin: 5283595, //FIX ME static data because of unavailability of real data
+                    circulating_supply: 5283535,
+                    active_validators: 155055
+                };
+            this.socket.io.emit(events.server.lateststats, boaStats)
+            logger.info(`Emited Updated BOA stats:  ${boaStats}`)
+            return resolve(boaStats);
+            }
+        })
+        .catch((err) => {
+            logger.error("Failed to latest BOA stats: " + err);
+           return;
+        });
+        });
+    }
+
+    /**
+     *  Stoa emits the updates using sockets on new block recieved
+     * @param height The height of block to emit  
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public emitBlock(height: Height): Promise<boolean> {
+        return new Promise<boolean>(async (resolve, reject) => {
+            try{
+               let emittedBlock :IBlock = await this.emitNewBlock(height);
+               await this.emitBlockTransactions(emittedBlock)
+               resolve(true);
+             }
+            catch(err)
+            {
+                reject("Failed to emit new block")
+            }
+        });
+    }
+
+    /**
+     * Stoa emits the detail of new block received
+     * @param height  
+     * @returns 
+     */
+    public emitNewBlock(height: Height): Promise<IBlock> {
+        return new Promise<IBlock>((resolve, reject) => {
+            this.ledger_storage.getBlock(height).then((data) => {
+                if (data.length === undefined || data.length === 0) {
+                    return  reject("Failed to emit new block")
+                }
+                else {
+                    let latestBlock: IBlock = {
+                        height: JSBI.BigInt(data[0].height).toString(),
+                        hash: new Hash(data[0].hash, Endian.Little).toString(),
+                        merkle_root: new Hash(data[0].merkle_root, Endian.Little).toString(),
+                        signature: new Hash(data[0].signature, Endian.Little).toString(),
+                        validators: data[0].validators.toString(),
+                        tx_count: (data[0].tx_count).toString(),
+                        enrollment_count: data[0].enrollment_count.toString(),
+                        time_stamp: data[0].time_stamp,
+                    }
+                    logger.info(`Emited new Block: ${latestBlock}`)
+                    this.socket.io.emit(events.server.newblock, latestBlock)
+                    return resolve(latestBlock);
+                }
+            }).catch((err) => {
+                return reject("Failed to emit new block")
+            });
+        });
+    }
+    /**
+     * Stoa emit the transaction inside the new block recieved.
+     * @param block 
+     * @returns 
+     */
+    public emitBlockTransactions(block: IBlock): Promise<IBlockTransactions> {
+        return new Promise<IBlockTransactions>(async (resolve, reject) => {
+            this.ledger_storage.getBlockTransactions("height", (block.height).toString(), Number(block.tx_count), 1).then(
+                (data: any) => {
+                if (data.tx.length === 0 || data.tx.length === undefined) {
+                    return reject(`Failed to emit block transaction at height': (${block.height})`);
+                }
+                else {
+                    let tx: Array<IBlockTransactionElements> = [];
+                    for (const row of data.tx) {
+                        tx.push(
+                            {
+                                height: JSBI.BigInt(row.block_height).toString(),
+                                tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
+                                amount: row.amount,
+                                type: row.type,
+                                fee: row.tx_fee,
+                                size: row.tx_size,
+                                time: row.time_stamp,
+                                sender_address: row.sender_address,
+                                receiver: row.receiver,
+                            }
+                        );
+                    }
+
+                    let transactionList: IBlockTransactions = {
+                        tx,
+                        total_data: data.total_data
+                    };
+                    this.socket.io.emit(events.server.newtransaction, transactionList)
+                    logger.info(`Emited new Transactions: ${transactionList}`)
+                    return  resolve(transactionList);
+                }
+            }).catch((err) => {
+                reject(`Failed to emit block transaction at height': (${block.height})`+ err);
+            });
+        });
     }
 
     /**

@@ -2172,7 +2172,7 @@ export class LedgerStorage extends Storages
                 T.tx_fee, T.tx_size, B.time_stamp,
                 JSON_ARRAYAGG(JSON_OBJECT("type", O.type, "address", O.address, "amount", O.amount)) as receiver,
                 (SELECT
-                    S.address
+                   JSON_ARRAYAGG(JSON_OBJECT("address", S.address, "amount", S.amount))
                 FROM
                     blocks B
                     INNER JOIN transactions T ON (B.height = T.block_height)
