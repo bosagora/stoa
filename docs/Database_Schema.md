@@ -467,3 +467,28 @@ CREATE TABLE IF NOT EXISTS tx_pool (
     PRIMARY KEY (`key`(64))
 )
 ```
+## 15. Table **fees**
+
+### _Schema_
+
+| Column                 | Data Type    | PK | Not NULL | Default  |Description|
+|:-----------------------|:---------    |:--:|:--------:| -------- | --------- |
+|  height                | TEXT         | Y  | Y        |          | Height of Block  |
+|  time_stamp            | INTEGER      |    | Y        |          | Block unix timestamp  |
+|  average_tx_fee        | BIGINT(20)   |    | Y        |          | Average Fee of All Fees  |
+|  total_tx_fee          | BIGINT(20)   |    | Y        |          | Total Fee of Transactions in Block  |
+|  total_payload_fee     | BIGINT(20)   |    | Y        |          | Total Payload Fee  |
+|  total_fee             | BIGINT(20)   |    | Y        |          | Total Fee  |
+
+### _Create Script_
+```sql
+CREATE TABLE IF NOT EXISTS "fees"(
+    "height"             INTEGER    NOT NULL,
+    "time_stamp"         INTEGER    NOT NULL,
+    "average_tx_fee"     BIGINT(20) NOT NULL,
+    "total_tx_fee"       BIGINT(20) NOT NULL,
+    "total_payload_fee"  BIGINT(20) NOT NULL,
+    "total_fee"          BIGINT(20) NOT NULL,
+    PRIMARY KEY(height)
+);
+```

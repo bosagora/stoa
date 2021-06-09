@@ -5,13 +5,13 @@ import { LedgerStorage } from './modules/storage/LedgerStorage';
 import { CoinMarketService } from './modules/service/CoinMarketService';
 import { logger } from './modules/common/Logger';
 import { Height, PreImageInfo, Hash, hash, Block, Utils,
-    Endian, Transaction, hashFull } from 'boa-sdk-ts';
+    Endian, Transaction, hashFull, TxPayloadFee } from 'boa-sdk-ts';
 import { WebService } from './modules/service/WebService';
 import { ValidatorData, IPreimage, IUnspentTxOutput, ITxStatus,
     ITxHistoryElement, ITxOverview, ConvertTypes, DisplayTxType,
     IPendingTxs, ISPVStatus, ITransactionFee, IBlock, ITransaction,
     IBlockOverview, IBlockEnrollmentElements, IBlockEnrollment, IBlockTransactions, IBlockTransactionElements,
-    IBOAStats, IPagination, IMarketCap, IMarketChart} from './Types';
+    IBOAStats, IPagination, IMarketCap, IAvgFee, IMarketChart} from './Types';
 import { Time } from './modules/common/Time';
 
 import bodyParser from 'body-parser';
@@ -152,7 +152,8 @@ class Stoa extends WebService
         this.app.get("/coinmarketchart", this.getBoaPriceChart.bind(this));
         this.app.post("/block_externalized", this.postBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
-        this.app.post("/transaction_received", this.putTransaction.bind(this));
+        this.app.post("/transaction_received", this.putTransaction.bind(this));        
+        this.app.get("/averagefeechart/:from", this.averageFeeChart.bind(this));
 
         let height: Height = new Height("0");
 
@@ -443,6 +444,13 @@ class Stoa extends WebService
             return;
         }
 
+        res.status(200).send(JSON.stringify(this.calculateTransactionFees(size)));
+    }
+    /**
+     * Calculates Transaction fees and data fee
+     * @param size Transaction size
+     */
+    private calculateTransactionFees (size: string){
         let tx_size = JSBI.BigInt(size);
         let factor = JSBI.BigInt(200);
         let minimum = JSBI.BigInt(100_000);     // 0.01BOA
@@ -462,8 +470,7 @@ class Stoa extends WebService
             medium: medium.toString(),
             low: low.toString()
         };
-
-        res.status(200).send(JSON.stringify(data));
+        return data;
     }
 
     /**
@@ -1425,6 +1432,50 @@ class Stoa extends WebService
                 }
             })
     }
+
+    /**
+     * GET /averagefeechart/
+     *@param req
+     *@param res
+     * Called when a request is received through the `/averagefeechart/` handler
+     *
+     * @returns Returns average transaction fee from given req
+     */
+    private async averageFeeChart(req: express.Request, res: express.Response){        
+        let to = await Time.msToTime(Date.now());
+        let from = await JSBI.subtract(JSBI.BigInt(to.seconds), JSBI.BigInt(req.params.from));
+        let num = Number(from.toString());
+        logger.http(`GET /averagefeechart/${req.params.from}`);
+        
+        this.ledger_storage.calculateAvgFeeChart(Number(from.toString()),to.seconds).then((data: any) => {
+            if ((data === undefined)) {
+                res.status(500).send("Failed to data lookup");
+                return;
+              }
+           else if (data.length === 0) {
+               return res.status(204).send(`The data does not exist.`);
+            }
+            else {
+                let avgFeelist: Array<IAvgFee> = [];
+                for (const row of data) {
+                    avgFeelist.push(
+                        {
+                            height: row.height,
+                            time_stamp: row.time_stamp,
+                            average_tx_fee: row.average_tx_fee,
+                            total_tx_fee: row.total_tx_fee,
+                            total_payload_fee: row.total_payload_fee,
+                            total_fee: row.total_fee
+                        }
+                    )
+                }
+            return res.status(200).send(JSON.stringify(avgFeelist));
+
+            }
+        })
+
+    }
+
     /**
       * Get Latest transactions
       * @param req
@@ -1718,6 +1769,7 @@ class Stoa extends WebService
             return resolve({ page, pageSize });
         });
     }
+
     /**
      * GET /coinmarketchart/
      *

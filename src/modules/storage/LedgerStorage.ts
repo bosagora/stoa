@@ -138,6 +138,17 @@ export class LedgerStorage extends Storages
             PRIMARY KEY(block_height, tx_index)
         );
 
+        CREATE TABLE IF NOT EXISTS fees
+        (
+            height             INTEGER NOT NULL,
+            time_stamp         INTEGER NOT NULL,
+            average_tx_fee     BIGINT(20) NOT NULL,
+            total_tx_fee       BIGINT(20) NOT NULL,
+            total_payload_fee  BIGINT(20) NOT NULL,
+            total_fee          BIGINT(20) NOT NULL,
+            PRIMARY KEY(height)
+        );
+
         CREATE TABLE IF NOT EXISTS tx_inputs
         (
             block_height        INTEGER  NOT NULL,
@@ -331,6 +342,57 @@ export class LedgerStorage extends Storages
             });
         }
 
+        /**
+         * Saving Average Fees
+         */
+        async function save_fees(storage: LedgerStorage, block: Block, genesis_timestamp: number){            
+            async function calculateFee (txs: Transaction[])
+            {
+                    let total_tx_fee = 0, total_payload_fee=0, total_fee=0, tx_count=0;
+                    for (let index = 0; index < block.txs.length; index++) {
+                        if (!(block.txs[index].isCoinbase())) {
+                            const fees = await storage.getTransactionFee(block.txs[index]);
+                                if (JSBI.toNumber(fees[1])>=0) {
+                                    total_tx_fee += JSBI.toNumber(fees[1]);
+                                    total_payload_fee += JSBI.toNumber(fees[2]);
+                                    total_fee += JSBI.toNumber(fees[0]);
+                                    tx_count++;
+                                }
+                        }
+                    }
+                return {total_tx_fee, total_payload_fee, total_fee, tx_count}
+            }
+            const fee = await calculateFee(block.txs)
+            const tx_count = (fee.tx_count!=0)?fee.tx_count:1
+            const average_tx_fee = fee.total_tx_fee/tx_count
+            
+            return new Promise<void>(async (resolve, reject) =>
+            {   
+                storage.run(
+                    `INSERT INTO fees
+                        (height ,time_stamp, average_tx_fee, total_tx_fee, total_payload_fee, total_fee)
+                    VALUES
+                        (?,?,?,?,?,?)`,
+                    [
+                        JSBI.toNumber(block.header.height.value),
+                        block.header.time_offset + genesis_timestamp,
+                        average_tx_fee,
+                        fee.total_tx_fee,
+                        fee.total_payload_fee,
+                        fee.total_fee                        
+                    ]
+                    )
+                    .then(() =>
+                    {
+                        resolve();
+                    })
+                    .catch((err) =>
+                    {
+                        reject(err);
+                    })
+            });
+        }
+
         return new Promise<void>((resolve, reject) =>
         {
             (async () => {
@@ -340,6 +402,7 @@ export class LedgerStorage extends Storages
                     for (let tx of block.txs)
                         await this.transaction_pool.remove(this.connection, tx);
                     await saveBlock(this, block, genesis_timestamp);
+                    await save_fees(this, block, genesis_timestamp)
                     await this.putTransactions(block);
                     await this.putEnrollments(block);
                     await this.putBlockHeight(block.header.height);
@@ -811,6 +874,8 @@ export class LedgerStorage extends Storages
      */
     public putTransactions (block: Block): Promise<void>
     {
+        let genesis_timestamp: number = this.genesis_timestamp;
+
         function save_transaction (storage: LedgerStorage, height: Height, tx_idx:
             number, hash: Hash, tx: Transaction): Promise<void>
         {
@@ -818,7 +883,6 @@ export class LedgerStorage extends Storages
             {
                 let fees = await storage.getTransactionFee(tx);
                 let tx_size = tx.getNumberOfBytes();
-
                 let unlock_height_query: string;
                 if (tx.isPayment() && (tx.inputs.length > 0))
                 {
@@ -873,7 +937,7 @@ export class LedgerStorage extends Storages
                         tx_size,
                         tx.inputs.length,
                         tx.outputs.length,
-                        tx.payload.length
+                        tx.payload.length,
                     ]
                 )
                     .then(() =>
@@ -2056,6 +2120,23 @@ export class LedgerStorage extends Storages
             T.tx_hash = ?`;
 
         return this.query(sql, [tx_hash.toBinary(Endian.Little)]);
+    }
+    /**
+     * Get Average Fees between given time range.
+     */
+    public calculateAvgFeeChart(from: number, to: number): Promise<any[]>{
+        let sql =
+            `SELECT
+                *
+            FROM
+                fees
+            WHERE
+                time_stamp
+            BETWEEN 
+                ?
+             AND 
+                ?`;
+            return this.query(sql, [from, to])
     }
     /**
      *  Get the Latest Blocks

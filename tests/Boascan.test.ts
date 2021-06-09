@@ -597,4 +597,13 @@ describe('Test of Stoa API Server', () => {
         }
         assert.deepStrictEqual(response.data, expected)
     });
+    it('Test for path /averagefeechart/', async ()=>{
+        let uri = URI(host)
+            .port(port)
+            .directory("/averagefeechart")
+            .filename("86400");
+        let response = await client.get(uri.toString())       
+        let expected = ''
+        assert.strictEqual(response.data, expected)
+});
 });
