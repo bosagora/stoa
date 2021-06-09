@@ -82,14 +82,14 @@ export const recovery_sample_data =
 
 export const sample_preImageInfo =
     {
-        "utxo": "0xf8751862d61a28fb878cd4b583ceaf39a59a5f2ff1fa78a169e56811c33b5c3eed80f83074cfb98ab5095ed563ebc6a96320ef59080628c4961f586dbf2e7d2f",
+        "utxo": "0x70455f0b03f4b8d54b164b251e813b3fecd447d4bfe7b173ef86654429d2f5c3866d3ea406bf02163221a2d4029f0e0930a48304b2ea0f9277c2b32795c4005f",
         "hash": "0x790ab7c8f8ddbf012561e70c944c1835fd1a873ca55c973c828164906f8b35b924df7bddcafade688ad92cfb4414b2cf69a02d115dc214bbd00d82167f645e7e",
         "height": "6"
     };
 
 export const sample_reEnroll_preImageInfo =
     {
-        "utxo": "0xf8751862d61a28fb878cd4b583ceaf39a59a5f2ff1fa78a169e56811c33b5c3eed80f83074cfb98ab5095ed563ebc6a96320ef59080628c4961f586dbf2e7d2f",
+        "utxo": "0x70455f0b03f4b8d54b164b251e813b3fecd447d4bfe7b173ef86654429d2f5c3866d3ea406bf02163221a2d4029f0e0930a48304b2ea0f9277c2b32795c4005f",
         "hash": "0xe51e1cc8dfdcdcd02586c9648c6977504eade2dffc8f3289e7ae7e501c2879f99af6a199ccad499be02a66d409ca4ab51b35f1c3a06a82464ce4efcfeb3ade33",
         "height": "12"
     };

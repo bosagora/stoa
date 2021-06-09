@@ -102,8 +102,8 @@ describe ('Test of Stoa API for the wallet', () =>
         assert.strictEqual(response.data[0].peer_count, 1);
         assert.strictEqual(response.data[0].height, "9");
         assert.strictEqual(response.data[0].tx_hash,
-            "0x137dfda16ebdcc93de30a171bd3de2cc08f8e124dc55858507b4d4ed696952d" +
-            "711b09ed83b31e0583ebddd7a3a73cc30d09d1fb656e62245e2dd56c585d1f61b");
+            "0xeffb91d272f3f116fb179c96dcc623010d393b83140d3e4929caa783ec3e66b" +
+            "3053d5ee4168b298d5a7f5f7fbc4a9949ced280f550e3aa235eafcfa24b2ca9dd");
         assert.strictEqual(response.data[0].tx_type, "payment");
         assert.strictEqual(response.data[0].amount, "610000000000000");
         assert.strictEqual(response.data[0].unlock_height, "10");
@@ -114,14 +114,14 @@ describe ('Test of Stoa API for the wallet', () =>
         let uri = URI(host)
             .port(port)
             .directory("/wallet/transaction/overview")
-            .filename("0x7a1f8c370a4e31f9f3cc1559c9f1c91cd1bf2efa39156bd88ee10848380f86b27a4ed029ce30550838a6e53eec156afb7b127a1ba872ecf6acea7ac1317f3386")
+            .filename("0xd39a98fb9ba8882be791000ddaa21b7b0fbf12850a8810dbea4bb1c7d6b85000d1b2e05837f8dcac97827a6c51d75aced5145364e6dac7596d7d8047e73b701c")
 
         let response = await client.get (uri.toString());
         let expected = {
             "status": "Confirmed",
             "height": "9",
             "time": 1609464600,
-            "tx_hash": "0x7a1f8c370a4e31f9f3cc1559c9f1c91cd1bf2efa39156bd88ee10848380f86b27a4ed029ce30550838a6e53eec156afb7b127a1ba872ecf6acea7ac1317f3386",
+            "tx_hash": "0xd39a98fb9ba8882be791000ddaa21b7b0fbf12850a8810dbea4bb1c7d6b85000d1b2e05837f8dcac97827a6c51d75aced5145364e6dac7596d7d8047e73b701c",
             "tx_type": "payment",
             "tx_size": 182,
             "unlock_height": "10",
@@ -132,11 +132,11 @@ describe ('Test of Stoa API for the wallet', () =>
                 {
                     "address": "boa1xrk00cupup5vxwpz09kl9rau78cwag28us4vuctr6zdxvwfzaht9v6tms8q",
                     "amount": 610000000000000,
-                    "utxo": "0x9fd93f7b6acf3a277569084fabc3b6a8e983087c03e75aed7327c45d0a853a18b142daf607990882fc6388856557219c2bce42fb208f9f7e2cbeb845b482dc50",
+                    "utxo": "0x3001f97e9536babe0e899909838d4fb12971cb7b61bdf4fffe4e65ea2c4f9dcaef6de683a1e30d011b5d686bccb62e6e355963da5cd62364e95f11389265b005",
                     "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
                     "index": 0,
                     "unlock_age": 0,
-                    "bytes": "0x92a70f8a1e99375e305c50269835545711daca7fbe3f97a1a2c94fcb75b67f004a1a9bd6f9d84f9b057b6901e0c93dbeac67a08f447021e31a604b65f1d0bda0"
+                    "bytes": "0x6e242b73d0e69ce822952c9fb1c1ed88c55bd8247a44bd62cc712d2d65964c01afa0e59336e43e947e41c51d7dea966554762c0c04bf173d321e3a1ce57eef0f"
                 }
             ],
             "receivers": [
@@ -145,13 +145,13 @@ describe ('Test of Stoa API for the wallet', () =>
                     "address": "boa1xza007gllhzdawnr727hds36guc0frnjsqscgf4k08zqesapcg3uujh9g93",
                     "lock_type": 0,
                     "amount": 610000000000000,
-                    "utxo": "0xfa4ca8aa9fbd8d00847b53dc48878d427bef4e5b9c655dce45e35df502829e33a672b47f6bbf506f0a01c920052106f551f46c19b4390c09c2c90ea4d96f69dc",
+                    "utxo": "0xf6de2987c803b29ca4d22a8f6f43db530b879d4986a7613c7d20686e337907230b91e23ff272c316f4fe15f5c1209b6540c91bc47c293f87b2ecc1c246cd8629",
                     "index": 0,
                     "bytes": "0x5f21dbacbd82f3f86006b1237f1bfc4b24b857d5e8bd8616a20d1feb09be640c9d096839324b36f8dd5457f4bef618261fe62c8e15a411495cca216a3bc94397"
                 }
             ],
             "fee": "0"
-        }
+        };
         assert.deepStrictEqual(response.data, expected);
     });
 
@@ -193,8 +193,8 @@ describe ('Test of Stoa API for the wallet', () =>
         assert.strictEqual(response.data[0].tx_type, "payment");
         assert.strictEqual(response.data[0].amount, "-610000000000000");
         assert.strictEqual(response.data[0].tx_hash,
-            "0xc9e537de55f0f353baf53d09f1524bf43778911c7aa0a4adc51ef263c4e7ea4" +
-            "2eaca79f518a32f0669a4898edb5a43dcd7cb89882b6c1bb1ef074810a357ef61");
+            "0x3bfdbf5776eeef6d6429b9aca3946d4a2de1be8e9d38c3bb2cff8cc18be32eb" +
+            "40e4bf0a33561ec644bd79be45621724824b6dda7edda1f7a77cc2efeeb723f6e");
     });
 
     it ('Test of the path /wallet/transactions/history - Filtering - Date', async () =>
@@ -220,8 +220,8 @@ describe ('Test of Stoa API for the wallet', () =>
         assert.strictEqual(response.data[0].tx_type, "payment");
         assert.strictEqual(response.data[0].amount, "610000000000000");
         assert.strictEqual(response.data[0].tx_hash,
-            "0x90f84f032e95084e243993891e4e40d708845e7d4de197d48c0ddd6e8a66378" +
-            "b8ed6745741dcd88b828509d52ed8e7bdc9c564b90414198e2a5a9ac93446d7b8");
+            "0xa21b598d404fdd5ffff7eb3ff4294c9cadd4ceb5a4be480c66e599bb2648187" +
+            "4c84ffe38c100b15ccc03406b885093306ae62bdd464a8c7399e1609269aceb8d");
     });
 
     it ('Test of the path /wallet/transactions/history - Filtering - Peer', async () =>
@@ -246,8 +246,8 @@ describe ('Test of Stoa API for the wallet', () =>
         assert.strictEqual(response.data[0].tx_type, "payment");
         assert.strictEqual(response.data[0].amount, "610000000000000");
         assert.strictEqual(response.data[0].tx_hash,
-            "0x90f84f032e95084e243993891e4e40d708845e7d4de197d48c0ddd6e8a66378" +
-            "b8ed6745741dcd88b828509d52ed8e7bdc9c564b90414198e2a5a9ac93446d7b8");
+            "0xa21b598d404fdd5ffff7eb3ff4294c9cadd4ceb5a4be480c66e599bb2648187" +
+            "4c84ffe38c100b15ccc03406b885093306ae62bdd464a8c7399e1609269aceb8d");
     });
 });
 
@@ -316,14 +316,14 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
         let uri = URI(host)
             .port(port)
             .directory("/wallet/transaction/overview")
-            .filename("0xfbe8c9c8544ed673672607552274aa1f1255375f8bf5f20bb1b7f6fe037a90ffbb84c70d0fd089afe5e6db9f68c5f6456b92f802fbb7a91a1b24353d2c625638")
+            .filename("0xc438670a649a4593b35d922023ca959b6dfb630e8d4cfc5783aaffe21f859882b71f59890ee889abf32d00df4bab872c91da13e9fc961bceeb3d91643ee2d0d9")
 
         let response = await client.get(uri.toString());
         let expected = {
             "status": "Confirmed",
             "height": "2",
             "time": 1609460400,
-            "tx_hash": "0xfbe8c9c8544ed673672607552274aa1f1255375f8bf5f20bb1b7f6fe037a90ffbb84c70d0fd089afe5e6db9f68c5f6456b92f802fbb7a91a1b24353d2c625638",
+            "tx_hash": "0xc438670a649a4593b35d922023ca959b6dfb630e8d4cfc5783aaffe21f859882b71f59890ee889abf32d00df4bab872c91da13e9fc961bceeb3d91643ee2d0d9",
             "tx_type": "payment",
             "tx_size": 1248,
             "unlock_height": "3",
@@ -334,11 +334,11 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
                 {
                     "address": "boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj",
                     "amount": 24400000000000,
-                    "utxo": "0xf180e8aede3ea3f6db7872b2af4225f186abc4835e2f1108ea6ee1c56a8edb79c6460de4968696ec1f9a7fe5ab0008d33781a0031d79409825f2ea45df6f7fbd",
+                    "utxo": "0x75283072696d82d8bca2fe45471906a26df1dbe0736e41a9f78e02a14e2bfced6e0cb671f023626f890f28204556aca217f3023c891fe64b9f4b3450cb3e80ad",
                     "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
                     "index": 0,
                     "unlock_age": 0,
-                    "bytes": "0x79989dee6906c074068975bd3f26d6bd9fe6c07469fe6c660f1f08df6aeb6202971960e21a354cd1afc33b8342d88ff6ad5e18cd1d5710cafc447e5799a56a28"
+                    "bytes": "0x56069fd0618adf7f7bd30a7b47fe96dff265350a4a045eff31368dfae07e4e054f012cae5c1e08ba41a02da2ebcebb1c6e039562a3f41366a782c7a1fea5744e"
                 }
             ],
             "receivers": [
@@ -347,7 +347,7 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
                     "address": "boa1xqcmmns5swnm03zay5wjplgupe65uw4w0dafzsdsqtwq6gv3h3lcz24a8ch",
                     "lock_type": 0,
                     "amount": 1663400000,
-                    "utxo": "0xb1262f48009e97c3f3041b52552986f0b260aad9c03d82ea6d027e0a85caa58a52aebcd8f623cf21e1652619feb047e911a4992dc58d2b1a58fe6bf2ee4ee679",
+                    "utxo": "0x690ece0f11d3e96c70eaf80623a22b8f404abf8c19ad3ca9dc20d2aa169260ee59ac07eac5d73093e0f9e070bd1aa575d4d8541e2d3d3aa77cad96b5b8d8866f",
                     "index": 0,
                     "bytes": "0x178f01a58740ab687b82c61fea00ed740de5bac97ada2599300bfbb1e5b244e945c9b78412864341f96f537a993cf011a15a2affc95f944fdc937aa8ce303f2c"
                 },
@@ -356,7 +356,7 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
                     "address": "boa1xrlj00v7wyf9vf0cm2thd58tquqxpj9xtdrh2hhfyrmag4cdkmej5nystea",
                     "lock_type": 0,
                     "amount": 24398336600000,
-                    "utxo": "0xdc6e74b9b32a706e7bf389d59dd88d1adfde4161e1854cc5663aa1b15fc6cc99ff9fa6c1779d0e58c51f101bad2d0d3246ffd0917ff12d194daa4486a1f52dee",
+                    "utxo": "0x1745945afae609e68d10b0ab15e55ac252c1706f235759e184cc38396990af5d08356bf419f689577bd4ab5bfaa5fc32c4c56bfe52e00a1852114f148c780ed9",
                     "index": 1,
                     "bytes": "0xe3dd9e0f4d5b39dfd3a0c656a12179f627da5298c2d9f668099db5dc33e6a9f8dfbbb5f7d9a974a2e2eb27e34ce33582948902c73aca315adc1c2e4025595b0f"
                 }
