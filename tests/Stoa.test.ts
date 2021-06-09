@@ -128,7 +128,7 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get (uri.toString());
         assert.strictEqual(response.data.length, 6);
         assert.strictEqual(response.data[0].address,
-            "boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn");
+            "boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t");
         assert.strictEqual(response.data[0].preimage.height, '');
     });
 
@@ -231,7 +231,7 @@ describe ('Test of Stoa API Server', () =>
             const enroll_sig =
                 new Signature("0x0c48e78972e1b138a37e37ae27a01d5ebdea193088ddef2d9883446efe63086925e8803400d7b93d22b1eef5c475098ce08a5b47e8125cf6b04274cc4db34bfd");
             const utxo_key =
-                new Hash("0xf8751862d61a28fb878cd4b583ceaf39a59a5f2ff1fa78a169e56811c33b5c3eed80f83074cfb98ab5095ed563ebc6a96320ef59080628c4961f586dbf2e7d2f");
+                new Hash("0x70455f0b03f4b8d54b164b251e813b3fecd447d4bfe7b173ef86654429d2f5c3866d3ea406bf02163221a2d4029f0e0930a48304b2ea0f9277c2b32795c4005f");
             const commitment =
                 new Hash("0xe0c04a5bd47ffc5b065b7d397e251016310c43dc77220bf803b73f1183da00b0e67602b1f95cb18a0059aa1cdf2f9adafe979998364b38cd5c15d92b9b8fd815");
             const enrollment = new Enrollment(utxo_key, commitment, 20, Sig.fromSignature(enroll_sig));
@@ -333,11 +333,11 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get (uri.toString())
         assert.strictEqual(response.data.height, '1');
         assert.strictEqual(response.data.hash,
-            '0x04348b962dac4423cd9ae48b4932ee1607fb1101a690d2583bbad909e8c3f22' +
-            'b12a6d65d1e1494d38681afc7bea61c3d81251800b8adbf1d31f52889df6d7e09');
+            '0x8161cb00f6d95e4c42c8aa8d752a378ff2de671e4dfc1edba3b53704d8dd124' +
+            '1077c1df1c3c0bb8f63dc4f0645cd86ccb17d932cc7a796f9e1c221abafe8b0d7');
         assert.strictEqual(response.data.merkle_root,
-            '0xa82a2d19ae115b521f0d65690e78f66260f5886da76508b72eee62a45cb8cfb' +
-            '5a7b8e300e0042faeb7b28fffc050cceb6c00ef4a326d992ef182969b1857f3d0');
+            '0x2a8158ee049c459e32912f426b0f4ebaea9d017455efd3e20c27954f22066a1' +
+            '0a4cb676254e9a011906ac8cb6855add4d314eb96d583d1a1828ff7f05d04ebd0');
         assert.strictEqual(response.data.time_stamp, 1609459800);
 
         uri = URI(host)
@@ -348,11 +348,11 @@ describe ('Test of Stoa API Server', () =>
         response = await client.get (uri.toString())
         assert.strictEqual(response.data.height, '0');
         assert.strictEqual(response.data.hash,
-            '0xba54155d042d03a722dc9234f7de5b304e9efbc896091e28fb3b19b908ee782' +
-            '653b5e6ef44566e19c728ff0eebf65ede6cc485337d5a473b819e86eeb2f7baf8');
+            '0xfca7a6455549ff1886969228b12dc5db03c67470145ed3e8e318f0c356a364e' +
+            'abbf1eeefc06232cfa7f3cdf3017521ee54b2b4542241650781022552ddc3dc99');
         assert.strictEqual(response.data.merkle_root,
-            '0x4cadc4d240a26ebf8a01ae1c53a4793fec40c92d36d9f8755311420c9594a9f' +
-            'bb827fb974b75774723acbd13b4d0589e957bf8f14da24633be6ae299446ddca7');
+            '0x67218493be437c25dc5884abdc8ee40e61f0af79aa9af8ab9bd8b0632eaaca2' +
+            '38b4c054f114b046da0d5911b1b205ba540d07c5dc01560beafe564e5f3d101c9');
         assert.strictEqual(response.data.time_stamp, 1609459200);
     });
 
@@ -378,8 +378,8 @@ describe ('Test of Stoa API Server', () =>
         let response = await client.get (uri.toString())
         assert.strictEqual(response.data.length, 2);
         assert.strictEqual(response.data[0].tx_hash,
-            '0xfbe8c9c8544ed673672607552274aa1f1255375f8bf5f20bb1b7f6fe037a90f' +
-            'fbb84c70d0fd089afe5e6db9f68c5f6456b92f802fbb7a91a1b24353d2c625638');
+            '0xc438670a649a4593b35d922023ca959b6dfb630e8d4cfc5783aaffe21f85988' +
+            '2b71f59890ee889abf32d00df4bab872c91da13e9fc961bceeb3d91643ee2d0d9');
         assert.strictEqual(response.data[0].address, 'boa1xqcmmns5swnm03zay5wjplgupe65uw4w0dafzsdsqtwq6gv3h3lcz24a8ch');
         assert.strictEqual(response.data[0].amount, '1663400000');
         assert.strictEqual(response.data[0].fee, '0');
@@ -391,27 +391,27 @@ describe ('Test of Stoa API Server', () =>
         let uri = URI(host)
             .port(port)
             .directory("/transaction/status")
-            .filename("0xfbe8c9c8544ed673672607552274aa1f1255375f8bf5f20bb1b7f6fe037a90ffbb84c70d0fd089afe5e6db9f68c5f6456b92f802fbb7a91a1b24353d2c625638");
+            .filename("0xc438670a649a4593b35d922023ca959b6dfb630e8d4cfc5783aaffe21f859882b71f59890ee889abf32d00df4bab872c91da13e9fc961bceeb3d91643ee2d0d9");
 
         let response_pending = await client.get(uri.toString());
         let expected_pending = {
             status: 'pending',
-            tx_hash: '0xfbe8c9c8544ed673672607552274aa1f1255375f8bf5f20bb1b7f6fe037a90ffbb84c70d0fd089afe5e6db9f68c5f6456b92f802fbb7a91a1b24353d2c625638'
+            tx_hash: '0xc438670a649a4593b35d922023ca959b6dfb630e8d4cfc5783aaffe21f859882b71f59890ee889abf32d00df4bab872c91da13e9fc961bceeb3d91643ee2d0d9'
         }
         assert.deepStrictEqual(response_pending.data, expected_pending);
 
         uri = URI(host)
             .port(port)
             .directory("/transaction/status")
-            .filename("0xdd75be9a8b2778deb99734dfb17f70c3635afff654342cc1c306ba0fc69eb72494c9e3c4543eaa6974757204ff19a521989b6ab4c6d41de535b8e634faf66183");
+            .filename("0x9e6d1b023eed4b4a7141c18b585e8aebc4955d5e279698e96086eca689daa8cebfef63deb816749445bf4a82af43958f44d90357488a5a3681fb6e3b4bc9789a");
 
         let response_confirmed = await client.get(uri.toString());
         let expected_confirmed = {
             status: "confirmed",
-            tx_hash: "0xdd75be9a8b2778deb99734dfb17f70c3635afff654342cc1c306ba0fc69eb72494c9e3c4543eaa6974757204ff19a521989b6ab4c6d41de535b8e634faf66183",
+            tx_hash: "0x9e6d1b023eed4b4a7141c18b585e8aebc4955d5e279698e96086eca689daa8cebfef63deb816749445bf4a82af43958f44d90357488a5a3681fb6e3b4bc9789a",
             block: {
                 height: 1,
-                hash: "0x04348b962dac4423cd9ae48b4932ee1607fb1101a690d2583bbad909e8c3f22b12a6d65d1e1494d38681afc7bea61c3d81251800b8adbf1d31f52889df6d7e09"
+                hash: "0x8161cb00f6d95e4c42c8aa8d752a378ff2de671e4dfc1edba3b53704d8dd1241077c1df1c3c0bb8f63dc4f0645cd86ccb17d932cc7a796f9e1c221abafe8b0d7"
             }
         };
         assert.deepStrictEqual(response_confirmed.data, expected_confirmed);
@@ -422,15 +422,15 @@ describe ('Test of Stoa API Server', () =>
         let uri = URI(host)
             .port(port)
             .directory("/transaction/pending")
-            .filename("0xfbe8c9c8544ed673672607552274aa1f1255375f8bf5f20bb1b7f6fe037a90ffbb84c70d0fd089afe5e6db9f68c5f6456b92f802fbb7a91a1b24353d2c625638");
+            .filename("0xc438670a649a4593b35d922023ca959b6dfb630e8d4cfc5783aaffe21f859882b71f59890ee889abf32d00df4bab872c91da13e9fc961bceeb3d91643ee2d0d9");
 
         let response = await client.get (uri.toString());
         let expected = {
             "inputs": [
                 {
-                    "utxo": "0xf180e8aede3ea3f6db7872b2af4225f186abc4835e2f1108ea6ee1c56a8edb79c6460de4968696ec1f9a7fe5ab0008d33781a0031d79409825f2ea45df6f7fbd",
+                    "utxo": "0x75283072696d82d8bca2fe45471906a26df1dbe0736e41a9f78e02a14e2bfced6e0cb671f023626f890f28204556aca217f3023c891fe64b9f4b3450cb3e80ad",
                     "unlock": {
-                        "bytes": "eZid7mkGwHQGiXW9PybWvZ/mwHRp/mxmDx8I32rrYgKXGWDiGjVM0a/DO4NC2I/2rV4YzR1XEMr8RH5XmaVqKA=="
+                        "bytes": "Vgaf0GGK33970wp7R/6W3/JlNQpKBF7/MTaN+uB+TgVPASyuXB4IukGgLaLrzrscbgOVYqP0E2angseh/qV0Tg=="
                     },
                     "unlock_age": 0
                 }
@@ -464,15 +464,15 @@ describe ('Test of Stoa API Server', () =>
         let uri = URI(host)
             .port(port)
             .directory("/transaction")
-            .filename("0xdd75be9a8b2778deb99734dfb17f70c3635afff654342cc1c306ba0fc69eb72494c9e3c4543eaa6974757204ff19a521989b6ab4c6d41de535b8e634faf66183");
+            .filename("0x9e6d1b023eed4b4a7141c18b585e8aebc4955d5e279698e96086eca689daa8cebfef63deb816749445bf4a82af43958f44d90357488a5a3681fb6e3b4bc9789a");
 
         let response = await client.get (uri.toString());
         let expected = {
             "inputs": [
                 {
-                    "utxo": "0x57d4bdc5e60ac4b25f7a6502b15b66394ce4d45b48694518e09d382b9fbc9905be211e45973102609621773daac68357fe0dc0a6092a28920d33ef3194c9aed5",
+                    "utxo": "0xb9794167a781561298bcb0f634346c85e56fba3f26c641e52dbf0066e8fb0b96d278cdd4c22c7e9885fceb307368e4130aaebd7800905c27c6a6e09870d8d9ca",
                     "unlock": {
-                        "bytes": "yuH5/OkqydVRZNQJSu4GJIOQxGVKCUSDzFJTVYXp5A2+oenm8a9vTdftxTgKxlXJsbLdHw4CLUGKGKY+SA8xaA=="
+                        "bytes": "CLJuoUgDcq/0c1TR1ooUOkWoAKvJPUMnu6wqws44vQrrv8MLiGzEBdnRv8dIjhucXYeQ8BEbWwMaBnp+Vb6E3Q=="
                     },
                     "unlock_age": 0
                 }
@@ -757,7 +757,7 @@ describe ('Test of the path /utxo', () =>
         let response = await client.get (uri.toString());
         let expected = [
             {
-                utxo: '0xf180e8aede3ea3f6db7872b2af4225f186abc4835e2f1108ea6ee1c56a8edb79c6460de4968696ec1f9a7fe5ab0008d33781a0031d79409825f2ea45df6f7fbd',
+                utxo: '0x75283072696d82d8bca2fe45471906a26df1dbe0736e41a9f78e02a14e2bfced6e0cb671f023626f890f28204556aca217f3023c891fe64b9f4b3450cb3e80ad',
                 type: 0,
                 unlock_height: '2',
                 amount: '24400000000000',
@@ -1033,9 +1033,9 @@ describe ('Test of the path /merkle_path', () =>
 
         let expected =
             [
-                "0x7989e23b6797d654499784cf70a97990b399948c7ed66663f6df31ea279c9200f770e39e72be7670b4daef64f6468b78891c29dad30c4c0a02d0b874ace16a23",
-                "0xbf807606597e0042db589a4e7ee9d01b9f79bc2132f0adc46b9548d51a61964a38b9e21bc9ff20e39793edd9c5c64067f451e30f2366d3c1a95bbffd61829a0c",
-                "0xf7358d0981428c3db379561c7446159c73465308dc2c815520cc875cbfe8c82a3f318e69631efde59fb9559f29df9f6ff237922eb369d76c6f0c812a6c81e8c2",
+                "0xd7cdd350d885c2f15a91b6b927de0e79d2cddecf4b8d02825978f026cecae23482252d8d04e57114aeb3fe5048fc1297d65824abe0696d9dc982153a64a4c6ac",
+                "0x23aebb377939f6a968dcf9d3d8f04111a734df988046efa6cc26fe4257ef01a3411c44b4c569af2934d99e488191f43a0ca9ef3aa2e200bdffffe5163901eca4",
+                "0xdd25e52d046a2bb2a95d44da736be7cab09affecad513de30a68aaecedcbb50fcc12078fb7858c37d0164430b5d58d1898c6d26250952d5d5bcc1646863dea9a",
             ];
 
         assert.deepStrictEqual(response.data, expected);
@@ -1050,9 +1050,9 @@ describe ('Test of the path /merkle_path', () =>
 
         let expected =
             [
-                new Hash("0x7989e23b6797d654499784cf70a97990b399948c7ed66663f6df31ea279c9200f770e39e72be7670b4daef64f6468b78891c29dad30c4c0a02d0b874ace16a23"),
-                new Hash("0xbf807606597e0042db589a4e7ee9d01b9f79bc2132f0adc46b9548d51a61964a38b9e21bc9ff20e39793edd9c5c64067f451e30f2366d3c1a95bbffd61829a0c"),
-                new Hash("0xf7358d0981428c3db379561c7446159c73465308dc2c815520cc875cbfe8c82a3f318e69631efde59fb9559f29df9f6ff237922eb369d76c6f0c812a6c81e8c2"),
+                new Hash("0xd7cdd350d885c2f15a91b6b927de0e79d2cddecf4b8d02825978f026cecae23482252d8d04e57114aeb3fe5048fc1297d65824abe0696d9dc982153a64a4c6ac"),
+                new Hash("0x23aebb377939f6a968dcf9d3d8f04111a734df988046efa6cc26fe4257ef01a3411c44b4c569af2934d99e488191f43a0ca9ef3aa2e200bdffffe5163901eca4"),
+                new Hash("0xdd25e52d046a2bb2a95d44da736be7cab09affecad513de30a68aaecedcbb50fcc12078fb7858c37d0164430b5d58d1898c6d26250952d5d5bcc1646863dea9a"),
             ];
 
         assert.deepStrictEqual(merkle_path, expected);
@@ -1063,7 +1063,7 @@ describe ('Test of the path /merkle_path', () =>
         let uri = URI(host)
             .port(port)
             .directory("spv")
-            .filename("0xdd75be9a8b2778deb99734dfb17f70c3635afff654342cc1c306ba0fc69eb72494c9e3c4543eaa6974757204ff19a521989b6ab4c6d41de535b8e634faf66183");
+            .filename("0x9e6d1b023eed4b4a7141c18b585e8aebc4955d5e279698e96086eca689daa8cebfef63deb816749445bf4a82af43958f44d90357488a5a3681fb6e3b4bc9789a");
 
         let response = await client.get(uri.toString());
 
@@ -1080,7 +1080,7 @@ describe ('Test of the path /merkle_path', () =>
         let uri = URI(host)
             .port(port)
             .directory("spv")
-            .filename("0x7989e23b6797d654499784cf70a97990b399948c7ed66663f6df31ea279c9200f770e39e72be7670b4daef64f6468b78891c29dad30c4c0a02d0b874ace16a23 ");
+            .filename("0xd7cdd350d885c2f15a91b6b927de0e79d2cddecf4b8d02825978f026cecae23482252d8d04e57114aeb3fe5048fc1297d65824abe0696d9dc982153a64a4c6ac ");
 
         let response = await client.get(uri.toString());
 
