@@ -1,0 +1,39 @@
+################################################################################
+##                             Network interface                              ##
+################################################################################
+server:
+  # Address to which we bind (default: 127.0.0.1)
+  address: "0.0.0.0"
+  # Port on which we bind (default: 3836)
+  port:    4242
+
+  # Endpoint of Agora
+  agora_endpoint: http://127.0.0.1:2826
+
+################################################################################
+##                               Database options                             ##
+################################################################################
+database:
+   host : 127.0.0.1
+   user : root
+   database : boascan
+   password : "Rnssol@123"
+   port : 3306
+
+################################################################################
+##                               Logging options                              ##
+################################################################################
+logging:
+  # The name of the folder where the logs are stored.
+  folder: logs/
+  # Values: error, warn, info, http, verbose, debug, silly
+  level: http
+  # Default to false
+  console: true
+
+################################################################################
+##                               Consensus config                             ##
+################################################################################
+consensus:
+  # 2021-01-01:00:00:00 GMT
+  genesis_timestamp: 1609459200

@@ -319,6 +319,7 @@ export class LedgerStorage extends Storages
                     await this.putBlockHeight(block.header.height);
                     await this.putMerkleTree(block);
                     await this.putBlockstats(block);
+                    await this.putAccount(block);
                     await this.commit();
                 }
                 catch (error)
@@ -1721,7 +1722,7 @@ export class LedgerStorage extends Storages
         let sql_receiver =
             `SELECT
                 O.output_index,
-                O.type,
+           
                 O.amount,
 				O.lock_type,
 				O.lock_bytes as bytes,
@@ -2289,4 +2290,136 @@ export class LedgerStorage extends Storages
             })();
         });
      }
+       /**
+     * Put all accounts
+     * @param block: The instance of the `Block`
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called and if an error occurs the `.catch`
+     * is called with an error.
+     */
+        public putAccount (block: Block): Promise<void>
+        {
+            function save_account (storage: LedgerStorage , output: TxOutput, tx: Transaction): Promise<void>
+            {
+                return new Promise<void>(async (resolve, reject) =>
+                {   
+                   
+                    let total_recieved_amount; 
+                    let total_sent_amount:any;
+                    let recieved_amount_sql:any;
+                    let sent_amount_sql:any;
+                    let balance = 0;
+                    let txs_count = 0;
+                    let address: string = (output.lock.type == 0)
+                    ? (new PublicKey(output.lock.bytes)).toString()
+                    : "";
+                    if(tx.inputs.length == 0)
+                    {
+                        recieved_amount_sql =     `SELECT 
+                                                    amount 
+                                                    FROM 
+                                                    tx_outputs`
+                        total_sent_amount = 0;
+                        storage.query(recieved_amount_sql, [])
+                        .then((rows: any[]) => {
+                         total_recieved_amount = rows[0].amount
+                        })
+                        
+                    } 
+                    else
+                    {
+                        recieved_amount_sql  =   `SELECT 
+                                                   SUM(O.amount - U.amount) as recieved_amount
+                                                   FROM tx_outputs O
+                                                   INNER JOIN tx_inputs I ON (O.utxo_key = I.utxo)
+                                                   INNER JOIN utxos U ON (O.utxo_key = U.utxo_key)
+                                                   WHERE O.amount > U.amount 
+                                                   GROUP BY '${address}'
+                                                   `
+                        sent_amount_sql  =   `SELECT 
+                                                   SUM(U.amount - O.amount) as sent_amount
+                                                   FROM tx_outputs O
+                                                   INNER JOIN tx_inputs I ON (O.utxo_key = I.utxo)
+                                                   INNER JOIN utxos U ON (O.utxo_key = U.utxo_key)
+                                                   WHERE O.amount < U.amount 
+                                                   GROUP BY '${address}'
+                                                   `
+                    }  
+                        
+    
+                        let balance_sql  =      `SELECT
+                                                  SUM(amount) as balance
+                                                  FROM
+                                                  utxos
+                                                  WHERE address = ?;`  
+    
+                        let tx_count_sql  =      `SELECT
+                                                   count(address) as tx_count
+                                                   FROM
+                                                   tx_outputs
+                                                   WHERE address = ?;`  
+    
+                        storage.query(balance_sql, [address.toString()])
+                       .then((rows: any[]) => {
+                        balance= rows[0].balance
+                        return storage.query(tx_count_sql,[address.toString()]);
+                       }).then((rows:any[])=>{
+                        txs_count = rows[0].tx_count;
+                        return storage.query(recieved_amount_sql,[address.toString()]);
+                       }).then((rows:any[])=>{
+                        total_recieved_amount = rows[0].recieved_amount;
+                        return storage.query(sent_amount_sql,[address.toString()]);
+                       }).then((rows:any[])=>{
+                        total_recieved_amount = rows[0].sent_amount;
+                        storage.run(
+                            `INSERT INTO account
+                                (address, lock_bytes, txs_count, total_recieved, total_sent, total_reward, balance)
+                                 VALUES
+                                 (?, ?, ?, ?, ?, ?, ?)`,
+                            [
+                                address.toString(),
+                                output.lock.bytes,
+                                txs_count,
+                                total_recieved_amount.toString(),
+                                total_sent_amount.toString(),
+                                '4568',
+                                balance,
+                            ]
+                        ) 
+                       })
+                       
+                        .then(() =>
+                        {
+                            resolve();
+                        })
+                        .catch((err) =>
+                        {
+                            reject(err);
+                        })
+                });
+            }
+    
+            return new Promise<void>((resolve, reject) =>
+            {
+                (async () =>
+                {
+                    try
+                    {
+                        for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++)
+                        {
+                            for (let out_idx = 0; out_idx < block.txs[tx_idx].outputs.length; out_idx++)
+                            {
+                                await save_account(this, block.txs[tx_idx].outputs[out_idx],block.txs[tx_idx]);
+                            }
+                        }
+                    }
+                    catch (err)
+                    {
+                        reject(err);
+                        return;
+                    }
+                    resolve();
+                })();
+            });
+        }
 }  
