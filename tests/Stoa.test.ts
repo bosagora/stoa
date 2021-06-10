@@ -37,8 +37,8 @@ import { URL } from 'url';
 import { IDatabaseConfig } from '../src/modules/common/Config';
 import { MockDBConfig } from "./TestConfig"
 import { BOASodium } from 'boa-sodium-ts';
-import { CoinMarketService } from '../src/modules/service/CoinMaketService';
-import { CoinGeckoMaket } from '../src/modules/coinmarket/CoinGeckoMaket';
+import { CoinMarketService } from '../src/modules/service/CoinMarketService';
+import { CoinGeckoMarket } from '../src/modules/coinmarket/CoinGeckoMarket';
 
 describe ('Test of Stoa API Server', () =>
 {
@@ -49,7 +49,7 @@ describe ('Test of Stoa API Server', () =>
     let client = new TestClient();
     let testDBConfig : IDatabaseConfig;
     let gecko_server: TestGeckoServer;
-    let gecko_market: CoinGeckoMaket;
+    let gecko_market: CoinGeckoMarket;
     let coinMarketService: CoinMarketService;
 
     before ('Wait for the package libsodium to finish loading', async () =>
@@ -67,7 +67,7 @@ describe ('Test of Stoa API Server', () =>
      before('Start a fake TestCoinGecko', () => {
         return new Promise<void>((resolve, reject) => {
                 gecko_server = new TestGeckoServer("7876", market_cap_sample_data, market_cap_history_sample_data, resolve);
-                gecko_market = new CoinGeckoMaket(gecko_server);
+                gecko_market = new CoinGeckoMarket(gecko_server);
         });
     });
     before('Start a fake coinMarketService', () => {
@@ -696,7 +696,7 @@ describe ('Test of the path /utxo', () =>
     let client = new TestClient();
     let testDBConfig : IDatabaseConfig;
     let gecko_server: TestGeckoServer;
-    let gecko_market: CoinGeckoMaket;
+    let gecko_market: CoinGeckoMarket;
     let coinMarketService: CoinMarketService;
 
     before ('Wait for the package libsodium to finish loading', async () =>
@@ -713,7 +713,7 @@ describe ('Test of the path /utxo', () =>
     before('Start a fake TestCoinGecko', () => {
         return new Promise<void>((resolve, reject) => {
                     gecko_server = new TestGeckoServer("7876", market_cap_sample_data, market_cap_history_sample_data, resolve);
-                    gecko_market = new CoinGeckoMaket(gecko_server);
+                    gecko_market = new CoinGeckoMarket(gecko_server);
         });
     });
     before('Start a fake coinMarketService', () => {
@@ -814,7 +814,7 @@ describe ('Test of the path /utxo for freezing', () =>
     let client = new TestClient();
     let testDBConfig : IDatabaseConfig;
     let gecko_server: TestGeckoServer;
-    let gecko_market: CoinGeckoMaket;
+    let gecko_market: CoinGeckoMarket;
     let coinMarketService: CoinMarketService;
 
     let blocks: Array<Block> = [];
@@ -836,7 +836,7 @@ describe ('Test of the path /utxo for freezing', () =>
     before('Start a fake TestCoinGecko', () => {
         return new Promise<void>((resolve, reject) => {
                 gecko_server = new TestGeckoServer("7876", market_cap_sample_data, market_cap_history_sample_data, resolve);
-                gecko_market = new CoinGeckoMaket(gecko_server);
+                gecko_market = new CoinGeckoMarket(gecko_server);
         });
     });
     before('Start a fake coinMarketService', () => {
@@ -982,7 +982,7 @@ describe ('Test of the path /merkle_path', () =>
     let client = new TestClient();
     let testDBConfig : IDatabaseConfig;
     let gecko_server: TestGeckoServer;
-    let gecko_market: CoinGeckoMaket;
+    let gecko_market: CoinGeckoMarket;
     let coinMarketService: CoinMarketService;
 
     before ('Wait for the package libsodium to finish loading', async () =>
@@ -1000,7 +1000,7 @@ describe ('Test of the path /merkle_path', () =>
     before('Start a fake TestCoinGecko', () => {
         return new Promise<void>((resolve, reject) => {
                 gecko_server = new TestGeckoServer("7876", market_cap_sample_data, market_cap_history_sample_data, resolve);
-                gecko_market = new CoinGeckoMaket(gecko_server);
+                gecko_market = new CoinGeckoMarket(gecko_server);
         });
     });
     before('Start a fake coinMarketService', () => {

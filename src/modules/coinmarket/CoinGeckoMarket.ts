@@ -1,6 +1,6 @@
 /*******************************************************************************
 
-    This file contains CoinMarket Interface and CoinGeckoMaket as concrete 
+    This file contains CoinMarket Interface and CoinGeckoMarket as concrete
     implementation of CoinMarket.
 
     Copyright:
@@ -26,9 +26,9 @@ export interface CoinMarket {
     fetch(): Promise<any>;
 }
 
-export class CoinGeckoMaket implements CoinMarket {
+export class CoinGeckoMarket implements CoinMarket {
     /**
-     * Market Client i.e Gecko_coin_market 
+     * Market Client i.e Gecko_coin_market
      */
     private coinMarketClient: any;
 
