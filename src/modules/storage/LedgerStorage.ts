@@ -235,13 +235,13 @@ export class LedgerStorage extends Storages
             PRIMARY KEY (last_updated_at)
             );
        Create TABLE IF NOT EXISTS account (
-            address         TEXT        NOT NULL,
-            lock_bytes      INTEGER     NOT NULL,
-            txs_count       INTEGER     NOT NULL,
-            total_recieved  BIGINT(20)  UNSIGNED NOT NULL,
-            total_sent      BIGINT(20)  UNSIGNED NOT NULL,
-            total_reward    BIGINT(20)  UNSIGNED NOT NULL,
-            balance         BIGINT(20)  UNSIGNED NOT NULL,
+            address                  TEXT        NOT NULL,
+            txs_count                INTEGER     NOT NULL,
+            total_received_amount    BIGINT(20)  UNSIGNED NOT NULL,
+            total_sent_amount        BIGINT(20)  UNSIGNED NOT NULL,
+            total_reward_amount      BIGINT(20)  UNSIGNED NOT NULL,
+            total_freeze_amount      BIGINT(20)  UNSIGNED NOT NULL,
+            balance                  BIGINT(20)  UNSIGNED NOT NULL,
             PRIMARY KEY (address(64))
             );
 
@@ -2201,7 +2201,8 @@ export class LedgerStorage extends Storages
     }
 
     /**
-     * Get Balance, freeze amount, tsx_count for a given address
+     * Get balance, freeze_amount, received_amount, received_rewards, precentage, value for boa holder as object
+     * @param address Address of the boa holder
      * @returns Returns the Promise with requested data
      * and if an error occurs the `.catch` is called with an error. 
      */
@@ -2210,11 +2211,11 @@ export class LedgerStorage extends Storages
         {
             (async () =>
             { 
-                let freeze_amount = JSBI.BigInt(0);
+                let freeze_amount:number = 0;
                 let txs_count = 0;
-                let balance = JSBI.BigInt(0);
+                let balance:number = 0;
                 let balance_sql  =       `SELECT
-                                              SUM(amount) as amount
+                                              amount as amount
                                               FROM
                                               utxos 
                                               WHERE address = ?;`
@@ -2231,14 +2232,16 @@ export class LedgerStorage extends Storages
                                                type = 1 and address = ?;`
 
                 this.query(balance_sql,[address!.toString()])
-                .then(async(amount:any)=>{
-                    balance = amount[0].amount;
+                .then(async(amount:any[])=>{
+                    let last_row = amount.length;     
+                    balance = Number(amount[last_row - 1].amount);
                    return this.query(tx_count_sql,[address!.toString()]);
                 }).then((count: any)=>{
                    txs_count = count[0].tx_count;
                    return this.query(freeze_sql,[address!.toString()])
                 }).then((freeze: any)=>{
-                    freeze_amount = freeze[0].freeze_amount;                    
+                   freeze_amount = Number(freeze[0].freeze_amount);
+                   balance = balance + freeze_amount
                    let res = {
                        balance,
                        txs_count,
@@ -2247,38 +2250,37 @@ export class LedgerStorage extends Storages
                        received_rewards:468768,
                        precentage:'45%',
                        value:'$8468'
-}
+                     }
                    resolve(res);
                   });
             })();
         });
-}
-      /**
-     * Get Adresss, Balance, Freeze Amount
+    }
+    /**
+     * Get balance, freeze_amount, received_amount, received_rewards, precentage, value for boa holders as array 
+     * @param limit Maximum record count that can be obtained from one query
+     * @param page The number on the page, this value begins with 1
      * @returns returns the Promise with requested data
      * and if an error occurs the `.catch` is called with an error. 
      */
-       public getBOAHolders(limit: number, page: number): Promise<any>{
+    public getBOAHolders(limit: number, page: number): Promise<any>{
         return new Promise<any>((resolve, reject) =>
         {
             (async () =>    
             {   
                 let data:any=[];
-                let freeze_amount = JSBI.BigInt(0);
-                let balance = JSBI.BigInt(0);
-                let boaHolder_sql  =       `SELECT address, SUM(amount) as balance,
+                let boaHolder_sql  =       `SELECT address, sum(amount) as balance,
                                               (SELECT SUM(amount) from utxos O where O.type = '1' and O.address = U.address) as freeze
                                               FROM utxos U GROUP BY address
                                               LIMIT ? OFFSET ?;`
                                               
                 this.query(boaHolder_sql,[limit, limit * (page - 1)])
                 .then(async(rows:any)=>{
-
-                    for(let i=0;i< rows.length;i++){
-                        let result= {
+                    for(let i = 0;i < rows.length;i++){
+                        let result = {
                             address:rows[i].address,
                             balance: rows[i].balance,
-                            freeze_amount:rows[i].freeze,
+                            freeze_amount:rows[i].freeze ? rows[i].freeze: 0,
                             received_rewards:468768,
                             precentage:'45%',
                             value:'$8468'
@@ -2289,25 +2291,24 @@ export class LedgerStorage extends Storages
                   });
             })();
         });
-     }
-       /**
+    }
+    /**
      * Put all accounts
      * @param block: The instance of the `Block`
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called and if an error occurs the `.catch`
      * is called with an error.
      */
-        public putAccount (block: Block): Promise<void>
+    public putAccount (block: Block): Promise<void>
         {
             function save_account (storage: LedgerStorage , output: TxOutput, tx: Transaction): Promise<void>
             {
                 return new Promise<void>(async (resolve, reject) =>
                 {   
                    
-                    let total_recieved_amount; 
+                    let total_recieved_amount:any; 
+                    let total_freeze_amount:any; 
                     let total_sent_amount:any;
-                    let recieved_amount_sql:any;
-                    let sent_amount_sql:any;
                     let balance = 0;
                     let txs_count = 0;
                     let address: string = (output.lock.type == 0)
@@ -2315,78 +2316,149 @@ export class LedgerStorage extends Storages
                     : "";
                     if(tx.inputs.length == 0)
                     {
-                        recieved_amount_sql =     `SELECT 
-                                                    amount 
+                        let recieved_amount_sql =     `SELECT 
+                                                        amount 
+                                                        FROM 
+                                                        tx_outputs
+                                                        WHERE type = 0 and address = '${address}'`
+
+                        let balance_sql  =      `SELECT
+                                                  amount as balance
+                                                  FROM
+                                                  utxos
+                                                  WHERE address = ?;`  
+                        // let tx_count_sql  =      `SELECT
+                        //                             count(address) as tx_count
+                        //                             FROM
+                        //                             tx_outputs
+                        //                             WHERE address = ?;`  
+                        let freeze_sql   =       `SELECT 
+                                                    SUM(amount) as freeze_amount
                                                     FROM 
-                                                    tx_outputs`
+                                                    utxos
+                                                    WHERE 
+                                                    type = 1 and address = ?;`
+                        
                         total_sent_amount = 0;
                         storage.query(recieved_amount_sql, [])
                         .then((rows: any[]) => {
                          total_recieved_amount = rows[0].amount
-                        })
-                        
-                    } 
-                    else
-                    {
-                        recieved_amount_sql  =   `SELECT 
-                                                   SUM(O.amount - U.amount) as recieved_amount
-                                                   FROM tx_outputs O
-                                                   INNER JOIN tx_inputs I ON (O.utxo_key = I.utxo)
-                                                   INNER JOIN utxos U ON (O.utxo_key = U.utxo_key)
-                                                   WHERE O.amount > U.amount 
-                                                   GROUP BY '${address}'
-                                                   `
-                        sent_amount_sql  =   `SELECT 
-                                                   SUM(U.amount - O.amount) as sent_amount
-                                                   FROM tx_outputs O
-                                                   INNER JOIN tx_inputs I ON (O.utxo_key = I.utxo)
-                                                   INNER JOIN utxos U ON (O.utxo_key = U.utxo_key)
-                                                   WHERE O.amount < U.amount 
-                                                   GROUP BY '${address}'
-                                                   `
-                    }  
-                        
-    
-                        let balance_sql  =      `SELECT
-                                                  SUM(amount) as balance
-                                                  FROM
-                                                  utxos
-                                                  WHERE address = ?;`  
-    
-                        let tx_count_sql  =      `SELECT
-                                                   count(address) as tx_count
-                                                   FROM
-                                                   tx_outputs
-                                                   WHERE address = ?;`  
-    
-                        storage.query(balance_sql, [address.toString()])
-                       .then((rows: any[]) => {
-                        balance= rows[0].balance
-                        return storage.query(tx_count_sql,[address.toString()]);
-                       }).then((rows:any[])=>{
-                        txs_count = rows[0].tx_count;
-                        return storage.query(recieved_amount_sql,[address.toString()]);
-                       }).then((rows:any[])=>{
-                        total_recieved_amount = rows[0].recieved_amount;
-                        return storage.query(sent_amount_sql,[address.toString()]);
-                       }).then((rows:any[])=>{
-                        total_recieved_amount = rows[0].sent_amount;
-                        storage.run(
-                            `INSERT INTO account
-                                (address, lock_bytes, txs_count, total_recieved, total_sent, total_reward, balance)
-                                 VALUES
-                                 (?, ?, ?, ?, ?, ?, ?)`,
-                            [
+                         return storage.query(balance_sql,[address.toString()])
+                        }).then((rows:any[])=>{
+                          let last_row = rows.length;
+                          balance = Number(rows[last_row - 1].balance);
+                        //   return storage.query(tx_count_sql,[address.toString()])
+                        // }).then((rows:any[])=>{
+                        //     txs_count = rows[0].tx_count;
+                            return storage.query(freeze_sql,[address.toString()])
+                        }).then((rows:any)=>{
+                            total_freeze_amount = Number(rows[0].freeze_amount)
+                            balance = total_freeze_amount ? balance + total_freeze_amount: balance + 0; 
+                            ++txs_count;
+                            storage.run(
+                                `INSERT INTO account
+                                    (address, txs_count, total_recieved, total_sent, total_reward, total_freeze_amount, balance)
+                                    VALUES
+                                    (?, ?, ?, ?, ?, ?, ? 
+                                    ON DUPLICATE KEY UPDATE 
+                                    address = ?, txs_count = ?, total_recieved = ?, total_sent = ?, total_reward = ?, total_freeze_amount = ?, balance = ? `,
+                                [
                                 address.toString(),
-                                output.lock.bytes,
                                 txs_count,
                                 total_recieved_amount.toString(),
                                 total_sent_amount.toString(),
                                 '4568',
+                                total_freeze_amount.toString(),
                                 balance,
-                            ]
-                        ) 
-                       })
+                                ]
+                            ) 
+                        })
+                        .then(() =>
+                        {
+                            resolve();
+                        })
+                        .catch((err) =>
+                        {
+                            reject(err);
+                        })
+                    } 
+                    else
+                    {
+
+                           
+                    let recieved_amount_sql  =   `SELECT 
+                                                    SUM(O.amount - U.amount) as recieved_amount
+                                                    FROM tx_outputs O
+                                                    INNER JOIN tx_inputs I ON (O.utxo_key = I.utxo)
+                                                    INNER JOIN utxos U ON (O.utxo_key = U.utxo_key)
+                                                    WHERE O.amount > U.amount 
+                                                    GROUP BY '${address}'`   
+
+                    let sent_amount_sql  =        `SELECT 
+                                                    SUM(U.amount - O.amount) as sent_amount
+                                                    FROM tx_outputs O
+                                                    INNER JOIN tx_inputs I ON (O.utxo_key = I.utxo)
+                                                    INNER JOIN utxos U ON (O.utxo_key = U.utxo_key)
+                                                    WHERE O.amount < U.amount 
+                                                    GROUP BY '${address}'`
+                               
+                               
+                    let balance_sql  =      `SELECT
+                                              amount as balance
+                                              FROM
+                                              utxos
+                                              WHERE address = ?;`  
+
+                                // let tx_count_sql  =      `SELECT
+                                //                            count(address) as tx_count
+                                //                            FROM
+                                //                            tx_outputs
+                                //                            WHERE address = ?;`  
+
+                    let freeze_sql   =       `SELECT 
+                                               SUM(amount) as freeze_amount
+                                               FROM 
+                                               utxos
+                                               WHERE 
+                                               type = 1 and address = ?;`
+                                               
+                                storage.query(balance_sql, [address.toString()])
+                                .then((rows: any[]) => {
+                                let last_row =  rows.length;     
+                                    balance = Number(rows[last_row - 1].amount);
+                                    // return storage.query(tx_count_sql,[address.toString()]);
+                                    //     }).then((rows:any[])=>{
+                                    //         txs_count = rows[0].tx_count;
+                                            return storage.query(recieved_amount_sql,[address.toString()]);
+                                        }).then((rows:any[])=>{
+                                            total_recieved_amount = rows[0].recieved_amount;
+                                            return storage.query(sent_amount_sql,[address.toString()]);
+                                        }).then((rows:any[])=>{
+                                            total_recieved_amount = rows[0].sent_amount;
+                                            return storage.query(freeze_sql,[address.toString()])
+                                        }).then((rows:any[])=>{
+                                            total_freeze_amount = Number(rows[0].freeze_amount);
+                                            balance = total_freeze_amount ? total_freeze_amount + balance : balance + 0;
+                                            ++txs_count
+                                            storage.run(
+                                                `INSERT INTO account
+                                                    (address, txs_count, total_recieved, total_sent, total_reward, total_freeze_amount, balance)
+                                                    VALUES
+                                                    (?, ?, ?, ?, ?, ?, ?)
+                                                    ON DUPLICATE KEY UPDATE 
+                                                    address = ?, txs_count = ?, total_recieved = ?, total_sent = ?, total_reward = ?, total_freeze_amount = ?, balance = ? `
+                                                ,
+                                                [
+                                                address.toString(),
+                                                txs_count,
+                                                total_recieved_amount.toString(),
+                                                total_sent_amount.toString(),
+                                                '4568',
+                                                total_freeze_amount.toString(),
+                                                balance,
+                                                ]
+                                            ) 
+                         })
                        
                         .then(() =>
                         {
@@ -2396,30 +2468,32 @@ export class LedgerStorage extends Storages
                         {
                             reject(err);
                         })
+                    }  
                 });
             }
     
-            return new Promise<void>((resolve, reject) =>
+        return new Promise<void>((resolve, reject) =>
+        {
+           (async () =>
             {
-                (async () =>
+              try
                 {
-                    try
-                    {
-                        for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++)
+                    for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++)
                         {
+                            console.log(block.txs.length);
                             for (let out_idx = 0; out_idx < block.txs[tx_idx].outputs.length; out_idx++)
                             {
                                 await save_account(this, block.txs[tx_idx].outputs[out_idx],block.txs[tx_idx]);
                             }
                         }
-                    }
-                    catch (err)
-                    {
-                        reject(err);
-                        return;
-                    }
-                    resolve();
-                })();
-            });
-        }
+                }
+                catch (err)
+                {
+                    reject(err);
+                    return;
+                }
+                resolve();
+            })();
+        });
+    }
 }  

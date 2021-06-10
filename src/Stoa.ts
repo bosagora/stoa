@@ -152,8 +152,8 @@ class Stoa extends WebService
         this.app.post("/block_externalized", this.postBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
         this.app.post("/transaction_received", this.putTransaction.bind(this));
-        this.app.get("/boaholder/:address", this.getBOAHolder.bind(this));
-        this.app.get("/boaholders", this.getBoaHolders.bind(this));
+        this.app.get("/holder/:address", this.getBOAHolder.bind(this));
+        this.app.get("/holders", this.getBoaHolders.bind(this));
 
         let height: Height = new Height("0");
 
@@ -1665,7 +1665,7 @@ class Stoa extends WebService
             return resolve({ page, pageSize });
         });
     }
-        /**
+    /**
      * GET /coinmarketchart/
      *
      * Called when a request is received through the `/utxo/` handler
@@ -1681,16 +1681,17 @@ class Stoa extends WebService
              let dt = new Date(to.seconds * 1000);
              let df = new Date((num)* 1000 )
      
-             logger.info(`Price chart from: ${df}, to: ${dt} `)
+             logger.info(`Price chart from: ${df}, to: ${dt}`)
      
              this.ledger_storage.getCoinMarketChart(Number(from.toString()), to.seconds)
-                 .then(async(rows :any [])=>{
-                      if(rows.length === 0)
+                 .then(async(rows: any [])=>{
+                      if(!rows.length)
                       {
                          res.status(204).send("The data does not exist")
                       }
-                      else{
-                         let marketCapChart : Array<IMarketChart> = [];
+                      else
+                      {
+                         let marketCapChart: Array<IMarketChart> = [];
                          await rows.forEach((element, index)=> {
                               marketCapChart.push({
                                  usd_price: element.price,
@@ -1709,24 +1710,25 @@ class Stoa extends WebService
          
     /**
      * GET /boaholder:address
-     *
+     * @param req 
+     * @param res 
      * Returns Address, Balance, Freeze Amount, Received Rewards, Percentage, Value.
      */
-        private getBOAHolder (req: express.Request, res: express.Response)
-    {
+    private getBOAHolder (req: express.Request, res: express.Response)
+         {
             let address: string = String(req.params.address);
 
-            logger.http(`GET /boaholder`);
+            logger.http(`GET /holder`);
 
             this.ledger_storage.getBOAHolder(address)
                 .then((data:any) => {
-
-                    
                     if (!data)
-                 {
+                    {
                         res.status(204).send(`No account. address': (${address})`);
                         return;
-                    }else {
+                    }
+                    else
+                    {
 
                         res.status(200).json({data});
                     }
@@ -1737,14 +1739,14 @@ class Stoa extends WebService
                     }
                 );
         }
-          /**
+     /**
       * Get BOA Holders
       * @param req 
       * @param res 
       * @returns Returns Boa Holders of the ledger.
       */
     public async getBoaHolders(req: express.Request, res: express.Response) {
-        logger.http(`GET /boaholders`);
+        logger.http(`GET /holders`);
         let pagination: IPagination = await this.paginate(req, res);
         this.ledger_storage.getBOAHolders(pagination.pageSize, pagination.page)
             .then((data: any) => {

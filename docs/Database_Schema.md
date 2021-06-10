@@ -448,3 +448,33 @@ Create TABLE IF NOT EXISTS "marketcap" (
     PRIMARY KEY ("last_updated_at")
 );
 ```
+----
+
+## 16. Table **account**
+
+### _Schema_
+
+| Column                 | Data Type  | PK | Not NULL | Default  |Description|
+|:-----------------------|:-----------|:--:|:--------:| -------- | --------- |
+|  address               | TEXT       | Y  | Y        |          | Public key of the wallet|
+|  txs_count             | INTEGER    |    | Y        |          | Transaction count correspondes to the public key|
+|  total_received_amount | BIGINT(20) |    | Y        |          | Total received amount to wallet correspondes to the public key |
+|  total_sent_amount     | BIGINT(20) |    | Y        |          | Total sent amount from wallet correspondes to the public key|
+|  total_reward_amount   | BIGINT(20) |    | Y        |          | Total reward amount to wallet correspondes to the public key |
+|  total_freeze_amount   | BIGINT(20) |    | Y        |          | Total freeze amount from wallet correspondes to the public key |
+|  balance               | BIGINT(20) |    | Y        |          | Total balance of wallet correspondes to the public key|
+
+### _Create Script_
+
+```sql
+CREATE TABLE IF NOT EXISTS "account" (
+    "address"                   TINYBLOB   NOT NULL,
+    "txs_count"                 INTEGER    NOT NULL,
+    "total_received_amount"     BIGINT(20) UNSIGNED   NOT NULL,
+    "total_sent_amount"         BIGINT(20) UNSIGNED   NOT NULL,
+    "total_reward_amount"       BIGINT(20) UNSIGNED   NOT NULL,
+    "total_freeze_amount"       BIGINT(20) UNSIGNED   NOT NULL,
+    "balance"                   BIGINT(20) UNSIGNED   NOT NULL,
+    PRIMARY KEY("address(64)")
+)
+```
