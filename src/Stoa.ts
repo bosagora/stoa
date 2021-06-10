@@ -2,7 +2,7 @@ import { AgoraClient } from './modules/agora/AgoraClient';
 import { cors_options } from './cors';
 import { IDatabaseConfig } from './modules/common/Config';
 import { LedgerStorage } from './modules/storage/LedgerStorage';
-import { CoinMarketService } from './modules/service/CoinMaketService';
+import { CoinMarketService } from './modules/service/CoinMarketService';
 import { logger } from './modules/common/Logger';
 import { Height, PreImageInfo, Hash, hash, Block, Utils,
     Endian, Transaction, hashFull } from 'boa-sdk-ts';
@@ -147,7 +147,7 @@ class Stoa extends WebService
         this.app.get("/block-transactions", this.getBlockTransactions.bind(this));
         this.app.get("/boa-stats", this.getBOAStats.bind(this));
         this.app.get("/spv/:hash", this.verifyPayment.bind(this));
-        this.app.get("/coinmarketcap", this.getcoinMaketCap.bind(this));
+        this.app.get("/coinmarketcap", this.getCoinMarketCap.bind(this));
         this.app.get("/coinmarketchart", this.getBoaPriceChart.bind(this));
         this.app.post("/block_externalized", this.postBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
@@ -1414,7 +1414,7 @@ class Stoa extends WebService
       * @param res
       * @returns Returns Coin market cap.
       */
-    private async getcoinMaketCap(req: express.Request, res: express.Response) {
+    private async getCoinMarketCap(req: express.Request, res: express.Response) {
 
          this.ledger_storage.getCoinMarketcap().then((rows:any)=>{
              if(rows[0])

@@ -1,6 +1,6 @@
 /*******************************************************************************
 
-    This file cotain implementation of coin market service for boascan. 
+    This file contains the implementation of coin market service for boascan.
 
     Copyright:
         Copyright (c) 2020-2021 BOSAGORA Foundation
@@ -20,30 +20,30 @@ import { Time } from '../common/Time';
 
 export class CoinMarketService {
     /**
-     * Market Client i.e CoinGeckoMaket
+     * Market Client i.e CoinGeckoMarket
      */
     private coinMarketClient: any;
 
     /**
-     * Job to collect coin market data 
+     * Job to collect coin market data
      */
     private job: cron.ScheduledTask | null = null;
 
     /**
-     * Job exection status 
+     * Job execution status
      */
     private status: boolean;
 
     /**
      * constructor
-     * @param coinMarketClient i.e CoinGeckoMaket
+     * @param coinMarketClient i.e CoinGeckoMarket
      */
     constructor(coinMarketClient: any) {
         this.coinMarketClient = coinMarketClient;
         this.status = false;
     }
     /**
-     * @param StoaInstance 
+     * @param StoaInstance
      * Asynchronously start CoinMarket Data sync service
      */
     public start(stoaInstance: Stoa, time: number = 15): Promise<boolean> {
@@ -58,10 +58,10 @@ export class CoinMarketService {
     }
 
     /**
-     * This method prefrom bosagora coin market cap recovery and handle 
+     * This method performs BOSAGORA coin market cap recovery and handle
      * the execution order of cron job
-     * @param stoaInstance 
-     * @returns 
+     * @param stoaInstance
+     * @returns
      */
     public scheduler(stoaInstance: Stoa): Promise<boolean> {
         return new Promise<boolean>(async (resolve, reject) => {
@@ -98,7 +98,7 @@ export class CoinMarketService {
     }
     
     /**
-     * @param StoaInstance 
+     * @param StoaInstance
      * Asynchronously recover 24 hour CoinMarket Data
      */
     public recover24hourData(stoaInstance: Stoa): Promise<boolean> {
@@ -124,7 +124,7 @@ export class CoinMarketService {
         });
     }
     /**
-     * @param StoaInstance 
+     * @param StoaInstance
      * Asynchronously recover CoinMarket Data
      */
     public recover(stoaInstance: Stoa): Promise<boolean> {

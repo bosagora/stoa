@@ -4,8 +4,8 @@ import { logger, Logger } from './modules/common/Logger';
 import { BOASodium } from "boa-sodium-ts";
 import { SodiumHelper } from "boa-sdk-ts";
 import Stoa from './Stoa';
-import { CoinMarketService } from './modules/service/CoinMaketService';
-import { CoinGeckoMaket } from './modules/coinmarket/CoinGeckoMaket'
+import { CoinMarketService } from './modules/service/CoinMarketService';
+import { CoinGeckoMarket } from './modules/coinmarket/CoinGeckoMarket'
 import { CoinGeckoClient } from "coingecko-api-v3";
 import { Storages } from './modules/storage/Storages';
 
@@ -40,7 +40,7 @@ const stoa: Stoa = new Stoa(config.database,
     config.server.port,
     config.server.address,
     config.consensus.genesis_timestamp,
-    new CoinMarketService(new CoinGeckoMaket( new CoinGeckoClient({
+    new CoinMarketService(new CoinGeckoMarket( new CoinGeckoClient({
             timeout: 10000,
             autoRetry: true,
         })))

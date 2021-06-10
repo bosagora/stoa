@@ -26,7 +26,7 @@ import { Block, Hash, Height, PreImageInfo, handleNetworkError,
 import { IDatabaseConfig } from '../src/modules/common/Config';
 
 import JSBI from 'jsbi';
-import { CoinMarketService } from '../src/modules/service/CoinMaketService';
+import { CoinMarketService } from '../src/modules/service/CoinMarketService';
 import { IMarketCap } from "../src/Types";
 
 export const sample_data_raw = (() => {
