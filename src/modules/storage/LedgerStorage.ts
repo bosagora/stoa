@@ -227,11 +227,11 @@ export class LedgerStorage extends Storages
         );
 
         CREATE TABLE IF NOT EXISTS marketcap (
-            last_updated_at     INTEGER NOT NULL,
-            price               DOUBLE  NOT NULL,
-            market_cap          BIGINT(20) UNSIGNED NOT NULL,
-            vol_24h             BIGINT(20) UNSIGNED NOT NULL,
-            change_24h          BIGINT(20),
+            last_updated_at INTEGER NOT NULL,
+            price           DECIMAL(14,6)  NOT NULL,
+            market_cap      BIGINT(20) UNSIGNED NOT NULL,
+            vol_24h         BIGINT(20) UNSIGNED NOT NULL,
+            change_24h      BIGINT(20),
             PRIMARY KEY (last_updated_at)
         );
 

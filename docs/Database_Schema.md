@@ -428,22 +428,22 @@ Create TABLE IF NOT EXISTS "blocks_stats" (
 
 ### _Schema_
 
-| Column                 | Data Type | PK | Not NULL | Default  |Description|
-|:-----------------------|:--------- |:--:|:--------:| -------- | --------- |
-|  last_updated_at       | INTEGER   | Y  | Y        |          | Time of last update  |
-|  price                 | BIGINT(20)|    | Y        |          | Price of BOA in USD  |
-|  market_cap            | BIGINT(20)|    | Y        |          | Market cap 24 hour amount  |
-|  vol_24h               | BIGINT(20)|    | Y        |          | 24 hours Volume  |
-|  change_24h            | BIGINT(20)|    |          |          | Market cap change for last 24 hours |
+| Column                 | Data Type    | PK | Not NULL | Default  |Description|
+|:-----------------------|:---------    |:--:|:--------:| -------- | --------- |
+|  last_updated_at       | INTEGER      | Y  | Y        |          | Time of last update  |
+|  price                 | DECIMAL(14,6)|    | Y        |          | Price of BOA in USD  |
+|  market_cap            | BIGINT(20)   |    | Y        |          | Market cap 24 hour amount  |
+|  vol_24h               | BIGINT(20)   |    | Y        |          | 24 hours Volume  |
+|  change_24h            | BIGINT(20)   |    |          |          | Market cap change for last 24 hours |
 
 ### _Create Script_
 
 ```sql
 Create TABLE IF NOT EXISTS "marketcap" (
-    "last_updated_at"        INTEGER     NOT NULL,
-    "price"                  BIGINT(20)  UNSIGNED NOT NULL,
-    "market_cap"             BIGINT(20)  UNSIGNED NOT NULL,
-    "vol_24h"                BIGINT(20)  UNSIGNED NOT NULL,
+    "last_updated_at"        INTEGER       NOT NULL,
+    "price"                  DECIMAL(14,6) NOT NULL,
+    "market_cap"             BIGINT(20)    UNSIGNED NOT NULL,
+    "vol_24h"                BIGINT(20)    UNSIGNED NOT NULL,
     "change_24h"             BIGINT(20),
     PRIMARY KEY ("last_updated_at")
 );

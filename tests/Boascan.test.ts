@@ -587,10 +587,10 @@ describe('Test of Stoa API Server', () => {
         let uri = URI(host)
             .port(port)
             .directory("/coinmarketcap");
-        let response = await client.get(uri.toString());        
+        let response = await client.get(uri.toString());
         let expected = {
             last_updated_at: 1622599176,
-            price: 0.239252,
+            price: "0.239252",
             market_cap: 72635724,
             vol_24h: 1835353,
             change_24h: -7
