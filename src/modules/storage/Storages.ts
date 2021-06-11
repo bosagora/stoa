@@ -16,6 +16,7 @@
 import * as mysql from 'mysql2';
 import { DatabaseConfig, IDatabaseConfig } from '../common/Config';
 import { logger, Logger } from '../common/Logger';
+import { Operation } from '../common/LogOperation';
 
 export class Storages
 {
@@ -47,7 +48,8 @@ export class Storages
             this.db = mysql.createConnection(dbconfig);
             this.db.connect(function (err) {
                 if (err) throw err;
-                logger.info(`connected to mysql host: ${databaseConfig.host}`);
+                logger.info(`connected to mysql host: ${databaseConfig.host}`,
+                    { operation: Operation.db, height: "", success: true });
             });
                 this.createTables()
                     .then(() =>

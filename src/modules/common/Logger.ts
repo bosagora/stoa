@@ -15,11 +15,12 @@
 *******************************************************************************/
 
 import path from 'path';
-import winston from 'winston';
-
-const { combine, timestamp, label, printf } = winston.format;
+import winston, { config } from 'winston';
+import { MongoDB } from 'winston-mongodb';
+import { MongoClient } from 'mongodb';
+const { combine, timestamp, label, printf, metadata, json } = winston.format;
 const logFormat = printf(({ level, message, label, timestamp }) => {
-  return `[${label}] ${timestamp} ${level} ${message}`;
+    return `[${label}] ${timestamp} ${level} ${message}`;
 });
 
 
@@ -78,6 +79,43 @@ export class Logger
         };
 
         return new winston.transports.Console(options);
+    }
+    /**
+    * Create the 'default' database transport to be added to a logger
+    *
+    *
+    * @return A transport that can be passed to `logger.add`
+    */
+    public static defaultDatabaseTransport(mongodb_url: string) {
+        const options = {
+            level: 'http',
+            db: mongodb_url,
+            collection: 'stoa_logs',
+            tryReconnect: true,
+            format: combine(
+                timestamp(),
+                json(),
+                metadata({ fillExcept: ['message', 'level', 'timestamp', 'label'] }),                
+            ),
+            options : {useUnifiedTopology: true}
+        };
+        return new MongoDB(options);
+    }
+    /**
+     * Method build connectivity with logging database.
+     * @param mongodb_url 
+     * @returns Ture if successfull, and return false if connection issue occers.
+     */
+    public static async BuildDbConnection(mongodb_url: string) {
+
+        const client = new MongoClient(mongodb_url, {useUnifiedTopology: true});
+        try {
+            await client.connect();
+            return true;
+        } catch (err) {
+            logger.error(`stoa is unable to build connection for db log. Error:`, err);
+            return false;
+        }
     }
 
     public static create () : winston.Logger

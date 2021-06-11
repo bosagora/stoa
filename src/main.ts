@@ -8,6 +8,7 @@ import { CoinMarketService } from './modules/service/CoinMarketService';
 import { CoinGeckoMarket } from './modules/coinmarket/CoinGeckoMarket'
 import { CoinGeckoClient } from "coingecko-api-v3";
 import { Storages } from './modules/storage/Storages';
+import { Operation } from './modules/common/LogOperation';
 
 // Create with the arguments and read from file
 let config = Config.createWithArgument();
@@ -29,11 +30,18 @@ switch (process.env.NODE_ENV) {
         logger.add(Logger.defaultFileTransport(config.logging.folder));
         if (config.logging.console)
             logger.add(Logger.defaultConsoleTransport());
+        if (config.logging.database)
+        {
+           Logger.BuildDbConnection(config.logging.mongodb_url).then((connection)=>{
+                 if (connection)
+                     logger.add(Logger.defaultDatabaseTransport(config.logging.mongodb_url));  
+           })
+        }  
 }
 logger.transports.forEach((tp) => { tp.level = config.logging.level });
 
-logger.info(`Agora endpoint: ${config.server.agora_endpoint.toString()}`);
-logger.info(`mysql database host: ${config.database.database}`);
+logger.info(`Agora endpoint: ${config.server.agora_endpoint.toString()}`, { operation: Operation.connection, height: "", success: true });
+logger.info(`mysql database host: ${config.database.database}`, { operation: Operation.connection, height: "", success: true});
 
 const stoa: Stoa = new Stoa(config.database,
     config.server.agora_endpoint,
@@ -53,7 +61,8 @@ SodiumHelper.init()
             await Storages.waiteForConnection(config.database);
             return await stoa.createStorage().catch((error:any) =>
             {
-                logger.error(`Failed to create LedgerStorage: ${error}`);
+                logger.error(`Failed to create LedgerStorage: ${error}`,
+                    { operation: Operation.start, height: "", success: false });
                 process.exit(1);
             });
         })
@@ -65,13 +74,13 @@ SodiumHelper.init()
                 switch (error.code)
                 {
                     case 'EACCES':
-                        logger.error(`${config.server.port} requires elevated privileges`);
+                        logger.error(`${config.server.port} requires elevated privileges`, { operation: Operation.start, height: "", success: false });
                         break;
                     case 'EADDRINUSE':
-                        logger.error(`Port ${config.server.port} is already in use`);
+                        logger.error(`Port ${config.server.port} is already in use`, { operation: Operation.start, height: "", success: false });
                         break;
                     default:
-                        logger.error(`An error occured while starting the server: ${error.stack}`);
+                        logger.error(`An error occured while starting the server: ${error.stack}`, { operation: Operation.start, height: "", success: false });
                 }
                 process.exit(1);
             });
@@ -79,6 +88,6 @@ SodiumHelper.init()
     ).catch(
         (error) =>
         {
-            logger.error(`Failed to load Sodium library: ${error}`);
+            logger.error(`Failed to load Sodium library: ${error}`, { operation: Operation.start, height: "", success: false });
             process.exit(1);
         });

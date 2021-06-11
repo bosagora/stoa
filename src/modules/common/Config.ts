@@ -298,6 +298,16 @@ export class LoggingConfig implements ILoggingConfig
     public console: boolean;
 
     /**
+     * Wheather db log is enable or not
+     */
+    public database: boolean;
+
+    /**
+     * url of mongodb to store logs
+     */
+    public mongodb_url: string;
+
+    /**
      * Constructor
      */
     constructor ()
@@ -306,6 +316,8 @@ export class LoggingConfig implements ILoggingConfig
         this.folder = path.resolve(Utils.getInitCWD(), defaults.folder);
         this.level = defaults.level;
         this.console = defaults.console;
+        this.database = defaults.database;
+        this.mongodb_url = defaults.mongodb_url;
     }
 
     /**
@@ -320,6 +332,9 @@ export class LoggingConfig implements ILoggingConfig
             this.level = config.level;
         if (config.console !== undefined)
             this.console = config.console;
+        if (config.database !== undefined)
+            this.database = config.database;
+            this.mongodb_url = config.mongodb_url;    
     }
 
     /**
@@ -330,7 +345,9 @@ export class LoggingConfig implements ILoggingConfig
         return {
             folder: path.resolve(Utils.getInitCWD(), "logs/"),
             level: "info",
-            console: false
+            console: false,
+            database: false,
+            mongodb_url: 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false'
         }
     }
 }
@@ -448,6 +465,16 @@ export interface ILoggingConfig
      * Whether the console is enabled as well
      */
     console: boolean;
+
+    /**
+     * Wheather db log is enable or not
+     */
+    database: boolean;
+     
+     /**
+     * url of mongodb to store logs
+     */
+    mongodb_url: string;
 }
 
 /**
