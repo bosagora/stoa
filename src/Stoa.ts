@@ -13,6 +13,8 @@ import { ValidatorData, IPreimage, IUnspentTxOutput, ITxStatus,
     IBlockOverview, IBlockEnrollmentElements, IBlockEnrollment, IBlockTransactions, IBlockTransactionElements,
     IBOAStats, IPagination, IMarketCap, IMarketChart} from './Types';
 import { Time } from './modules/common/Time';
+import { Operation } from './modules/common/LogOperation';
+import { HeightManager } from './modules/common/HeightManager';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -109,7 +111,7 @@ class Stoa extends WebService
             return this._ledger_storage;
         else
         {
-            logger.error('LedgerStorage is not ready yet.');
+            logger.error('LedgerStorage is not ready yet.', { operation: Operation.start, height: "", success: false });
             process.exit(1);
         }
     }
@@ -155,17 +157,20 @@ class Stoa extends WebService
         this.app.post("/transaction_received", this.putTransaction.bind(this));
 
         let height: Height = new Height("0");
+        await HeightManager.init(this);
+        
 
         // Start the server once we can establish a connection to Agora
         return this.agora.getBlockHeight()
             .then(
-                (res) => {
+               async(res) => {
+                    
                     height.value = JSBI.BigInt(res.value);
-                    logger.info(`Connected to Agora, block height is ${res.toString()}`);
+                    logger.info(`Connected to Agora, block height is ${res.toString()}`, { operation: Operation.connection, height: HeightManager.height.toString(), success: true });
                     return super.start();
                 },
                 (err) => {
-                    logger.error(`Error: Could not connect to Agora node: ${err.toString()}`);
+                    logger.error(`Error: Could not connect to Agora node: ${err.toString()}`, { operation: Operation.connection, height: HeightManager.height.toString(), success: false });
                     process.exit(1);
                 })
             .then(
@@ -174,7 +179,8 @@ class Stoa extends WebService
                     if(!(process.env.NODE_ENV === 'test'))
                     {
                         this.coinMarketService.start(this).catch((err)=>{
-                        logger.error(`Error: Could not connect to marketcap Client: ${err.toString()}`);
+                        logger.error(`Error: Could not connect to marketcap Client: ${err.toString()}`, 
+                            { operation: Operation.connection, height: HeightManager.height.toString(), success: false });
                         });
                     }
                     return this.pending = this.pending.then(() => { return this.catchup(height); });
@@ -272,7 +278,8 @@ class Stoa extends WebService
                 res.status(200).send(JSON.stringify(out_put));
             })
             .catch((err) => {
-                logger.error("Failed to data lookup to the DB: " + err);
+                logger.error("Failed to data lookup to the DB: " + err, 
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
             }
         );
@@ -369,7 +376,8 @@ class Stoa extends WebService
                 res.status(200).send(JSON.stringify(out_put));
             })
             .catch((err) => {
-                logger.error("Failed to data lookup to the DB: " + err);
+                logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
             }
         );
@@ -416,7 +424,8 @@ class Stoa extends WebService
                 res.status(200).send(JSON.stringify(status));
             })
             .catch((err) => {
-                logger.error("Failed to data lookup to the DB: " + err);
+                logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
             });
     }
@@ -501,7 +510,8 @@ class Stoa extends WebService
                 res.status(200).send(JSON.stringify(tx));
             })
             .catch((err) => {
-                    logger.error("Failed to data lookup to the DB: " + err);
+                logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                     res.status(500).send("Failed to data lookup");
                 }
             );
@@ -542,7 +552,8 @@ class Stoa extends WebService
                 res.status(200).send(JSON.stringify(tx));
             })
             .catch((err) => {
-                    logger.error("Failed to data lookup to the DB: " + err);
+                logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                     res.status(500).send("Failed to data lookup");
                 }
             );
@@ -581,7 +592,8 @@ class Stoa extends WebService
                 res.status(200).send(JSON.stringify(utxo_array));
             })
             .catch((err) => {
-                    logger.error("Failed to data lookup to the DB: " + err);
+                logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                     res.status(500).send("Failed to data lookup");
                 }
             );
@@ -635,7 +647,8 @@ class Stoa extends WebService
                 res.status(200).send(JSON.stringify(utxo_array));
             })
             .catch((err) => {
-                    logger.error("Failed to data lookup to the DB: " + err);
+                    logger.error("Failed to data lookup to the DB: " + err,
+                        { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                     res.status(500).send("Failed to data lookup");
                 }
             );
@@ -756,7 +769,8 @@ class Stoa extends WebService
                 res.status(200).send(JSON.stringify(out_put));
             })
             .catch((err) => {
-                logger.error("Failed to data lookup to the DB: " + err);
+                logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
             });
     }
@@ -826,7 +840,8 @@ class Stoa extends WebService
                 res.status(200).send(JSON.stringify(overview));
             })
             .catch((err) => {
-                logger.error("Failed to data lookup to the DB: " + err);
+                logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
             });
     }
@@ -901,7 +916,8 @@ class Stoa extends WebService
             }
             })
             .catch((err) => {
-                logger.error("Failed to data lookup to the DB: " + err);
+                logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
             });
     }
@@ -975,7 +991,8 @@ class Stoa extends WebService
             }
         })
         .catch((err) => {
-            logger.error("Failed to data lookup to the DB: " + err);
+            logger.error("Failed to data lookup to the DB: " + err,
+                { operation: Operation.db, height: HeightManager.height.toString(), success: false });
            return res.status(500).send("Failed to data lookup");
         });
     }
@@ -1057,7 +1074,8 @@ class Stoa extends WebService
             }
         })
         .catch((err) => {
-            logger.error("Failed to data lookup to the DB: " + err);
+            logger.error("Failed to data lookup to the DB: " + err,
+                { operation: Operation.db, height: HeightManager.height.toString(), success: false });
             res.status(500).send("Failed to data lookup");
         });
     }
@@ -1095,7 +1113,8 @@ class Stoa extends WebService
             }
         })
         .catch((err) => {
-            logger.error("Failed to data lookup to the DB: " + err);
+            logger.error("Failed to data lookup to the DB: " + err,
+                { operation: Operation.db, height: HeightManager.height.toString(), success: false });
            return res.status(500).send("Failed to data lookup");
         });
     }
@@ -1158,7 +1177,8 @@ class Stoa extends WebService
                     })
                 })
             .catch((err) => {
-                logger.error("Failed to data lookup to the DB: " + err);
+                logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
             });
     }
@@ -1178,7 +1198,8 @@ class Stoa extends WebService
             return;
         }
 
-        logger.http(`POST /block_externalized block=${req.body.block.toString()}`);
+        logger.http(`POST /block_externalized block=${req.body.block.toString()}`,
+        { operation: Operation.db, height: "", success: true });
 
         // To do
         // For a more stable operating environment,
@@ -1225,11 +1246,13 @@ class Stoa extends WebService
        this.ledger_storage.storeCoinMarket(data).then((result: any)=>{
             if(result.affectedRows)
             {
-             logger.info(`CoinMarket: Data Update Completed`);
+                logger.info(`CoinMarket: Data Update Completed`,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: true });
              resolve (result);
             }
        }).catch((err) => {
-                logger.error("Failed to Store coin market cap data." + err);
+            logger.error("Failed to Store coin market cap data." + err,
+                { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 reject(err);
         });
        });
@@ -1293,7 +1316,8 @@ class Stoa extends WebService
                 res.status(200).send(JSON.stringify(pending_array));
             })
             .catch((err) => {
-                    logger.error("Failed to data lookup to the DB: " + err);
+                    logger.error("Failed to data lookup to the DB: " + err,
+                        { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                     res.status(500).send("Failed to data lookup");
                 }
             );
@@ -1344,7 +1368,8 @@ class Stoa extends WebService
             })
             .catch((err) =>
             {
-                logger.error("Failed to data lookup to the DB: " + err);
+                logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
             });
     }
@@ -1366,7 +1391,8 @@ class Stoa extends WebService
                     res.status(200).send(JSON.stringify(row));
             })
             .catch((err) => {
-                logger.error("Failed to data lookup to the DB: " + err);
+                logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
             }
             );
@@ -1481,7 +1507,8 @@ class Stoa extends WebService
              }
 
          }).catch((err)=>{
-              logger.error("Failed to data lookup to the DB: " + err);
+              logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
          })
     }
@@ -1519,7 +1546,9 @@ class Stoa extends WebService
                             {
                                 await this.ledger_storage.putBlocks(block);
                                 expected_height.value = JSBI.add(expected_height.value, JSBI.BigInt(1));
-                                logger.info(`Recovered a block with block height of ${block.header.height.toString()}`);
+                                HeightManager.height = new Height(block.header.height.toString());
+                                logger.info(`Recovered a block with block height of ${block.header.height.toString()}`,
+                                    { operation: Operation.block_recovery, height: HeightManager.height.toString(), success: true });
                             }
                             else
                             {
@@ -1535,13 +1564,17 @@ class Stoa extends WebService
                         if (block != null)
                         {
                             await this.ledger_storage.putBlocks(Block.reviver("", block));
-                            logger.info(`Saved a block with block height of ${height.toString()}`);
+                            HeightManager.height = new Height(block.header.height.toString());
+                            logger.info(`Saved a block with block height of ${height.toString()}`,
+                                { operation: Operation.block_sync, height: HeightManager.height.toString(), success: true });
                         }
                         resolve(true);
                     }
                     else
                     {
-                        logger.info(`Save of block ${height.toString()} postponed to`);
+                        HeightManager.height = new Height(block.header.height.toString())
+                        logger.info(`Save of block ${height.toString()} postponed to`,
+                            { operation: Operation.block_sync, height: HeightManager.height.toString(), success: true });
                         resolve(false);
                     }
                 }
@@ -1588,7 +1621,9 @@ class Stoa extends WebService
                         // The normal case
                         // Save a block just received
                         await this.ledger_storage.putBlocks(Block.reviver("", block));
-                        logger.info(`Saved a block with block height of ${height.toString()}`);
+                        HeightManager.height = new Height(height.toString());
+                        logger.info(`Saved a block with block height of ${height.toString()}`,
+                            { operation: Operation.db, height: HeightManager.height.toString(), success: true });
                     }
                     else if (JSBI.greaterThan(height.value, expected_height.value))
                     {
@@ -1602,13 +1637,15 @@ class Stoa extends WebService
                     else
                     {
                         // Do not save because it is already a saved block.
-                        logger.info(`Ignored a block with block height of ${height.toString()}`);
+                        logger.info(`Ignored a block with block height of ${height.toString()}`, 
+                            { operation: Operation.block_recovery, height: HeightManager.height.toString(), success: true });
                     }
                     resolve();
                 }
                 catch (err)
                 {
-                    logger.error("Failed to store the payload of a push to the DB: " + err);
+                    logger.error("Failed to store the payload of a push to the DB: " + err,
+                        { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                     reject(err);
                 }
             }
@@ -1621,12 +1658,14 @@ class Stoa extends WebService
 
                     if (changes)
                         logger.info(`Saved a pre-image utxo : ${pre_image.utxo.toString().substr(0, 18)}, ` +
-                        `hash : ${pre_image.hash.toString().substr(0, 18)}, pre-image height : ${pre_image.height}`);
+                            `hash : ${pre_image.hash.toString().substr(0, 18)}, pre-image height : ${pre_image.height}`,
+                            { operation: Operation.db, height: HeightManager.height.toString(), success: true });
                     resolve();
                 }
                 catch(err)
                 {
-                    logger.error("Failed to store the payload of a update to the DB: " + err);
+                    logger.error("Failed to store the payload of a update to the DB: " + err,
+                        { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                     reject(err);
                 }
             }
@@ -1636,15 +1675,18 @@ class Stoa extends WebService
                 {
                     let tx = Transaction.reviver("", stored_data.data);
                     let changes = await this.ledger_storage.putTransactionPool(tx);
+                    let height = await this.agora.getBlockHeight();
 
                     if (changes)
                         logger.info(`Saved a transaction hash : ${hashFull(tx).toString()}, ` +
-                        `data : ` + stored_data.data);
+                            `data : ` + stored_data.data, 
+                            { operation: Operation.db, height: HeightManager.height.toString(), success: true });
                     resolve();
                 }
                 catch(err)
                 {
-                    logger.error("Failed to store the payload of a push to the DB: " + err);
+                    logger.error("Failed to store the payload of a push to the DB: " + err,
+                        { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                     reject(err);
                 }
             }
@@ -1680,7 +1722,8 @@ class Stoa extends WebService
             }
             catch(err)
             {
-                logger.error("Failed to catch up to block height of Agora: " + err);
+                logger.error("Failed to catch up to block height of Agora: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 reject(err);
             }
         });
@@ -1734,7 +1777,8 @@ class Stoa extends WebService
         let dt = new Date(to.seconds * 1000);
         let df = new Date((num)* 1000 )
 
-        logger.info(`Price chart from: ${df}, to: ${dt} `)
+        logger.info(`Price chart from: ${df}, to: ${dt} `,
+            { operation: Operation.coin_market_data_sync, height: HeightManager.height.toString(), success: true });
 
         this.ledger_storage.getCoinMarketChart(Number(from.toString()), to.seconds)
             .then(async(rows :any [])=>{
@@ -1755,7 +1799,8 @@ class Stoa extends WebService
 
             })
             .catch((err)=>{
-                logger.error("Failed to data lookup to the DB: " + err);
+                logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.send(500).send("Failed to data lookup")
             })
     }

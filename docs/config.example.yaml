@@ -30,6 +30,11 @@ logging:
   level: http
   # Default to false
   console: true
+  # Default to false
+  database: true
+  # Connection string for mongodb
+  mongodb_url: "mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false"
+
 
 ################################################################################
 ##                               Consensus config                             ##

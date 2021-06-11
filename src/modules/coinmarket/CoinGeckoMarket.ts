@@ -75,7 +75,7 @@ export class CoinGeckoMarket implements CoinMarket {
                 return resolve(coinMarketStat);
             }
             else {
-                logger.info(`Fail to fetch CoinMarket data`);
+                logger.error(`Fail to fetch CoinMarket data`);
                 reject(`Fail to fetch CoinMarket data`);
             }
         });
@@ -104,7 +104,7 @@ export class CoinGeckoMarket implements CoinMarket {
                 return resolve(coinMarketStat);
             }
             else {
-                logger.info(`Fail to fetch CoinMarket data`);
+                logger.error(`Fail to fetch CoinMarket data`);
                 reject(`Fail to fetch CoinMarket data`);
             }
         });
