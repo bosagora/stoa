@@ -134,6 +134,7 @@ class Stoa extends WebService
         this.app.get("/transaction/pending/:hash", this.getTransactionPending.bind(this));
         this.app.get("/transaction/:hash", this.getTransaction.bind(this));
         this.app.get("/utxo/:address", this.getUTXO.bind(this));
+        this.app.post("/utxos", this.getUTXOs.bind(this));
         this.app.get("/transaction/status/:hash", this.getTransactionStatus.bind(this));
         this.app.get("/transaction/fees/:tx_size", this.getTransactionFees.bind(this));
         this.app.get("/wallet/transactions/history/:address", this.getWalletTransactionsHistory.bind(this));
@@ -561,6 +562,60 @@ class Stoa extends WebService
         logger.http(`GET /utxo/${address}}`);
 
         this.ledger_storage.getUTXO(address)
+            .then((rows: any[]) => {
+                let utxo_array: Array<IUnspentTxOutput> = [];
+                for (const row of rows)
+                {
+                    let utxo = {
+                        utxo: new Hash(row.utxo, Endian.Little).toString(),
+                        type: row.type,
+                        unlock_height: JSBI.BigInt(row.unlock_height).toString(),
+                        amount: JSBI.BigInt(row.amount).toString(),
+                        height: JSBI.BigInt(row.block_height).toString(),
+                        time: row.block_time,
+                        lock_type: row.lock_type,
+                        lock_bytes: row.lock_bytes.toString('base64')
+                    }
+                    utxo_array.push(utxo);
+                }
+                res.status(200).send(JSON.stringify(utxo_array));
+            })
+            .catch((err) => {
+                    logger.error("Failed to data lookup to the DB: " + err);
+                    res.status(500).send("Failed to data lookup");
+                }
+            );
+    }
+
+    /**
+     * POST /utxos
+     *
+     * Returns UTXO's information about the UTXO hash array.
+     *
+     * Returns a array of UTXO information.
+     */
+    private getUTXOs (req: express.Request, res: express.Response)
+    {
+        if (req.body.utxos === undefined)
+        {
+            res.status(400).send({ statusMessage: "Missing 'utxos' object in body"});
+            return;
+        }
+
+        logger.http(`POST /utxos tx=${req.body.utxos.toString()}`);
+
+        let utxos_hash: Array<Hash>;
+        try
+        {
+            utxos_hash = req.body.utxos.map((m: string) => new Hash(m))
+        }
+        catch (error)
+        {
+            res.status(400).send(`Invalid value for parameter 'utxos': ${req.body.utxos.toString()}`);
+            return;
+        }
+
+        this.ledger_storage.getUTXOs(utxos_hash)
             .then((rows: any[]) => {
                 let utxo_array: Array<IUnspentTxOutput> = [];
                 for (const row of rows)
