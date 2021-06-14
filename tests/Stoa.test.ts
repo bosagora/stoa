@@ -869,6 +869,44 @@ describe ('Test of the path /utxo for freezing', () =>
         await delay(1000);
     });
 
+    it ('Test of /utxos - Get UTXO information', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("utxos");
+
+        let utxo_hash = [
+            "0x75283072696d82d8bca2fe45471906a26df1dbe0736e41a9f78e02a14e2bfced6e0cb671f023626f890f28204556aca217f3023c891fe64b9f4b3450cb3e80ad",
+            "0x6fbcdb2573e0f5120f21f1875b6dc281c2eca3646ec2c39d703623d89b0eb83cd4b12b73f18db6bc6e8cbcaeb100741f6384c498ff4e61dd189e728d80fb9673",
+            "0x7fbcdb2573e0f5120f21f1875b6dc281c2eca3646ec2c39d703623d89b0eb83cd4b12b73f18db6bc6e8cbcaeb100741f6384c498ff4e61dd189e728d80fb9673"
+        ];
+
+        let response = await client.post(uri.toString(), {utxos: utxo_hash});
+        let expected = [
+            {
+                "utxo": "0x6fbcdb2573e0f5120f21f1875b6dc281c2eca3646ec2c39d703623d89b0eb83cd4b12b73f18db6bc6e8cbcaeb100741f6384c498ff4e61dd189e728d80fb9673",
+                "type": 1,
+                "unlock_height": "1",
+                "amount": "20000000000000",
+                "height": "0",
+                "time": 1609459200,
+                "lock_type": 0,
+                "lock_bytes": "md+31zMRMVqPgR9b99kSCEWZdIIdFUREO38ok6oFX50="
+            },
+            {
+                "utxo": "0x75283072696d82d8bca2fe45471906a26df1dbe0736e41a9f78e02a14e2bfced6e0cb671f023626f890f28204556aca217f3023c891fe64b9f4b3450cb3e80ad",
+                "type": 0,
+                "unlock_height": "2",
+                "amount": "24400000000000",
+                "height": "1",
+                "time": 1609459800,
+                "lock_type": 0,
+                "lock_bytes": "ejw94GMKeuLPesbtpNxgN7+6BnCTHv3rgCllDdrrqq8="
+            }
+        ];
+        assert.deepStrictEqual(response.data, expected);
+    });
+
     it ('Create a block with a freeze transaction', async () =>
     {
         let uri = URI(host)

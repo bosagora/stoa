@@ -1510,6 +1510,43 @@ export class LedgerStorage extends Storages
     }
 
     /**
+     * Returns UTXO's information about the UTXO hash array.
+     * @param utxos The array of UTXO hash
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the array of UTXO
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getUTXOs (utxos: Array<Hash>): Promise<any[]>
+    {
+        let u = utxos.map(m => `x'${m.toBinary(Endian.Little).toString("hex")}'`);
+        let sql_utxo =
+            `SELECT
+                O.utxo_key as utxo,
+                O.amount,
+                O.lock_type,
+                O.lock_bytes,
+                T.block_height,
+                B.time_stamp as block_time,
+                O.type,
+                O.unlock_height
+            FROM
+                utxos O
+                INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
+                INNER JOIN blocks B ON (B.height = T.block_height)
+            WHERE
+                O.utxo_key in (${u.join(',')})
+            ORDER BY T.block_height, O.amount;`;
+
+        return new Promise<any[]>((resolve, reject) => {
+            this.query(sql_utxo, [])
+                .then((result: any[]) => {
+                    return resolve(result);
+                })
+                .catch(reject);
+        });
+    }
+
+    /**
      * Provides a history of transactions.
      * Returns data sorted in descending order by block height.
      * The most recent transaction is located at the front.
