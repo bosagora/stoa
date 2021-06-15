@@ -35,6 +35,7 @@ import {
     ITxStatus,
     IUnspentTxOutput,
     ValidatorData,
+    IBOAHolder
 } from "./Types";
 
 import bodyParser from "body-parser";
@@ -186,6 +187,7 @@ class Stoa extends WebService {
         this.app.post("/block_externalized", this.postBlock.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
         this.app.post("/transaction_received", this.putTransaction.bind(this));
+        this.app.get("/holders", this.getBoaHolders.bind(this));
 
         let height: Height = new Height("0");
         await HeightManager.init(this);
@@ -751,9 +753,9 @@ class Stoa extends WebService {
         filter_type =
             req.query.type !== undefined
                 ? req.query.type
-                      .toString()
-                      .split(",")
-                      .map((m) => ConvertTypes.toDisplayTxType(m))
+                    .toString()
+                    .split(",")
+                    .map((m) => ConvertTypes.toDisplayTxType(m))
                 : [0, 1, 2, 3];
 
         if (filter_type.find((m) => m < 0) !== undefined) {
@@ -1729,9 +1731,8 @@ class Stoa extends WebService {
                     if (changes)
                         logger.info(
                             `Saved a pre-image utxo : ${pre_image.utxo.toString().substr(0, 18)}, ` +
-                                `hash : ${pre_image.hash.toString().substr(0, 18)}, pre-image height : ${
-                                    pre_image.height
-                                }`,
+                            `hash : ${pre_image.hash.toString().substr(0, 18)}, pre-image height : ${pre_image.height
+                            }`,
                             {
                                 operation: Operation.db,
                                 height: HeightManager.height.toString(),
@@ -1981,6 +1982,42 @@ class Stoa extends WebService {
             this.socket.io.emit(events.server.newTransaction, blockTransactions);
             return resolve(blockTransactions);
         });
+    }
+    /* Get BOA Holders
+     * @returns Returns BOA Holders of the ledger.
+     */
+    public async getBoaHolders(req: express.Request, res: express.Response) {
+
+        logger.http(`GET /holders`);
+
+        let pagination: IPagination = await this.paginate(req, res);
+        this.ledger_storage.getBOAHolders(pagination.pageSize, pagination.page)
+            .then((data: any[]) => {
+                if (data.length === 0) {
+                    return res.status(204).send(`The data does not exist.`);
+                }
+                else {
+                    let holderList: Array<IBOAHolder> = [];
+                    for (const row of data) {
+                        holderList.push(
+                            {
+                                address: row.address,
+                                tx_count: row.tx_count,
+                                total_received: row.total_received,
+                                total_sent: row.total_sent,
+                                total_reward: row.total_reward,
+                                total_frozen: row.total_frozen,
+                                total_spendable: row.total_spendable,
+                                total_balance: row.total_balance,
+                            });
+                    }
+                    return res.status(200).send(JSON.stringify(holderList));
+                }
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err);
+                return res.status(500).send("Failed to data lookup");
+            })
     }
 
     /**

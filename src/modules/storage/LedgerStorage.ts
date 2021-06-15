@@ -29,8 +29,13 @@ import {
     TxPayloadFee,
     Unlock,
     Utils,
+    UnspentTxOutput,
+    UTXOManager
 } from "boa-sdk-ts";
-import { IMarketCap } from "../../Types";
+import {
+    IMarketCap,
+    IAccountInformation
+} from "../../Types";
 import { IDatabaseConfig } from "../common/Config";
 import { FeeManager } from "../common/FeeManager";
 import { logger } from "../common/Logger";
@@ -280,7 +285,20 @@ export class LedgerStorage extends Storages {
             \`val\`     BLOB        NOT NULL,
             PRIMARY KEY(\`key\`(64))
         );
-
+        
+        CREATE TABLE IF NOT EXISTS accounts(
+            address          TEXT,
+            tx_count         INTEGER,
+            total_received   BIGINT(20) UNSIGNED NOT NULL,
+            total_sent       BIGINT(20) UNSIGNED NOT NULL,
+            total_reward     BIGINT(20) UNSIGNED NOT NULL,
+            total_frozen     BIGINT(20) UNSIGNED NOT NULL,
+            total_spendable  BIGINT(20) UNSIGNED NOT NULL,
+            total_balance    BIGINT(20) UNSIGNED NOT NULL,
+            last_updated_at   INTEGER,
+            PRIMARY KEY (address(64))
+        );
+        
        DROP TRIGGER IF EXISTS tx_trigger;
        CREATE TRIGGER tx_trigger AFTER INSERT
        ON transactions
@@ -351,6 +369,7 @@ export class LedgerStorage extends Storages {
                     await this.putMerkleTree(block);
                     await this.putBlockstats(block);
                     await this.putFeeDisparity(block);
+                    await this.putAccountStats(block);
                     await this.commit();
                 } catch (error) {
                     await this.rollback();
@@ -576,6 +595,138 @@ export class LedgerStorage extends Storages {
             })();
         });
     }
+    /**
+     * Put BOA Account Stats.
+     * @param block: The instance of the `Block`
+     */
+    public putAccountStats(block: Block): Promise<void> {
+        function save_stats(storage: LedgerStorage, address: string, accountInfo: IAccountInformation, received_amount: JSBI, sent_amount: JSBI, height: Height): Promise<void> {
+            return new Promise<void>((resolve, reject) => {
+                storage.query(
+                    `INSERT INTO accounts
+                            (address, tx_count, total_received, total_sent, total_reward, total_frozen, total_spendable, total_balance, last_updated_at)
+                        VALUES
+                            (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ON DUPLICATE KEY UPDATE 
+                                    address = VALUES(address), 
+                                    tx_count = IF(last_updated_at = VALUES(last_updated_at), tx_count, (tx_count + VALUES(tx_count))),
+                                    total_received = total_received + VALUES(total_received),
+                                    total_sent = total_sent + VALUES(total_sent),
+                                    total_frozen = VALUES(total_frozen),
+                                    total_spendable = VALUES(total_spendable),
+                                    total_balance = VALUES(total_balance),
+                                    last_updated_at = VALUES(last_updated_at)
+                        `,
+                    [
+                        address,
+                        accountInfo.tx_count,
+                        received_amount.toString(),
+                        sent_amount.toString(),
+                        "0",  //FIX ME
+                        accountInfo.total_frozen.toString(),
+                        accountInfo.total_spendable.toString(),
+                        accountInfo.total_balance.toString(),
+                        height.value.toString()
+
+                    ])
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+
+                return resolve();
+
+            });
+        }
+        function getTXStats(storage: LedgerStorage, tx_hash: Hash) {
+            let hash = tx_hash.toBinary(Endian.Little);
+            let sql_sender = `
+                      SELECT
+                          S.address,
+                          SUM(IFNULL(S.amount,0)) as amount
+                      FROM
+                          blocks B
+                          INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
+                          INNER JOIN tx_inputs I ON (T.tx_hash = I.tx_hash)
+                          INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key)
+                          GROUP BY address`;
+
+            let sql_receiver = `
+                       SELECT
+                           SUM(IFNULL(O.amount,0)) as amount,
+                           O.address
+                       FROM
+                           blocks B
+                           INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
+                           INNER JOIN tx_outputs O ON (T.tx_hash = O.tx_hash)
+                           GROUP BY address;`;
+
+            return new Promise<any[]>((resolve, reject) => {
+                let result: any = {};
+                storage.query(sql_sender, hash)
+                    .then((rows: any[]) => {
+                        result.senders = rows;
+                        return storage.query(sql_receiver, [hash]);
+                    })
+                    .then((rows: any[]) => {
+                        result.receivers = rows;
+                        resolve(result);
+                    })
+                    .catch(reject)
+            })
+        }
+
+        return new Promise<void>((resolve, reject) => {
+            (async () => {
+                let block_transactions = `SELECT
+	                                        T.block_height, T.tx_hash, T.tx_fee, T.tx_size, B.time_stamp
+                                          From 
+                                             blocks B INNER JOIN transactions T ON(B.height = T.block_height) 
+                                          Where B.height = ?`;
+
+                this.query(block_transactions, [block.header.height.value.toString()])
+                    .then(async (rows: any[]) => {
+
+                        let senders = [];
+                        let receivers = [];
+
+                        for (let tx_index = 0; tx_index < rows.length; tx_index++) {
+
+                            let hash = new Hash(rows[tx_index].tx_hash, Endian.Little)
+                            let txStats: any = await getTXStats(this, hash);
+
+                            senders = txStats.senders;
+                            receivers = txStats.receivers;
+
+                            for (var sender_index = 0; sender_index < senders.length; sender_index++) {
+                                for (var receiver_index = 0; receiver_index < receivers.length; receiver_index++) {
+                                    if (senders[sender_index].address == receivers[receiver_index].address) {
+                                        let total_sent = JSBI.subtract(JSBI.BigInt(senders[sender_index].amount), JSBI.BigInt(receivers[receiver_index].amount));
+                                        let accountInfo = await this.getAccountInfo(block.header.height, senders[sender_index].address);
+                                        await save_stats(this, senders[sender_index].address, accountInfo, JSBI.BigInt(0), total_sent, block.header.height);
+                                        senders.splice(sender_index, 1);
+                                        receivers.splice(receiver_index, 1);
+                                    }
+                                }
+                            }
+                            for (var receiver_index = 0; receiver_index < receivers.length; receiver_index++) {
+                                let accountInfo = await this.getAccountInfo(block.header.height, receivers[receiver_index].address);
+                                await save_stats(this, receivers[receiver_index].address, accountInfo, receivers[receiver_index].amount, JSBI.BigInt(0), block.header.height);
+                            }
+                            for (var sender_index = 0; sender_index < senders.length; sender_index++) {
+                                let accountInfo = await this.getAccountInfo(block.header.height, senders[sender_index].address);
+                                await save_stats(this, senders[sender_index].address, accountInfo, JSBI.BigInt(0), senders[sender_index].amount, block.header.height);
+                            }
+                        }
+                        resolve();
+                    }).catch((err) => {
+                        reject(err);
+                    });
+            })();
+        });
+    }
 
     /**
      * Puts merkle tree
@@ -701,6 +852,43 @@ export class LedgerStorage extends Storages {
                     reject(err);
                 });
         });
+    }
+
+    /* Get the detail for an account
+     * @param address 
+     * @returns  Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public async getAccountInfo(height: Height, address: string): Promise<IAccountInformation> {
+        return new Promise<IAccountInformation>(async (resolve, reject) => {
+            let utxo_array: Array<UnspentTxOutput> = [];
+            await this.getUTXO(address)
+                .then((rows: any[]) => {
+                    for (const row of rows) {
+                        let utxo: UnspentTxOutput = new UnspentTxOutput(
+                            new Hash(row.utxo, Endian.Little),
+                            row.type,
+                            JSBI.BigInt(row.unlock_height),
+                            JSBI.BigInt(row.amount),
+                            JSBI.BigInt(row.block_height));
+                        utxo_array.push(utxo);
+                    }
+                }).catch(err => {
+                    reject(err)
+                });
+
+            let utxo_manager: UTXOManager = new UTXOManager(utxo_array);
+            let getSum: Array<JSBI> = await utxo_manager.getSum(JSBI.add(height.value, JSBI.BigInt(1)));
+            let total_txs = await this.getTxCount(height, address);
+            let accountInfo: IAccountInformation = {
+                total_balance: JSBI.add((JSBI.add(getSum[0], getSum[1])), getSum[2]),
+                total_spendable: JSBI.BigInt(getSum[0]),
+                total_frozen: JSBI.BigInt(getSum[1]),
+                tx_count: total_txs[0].tx_count ? total_txs[0].tx_count : 0
+            }
+            return resolve(accountInfo)
+        })
     }
 
     /**
@@ -878,9 +1066,9 @@ export class LedgerStorage extends Storages {
 
                     unlock_height_query = `(
                             SELECT '${JSBI.add(
-                                height.value,
-                                JSBI.BigInt(2016)
-                            ).toString()}' AS unlock_height WHERE EXISTS
+                        height.value,
+                        JSBI.BigInt(2016)
+                    ).toString()}' AS unlock_height WHERE EXISTS
                             (
                                 SELECT
                                     *
@@ -2267,6 +2455,63 @@ export class LedgerStorage extends Storages {
         let sql = `SELECT * FROM marketcap WHERE last_updated_at BETWEEN ? AND ?`;
 
         return this.query(sql, [from, to]);
+    }
+
+    /**
+     * Get the transaction count for an address
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getTxCount(height: Height, address: string): Promise<any[]> {
+        let sql =
+            `SELECT
+               COUNT(DISTINCT(tx_hash)) AS tx_count
+            FROM
+            (
+                SELECT
+                    T.tx_hash
+                FROM
+                    tx_outputs S
+                    INNER JOIN tx_inputs I ON (I.utxo = S.utxo_key)
+                    INNER JOIN transactions T ON (T.tx_hash = I.tx_hash)
+                WHERE
+                    T.block_height = ?
+                    AND S.address = ?
+                GROUP BY T.tx_hash, S.address
+                
+                UNION ALL
+                
+                SELECT
+                    T.tx_hash
+                FROM
+                    tx_outputs O
+                    INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
+                WHERE
+                    T.block_height = ?
+                    AND O.address = ?
+                GROUP BY T.tx_hash, O.address
+            ) Tx;`;
+        return this.query(sql, [height.value.toString(), address, height.value.toString(), address]);
+    }
+
+    /**
+     * Get BOA Holder List.
+     * @param limit Maximum record count that can be obtained from one query
+     * @param page The number on the page, this value begins with 1
+     * @returns returns the Promise with requested data
+     * and if an error occurs the .catch is called with an error. 
+     */
+    public getBOAHolders(limit: number, page: number): Promise<any> {
+        let sql = `
+            SELECT 
+	            address, tx_count, total_received, total_sent, 
+	            total_reward, total_frozen, total_spendable, total_balance
+            FROM
+                accounts
+            ORDER BY total_balance DESC, address ASC
+            LIMIT ? OFFSET ?`
+        return this.query(sql, [limit, limit * (page - 1)])
     }
 
     /**

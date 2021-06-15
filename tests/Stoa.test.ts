@@ -903,7 +903,7 @@ describe("Test of the path /utxo for freezing", () => {
         await client.post(url, { block: sample_data[0] });
         await client.post(url, { block: sample_data[1] });
         // Wait for the block to be stored in the database for the next test.
-        await delay(1000);
+        await delay(2000);
     });
 
     it("Test of /utxos - Get UTXO information", async () => {

@@ -11,7 +11,7 @@
 
  *******************************************************************************/
 
-import { Block, Height, OutputType, Transaction } from "boa-sdk-ts";
+import { Height, OutputType, BlockHeader, Block, Transaction, JSBI } from 'boa-sdk-ts';
 
 /**
  * The interface of the Validator
@@ -776,6 +776,76 @@ export interface IMarketChart {
      * Time
      */
     last_updated_at: number;
+}
+
+/**
+ * Interface for Account Information
+ */
+export interface IAccountInformation {
+    /**
+     * Total Balance of account
+     */
+    total_balance: JSBI;
+
+    /**
+     * Total Spendable Balance of account
+     */
+    total_spendable: JSBI;
+
+    /**
+     * Total frozen amount of account
+     */
+    total_frozen: JSBI;
+
+    /**
+     * Tranaction count of account  
+     */
+    tx_count: JSBI;
+}
+
+/**
+ * Interface for BOA Holder API
+ */
+export interface IBOAHolder {
+    /**
+     * Address of holder
+     */
+    address: string;
+
+    /**
+     * Transaction count of holder
+     */
+    tx_count: number;
+
+    /**
+     * Total recieved amount of holder
+     */
+    total_received: number;
+
+    /**
+     * Total sent amount of holder
+     */
+    total_sent: number;
+
+    /**
+     * Total reward amount of holder
+     */
+    total_reward: number;
+
+    /**
+     * Total frozen amount of holder
+     */
+    total_frozen: number;
+
+    /**
+     * Total spendable amount of holder
+     */
+    total_spendable: number;
+
+    /**
+     * Total balance of holder
+     */
+    total_balance: number;
 }
 
 /**
