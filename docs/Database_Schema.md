@@ -448,3 +448,34 @@ Create TABLE IF NOT EXISTS "marketcap" (
     PRIMARY KEY ("last_updated_at")
 );
 ```
+--------
+## 16. Table **account**
+
+### Schema
+
+| Column                 | Data Type  | PK | Not NULL | Default  |Description|
+|:-----------------------|:-----------|:--:|:--------:| -------- | --------- |
+|  address               | TEXT       | Y  | Y        |          | Public key of the wallet|
+|  tx_count              | INTEGER    |    | Y        |          | Transaction count of BOA Holder        |
+|  total_received        | BIGINT(20) |    | Y        |          | Total received amount of BOA Holder    |
+|  total_sent            | BIGINT(20) |    | Y        |          | Total sent amount of BOA Holder        |
+|  total_reward          | BIGINT(20) |    | Y        |          | Total reward amount of BOA Holder      |
+|  total_freeze          | BIGINT(20) |    | Y        |          | Total freeze amount of BOA Holder      |
+|  total_spendable       | BIGINT(20) |    | Y        |          | Total received amount of BOA Holder    |
+|  total_balance         | BIGINT(20) |    | Y        |          | Total balance of wallet of BOA Holder  | 
+
+### _Create Script_
+
+```sql
+CREATE TABLE IF NOT EXISTS "account"(
+            "address"          TEXT,
+            "tx_count "        INTEGER,
+            "total_received"   BIGINT(20) UNSIGNED NOT NULL,
+            "total_sent"       BIGINT(20) UNSIGNED NOT NULL,
+            "total_reward"     BIGINT(20) UNSIGNED NOT NULL,
+            "total_freeze"     BIGINT(20) UNSIGNED NOT NULL,
+            "total_spendable"  BIGINT(20) UNSIGNED NOT NULL,
+            "total_balance"    BIGINT(20) UNSIGNED NOT NULL,
+            PRIMARY KEY ("address(64)")
+        );
+);

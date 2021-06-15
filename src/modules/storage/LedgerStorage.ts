@@ -14,11 +14,11 @@
 import {
     Block, Enrollment, Hash, Height, PreImageInfo, Transaction,
     TxInput, TxOutput, makeUTXOKey, hashFull,
-    Utils, Endian, Lock, Unlock, PublicKey, TxPayloadFee, OutputType
+    Utils, Endian, Lock, Unlock, PublicKey, TxPayloadFee, OutputType, UTXOManager, UnspentTxOutput
 } from 'boa-sdk-ts';
 import { Storages } from './Storages';
 import { IDatabaseConfig } from '../common/Config';
-import { IMarketCap } from '../../Types'
+import { IAccountInformation, IMarketCap, IUnspentTxOutput } from '../../Types'
 
 import JSBI from 'jsbi';
 
@@ -235,6 +235,17 @@ export class LedgerStorage extends Storages
             PRIMARY KEY (last_updated_at)
         );
 
+        CREATE TABLE IF NOT EXISTS account(
+            address          TEXT,
+            tx_count         INTEGER,
+            total_received   BIGINT(20) UNSIGNED NOT NULL,
+            total_sent       BIGINT(20) UNSIGNED NOT NULL,
+            total_reward     BIGINT(20) UNSIGNED NOT NULL,
+            total_freeze     BIGINT(20) UNSIGNED NOT NULL,
+            total_spendable  BIGINT(20) UNSIGNED NOT NULL,
+            total_balance    BIGINT(20) UNSIGNED NOT NULL,
+            PRIMARY KEY (address(64))
+        );
        DROP TRIGGER IF EXISTS tx_trigger;
        CREATE TRIGGER tx_trigger AFTER INSERT
        ON transactions
@@ -309,6 +320,7 @@ export class LedgerStorage extends Storages
                     await this.putBlockHeight(block.header.height);
                     await this.putMerkleTree(block);
                     await this.putBlockstats(block);
+                    await this.putAccountStats(block);
                     await this.commit();
                 }
                 catch (error)
@@ -523,6 +535,110 @@ export class LedgerStorage extends Storages
             })();
         });
     }
+    /**
+     * Puts merkle tree
+     * @param block: The instance of the `Block`
+     */
+    public putAccountStats(block: Block): Promise<void> {
+        function save_stats(storage: LedgerStorage, address: string, accountInfo: IAccountInformation, received_amount: JSBI, sent_amount: JSBI,): Promise<void> {
+            return new Promise<void>((resolve, reject) => {
+                storage.query(
+                    `INSERT INTO account
+                            (address, tx_count, total_received, total_sent, total_reward, total_freeze, total_spendable, total_balance)
+                        VALUES
+                            (?, ?, ?, ?, ?, ?, ?, ? )
+                        ON DUPLICATE KEY UPDATE 
+                                    address = VALUES(address) , 
+                                    tx_count = VALUES(tx_count),
+                                    total_received = total_received + VALUES(total_received),
+                                    total_sent = total_sent + VALUES(total_sent),
+                                    total_freeze = VALUES(total_freeze),
+                                    total_spendable = VALUES(total_spendable),
+                                    total_balance = VALUES(total_balance)
+
+                        `,
+                    [
+                        address,
+                        accountInfo.tx_count,
+                        received_amount.toString(),
+                        sent_amount.toString(),
+                        "0",
+                        accountInfo.total_freeze.toString(),
+                        accountInfo.total_spendable.toString(),
+                        accountInfo.total_balance.toString(),
+                    ])
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+
+                return resolve();
+
+            });
+        }
+        return new Promise<void>((resolve, reject) => {
+            (async () => {
+                let block_transactions = `SELECT
+                 T.block_height, T.tx_hash, SUM(IFNULL(O.amount,0)) as amount,
+                T.tx_fee, T.tx_size, B.time_stamp,
+                JSON_ARRAYAGG(JSON_OBJECT("type", O.type, "address", O.address, "amount", O.amount)) as receiver,
+                (SELECT
+                   JSON_ARRAYAGG(JSON_OBJECT("type", O.type, "address", S.address, "amount", S.amount))
+                FROM
+                    blocks B
+                    INNER JOIN transactions T ON (B.height = T.block_height)
+                    INNER JOIN tx_inputs I ON (T.tx_hash = I.tx_hash)
+                    INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key)
+                WHERE
+                    B.height= ? ) as sender_address
+            FROM
+                tx_outputs O
+                INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
+                INNER JOIN blocks B ON  (B.height = T.block_height)
+            WHERE
+                B.height = ?
+            GROUP BY T.tx_hash
+            ORDER BY T.tx_index ASC;`;
+
+                this.query(block_transactions, [block.header.height.value.toString(), block.header.height.value.toString()])
+                    .then(async (rows: any[]) => {
+                        let receivers = [];
+                        let senders = [];
+                        for (let tx_index = 0; tx_index < rows.length; tx_index++) {
+                            receivers = rows[tx_index].receiver;
+                            senders = rows[tx_index].sender_address ? rows[tx_index].sender_address : [];
+                            if (!(receivers[0].type === 2)) {
+
+                                for (var sender_index = 0; sender_index < senders.length; sender_index++) {
+                                    for (var receiver_index = 0; receiver_index < receivers.length; receiver_index++) {
+                                        if (senders[sender_index].address == receivers[receiver_index].address) {
+                                            let total_sent = JSBI.subtract(JSBI.BigInt(senders[sender_index].amount), JSBI.BigInt(receivers[receiver_index].amount));
+                                            let accountInfo = await this.getAccountInfo(senders[sender_index].address);
+                                            await save_stats(this, senders[sender_index].address, accountInfo, JSBI.BigInt(0), total_sent);
+                                            senders.splice(sender_index, 1);
+                                            receivers.splice(receiver_index, 1);
+                                        }
+                                    }
+                                }
+                                for (var receiver_index = 0; receiver_index < receivers.length; receiver_index++) {
+                                    let accountInfo = await this.getAccountInfo(receivers[receiver_index].address);
+                                    await save_stats(this, receivers[receiver_index].address, accountInfo, receivers[receiver_index].amount, JSBI.BigInt(0));
+                                }
+                                for (var sender_index = 0; sender_index < senders.length; sender_index++) {
+                                    let accountInfo = await this.getAccountInfo(senders[sender_index].address);
+                                    await save_stats(this, senders[sender_index].address, accountInfo, JSBI.BigInt(0), senders[sender_index].amount);
+                                }
+                            }
+                        }
+                        resolve();
+                    }).catch((err)=>{
+                        reject(err);
+                    });
+            })();
+        });
+    }
 
      /**
      * Puts merkle tree
@@ -596,6 +712,47 @@ export class LedgerStorage extends Storages
               })();
           });
       }
+    /**
+     * Get the detail for an account
+     * @param address 
+     * @returns 
+     */  
+    public async getAccountInfo(address: string): Promise<IAccountInformation> {
+        return new Promise<IAccountInformation>(async (resolve, reject) => {
+            let utxo_array: Array<UnspentTxOutput> = [];
+            await this.getUTXO(address)
+                .then((rows: any[]) => {
+                    for (const row of rows) {
+                        let record = {
+                            utxo: new Hash(row.utxo, Endian.Little).toString(),
+                            type: row.type,
+                            unlock_height: JSBI.BigInt(row.unlock_height).toString(),
+                            amount: JSBI.BigInt(row.amount).toString(),
+                            height: JSBI.BigInt(row.block_height).toString(),
+                            time: row.block_time,
+                            lock_type: row.lock_type,
+                            lock_bytes: row.lock_bytes.toString('base64')
+                        }
+                        let utxo: UnspentTxOutput = new UnspentTxOutput();
+                        utxo.fromJSON(record);
+                        utxo_array.push(utxo);
+                    }
+                }).catch(err =>{
+                    reject(err)
+                });
+
+            let utxo_manager: UTXOManager = new UTXOManager(utxo_array);
+            let getSum: Array<JSBI> = await utxo_manager.getSum();
+            let total_txs = await this.getTxCount(address)
+            let accountInfo: IAccountInformation = {
+                total_balance: JSBI.add((JSBI.add(getSum[0], getSum[1])), getSum[2]),
+                total_spendable: JSBI.BigInt(getSum[0]),
+                total_freeze: JSBI.BigInt(getSum[1]),
+                tx_count: total_txs[0].tx_count ? total_txs[0].tx_count : 0
+            }
+            return resolve(accountInfo)
+        });
+    }
 
     /**
      * Update a preImage to database
@@ -2177,6 +2334,44 @@ export class LedgerStorage extends Storages
             `SELECT * FROM marketcap WHERE last_updated_at BETWEEN ? AND ?`;
 
         return this.query(sql, [from, to]);
+    }
+    /**
+   * Get the transaction count for an address
+   * @returns Returns the Promise. If it is finished successfully the `.then`
+   * of the returned Promise is called with the records
+   * and if an error occurs the `.catch` is called with an error.
+   */
+    public getTxCount(address: string): Promise<any[]> {
+        let sql =
+            `SELECT COUNT(*) as tx_count FROM 
+             (
+              SELECT COUNT(*)
+               FROM 
+                   transactions T INNER JOIN tx_outputs O ON(O.tx_hash = T.tx_hash)
+               WHERE 
+                   O.address = ?
+               GROUP BY 
+                   T.tx_hash) Tx`;
+
+        return this.query(sql, [address]);
+    }
+    /**
+     * Get balance, freeze_amount, received_amount, received_rewards
+     * @param limit Maximum record count that can be obtained from one query
+     * @param page The number on the page, this value begins with 1
+     * @returns returns the Promise with requested data
+     * and if an error occurs the .catch is called with an error. 
+     */
+    public getBOAHolders(limit: number, page: number): Promise<any>{
+      let sql = `
+            SELECT 
+	            address, tx_count, total_received, total_sent, 
+	            total_reward, total_freeze, total_spendable, total_balance
+            FROM
+                account
+            ORDER BY total_balance DESC
+            LIMIT ? OFFSET ?`
+        return this.query(sql, [limit, limit*(page-1)])    
     }
 
     /**

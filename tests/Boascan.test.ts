@@ -597,4 +597,113 @@ describe('Test of Stoa API Server', () => {
         }
         assert.deepStrictEqual(response.data, expected)
     });
+    it('Test for /holders', async () => {
+        let uri = URI(host)
+            .port(port)
+            .directory("/holders");
+        let response = await client.get(uri.toString());
+        let expected = [
+            {
+                address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67',
+                tx_count: 1,
+                total_received: 4880000000000000,
+                total_sent: 39040000000000000,
+                total_reward: 0,
+                total_freeze: 0,
+                total_spendable: 4270000000000000,
+                total_balance: 4270000000000000
+            },
+            {
+                address: 'boa1xrft007petq803lnkk4820l8ya6xpshrl3tg9az8yghejm9t7mwgc8wtgrs',
+                tx_count: 2,
+                total_received: 48800000000000,
+                total_sent: 0,
+                total_reward: 0,
+                total_freeze: 0,
+                total_spendable: 48800000000000,
+                total_balance: 48800000000000
+            },
+            {
+                address: 'boa1xzfv00s88ky9mf50nqngvztmnmtjzv4yr0w555aet366ssrv5zqaj6zsga3',
+                tx_count: 2,
+                total_received: 48800000000000,
+                total_sent: 0,
+                total_reward: 0,
+                total_freeze: 0,
+                total_spendable: 48800000000000,
+                total_balance: 48800000000000
+            },
+            {
+                address: 'boa1xzfu00gaqcea0j0n4jdmveve4hhwsa264tthyaqrtyx9pu0rrc3rsma3zdy',
+                tx_count: 2,
+                total_received: 48800000000000,
+                total_sent: 0,
+                total_reward: 0,
+                total_freeze: 0,
+                total_spendable: 48800000000000,
+                total_balance: 48800000000000
+            },
+            {
+                address: 'boa1xpfr005hadezanqmze3f99st3v4n8q3zu0lrzsc3t4mvcj7fnrn7sseah6p',
+                tx_count: 2,
+                total_received: 48800000000000,
+                total_sent: 0,
+                total_reward: 0,
+                total_freeze: 0,
+                total_spendable: 48800000000000,
+                total_balance: 48800000000000
+            },
+            {
+                address: 'boa1xpfq00t5f0uv8v0wzclvt72fl3x2vz4z48harsx5zdks6m5pecxey9vh4e8',
+                tx_count: 2,
+                total_received: 48800000000000,
+                total_sent: 0,
+                total_reward: 0,
+                total_freeze: 0,
+                total_spendable: 48800000000000,
+                total_balance: 48800000000000
+            },
+            {
+                address: 'boa1xpfp00tr86d9zdgv3uy08qs0ld5s3wmx869yte68h3y4erteyn3wkq692jq',
+                tx_count: 2,
+                total_received: 48800000000000,
+                total_sent: 0,
+                total_reward: 0,
+                total_freeze: 0,
+                total_spendable: 48800000000000,
+                total_balance: 48800000000000
+            },
+            {
+                address: 'boa1xqfs008pm8f73te5dsys46ewdk3ha5wzlfcz2d6atn2z4nayunp66aelwmr',
+                tx_count: 2,
+                total_received: 48800000000000,
+                total_sent: 0,
+                total_reward: 0,
+                total_freeze: 0,
+                total_spendable: 48800000000000,
+                total_balance: 48800000000000
+            },
+            {
+                address: 'boa1xqfn00yp3myu4jt2se80flcksf9j2nta3t6yvhfh7gugzllkmzwfskczvk5',
+                tx_count: 2,
+                total_received: 48800000000000,
+                total_sent: 0,
+                total_reward: 0,
+                total_freeze: 0,
+                total_spendable: 48800000000000,
+                total_balance: 48800000000000
+            },
+            {
+                address: 'boa1xrqs3669txkt796p8uqgwkjfxc4sv98sm2dr4cl2mlq6ku3pk5y2u5dd55c',
+                tx_count: 1,
+                total_received: 24400000000000,
+                total_sent: 0,
+                total_reward: 0,
+                total_freeze: 0,
+                total_spendable: 24400000000000,
+                total_balance: 24400000000000
+            }
+        ]
+        assert.deepStrictEqual(response.data, expected)
+    });
 });
