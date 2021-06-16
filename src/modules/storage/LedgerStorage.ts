@@ -17,8 +17,10 @@ import {
     Utils, Endian, Lock, Unlock, PublicKey, TxPayloadFee, OutputType
 } from 'boa-sdk-ts';
 import { Storages } from './Storages';
+import { TransactionPool } from "./TransactionPool";
 import { IDatabaseConfig } from '../common/Config';
 import { IMarketCap } from '../../Types'
+import { logger } from '../common/Logger';
 
 import JSBI from 'jsbi';
 
@@ -31,6 +33,11 @@ export class LedgerStorage extends Storages
      * The genesis timestamp
      */
     private genesis_timestamp: number;
+
+    /**
+     * The pool of transactions to manage double-spent transactions.
+     */
+    private _transaction_pool: TransactionPool | null = null;
 
     /**
      * Construct an instance of `LedgerStorage`, exposes callback API.
@@ -47,14 +54,34 @@ export class LedgerStorage extends Storages
     public static make (databaseConfig: IDatabaseConfig, genesis_timestamp: number): Promise<LedgerStorage>
     {
         return new Promise<LedgerStorage>((resolve, reject) => {
-            let result = new LedgerStorage(databaseConfig, genesis_timestamp, (err: Error | null) => {
+            let result = new LedgerStorage(databaseConfig, genesis_timestamp, async (err: Error | null) => {
                 if (err)
                     reject(err);
                 else
+                {
+                    result._transaction_pool = new TransactionPool();
+                    await result.transaction_pool.loadSpenderList(result.connection);
                     resolve(result);
+                }
             });
             return result;
         });
+    }
+
+    /**
+     * Returns the instance of TransactionPool
+     * @returns If `_transaction_pool` is not null, return `_transaction_pool`.
+     * Otherwise, terminate the process.
+     */
+    public get transaction_pool (): TransactionPool
+    {
+        if (this._transaction_pool !== null)
+            return this._transaction_pool;
+        else
+        {
+            logger.error('TransactionPool is not ready yet.');
+            process.exit(1);
+        }
     }
 
     /**
@@ -310,6 +337,8 @@ export class LedgerStorage extends Storages
                 try
                 {
                     await this.begin();
+                    for (let tx of block.txs)
+                        await this.transaction_pool.remove(this.connection, tx);
                     await saveBlock(this, block, genesis_timestamp);
                     await this.putTransactions(block);
                     await this.putEnrollments(block);
@@ -1229,6 +1258,11 @@ export class LedgerStorage extends Storages
                 try
                 {
                     await this.begin();
+
+                    // Remove pending transactions using the same input.
+                    await this.transaction_pool.remove(this.connection, tx, true);
+                    await this.transaction_pool.add(this.connection, tx);
+
                     let hash = hashFull(tx);
                     tx_changes = await save_transaction_pool(this, tx, hash);
                     if (tx_changes !== 1)

@@ -13,7 +13,7 @@
 
 import {
     SodiumHelper, Hash, Transaction, TxInput, TxOutput, OutputType,
-    PublicKey, JSBI, Signature, Unlock
+    PublicKey, JSBI, Signature, Unlock, Block
 } from 'boa-sdk-ts';
 import { BOASodium } from 'boa-sodium-ts';
 import { LedgerStorage } from "../src/modules/storage/LedgerStorage";
@@ -21,7 +21,22 @@ import { TransactionPool } from "../src/modules/storage/TransactionPool";
 import { IDatabaseConfig } from "../src/modules/common/Config";
 import { MockDBConfig } from "./TestConfig";
 
+import {
+    delay,
+    market_cap_history_sample_data,
+    market_cap_sample_data,
+    sample_data, sample_data2,
+    TestAgora,
+    TestClient,
+    TestGeckoServer,
+    TestStoa
+} from "./Utils";
+import { CoinGeckoMarket} from "../src/modules/coinmarket/CoinGeckoMarket";
+import { CoinMarketService} from "../src/modules/service/CoinMarketService";
+
 import * as assert from 'assert';
+import { URL } from "url";
+import URI from "urijs";
 
 describe ('Test TransactionPool', () =>
 {
@@ -153,5 +168,156 @@ describe ('Test TransactionPool', () =>
 
         await transaction_pool.add(ledger_storage.connection, tx2);
         assert.strictEqual(await transaction_pool.getLength(ledger_storage.connection), 1);
+    });
+});
+
+describe ('Test of double spending transaction', () =>
+{
+    let host: string = 'http://localhost';
+    let port: string = '3837';
+    let stoa_server: TestStoa;
+    let agora_server: TestAgora;
+    let client = new TestClient();
+    let testDBConfig: IDatabaseConfig;
+    let gecko_server: TestGeckoServer;
+    let gecko_market: CoinGeckoMarket;
+    let coinMarketService: CoinMarketService;
+
+    const block = Block.reviver("", sample_data2);
+
+    before ('Wait for the package libsodium to finish loading', async () =>
+    {
+        SodiumHelper.assign(new BOASodium());
+        await SodiumHelper.init();
+    });
+
+    before ('Start a fake Agora', () =>
+    {
+        return new Promise<void>((resolve, reject) =>
+        {
+            agora_server = new TestAgora("2826", sample_data, resolve);
+        });
+    });
+
+    before('Start a fake TestCoinGecko', () =>
+    {
+        return new Promise<void>((resolve, reject) =>
+        {
+            gecko_server = new TestGeckoServer("7876", market_cap_sample_data, market_cap_history_sample_data, resolve);
+            gecko_market = new CoinGeckoMarket(gecko_server);
+        });
+    });
+
+    before ('Start a fake coinMarketService', () =>
+    {
+        coinMarketService = new CoinMarketService(gecko_market)
+    });
+
+    before ('Create TestStoa', async () =>
+    {
+        testDBConfig = await MockDBConfig();
+        stoa_server = new TestStoa(testDBConfig, new URL("http://127.0.0.1:2826"), port, coinMarketService);
+        await stoa_server.createStorage();
+    });
+
+    before ('Start TestStoa', async () =>
+    {
+        await stoa_server.start();
+    });
+
+    after ('Stop Stoa and Agora server instances', async () =>
+    {
+        await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
+        await stoa_server.stop();
+        await agora_server.stop();
+        await gecko_server.stop();
+    });
+
+    it ('Test of the path /block_externalized', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("block_externalized");
+
+        let url = uri.toString();
+        await client.post(url, {block: sample_data[0]});
+        await client.post(url, {block: sample_data[1]});
+        // Wait for the block to be stored in the database for the next test.
+        await delay(100);
+    });
+
+    it ('Send the first transaction', async () =>
+    {
+        let tx = new Transaction(
+            [
+                new TxInput(
+                    block.txs[0].inputs[0].utxo,
+                    Unlock.fromSignature(new Signature(Buffer.alloc(Signature.Width)))
+                )
+            ],
+            [
+                new TxOutput(
+                    OutputType.Payment,
+                    JSBI.BigInt(24_400_000_000_000),
+                    new PublicKey("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj")
+                )
+            ],
+            Buffer.alloc(0)
+        );
+
+        let uri = URI(host)
+            .port(port)
+            .directory("transaction_received");
+
+        let url = uri.toString();
+        await client.post(url, {tx: tx});
+        await delay(100);
+    });
+
+    it ('Check if the pending transaction is the first transaction', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("/wallet/transactions/pending")
+            .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
+
+        let response = await client.get (uri.toString());
+        assert.strictEqual(response.data.length, 1);
+        assert.strictEqual(response.data[0].tx_hash,
+            '0xf507d81b7a8388000298831d6b9806c543b224663b96251acdf9cec8fb50f13' +
+            '3311eead6a84fbde2ee37e7208d602c0d4f268f934151ef0c5a6b5463d6de31a7');
+        assert.strictEqual(response.data[0].address, 'boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj');
+        assert.strictEqual(response.data[0].amount, '24400000000000');
+        assert.strictEqual(response.data[0].fee, '0');
+    });
+
+    it ('Send a second transaction with the same input as the first transaction', async () =>
+    {
+        let tx = block.txs[0];
+
+        let uri = URI(host)
+            .port(port)
+            .directory("transaction_received");
+
+        let url = uri.toString();
+        await client.post(url, {tx: tx});
+        await delay(100);
+    });
+
+    it ('Check if there is only a second transaction.', async () =>
+    {
+        let uri = URI(host)
+            .port(port)
+            .directory("/wallet/transactions/pending")
+            .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
+
+        let response = await client.get (uri.toString());
+        assert.strictEqual(response.data.length, 2);
+        assert.strictEqual(response.data[0].tx_hash,
+            '0xc438670a649a4593b35d922023ca959b6dfb630e8d4cfc5783aaffe21f85988' +
+            '2b71f59890ee889abf32d00df4bab872c91da13e9fc961bceeb3d91643ee2d0d9');
+        assert.strictEqual(response.data[0].address, 'boa1xqcmmns5swnm03zay5wjplgupe65uw4w0dafzsdsqtwq6gv3h3lcz24a8ch');
+        assert.strictEqual(response.data[0].amount, '1663400000');
+        assert.strictEqual(response.data[0].fee, '0');
     });
 });
