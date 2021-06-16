@@ -601,9 +601,26 @@ describe('Test of Stoa API Server', () => {
         let uri = URI(host)
             .port(port)
             .directory("/averagefeechart")
-            .filename("86400");
-        let response = await client.get(uri.toString())       
-        let expected = ''
-        assert.strictEqual(response.data, expected)
+            .filename("31536000");
+        let response = await client.get(uri.toString());               
+        let expected = [
+            {
+              height: 0,
+              time_stamp: 1609459200,
+              average_tx_fee: 0,
+              total_tx_fee: 0,
+              total_payload_fee: 0,
+              total_fee: 0
+            },
+            {
+              height: 1,
+              time_stamp: 1609459800,
+              average_tx_fee: 0,
+              total_tx_fee: 0,
+              total_payload_fee: 0,
+              total_fee: 0
+            }
+          ]
+        assert.deepStrictEqual(response.data, expected)
 });
 });

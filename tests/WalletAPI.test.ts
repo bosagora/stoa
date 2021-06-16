@@ -316,10 +316,53 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
         let uri = URI(host)
             .port(port)
             .directory("/wallet/transaction/overview")
-            .filename("0xd39a98fb9ba8882be791000ddaa21b7b0fbf12850a8810dbea4bb1c7d6b85000d1b2e05837f8dcac97827a6c51d75aced5145364e6dac7596d7d8047e73b701c")
+            .filename("0xc438670a649a4593b35d922023ca959b6dfb630e8d4cfc5783aaffe21f859882b71f59890ee889abf32d00df4bab872c91da13e9fc961bceeb3d91643ee2d0d9")
 
-        let response = await client.get(uri.toString());        
-        let expected = ''
+        let response = await client.get(uri.toString());
+        let expected = {
+            status: 'Confirmed',
+            height: '2',
+            time: 1609460400,
+            tx_hash: '0xc438670a649a4593b35d922023ca959b6dfb630e8d4cfc5783aaffe21f859882b71f59890ee889abf32d00df4bab872c91da13e9fc961bceeb3d91643ee2d0d9',
+            tx_type: 'payment',
+            tx_size: 1248,
+            unlock_height: '3',
+            lock_height: '0',
+            unlock_time: 1609461000,
+            payload: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gIGCg4SFhoeIiYqLjI2Oj5CRkpOUlZaXmJmam5ydnp+goaKjpKWmp6ipqqusra6vsLGys7S1tre4ubq7vL2+v8DBwsPExcbHyMnKy8zNzs/Q0dLT1NXW19jZ2tvc3d7f4OHi4+Tl5ufo6err7O3u7/Dx8vP09fb3+Pn6+/z9/v8AAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+f4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7/AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/w==',
+            senders: [
+              {
+                address: 'boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj',
+                amount: 24400000000000,
+                utxo: '0x75283072696d82d8bca2fe45471906a26df1dbe0736e41a9f78e02a14e2bfced6e0cb671f023626f890f28204556aca217f3023c891fe64b9f4b3450cb3e80ad',
+                signature: '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+                index: 0,
+                unlock_age: 0,
+                bytes: '0x56069fd0618adf7f7bd30a7b47fe96dff265350a4a045eff31368dfae07e4e054f012cae5c1e08ba41a02da2ebcebb1c6e039562a3f41366a782c7a1fea5744e'
+              }
+            ],
+            receivers: [
+              {
+                type: 0,
+                address: 'boa1xqcmmns5swnm03zay5wjplgupe65uw4w0dafzsdsqtwq6gv3h3lcz24a8ch',
+                lock_type: 0,
+                amount: 1663400000,
+                utxo: '0x690ece0f11d3e96c70eaf80623a22b8f404abf8c19ad3ca9dc20d2aa169260ee59ac07eac5d73093e0f9e070bd1aa575d4d8541e2d3d3aa77cad96b5b8d8866f',
+                index: 0,
+                bytes: '0x178f01a58740ab687b82c61fea00ed740de5bac97ada2599300bfbb1e5b244e945c9b78412864341f96f537a993cf011a15a2affc95f944fdc937aa8ce303f2c'
+              },
+              {
+                type: 0,
+                address: 'boa1xrlj00v7wyf9vf0cm2thd58tquqxpj9xtdrh2hhfyrmag4cdkmej5nystea',
+                lock_type: 0,
+                amount: 24398336600000,
+                utxo: '0x1745945afae609e68d10b0ab15e55ac252c1706f235759e184cc38396990af5d08356bf419f689577bd4ab5bfaa5fc32c4c56bfe52e00a1852114f148c780ed9',
+                index: 1,
+                bytes: '0xe3dd9e0f4d5b39dfd3a0c656a12179f627da5298c2d9f668099db5dc33e6a9f8dfbbb5f7d9a974a2e2eb27e34ce33582948902c73aca315adc1c2e4025595b0f'
+              }
+            ],
+            fee: '0'
+          }
         assert.deepStrictEqual(response.data, expected);
     });
 
