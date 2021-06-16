@@ -35,6 +35,16 @@ logging:
   # Connection string for mongodb
   mongodb_url: "mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false"
 
+##################################################################################
+##                               Sendgird                                       ##
+##################################################################################
+admin:
+  # Sendgrid API key
+  sendgrid_api_key: "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"
+  # Sendgrid Email of Admin
+  sender: "rnssol@gmail.com"
+
+
 
 ################################################################################
 ##                               Consensus config                             ##

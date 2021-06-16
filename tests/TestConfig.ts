@@ -13,3 +13,12 @@ export let MockDBConfig = () => {
         multipleStatements: true,
     };
 };
+
+export let MockAdminConfig = () => {
+    let config: Config = new Config();
+    config.readFromFile(path.resolve(process.cwd(), "docs/config.example.yaml"));
+    return {
+        apiKey: config.admin.apiKey,
+        email: config.admin.email,
+    };
+};

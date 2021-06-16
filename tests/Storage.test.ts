@@ -18,12 +18,13 @@ import { sample_data, sample_data2, sample_preImageInfo } from "./Utils";
 
 import { BOASodium } from "boa-sodium-ts";
 import * as fs from "fs";
-import { IDatabaseConfig } from "../src/modules/common/Config";
+import { IDatabaseConfig, IAdminConfig } from "../src/modules/common/Config";
 import { MockDBConfig } from "./TestConfig";
 
 describe("Test ledger storage and inquiry function.", () => {
     let ledger_storage: LedgerStorage;
     let testDBConfig: IDatabaseConfig;
+    let testAdminConfig: IAdminConfig;
 
     before("Wait for the package libsodium to finish loading", async () => {
         SodiumHelper.assign(new BOASodium());
@@ -250,6 +251,7 @@ describe("Test ledger storage and inquiry function.", () => {
 describe("Test for storing block data in the database", () => {
     let ledger_storage: LedgerStorage;
     let testDBConfig: IDatabaseConfig;
+    let testAdminConfig: IAdminConfig;
 
     before("Wait for the package libsodium to finish loading", async () => {
         SodiumHelper.assign(new BOASodium());
@@ -327,6 +329,7 @@ describe("Test for storing block data in the database", () => {
 describe("Tests that sending a pre-image", () => {
     let ledger_storage: LedgerStorage;
     let testDBConfig: IDatabaseConfig;
+    let testAdminConfig: IAdminConfig;
     const height = new Height("0");
 
     before("Wait for the package libsodium to finish loading", async () => {
@@ -395,6 +398,7 @@ describe("Tests that sending a pre-image", () => {
 describe("Tests storing transaction pools of a transaction", () => {
     let ledger_storage: LedgerStorage;
     let testDBConfig: IDatabaseConfig;
+    let testAdminConfig: IAdminConfig;
 
     before("Wait for the package libsodium to finish loading", async () => {
         SodiumHelper.assign(new BOASodium());

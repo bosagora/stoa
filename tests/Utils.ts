@@ -31,11 +31,11 @@ import {
     Transaction,
 } from "boa-sdk-ts";
 import { FullNodeAPI } from "../src/modules/agora/AgoraClient";
-import { IDatabaseConfig } from "../src/modules/common/Config";
+import { IAdminConfig, IDatabaseConfig } from "../src/modules/common/Config";
 import Stoa from "../src/Stoa";
-
 import JSBI from "jsbi";
 import { CoinMarketService } from "../src/modules/service/CoinMarketService";
+import User from '../src/modules/models/userModel';
 
 export const sample_data_raw = (() => {
     return [
@@ -267,11 +267,12 @@ export class TestAgora implements FullNodeAPI {
 export class TestStoa extends Stoa {
     constructor(
         testDBConfig: IDatabaseConfig,
+        adminConfig: IAdminConfig,
         agora_endpoint: URL,
         port: number | string,
         testCoinMarketService: CoinMarketService
     ) {
-        super(testDBConfig, agora_endpoint, port, "127.0.0.1", 1609459200, testCoinMarketService);
+        super(testDBConfig, adminConfig , agora_endpoint, port, "127.0.0.1", 1609459200, testCoinMarketService);
     }
 
     public stop(): Promise<void> {
@@ -453,4 +454,19 @@ export function createBlock(prev_block: Block, txs: Array<Transaction>): Block {
     let block = new Block(block_header, txs, merkle_tree);
 
     return block;
+}
+/**
+* Send mail
+* @param email email address of the receiver
+*/
+export async function recover(email: string): Promise<any> {
+
+    const user = await User.findOne({ email: email })
+    if (!user)
+        return ('The email address ' + email + ' is not associated with any account. Double-check your email address and try again.')
+    user.generatePasswordReset();
+    const token = user.resetPasswordToken;
+    await user.save()
+    return ({ message: 'Email sent successfully', token })
+
 }

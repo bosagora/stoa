@@ -41,6 +41,7 @@ import {
     TestGeckoServer,
     TestStoa,
 } from "./Utils";
+import { Logger } from '../src/modules/common/Logger';
 
 import * as assert from "assert";
 import { BOASodium } from "boa-sodium-ts";
@@ -48,9 +49,9 @@ import URI from "urijs";
 import { URL } from "url";
 import { AgoraClient } from "../src/modules/agora/AgoraClient";
 import { CoinGeckoMarket } from "../src/modules/coinmarket/CoinGeckoMarket";
-import { IDatabaseConfig } from "../src/modules/common/Config";
+import { IDatabaseConfig, IAdminConfig } from "../src/modules/common/Config";
 import { CoinMarketService } from "../src/modules/service/CoinMarketService";
-import { MockDBConfig } from "./TestConfig";
+import { MockDBConfig, MockAdminConfig } from "./TestConfig";
 
 describe("Test of Stoa API Server", () => {
     let host: string = "http://localhost";
@@ -59,6 +60,7 @@ describe("Test of Stoa API Server", () => {
     let agora_server: TestAgora;
     let client = new TestClient();
     let testDBConfig: IDatabaseConfig;
+    let testAdminConfig: IAdminConfig;
     let gecko_server: TestGeckoServer;
     let gecko_market: CoinGeckoMarket;
     let coinMarketService: CoinMarketService;
@@ -85,7 +87,8 @@ describe("Test of Stoa API Server", () => {
 
     before("Create TestStoa", async () => {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig, new URL("http://127.0.0.1:2826"), port, coinMarketService);
+        testAdminConfig = await MockAdminConfig();
+        stoa_server = new TestStoa(testDBConfig, testAdminConfig, new URL("http://127.0.0.1:2826"), port, coinMarketService);
         await stoa_server.createStorage();
     });
 
@@ -98,6 +101,10 @@ describe("Test of Stoa API Server", () => {
         await stoa_server.stop();
         await agora_server.stop();
         await gecko_server.stop();
+    });
+    after('Drop mongoDb database', async () => {
+        let conn: any = Logger.dbInstance.connection;
+        await conn.dropDatabase();
     });
 
     it("Test of the path /block_externalized", async () => {
@@ -708,6 +715,7 @@ describe("Test of the path /utxo", () => {
     let agora_server: TestAgora;
     let client = new TestClient();
     let testDBConfig: IDatabaseConfig;
+    let testAdminConfig: IAdminConfig;
     let gecko_server: TestGeckoServer;
     let gecko_market: CoinGeckoMarket;
     let coinMarketService: CoinMarketService;
@@ -733,7 +741,8 @@ describe("Test of the path /utxo", () => {
     });
     before("Create TestStoa", async () => {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig, new URL("http://127.0.0.1:2826"), port, coinMarketService);
+        testAdminConfig = await MockAdminConfig();
+        stoa_server = new TestStoa(testDBConfig, testAdminConfig, new URL("http://127.0.0.1:2826"), port, coinMarketService);
         await stoa_server.createStorage();
         await stoa_server.start();
     });
@@ -743,6 +752,10 @@ describe("Test of the path /utxo", () => {
         await stoa_server.stop();
         await agora_server.stop();
         await gecko_server.stop();
+    });
+    after('Drop mongoDb database', async () => {
+        let conn: any = Logger.dbInstance.connection;
+        await conn.dropDatabase();
     });
 
     it("Store two blocks", async () => {
@@ -851,6 +864,7 @@ describe("Test of the path /utxo for freezing", () => {
     let agora_server: TestAgora;
     let client = new TestClient();
     let testDBConfig: IDatabaseConfig;
+    let testAdminConfig: IAdminConfig;
     let gecko_server: TestGeckoServer;
     let gecko_market: CoinGeckoMarket;
     let coinMarketService: CoinMarketService;
@@ -884,7 +898,8 @@ describe("Test of the path /utxo for freezing", () => {
 
     before("Create TestStoa", async () => {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig, new URL("http://127.0.0.1:2826"), port, coinMarketService);
+        testAdminConfig = await MockAdminConfig();
+        stoa_server = new TestStoa(testDBConfig, testAdminConfig, new URL("http://127.0.0.1:2826"), port, coinMarketService);
         await stoa_server.createStorage();
         await stoa_server.start();
     });
@@ -894,6 +909,10 @@ describe("Test of the path /utxo for freezing", () => {
         await stoa_server.stop();
         await agora_server.stop();
         await gecko_server.stop();
+    });
+    after('Drop mongoDb database', async () => {
+        let conn: any = Logger.dbInstance.connection;
+        await conn.dropDatabase();
     });
 
     it("Store two blocks", async () => {
@@ -1057,6 +1076,7 @@ describe("Test of the path /merkle_path", () => {
     let agora_server: TestAgora;
     let client = new TestClient();
     let testDBConfig: IDatabaseConfig;
+    let testAdminConfig: IAdminConfig;
     let gecko_server: TestGeckoServer;
     let gecko_market: CoinGeckoMarket;
     let coinMarketService: CoinMarketService;
@@ -1082,7 +1102,8 @@ describe("Test of the path /merkle_path", () => {
     });
     before("Create TestStoa", async () => {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig, new URL("http://127.0.0.1:2826"), port, coinMarketService);
+        testAdminConfig = await MockAdminConfig();
+        stoa_server = new TestStoa(testDBConfig, testAdminConfig, new URL("http://127.0.0.1:2826"), port, coinMarketService);
         await stoa_server.createStorage();
         await stoa_server.start();
     });
@@ -1091,6 +1112,10 @@ describe("Test of the path /merkle_path", () => {
         await stoa_server.stop();
         await agora_server.stop();
         await gecko_server.stop();
+    });
+    after('Drop mongoDb database', async () => {
+        let conn: any = Logger.dbInstance.connection;
+        await conn.dropDatabase();
     });
 
     it("Test of the path /merkle_path", async () => {

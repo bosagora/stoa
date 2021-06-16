@@ -17,10 +17,11 @@ import { BOASodium } from "boa-sodium-ts";
 import URI from "urijs";
 import { URL } from "url";
 import { CoinGeckoMarket } from "../src/modules/coinmarket/CoinGeckoMarket";
-import { IDatabaseConfig } from "../src/modules/common/Config";
+import { IAdminConfig, IDatabaseConfig } from "../src/modules/common/Config";
 import { CoinMarketService } from "../src/modules/service/CoinMarketService";
 import { IMarketCap } from "../src/Types";
-import { MockDBConfig } from "./TestConfig";
+import { MockDBConfig, MockAdminConfig } from "./TestConfig";
+import { Logger } from '../src/modules/common/Logger';
 import {
     market_cap_history_sample_data,
     market_cap_sample_data,
@@ -28,6 +29,9 @@ import {
     TestAgora,
     TestClient,
     TestGeckoServer,
+    delay,
+    createBlock,
+    recover,
     TestStoa,
 } from "./Utils";
 
@@ -38,6 +42,7 @@ describe("Test of Stoa API Server", () => {
     let agora_server: TestAgora;
     let client = new TestClient();
     let testDBConfig: IDatabaseConfig;
+    let testAdminConfig: IAdminConfig;
     let gecko_server: TestGeckoServer;
     let gecko_market: CoinGeckoMarket;
     let coinMarketService: CoinMarketService;
@@ -66,7 +71,8 @@ describe("Test of Stoa API Server", () => {
 
     before("Create TestStoa", async () => {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig, new URL("http://127.0.0.1:2826"), port, coinMarketService);
+        testAdminConfig = await MockAdminConfig();
+        stoa_server = new TestStoa(testDBConfig, testAdminConfig, new URL("http://127.0.0.1:2826"), port, coinMarketService);
         await stoa_server.createStorage();
     });
 
@@ -79,6 +85,10 @@ describe("Test of Stoa API Server", () => {
         await stoa_server.stop();
         await gecko_server.stop();
         await agora_server.stop();
+    });
+    after('Drop mongoDb database', async () => {
+        let conn: any = Logger.dbInstance.connection;
+        await conn.dropDatabase();
     });
 
     it("Test of the path /latest-blocks", async () => {
@@ -743,4 +753,253 @@ describe("Test of Stoa API Server", () => {
         }];
         assert.deepStrictEqual(response.data, expected);
     });
+});
+
+describe('Test Admin API', async () => {
+    let host: string = 'http://localhost';
+    let port: string = '3837';
+    let stoa_server: TestStoa;
+    let agora_server: TestAgora;
+    let client = new TestClient();
+    let testDBConfig: IDatabaseConfig;
+    let testAdminConfig: IAdminConfig;
+    let gecko_server: TestGeckoServer;
+    let gecko_market: CoinGeckoMarket;
+    let coinMarketService: CoinMarketService;
+
+    before('Wait for the package libsodium to finish loading', async () => {
+        SodiumHelper.assign(new BOASodium());
+        await SodiumHelper.init();
+    });
+
+    before('Start a fake Agora', () => {
+        return new Promise<void>((resolve, reject) => {
+            agora_server = new TestAgora("2826", sample_data, resolve);
+        });
+    });
+    before('Start a fake TestCoinGeckoServer', () => {
+        return new Promise<void>(async (resolve, reject) => {
+            gecko_server = new TestGeckoServer("7876", market_cap_sample_data, market_cap_history_sample_data, resolve);
+            gecko_market = new CoinGeckoMarket(gecko_server);
+        });
+    });
+    before('Start a fake TestCoinGecko', () => {
+        coinMarketService = new CoinMarketService(gecko_market);
+    });
+    before('Create TestStoa', async () => {
+        testDBConfig = await MockDBConfig();
+        testAdminConfig = await MockAdminConfig();
+        stoa_server = new TestStoa(testDBConfig, testAdminConfig, new URL("http://127.0.0.1:2826"), port, coinMarketService);
+        await stoa_server.createStorage();
+    });
+
+    before('Start TestStoa', async () => {
+        await stoa_server.start();
+    });
+
+    after('Stop Stoa and Agora server instances', async () => {
+        await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
+        await stoa_server.stop();
+        await gecko_server.stop();
+        await agora_server.stop();
+    });
+    after('Drop mongoDb database', async () => {
+        let conn: any = Logger.dbInstance.connection;
+        await conn.dropDatabase();
+    });
+    it('Test register API', async () => {
+        let uri = URI(host)
+            .port(port)
+            .directory("/register-user")
+        let user = {
+            name: 'test',
+            email: 'test@test.com',
+            password: '12345'
+        }
+        let url = uri.toString();
+
+        let res = await client.post(url, user);
+        assert.strictEqual(res.status, 200);
+        assert.strictEqual(res.data.email, user.email);
+    });
+    it('Test sign In API', async () => {
+        let uri = URI(host)
+            .port(port)
+            .directory("/signin")
+
+        let user = {
+            email: 'test@test.com',
+            password: '12345'
+        }
+        let url = uri.toString();
+        let res = await client.post(url, user)
+
+        assert.strictEqual(res.status, 200);
+        assert.strictEqual(res.data.message, 'Login successfully');
+    });
+    it('Test recover API', async () => {
+        let email = 'test1@test.com'
+        recover(email).then((res: any) => {
+            assert.strictEqual(res.message, 'Email sent successfully');
+        })
+    });
+    it('Test reset API', async () => {
+        let email = 'test1@test.com';
+        var token;
+        recover(email).then(async (res: any) => {
+            token = res.token;
+            let uri = URI(host)
+                .port(port)
+                .directory("/reset")
+                .filename(token)
+
+            let url = uri.toString();
+            let result = await client.get(url);
+
+            assert.strictEqual(result.status, 200);
+            assert.strictEqual(result.data.message, 'Token verified');
+        })
+    });
+    it('Test reset password API', async () => {
+        let email = 'test1@test.com';
+        let token;
+
+        recover(email).then(async (res: any) => {
+            token = res.token;
+            let uri = URI(host)
+                .port(port)
+                .directory("/reset")
+                .filename(token)
+            let data = { password: '54321' }
+            let url = uri.toString();
+            let result = await client.post(url, data);
+
+            assert.strictEqual(result.status, 200);
+            assert.strictEqual(result.data.message, 'Your password has been updated.');
+        })
+    });
+    it('Test add blacklist ip API', async () => {
+        let uri = URI(host)
+            .port(port)
+            .directory("/addblacklist")
+        let expected = {
+            ipAddress: '192.168.0.0',
+            description: 'Too many requests'
+        }
+        let data = {
+            blackListIp: '192.168.0.0',
+            description: 'Too many requests'
+        }
+
+        let url = uri.toString();
+        let res = await client.post(url, data)
+
+        assert.strictEqual(res.status, 200);
+        assert.strictEqual(res.data.ip, expected.ipAddress);
+
+    });
+    it('Test all blacklist ip API', async () => {
+        let uri = URI(host)
+            .port(port)
+            .directory("/blacklist")
+
+        let data: any = {
+            ips: [{ blacklistIp: '192.168.0.0' }]
+        }
+        let url = uri.toString();
+
+        let res = await client.get(url)
+
+        assert.strictEqual(res.status, 200);
+        assert.strictEqual(res.data[0].ipAddress, data.ips[0].blacklistIp);
+    });
+    it('Test delete blacklist ip API', async () => {
+
+        let uri = URI(host)
+            .port(port)
+            .directory("/deleteblacklist")
+
+        let data: any = {
+            ips: [{ blacklistIp: '192.168.0.0' }]
+        }
+        let url = uri.toString();
+        let res = await client.post(url, data)
+
+        assert.strictEqual(res.status, 200);
+        assert.strictEqual(res.data.data[0], data.ips[0].blacklistIp);
+    });
+    it('Test operation logs API', async () => {
+        let uri = URI(host)
+            .port(port)
+            .directory("/operationlogs")
+
+        let url = uri.toString();
+
+        let res = await client.get(url);
+
+        assert.strictEqual(res.status, 200);
+    });
+
+    it('Test access logs API', async () => {
+
+        let uri = URI(host)
+            .port(port)
+            .directory("/accesslogs")
+
+        let url = uri.toString();
+
+        let res = await client.get(url);
+
+        assert.strictEqual(res.status, 200);
+    });
+    it('Test operation log API', async () => {
+
+        let uri = URI(host)
+            .port(port)
+            .directory("/operationlogs")
+
+        let url = uri.toString();
+        let res = await client.get(url);
+        let id = res.data[0]._id
+        let expected = res.data[0]
+        let Newuri = URI(host)
+            .port(port)
+            .directory("/operationlogs")
+            .filename(id)
+
+        url = Newuri.toString();
+
+        res = await client.get(url);
+
+        assert.strictEqual(res.status, 200);
+        assert.deepStrictEqual(res.data, expected);
+    });
+    it('Test search operation log API', async () => {
+
+        let uri = URI(host)
+            .port(port)
+            .directory("/operationlogs/search")
+            .addSearch('type', 'DB%20Operation')
+
+        let url = uri.toString();
+
+        let res = await client.get(url);
+
+        assert.strictEqual(res.status, 200);
+
+    });
+    it('Test search access log API', async () => {
+
+        let uri = URI(host)
+            .port(port)
+            .directory("/accesslogs/search")
+            .addSearch('status', 'Granted')
+
+        let url = uri.toString();
+
+        let res = await client.get(url);
+
+        assert.strictEqual(res.status, 200);
+    });
+
 });

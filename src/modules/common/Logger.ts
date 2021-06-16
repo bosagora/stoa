@@ -14,16 +14,18 @@
 
 *******************************************************************************/
 
-import { MongoClient } from "mongodb";
-import path from "path";
-import winston, { config } from "winston";
-import { MongoDB } from "winston-mongodb";
+import path from 'path';
+import winston, { config } from 'winston';
+import { MongoDB } from 'winston-mongodb';
+import mongoose from 'mongoose';
+import { Config } from './Config';
 const { combine, timestamp, label, printf, metadata, json } = winston.format;
 const logFormat = printf(({ level, message, label, timestamp }) => {
     return `[${label}] ${timestamp} ${level} ${message}`;
 });
 
 export class Logger {
+    public static dbInstance: any
     /**
      * Create the 'default' file transport to be added to a logger
      *
@@ -75,15 +77,41 @@ export class Logger {
      * @return A transport that can be passed to `logger.add`
      */
     public static defaultDatabaseTransport(mongodb_url: string) {
+        const customLevel: config.AbstractConfigSetLevels =
+        {
+            http: 0,
+            info: 1,
+            error: 2,
+            debug: 3,
+            warn: 4,
+        };
         const options = {
-            level: "http",
+            level: 'info',
             db: mongodb_url,
-            collection: "stoa_logs",
+            collection: 'operation_logs',
+            tryReconnect: true,
+            format: combine(
+                timestamp(),
+                json(),
+                metadata({ fillExcept: ['message', 'level', 'timestamp', 'label'] }),
+            ),
+            options: { useUnifiedTopology: true }
+        };
+        const access_options = {
+            level: 'http',
+            db: mongodb_url,
+            collection: 'access_logs',
             tryReconnect: true,
             format: combine(timestamp(), json(), metadata({ fillExcept: ["message", "level", "timestamp", "label"] })),
             options: { useUnifiedTopology: true },
         };
-        return new MongoDB(options);
+        return winston.createLogger({
+            levels: customLevel,
+            transports: [
+                new MongoDB(options),
+                new MongoDB(access_options),
+            ],
+        });
     }
     /**
      * Method build connectivity with logging database.
@@ -91,9 +119,8 @@ export class Logger {
      * @returns Ture if successfull, and return false if connection issue occers.
      */
     public static async BuildDbConnection(mongodb_url: string) {
-        const client = new MongoClient(mongodb_url, { useUnifiedTopology: true });
         try {
-            await client.connect();
+            Logger.dbInstance = await mongoose.connect(mongodb_url, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true });
             return true;
         } catch (err) {
             logger.error(`stoa is unable to build connection for db log. Error:`, err);
@@ -103,11 +130,24 @@ export class Logger {
 
     public static create(): winston.Logger {
         switch (process.env.NODE_ENV) {
-            case "test":
-                return winston.createLogger({
-                    level: "error",
-                    transports: [Logger.defaultConsoleTransport()],
+            case "test": {
+                const config: Config = new Config();
+                config.readFromFile(path.resolve(process.cwd(), "docs/config.example.yaml"));
+                Logger.BuildDbConnection(config.logging.mongodb_url).then((conn) => {
+                    if (conn) {
+                        return logger.add(Logger.defaultDatabaseTransport(config.logging.mongodb_url))
+                    }
+                    else {
+                        return winston.createLogger({
+                            level: "info",
+                        });
+                    }
                 });
+                return winston.createLogger({
+                    level: "info",
+                });
+            }
+
             case "development":
                 return winston.createLogger({
                     level: "debug",
@@ -121,4 +161,4 @@ export class Logger {
     }
 }
 
-export const logger: winston.Logger = Logger.create();
+export const logger: any = Logger.create();

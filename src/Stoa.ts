@@ -1,7 +1,7 @@
 import { Block, Endian, Hash, hash, hashFull, Height, PreImageInfo, Transaction, Utils } from "boa-sdk-ts";
 import { cors_options } from "./cors";
 import { AgoraClient } from "./modules/agora/AgoraClient";
-import { IDatabaseConfig } from "./modules/common/Config";
+import { IAdminConfig, IDatabaseConfig } from "./modules/common/Config";
 import { FeeManager } from "./modules/common/FeeManager";
 import { HeightManager } from "./modules/common/HeightManager";
 import { logger } from "./modules/common/Logger";
@@ -41,11 +41,13 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
 import JSBI from "jsbi";
+import { ObjectID } from "mongodb";
 import { Socket } from "socket.io";
 import { URL } from "url";
 import events from "./modules/events/events";
 import "./modules/events/handlers";
 import moment from "moment";
+const responseTime = require('response-time')
 
 class Stoa extends WebService {
     private _ledger_storage: LedgerStorage | null;
@@ -85,6 +87,11 @@ class Stoa extends WebService {
     private databaseConfig: IDatabaseConfig;
 
     /**
+     * The Database config
+     */
+    private adminConfig: IAdminConfig;
+
+    /**
      * The genesis timestamp
      */
     private readonly genesis_timestamp: number;
@@ -96,9 +103,11 @@ class Stoa extends WebService {
      * @param port The network port of Stoa
      * @param address The network address of Stoa
      * @param genesis_timestamp The genesis timestamp
+     * @param adminConfig The genesis timestamp
      */
     constructor(
         databaseConfig: IDatabaseConfig,
+        adminConfig: IAdminConfig,
         agora_endpoint: URL,
         port: number | string,
         address: string,
@@ -111,6 +120,7 @@ class Stoa extends WebService {
         this._ledger_storage = null;
         this.databaseConfig = databaseConfig;
         this.coinMarketService = coinMarketService;
+        this.adminConfig = adminConfig;
         // Instantiate a dummy promise for chaining
         this.pending = new Promise<void>(function (resolve, reject) {
             resolve();
@@ -160,6 +170,10 @@ class Stoa extends WebService {
         this.app.use(bodyParser.json({ limit: "1mb" }));
         this.app.use(cors(cors_options));
 
+        this.app.use(responseTime((req: any, res: any, time: any) => {
+            logger.http(`${req.method} ${req.url}`,
+                { endpoint: req.url, RequesterIP: req.ip, protocol: req.protocol, httpStatusCode: res.statusCode, userAgent: req.headers['user-agent'], accessStatus: res.statusCode !== 200 ? 'Denied' : 'Granted', bytesTransmitted: res.socket?.bytesWritten, responseTime: time });
+        }));
         // Prepare routes
         this.app.get("/block_height", this.getBlockHeight.bind(this));
         this.app.get("/block_height_at/:time", this.getBlockHeightAt.bind(this));
@@ -189,6 +203,19 @@ class Stoa extends WebService {
         this.app.post("/transaction_received", this.putTransaction.bind(this));
         this.app.get("/holders", this.getBoaHolders.bind(this));
         this.app.get("/average_fee_chart", this.averageFeeChart.bind(this));
+        this.app.post("/register-user", this.registerUser.bind(this));
+        this.app.post("/signin", this.signIn.bind(this));
+        this.app.post("/addblacklist", this.addBlacklist.bind(this));
+        this.app.get("/blacklist", this.allBlacklist.bind(this));
+        this.app.post("/deleteblacklist", this.deleteBlacklist.bind(this));
+        this.app.get("/operationlogs", this.getOperationLogs.bind(this));
+        this.app.get("/operationlogs/search", this.searchOperationLogs.bind(this));
+        this.app.get("/operationlogs/:id", this.getOperationLog.bind(this));
+        this.app.get("/accesslogs", this.getAccessLogs.bind(this));
+        this.app.get("/accesslogs/search", this.searchAccessLogs.bind(this));
+        this.app.post("/recover", this.recover.bind(this));
+        this.app.get("/reset/:token", this.reset.bind(this));
+        this.app.post("/reset/:token", this.resetPassword.bind(this));
 
         let height: Height = new Height("0");
         await HeightManager.init(this);
@@ -431,9 +458,6 @@ class Stoa extends WebService {
      */
     private getTransactionStatus(req: express.Request, res: express.Response) {
         let hash: string = String(req.params.hash);
-
-        logger.http(`GET /transaction/status/${hash}}`);
-
         let tx_hash: Hash;
         try {
             tx_hash = new Hash(hash);
@@ -477,8 +501,6 @@ class Stoa extends WebService {
     private getTransactionFees(req: express.Request, res: express.Response) {
         let size: string = req.params.tx_size.toString();
 
-        logger.http(`GET /transaction/fees/${size}}`);
-
         if (!Utils.isPositiveInteger(size)) {
             res.status(400).send(`Invalid value for parameter 'tx_size': ${size}`);
             return;
@@ -516,9 +538,6 @@ class Stoa extends WebService {
      */
     private getTransactionPending(req: express.Request, res: express.Response) {
         let hash: string = String(req.params.hash);
-
-        logger.http(`GET /transaction/pending/${hash}}`);
-
         let tx_hash: Hash;
         try {
             tx_hash = new Hash(hash);
@@ -556,9 +575,6 @@ class Stoa extends WebService {
      */
     private getTransaction(req: express.Request, res: express.Response) {
         let hash: string = String(req.params.hash);
-
-        logger.http(`GET /transaction/${hash}}`);
-
         let tx_hash: Hash;
         try {
             tx_hash = new Hash(hash);
@@ -596,9 +612,6 @@ class Stoa extends WebService {
      */
     private getUTXO(req: express.Request, res: express.Response) {
         let address: string = String(req.params.address);
-
-        logger.http(`GET /utxo/${address}}`);
-
         this.ledger_storage
             .getUTXO(address)
             .then((rows: any[]) => {
@@ -642,8 +655,6 @@ class Stoa extends WebService {
             });
             return;
         }
-
-        logger.http(`POST /utxos utxos=${req.body.utxos.toString()}`);
 
         let utxos_hash: Array<Hash>;
         try {
@@ -711,9 +722,6 @@ class Stoa extends WebService {
      */
     private async getWalletTransactionsHistory(req: express.Request, res: express.Response) {
         let address: string = String(req.params.address);
-
-        logger.http(`GET /wallet/transactions/history/${address}}`);
-
         let filter_begin: number | undefined;
         let filter_end: number | undefined;
         let page_size: number;
@@ -815,9 +823,6 @@ class Stoa extends WebService {
      */
     private getWalletTransactionOverview(req: express.Request, res: express.Response) {
         let txHash: string = String(req.params.hash);
-
-        logger.http(`GET /wallet/transaction/overview/${txHash}}`);
-
         let tx_hash: Hash;
         try {
             tx_hash = new Hash(txHash);
@@ -906,8 +911,6 @@ class Stoa extends WebService {
         let field: string;
         let value: string | Buffer;
 
-        logger.http(`GET /block-summary/`);
-
         // Validating Parameter - height
         if (req.query.height !== undefined && Utils.isPositiveInteger(req.query.height.toString())) {
             field = "height";
@@ -981,8 +984,6 @@ class Stoa extends WebService {
         let field: string;
         let value: string | Buffer;
 
-        logger.http(`GET /block-enrollments/`);
-
         // Validating Parameter - height
         if (req.query.height !== undefined && Utils.isPositiveInteger(req.query.height.toString())) {
             field = "height";
@@ -1050,8 +1051,6 @@ class Stoa extends WebService {
     private async getBlockTransactions(req: express.Request, res: express.Response) {
         let field: string;
         let value: string | Buffer;
-
-        logger.http(`GET /block-transactions/`);
 
         // Validating Parameter - height
         if (req.query.height !== undefined && Utils.isPositiveInteger(req.query.height.toString())) {
@@ -1152,8 +1151,6 @@ class Stoa extends WebService {
 
     private verifyPayment(req: express.Request, res: express.Response) {
         let hash: string = String(req.params.hash);
-
-        logger.http(`GET /spv/${hash}}`);
 
         let tx_hash: Hash;
 
@@ -1263,8 +1260,6 @@ class Stoa extends WebService {
             return;
         }
 
-        logger.http(`POST /preimage_received preimage=${req.body.preimage.toString()}`);
-
         // To do
         // For a more stable operating environment,
         // it would be necessary to consider organizing the pool
@@ -1325,7 +1320,6 @@ class Stoa extends WebService {
         this.pending = this.pending.then(() => {
             return this.task({ type: "transaction", data: req.body.tx });
         });
-
         res.status(200).send();
     }
 
@@ -1424,8 +1418,6 @@ class Stoa extends WebService {
      * Return the highest block height stored in Stoa
      */
     private getBlockHeight(req: express.Request, res: express.Response) {
-        logger.http(`GET /block_height`);
-
         this.ledger_storage
             .getBlockHeight()
             .then((row: Height | null) => {
@@ -1538,8 +1530,7 @@ class Stoa extends WebService {
         let pagination: IPagination = await this.paginate(req, res);
         this.ledger_storage.getLatestTransactions(pagination.pageSize, pagination.page).then((data: any) => {
             if (data === undefined) {
-                res.status(500).send("Failed to data lookup");
-                return;
+                return res.status(500).send("Failed to data lookup");
             } else if (data.length === 0) {
                 return res.status(204).send(`The data does not exist.`);
             } else {
@@ -1564,28 +1555,307 @@ class Stoa extends WebService {
     }
 
     /**
+     * Register new admin user
+     */
+    public async registerUser(req: express.Request, res: express.Response): Promise<any> {
+        try {
+            const { name, email, password } = req.body;
+            this.ledger_storage.registerUser(name, email, password).then((data: any) => {
+                if (data === undefined) {
+                    return res.status(500).json('Internal server error');
+                } else if (data === true) {
+                    return res.status(409).json('User already exist');
+                } else {
+                    return res.status(200).json(data);
+                }
+            });
+        }
+        catch (error) {
+            logger.error('Error', error);
+        }
+    }
+
+    /**
+     * Sign in to the admin panel
+     */
+    public async signIn(req: express.Request, res: express.Response): Promise<any> {
+        try {
+            const { email, password } = req.body;
+            this.ledger_storage.signInUser(email, password).then((data) => {
+                if (data === undefined) {
+                    return res.status(400).json('Email or password is incorrect');
+                } else {
+                    return res.status(200).json(data);
+                }
+            })
+        }
+        catch (error) {
+            logger.error('Error', error);
+        }
+    }
+
+    /**
+     * get all operation logs
+     */
+    public async getOperationLogs(req: express.Request, res: express.Response): Promise<any> {
+        let pagination: IPagination = await this.paginate(req, res);
+        try {
+            this.ledger_storage.operationLogs(pagination.pageSize, pagination.page).then((data: any) => {
+
+                if (data === undefined) {
+                    return res.status(500).json('Failed to data lookup');
+                } else if (data.length === 0) {
+                    return res.status(200).json('No log found');
+                } else {
+                    return res.status(200).json(data);
+                }
+            });
+        }
+        catch (error) {
+            logger.error('Error', error);
+        }
+    };
+
+    /**
+     * get all access logs
+     */
+    public async getAccessLogs(req: express.Request, res: express.Response): Promise<any> {
+        let pagination: IPagination = await this.paginate(req, res);
+        try {
+            this.ledger_storage.accsessLogs(pagination.pageSize, pagination.page).then((data: any) => {
+
+                if (data === undefined) {
+                    return res.status(500).json('Failed to data lookup');
+                } else if (data.length === 0) {
+                    return res.status(200).json('No log found');
+                } else {
+                    return res.status(200).json(data);
+                }
+            });
+        }
+        catch (error) {
+            logger.error('Error', error);
+        }
+    };
+
+    /**
+     * get detailed opreation log
+     */
+    public async getOperationLog(req: express.Request, res: express.Response): Promise<any> {
+        let id = new ObjectID(req.params.id);
+        try {
+            this.ledger_storage.operationLog(id).then((data: any) => {
+
+                if (data === undefined) {
+                    return res.status(500).json('Failed to data lookup');
+                } else {
+                    return res.status(200).json(data);
+                }
+            });
+        }
+        catch (error) {
+            logger.error('Error', error);
+
+        }
+    }
+
+    /**
+     * get passwordToken and verify the token
+     */
+    public async reset(req: express.Request, res: express.Response): Promise<any> {
+        try {
+            const { token } = req.params;
+            this.ledger_storage.reset(token).then((data) => {
+
+                if (data === undefined) {
+                    return res.status(401).json({ message: 'Password reset token is invalid or has expired.' });
+                } else {
+                    //Redirect user to form with the email address
+                    return res.status(200).json({ message: 'Token verified', data });
+                }
+            });
+        }
+        catch (error) {
+            logger.error('Error', error);
+        }
+    }
+
+    /**
+     * reset user password
+     */
+    public async resetPassword(req: express.Request, res: express.Response): Promise<any> {
+        try {
+            const { token } = req.params;
+            const { password } = req.body;
+            this.ledger_storage.resetPassword(token, password).then((data) => {
+
+                if (data === undefined) {
+                    return res.status(401).json({ message: 'Password reset token is invalid or has expired.' });
+                } else if (data === false) {
+                    return res.status(500).json({ message: 'Internal server error' });
+                } else {
+                    return res.status(200).json({ message: 'Your password has been updated.' });
+                }
+            });
+        }
+        catch (error) {
+            logger.error('Error', error);
+        }
+    }
+
+    /**
+     * Forget password, send mail through sendgrid
+     */
+    public async recover(req: express.Request, res: express.Response): Promise<any> {
+        const { email } = req.body;
+        let host = req.headers.host;
+        try {
+            this.ledger_storage.recover(this.adminConfig, email, host).then((data) => {
+                if (!data) {
+                    return res.status(400).send('The email address ' + email + ' is not associated with any account. Double-check your email address and try again.');
+                } else {
+                    return res.status(200).json({ message: 'Email sent successfully' });
+                }
+            }).catch((error) => {
+                return res.status(500).json({ message: error });
+            });
+        }
+        catch (error) {
+            return res.status(500).json({ message: error });
+        }
+    }
+
+    /**
+     *   Add blacklist ip address to database
+     */
+    public async addBlacklist(req: express.Request, res: express.Response): Promise<any> {
+        try {
+            const { blackListIp, description } = req.body;
+            this.ledger_storage.addBlacklist(blackListIp, description).then((data: any) => {
+                if (data === undefined) {
+                    return res.status(500).json('Failed to data lookup');
+                } else if (data === true) {
+                    return res.status(409).json('Ip already exist');
+                } else {
+                    return res.status(200).json(data);
+                }
+            });
+        }
+        catch (error) {
+            logger.error('Error', error);
+        }
+    }
+
+    /**
+     *   get all blacklisted ips
+     */
+    public async allBlacklist(req: express.Request, res: express.Response): Promise<any> {
+        let pagination: IPagination = await this.paginate(req, res);
+        try {
+            this.ledger_storage.getAllBlacklistIps(pagination.pageSize, pagination.page).then((data) => {
+                if (data === undefined) {
+                    return res.status(500).json('Failed to data lookup');
+                } else if (data.length === 0) {
+                    return res.status(400).json('No blacklisted ip found');
+                } else {
+                    return res.status(200).json(data);
+                }
+            });
+        }
+        catch (error) {
+            logger.error('Error', error);
+        }
+    }
+
+    /**
+     *   Add blacklist ip address to database
+     */
+    public async deleteBlacklist(req: express.Request, res: express.Response): Promise<any> {
+        const ips = req.body.ips
+        try {
+            this.ledger_storage.deleteBlacklist(ips).then((data) => {
+                if (data === undefined) {
+                    return res.status(500).json("Failed to data lookup");
+                } else {
+                    return res.status(200).json({ message: 'Ip delete successfully', data });
+                }
+            });
+        }
+        catch (error) {
+            logger.error('Error', error);
+        }
+    }
+
+    /**
+     * search access logs
+     */
+    public async searchAccessLogs(req: express.Request, res: express.Response): Promise<any> {
+        let pagination: IPagination = await this.paginate(req, res);
+        let ip = req.query.ip?.toString();
+        let status = req.query.status?.toString();
+        let endpoint = req.query.endpoint?.toString();
+        let from = req.query.from?.toString();
+        let to = req.query.to?.toString();
+        try {
+            this.ledger_storage.searchAccessLogs(ip, status, endpoint, from, to, pagination.pageSize, pagination.page)
+                .then((data) => {
+                    if (data === undefined) {
+                        return res.status(500).json("Failed to data lookup");
+                    } else {
+                        return res.status(200).json(data);
+                    }
+                });
+        }
+        catch (error) {
+            logger.error('Error', error);
+        }
+    }
+
+    /**
+     * search operation logs
+     */
+    public async searchOperationLogs(req: express.Request, res: express.Response): Promise<any> {
+        let pagination: IPagination = await this.paginate(req, res);
+        let type = req.query.type?.toString();
+        let height = req.query.height?.toString();
+        let status = req.query.status?.toString();
+        let from = req.query.from?.toString();
+        let to = req.query.to?.toString();
+        try {
+            this.ledger_storage.searchOperationLogs(type, status, height, from, to, pagination.pageSize, pagination.page)
+                .then((data) => {
+                    if (data === undefined) {
+                        return res.status(500).json("Failed to data lookup");
+                    } else {
+                        return res.status(200).json(data);
+                    }
+                });
+        }
+        catch (error) {
+            logger.error('Error', error);
+        }
+    }
+
+    /**
      * Get Coin Market Cap for BOA.
      * @param req
      * @param res
      * @returns Returns Coin market cap.
      */
     private async getCoinMarketCap(req: express.Request, res: express.Response) {
-        this.ledger_storage.getCoinMarketcap()
-            .then((rows: any) => {
-                if (rows[0]) {
-                    return res.status(200).send(rows[0]);
-                } else {
-                    return res.status(204).send(`The data does not exist.`);
-                }
-            })
-            .catch((err) => {
-                logger.error("Failed to data lookup to the DB: " + err, {
-                    operation: Operation.db,
-                    height: HeightManager.height.toString(),
-                    success: false,
-                });
-                res.status(500).send("Failed to data lookup");
-            });
+        this.ledger_storage.getCoinMarketcap().then((rows: any) => {
+            if (rows[0]) {
+                return res.status(200).send(rows[0]);
+            }
+            else {
+                return res.status(204).send(`The data does not exist.`);
+            }
+
+        }).catch((err) => {
+            logger.error("Failed to data lookup to the DB: " + err,
+                { operation: Operation.db, height: HeightManager.height.toString(), success: false });
+            res.status(500).send("Failed to data lookup");
+        });
     }
 
     /**
@@ -2047,7 +2317,7 @@ class Stoa extends WebService {
                 res.status(400).send(`Invalid value for parameter 'beginDate': ${req.query.date.toString()}`);
                 return;
             }
-            
+
             filter_end = Number(req.query.date.toString());
         }
 

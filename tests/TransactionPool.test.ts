@@ -25,10 +25,11 @@ import {
     Unlock,
 } from "boa-sdk-ts";
 import { BOASodium } from "boa-sodium-ts";
-import { IDatabaseConfig } from "../src/modules/common/Config";
+import { IDatabaseConfig, IAdminConfig } from "../src/modules/common/Config";
 import { LedgerStorage } from "../src/modules/storage/LedgerStorage";
 import { TransactionPool } from "../src/modules/storage/TransactionPool";
 import { MockDBConfig } from "./TestConfig";
+import { Logger } from '../src/modules/common/Logger';
 
 import { CoinGeckoMarket } from "../src/modules/coinmarket/CoinGeckoMarket";
 import { CoinMarketService } from "../src/modules/service/CoinMarketService";
@@ -52,6 +53,7 @@ describe("Test TransactionPool", () => {
     let ledger_storage: LedgerStorage;
     let transaction_pool: TransactionPool;
     let testDBConfig: IDatabaseConfig;
+    let testAdminConfig: IAdminConfig;
 
     before("Wait for the package libsodium to finish loading", async () => {
         SodiumHelper.assign(new BOASodium());
@@ -185,6 +187,7 @@ describe("Test of double spending transaction", () => {
     let agora_server: TestAgora;
     let client = new TestClient();
     let testDBConfig: IDatabaseConfig;
+    let testAdminConfig: IAdminConfig;
     let gecko_server: TestGeckoServer;
     let gecko_market: CoinGeckoMarket;
     let coinMarketService: CoinMarketService;
@@ -215,7 +218,7 @@ describe("Test of double spending transaction", () => {
 
     before("Create TestStoa", async () => {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig, new URL("http://127.0.0.1:2826"), port, coinMarketService);
+        stoa_server = new TestStoa(testDBConfig, testAdminConfig, new URL("http://127.0.0.1:2826"), port, coinMarketService);
         await stoa_server.createStorage();
     });
 
@@ -228,6 +231,10 @@ describe("Test of double spending transaction", () => {
         await stoa_server.stop();
         await agora_server.stop();
         await gecko_server.stop();
+    });
+    after('Drop mongoDb database', async () => {
+        let conn: any = Logger.dbInstance.connection;
+        await conn.dropDatabase();
     });
 
     it("Test of the path /block_externalized", async () => {

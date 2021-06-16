@@ -10,6 +10,7 @@ jobs:
     strategy:
       matrix:
         node-version: [ 14.x, 15.x ]
+        mongodb-version: ['4.4']
 
     steps:
     - uses: actions/checkout@v2
@@ -25,6 +26,10 @@ jobs:
         mysql version: 8.0
         mysql database: root
         mysql root password: 12345678
+    - name: Start MongoDB
+      uses: supercharge/mongodb-github-action@1.6.0
+      with:
+        mongodb-version: ${{ matrix.mongodb-version }}
 
     - name: npm install, build, and test
       run: |

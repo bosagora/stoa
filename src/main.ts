@@ -9,6 +9,7 @@ import { Operation } from "./modules/common/LogOperation";
 import { CoinMarketService } from "./modules/service/CoinMarketService";
 import { Storages } from "./modules/storage/Storages";
 import Stoa from "./Stoa";
+import sgMail from "@sendgrid/mail";
 
 // Create with the arguments and read from file
 let config = Config.createWithArgument();
@@ -26,16 +27,20 @@ switch (process.env.NODE_ENV) {
 
     case "production":
     default:
+        // Initializing the sendgrid API key
+        sgMail.setApiKey(config.admin.apiKey)
         // Read the config file and potentially use both
         logger.add(Logger.defaultFileTransport(config.logging.folder));
-        if (config.logging.console) logger.add(Logger.defaultConsoleTransport());
+        if (config.logging.console)
+            logger.add(Logger.defaultConsoleTransport());
         if (config.logging.database) {
             Logger.BuildDbConnection(config.logging.mongodb_url).then((connection) => {
-                if (connection) logger.add(Logger.defaultDatabaseTransport(config.logging.mongodb_url));
-            });
+                if (connection)
+                    logger.add(Logger.defaultDatabaseTransport(config.logging.mongodb_url));
+            })
         }
 }
-logger.transports.forEach((tp) => {
+logger.transports.forEach((tp:any) => {
     tp.level = config.logging.level;
 });
 
@@ -49,9 +54,11 @@ logger.info(`mysql database host: ${config.database.database}`, {
     height: "",
     success: true,
 });
+logger.info(`MongoDB connection url: ${config.logging.mongodb_url}`);
 
 const stoa: Stoa = new Stoa(
     config.database,
+    config.admin,
     config.server.agora_endpoint,
     config.server.port,
     config.server.address,

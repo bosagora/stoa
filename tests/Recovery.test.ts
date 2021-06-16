@@ -20,10 +20,11 @@ import { BOASodium } from "boa-sodium-ts";
 import express from "express";
 import URI from "urijs";
 import { URL } from "url";
+import { Logger } from '../src/modules/common/Logger';
 import { CoinGeckoMarket } from "../src/modules/coinmarket/CoinGeckoMarket";
-import { IDatabaseConfig } from "../src/modules/common/Config";
+import { AdminConfig, IAdminConfig, IDatabaseConfig } from "../src/modules/common/Config";
 import { CoinMarketService } from "../src/modules/service/CoinMarketService";
-import { MockDBConfig } from "./TestConfig";
+import { MockAdminConfig, MockDBConfig } from "./TestConfig";
 import {
     delay,
     market_cap_history_sample_data,
@@ -42,11 +43,12 @@ import {
 class TestRecoveryStoa extends TestStoa {
     constructor(
         testDBConfig: IDatabaseConfig,
+        testAdminConfig: IAdminConfig,
         agora_endpoint: URL,
         port: number | string,
         coinMarketService: CoinMarketService
     ) {
-        super(testDBConfig, agora_endpoint, port, coinMarketService);
+        super(testDBConfig, testAdminConfig, agora_endpoint, port, coinMarketService);
 
         this.app.get("/block", async (req: express.Request, res: express.Response) => {
             if (req.query.block_height === undefined || !Utils.isPositiveInteger(req.query.block_height.toString())) {
@@ -73,6 +75,7 @@ describe("Test of Recovery", () => {
     let agora_node: TestAgora;
     let stoa_server: TestRecoveryStoa;
     let testDBConfig: IDatabaseConfig;
+    let testAdminConfig: IAdminConfig;
     let gecko_server: TestGeckoServer;
     let gecko_market: CoinGeckoMarket;
     let coinMarketService: CoinMarketService;
@@ -103,7 +106,8 @@ describe("Test of Recovery", () => {
     });
     before("Create TestStoa and start it", async () => {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestRecoveryStoa(testDBConfig, agora_addr, stoa_addr.port, coinMarketService);
+        testAdminConfig  = await MockAdminConfig();
+        stoa_server = new TestRecoveryStoa(testDBConfig, testAdminConfig, agora_addr, stoa_addr.port, coinMarketService);
         await stoa_server.createStorage();
         await stoa_server.start();
     });
@@ -111,6 +115,10 @@ describe("Test of Recovery", () => {
         await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
         await stoa_server.stop();
         await gecko_server.stop();
+    });
+    after('Drop mongoDb database', async () => {
+        let conn: any = Logger.dbInstance.connection;
+        await conn.dropDatabase();
     });
     it("Test `getBlocksFrom`", async () => {
         let agora_client = new AgoraClient(agora_addr);

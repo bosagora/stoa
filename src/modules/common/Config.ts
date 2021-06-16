@@ -46,6 +46,11 @@ export class Config implements IConfig {
     public consensus: ConsensusConfig;
 
     /**
+     * Admin config
+     */
+    public admin: AdminConfig;
+
+    /**
      * Constructor
      */
     constructor() {
@@ -53,6 +58,7 @@ export class Config implements IConfig {
         this.database = new DatabaseConfig();
         this.logging = new LoggingConfig();
         this.consensus = new ConsensusConfig();
+        this.admin = new AdminConfig();
     }
 
     /**
@@ -74,6 +80,7 @@ export class Config implements IConfig {
         this.database.readFromObject(cfg.database);
         this.logging.readFromObject(cfg.logging);
         this.consensus.readFromObject(cfg.consensus);
+        this.admin.readFromObject(cfg.admin);
     }
 
     /**
@@ -311,7 +318,7 @@ export class LoggingConfig implements ILoggingConfig {
         this.level = defaults.level;
         this.console = defaults.console;
         this.database = defaults.database;
-        this.mongodb_url = defaults.mongodb_url;
+        this.mongodb_url = defaults.mongodb_url
     }
 
     /**
@@ -335,8 +342,8 @@ export class LoggingConfig implements ILoggingConfig {
             level: "info",
             console: false,
             database: false,
-            mongodb_url: "mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false",
-        };
+            mongodb_url: 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false',
+        }
     }
 }
 
@@ -379,6 +386,58 @@ export class ConsensusConfig implements IConsensusConfig {
 }
 
 /**
+ * Admin Config class
+ */
+export class AdminConfig implements IAdminConfig {
+    /**
+     * The Api key of sendgrid
+     */
+    public apiKey: string;
+
+    /**
+     * The Email of admin
+     */
+    public email: string;
+
+    /**
+     * Constructor
+     * @param apiKey The Api key of sendgrid
+     * @param email The Email of admin
+     */
+    constructor(apiKey?: string, email?: string) {
+
+        let conf = extend(true, {}, AdminConfig.defaultValue());
+        extend(true, conf, {
+            apiKey: apiKey,
+            email: email
+        });
+        this.apiKey = conf.apiKey;
+        this.email = conf.email;
+    }
+
+    /**
+     * Reads from Object
+     * @param config The object of IAdminConfig
+     */
+    public readFromObject(config: IAdminConfig) {
+        let conf = extend(true, {}, AdminConfig.defaultValue());
+        extend(true, conf, config);
+        this.apiKey = conf.apiKey;
+        this.email = conf.email;
+    }
+
+    /**
+     * Returns default value
+     */
+    public static defaultValue(): IAdminConfig {
+        return {
+              apiKey: "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",
+              email: "rnssol@gmail.com",
+        };
+    }
+}
+
+/**
  * The interface of server config
  */
 export interface IServerConfig {
@@ -396,6 +455,21 @@ export interface IServerConfig {
      * The endpoint of Agora
      */
     agora_endpoint: URL;
+}
+
+/**
+ * The interface of admin config
+ */
+export interface IAdminConfig {
+    /**
+     * The Api key of sendgrid
+     */
+    apiKey: string;
+
+    /**
+     * The Email of admin
+     */
+    email: string;
 }
 
 /**
@@ -461,6 +535,7 @@ export interface ILoggingConfig {
      * url of mongodb to store logs
      */
     mongodb_url: string;
+
 }
 
 /**
@@ -496,4 +571,9 @@ export interface IConfig {
      * Consensus config
      */
     consensus: IConsensusConfig;
+
+    /**
+     * Admin config
+     */
+    admin : IAdminConfig;
 }

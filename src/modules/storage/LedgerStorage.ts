@@ -36,14 +36,19 @@ import {
     IMarketCap,
     IAccountInformation
 } from "../../Types";
-import { IDatabaseConfig } from "../common/Config";
+import { IAdminConfig, IDatabaseConfig } from "../common/Config";
 import { FeeManager } from "../common/FeeManager";
-import { logger } from "../common/Logger";
+import { Logger, logger } from "../common/Logger";
 import { Storages } from "./Storages";
 import { TransactionPool } from "./TransactionPool";
 import moment from 'moment';
-
+import User from '../models/userModel'
+import Blacklist from '../models/blacklistModel'
+import generateToken from '../common/generateToken'
 import JSBI from "jsbi";
+import bcrypt from 'bcrypt';
+import { ObjectID } from "mongodb";
+import sgMail from '@sendgrid/mail';
 
 /**
  * The class that inserts and reads the ledger into the database.
@@ -2576,6 +2581,316 @@ export class LedgerStorage extends Storages {
             ) Tx;`;
         return this.query(sql, [height.value.toString(), address, height.value.toString(), address]);
     }
+    /**
+     * Register new user to the admin penal
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public async registerUser(name: string, email: string, password: string): Promise<any> {
+        let res: any = {};
+        const exisitngUser = await User.findOne({ email: email });
+        if (exisitngUser) {
+            res = true;
+            return res;
+        }
+        const hashedPassword = bcrypt.hashSync(password, 10);
+
+        const userRecord = await User.create({
+            name: name,
+            email: email,
+            password: hashedPassword,
+        });
+        if (!userRecord) {
+            return;
+        }
+        return res = {
+            message: 'User created successfully',
+            email: email,
+        };
+    }
+
+    /**
+     * User sign in to the admin penal
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public async signInUser(email: string, password: string): Promise<any> {
+        let res: any = {};
+        const user = await User.findOne({ email: email });
+
+        if (!user) {
+            return;
+        }
+        else {
+            const matchedPassword: boolean = bcrypt.compareSync(password, user.password);
+            if (!matchedPassword) {
+                return;
+            }
+            const token: string = generateToken(email);
+            res = {
+                message: 'Login successfully',
+                token: token,
+            };
+            return res;
+        }
+    }
+
+    /**
+     * Get all operation logs
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public async operationLogs(limit: number, page: number) {
+        let res: any[] = [];
+        let db = Logger.dbInstance.connection.db;
+        let obj = db.collection('operation_logs')
+            .find()
+            .skip((page - 1) * limit)
+            .limit(limit);
+        res = await obj.toArray();
+        return res;
+    }
+
+    /**
+     * Get all access logs
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public async accsessLogs(limit: number, page: number): Promise<any> {
+        let res: any[] = [];
+        let db = Logger.dbInstance.connection.db;
+        let obj = db.collection('access_logs')
+            .find()
+            .skip((page - 1) * limit)
+            .limit(limit);
+        res = await obj.toArray();
+        return res;
+    }
+
+    /**
+     * Get requested operation log
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public async operationLog(id: ObjectID): Promise<any> {
+        let db = Logger.dbInstance.connection.db;
+        let data = await db.collection('operation_logs').findOne({ _id: id });
+        return data;
+    }
+
+    /**
+     * Add blacklisted ip address into the database 
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public async addBlacklist(ip: string, desc: string): Promise<any> {
+        let res: any = {};
+        const existBlacklist = await Blacklist.findOne({ ipAddress: ip });
+        if (existBlacklist) {
+            res = true;
+            return res;
+        }
+        const newBlacklistIp = await Blacklist.create({
+            ipAddress: ip,
+            description: desc,
+        });
+        if (!newBlacklistIp) {
+            return;
+        }
+        return res = {
+            message: 'Ip added successfully',
+            ip: ip,
+        };
+    }
+
+    /**
+     * Get all blacklisted ip addresses
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public async getAllBlacklistIps(limit: number, page: number): Promise<any> {
+        let data = await Blacklist.find()
+            .skip((page - 1) * limit)
+            .limit(limit);
+        return data;
+    }
+
+    /**
+     * Seach logs from access logs
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public async searchAccessLogs(ip: string | undefined, status: string | undefined, endPoint: string | undefined, from: string | undefined, to: string | undefined, limit: number, page: number): Promise<any> {
+
+        let conditions = [];
+        let res: any[] = [];
+        if (ip !== undefined)
+            conditions.push({ 'meta.RequesterIP': ip });
+        if (status !== undefined)
+            conditions.push({ 'meta.accessStatus': status });
+        if (endPoint !== undefined)
+            conditions.push({ 'meta.endpoint': endPoint });
+        if (from !== undefined && to !== undefined) {
+            let fromDate = new Date(Number(from) * 1000);
+            let toDate = new Date(Number(to) * 1000);
+            conditions.push({ timestamp: { $gte: fromDate } });
+            conditions.push({ timestamp: { $lte: toDate } });
+        }
+        let final_condition = conditions.length ? { $and: conditions } : {};
+
+        let db = Logger.dbInstance.connection.db;
+        let obj = db.collection('access_logs')
+            .find(final_condition)
+            .skip((page - 1) * limit)
+            .limit(limit);
+        res = await obj.toArray();
+        return res;
+    }
+
+    /**
+     * Search logs from operation logs
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public async searchOperationLogs(type: string | undefined, status: string | undefined, height: string | undefined, from: string | undefined, to: string | undefined, limit: number, page: number): Promise<any> {
+
+        let conditions = [];
+        let res: any[] = [];
+        if (type !== undefined)
+            conditions.push({ 'meta.operation': type });
+        if (height !== undefined)
+            conditions.push({ 'meta.height': height });
+        if (status !== undefined)
+            conditions.push({ 'meta.success': status });
+        if (from !== undefined && to !== undefined) {
+            let fromDate = new Date(Number(from) * 1000);
+            let toDate = new Date(Number(to) * 1000);
+            conditions.push({ timestamp: { $gte: fromDate } });
+            conditions.push({ timestamp: { $lte: toDate } });
+        }
+        let final_condition = conditions.length ? { $and: conditions } : {};
+        let db = Logger.dbInstance.connection.db;
+        let obj = db.collection('operation_logs')
+            .find(final_condition)
+            .skip((page - 1) * limit)
+            .limit(limit);
+        res = await obj.toArray();
+        return res;
+    }
+
+    /**
+     * Delete blacklisted ip address from the database
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public async deleteBlacklist(ip: any[]): Promise<any> {
+        let deletedIps: any = [];
+
+        if (ip.length) {
+            for (let i = 0; i < ip.length; i++) {
+                await Blacklist.findOneAndRemove({ ipAddress: ip[i].blacklistIp }).then((res) => {
+                    if (res)
+                        deletedIps.push(res.ipAddress);
+                });
+            }
+            return deletedIps;
+        } else {
+            return;
+        }
+    }
+
+    /**
+     * Generate dynamic link and send it to the user through sendgrid
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public recover(adminConfig: IAdminConfig, email: string, host: string | undefined): Promise<any> {
+        return new Promise<boolean>(async (resolve, reject) => {
+            try {
+                const user = await User.findOne({ email: email });
+                if (!user) {
+                    return resolve(false);
+                }
+                await user.generatePasswordReset();
+                await user.save()
+                    .then(user => {
+                        let link = "http://" + host + "/reset/" + user.resetPasswordToken;
+                        const mailOptions = {
+                            to: user.email,
+                            from: adminConfig.email, // email of the sender
+                            subject: "Password change request",
+                            html: `Hi \n 
+                                Please click on the following link ${link} to reset your password. \n\n 
+                                If you did not request this, please ignore this email and your password will remain unchanged.\n`,
+                        };
+                        sgMail
+                            .send(mailOptions).then((res) => {
+                                return resolve(true);
+                            }).catch((err) => {
+                                return reject("Error While sending Email");
+                            });
+                    });
+            }
+            catch (err) {
+                return reject("Error While sending Email");
+            }
+        });
+    }
+
+    /**
+     * Authenticate token and redirect the user to reset password page
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public async reset(token: string | undefined): Promise<any> {
+
+        const user = await User.findOne({ resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } });
+
+        if (!user) {
+            return;
+        }
+        else {
+            return true;
+        }
+    }
+
+    /**
+     * Authenticate token and update user password
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public async resetPassword(token: string | undefined, password: string): Promise<any> {
+
+        const user = await User.findOne({ resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } });
+        if (user === null) {
+            return;
+        }
+        else {
+            // Set the new password
+            const hashedPassword = bcrypt.hashSync(password, 10);
+            user.password = hashedPassword;
+            user.resetPasswordToken = undefined;
+            user.resetPasswordExpires = undefined;
+            user.isVerified = true;
+
+            // Save the updated user object
+            await user.save()
+            return true;
+        }
+    }
 
     /**
      * Get BOA Holder List.
@@ -2593,9 +2908,10 @@ export class LedgerStorage extends Storages {
                 accounts
             ORDER BY total_balance DESC, address ASC
             LIMIT ? OFFSET ?`
-        return this.query(sql, [limit, limit * (page - 1)])
-    
+        return this.query(sql, [limit, limit * (page - 1)]);
+
     }
+
     /*    
     * Get Average Fees between given time range.
     * @param from Begin date for chart history 
