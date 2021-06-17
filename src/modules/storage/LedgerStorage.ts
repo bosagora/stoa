@@ -342,57 +342,6 @@ export class LedgerStorage extends Storages
             });
         }
 
-        /**
-         * Saving Average Fees
-         */
-        async function save_fees(storage: LedgerStorage, block: Block, genesis_timestamp: number){            
-            async function calculateFee (txs: Transaction[])
-            {
-                    let total_tx_fee = 0, total_payload_fee=0, total_fee=0, tx_count=0;
-                    for (let index = 0; index < block.txs.length; index++) {
-                        if (!(block.txs[index].isCoinbase())) {
-                            const fees = await storage.getTransactionFee(block.txs[index]);
-                                if (JSBI.toNumber(fees[1])>=0) {
-                                    total_tx_fee += JSBI.toNumber(fees[1]);
-                                    total_payload_fee += JSBI.toNumber(fees[2]);
-                                    total_fee += JSBI.toNumber(fees[0]);
-                                    tx_count++;
-                                }
-                        }
-                    }
-                return {total_tx_fee, total_payload_fee, total_fee, tx_count}
-            }
-            const fee = await calculateFee(block.txs)
-            const tx_count = (fee.tx_count!=0)?fee.tx_count:1
-            const average_tx_fee = fee.total_tx_fee/tx_count
-            
-            return new Promise<void>(async (resolve, reject) =>
-            {   
-                storage.run(
-                    `INSERT INTO fees
-                        (height ,time_stamp, average_tx_fee, total_tx_fee, total_payload_fee, total_fee)
-                    VALUES
-                        (?,?,?,?,?,?)`,
-                    [
-                        JSBI.toNumber(block.header.height.value),
-                        block.header.time_offset + genesis_timestamp,
-                        average_tx_fee,
-                        fee.total_tx_fee,
-                        fee.total_payload_fee,
-                        fee.total_fee                        
-                    ]
-                    )
-                    .then(() =>
-                    {
-                        resolve();
-                    })
-                    .catch((err) =>
-                    {
-                        reject(err);
-                    })
-            });
-        }
-
         return new Promise<void>((resolve, reject) =>
         {
             (async () => {
@@ -402,7 +351,7 @@ export class LedgerStorage extends Storages
                     for (let tx of block.txs)
                         await this.transaction_pool.remove(this.connection, tx);
                     await saveBlock(this, block, genesis_timestamp);
-                    await save_fees(this, block, genesis_timestamp)
+                    await this.save_fees(this, block, genesis_timestamp)                    
                     await this.putTransactions(block);
                     await this.putEnrollments(block);
                     await this.putBlockHeight(block.header.height);
@@ -418,6 +367,50 @@ export class LedgerStorage extends Storages
                 }
                 resolve();
             })();
+        });
+    }
+
+     /**
+     * Saving Average Fees
+     */
+    public async save_fees(storage: LedgerStorage, block: Block, genesis_timestamp: number){
+        
+        return new Promise<void>(async (resolve, reject) =>
+        {
+            let total_tx_fee: number = 0, total_payload_fee: number = 0, total_fee: number = 0, tx_count: number = 0, sum: JSBI = JSBI.BigInt(0);
+            for (let index = 0; index < block.txs.length; index++) {
+                if (!(block.txs[index].isCoinbase())) {
+                    const fees = await storage.getTransactionFee(block.txs[index]);
+                        if (JSBI.toNumber(fees[1])>=0) {
+                            sum = JSBI.ADD(sum, JSBI.divide(fees[1], JSBI.BigInt(block.txs[index].getNumberOfBytes())))
+                            tx_count++;
+                        }
+                }
+            }
+            tx_count = (tx_count!=0)?tx_count:1
+            const average_tx_fee =  JSBI.toNumber(JSBI.divide(sum,JSBI.BigInt(tx_count)))
+            storage.run(
+                `INSERT INTO fees
+                    (height ,time_stamp, average_tx_fee, total_tx_fee, total_payload_fee, total_fee)
+                VALUES
+                    (?,?,?,?,?,?)`,
+                [
+                    JSBI.toNumber(block.header.height.value),
+                    block.header.time_offset + genesis_timestamp,
+                    average_tx_fee,
+                    total_tx_fee,
+                    total_payload_fee,
+                    total_fee
+                ]
+                )
+                .then(() =>
+                {
+                    resolve();
+                })
+                .catch((err) =>
+                {
+                    reject(err);
+                })
         });
     }
 
@@ -874,8 +867,6 @@ export class LedgerStorage extends Storages
      */
     public putTransactions (block: Block): Promise<void>
     {
-        let genesis_timestamp: number = this.genesis_timestamp;
-
         function save_transaction (storage: LedgerStorage, height: Height, tx_idx:
             number, hash: Hash, tx: Transaction): Promise<void>
         {
