@@ -359,10 +359,10 @@ describe ('Test of Stoa API for the wallet with `sample_data`', () => {
                     "utxo": "0x1745945afae609e68d10b0ab15e55ac252c1706f235759e184cc38396990af5d08356bf419f689577bd4ab5bfaa5fc32c4c56bfe52e00a1852114f148c780ed9",
                     "index": 1,
                     "bytes": "0xe3dd9e0f4d5b39dfd3a0c656a12179f627da5298c2d9f668099db5dc33e6a9f8dfbbb5f7d9a974a2e2eb27e34ce33582948902c73aca315adc1c2e4025595b0f"
-                },
+                }
             ],
             "fee": "0"
-        }; 
+        };
         assert.deepStrictEqual(response.data, expected);
     });
 

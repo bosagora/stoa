@@ -377,12 +377,15 @@ export class LedgerStorage extends Storages
         
         return new Promise<void>(async (resolve, reject) =>
         {
-            let total_tx_fee: number = 0, total_payload_fee: number = 0, total_fee: number = 0, tx_count: number = 0, sum: JSBI = JSBI.BigInt(0);
+            let total_tx_fee: JSBI = JSBI.BigInt(0), total_payload_fee: JSBI = JSBI.BigInt(0), total_fee: JSBI = JSBI.BigInt(0), tx_count: number = 0, sum: JSBI = JSBI.BigInt(0);
             for (let index = 0; index < block.txs.length; index++) {
                 if (!(block.txs[index].isCoinbase())) {
                     const fees = await storage.getTransactionFee(block.txs[index]);
                         if (JSBI.toNumber(fees[1])>=0) {
                             sum = JSBI.ADD(sum, JSBI.divide(fees[1], JSBI.BigInt(block.txs[index].getNumberOfBytes())))
+                            total_tx_fee = JSBI.ADD(total_tx_fee, fees[1]);
+                            total_payload_fee = JSBI.ADD(total_tx_fee, fees[2]);
+                            total_fee = JSBI.ADD(total_tx_fee, fees[0]);
                             tx_count++;
                         }
                 }
@@ -398,9 +401,9 @@ export class LedgerStorage extends Storages
                     JSBI.toNumber(block.header.height.value),
                     block.header.time_offset + genesis_timestamp,
                     average_tx_fee,
-                    total_tx_fee,
-                    total_payload_fee,
-                    total_fee
+                    JSBI.toNumber(total_tx_fee),
+                    JSBI.toNumber(total_payload_fee),
+                    JSBI.toNumber(total_fee)
                 ]
                 )
                 .then(() =>
