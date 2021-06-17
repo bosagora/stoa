@@ -590,9 +590,9 @@ class Stoa extends WebService
     /**
      * POST /utxos
      *
-     * Returns UTXO's information about the UTXO hash array.
+     * Called when a request is received through the `/utxos/` handler
      *
-     * Returns a array of UTXO information.
+     * Returns UTXO's information about the UTXO hash array.
      */
     private getUTXOs (req: express.Request, res: express.Response)
     {
@@ -602,7 +602,7 @@ class Stoa extends WebService
             return;
         }
 
-        logger.http(`POST /utxos tx=${req.body.utxos.toString()}`);
+        logger.http(`POST /utxos utxos=${req.body.utxos.toString()}`);
 
         let utxos_hash: Array<Hash>;
         try
