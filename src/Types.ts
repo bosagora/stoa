@@ -11,7 +11,7 @@
 
  *******************************************************************************/
 
-import { Height, OutputType } from 'boa-sdk-ts';
+import { Height, OutputType, BlockHeader, Block, Transaction } from 'boa-sdk-ts';
 
 /**
  * The interface of the Validator
@@ -810,4 +810,50 @@ export interface IMarketChart
      * Time
      */
     last_updated_at: number
+}
+
+/**
+ * Interface for new Block Emit
+ */
+export interface IEmitBlock
+{
+    /**
+     * block height
+     */
+    height: string;
+
+    /**
+     * hash of block
+     */
+    hash: string;
+
+    /**
+     * timestamp of the block
+     */
+    time_stamp: number;
+
+    block: Block;
+}
+
+/**
+ * Interface for new Transaction Emit 
+ */
+export interface IEmitTransaction
+{
+    /**
+     * block height
+     */
+    height: string;
+
+    /**
+     * hash of block
+     */
+    hash: string;
+    
+    /**
+     * hash of transaction
+     */
+    tx_hash: string;
+
+    transaction: Transaction;
 }

@@ -3,9 +3,10 @@ export default {
     connection: 'connection',
     ping: 'ping'
   },
+
   server:{
-    newblock:"newblock",
-    newtransaction:"newtransaction",
-    lateststats:"lateststats"
+    newBlock:"newblock",
+    newTransaction:"newtransaction",
+    latestStats:"lateststats"
   }
 };

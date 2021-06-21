@@ -14,7 +14,7 @@ export class SocketIO {
     this.io = require("socket.io")(server, {
       cors: {
         origin: "*",
-        methods: ["GET", "POST"],
+        methods: ["GET"],
         allowedHeaders: true,
         credentials: true
       }
