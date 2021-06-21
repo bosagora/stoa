@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS "enrollments" (
 | tx_fee            | INTEGER   |    | Y        |          | The fee of this transaction |
 | payload_fee       | INTEGER   |    | Y        |          | The payload fee of this transaction  |
 | tx_size           | INTEGER   |    | Y        |          | The size of this transaction  |
+| calculated_tx_fee | INTEGER   |    | Y        |          | The calculated fee of this transaction |
 | inputs_count      | INTEGER   |    | Y        |          | The number of inputs in the transaction |
 | outputs_count     | INTEGER   |    | Y        |          | The number of outputs in the transaction |
 | payload_size      | INTEGER   |    | Y        |          | The size of data payload in the transaction |
@@ -101,6 +102,7 @@ CREATE TABLE IF NOT EXISTS "transactions" (
     "tx_fee"                INTEGER  NOT NULL,
     "payload_fee"           INTEGER  NOT NULL,
     "tx_size"               INTEGER  NOT NULL,
+    "calculated_tx_fee"     INTEGER  NOT NULL,
     "inputs_count"          INTEGER  NOT NULL,
     "outputs_count"         INTEGER  NOT NULL,
     "payload_size"          INTEGER  NOT NULL,
