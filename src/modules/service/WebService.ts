@@ -41,14 +41,14 @@ export class WebService
     /**
      * The Event Dispatcher 
      */
-    protected  eventDispatcher : EventDispatcher;
+    protected  eventDispatcher: EventDispatcher;
 
     /**
      * Connection
      * @param port 
      * @param address 
      */
-    protected socket : SocketIO
+    protected socket: SocketIO
     
     /**
      * Constructor
