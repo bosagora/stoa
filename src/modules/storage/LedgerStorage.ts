@@ -21,6 +21,7 @@ import { TransactionPool } from "./TransactionPool";
 import { IDatabaseConfig } from '../common/Config';
 import { IMarketCap } from '../../Types'
 import { logger } from '../common/Logger';
+import { FeeManager } from '../common/FeeManager';
 
 import JSBI from 'jsbi';
 
@@ -132,6 +133,7 @@ export class LedgerStorage extends Storages
             tx_fee              INTEGER  NOT NULL,
             payload_fee         INTEGER  NOT NULL,
             tx_size             INTEGER  NOT NULL,
+            calculated_tx_fee   INTEGER  NOT NULL,
             inputs_count        INTEGER  NOT NULL,
             outputs_count       INTEGER  NOT NULL,
             payload_size        INTEGER  NOT NULL,
@@ -818,6 +820,7 @@ export class LedgerStorage extends Storages
             {
                 let fees = await storage.getTransactionFee(tx);
                 let tx_size = tx.getNumberOfBytes();
+                let calculated_fee = FeeManager.getTxFee(tx_size, 0)[1];
 
                 let unlock_height_query: string;
                 if (tx.isPayment() && (tx.inputs.length > 0))
@@ -859,9 +862,9 @@ export class LedgerStorage extends Storages
 
                 storage.run(
                     `INSERT INTO transactions
-                        (block_height, tx_index, tx_hash, type, unlock_height, lock_height, tx_fee, payload_fee, tx_size, inputs_count, outputs_count, payload_size)
+                        (block_height, tx_index, tx_hash, type, unlock_height, lock_height, tx_fee, payload_fee, tx_size, calculated_tx_fee, inputs_count, outputs_count, payload_size)
                     VALUES
-                        (?, ?, ?, ?, ${unlock_height_query}, ?, ?, ?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ${unlock_height_query}, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         height.toString(),
                         tx_idx,
@@ -871,6 +874,7 @@ export class LedgerStorage extends Storages
                         fees[1].toString(),
                         fees[2].toString(),
                         tx_size,
+                        calculated_fee,
                         tx.inputs.length,
                         tx.outputs.length,
                         tx.payload.length
