@@ -469,3 +469,21 @@ CREATE TABLE IF NOT EXISTS tx_pool (
     PRIMARY KEY (`key`(64))
 )
 ```
+## 17. Table **fee_mean_disparity**
+
+### _Schema_
+
+| Column            | Data Type | PK | Not NULL | Default  |Description|
+|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
+| height            | INTEGER   | Y  | Y        |          | The height of the block |
+| disparity         | INTEGER   |    | Y        |          | The disparity of transaction fee |
+
+### _Create Script_
+
+```sql
+CREATE TABLE IF NOT EXISTS fee_mean_disparity (
+    height      INTEGER    NOT NULL,
+    disparity   INTEGER    NOT NULL,
+    PRIMARY KEY (height)
+)
+```
