@@ -35,7 +35,8 @@ import {
     ITxStatus,
     IUnspentTxOutput,
     ValidatorData,
-    IBOAHolder
+    IBOAHolder,
+    IAvgFee
 } from "./Types";
 
 import bodyParser from "body-parser";
@@ -46,6 +47,7 @@ import { Socket } from "socket.io";
 import { URL } from "url";
 import events from "./modules/events/events";
 import "./modules/events/handlers";
+import moment from "moment";
 
 class Stoa extends WebService {
     private _ledger_storage: LedgerStorage | null;
@@ -188,6 +190,7 @@ class Stoa extends WebService {
         this.app.post("/preimage_received", this.putPreImage.bind(this));
         this.app.post("/transaction_received", this.putTransaction.bind(this));
         this.app.get("/holders", this.getBoaHolders.bind(this));
+        this.app.get("/average_fee_chart", this.averageFeeChart.bind(this));
 
         let height: Height = new Height("0");
         await HeightManager.init(this);
@@ -2018,6 +2021,114 @@ class Stoa extends WebService {
                 logger.error("Failed to data lookup to the DB: " + err);
                 return res.status(500).send("Failed to data lookup");
             })
+    }
+
+    /**
+     * GET /average_fee_chart
+     * Called when a request is received through the `/average_fee_chart` handler
+     * The parameter `date` is the start date of the range of dates to look up.
+     * @returns Returns average transaction fee between range (date - filter)
+     */
+    private async averageFeeChart(req: express.Request, res: express.Response) {
+
+        logger.http(`GET /average_fee_chart/`);
+
+        let filter;
+        let filter_end;
+        let filter_begin;
+
+        if (req.query.filter === undefined) {
+            res.status(400).send(`Parameter filter must also be set.`);
+            return;
+        }
+        else if (req.query.date === undefined) {
+            res.status(400).send(`Parameter endDate must also be set.`);
+            return;
+        }
+        else {
+            if (!Utils.isPositiveInteger(req.query.date.toString())) {
+                res.status(400).send(`Invalid value for parameter 'beginDate': ${req.query.date.toString()}`);
+                return;
+            }
+            
+            filter_end = Number(req.query.date.toString());
+        }
+
+        filter = req.query.filter.toString();
+        filter_end = moment(Number(req.query.date.toString()) * 1000).startOf('D')
+
+        switch (filter) {
+            case 'D': {
+                filter_begin = filter_end.unix() - 84000;
+                break;
+            }
+            case '5D': {
+                filter_begin = filter_end.unix() - 432000;
+                filter = 'D'
+                break;
+            }
+            case 'M': {
+                filter_begin = filter_end.unix() - 2592000;
+                break;
+            }
+            case '3M': {
+                filter_begin = filter_end.unix() - 7776000;
+                filter = 'M'
+                break;
+            }
+            case '6M': {
+                filter_begin = filter_end.unix() - 15552000;
+                filter = 'M'
+                break;
+            }
+            case 'Y': {
+                filter_begin = filter_end.unix() - 31536000;
+                break;
+            }
+            case '5Y': {
+                filter_begin = filter_end.unix() - 157680000;
+                filter = 'Y'
+                break;
+            }
+            default: {
+                filter_begin = filter_end.unix() - 84000;
+                break;
+            }
+        }
+
+        this.ledger_storage.calculateAvgFeeChart(filter_begin, moment(filter_end).startOf('D').unix(), filter)
+            .then((data: any) => {
+                if ((data === undefined)) {
+                    res.status(500).send("Failed to data lookup");
+                    return;
+                }
+                else if (data.length === 0) {
+                    return res.status(204).send(`The data does not exist.`);
+                }
+                else {
+                    let avgFeelist: Array<IAvgFee> = [];
+                    for (const row of data) {
+                        avgFeelist.push(
+                            {
+                                height: row.height,
+                                granularity: row.granularity,
+                                time_stamp: row.time_stamp,
+                                average_tx_fee: row.average_tx_fee,
+                                total_tx_fee: row.total_tx_fee,
+                                total_payload_fee: row.total_payload_fee,
+                                total_fee: row.total_fee
+                            }
+                        )
+                    }
+                    return res.status(200).send(JSON.stringify(avgFeelist));
+                }
+            })
+            .catch((err) => {
+                logger.error("Failed to averageFeeChart data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
+                res.send(500).send("Failed to data lookup")
+            })
+
     }
 
     /**

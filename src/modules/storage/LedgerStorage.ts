@@ -41,6 +41,7 @@ import { FeeManager } from "../common/FeeManager";
 import { logger } from "../common/Logger";
 import { Storages } from "./Storages";
 import { TransactionPool } from "./TransactionPool";
+import moment from 'moment';
 
 import JSBI from "jsbi";
 
@@ -299,6 +300,19 @@ export class LedgerStorage extends Storages {
             PRIMARY KEY (address(64))
         );
         
+
+        CREATE TABLE IF NOT EXISTS fees
+        (
+            height             INTEGER NOT NULL,
+            time_stamp         INTEGER NOT NULL,
+            granularity        TEXT NOT NULL,
+            average_tx_fee     BIGINT(20) NOT NULL,
+            total_tx_fee       BIGINT(20) NOT NULL,
+            total_payload_fee  BIGINT(20) NOT NULL,
+            total_fee          BIGINT(20) NOT NULL,
+            PRIMARY KEY(time_stamp, granularity(64))
+        );
+
        DROP TRIGGER IF EXISTS tx_trigger;
        CREATE TRIGGER tx_trigger AFTER INSERT
        ON transactions
@@ -363,6 +377,7 @@ export class LedgerStorage extends Storages {
                     await this.begin();
                     for (let tx of block.txs) await this.transaction_pool.remove(this.connection, tx);
                     await saveBlock(this, block, genesis_timestamp);
+                    await this.putfees(block)
                     await this.putTransactions(block);
                     await this.putEnrollments(block);
                     await this.putBlockHeight(block.header.height);
@@ -378,6 +393,80 @@ export class LedgerStorage extends Storages {
                 }
                 resolve();
             })();
+        });
+    }
+    /**
+     * Saving Average Fees
+     */
+    public putfees(block: Block) {
+        function save_fee(storage: LedgerStorage, height: Height, time_stamp: number, granularity: number, average_tx_fee: JSBI, total_tx_fee: JSBI, total_payload_fee: JSBI, total_fee: JSBI) {
+            return new Promise<void>((resolve, reject) => {
+                storage.run(
+                    `INSERT INTO fees
+                        ( height, time_stamp, granularity,  average_tx_fee, total_tx_fee, total_payload_fee, total_fee)
+                    VALUES
+                        (?,?,?,?,?,?,?)
+                    ON DUPLICATE KEY 
+                    UPDATE 
+                        height = VALUES(height),
+                        average_tx_fee = VALUES(average_tx_fee),
+                        total_tx_fee = VALUES(total_tx_fee),
+                        total_payload_fee = VALUES(total_payload_fee),
+                        total_fee = VALUES(total_fee)`,
+                    [
+                        height.value.toString(),
+                        time_stamp.toString(),
+                        granularity.toString(),
+                        average_tx_fee.toString(),
+                        total_tx_fee.toString(),
+                        total_payload_fee.toString(),
+                        total_fee.toString(),
+                    ]
+                )
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+            });
+        }
+        async function applyGranularity(time_stamp: number) {
+            let granularityArray = ['H', 'D', 'M', 'Y'];
+            let date = moment(new Date(time_stamp * 1000));
+            let newEntry: any = [];
+            for (let index = 0; index < granularityArray.length; index++) {
+                let element = granularityArray[index];
+                let unit = date.startOf(element as moment.unitOfTime.StartOf);
+                newEntry.push({ time_stamp: unit.unix(), granularity: granularityArray[index] });
+                if (index === (granularityArray.length - 1)) {
+                    return newEntry;
+                }
+            }
+        }
+        return new Promise<void>(async (resolve, reject) => {
+            let total_tx_fee: JSBI = JSBI.BigInt(0);
+            let total_payload_fee: JSBI = JSBI.BigInt(0);
+            let total_fee: JSBI = JSBI.BigInt(0);
+            let sum: JSBI = JSBI.BigInt(0);
+            for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++) {
+                if (!(block.txs[tx_idx].isCoinbase())) {
+                    let fees = await this.getTransactionFee(block.txs[tx_idx]);
+                    sum = JSBI.add(sum, JSBI.divide(fees[1], JSBI.BigInt(block.txs[tx_idx].getNumberOfBytes())))
+                    total_tx_fee = JSBI.add(total_tx_fee, fees[1]);
+                    total_payload_fee = JSBI.add(total_payload_fee, fees[2]);
+                    total_fee = JSBI.add(total_fee, fees[0]);
+                }
+            }
+            const average_tx_fee = JSBI.divide(sum, JSBI.BigInt(block.txs.length));
+            let newEntry = await applyGranularity(block.header.time_offset + this.genesis_timestamp);
+            if (newEntry.length > 0) {
+                for (let index = 0; index < newEntry.length; index++) {
+                    await save_fee(this, block.header.height, newEntry[index].time_stamp, newEntry[index].granularity,
+                        average_tx_fee, total_tx_fee, total_payload_fee, total_fee);
+                }
+            }
+            resolve();
         });
     }
 
@@ -2512,6 +2601,23 @@ export class LedgerStorage extends Storages {
             ORDER BY total_balance DESC, address ASC
             LIMIT ? OFFSET ?`
         return this.query(sql, [limit, limit * (page - 1)])
+    
+    }
+    /*    
+    * Get Average Fees between given time range.
+    * @param from Begin date for chart history 
+    * @param to End date for chart history
+    */
+    public calculateAvgFeeChart(from: number, to: number, filter: string): Promise<any[]> {
+        let sql =
+            `SELECT
+                height, time_stamp, average_tx_fee,
+                granularity, total_tx_fee, total_payload_fee, total_fee
+             FROM
+                fees
+             WHERE
+                time_stamp>=? AND  time_stamp<=? AND  granularity = ?`;
+        return this.query(sql, [from, to, filter]);
     }
 
     /**
