@@ -746,6 +746,23 @@ describe("Test of Stoa API Server", () => {
                 total_balance: 24399999990480
             }
         ];
+    });
+    it('Test for path /average_fee_chart/', async () => {
+        let uri = URI(host)
+            .port(port)
+            .directory("/average_fee_chart")
+            .setSearch("date", "1609459200")
+            .setSearch("filter", "D")
+        let response = await client.get(uri.toString());
+        let expected = [{
+            height: 1,
+            granularity: 'D',
+            time_stamp: 1609459200,
+            average_tx_fee: 188,
+            total_tx_fee: 1904000,
+            total_payload_fee: 0,
+            total_fee: 1904000
+        }];
         assert.deepStrictEqual(response.data, expected);
     });
 });

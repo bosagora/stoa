@@ -891,3 +891,43 @@ export interface IEmitTransaction {
 
     transaction: Transaction;
 }
+
+/**
+* The interface of average Fee
+*/
+export interface IAvgFee {
+    /**
+     * Height of Block
+     */
+    height: number;
+
+    /**
+     * Granularity of Record
+     */
+    granularity: string
+
+    /**
+     * Block unix timestamp
+     */
+    time_stamp: number;
+
+    /**
+     * Average Fee of ALl Transactions in a Block
+     */
+    average_tx_fee: number;
+
+    /**
+     * Total Fee of Transactions in Block
+     */
+    total_tx_fee: number;
+
+    /**
+     * Total Payload Fee
+     */
+    total_payload_fee: number;
+
+    /**
+     * Total Fee
+     */
+    total_fee: number;
+}
