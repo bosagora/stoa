@@ -263,7 +263,13 @@ export class LedgerStorage extends Storages
             change_24h      BIGINT(20),
             PRIMARY KEY (last_updated_at)
         );
-        
+
+        CREATE TABLE IF NOT EXISTS fee_mean_disparity (
+            height      INTEGER    NOT NULL,
+            disparity   INTEGER    NOT NULL,
+            PRIMARY KEY (height)
+        );
+
         CREATE TABLE IF NOT EXISTS tx_pool
         (
             \`key\`     TINYBLOB    NOT NULL,
@@ -347,6 +353,7 @@ export class LedgerStorage extends Storages
                     await this.putBlockHeight(block.header.height);
                     await this.putMerkleTree(block);
                     await this.putBlockstats(block);
+                    await this.putFeeDisparity(block);
                     await this.commit();
                 }
                 catch (error)
@@ -634,6 +641,67 @@ export class LedgerStorage extends Storages
               })();
           });
       }
+
+    /**
+     * Puts the average of disparity from the calculated transaction fee.
+     * @param block: The instance of the `Block`
+     */
+    public putFeeDisparity (block: Block): Promise<void>
+    {
+        return new Promise<void>((resolve, reject) =>
+        {
+            const range = 100;
+            const start = JSBI.subtract(block.header.height.value, JSBI.BigInt(range - 1));
+            const end = block.header.height.value;
+            const select_sql =
+                `SELECT (tx_fee - calculated_tx_fee) as disparity 
+                FROM 
+                    transactions 
+                WHERE 
+                    inputs_count > 0 
+                    AND type != 2 
+                    AND block_height BETWEEN ? AND ?;`;
+            this.query(select_sql, [start.toString(), end.toString()])
+                .then((rows: any[]) =>
+                {
+                    const insert_sql =
+                        `INSERT INTO fee_mean_disparity (height, disparity) VALUES (?, ?);`;
+                    return this.query(insert_sql,
+                        [end.toString(), FeeManager.calculateTrimmedMeanDisparity(rows.map(m => m.disparity))])
+                })
+                .then(() =>
+                {
+                    resolve();
+                })
+                .catch((err) =>
+                {
+                    reject(err);
+                });
+        });
+    }
+
+    /**
+     * Gets the mean of disparity from the calculated transaction fee.
+     */
+    public getFeeMeanDisparity (): Promise<number>
+    {
+        return new Promise<number>((resolve, reject) =>
+        {
+            const sql = `SELECT disparity FROM fee_mean_disparity ORDER BY height DESC LIMIT 1;`;
+            this.query(sql, [])
+                .then((rows: any[]) =>
+                {
+                    if (rows.length > 0)
+                        resolve(rows[0].disparity);
+                    else
+                        resolve(0);
+                })
+                .catch((err) =>
+                {
+                    reject(err);
+                });
+        });
+    }
 
     /**
      * Update a preImage to database
