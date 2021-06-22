@@ -96,8 +96,8 @@ describe('Test of Stoa API Server', () => {
         let expected = [
             {
                 "height": "1",
-                "hash": "0x8161cb00f6d95e4c42c8aa8d752a378ff2de671e4dfc1edba3b53704d8dd1241077c1df1c3c0bb8f63dc4f0645cd86ccb17d932cc7a796f9e1c221abafe8b0d7",
-                "merkle_root": "0x2a8158ee049c459e32912f426b0f4ebaea9d017455efd3e20c27954f22066a10a4cb676254e9a011906ac8cb6855add4d314eb96d583d1a1828ff7f05d04ebd0",
+                "hash": "0x5e57db5e2c2effd180f831330ddf2ea2686817b4f14c8ee60700ecb5c4e9130ce5fe1b9785bc2b5cc6c5fd8c1682647b258419cafa637f07f0aa4e88c9a7de9f",
+                "merkle_root": "0x515a30d31fbd031d63f041b92184f32baf00d08e4120da9299bc336c6f980f2245b11e70bb1dcb7c2279ead9dab1c37b62dee8414083ae8346d166cf033cddfb",
                 "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
                 "validators": "[252]",
                 "tx_count": "8",
@@ -128,65 +128,65 @@ describe('Test of Stoa API Server', () => {
         let expected = [
             {
                 "height": "1",
-                "tx_hash": "0x9e6d1b023eed4b4a7141c18b585e8aebc4955d5e279698e96086eca689daa8cebfef63deb816749445bf4a82af43958f44d90357488a5a3681fb6e3b4bc9789a",
-                "amount": "610000000000000",
-                "tx_fee": "0",
+                "tx_hash": "0xfbaaebc15bb1618465077fed2425a826d88c7f5ae0197634f056bfbad12a7a74b28cc82951e889255e149707bd3ef64eb01121875c766b5d24afed176d7d255c",
+                "amount": "609999999762000",
+                "tx_fee": "238000",
                 "tx_size": "1190",
                 "time_stamp": 1609459800
             },
             {
                 "height": "1",
-                "tx_hash": "0xd7cdd350d885c2f15a91b6b927de0e79d2cddecf4b8d02825978f026cecae23482252d8d04e57114aeb3fe5048fc1297d65824abe0696d9dc982153a64a4c6ac",
-                "amount": "610000000000000",
-                "tx_fee": "0",
+                "tx_hash": "0x25ba9352ec7a92efd273b62de9bb30c62a2c468030e2ac0711563453102299abcb9e014a59b9c0ba43e2041c1444535098bf6f0e5532e7e4dce10ebac751f747",
+                "amount": "609999999762000",
+                "tx_fee": "238000",
                 "tx_size": "1190",
                 "time_stamp": 1609459800
             },
             {
                 "height": "1",
-                "tx_hash": "0x1abe5052d4870dc6c803688aa1219b8432f60e0a17637442133cc82491ff752b519f626064925639fdb4ce2de03a5d3b4dc82742bfb7659ef6f9838addf0a56e",
-                "amount": "610000000000000",
-                "tx_fee": "0",
+                "tx_hash": "0xf07bdd8d4285928d39debe21601368220b6132f0bf1e9a0e45f94407648b74534c1d27c421b978fdcadae058cb426039d69c5469409c6f3b29f1d79bfb808b4b",
+                "amount": "609999999762000",
+                "tx_fee": "238000",
                 "tx_size": "1190",
                 "time_stamp": 1609459800
             },
             {
                 "height": "1",
-                "tx_hash": "0x54356f02180daf134a324265f264130c56d29a77fea8c904a7e404dcee030ba234b15f92e33cea1aa1e15f4ba2eed0f215038f488637bd4b8055da3cabab6007",
-                "amount": "610000000000000",
-                "tx_fee": "0",
+                "tx_hash": "0x21df6397c1353dafac1092eef428b9cf27ee96baa143f5a111c587c46f887688c45b956b8cf2adf01285536c13b452c8c15bd82ec436b39b373c2987d7f1f3d9",
+                "amount": "609999999762000",
+                "tx_fee": "238000",
                 "tx_size": "1190",
                 "time_stamp": 1609459800
             },
             {
                 "height": "1",
-                "tx_hash": "0xee063a939506b1582680aecacc5c95f2f1bf0df3c4c5eb66ef3802113c8366010950013217d7dff9f66b64aadffa34553743123818b2ec551095c60b762ae823",
-                "amount": "610000000000000",
-                "tx_fee": "0",
+                "tx_hash": "0x622e862706aa4e2b3ff5df7fa63b4dec77e93f13f0650cede3f19705486815ea4e00f62f34abafc61f93bef17463924df0e81ca0ed154733f8790d2fe8adafd1",
+                "amount": "609999999762000",
+                "tx_fee": "238000",
                 "tx_size": "1190",
                 "time_stamp": 1609459800
             },
             {
                 "height": "1",
-                "tx_hash": "0x1a94390f4dac13b28c6a13c36a99aa02c4feb45bb7af3f18a047e1441fc2c8574d565bdb18ae05685877a6f32d8a12ee989e24a51bb84395c496b37b3cba0343",
-                "amount": "610000000000000",
-                "tx_fee": "0",
+                "tx_hash": "0x05f9fd77edc4cddd9c6573a275db1bef40372191a7a99eaa9afaaeedcc26ffd0071532c533193ad7abf7cfa3d646a711bdc1977cc331685864ef31e23dddcb1d",
+                "amount": "609999999762000",
+                "tx_fee": "238000",
                 "tx_size": "1190",
                 "time_stamp": 1609459800
             },
             {
                 "height": "1",
-                "tx_hash": "0xd4db9e5325508acf34e91a856c5fd3c760ec3efd1e8621b7a3c79e34480e938580c28aec3ecff12d27b1d8f617dd48e3d8d99ac3ce20f5d8181a8107d1d3973b",
-                "amount": "610000000000000",
-                "tx_fee": "0",
+                "tx_hash": "0x143a9feedb1b8cd8f2af4c0a508b742bc5fd6fdc2705e25a4d156cf8cb68688da8bc68de7118a8ba8919ab0009dbb02ad8fcbb3170c50674c7825d5ea14b2e05",
+                "amount": "609999999762000",
+                "tx_fee": "238000",
                 "tx_size": "1190",
                 "time_stamp": 1609459800
             },
             {
                 "height": "1",
-                "tx_hash": "0x6b183cfad10adbb03092ef170b7105ec2af452c36185906d1ce1fbeddfaaa19ac50feda39bebf3caca8f501ec85e56432ce706506f18058d978d5b20ae2ec7e8",
-                "amount": "610000000000000",
-                "tx_fee": "0",
+                "tx_hash": "0x70f8c2a080fd8c7afd8500a218939e44e91cab869069d40ebb0b0226c1b0617ac4df5a6da5c2ad99d19c7b53e63a8c44be3e906261280f718bb407d843f7b842",
+                "amount": "609999999762000",
+                "tx_fee": "238000",
                 "tx_size": "1190",
                 "time_stamp": 1609459800
             },
@@ -219,17 +219,17 @@ describe('Test of Stoa API Server', () => {
         let expected = {
             "height": "1",
             "total_transactions": 8,
-            "hash": "0x8161cb00f6d95e4c42c8aa8d752a378ff2de671e4dfc1edba3b53704d8dd1241077c1df1c3c0bb8f63dc4f0645cd86ccb17d932cc7a796f9e1c221abafe8b0d7",
+            "hash": "0x5e57db5e2c2effd180f831330ddf2ea2686817b4f14c8ee60700ecb5c4e9130ce5fe1b9785bc2b5cc6c5fd8c1682647b258419cafa637f07f0aa4e88c9a7de9f",
             "prev_hash": "0xfca7a6455549ff1886969228b12dc5db03c67470145ed3e8e318f0c356a364eabbf1eeefc06232cfa7f3cdf3017521ee54b2b4542241650781022552ddc3dc99",
-            "merkle_root": "0x2a8158ee049c459e32912f426b0f4ebaea9d017455efd3e20c27954f22066a10a4cb676254e9a011906ac8cb6855add4d314eb96d583d1a1828ff7f05d04ebd0",
+            "merkle_root": "0x515a30d31fbd031d63f041b92184f32baf00d08e4120da9299bc336c6f980f2245b11e70bb1dcb7c2279ead9dab1c37b62dee8414083ae8346d166cf033cddfb",
             "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
             "random_seed": "0x691775809b9498f45a2c5ef8b8d552e318ebaf0b1b2fb15dcc39e0ec962ae9812d7edffa5f053590a895c9ff72c1b0838ce8f5c709579d4529f9f4caf0fab13d",
             "time": 1609459800,
             "version": "v0.x.x",
             "total_sent": 4880000000000000,
-            "total_received": 4880000000000000,
+            "total_received": 4879999998096000,
             "total_reward": 0,
-            "total_fee": 0,
+            "total_fee": 1904000,
             "total_size": 9520
         };
         assert.deepStrictEqual(response.data, expected);
