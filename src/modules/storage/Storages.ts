@@ -32,7 +32,8 @@ export class Storages
      * the database was opened successfully or when an error occurred.
      * The first argument is an error object. If there is no error, this value is null.
      */
-    constructor(databaseConfig: IDatabaseConfig, callback: (err: Error | null) => void) {
+    constructor(databaseConfig: IDatabaseConfig, callback: (err: Error | null) => void)
+    {
         let dbconfig: IDatabaseConfig = {
             host: databaseConfig.host,
             user: databaseConfig.user,

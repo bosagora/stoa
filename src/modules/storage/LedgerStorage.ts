@@ -758,7 +758,8 @@ export class LedgerStorage extends Storages
      * and if an error occurs the `.catch` is called with an error.
      *
      */
-    public storeCoinMarket(data: IMarketCap): Promise<any> {
+    public storeCoinMarket (data: IMarketCap): Promise<any>
+    {
 
         return new Promise<void>((resolve, reject) => {
             let sql =
@@ -1440,7 +1441,6 @@ export class LedgerStorage extends Storages
 
     /**
      * Gets transaction pool data
-     * @param height The height of the block to get
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
@@ -2129,6 +2129,7 @@ export class LedgerStorage extends Storages
 
         return this.query(sql, [tx_hash.toBinary(Endian.Little)]);
     }
+
     /**
      *  Get the Latest Blocks
      * @param limit Maximum record count that can be obtained from one query
@@ -2137,7 +2138,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getLatestBlocks(limit: number, page: number): Promise<any[]> {
+    public getLatestBlocks (limit: number, page: number): Promise<any[]>
+    {
         let sql =
             `SELECT
                 height, hash, merkle_root, signature, validators, tx_count,
@@ -2149,6 +2151,7 @@ export class LedgerStorage extends Storages
 
         return this.query(sql, [limit, limit * (page - 1)]);
     }
+
      /**
       * Get the Latest transactions
       * @param limit Maximum record count that can be obtained from one query
@@ -2157,7 +2160,8 @@ export class LedgerStorage extends Storages
       * of the returned Promise is called with the records
       * and if an error occurs the `.catch` is called with an error.
       */
-    public getLatestTransactions(limit: number, page: number): Promise<any[]> {
+     public getLatestTransactions (limit: number, page: number): Promise<any[]>
+     {
         let sql =
             `SELECT
                 T.block_height, T.tx_hash, T.tx_fee, T.tx_size,
@@ -2171,6 +2175,7 @@ export class LedgerStorage extends Storages
              LIMIT ? OFFSET ?;`
         return this.query(sql, [limit, limit * (page - 1)]);
     }
+
     /**
      * Get the block overview
      * @param limit Maximum record count that can be obtained from one query
@@ -2180,7 +2185,8 @@ export class LedgerStorage extends Storages
      * and if an error occurs the `.catch` is called with an error.
      *
      */
-    public getBlockSummary(field: string, value: string | Buffer): Promise<any[]> {
+    public getBlockSummary (field: string, value: string | Buffer): Promise<any[]>
+    {
         let sql =
             `SELECT B.height, B.hash, B.merkle_root, B.signature, B.prev_block, B.random_seed,
              B.time_stamp, B.tx_count,
@@ -2191,6 +2197,7 @@ export class LedgerStorage extends Storages
 
         return this.query(sql, [value]);
     }
+
     /**
      * Get enrolled validators of a block
      * @param limit Maximum record count that can be obtained from one query
@@ -2199,7 +2206,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getBlockEnrollments(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
+    public getBlockEnrollments (field: string, value: string | Buffer, limit: number, page: number): Promise<any[]>
+    {
         let sql =
             `SELECT
                 E.block_height, E.utxo_key, E.commitment, E.cycle_length, E.enroll_sig
@@ -2229,6 +2237,7 @@ export class LedgerStorage extends Storages
         });
        });
     }
+
     /**
      * Get transactions of a block
      * @param limit Maximum record count that can be obtained from one query
@@ -2237,7 +2246,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getBlockTransactions(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
+    public getBlockTransactions (field: string, value: string | Buffer, limit: number, page: number): Promise<any[]>
+    {
         let sql_tx =
             `SELECT
                 T.block_height, T.tx_hash, SUM(IFNULL(O.amount,0)) as amount,
@@ -2292,7 +2302,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getBOAStats(): Promise<any[]> {
+    public getBOAStats (): Promise<any[]>
+    {
         let sql =
             `SELECT max(height) as height,
              (SELECT count(*) from transactions) as transactions,
@@ -2309,7 +2320,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getCoinMarketcap(): Promise<any[]> {
+    public getCoinMarketcap (): Promise<any[]>
+    {
         let sql =
             `SELECT * FROM marketcap WHERE last_updated_at = (SELECT MAX(last_updated_at) as time FROM marketcap)`;
 
@@ -2322,7 +2334,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getCoinMarketChart(from: number, to: number): Promise<any[]> {
+    public getCoinMarketChart (from: number, to: number): Promise<any[]>
+    {
         let sql =
             `SELECT * FROM marketcap WHERE last_updated_at BETWEEN ? AND ?`;
 
@@ -2333,9 +2346,10 @@ export class LedgerStorage extends Storages
      * Drop Database
      * @param database The name of database
      */
-    public async dropTestDB(database : any): Promise<any[]> {
+    public async dropTestDB (database : any): Promise<any[]>
+    {
         let sql =
             `DROP DATABASE ${database}`;
-       return this.run(sql, []);;
+       return this.run(sql, []);
     }
 }

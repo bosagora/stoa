@@ -39,17 +39,17 @@ export class WebService
     protected server: http.Server | null = null;
 
     /**
-     * The Event Dispatcher 
+     * The Event Dispatcher
      */
     protected  eventDispatcher: EventDispatcher;
 
     /**
      * Connection
-     * @param port 
-     * @param address 
+     * @param port
+     * @param address
      */
-    protected socket: SocketIO
-    
+    protected socket: SocketIO;
+
     /**
      * Constructor
      * @param port The bind port

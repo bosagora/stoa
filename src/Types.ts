@@ -685,16 +685,17 @@ export interface IBlock {
     validators: string;
 
     /**
-     * signature of blcok
+     * signature of block
      */
     signature: string;
+
     /**
      * no of transactions in the block
      */
     tx_count: number;
 
     /**
-     * enrollemnet counts in that block
+     * enrollment counts in that block
      */
     enrollment_count: string;
 
@@ -731,23 +732,23 @@ export interface ITransaction
     amount: string;
 
    /**
-    * tranaction fee
+    * transaction fee
     */
     tx_fee: string;
 
    /**
-    * size of the tranaction
+    * size of the transaction
     */
     tx_size: string;
 
     /**
-    * timestamp of the tranasaction
+    * timestamp of the transaction
     */
     time_stamp: string;
 }
 
 /**
- * Interface for boascan pagination
+ * Interface for BOAScan pagination
  */
 
 export interface IPagination
@@ -785,7 +786,7 @@ export interface IMarketCap
     change_24h?: number;
 
     /**
-     * 24 hour volumne
+     * 24 hour volume
      */
     vol_24h: number;
 
@@ -804,12 +805,12 @@ export interface IMarketChart
     /**
      * Price of BOA in usd
      */
-    usd_price: number
+    usd_price: number;
 
     /**
      * Time
      */
-    last_updated_at: number
+    last_updated_at: number;
 }
 
 /**

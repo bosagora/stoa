@@ -1,18 +1,21 @@
 import http from 'http';
 import { Socket } from "socket.io";
 
-export class SocketIO {
+export class SocketIO
+{
+    public io: Socket;
 
-  public io: Socket
-
-  constructor(server: http.Server) {
-    this.io = require("socket.io")(server, {
-      cors: {
-        origin: "*",
-        methods: ["GET"],
-        allowedHeaders: true,
-        credentials: true
-      }
-    });
-  }
+    constructor(server: http.Server)
+    {
+        this.io = require("socket.io")(server,
+            {
+                cors: {
+                    origin: "*",
+                    methods: ["GET"],
+                    allowedHeaders: true,
+                    credentials: true
+                }
+            }
+        );
+    }
 }
