@@ -14,7 +14,9 @@
 import { EventDispatcher } from "event-dispatch";
 import express from "express";
 import http from "http";
-import { SocketIO } from "../service/Socket";
+import { logger } from "../common/Logger";
+import { Operation } from "../common/LogOperation";
+import { SocketIO } from "./Socket";
 
 export class WebService {
     /**
@@ -43,11 +45,9 @@ export class WebService {
     protected eventDispatcher: EventDispatcher;
 
     /**
-     * Connection
-     * @param port
-     * @param address
+     * The instance of SocketIO
      */
-    protected socket: SocketIO;
+    protected _socket: SocketIO | null = null;
 
     /**
      * Constructor
@@ -55,7 +55,7 @@ export class WebService {
      * @param address The bind address
      */
     constructor(port: number | string, address?: string) {
-        if (typeof port == "string") this.port = parseInt(port, 10);
+        if (typeof port === "string") this.port = parseInt(port, 10);
         else this.port = port;
 
         if (address !== undefined) this.address = address;
@@ -63,7 +63,14 @@ export class WebService {
 
         this.app = express();
         this.eventDispatcher = new EventDispatcher();
-        this.socket = new SocketIO(http.createServer(this.app));
+    }
+
+    public get socket(): SocketIO {
+        if (this._socket !== null) return this._socket;
+        else {
+            logger.error("SocketIO is not ready yet.", { operation: Operation.start, height: "", success: false });
+            process.exit(1);
+        }
     }
 
     /**
@@ -76,7 +83,7 @@ export class WebService {
         return new Promise<void>((resolve, reject) => {
             // Create HTTP server.
             this.server = http.createServer(this.app);
-            this.socket = new SocketIO(this.server);
+            this._socket = new SocketIO(this.server);
             this.server.on("error", reject);
             this.server.listen(this.port, this.address, () => {
                 resolve();
