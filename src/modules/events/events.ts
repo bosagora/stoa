@@ -1,12 +1,13 @@
-export default {
-  client: {
-    connection: 'connection',
-    ping: 'ping'
-  },
+export default
+{
+    client: {
+        connection: 'connection',
+        ping: 'ping'
+    },
 
-  server:{
-    newBlock:"newblock",
-    newTransaction:"newtransaction",
-    latestStats:"lateststats"
-  }
+    server: {
+        newBlock:"newblock",
+        newTransaction:"newtransaction",
+        latestStats:"lateststats"
+    }
 };

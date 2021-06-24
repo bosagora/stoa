@@ -78,7 +78,8 @@ class Stoa extends WebService
      * @param address The network address of Stoa
      * @param genesis_timestamp The genesis timestamp
      */
-    constructor(databaseConfig:IDatabaseConfig, agora_endpoint: URL, port: number | string, address: string, genesis_timestamp: number, coinMarketService: CoinMarketService) {
+    constructor (databaseConfig:IDatabaseConfig, agora_endpoint: URL, port: number | string, address: string, genesis_timestamp: number, coinMarketService: CoinMarketService)
+    {
         super(port, address);
 
         this.genesis_timestamp = genesis_timestamp;
@@ -95,7 +96,7 @@ class Stoa extends WebService
     /**
      * Creates a instance of LedgerStorage
      */
-    public createStorage(): Promise<void>
+    public createStorage (): Promise<void>
     {
         return LedgerStorage.make(this.databaseConfig, this.genesis_timestamp)
             .then((storage) => {
@@ -181,7 +182,7 @@ class Stoa extends WebService
             .then(
                 () =>
                 {
-                    if(!(process.env.NODE_ENV === 'test'))
+                    if (!(process.env.NODE_ENV === 'test'))
                     {
                         this.coinMarketService.start(this).catch((err)=>{
                         logger.error(`Error: Could not connect to marketcap Client: ${err.toString()}`,
@@ -222,7 +223,8 @@ class Stoa extends WebService
             logger.http(`GET /validators`);
 
         this.ledger_storage.getValidatorsAPI(height, null)
-            .then((rows: any[]) => {
+            .then((rows: any[]) =>
+            {
                 // Nothing found
                 if (!rows.length)
                 {
@@ -285,12 +287,12 @@ class Stoa extends WebService
                 }
                 res.status(200).send(JSON.stringify(out_put));
             })
-            .catch((err) => {
+            .catch((err) =>
+            {
                 logger.error("Failed to data lookup to the DB: " + err,
                     { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
-            }
-        );
+            });
     }
 
     /**
@@ -323,7 +325,8 @@ class Stoa extends WebService
             logger.http(`GET /validator/${address}}`);
 
         this.ledger_storage.getValidatorsAPI(height, address)
-            .then((rows: any[]) => {
+            .then((rows: any[]) =>
+            {
                 // Nothing to show
                 if (!rows.length)
                 {
@@ -383,12 +386,12 @@ class Stoa extends WebService
                 }
                 res.status(200).send(JSON.stringify(out_put));
             })
-            .catch((err) => {
+            .catch((err) =>
+            {
                 logger.error("Failed to data lookup to the DB: " + err,
                     { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
-            }
-        );
+            });
     }
 
     /**
@@ -417,7 +420,8 @@ class Stoa extends WebService
         }
 
         this.ledger_storage.getTransactionStatus(tx_hash)
-            .then((data: any) => {
+            .then((data: any) =>
+            {
                 let status: ITxStatus = {
                     status: data.status,
                     tx_hash: new Hash(data.tx_hash, Endian.Little).toString()
@@ -512,12 +516,12 @@ class Stoa extends WebService
 
                 res.status(200).send(JSON.stringify(tx));
             })
-            .catch((err) => {
+            .catch((err) =>
+            {
                 logger.error("Failed to data lookup to the DB: " + err,
                     { operation: Operation.db, height: HeightManager.height.toString(), success: false });
-                    res.status(500).send("Failed to data lookup");
-                }
-            );
+                res.status(500).send("Failed to data lookup");
+            });
     }
 
     /**
@@ -554,12 +558,12 @@ class Stoa extends WebService
 
                 res.status(200).send(JSON.stringify(tx));
             })
-            .catch((err) => {
+            .catch((err) =>
+            {
                 logger.error("Failed to data lookup to the DB: " + err,
                     { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                     res.status(500).send("Failed to data lookup");
-                }
-            );
+            });
     }
 
     /**
@@ -576,7 +580,8 @@ class Stoa extends WebService
         logger.http(`GET /utxo/${address}}`);
 
         this.ledger_storage.getUTXO(address)
-            .then((rows: any[]) => {
+            .then((rows: any[]) =>
+            {
                 let utxo_array: Array<IUnspentTxOutput> = [];
                 for (const row of rows)
                 {
@@ -594,12 +599,12 @@ class Stoa extends WebService
                 }
                 res.status(200).send(JSON.stringify(utxo_array));
             })
-            .catch((err) => {
+            .catch((err) =>
+            {
                 logger.error("Failed to data lookup to the DB: " + err,
-                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
-                    res.status(500).send("Failed to data lookup");
-                }
-            );
+                    {operation: Operation.db, height: HeightManager.height.toString(), success: false});
+                res.status(500).send("Failed to data lookup");
+            });
     }
 
     /**
@@ -631,7 +636,8 @@ class Stoa extends WebService
         }
 
         this.ledger_storage.getUTXOs(utxos_hash)
-            .then((rows: any[]) => {
+            .then((rows: any[]) =>
+            {
                 let utxo_array: Array<IUnspentTxOutput> = [];
                 for (const row of rows)
                 {
@@ -649,12 +655,12 @@ class Stoa extends WebService
                 }
                 res.status(200).send(JSON.stringify(utxo_array));
             })
-            .catch((err) => {
-                    logger.error("Failed to data lookup to the DB: " + err,
-                        { operation: Operation.db, height: HeightManager.height.toString(), success: false });
-                    res.status(500).send("Failed to data lookup");
-                }
-            );
+            .catch((err) =>
+            {
+                logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
+                res.status(500).send("Failed to data lookup");
+            });
     }
 
     /**
@@ -684,7 +690,7 @@ class Stoa extends WebService
      * Returns a set of transactions history of the addresses.
      * ```
      */
-    private async getWalletTransactionsHistory(req: express.Request, res: express.Response)
+    private async getWalletTransactionsHistory (req: express.Request, res: express.Response)
     {
         let address: string = String(req.params.address);
 
@@ -751,7 +757,8 @@ class Stoa extends WebService
         let pagination: IPagination = await this.paginate(req, res);
         this.ledger_storage.getWalletTransactionsHistory(address, pagination.pageSize, pagination.page,
             filter_type, filter_begin, filter_end, filter_peer)
-            .then((rows: any[]) => {
+            .then((rows: any[]) =>
+            {
                 let out_put: Array<ITxHistoryElement> = [];
                 for (const row of rows)
                 {
@@ -771,7 +778,8 @@ class Stoa extends WebService
                 }
                 res.status(200).send(JSON.stringify(out_put));
             })
-            .catch((err) => {
+            .catch((err) =>
+            {
                 logger.error("Failed to data lookup to the DB: " + err,
                     { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
@@ -804,7 +812,8 @@ class Stoa extends WebService
         }
 
         this.ledger_storage.getWalletTransactionOverview(tx_hash)
-            .then((data: any) => {
+            .then((data: any) =>
+            {
                 if ((data === undefined) || (data.tx === undefined) ||
                     (data.senders === undefined) || (data.receivers === undefined))
                 {
@@ -842,7 +851,8 @@ class Stoa extends WebService
 
                 res.status(200).send(JSON.stringify(overview));
             })
-            .catch((err) => {
+            .catch((err) =>
+            {
                 logger.error("Failed to data lookup to the DB: " + err,
                     { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
@@ -857,20 +867,22 @@ class Stoa extends WebService
      *
      * Returns a block overview.
      */
-     private getBlockSummary(req: express.Request, res: express.Response) {
-
+    private getBlockSummary (req: express.Request, res: express.Response)
+    {
         let field: string;
         let value: string | Buffer;
 
         logger.http(`GET /block-summary/`);
 
          // Validating Parameter - height
-        if (req.query.height !== undefined && Utils.isPositiveInteger(req.query.height.toString())) {
+        if (req.query.height !== undefined && Utils.isPositiveInteger(req.query.height.toString()))
+        {
             field = 'height';
             value = String(req.query.height);
         }
          // Validating Parameter - hash
-        else if (req.query.hash !== undefined) {
+        else if (req.query.hash !== undefined)
+        {
             field = 'hash';
             try
             {
@@ -883,7 +895,8 @@ class Stoa extends WebService
                 return;
             }
         }
-        else {
+        else
+        {
             res.status(400).send(`Invalid value for parameter 'height': ${req.query.height} and 'hash': ${req.query.hash}`);
             return;
         }
@@ -933,20 +946,22 @@ class Stoa extends WebService
      *
      *@returns Returns enrolled validators of block.
      */
-    private async getBlockEnrollments(req: express.Request, res: express.Response) {
-
+    private async getBlockEnrollments (req: express.Request, res: express.Response)
+    {
         let field: string;
         let value: string | Buffer;
 
         logger.http(`GET /block-enrollments/`);
 
         // Validating Parameter - height
-        if (req.query.height !== undefined && Utils.isPositiveInteger(req.query.height.toString())) {
+        if (req.query.height !== undefined && Utils.isPositiveInteger(req.query.height.toString()))
+        {
             field = 'height';
             value = String(req.query.height);
         }
         // Validating Parameter - hash
-        else if (req.query.hash !== undefined) {
+        else if (req.query.hash !== undefined)
+        {
             field = 'hash';
             try
             {
@@ -959,45 +974,52 @@ class Stoa extends WebService
                 return;
             }
         }
-        else {
+        else
+        {
             res.status(400).send(`Invalid value for parameter 'height': ${req.query.height} and 'hash': ${req.query.hash}`);
             return;
         }
+
         let pagination: IPagination = await this.paginate(req, res);
         this.ledger_storage.getBlockEnrollments(field, value, pagination.pageSize, pagination.page)
-        .then((data: any) => {
-            if ((data === undefined)) {
-                res.status(500).send("Failed to data lookup");
-                return;
-              }
-           else if (data.total_records === 0) {
-               return res.status(204).send(`The data does not exist. 'height': (${value})`);
-            }
-            else {
-                let enrollmentElementList: Array<IBlockEnrollmentElements> = [];
-                for (const row of data.enrollments) {
-                    enrollmentElementList.push(
-                        {
-                            height: JSBI.BigInt(row.block_height).toString(),
-                            utxo: new Hash(row.utxo_key, Endian.Little).toString(),
-                            enroll_sig: new Hash(row.enroll_sig, Endian.Little).toString(),
-                            commitment: new Hash(row.commitment, Endian.Little).toString(),
-                            cycle_length: row.cycle_length,
-                        }
-                    );
+            .then((data: any) =>
+            {
+                if ((data === undefined))
+                {
+                    res.status(500).send("Failed to data lookup");
+                    return;
                 }
-                let enrollmentList: IBlockEnrollment = {
-                    enrollmentElementList,
-                    total_data: data.total_records
-                };
-                return res.status(200).send(JSON.stringify(enrollmentList));
-            }
-        })
-        .catch((err) => {
-            logger.error("Failed to data lookup to the DB: " + err,
-                { operation: Operation.db, height: HeightManager.height.toString(), success: false });
-           return res.status(500).send("Failed to data lookup");
-        });
+                else if (data.total_records === 0)
+                {
+                    return res.status(204).send(`The data does not exist. 'height': (${value})`);
+                }
+                else
+                {
+                    let enrollmentElementList: Array<IBlockEnrollmentElements> = [];
+                    for (const row of data.enrollments) {
+                        enrollmentElementList.push(
+                            {
+                                height: JSBI.BigInt(row.block_height).toString(),
+                                utxo: new Hash(row.utxo_key, Endian.Little).toString(),
+                                enroll_sig: new Hash(row.enroll_sig, Endian.Little).toString(),
+                                commitment: new Hash(row.commitment, Endian.Little).toString(),
+                                cycle_length: row.cycle_length,
+                            }
+                        );
+                    }
+                    let enrollmentList: IBlockEnrollment = {
+                        enrollmentElementList,
+                        total_data: data.total_records
+                    };
+                    return res.status(200).send(JSON.stringify(enrollmentList));
+                }
+            })
+            .catch((err) =>
+            {
+                logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
+               return res.status(500).send("Failed to data lookup");
+            });
     }
 
     /**
@@ -1008,8 +1030,8 @@ class Stoa extends WebService
      *
      * @returns Returns transactions of block.
      */
-    private async getBlockTransactions(req: express.Request, res: express.Response) {
-
+    private async getBlockTransactions (req: express.Request, res: express.Response)
+    {
         let field: string;
         let value: string | Buffer;
         let limit: number;
@@ -1018,17 +1040,19 @@ class Stoa extends WebService
         logger.http(`GET /block-transactions/`);
 
         // Validating Parameter - height
-        if (req.query.height !== undefined && Utils.isPositiveInteger(req.query.height.toString())) {
+        if (req.query.height !== undefined && Utils.isPositiveInteger(req.query.height.toString()))
+        {
             field = 'height';
             value = String(req.query.height);
         }
         // Validating Parameter - hash
-        else if (req.query.hash !== undefined) {
+        else if (req.query.hash !== undefined)
+        {
             field = 'hash';
             try
             {
-             const hash: string = String(req.query.hash);
-             value = new Hash(hash).toBinary(Endian.Little);
+                const hash: string = String(req.query.hash);
+                value = new Hash(hash).toBinary(Endian.Little);
             }
             catch (error)
             {
@@ -1036,51 +1060,58 @@ class Stoa extends WebService
                 return;
             }
         }
-        else {
+        else
+        {
             res.status(400).send(`Invalid value for parameter 'height': ${req.query.height} and 'hash': ${req.query.hash}`);
             return;
         }
 
         let pagination: IPagination = await this.paginate(req, res);
         this.ledger_storage.getBlockTransactions(field, value, pagination.pageSize, pagination.page)
-        .then((data: any) => {
-            if ((data === undefined)) {
-                res.status(500).send("Failed to data lookup");
-                return;
-              }
-            else if (data.tx.length === 0) {
-               return res.status(204).send(`The data does not exist. 'height': (${value})`);
-            }
-            else {
-                let tx: Array<IBlockTransactionElements> = [];
-                for (const row of data.tx) {
-                    tx.push(
-                         {
-                            height: JSBI.BigInt(row.block_height).toString(),
-                            tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
-                            amount: row.amount,
-                            type: row.type,
-                            fee: row.tx_fee,
-                            size: row.tx_size,
-                            time: row.time_stamp,
-                            sender_address: row.sender_address,
-                            receiver: row.receiver,
-                        }
-                    );
+            .then((data: any) =>
+            {
+                if ((data === undefined))
+                {
+                    res.status(500).send("Failed to data lookup");
+                    return;
                 }
+                else if (data.tx.length === 0)
+                {
+                   return res.status(204).send(`The data does not exist. 'height': (${value})`);
+                }
+                else
+                {
+                    let tx: Array<IBlockTransactionElements> = [];
+                    for (const row of data.tx)
+                    {
+                        tx.push(
+                             {
+                                height: JSBI.BigInt(row.block_height).toString(),
+                                tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
+                                amount: row.amount,
+                                type: row.type,
+                                fee: row.tx_fee,
+                                size: row.tx_size,
+                                time: row.time_stamp,
+                                sender_address: row.sender_address,
+                                receiver: row.receiver,
+                            }
+                        );
+                    }
 
-                let transactionList: IBlockTransactions = {
-                    tx,
-                    total_data: data.total_data
-                };
-               return res.status(200).send(JSON.stringify(transactionList));
-            }
-        })
-        .catch((err) => {
-            logger.error("Failed to data lookup to the DB: " + err,
-                { operation: Operation.db, height: HeightManager.height.toString(), success: false });
-            res.status(500).send("Failed to data lookup");
-        });
+                    let transactionList: IBlockTransactions = {
+                        tx,
+                        total_data: data.total_data
+                    };
+                    return res.status(200).send(JSON.stringify(transactionList));
+                }
+            })
+            .catch((err) =>
+            {
+                logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
+                res.status(500).send("Failed to data lookup");
+            });
     }
 
     /**
@@ -1090,36 +1121,40 @@ class Stoa extends WebService
      *
      * @returns Returns statistics of BOA coin.
      */
-    private getBOAStats(req: express.Request, res: express.Response) {
-
+    private getBOAStats (req: express.Request, res: express.Response)
+    {
         logger.http(`GET /boa-stats/`);
 
         this.ledger_storage.getBOAStats()
-        .then((data: any [] ) => {
-            if(!data[0])
+            .then((data: any [] ) =>
             {
+                if (!data[0])
+                {
+                    return res.status(500).send("Failed to data lookup");
+                }
+                else
+                {
+                    let boaStats: IBOAStats = {
+                        height: data[0].height,
+                        transactions: data[0].transactions,
+                        validators: data[0].validators,
+                        frozen_coin: 5283595, //FIX ME static data because of unavailability of real data
+                        circulating_supply: 5283535,
+                        active_validators: 155055
+                    };
+                    return res.status(200).send(JSON.stringify(boaStats));
+                }
+            })
+            .catch((err) =>
+            {
+                logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 return res.status(500).send("Failed to data lookup");
-            }
-            else {
-                let boaStats: IBOAStats = {
-                    height: data[0].height,
-                    transactions: data[0].transactions,
-                    validators: data[0].validators,
-                    frozen_coin: 5283595, //FIX ME static data because of unavailability of real data
-                    circulating_supply: 5283535,
-                    active_validators: 155055
-                };
-               return res.status(200).send(JSON.stringify(boaStats));
-            }
-        })
-        .catch((err) => {
-            logger.error("Failed to data lookup to the DB: " + err,
-                { operation: Operation.db, height: HeightManager.height.toString(), success: false });
-           return res.status(500).send("Failed to data lookup");
-        });
+            });
     }
 
-    private verifyPayment(req: express.Request, res: express.Response) {
+    private verifyPayment (req: express.Request, res: express.Response)
+    {
         let hash: string = String(req.params.hash);
 
         logger.http(`GET /spv/${hash}}`);
@@ -1137,7 +1172,8 @@ class Stoa extends WebService
         }
 
         this.ledger_storage.getBlockHeaderByTxHash(tx_hash)
-            .then((rows: any) => {
+            .then((rows: any) =>
+            {
                 if (rows.length == 0)
                 {
                     let status: ISPVStatus = {
@@ -1148,7 +1184,8 @@ class Stoa extends WebService
                     return;
                 }
                 this.agora.getMerklePath(rows[0].height, tx_hash)
-                    .then((path: Array<Hash>) => {
+                    .then((path: Array<Hash>) =>
+                    {
                         let root = new Hash(rows[0].merkle_root, Endian.Little)
 
                         if (Buffer.compare(AgoraClient.checkMerklePath(path, tx_hash, rows[0].tx_index).data, root.data) === 0)
@@ -1168,15 +1205,17 @@ class Stoa extends WebService
                             res.status(200).send(JSON.stringify(status));
                         }
                     })
-                    .catch((error) => {
+                    .catch((error) =>
+                    {
                         let status: ISPVStatus = {
                             result: false,
                             message: error.message
                         }
                         res.status(200).send(JSON.stringify(status));
-                    })
-                })
-            .catch((err) => {
+                    });
+            })
+            .catch((err) =>
+            {
                 logger.error("Failed to data lookup to the DB: " + err,
                     { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
@@ -1199,7 +1238,7 @@ class Stoa extends WebService
         }
 
         logger.http(`POST /block_externalized block=${req.body.block.toString()}`,
-        { operation: Operation.db, height: "", success: true });
+            { operation: Operation.db, height: "", success: true });
 
         // To do
         // For a more stable operating environment,
@@ -1240,21 +1279,26 @@ class Stoa extends WebService
      *
      * This method Store the Coin market data to database.
      */
-    public putCoinMarketStats(data: IMarketCap): Promise<any>
+    public putCoinMarketStats (data: IMarketCap): Promise<any>
     {
-       return new Promise<any>((resolve, reject)=>{
-       this.ledger_storage.storeCoinMarket(data).then((result: any)=>{
-            if(result.affectedRows)
-            {
-                logger.info(`CoinMarket: Data Update Completed`,
-                    { operation: Operation.db, height: HeightManager.height.toString(), success: true });
-             resolve (result);
-            }
-       }).catch((err) => {
-            logger.error("Failed to Store coin market cap data." + err,
-                { operation: Operation.db, height: HeightManager.height.toString(), success: false });
-                reject(err);
-        });
+       return new Promise<any>((resolve, reject) =>
+       {
+           this.ledger_storage.storeCoinMarket(data)
+               .then((result: any) =>
+               {
+                    if (result.affectedRows)
+                    {
+                        logger.info(`CoinMarket: Data Update Completed`,
+                            { operation: Operation.db, height: HeightManager.height.toString(), success: true });
+                        resolve (result);
+                    }
+               })
+               .catch((err) =>
+               {
+                    logger.error("Failed to Store coin market cap data." + err,
+                        { operation: Operation.db, height: HeightManager.height.toString(), success: false });
+                    reject(err);
+               });
        });
     }
 
@@ -1293,7 +1337,8 @@ class Stoa extends WebService
         logger.http(`GET /wallet/transactions/pending/${address}}`);
 
         this.ledger_storage.getWalletTransactionsPending(address)
-            .then((rows: any[]) => {
+            .then((rows: any[]) =>
+            {
                 if (!rows.length)
                 {
                     res.status(204).send(`No pending transactions. address': (${address})`);
@@ -1315,12 +1360,12 @@ class Stoa extends WebService
                 }
                 res.status(200).send(JSON.stringify(pending_array));
             })
-            .catch((err) => {
-                    logger.error("Failed to data lookup to the DB: " + err,
-                        { operation: Operation.db, height: HeightManager.height.toString(), success: false });
-                    res.status(500).send("Failed to data lookup");
-                }
-            );
+            .catch((err) =>
+            {
+                logger.error("Failed to data lookup to the DB: " + err,
+                    {operation: Operation.db, height: HeightManager.height.toString(), success: false});
+                res.status(500).send("Failed to data lookup");
+            });
     }
 
     /**
@@ -1384,25 +1429,26 @@ class Stoa extends WebService
         logger.http(`GET /block_height`);
 
         this.ledger_storage.getBlockHeight()
-            .then((row: Height | null) => {
+            .then((row: Height | null) =>
+            {
                 if (row == null)
                     res.status(400).send(`The block height not found.`);
                 else
                     res.status(200).send(JSON.stringify(row));
             })
-            .catch((err) => {
+            .catch((err) =>
+            {
                 logger.error("Failed to data lookup to the DB: " + err,
                     { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
-            }
-            );
+            });
     };
 
     /**
      * Extract the block height from JSON.
      * @param block
      */
-    private static getJsonBlockHeight(block: any): Height
+    private static getJsonBlockHeight (block: any): Height
     {
         if ((block.header === undefined) ||
             (block.header.height === undefined))
@@ -1412,28 +1458,34 @@ class Stoa extends WebService
 
         return new Height(block.header.height);
     };
+
     /**
     * Get latest blocks
     * @param req
     * @param res
-    * @returns Return Latest blocks of the ledeger
+    * @returns Return Latest blocks of the ledger
     */
-    private async getLatestBlocks(req: express.Request, res: express.Response) {
-
+    private async getLatestBlocks (req: express.Request, res: express.Response)
+    {
         let pagination: IPagination = await this.paginate(req, res);
         this.ledger_storage.getLatestBlocks(pagination.pageSize, pagination.page)
-            .then((data: any) => {
-                if ((data === undefined)) {
+            .then((data: any) =>
+            {
+                if ((data === undefined))
+                {
                     res.status(500).send("Failed to data lookup");
                     return;
-                  }
-               else if (data.length === 0) {
+                }
+                else if (data.length === 0)
+                {
                    return res.status(204).send(`The data does not exist.`);
                 }
-                else {
-                    let blocklist: Array<IBlock> = [];
-                    for (const row of data) {
-                        blocklist.push(
+                else
+                {
+                    let block_list: Array<IBlock> = [];
+                    for (const row of data)
+                    {
+                        block_list.push(
                             {
                                 height: JSBI.BigInt(row.height).toString(),
                                 hash: new Hash(row.hash, Endian.Little).toString(),
@@ -1446,32 +1498,37 @@ class Stoa extends WebService
                             }
                         )
                     }
-                return res.status(200).send(JSON.stringify(blocklist));
-
+                    return res.status(200).send(JSON.stringify(block_list));
                 }
-            })
+            });
     }
+
     /**
       * Get Latest transactions
       * @param req
       * @param res
       * @returns Returns Latest transactions of the ledger.
       */
-    private async getLatestTransactions(req: express.Request, res: express.Response) {
+    private async getLatestTransactions (req: express.Request, res: express.Response) {
 
         let pagination: IPagination = await this.paginate(req, res);
         this.ledger_storage.getLatestTransactions(pagination.pageSize, pagination.page)
-            .then((data: any) => {
-                if ((data === undefined)) {
+            .then((data: any) =>
+            {
+                if ((data === undefined))
+                {
                     res.status(500).send("Failed to data lookup");
                     return;
-                  }
-               else if (data.length === 0) {
+                }
+                else if (data.length === 0)
+                {
                    return res.status(204).send(`The data does not exist.`);
                 }
-                else {
+                else
+                {
                     let transactionList: Array<ITransaction> = [];
-                    for (const row of data) {
+                    for (const row of data)
+                    {
                         transactionList.push(
                             {
                                 height: JSBI.BigInt(row.block_height).toString(),
@@ -1484,33 +1541,37 @@ class Stoa extends WebService
                             }
                         )
                     }
-                   return res.status(200).send(JSON.stringify(transactionList));
-
+                    return res.status(200).send(JSON.stringify(transactionList));
                 }
-            })
+            });
     }
+
     /**
       * Get Coin Market Cap for BOA.
       * @param req
       * @param res
       * @returns Returns Coin market cap.
       */
-    private async getCoinMarketCap(req: express.Request, res: express.Response) {
-
-         this.ledger_storage.getCoinMarketcap().then((rows:any)=>{
-             if(rows[0])
-             {
-              return res.status(200).send(rows[0]);
-             }
-             else{
-                 return res.status(204).send(`The data does not exist.`)
-             }
-
-         }).catch((err)=>{
-              logger.error("Failed to data lookup to the DB: " + err,
-                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
+    private async getCoinMarketCap (req: express.Request, res: express.Response)
+    {
+        this.ledger_storage.getCoinMarketcap()
+            .then((rows:any) =>
+            {
+                if (rows[0])
+                {
+                    return res.status(200).send(rows[0]);
+                }
+                else
+                {
+                    return res.status(204).send(`The data does not exist.`)
+                }
+            })
+            .catch((err) =>
+            {
+                logger.error("Failed to data lookup to the DB: " + err,
+                        { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
-         })
+            });
     }
 
 
@@ -1666,7 +1727,7 @@ class Stoa extends WebService
                             { operation: Operation.db, height: HeightManager.height.toString(), success: true });
                     resolve();
                 }
-                catch(err)
+                catch (err)
                 {
                     logger.error("Failed to store the payload of a update to the DB: " + err,
                         { operation: Operation.db, height: HeightManager.height.toString(), success: false });
@@ -1687,7 +1748,7 @@ class Stoa extends WebService
                             { operation: Operation.db, height: HeightManager.height.toString(), success: true });
                     resolve();
                 }
-                catch(err)
+                catch (err)
                 {
                     logger.error("Failed to store the payload of a push to the DB: " + err,
                         { operation: Operation.db, height: HeightManager.height.toString(), success: false });
@@ -1724,7 +1785,7 @@ class Stoa extends WebService
 
                 resolve();
             }
-            catch(err)
+            catch (err)
             {
                 logger.error("Failed to catch up to block height of Agora: " + err,
                     { operation: Operation.db, height: HeightManager.height.toString(), success: false });
@@ -1733,13 +1794,17 @@ class Stoa extends WebService
         });
     }
 
-    private paginate(req: express.Request, res: express.Response): Promise<IPagination> {
-        return new Promise<IPagination>((resolve, reject) => {
+    private paginate (req: express.Request, res: express.Response): Promise<IPagination>
+    {
+        return new Promise<IPagination>((resolve, reject) =>
+        {
             let page: number;
             let pageSize: number;
 
-            if (req.query.page !== undefined && Number(req.query.page) !== 0) {
-                if (!Utils.isPositiveInteger(req.query.page.toString())) {
+            if (req.query.page !== undefined && Number(req.query.page) !== 0)
+            {
+                if (!Utils.isPositiveInteger(req.query.page.toString()))
+                {
                     res.status(400).send(`Invalid value for parameter 'page': ${req.query.page.toString()}`);
                     return;
                 }
@@ -1748,13 +1813,16 @@ class Stoa extends WebService
             else
                 page = 1;
 
-            if (req.query.pageSize !== undefined) {
-                if (!Utils.isPositiveInteger(req.query.pageSize.toString())) {
+            if (req.query.pageSize !== undefined)
+            {
+                if (!Utils.isPositiveInteger(req.query.pageSize.toString()))
+                {
                     res.status(400).send(`Invalid value for parameter 'limit': ${req.query.pageSize.toString()}`);
                     return;
                 }
                 pageSize = Number(req.query.pageSize.toString());
-                if (pageSize > this.limit_page_size) {
+                if (pageSize > this.limit_page_size)
+                {
                     res.status(400).send(`Page size cannot be a number greater than 100: ${pageSize}`);
                     return;
                 }
@@ -1765,6 +1833,7 @@ class Stoa extends WebService
             return resolve({ page, pageSize });
         });
     }
+
     /**
      * GET /coinmarketchart/
      *
@@ -1772,7 +1841,7 @@ class Stoa extends WebService
      *
      * Returns BOA statistics of last 24 hours.
      */
-    private async getBoaPriceChart(req: express.Request, res: express.Response)
+    private async getBoaPriceChart (req: express.Request, res: express.Response)
     {
         let to = await Time.msToTime(Date.now());
         let from = await JSBI.subtract(JSBI.BigInt(to.seconds), JSBI.BigInt(60 * 60 * 24));
@@ -1785,74 +1854,85 @@ class Stoa extends WebService
             { operation: Operation.coin_market_data_sync, height: HeightManager.height.toString(), success: true });
 
         this.ledger_storage.getCoinMarketChart(Number(from.toString()), to.seconds)
-            .then(async(rows :any [])=>{
-                 if(rows.length === 0)
-                 {
+            .then(async(rows :any []) =>
+            {
+                if (rows.length === 0)
+                {
                     res.status(204).send("The data does not exist")
-                 }
-                 else{
+                }
+                else
+                {
                     let marketCapChart : Array<IMarketChart> = [];
-                    await rows.forEach((element, index)=> {
+                    await rows.forEach((element, index) =>
+                    {
                          marketCapChart.push({
                             usd_price: element.price,
                             last_updated_at: element.last_updated_at
                          });
-                     });
+                    });
                     res.status(200).send(marketCapChart);
-                 }
-
+                }
             })
-            .catch((err)=>{
+            .catch((err) =>
+            {
                 logger.error("Failed to data lookup to the DB: " + err,
                     { operation: Operation.db, height: HeightManager.height.toString(), success: false });
-                res.send(500).send("Failed to data lookup")
-            })
+                res.send(500).send("Failed to data lookup");
+            });
     }
+
     /**
-     *  Stoa emits the latest Boa stats using sockets on new block recieved.
+     *  Stoa emits the latest Boa stats using sockets on new block received.
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called
      * and if an error occurs the `.catch` is called with an error.
      */
-    public emitBoaStats(): Promise<IBOAStats> {
-        return new Promise<IBOAStats>(async (resolve, reject) => {
+    public emitBoaStats (): Promise<IBOAStats>
+    {
+        return new Promise<IBOAStats>(async (resolve, reject) =>
+        {
                this.ledger_storage.getBOAStats()
-        .then((data: any[]) => {
-            if (!data[0]) {
-                logger.info("Failed to latest BOA stats");
-                return;
-            }
-            else {
-                let boaStats: IBOAStats = {
-                    height: data[0].height,
-                    transactions: data[0].transactions,
-                    validators: data[0].validators,
-                    frozen_coin: 5283595, //FIX ME static data because of unavailability of real data
-                    circulating_supply: 5283535,
-                    active_validators: 155055
-                };
-            this.socket.io.emit(events.server.latestStats, boaStats)
-            logger.info(`Emited Updated BOA stats:  ${boaStats}`)
-            return resolve(boaStats);
-            }
-        })
-        .catch((err) => {
-            logger.error("Failed to latest BOA stats: " + err);
-           return;
-        });
+                    .then((data: any[]) =>
+                    {
+                        if (!data[0])
+                        {
+                            logger.info("Failed to latest BOA stats");
+                            return;
+                        }
+                        else
+                        {
+                            let boaStats: IBOAStats = {
+                                height: data[0].height,
+                                transactions: data[0].transactions,
+                                validators: data[0].validators,
+                                frozen_coin: 5283595, //FIX ME static data because of unavailability of real data
+                                circulating_supply: 5283535,
+                                active_validators: 155055
+                            };
+                            this.socket.io.emit(events.server.latestStats, boaStats);
+                            logger.info(`Emitted Updated BOA stats:  ${boaStats}`);
+                            return resolve(boaStats);
+                        }
+                    })
+                    .catch((err) =>
+                    {
+                        logger.error("Failed to latest BOA stats: " + err);
+                        return;
+                    });
         });
     }
 
     /**
-     *  Stoa emits the updates using sockets on new block recieved
-     * @param height The height of block to emit
+     *  Stoa emits the updates using sockets on new block received
+     * @param block The block to emit
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called
      * and if an error occurs the `.catch` is called with an error.
      */
     public emitBlock (block: Block): Promise<boolean>
     {
-        return new Promise<boolean>(async (resolve, reject) => {
+        return new Promise<boolean>(async (resolve, reject) =>
+        {
             try
             {
                 await this.emitNewBlock(block);
@@ -1868,13 +1948,13 @@ class Stoa extends WebService
 
     /**
      * Stoa emits the detail of new block received
-     * @param height
+     * @param block
      * @returns
      */
     public emitNewBlock (block: Block): Promise<IEmitBlock>
     {
-        return new Promise<IEmitBlock>((resolve, reject) => {
-
+        return new Promise<IEmitBlock>((resolve, reject) =>
+        {
             let block_hash = hashFull(block.header);
             let latestBlock: IEmitBlock =
             {
@@ -1882,23 +1962,24 @@ class Stoa extends WebService
                 hash: block_hash.toString(),
                 time_stamp: block.header.time_offset + this.genesis_timestamp,
                 block: block
-            }
-            logger.info(`Emited new Block: ${latestBlock}`)
-            this.socket.io.emit(events.server.newBlock, latestBlock)
+            };
+            logger.info(`Emitted new Block: ${latestBlock}`);
+            this.socket.io.emit(events.server.newBlock, latestBlock);
             return resolve(latestBlock);
         });
     }
+
     /**
-     * Stoa emit the transaction inside the new block recieved.
+     * Stoa emit the transaction inside the new block received.
      * @param block
      * @returns
      */
     public emitBlockTransactions (block: Block): Promise<IEmitTransaction []>
     {
-        return new Promise<IEmitTransaction []>(async (resolve, reject) => {
-
+        return new Promise<IEmitTransaction []>(async (resolve, reject) =>
+        {
             let block_hash = hashFull(block.header);
-            let blockTransactions: Array<IEmitTransaction>=[];
+            let blockTransactions: Array<IEmitTransaction> = [];
 
             for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++)
             {
@@ -1907,13 +1988,13 @@ class Stoa extends WebService
                     hash: block_hash.toString(),
                     tx_hash: block.merkle_tree[tx_idx].toString(),
                     transaction: block.txs[tx_idx],
-                }
-                blockTransactions.push(EmitTransaction)
+                };
+                blockTransactions.push(EmitTransaction);
             }
-            logger.info(`Emited new Transactions: ${blockTransactions}`)
-            this.socket.io.emit(events.server.newTransaction, blockTransactions)
+            logger.info(`Emitted new Transactions: ${blockTransactions}`);
+            this.socket.io.emit(events.server.newTransaction, blockTransactions);
             return resolve(blockTransactions);
-        })
+        });
     }
 
     /**

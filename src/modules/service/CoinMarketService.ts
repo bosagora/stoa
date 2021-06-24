@@ -40,15 +40,18 @@ export class CoinMarketService {
      * constructor
      * @param coinMarketClient i.e CoinGeckoMarket
      */
-    constructor(coinMarketClient: any) {
+    constructor (coinMarketClient: any)
+    {
         this.coinMarketClient = coinMarketClient;
         this.status = false;
     }
+
     /**
      * @param StoaInstance
      * Asynchronously start CoinMarket Data sync service
      */
-    public start(stoaInstance: Stoa, time: number = 15): Promise<boolean> {
+    public start(stoaInstance: Stoa, time: number = 15): Promise<boolean>
+    {
         return new Promise<boolean>((resolve, reject) => {
             this.status = false;
             cron.schedule(`*/${time} * * * * *`, async () => {
@@ -65,11 +68,13 @@ export class CoinMarketService {
      * @param stoaInstance
      * @returns
      */
-    public scheduler(stoaInstance: Stoa): Promise<boolean> {
-        return new Promise<boolean>(async (resolve, reject) => {
-            if (this.status === true) {
+    public scheduler (stoaInstance: Stoa): Promise<boolean>
+    {
+        return new Promise<boolean>(async (resolve, reject) =>
+        {
+            if (this.status === true)
                 return resolve(true);
-            }
+
             let geckoConnection = await this.coinMarketClient.ping();
             if (!geckoConnection) {
                 logger.warn(`Hints: either api.coingecko.com is available or check you internet connection`);
@@ -77,7 +82,8 @@ export class CoinMarketService {
             }
             else {
                 this.status = true;
-                stoaInstance.ledger_storage.getCoinMarketcap().then(async (rows: any[]) => {
+                stoaInstance.ledger_storage.getCoinMarketcap().then(async (rows: any[]) =>
+                {
                     if (!rows[0]) {
                         await this.recover24hourData(stoaInstance);
                         this.status = false;
@@ -99,13 +105,15 @@ export class CoinMarketService {
             }
         });
     }
-    
+
     /**
      * @param StoaInstance
      * Asynchronously recover 24 hour CoinMarket Data
      */
-    public recover24hourData(stoaInstance: Stoa): Promise<boolean> {
-        return new Promise<boolean>(async (resolve, reject) => {
+    public recover24hourData (stoaInstance: Stoa): Promise<boolean>
+    {
+        return new Promise<boolean>(async (resolve, reject) =>
+        {
             try {
                 let to = await Time.msToTime(Date.now());
                 let from = await JSBI.subtract(JSBI.BigInt(to.seconds), JSBI.BigInt(60 * 60 * 24));
@@ -122,7 +130,7 @@ export class CoinMarketService {
                 resolve(true);
             }
             catch (err) {
-                logger.error(`Failed to 24-hour coin market data recovery: ${err}`, 
+                logger.error(`Failed to 24-hour coin market data recovery: ${err}`,
                     { operation: Operation.coin_market_data_sync, height: HeightManager.height.toString(), success: false });
                 reject(`Failed to 24-hour coin market data recovery`);
             }
@@ -132,8 +140,10 @@ export class CoinMarketService {
      * @param StoaInstance
      * Asynchronously recover CoinMarket Data
      */
-    public recover(stoaInstance: Stoa): Promise<boolean> {
-        return new Promise<boolean>(async (resolve, reject) => {
+    public recover (stoaInstance: Stoa): Promise<boolean>
+    {
+        return new Promise<boolean>(async (resolve, reject) =>
+        {
             try {
                 let rows = await stoaInstance.ledger_storage.getCoinMarketcap();
                 if (!rows[0]) {
@@ -166,7 +176,8 @@ export class CoinMarketService {
     /*
     * Stop CoinMarket Data sync service
     */
-    public async stop() {
+    public async stop ()
+    {
         if (this.job) {
             this.job.stop();
             return;

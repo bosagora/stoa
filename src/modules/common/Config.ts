@@ -198,33 +198,33 @@ export class DatabaseConfig implements IDatabaseConfig
     /**
      * The host of mysql
      */
-    host: string
+    host: string;
 
     /**
      * The user of mysql
      */
-    user: string
+    user: string;
 
     /**
      * The pasword of mysql
      */
-    password: string
+    password: string;
 
     /**
      * The database name
      */
-    database?: string
+    database?: string;
 
     /**
      * The host database port
      */
-    port: number
+    port: number;
 
-    /** 
+    /**
      * multiple Statements exec config
     */
-    multipleStatements: boolean
-    
+    multipleStatements: boolean;
+
     /**
      * Constructor
      * @param host Mysql database host
@@ -334,7 +334,7 @@ export class LoggingConfig implements ILoggingConfig
             this.console = config.console;
         if (config.database !== undefined)
             this.database = config.database;
-            this.mongodb_url = config.mongodb_url;    
+            this.mongodb_url = config.mongodb_url;
     }
 
     /**
@@ -423,27 +423,32 @@ export interface IDatabaseConfig
     /**
      * The host of mysql
      */
-    host: string
+    host: string;
+
     /**
      * The user of mysql
      */
-    user: string
+    user: string;
+
     /**
      * The pasword of mysql
      */
-    password: string
+    password: string;
+
     /**
      * The database name
      */
-    database?: string
+    database?: string;
+
     /**
      * The host database port
      */
-     port: number
-    /** 
+     port: number;
+
+    /**
      * Multiple Statements execution statement Option
      */
-    multipleStatements: boolean
+    multipleStatements: boolean;
 }
 
 /**
@@ -470,7 +475,7 @@ export interface ILoggingConfig
      * Wheather db log is enable or not
      */
     database: boolean;
-     
+
      /**
      * url of mongodb to store logs
      */
