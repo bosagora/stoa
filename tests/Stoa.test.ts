@@ -800,9 +800,9 @@ describe ('Test of the path /utxo', () =>
             .filename("1000");
 
         let response = await client.get (uri.toString());
-        assert.strictEqual(response.data.medium, "200000");
-        assert.strictEqual(response.data.low, "180000");
-        assert.strictEqual(response.data.high, "220000");
+        assert.strictEqual(response.data.medium, "185000");
+        assert.strictEqual(response.data.low, "166500");
+        assert.strictEqual(response.data.high, "203500");
     });
 });
 
