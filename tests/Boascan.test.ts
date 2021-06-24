@@ -131,7 +131,7 @@ describe('Test of Stoa API Server', () => {
                 "tx_hash": "0xfbaaebc15bb1618465077fed2425a826d88c7f5ae0197634f056bfbad12a7a74b28cc82951e889255e149707bd3ef64eb01121875c766b5d24afed176d7d255c",
                 "amount": "609999999762000",
                 "tx_fee": "238000",
-                "tx_size": "1190",
+                "tx_size": "1265",
                 "time_stamp": 1609459800
             },
             {
@@ -139,7 +139,7 @@ describe('Test of Stoa API Server', () => {
                 "tx_hash": "0x25ba9352ec7a92efd273b62de9bb30c62a2c468030e2ac0711563453102299abcb9e014a59b9c0ba43e2041c1444535098bf6f0e5532e7e4dce10ebac751f747",
                 "amount": "609999999762000",
                 "tx_fee": "238000",
-                "tx_size": "1190",
+                "tx_size": "1265",
                 "time_stamp": 1609459800
             },
             {
@@ -147,7 +147,7 @@ describe('Test of Stoa API Server', () => {
                 "tx_hash": "0xf07bdd8d4285928d39debe21601368220b6132f0bf1e9a0e45f94407648b74534c1d27c421b978fdcadae058cb426039d69c5469409c6f3b29f1d79bfb808b4b",
                 "amount": "609999999762000",
                 "tx_fee": "238000",
-                "tx_size": "1190",
+                "tx_size": "1265",
                 "time_stamp": 1609459800
             },
             {
@@ -155,7 +155,7 @@ describe('Test of Stoa API Server', () => {
                 "tx_hash": "0x21df6397c1353dafac1092eef428b9cf27ee96baa143f5a111c587c46f887688c45b956b8cf2adf01285536c13b452c8c15bd82ec436b39b373c2987d7f1f3d9",
                 "amount": "609999999762000",
                 "tx_fee": "238000",
-                "tx_size": "1190",
+                "tx_size": "1265",
                 "time_stamp": 1609459800
             },
             {
@@ -163,7 +163,7 @@ describe('Test of Stoa API Server', () => {
                 "tx_hash": "0x622e862706aa4e2b3ff5df7fa63b4dec77e93f13f0650cede3f19705486815ea4e00f62f34abafc61f93bef17463924df0e81ca0ed154733f8790d2fe8adafd1",
                 "amount": "609999999762000",
                 "tx_fee": "238000",
-                "tx_size": "1190",
+                "tx_size": "1265",
                 "time_stamp": 1609459800
             },
             {
@@ -171,7 +171,7 @@ describe('Test of Stoa API Server', () => {
                 "tx_hash": "0x05f9fd77edc4cddd9c6573a275db1bef40372191a7a99eaa9afaaeedcc26ffd0071532c533193ad7abf7cfa3d646a711bdc1977cc331685864ef31e23dddcb1d",
                 "amount": "609999999762000",
                 "tx_fee": "238000",
-                "tx_size": "1190",
+                "tx_size": "1265",
                 "time_stamp": 1609459800
             },
             {
@@ -179,7 +179,7 @@ describe('Test of Stoa API Server', () => {
                 "tx_hash": "0x143a9feedb1b8cd8f2af4c0a508b742bc5fd6fdc2705e25a4d156cf8cb68688da8bc68de7118a8ba8919ab0009dbb02ad8fcbb3170c50674c7825d5ea14b2e05",
                 "amount": "609999999762000",
                 "tx_fee": "238000",
-                "tx_size": "1190",
+                "tx_size": "1265",
                 "time_stamp": 1609459800
             },
             {
@@ -187,7 +187,7 @@ describe('Test of Stoa API Server', () => {
                 "tx_hash": "0x70f8c2a080fd8c7afd8500a218939e44e91cab869069d40ebb0b0226c1b0617ac4df5a6da5c2ad99d19c7b53e63a8c44be3e906261280f718bb407d843f7b842",
                 "amount": "609999999762000",
                 "tx_fee": "238000",
-                "tx_size": "1190",
+                "tx_size": "1265",
                 "time_stamp": 1609459800
             },
             {
@@ -195,7 +195,7 @@ describe('Test of Stoa API Server', () => {
                 "tx_hash": "0x224c72ad879eccd38e9b612047633d235e47e329e68a69517822c4c234c53c2d7d81b0245cdb61857002d58a5e033c8720b462e20517f45a5516df432866b32f",
                 "amount": "120000000000000",
                 "tx_fee": "0",
-                "tx_size": "260",
+                "tx_size": "278",
                 "time_stamp": 1609459200
             },
             {
@@ -203,7 +203,7 @@ describe('Test of Stoa API Server', () => {
                 "tx_hash": "0x26866bb263593d024a92103646c48cf35a2b1bfcc49b087915b85db14a432b373569d56f576242354328a31bf0102a0a78cb806cf6e25d88d7981367833631b7",
                 "amount": "4880000000000000",
                 "tx_fee": "0",
-                "tx_size": "344",
+                "tx_size": "368",
                 "time_stamp": 1609459200
             }
         ];
@@ -230,7 +230,7 @@ describe('Test of Stoa API Server', () => {
             "total_received": 4879999998096000,
             "total_reward": 0,
             "total_fee": 1904000,
-            "total_size": 9520
+            "total_size": 10120
         };
         assert.deepStrictEqual(response.data, expected);
     });
@@ -363,7 +363,7 @@ describe('Test of Stoa API Server', () => {
                     "tx_hash": "0x224c72ad879eccd38e9b612047633d235e47e329e68a69517822c4c234c53c2d7d81b0245cdb61857002d58a5e033c8720b462e20517f45a5516df432866b32f",
                     "amount": "120000000000000",
                     "fee": 0,
-                    "size": 260,
+                    "size": 278,
                     "time": 1609459200,
                     "sender_address": null,
                     "receiver": [
@@ -404,7 +404,7 @@ describe('Test of Stoa API Server', () => {
                     "tx_hash": "0x26866bb263593d024a92103646c48cf35a2b1bfcc49b087915b85db14a432b373569d56f576242354328a31bf0102a0a78cb806cf6e25d88d7981367833631b7",
                     "amount": "4880000000000000",
                     "fee": 0,
-                    "size": 344,
+                    "size": 368,
                     "time": 1609459200,
                     "sender_address": null,
                     "receiver": [
@@ -471,7 +471,7 @@ describe('Test of Stoa API Server', () => {
                     "tx_hash": "0x224c72ad879eccd38e9b612047633d235e47e329e68a69517822c4c234c53c2d7d81b0245cdb61857002d58a5e033c8720b462e20517f45a5516df432866b32f",
                     "amount": "120000000000000",
                     "fee": 0,
-                    "size": 260,
+                    "size": 278,
                     "time": 1609459200,
                     "sender_address": null,
                     "receiver": [
@@ -512,7 +512,7 @@ describe('Test of Stoa API Server', () => {
                     "tx_hash": "0x26866bb263593d024a92103646c48cf35a2b1bfcc49b087915b85db14a432b373569d56f576242354328a31bf0102a0a78cb806cf6e25d88d7981367833631b7",
                     "amount": "4880000000000000",
                     "fee": 0,
-                    "size": 344,
+                    "size": 368,
                     "time": 1609459200,
                     "sender_address": null,
                     "receiver": [
