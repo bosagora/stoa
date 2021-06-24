@@ -1,10 +1,5 @@
-import { rejects } from 'assert';
 import http from 'http';
-import { resolve } from 'path';
 import { Socket } from "socket.io";
-import Stoa from '../../Stoa';
-import { WebService } from './WebService';
-import events from '../events/events';
 
 export class SocketIO {
 

@@ -24,10 +24,6 @@ import { IDatabaseConfig } from '../src/modules/common/Config';
 import { MockDBConfig } from "./TestConfig"
 import { BOASodium } from 'boa-sodium-ts';
 import {
-    sample_data,
-    sample_data2,
-    sample_preImageInfo,
-    sample_reEnroll_preImageInfo,
     market_cap_sample_data,
     recovery_sample_data,
     market_cap_history_sample_data,
@@ -35,8 +31,7 @@ import {
     TestStoa,
     TestClient,
     TestGeckoServer,
-    delay,
-    createBlock
+    delay
 } from './Utils';
 import { CoinMarketService } from '../src/modules/service/CoinMarketService';
 import { CoinGeckoMarket } from '../src/modules/coinmarket/CoinGeckoMarket';

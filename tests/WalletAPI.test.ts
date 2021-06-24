@@ -12,7 +12,11 @@
 *******************************************************************************/
 
 import { SodiumHelper } from 'boa-sdk-ts';
-import { TestAgora, TestStoa, TestGeckoServer, TestClient, market_cap_sample_data, sample_data, market_cap_history_sample_data, sample_data2, recovery_sample_data, delay } from './Utils';
+import {
+    TestAgora, TestStoa, TestGeckoServer, TestClient,
+    market_cap_sample_data, sample_data, market_cap_history_sample_data, sample_data2, recovery_sample_data,
+    delay
+} from './Utils';
 
 import * as assert from 'assert';
 import URI from 'urijs';

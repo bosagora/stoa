@@ -12,7 +12,7 @@
 
 *******************************************************************************/
 
-import { logger, Logger } from '../common/Logger';
+import { logger } from '../common/Logger';
 import { IMarketCap } from "../../Types";
 
 export interface CoinMarket {
