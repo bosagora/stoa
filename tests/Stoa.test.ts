@@ -19,7 +19,6 @@ import {
     sample_data,
     sample_data2,
     sample_preImageInfo,
-    sample_reEnroll_preImageInfo,
     market_cap_history_sample_data,
     market_cap_sample_data,
     TestAgora,

@@ -11,8 +11,7 @@
 
 *******************************************************************************/
 
-import {BOASodium} from "boa-sodium-ts";
-import { SodiumHelper, JSBI } from 'boa-sdk-ts';
+import { JSBI } from 'boa-sdk-ts';
 import { FeeManager } from '../src/modules/common/FeeManager';
 
 import * as assert from 'assert';

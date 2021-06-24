@@ -17,7 +17,6 @@ import * as http from 'http';
 import { URL } from 'url';
 
 import Stoa from '../src/Stoa';
-import { Config } from '../src/modules/common/Config';
 import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from "axios";
 import { FullNodeAPI } from '../src/modules/agora/AgoraClient';
 import { Block, Hash, Height, PreImageInfo, handleNetworkError,
@@ -27,7 +26,6 @@ import { IDatabaseConfig } from '../src/modules/common/Config';
 
 import JSBI from 'jsbi';
 import { CoinMarketService } from '../src/modules/service/CoinMarketService';
-import { IMarketCap } from "../src/Types";
 
 export const sample_data_raw = (() => {
     return [

@@ -26,7 +26,6 @@ import { URL } from 'url';
 import { Socket } from 'socket.io';
 import "./modules/events/handlers";
 import events from './modules/events/events';
-import socketIOClient from 'socket.io-client'
 
 class Stoa extends WebService
 {
@@ -164,13 +163,13 @@ class Stoa extends WebService
 
         let height: Height = new Height("0");
         await HeightManager.init(this);
-        
+
 
         // Start the server once we can establish a connection to Agora
         return this.agora.getBlockHeight()
             .then(
                async(res) => {
-                    
+
                     height.value = JSBI.BigInt(res.value);
                     logger.info(`Connected to Agora, block height is ${res.toString()}`, { operation: Operation.connection, height: HeightManager.height.toString(), success: true });
                     return super.start();
@@ -185,7 +184,7 @@ class Stoa extends WebService
                     if(!(process.env.NODE_ENV === 'test'))
                     {
                         this.coinMarketService.start(this).catch((err)=>{
-                        logger.error(`Error: Could not connect to marketcap Client: ${err.toString()}`, 
+                        logger.error(`Error: Could not connect to marketcap Client: ${err.toString()}`,
                             { operation: Operation.connection, height: HeightManager.height.toString(), success: false });
                         });
                         this.socket.io.on(events.client.connection, (socket: Socket) => {
@@ -287,7 +286,7 @@ class Stoa extends WebService
                 res.status(200).send(JSON.stringify(out_put));
             })
             .catch((err) => {
-                logger.error("Failed to data lookup to the DB: " + err, 
+                logger.error("Failed to data lookup to the DB: " + err,
                     { operation: Operation.db, height: HeightManager.height.toString(), success: false });
                 res.status(500).send("Failed to data lookup");
             }
@@ -1642,7 +1641,7 @@ class Stoa extends WebService
                     else
                     {
                         // Do not save because it is already a saved block.
-                        logger.info(`Ignored a block with block height of ${height.toString()}`, 
+                        logger.info(`Ignored a block with block height of ${height.toString()}`,
                             { operation: Operation.block_recovery, height: HeightManager.height.toString(), success: true });
                     }
                     resolve();
@@ -1684,7 +1683,7 @@ class Stoa extends WebService
 
                     if (changes)
                         logger.info(`Saved a transaction hash : ${hashFull(tx).toString()}, ` +
-                            `data : ` + stored_data.data, 
+                            `data : ` + stored_data.data,
                             { operation: Operation.db, height: HeightManager.height.toString(), success: true });
                     resolve();
                 }
@@ -1810,7 +1809,7 @@ class Stoa extends WebService
             })
     }
     /**
-     *  Stoa emits the latest Boa stats using sockets on new block recieved. 
+     *  Stoa emits the latest Boa stats using sockets on new block recieved.
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called
      * and if an error occurs the `.catch` is called with an error.
@@ -1846,7 +1845,7 @@ class Stoa extends WebService
 
     /**
      *  Stoa emits the updates using sockets on new block recieved
-     * @param height The height of block to emit  
+     * @param height The height of block to emit
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called
      * and if an error occurs the `.catch` is called with an error.
@@ -1869,8 +1868,8 @@ class Stoa extends WebService
 
     /**
      * Stoa emits the detail of new block received
-     * @param height  
-     * @returns 
+     * @param height
+     * @returns
      */
     public emitNewBlock (block: Block): Promise<IEmitBlock>
     {
@@ -1891,16 +1890,16 @@ class Stoa extends WebService
     }
     /**
      * Stoa emit the transaction inside the new block recieved.
-     * @param block 
-     * @returns 
+     * @param block
+     * @returns
      */
     public emitBlockTransactions (block: Block): Promise<IEmitTransaction []>
     {
         return new Promise<IEmitTransaction []>(async (resolve, reject) => {
-            
+
             let block_hash = hashFull(block.header);
             let blockTransactions: Array<IEmitTransaction>=[];
-            
+
             for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++)
             {
                 let EmitTransaction: IEmitTransaction = {

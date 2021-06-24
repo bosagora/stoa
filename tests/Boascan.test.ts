@@ -11,23 +11,15 @@
 
 *******************************************************************************/
 
-import {
-    BitField, Block, BlockHeader, Enrollment, Height, Hash, Signature, SodiumHelper,
-    Transaction, OutputType, TxInput, TxOutput, PublicKey, JSBI
-} from 'boa-sdk-ts';
+import { SodiumHelper } from 'boa-sdk-ts';
 import {
     sample_data,
-    sample_data2,
-    sample_preImageInfo,
-    sample_reEnroll_preImageInfo,
     market_cap_sample_data,
     market_cap_history_sample_data,
     TestAgora,
     TestStoa,
     TestClient,
-    TestGeckoServer,
-    delay,
-    createBlock
+    TestGeckoServer
 } from './Utils';
 import * as assert from 'assert';
 import URI from 'urijs';

@@ -11,7 +11,7 @@
 
  *******************************************************************************/
 
-import { Height, OutputType, BlockHeader, Block, Transaction } from 'boa-sdk-ts';
+import { Height, OutputType, Block, Transaction } from 'boa-sdk-ts';
 
 /**
  * The interface of the Validator
@@ -836,7 +836,7 @@ export interface IEmitBlock
 }
 
 /**
- * Interface for new Transaction Emit 
+ * Interface for new Transaction Emit
  */
 export interface IEmitTransaction
 {
@@ -849,7 +849,7 @@ export interface IEmitTransaction
      * hash of block
      */
     hash: string;
-    
+
     /**
      * hash of transaction
      */
