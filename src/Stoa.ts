@@ -15,6 +15,7 @@ import { ValidatorData, IPreimage, IUnspentTxOutput, ITxStatus,
 import { Time } from './modules/common/Time';
 import { Operation } from './modules/common/LogOperation';
 import { HeightManager } from './modules/common/HeightManager';
+import { FeeManager } from './modules/common/FeeManager';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -439,9 +440,6 @@ class Stoa extends WebService
      */
     private getTransactionFees (req: express.Request, res: express.Response)
     {
-        // TODO This is still incomplete.
-        //  We will proceed with statistics to find appropriate fees and then upgrade.
-
         let size: string = req.params.tx_size.toString();
 
         logger.http(`GET /transaction/fees/${size}}`);
@@ -452,27 +450,25 @@ class Stoa extends WebService
             return;
         }
 
-        let tx_size = JSBI.BigInt(size);
-        let factor = JSBI.BigInt(200);
-        let minimum = JSBI.BigInt(100_000);     // 0.01BOA
-        let medium = JSBI.multiply(tx_size, factor);
-        if (JSBI.lessThan(medium, minimum))
-            medium = JSBI.BigInt(minimum);
-
-        let width = JSBI.divide(medium, JSBI.BigInt(10));
-        let high = JSBI.add(medium, width);
-        let low = JSBI.subtract(medium, width);
-        if (JSBI.lessThan(low, minimum))
-            low = JSBI.BigInt(minimum);
-
-        let data: ITransactionFee = {
-            tx_size: JSBI.toNumber(tx_size),
-            high: high.toString(),
-            medium: medium.toString(),
-            low: low.toString()
-        };
-
-        res.status(200).send(JSON.stringify(data));
+        let tx_size = Number(size);
+        this.ledger_storage.getFeeMeanDisparity()
+            .then((value: number) =>
+            {
+                let fees = FeeManager.getTxFee(tx_size, value);
+                let data: ITransactionFee = {
+                    tx_size: tx_size,
+                    high: fees[0].toString(),
+                    medium: fees[1].toString(),
+                    low: fees[2].toString()
+                };
+                res.status(200).send(JSON.stringify(data));
+            })
+            .catch((err) =>
+            {
+                logger.error("Failed to data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
+                res.status(500).send("Failed to data lookup");
+            });
     }
 
     /**
