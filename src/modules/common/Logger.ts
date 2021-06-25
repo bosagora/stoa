@@ -14,18 +14,16 @@
 
 *******************************************************************************/
 
-import path from 'path';
-import winston, { config } from 'winston';
-import { MongoDB } from 'winston-mongodb';
-import { MongoClient } from 'mongodb';
+import { MongoClient } from "mongodb";
+import path from "path";
+import winston, { config } from "winston";
+import { MongoDB } from "winston-mongodb";
 const { combine, timestamp, label, printf, metadata, json } = winston.format;
 const logFormat = printf(({ level, message, label, timestamp }) => {
     return `[${label}] ${timestamp} ${level} ${message}`;
 });
 
-
-export class Logger
-{
+export class Logger {
     /**
      * Create the 'default' file transport to be added to a logger
      *
@@ -36,21 +34,16 @@ export class Logger
      * @param folderPath The absolute path to the folder in which to store the file
      * @return A transport that can be passed to `logger.add`
      */
-    public static defaultFileTransport (folderPath: string)
-    {
+    public static defaultFileTransport(folderPath: string) {
         // write log file options
         const options = {
-            filename: path.join(folderPath, 'Stoa.log'),
+            filename: path.join(folderPath, "Stoa.log"),
             handleExceptions: true,
             json: false,
             maxsize: 10485760, // 10MB
             maxFiles: 10,
             colorize: false,
-            format: combine(
-                label({ label: 'Stoa' }),
-                timestamp(),
-                logFormat
-            )
+            format: combine(label({ label: "Stoa" }), timestamp(), logFormat),
         };
 
         return new winston.transports.File(options);
@@ -64,51 +57,41 @@ export class Logger
      *
      * @return A transport that can be passed to `logger.add`
      */
-    public static defaultConsoleTransport ()
-    {
+    public static defaultConsoleTransport() {
         // console log mode options
         const options = {
             handleExceptions: true,
             json: false,
             colorize: false,
-            format: combine(
-                label({ label: 'Stoa' }),
-                timestamp(),
-                logFormat
-            )
+            format: combine(label({ label: "Stoa" }), timestamp(), logFormat),
         };
 
         return new winston.transports.Console(options);
     }
     /**
-    * Create the 'default' database transport to be added to a logger
-    *
-    *
-    * @return A transport that can be passed to `logger.add`
-    */
+     * Create the 'default' database transport to be added to a logger
+     *
+     *
+     * @return A transport that can be passed to `logger.add`
+     */
     public static defaultDatabaseTransport(mongodb_url: string) {
         const options = {
-            level: 'http',
+            level: "http",
             db: mongodb_url,
-            collection: 'stoa_logs',
+            collection: "stoa_logs",
             tryReconnect: true,
-            format: combine(
-                timestamp(),
-                json(),
-                metadata({ fillExcept: ['message', 'level', 'timestamp', 'label'] }),                
-            ),
-            options : {useUnifiedTopology: true}
+            format: combine(timestamp(), json(), metadata({ fillExcept: ["message", "level", "timestamp", "label"] })),
+            options: { useUnifiedTopology: true },
         };
         return new MongoDB(options);
     }
     /**
      * Method build connectivity with logging database.
-     * @param mongodb_url 
+     * @param mongodb_url
      * @returns Ture if successfull, and return false if connection issue occers.
      */
     public static async BuildDbConnection(mongodb_url: string) {
-
-        const client = new MongoClient(mongodb_url, {useUnifiedTopology: true});
+        const client = new MongoClient(mongodb_url, { useUnifiedTopology: true });
         try {
             await client.connect();
             return true;
@@ -118,13 +101,12 @@ export class Logger
         }
     }
 
-    public static create () : winston.Logger
-    {
+    public static create(): winston.Logger {
         switch (process.env.NODE_ENV) {
             case "test":
                 return winston.createLogger({
                     level: "error",
-                    transports: [ Logger.defaultConsoleTransport() ],
+                    transports: [Logger.defaultConsoleTransport()],
                 });
             case "development":
                 return winston.createLogger({
@@ -133,10 +115,10 @@ export class Logger
             case "production":
             default:
                 return winston.createLogger({
-                    level: "info"
+                    level: "info",
                 });
         }
     }
 }
 
-export const logger : winston.Logger = Logger.create();
+export const logger: winston.Logger = Logger.create();

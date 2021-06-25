@@ -11,13 +11,12 @@
 
  *******************************************************************************/
 
-import { Height, OutputType, Block, Transaction } from 'boa-sdk-ts';
+import { Block, Height, OutputType, Transaction } from "boa-sdk-ts";
 
 /**
  * The interface of the Validator
  */
-export interface IValidator
-{
+export interface IValidator {
     address: string;
     enrolled_at: Height;
     stake: string;
@@ -27,8 +26,7 @@ export interface IValidator
 /**
  * The interface of the Preimage
  */
-export interface IPreimage
-{
+export interface IPreimage {
     height?: string;
     hash?: string;
 }
@@ -36,15 +34,13 @@ export interface IPreimage
 /**
  * The class of the Validator data
  */
-export class ValidatorData implements IValidator
-{
+export class ValidatorData implements IValidator {
     address: string;
     enrolled_at: Height;
     stake: string;
     preimage: IPreimage;
 
-    constructor (address: string, enrolled_at: Height, stake: string, preimage: IPreimage)
-    {
+    constructor(address: string, enrolled_at: Height, stake: string, preimage: IPreimage) {
         this.address = address;
         this.enrolled_at = enrolled_at;
         this.stake = stake;
@@ -55,8 +51,7 @@ export class ValidatorData implements IValidator
 /**
  * The interface of the UTXO
  */
-export interface IUnspentTxOutput
-{
+export interface IUnspentTxOutput {
     /**
      * Hash of unspent transaction output
      */
@@ -101,8 +96,7 @@ export interface IUnspentTxOutput
 /**
  * The interface of the transactions history element
  */
-export interface ITxHistoryElement
-{
+export interface ITxHistoryElement {
     /**
      * The transaction type of wallet ('inbound', 'outbound', 'freeze', 'payload')
      */
@@ -162,8 +156,7 @@ export interface ITxHistoryElement
 /**
  * The interface of the statistics of BOA coin
  */
-export interface IBOAStats
-{
+export interface IBOAStats {
     /**
      * Latest height of block
      */
@@ -193,13 +186,12 @@ export interface IBOAStats
      * Circulating supply
      */
     circulating_supply: number;
- }
+}
 
 /**
  * The interface of the block overview
  */
-export interface IBlockOverview
-{
+export interface IBlockOverview {
     /**
      * Block height
      */
@@ -253,29 +245,28 @@ export interface IBlockOverview
     /**
      * total rewards
      */
-    total_reward: string
+    total_reward: string;
 
     /**
      * total fee for the block
      */
-    total_fee: string
+    total_fee: string;
 
     /**
      * total size of the block
      */
-    total_size: number
+    total_size: number;
 
     /**
      * Agora version
      */
-    version: string
+    version: string;
 }
 
 /**
  * The interface of the enrolled validators of block
  */
-export interface IBlockEnrollmentElements
-{
+export interface IBlockEnrollmentElements {
     /**
      * Block height
      */
@@ -289,34 +280,31 @@ export interface IBlockEnrollmentElements
     /**
      * Random seed
      */
-    commitment: string,
+    commitment: string;
 
     /**
      * Enroll signature
      */
-    enroll_sig: string,
+    enroll_sig: string;
 
     /**
      * Cycle length
      */
-    cycle_length: number,
+    cycle_length: number;
 }
 
 /**
  * The interface of the enrolled validators of block with total_records
  */
-export interface IBlockEnrollment
-{
-    enrollmentElementList : IBlockEnrollmentElements [],
-    total_data : string
-
+export interface IBlockEnrollment {
+    enrollmentElementList: IBlockEnrollmentElements[];
+    total_data: string;
 }
 
 /**
  * The interface of the transaction elements of block
  */
-export interface IBlockTransactionElements
-{
+export interface IBlockTransactionElements {
     /**
      * Transaction hash
      */
@@ -363,28 +351,25 @@ export interface IBlockTransactionElements
     sender_address: string;
 }
 
- /**
-  * The interface of the transactions of block
-  */
- export interface IBlockTransactions
- {
-     /**
-      * Transactions record
-      */
-     tx: Array<IBlockTransactionElements>;
+/**
+ * The interface of the transactions of block
+ */
+export interface IBlockTransactions {
+    /**
+     * Transactions record
+     */
+    tx: Array<IBlockTransactionElements>;
 
-     /**
-      * Total record
-      */
-     total_data: string;
-
- }
+    /**
+     * Total record
+     */
+    total_data: string;
+}
 
 /**
  * The interface of the transaction overview
  */
-export interface ITxOverview
-{
+export interface ITxOverview {
     /**
      * Transaction status
      */
@@ -454,8 +439,7 @@ export interface ITxOverview
 /**
  * The interface of the transaction overview output element
  */
-export interface ITxOverviewOutputElement
-{
+export interface ITxOverviewOutputElement {
     /**
      * Output type
      */
@@ -490,13 +474,12 @@ export interface ITxOverviewOutputElement
      * Amount
      */
     amount: string;
- }
+}
 
 /**
  * The interface of the transaction overview input element
  */
-export interface ITxOverviewInputElement
-{
+export interface ITxOverviewInputElement {
     /**
      * Address, Public key
      */
@@ -536,8 +519,7 @@ export interface ITxOverviewInputElement
 /**
  * The interface of the pending transactions
  */
-export interface IPendingTxs
-{
+export interface IPendingTxs {
     tx_hash: string;
     submission_time: number;
     address: string;
@@ -549,8 +531,7 @@ export interface IPendingTxs
 /**
  * The interface of the transaction status
  */
-export interface ITxStatus
-{
+export interface ITxStatus {
     /**
      * The status of the transaction ("pending", "confirmed", "not found")
      */
@@ -568,61 +549,51 @@ export interface ITxStatus
         /**
          * The height of the block
          */
-        height? : number;
+        height?: number;
 
         /**
          * The hash of the block
          */
-        hash? : string;
-    }
+        hash?: string;
+    };
 }
 
 /**
  * Define the types of transactions to be displayed in various applications
  */
-export enum DisplayTxType
-{
+export enum DisplayTxType {
     Inbound = 0,
     Outbound = 1,
     Freeze = 2,
-    Payload = 3
+    Payload = 3,
 }
 
 /**
  * Class that converts various enum values into strings
  */
-export class ConvertTypes
-{
+export class ConvertTypes {
     static tx_types: Array<string> = ["payment", "freeze"];
     static display_tx_type: Array<string> = ["inbound", "outbound", "freeze", "payload"];
 
-    public static DisplayTxTypeToString (type: OutputType): string
-    {
-        if (type < ConvertTypes.display_tx_type.length)
-            return ConvertTypes.display_tx_type[type];
-        else
-            return "";
+    public static DisplayTxTypeToString(type: OutputType): string {
+        if (type < ConvertTypes.display_tx_type.length) return ConvertTypes.display_tx_type[type];
+        else return "";
     }
 
-    public static TxTypeToString (type: OutputType): string
-    {
-        if (type < ConvertTypes.tx_types.length)
-            return ConvertTypes.tx_types[type];
-        else
-            return "";
+    public static TxTypeToString(type: OutputType): string {
+        if (type < ConvertTypes.tx_types.length) return ConvertTypes.tx_types[type];
+        else return "";
     }
 
-    public static toDisplayTxType (type: string): DisplayTxType
-    {
-        return ConvertTypes.display_tx_type.findIndex(m => (m === type.trim().toLowerCase()));
+    public static toDisplayTxType(type: string): DisplayTxType {
+        return ConvertTypes.display_tx_type.findIndex((m) => m === type.trim().toLowerCase());
     }
 }
 
 /**
  * Define the interface of the fee of the transaction
  */
-export interface ITransactionFee
-{
+export interface ITransactionFee {
     /**
      * The size of the transaction
      */
@@ -644,11 +615,10 @@ export interface ITransactionFee
     low: string;
 }
 
- /**
-  * The interface of the SPV status
-  */
-export interface ISPVStatus
-{
+/**
+ * The interface of the SPV status
+ */
+export interface ISPVStatus {
     /**
      * True or false
      */
@@ -671,7 +641,7 @@ export interface IBlock {
 
     /**
      * hash of block
-    */
+     */
     hash: string;
 
     /**
@@ -709,41 +679,40 @@ export interface IBlock {
  * The interface of transaction
  */
 
-export interface ITransaction
-{
+export interface ITransaction {
     /**
-    * Block height
-    */
-    height: string,
+     * Block height
+     */
+    height: string;
 
-   /**
-    * Hash of the transaction
-    */
+    /**
+     * Hash of the transaction
+     */
     tx_hash: string;
 
-   /**
-    * Type of the transaction
-    */
+    /**
+     * Type of the transaction
+     */
     type: string;
 
-   /**
-    * amount of transaction
-    */
+    /**
+     * amount of transaction
+     */
     amount: string;
 
-   /**
-    * transaction fee
-    */
+    /**
+     * transaction fee
+     */
     tx_fee: string;
 
-   /**
-    * size of the transaction
-    */
+    /**
+     * size of the transaction
+     */
     tx_size: string;
 
     /**
-    * timestamp of the transaction
-    */
+     * timestamp of the transaction
+     */
     time_stamp: string;
 }
 
@@ -751,8 +720,7 @@ export interface ITransaction
  * Interface for BOAScan pagination
  */
 
-export interface IPagination
-{
+export interface IPagination {
     /**
      * page size
      */
@@ -768,8 +736,7 @@ export interface IPagination
  * Interface for MarketCap
  */
 
-export interface IMarketCap
-{
+export interface IMarketCap {
     /**
      * Price of BOA in usd
      */
@@ -794,14 +761,12 @@ export interface IMarketCap
      * Last updated time
      */
     last_updated_at: number;
-
 }
 
 /**
  * Interface for BOA Market Chart
  */
-export interface IMarketChart
-{
+export interface IMarketChart {
     /**
      * Price of BOA in usd
      */
@@ -816,8 +781,7 @@ export interface IMarketChart
 /**
  * Interface for new Block Emit
  */
-export interface IEmitBlock
-{
+export interface IEmitBlock {
     /**
      * block height
      */
@@ -839,8 +803,7 @@ export interface IEmitBlock
 /**
  * Interface for new Transaction Emit
  */
-export interface IEmitTransaction
-{
+export interface IEmitTransaction {
     /**
      * block height
      */

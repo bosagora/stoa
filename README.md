@@ -29,7 +29,7 @@ $ npm ci
 
 ## Docker image
 
-There is  an image automatically deployed on [Docker Hub](https://hub.docker.com/r/bpfk/stoa).
+There is an image automatically deployed on [Docker Hub](https://hub.docker.com/r/bpfk/stoa).
 It can be pulled with `docker pull bpfk/stoa`.
 
 ## Manual

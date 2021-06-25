@@ -11,21 +11,20 @@
 
 *******************************************************************************/
 
-import { Utils } from 'boa-sdk-ts';
+import { Utils } from "boa-sdk-ts";
 
-import {ArgumentParser} from 'argparse';
-import extend from 'extend';
-import ip from 'ip';
+import { ArgumentParser } from "argparse";
+import extend from "extend";
 import fs from "fs";
-import path from 'path';
-import { URL } from 'url';
-import yaml from 'js-yaml';
+import ip from "ip";
+import yaml from "js-yaml";
+import path from "path";
+import { URL } from "url";
 
 /**
  * Main config
  */
-export class Config implements IConfig
-{
+export class Config implements IConfig {
     /**
      * Server config
      */
@@ -49,8 +48,7 @@ export class Config implements IConfig
     /**
      * Constructor
      */
-    constructor ()
-    {
+    constructor() {
         this.server = new ServerConfig();
         this.database = new DatabaseConfig();
         this.logging = new LoggingConfig();
@@ -61,9 +59,8 @@ export class Config implements IConfig
      * Reads from file
      * @param config_file The file name of configuration
      */
-    public readFromFile (config_file: string)
-    {
-        let config_content = fs.readFileSync(path.resolve(Utils.getInitCWD(), config_file), 'utf8');
+    public readFromFile(config_file: string) {
+        let config_content = fs.readFileSync(path.resolve(Utils.getInitCWD(), config_file), "utf8");
         this.readFromString(config_content);
     }
 
@@ -71,8 +68,7 @@ export class Config implements IConfig
      * Reads from string
      * @param config_content The content of configuration
      */
-    public readFromString (config_content: string)
-    {
+    public readFromString(config_content: string) {
         const cfg = yaml.safeLoad(config_content) as IConfig;
         this.server.readFromObject(cfg.server);
         this.database.readFromObject(cfg.database);
@@ -83,11 +79,10 @@ export class Config implements IConfig
     /**
      * Parses the command line arguments, Reads from the configuration file
      */
-    public static createWithArgument (): Config
-    {
+    public static createWithArgument(): Config {
         // Parse the arguments
         const parser = new ArgumentParser();
-        parser.add_argument('-c', '--config', {
+        parser.add_argument("-c", "--config", {
             default: "config.yaml",
             help: "Path to the config file to use",
         });
@@ -100,12 +95,9 @@ export class Config implements IConfig
         }
 
         let cfg = new Config();
-        try
-        {
+        try {
             cfg.readFromFile(configPath);
-        }
-        catch (error)
-        {
+        } catch (error) {
             // Logging setup has not been completed and is output to the console.
             console.error(error.message);
 
@@ -119,8 +111,7 @@ export class Config implements IConfig
 /**
  * Server config
  */
-export class ServerConfig implements IServerConfig
-{
+export class ServerConfig implements IServerConfig {
     /**
      * THe address to which we bind
      */
@@ -142,13 +133,11 @@ export class ServerConfig implements IServerConfig
      * @param port The port on which we bind
      * @param agora_endpoint The endpoint of Agora
      */
-    constructor (address?: string, port?: number, agora_endpoint?: string)
-    {
+    constructor(address?: string, port?: number, agora_endpoint?: string) {
         let conf = extend(true, {}, ServerConfig.defaultValue());
-        extend(true, conf, {address: address, port: port, agora_endpoint: agora_endpoint});
+        extend(true, conf, { address: address, port: port, agora_endpoint: agora_endpoint });
 
-        if (!ip.isV4Format(conf.address) && !ip.isV6Format(conf.address))
-        {
+        if (!ip.isV4Format(conf.address) && !ip.isV6Format(conf.address)) {
             console.error(`${conf.address}' is not appropriate to use as an IP address.`);
             process.exit(1);
         }
@@ -162,13 +151,11 @@ export class ServerConfig implements IServerConfig
      * Reads from Object
      * @param config The object of IServerConfig
      */
-    public readFromObject (config: IServerConfig)
-    {
+    public readFromObject(config: IServerConfig) {
         let conf = extend(true, {}, ServerConfig.defaultValue());
         extend(true, conf, config);
 
-        if (!ip.isV4Format(conf.address) && !ip.isV6Format(conf.address))
-        {
+        if (!ip.isV4Format(conf.address) && !ip.isV6Format(conf.address)) {
             console.error(`${conf.address}' is not appropriate to use as an IP address.`);
             process.exit(1);
         }
@@ -180,21 +167,19 @@ export class ServerConfig implements IServerConfig
     /**
      * Returns default value
      */
-    public static defaultValue (): IServerConfig
-    {
+    public static defaultValue(): IServerConfig {
         return {
             address: "127.0.0.1",
             port: 3836,
-            agora_endpoint: new URL("http://127.0.0.1:2826")
-        }
+            agora_endpoint: new URL("http://127.0.0.1:2826"),
+        };
     }
 }
 
 /**
  * Database config
  */
-export class DatabaseConfig implements IDatabaseConfig
-{
+export class DatabaseConfig implements IDatabaseConfig {
     /**
      * The host of mysql
      */
@@ -222,7 +207,7 @@ export class DatabaseConfig implements IDatabaseConfig
 
     /**
      * multiple Statements exec config
-    */
+     */
     multipleStatements: boolean;
 
     /**
@@ -233,10 +218,23 @@ export class DatabaseConfig implements IDatabaseConfig
      * @param database Mysql database name
      * @param multipleStatements Mysql allow multiple statement to execute (true / false)
      */
-    constructor(host?: string, user?: string, password?: string, database?: string, port?: number, multipleStatements?: boolean
+    constructor(
+        host?: string,
+        user?: string,
+        password?: string,
+        database?: string,
+        port?: number,
+        multipleStatements?: boolean
     ) {
         let conf = extend(true, {}, DatabaseConfig.defaultValue());
-        extend(true, conf, { host: host, user: user, password: password, database: database, port: port, multipleStatements: multipleStatements });
+        extend(true, conf, {
+            host: host,
+            user: user,
+            password: password,
+            database: database,
+            port: port,
+            multipleStatements: multipleStatements,
+        });
         this.host = conf.host;
         this.user = conf.user;
         this.password = conf.password;
@@ -249,8 +247,7 @@ export class DatabaseConfig implements IDatabaseConfig
      * Reads from Object
      * @param config The object of IDatabaseConfig
      */
-    public readFromObject (config: IDatabaseConfig)
-    {
+    public readFromObject(config: IDatabaseConfig) {
         let conf = extend(true, {}, DatabaseConfig.defaultValue());
         extend(true, conf, config);
         this.host = conf.host;
@@ -264,24 +261,22 @@ export class DatabaseConfig implements IDatabaseConfig
     /**
      * Returns default value
      */
-    public static defaultValue (): IDatabaseConfig
-    {
+    public static defaultValue(): IDatabaseConfig {
         return {
-            host: 'localhost',
-            user: 'root',
-            password: '12345678',
-            database: 'boascan',
-            port:3306,
+            host: "localhost",
+            user: "root",
+            password: "12345678",
+            database: "boascan",
+            port: 3306,
             multipleStatements: true,
-        }
+        };
     }
 }
 
 /**
  * Logging config
  */
-export class LoggingConfig implements ILoggingConfig
-{
+export class LoggingConfig implements ILoggingConfig {
     /**
      * The path of logging files
      */
@@ -310,8 +305,7 @@ export class LoggingConfig implements ILoggingConfig
     /**
      * Constructor
      */
-    constructor ()
-    {
+    constructor() {
         const defaults = LoggingConfig.defaultValue();
         this.folder = path.resolve(Utils.getInitCWD(), defaults.folder);
         this.level = defaults.level;
@@ -324,39 +318,32 @@ export class LoggingConfig implements ILoggingConfig
      * Reads from Object
      * @param config The object of ILoggingConfig
      */
-    public readFromObject (config: ILoggingConfig)
-    {
-        if (config.folder)
-            this.folder = path.resolve(Utils.getInitCWD(), config.folder);
-        if (config.level)
-            this.level = config.level;
-        if (config.console !== undefined)
-            this.console = config.console;
-        if (config.database !== undefined)
-            this.database = config.database;
-            this.mongodb_url = config.mongodb_url;
+    public readFromObject(config: ILoggingConfig) {
+        if (config.folder) this.folder = path.resolve(Utils.getInitCWD(), config.folder);
+        if (config.level) this.level = config.level;
+        if (config.console !== undefined) this.console = config.console;
+        if (config.database !== undefined) this.database = config.database;
+        this.mongodb_url = config.mongodb_url;
     }
 
     /**
      * Returns default value
      */
-    public static defaultValue (): ILoggingConfig
-    {
+    public static defaultValue(): ILoggingConfig {
         return {
             folder: path.resolve(Utils.getInitCWD(), "logs/"),
             level: "info",
             console: false,
             database: false,
-            mongodb_url: 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false'
-        }
+            mongodb_url: "mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false",
+        };
     }
 }
 
 /**
  * Consensus config
  */
-export class ConsensusConfig implements IConsensusConfig
-{
+export class ConsensusConfig implements IConsensusConfig {
     /**
      * The genesis timestamp
      */
@@ -366,8 +353,7 @@ export class ConsensusConfig implements IConsensusConfig
      * Constructor
      * @param genesis_timestamp The genesis timestamp
      */
-    constructor ()
-    {
+    constructor() {
         const defaults = ConsensusConfig.defaultValue();
         this.genesis_timestamp = defaults.genesis_timestamp;
     }
@@ -376,8 +362,7 @@ export class ConsensusConfig implements IConsensusConfig
      * Reads from Object
      * @param config The object of IConsensusConfig
      */
-    public readFromObject (config: IConsensusConfig)
-    {
+    public readFromObject(config: IConsensusConfig) {
         let conf = extend(true, {}, ConsensusConfig.defaultValue());
         extend(true, conf, config);
         this.genesis_timestamp = conf.genesis_timestamp;
@@ -386,19 +371,17 @@ export class ConsensusConfig implements IConsensusConfig
     /**
      * Returns default value
      */
-    public static defaultValue (): IConsensusConfig
-    {
+    public static defaultValue(): IConsensusConfig {
         return {
             genesis_timestamp: 1609459200,
-        }
+        };
     }
 }
 
 /**
  * The interface of server config
  */
-export interface IServerConfig
-{
+export interface IServerConfig {
     /**
      * THe address to which we bind
      */
@@ -418,8 +401,7 @@ export interface IServerConfig
 /**
  * The interface of database config
  */
-export interface IDatabaseConfig
-{
+export interface IDatabaseConfig {
     /**
      * The host of mysql
      */
@@ -443,7 +425,7 @@ export interface IDatabaseConfig
     /**
      * The host database port
      */
-     port: number;
+    port: number;
 
     /**
      * Multiple Statements execution statement Option
@@ -454,8 +436,7 @@ export interface IDatabaseConfig
 /**
  * The interface of logging config
  */
-export interface ILoggingConfig
-{
+export interface ILoggingConfig {
     /**
      * The path of logging files
      */
@@ -476,7 +457,7 @@ export interface ILoggingConfig
      */
     database: boolean;
 
-     /**
+    /**
      * url of mongodb to store logs
      */
     mongodb_url: string;
@@ -485,8 +466,7 @@ export interface ILoggingConfig
 /**
  * The interface of consensus config
  */
-export interface IConsensusConfig
-{
+export interface IConsensusConfig {
     /**
      * The genesis timestamp
      */
@@ -496,8 +476,7 @@ export interface IConsensusConfig
 /**
  * The interface of main config
  */
-export interface IConfig
-{
+export interface IConfig {
     /**
      * Server config
      */

@@ -11,40 +11,37 @@
 
 *******************************************************************************/
 
-import { Block, Hash, Height, PreImageInfo, handleNetworkError, hashMulti } from 'boa-sdk-ts';
+import { Block, handleNetworkError, Hash, hashMulti, Height, PreImageInfo } from "boa-sdk-ts";
 
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import URI from 'urijs';
-import { URL } from 'url';
+import axios, { AxiosInstance, AxiosResponse } from "axios";
+import URI from "urijs";
+import { URL } from "url";
 
 /**
  * The interface exposed by a full node
  *
  * See_Also: https://github.com/bosagora/agora/blob/v0.x.x/source/agora/api/FullNode.d
  */
-export interface FullNodeAPI
-{
+export interface FullNodeAPI {
     // getNodeInfo (): NodeInfo;
     // getLocalTime (): bigint;
 
-    getBlockHeight (): Promise<Height>;
-    getBlocksFrom (height: Height, max_blocks: number): Promise<Block[]>;
-    getMerklePath (height: Height, hash: Hash): Promise<Hash[]>;
+    getBlockHeight(): Promise<Height>;
+    getBlocksFrom(height: Height, max_blocks: number): Promise<Block[]>;
+    getMerklePath(height: Height, hash: Hash): Promise<Hash[]>;
     // hasTransactionHash (tx: Hash): boolean;
     // putTransaction (tx: Transaction): void;
 
     // enrollValidator (enroll: Enrollment): void;
     // getEnrollment (enroll_hash: Hash): Enrollment;
-    getPreimage (enroll_key: Hash): Promise<PreImageInfo>;
+    getPreimage(enroll_key: Hash): Promise<PreImageInfo>;
     // receivePreimage (preimage: PreImageInfo): void;
 }
-
 
 /**
  * The class that recovers data
  */
-export class AgoraClient implements FullNodeAPI
-{
+export class AgoraClient implements FullNodeAPI {
     /**
      * The network endpoint to connect to Agora
      */
@@ -59,8 +56,7 @@ export class AgoraClient implements FullNodeAPI
      * Constructor
      * @param endpoint - The network endpoint to connect to Agora
      */
-    constructor (endpoint: URL)
-    {
+    constructor(endpoint: URL) {
         this.endpoint = endpoint;
         this.client = axios.create({
             baseURL: endpoint.toString(),
@@ -72,10 +68,10 @@ export class AgoraClient implements FullNodeAPI
     /**
      * Request an Agora node's current block height.
      */
-    public getBlockHeight (): Promise<Height>
-    {
-        return this.client.get(URI("/block_height").toString())
-            .then((res) => { return new Height(res.data); });
+    public getBlockHeight(): Promise<Height> {
+        return this.client.get(URI("/block_height").toString()).then((res) => {
+            return new Height(res.data);
+        });
     }
 
     /**
@@ -83,21 +79,15 @@ export class AgoraClient implements FullNodeAPI
      * @param height - The height of the block
      * @param max_blocks - The maximum number of block to request
      */
-    public getBlocksFrom (height: Height, max_blocks: number): Promise<Block[]>
-    {
-        return new Promise<Block[]>((resolve, reject) =>
-        {
-            let uri = URI("/blocks_from")
-                .addSearch("height", height.toString())
-                .addSearch("max_blocks", max_blocks);
+    public getBlocksFrom(height: Height, max_blocks: number): Promise<Block[]> {
+        return new Promise<Block[]>((resolve, reject) => {
+            let uri = URI("/blocks_from").addSearch("height", height.toString()).addSearch("max_blocks", max_blocks);
 
-            this.client.get(uri.toString())
-                .then((response: AxiosResponse) =>
-                {
-                    if (response.status == 200)
-                        resolve(response.data.map((entry: any) => Block.reviver("", entry)));
-                    else
-                        reject(handleNetworkError({response: response}));
+            this.client
+                .get(uri.toString())
+                .then((response: AxiosResponse) => {
+                    if (response.status == 200) resolve(response.data.map((entry: any) => Block.reviver("", entry)));
+                    else reject(handleNetworkError({ response: response }));
                 })
                 .catch((reason: any) => {
                     reject(handleNetworkError(reason));
@@ -110,22 +100,14 @@ export class AgoraClient implements FullNodeAPI
      * @param height - The height of the block
      * @param hash - The hash of the transaction
      */
-    public getMerklePath (height: Height, hash: Hash): Promise<Hash[]>
-    {
-        return new Promise<Hash[]>((resolve, reject) =>
-        {
-            let uri = URI("/merkle_path")
-                .addSearch("height", height.toString())
-                .addSearch("hash", hash.toString());
+    public getMerklePath(height: Height, hash: Hash): Promise<Hash[]> {
+        return new Promise<Hash[]>((resolve, reject) => {
+            let uri = URI("/merkle_path").addSearch("height", height.toString()).addSearch("hash", hash.toString());
 
-            this.client.get(uri.toString())
-                .then((response: AxiosResponse) =>
-                {
-                    if (response.status == 200)
-                        resolve(response.data.map((entry: any) => new Hash(entry)));
-                    else
-                        reject(handleNetworkError({response: response}));
-                });
+            this.client.get(uri.toString()).then((response: AxiosResponse) => {
+                if (response.status == 200) resolve(response.data.map((entry: any) => new Hash(entry)));
+                else reject(handleNetworkError({ response: response }));
+            });
         });
     }
 
@@ -135,20 +117,15 @@ export class AgoraClient implements FullNodeAPI
      * @param enroll_key Hash of the UTXO used by the validator
      * @returns A `PreImageInfo` matching this `enroll_key`
      */
-    public getPreimage (enroll_key: Hash): Promise<PreImageInfo>
-    {
-        return new Promise<PreImageInfo>((resolve, reject) =>
-        {
-            let uri = URI("/preimage")
-                .addSearch("enroll_key", enroll_key);
+    public getPreimage(enroll_key: Hash): Promise<PreImageInfo> {
+        return new Promise<PreImageInfo>((resolve, reject) => {
+            let uri = URI("/preimage").addSearch("enroll_key", enroll_key);
 
-            this.client.get(uri.toString())
-                .then((response: AxiosResponse) =>
-                {
-                    if (response.status == 200)
-                        resolve(PreImageInfo.reviver("", response.data));
-                    else
-                        reject(handleNetworkError({response: response}));
+            this.client
+                .get(uri.toString())
+                .then((response: AxiosResponse) => {
+                    if (response.status == 200) resolve(PreImageInfo.reviver("", response.data));
+                    else reject(handleNetworkError({ response: response }));
                 })
                 .catch((reason: any) => {
                     reject(handleNetworkError(reason));
@@ -156,15 +133,11 @@ export class AgoraClient implements FullNodeAPI
         });
     }
 
-    public static checkMerklePath (merkle_path: Array<Hash>, tx_hash: Hash, tx_index: number): Hash
-    {
+    public static checkMerklePath(merkle_path: Array<Hash>, tx_hash: Hash, tx_index: number): Hash {
         let root: Hash = tx_hash;
-        for (const otherside of merkle_path)
-        {
-            if (tx_index & 1)
-                root = hashMulti(otherside.data, root.data);
-            else
-                root = hashMulti(root.data, otherside.data);
+        for (const otherside of merkle_path) {
+            if (tx_index & 1) root = hashMulti(otherside.data, root.data);
+            else root = hashMulti(root.data, otherside.data);
 
             tx_index >>= 1;
         }
