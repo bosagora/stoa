@@ -161,6 +161,7 @@ class Stoa extends WebService {
 
         // Prepare routes
         this.app.get("/block_height", this.getBlockHeight.bind(this));
+        this.app.get("/block_height_at/:time", this.getBlockHeightAt.bind(this));
         this.app.get("/validators", this.getValidators.bind(this));
         this.app.get("/validator/:address", this.getValidator.bind(this));
         this.app.get("/transaction/pending/:hash", this.getTransactionPending.bind(this));
@@ -1436,6 +1437,41 @@ class Stoa extends WebService {
             .then((row: Height | null) => {
                 if (row == null) res.status(400).send(`The block height not found.`);
                 else res.status(200).send(JSON.stringify(row));
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    success: false,
+                });
+                res.status(500).send("Failed to data lookup");
+            });
+    }
+
+    /**
+     * GET /block_height_at/:time
+     *
+     * Return the block height corresponding to to the block creation time
+     */
+    private getBlockHeightAt(req: express.Request, res: express.Response) {
+        if (req.params.time === undefined) {
+            res.status(400).send(`Invalid value for parameter 'time'`);
+            return;
+        }
+
+        if (!Utils.isPositiveInteger(req.params.time.toString())) {
+            res.status(400).send(`Invalid value for parameter 'time': ${req.params.time.toString()}`);
+            return;
+        }
+
+        const time_stamp = Number(req.params.time.toString());
+        logger.http(`GET /block_height_at time=${time_stamp.toString()}`);
+
+        this.ledger_storage
+            .getEstimatedBlockHeight(time_stamp)
+            .then((height: Height | null) => {
+                if (height === null) res.status(204).send("No Content");
+                else res.status(200).send(JSON.stringify(height));
             })
             .catch((err) => {
                 logger.error("Failed to data lookup to the DB: " + err, {

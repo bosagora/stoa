@@ -400,6 +400,40 @@ export class LedgerStorage extends Storages {
     }
 
     /**
+     * Get the height corresponding to to the block creation time
+     * @param time_stamp The time to get block height
+     * @returns If it already exists in the block,
+     * it returns the height of the block and,
+     * if the block has not yet been created,
+     * it returns the estimated height is returned.
+     */
+    public getEstimatedBlockHeight(time_stamp: number): Promise<Height | null> {
+        return new Promise<Height | null>((resolve, reject) => {
+            const sql = `SELECT
+                    height, time_stamp
+                FROM
+                    blocks
+                WHERE
+                    time_stamp < ?
+                ORDER BY height DESC
+                LIMIT 1`;
+            this.query(sql, [time_stamp])
+                .then((rows: any[]) => {
+                    if (rows.length === 0) resolve(null);
+                    else {
+                        const period = 10 * 60; // 10 minutes
+                        const additional_height = Math.floor((time_stamp - rows[0].time_stamp) / period);
+                        const estimated_height = new Height(JSBI.BigInt(rows[0].height + additional_height));
+                        resolve(estimated_height);
+                    }
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
+    }
+
+    /**
      * Puts all enrollments
      * @param block: The instance of the `Block`
      */

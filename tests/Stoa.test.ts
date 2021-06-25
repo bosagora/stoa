@@ -803,6 +803,45 @@ describe("Test of the path /utxo", () => {
         assert.strictEqual(response.data.low, "166500");
         assert.strictEqual(response.data.high, "203500");
     });
+
+    it("Test getting height at", async () => {
+        const zero = 1609459200;
+        const one = zero + 10 * 60;
+
+        const no_exist = zero - 10 * 60;
+        let uri = URI(host).port(port).directory("block_height_at").filename(no_exist.toString());
+        let response = await client.get(uri.toString());
+        assert.strictEqual(response.statusText, "No Content");
+
+        uri = URI(host).port(port).directory("block_height_at").filename(one.toString());
+        response = await client.get(uri.toString());
+        assert.strictEqual(response.data, "1");
+
+        const one_alpha = one + 1;
+        uri = URI(host).port(port).directory("block_height_at").filename(one_alpha.toString());
+        response = await client.get(uri.toString());
+        assert.strictEqual(response.data, "1");
+
+        const one_beta = one - 1;
+        uri = URI(host).port(port).directory("block_height_at").filename(one_beta.toString());
+        response = await client.get(uri.toString());
+        assert.strictEqual(response.data, "0");
+
+        const hundred = zero + 100 * 10 * 60;
+        uri = URI(host).port(port).directory("block_height_at").filename(hundred.toString());
+        response = await client.get(uri.toString());
+        assert.strictEqual(response.data, "100");
+
+        const hundred_alpha = hundred + 1;
+        uri = URI(host).port(port).directory("block_height_at").filename(hundred_alpha.toString());
+        response = await client.get(uri.toString());
+        assert.strictEqual(response.data, "100");
+
+        const hundred_beta = hundred - 1;
+        uri = URI(host).port(port).directory("block_height_at").filename(hundred_beta.toString());
+        response = await client.get(uri.toString());
+        assert.strictEqual(response.data, "99");
+    });
 });
 
 describe("Test of the path /utxo for freezing", () => {
