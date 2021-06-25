@@ -12,24 +12,37 @@
 *******************************************************************************/
 
 import {
-    Block, Enrollment, Hash, Height, PreImageInfo, Transaction,
-    TxInput, TxOutput, makeUTXOKey, hashFull,
-    Utils, Endian, Lock, Unlock, PublicKey, TxPayloadFee, OutputType
-} from 'boa-sdk-ts';
-import { Storages } from './Storages';
+    Block,
+    Endian,
+    Enrollment,
+    Hash,
+    hashFull,
+    Height,
+    Lock,
+    makeUTXOKey,
+    OutputType,
+    PreImageInfo,
+    PublicKey,
+    Transaction,
+    TxInput,
+    TxOutput,
+    TxPayloadFee,
+    Unlock,
+    Utils,
+} from "boa-sdk-ts";
+import { IMarketCap } from "../../Types";
+import { IDatabaseConfig } from "../common/Config";
+import { FeeManager } from "../common/FeeManager";
+import { logger } from "../common/Logger";
+import { Storages } from "./Storages";
 import { TransactionPool } from "./TransactionPool";
-import { IDatabaseConfig } from '../common/Config';
-import { IMarketCap } from '../../Types'
-import { logger } from '../common/Logger';
-import { FeeManager } from '../common/FeeManager';
 
-import JSBI from 'jsbi';
+import JSBI from "jsbi";
 
 /**
  * The class that inserts and reads the ledger into the database.
  */
-export class LedgerStorage extends Storages
-{
+export class LedgerStorage extends Storages {
     /**
      * The genesis timestamp
      */
@@ -43,8 +56,7 @@ export class LedgerStorage extends Storages
     /**
      * Construct an instance of `LedgerStorage`, exposes callback API.
      */
-    constructor (databaseConfig: IDatabaseConfig, genesis_timestamp: number, callback: (err: Error | null) => void)
-    {
+    constructor(databaseConfig: IDatabaseConfig, genesis_timestamp: number, callback: (err: Error | null) => void) {
         super(databaseConfig, callback);
         this.genesis_timestamp = genesis_timestamp;
     }
@@ -52,14 +64,11 @@ export class LedgerStorage extends Storages
     /**
      * Construct an instance of `LedgerStorage` using `Promise` API.
      */
-    public static make (databaseConfig: IDatabaseConfig, genesis_timestamp: number): Promise<LedgerStorage>
-    {
+    public static make(databaseConfig: IDatabaseConfig, genesis_timestamp: number): Promise<LedgerStorage> {
         return new Promise<LedgerStorage>((resolve, reject) => {
             let result = new LedgerStorage(databaseConfig, genesis_timestamp, async (err: Error | null) => {
-                if (err)
-                    reject(err);
-                else
-                {
+                if (err) reject(err);
+                else {
                     result._transaction_pool = new TransactionPool();
                     await result.transaction_pool.loadSpenderList(result.connection);
                     resolve(result);
@@ -74,13 +83,10 @@ export class LedgerStorage extends Storages
      * @returns If `_transaction_pool` is not null, return `_transaction_pool`.
      * Otherwise, terminate the process.
      */
-    public get transaction_pool (): TransactionPool
-    {
-        if (this._transaction_pool !== null)
-            return this._transaction_pool;
-        else
-        {
-            logger.error('TransactionPool is not ready yet.');
+    public get transaction_pool(): TransactionPool {
+        if (this._transaction_pool !== null) return this._transaction_pool;
+        else {
+            logger.error("TransactionPool is not ready yet.");
             process.exit(1);
         }
     }
@@ -91,10 +97,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called and if an error occurs the `.catch`
      * is called with an error.
      */
-    public createTables (): Promise<void>
-    {
-        let sql =
-        `CREATE TABLE IF NOT EXISTS blocks
+    public createTables(): Promise<void> {
+        let sql = `CREATE TABLE IF NOT EXISTS blocks
         (
             height              INTEGER  NOT NULL,
             hash                TINYBLOB NOT NULL,
@@ -276,7 +280,7 @@ export class LedgerStorage extends Storages
             \`val\`     BLOB        NOT NULL,
             PRIMARY KEY(\`key\`(64))
         );
-        
+
        DROP TRIGGER IF EXISTS tx_trigger;
        CREATE TRIGGER tx_trigger AFTER INSERT
        ON transactions
@@ -298,55 +302,48 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called and if an error occurs the `.catch`
      * is called with an error.
      */
-    public putBlocks (block: Block): Promise<void>
-    {
+    public putBlocks(block: Block): Promise<void> {
         let genesis_timestamp: number = this.genesis_timestamp;
 
-        function saveBlock (storage: LedgerStorage, block: Block, genesis_timestamp: number): Promise<void>
-        {
-            return new Promise<void>((resolve, reject) =>
-            {
+        function saveBlock(storage: LedgerStorage, block: Block, genesis_timestamp: number): Promise<void> {
+            return new Promise<void>((resolve, reject) => {
                 let block_hash = hashFull(block.header);
-                storage.query(
-                    `INSERT INTO blocks
+                storage
+                    .query(
+                        `INSERT INTO blocks
                         (height, hash, prev_block, validators, merkle_root, signature,
                          random_seed, missing_validators, tx_count, enrollment_count, time_offset, time_stamp)
                     VALUES
                         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [
-                        block.header.height.toString(),
-                        block_hash.toBinary(Endian.Little),
-                        block.header.prev_block.toBinary(Endian.Little),
-                        JSON.stringify(block.header.validators.storage),
-                        block.header.merkle_root.toBinary(Endian.Little),
-                        block.header.signature.toBinary(Endian.Little),
-                        block.header.random_seed.toBinary(Endian.Little),
-                        block.header.missing_validators.toString(),
-                        block.txs.length,
-                        block.header.enrollments.length,
-                        block.header.time_offset,
-                        block.header.time_offset + genesis_timestamp,
-                    ]
-                )
-                    .then(() =>
-                    {
+                        [
+                            block.header.height.toString(),
+                            block_hash.toBinary(Endian.Little),
+                            block.header.prev_block.toBinary(Endian.Little),
+                            JSON.stringify(block.header.validators.storage),
+                            block.header.merkle_root.toBinary(Endian.Little),
+                            block.header.signature.toBinary(Endian.Little),
+                            block.header.random_seed.toBinary(Endian.Little),
+                            block.header.missing_validators.toString(),
+                            block.txs.length,
+                            block.header.enrollments.length,
+                            block.header.time_offset,
+                            block.header.time_offset + genesis_timestamp,
+                        ]
+                    )
+                    .then(() => {
                         resolve();
                     })
-                    .catch((err) =>
-                    {
+                    .catch((err) => {
                         reject(err);
                     });
             });
         }
 
-        return new Promise<void>((resolve, reject) =>
-        {
+        return new Promise<void>((resolve, reject) => {
             (async () => {
-                try
-                {
+                try {
                     await this.begin();
-                    for (let tx of block.txs)
-                        await this.transaction_pool.remove(this.connection, tx);
+                    for (let tx of block.txs) await this.transaction_pool.remove(this.connection, tx);
                     await saveBlock(this, block, genesis_timestamp);
                     await this.putTransactions(block);
                     await this.putEnrollments(block);
@@ -355,9 +352,7 @@ export class LedgerStorage extends Storages
                     await this.putBlockstats(block);
                     await this.putFeeDisparity(block);
                     await this.commit();
-                }
-                catch (error)
-                {
+                } catch (error) {
                     await this.rollback();
                     reject(error);
                     return;
@@ -374,10 +369,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getBlock (height: Height): Promise<any[]>
-    {
-        let sql =
-        `SELECT
+    public getBlock(height: Height): Promise<any[]> {
+        let sql = `SELECT
             height, hash, prev_block, validators, merkle_root, signature, random_seed,
             missing_validators,  tx_count, enrollment_count, time_offset, time_stamp
         FROM
@@ -392,21 +385,15 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the block height
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getBlockHeight (): Promise<Height | null>
-    {
-        return new Promise<Height | null>((resolve, reject) =>
-        {
+    public getBlockHeight(): Promise<Height | null> {
+        return new Promise<Height | null>((resolve, reject) => {
             let sql = `SELECT MAX(height) as height FROM blocks`;
             this.query(sql, [])
-                .then((row: any[]) =>
-                {
-                    if (row[0].height !== null)
-                        resolve(new Height(JSBI.BigInt(row[0].height)));
-                    else
-                        resolve(null);
+                .then((row: any[]) => {
+                    if (row[0].height !== null) resolve(new Height(JSBI.BigInt(row[0].height)));
+                    else resolve(null);
                 })
-                .catch((err) =>
-                {
+                .catch((err) => {
                     reject(err);
                 });
         });
@@ -416,79 +403,76 @@ export class LedgerStorage extends Storages
      * Puts all enrollments
      * @param block: The instance of the `Block`
      */
-    public putEnrollments (block: Block): Promise<void>
-    {
-        function save_enrollment (storage: LedgerStorage, height: Height,
-            enroll_idx: number, enroll: Enrollment): Promise<void>
-        {
-            return new Promise<void>((resolve, reject) =>
-            {
-                storage.query(
-                    `INSERT INTO enrollments
+    public putEnrollments(block: Block): Promise<void> {
+        function save_enrollment(
+            storage: LedgerStorage,
+            height: Height,
+            enroll_idx: number,
+            enroll: Enrollment
+        ): Promise<void> {
+            return new Promise<void>((resolve, reject) => {
+                storage
+                    .query(
+                        `INSERT INTO enrollments
                         (block_height, enrollment_index, utxo_key, commitment, cycle_length, enroll_sig)
                     VALUES
                         (?, ?, ?, ?, ?, ?)`,
-                    [
-                        height.toString(),
-                        enroll_idx,
-                        enroll.utxo_key.toBinary(Endian.Little),
-                        enroll.commitment.toBinary(Endian.Little),
-                        enroll.cycle_length,
-                        enroll.enroll_sig.toSignature().toBinary(Endian.Little)
-                    ])
+                        [
+                            height.toString(),
+                            enroll_idx,
+                            enroll.utxo_key.toBinary(Endian.Little),
+                            enroll.commitment.toBinary(Endian.Little),
+                            enroll.cycle_length,
+                            enroll.enroll_sig.toSignature().toBinary(Endian.Little),
+                        ]
+                    )
                     .then(() => {
                         resolve();
                     })
-                    .catch((err) =>
-                    {
+                    .catch((err) => {
                         reject(err);
                     });
             });
         }
 
-        function save_validator (storage: LedgerStorage, height: Height, enroll: Enrollment): Promise<void>
-        {
-            return new Promise<void>((resolve, reject) =>
-            {
-                storage.run(
-                    `INSERT INTO validators
+        function save_validator(storage: LedgerStorage, height: Height, enroll: Enrollment): Promise<void> {
+            return new Promise<void>((resolve, reject) => {
+                storage
+                    .run(
+                        `INSERT INTO validators
                         (enrolled_at, utxo_key, address, amount, preimage_height, preimage_hash)
                     SELECT ?, utxo_key, address, amount, ?, ?
                         FROM tx_outputs
                     WHERE
                         tx_outputs.utxo_key = ?`,
-                    [
-                        height.toString(),
-                        0,
-                        enroll.commitment.toBinary(Endian.Little),
-                        enroll.utxo_key.toBinary(Endian.Little)
-                    ])
-                    .then(() =>
-                    {
+                        [
+                            height.toString(),
+                            0,
+                            enroll.commitment.toBinary(Endian.Little),
+                            enroll.utxo_key.toBinary(Endian.Little),
+                        ]
+                    )
+                    .then(() => {
                         resolve();
                     })
-                    .catch((err) =>
-                    {
+                    .catch((err) => {
                         reject(err);
                     });
             });
         }
 
-        return new Promise<void>((resolve, reject) =>
-        {
-            (async () =>
-            {
-                for (let enroll_idx = 0; enroll_idx < block.header.enrollments.length; enroll_idx++)
-                {
-                    try
-                    {
-                        await save_enrollment(this, block.header.height, enroll_idx,
-                            block.header.enrollments[enroll_idx]);
-                        await save_validator(this, block.header.height,
-                            block.header.enrollments[enroll_idx]);
-                    }
-                    catch (err)
-                    {
+        return new Promise<void>((resolve, reject) => {
+            (async () => {
+                for (let enroll_idx = 0; enroll_idx < block.header.enrollments.length; enroll_idx++) {
+                    try {
+                        await save_enrollment(
+                            this,
+                            block.header.height,
+                            enroll_idx,
+                            block.header.enrollments[enroll_idx]
+                        );
+                        await save_validator(this, block.header.height, block.header.enrollments[enroll_idx]);
+                    } catch (err) {
                         reject(err);
                         return;
                     }
@@ -505,10 +489,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getMerkleTree (height: Height): Promise<any[]>
-    {
-        let sql =
-            `SELECT
+    public getMerkleTree(height: Height): Promise<any[]> {
+        let sql = `SELECT
                 block_height, merkle_index, merkle_hash
              FROM
                 merkle_trees
@@ -521,45 +503,37 @@ export class LedgerStorage extends Storages
      * Puts merkle tree
      * @param block: The instance of the `Block`
      */
-    public putMerkleTree (block: Block): Promise<void>
-    {
-        function save_merkle (storage: LedgerStorage, height: Height, merkle_index: number, merkle_hash: Hash): Promise<void>
-        {
-            return new Promise<void>((resolve, reject) =>
-            {
-                storage.query(
-                    `INSERT INTO merkle_trees
+    public putMerkleTree(block: Block): Promise<void> {
+        function save_merkle(
+            storage: LedgerStorage,
+            height: Height,
+            merkle_index: number,
+            merkle_hash: Hash
+        ): Promise<void> {
+            return new Promise<void>((resolve, reject) => {
+                storage
+                    .query(
+                        `INSERT INTO merkle_trees
                         (block_height, merkle_index, merkle_hash)
                     VALUES
                         (?, ?, ?)`,
-                    [
-                        height.toString(),
-                        merkle_index,
-                        merkle_hash.toBinary(Endian.Little),
-                    ])
+                        [height.toString(), merkle_index, merkle_hash.toBinary(Endian.Little)]
+                    )
                     .then(() => {
                         resolve();
                     })
-                    .catch((err) =>
-                    {
+                    .catch((err) => {
                         reject(err);
                     });
             });
         }
 
-        return new Promise<void>((resolve, reject) =>
-        {
-            (async () =>
-            {
-                for (let merkle_index = 0; merkle_index < block.merkle_tree.length; merkle_index++)
-                {
-                    try
-                    {
-                        await save_merkle(this, block.header.height, merkle_index,
-                            block.merkle_tree[merkle_index]);
-                    }
-                    catch (err)
-                    {
+        return new Promise<void>((resolve, reject) => {
+            (async () => {
+                for (let merkle_index = 0; merkle_index < block.merkle_tree.length; merkle_index++) {
+                    try {
+                        await save_merkle(this, block.header.height, merkle_index, block.merkle_tree[merkle_index]);
+                    } catch (err) {
                         reject(err);
                         return;
                     }
@@ -569,56 +543,58 @@ export class LedgerStorage extends Storages
         });
     }
 
-     /**
+    /**
      * Puts merkle tree
      * @param block: The instance of the `Block`
      */
-      public putBlockstats (block: Block): Promise<void>
-      {
-          function save_blockstats (storage: LedgerStorage, height: Height, total_sent: JSBI, total_received: JSBI, total_size: JSBI, total_fee: JSBI): Promise<void>
-          {
-              return new Promise<void>((resolve, reject) =>
-              {
-                storage.query(
-                    `INSERT INTO blocks_stats
+    public putBlockstats(block: Block): Promise<void> {
+        function save_blockstats(
+            storage: LedgerStorage,
+            height: Height,
+            total_sent: JSBI,
+            total_received: JSBI,
+            total_size: JSBI,
+            total_fee: JSBI
+        ): Promise<void> {
+            return new Promise<void>((resolve, reject) => {
+                storage
+                    .query(
+                        `INSERT INTO blocks_stats
                         (block_height, total_sent, total_received, total_size, total_fee,total_reward)
                     VALUES
                         (?, ?, ?, ?, ?, ?)`,
-                    [
-                        height.toString(),
-                        total_sent.toString(),
-                        total_received.toString(),
-                        total_size.toString(),
-                        total_fee.toString(),
-                        "0"
-                    ])
+                        [
+                            height.toString(),
+                            total_sent.toString(),
+                            total_received.toString(),
+                            total_size.toString(),
+                            total_fee.toString(),
+                            "0",
+                        ]
+                    )
                     .then(() => {
                         resolve();
                     })
-                    .catch((err) =>
-                    {
+                    .catch((err) => {
                         reject(err);
                     });
+            });
+        }
 
-              });
-          }
-
-          return new Promise<void>((resolve, reject) =>
-          {
-              (async () =>
-              {
-                  let total_received = JSBI.BigInt(0);
-                  let total_sent = JSBI.BigInt(0);
-                  let total_fee = JSBI.BigInt(0);
-                  let total_size = JSBI.BigInt(0);
-                  let total_received_sql = `SELECT
+        return new Promise<void>((resolve, reject) => {
+            (async () => {
+                let total_received = JSBI.BigInt(0);
+                let total_sent = JSBI.BigInt(0);
+                let total_fee = JSBI.BigInt(0);
+                let total_size = JSBI.BigInt(0);
+                let total_received_sql = `SELECT
                                                 SUM(IFNULL(O.amount,0)) as total_received
                                                 FROM
                                                 tx_outputs O
                                                     INNER JOIN blocks B ON (O.block_height = B.height)
                                                 WHERE
                                                     block_height = ?;`;
-                  let transaction_stats = `SELECT
+                let transaction_stats = `SELECT
                                                 SUM(IFNULL(T.tx_fee,0)) as tx_fee,
                                             SUM(IFNULL(T.payload_fee,0)) as payload_fee, SUM(IFNULL(T.tx_size,0)) as total_size
                                             FROM
@@ -627,54 +603,50 @@ export class LedgerStorage extends Storages
                                             WHERE
                                                 block_height =?;`;
 
-                  this.query(total_received_sql,[block.header.height.toString()])
-                  .then(async(row :any)=>{
-                      total_received = JSBI.BigInt(row[0].total_received);
-                     return this.query(transaction_stats,[block.header.height.toString()]);
-                  }).then((row: any)=>{
-                      total_fee = JSBI.ADD( JSBI.BigInt(row[0].tx_fee) ,JSBI.BigInt(row[0].payload_fee));
-                      total_size = JSBI.BigInt(row[0].total_size);
-                      total_sent = JSBI.ADD(total_received,total_fee);
-                      save_blockstats(this,block.header.height,total_sent,total_received,total_size,total_fee)
-                      resolve();
+                this.query(total_received_sql, [block.header.height.toString()])
+                    .then(async (row: any) => {
+                        total_received = JSBI.BigInt(row[0].total_received);
+                        return this.query(transaction_stats, [block.header.height.toString()]);
+                    })
+                    .then((row: any) => {
+                        total_fee = JSBI.ADD(JSBI.BigInt(row[0].tx_fee), JSBI.BigInt(row[0].payload_fee));
+                        total_size = JSBI.BigInt(row[0].total_size);
+                        total_sent = JSBI.ADD(total_received, total_fee);
+                        save_blockstats(this, block.header.height, total_sent, total_received, total_size, total_fee);
+                        resolve();
                     });
-              })();
-          });
-      }
+            })();
+        });
+    }
 
     /**
      * Puts the average of disparity from the calculated transaction fee.
      * @param block: The instance of the `Block`
      */
-    public putFeeDisparity (block: Block): Promise<void>
-    {
-        return new Promise<void>((resolve, reject) =>
-        {
+    public putFeeDisparity(block: Block): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
             const range = 100;
             const start = JSBI.subtract(block.header.height.value, JSBI.BigInt(range - 1));
             const end = block.header.height.value;
-            const select_sql =
-                `SELECT (tx_fee - calculated_tx_fee) as disparity 
-                FROM 
-                    transactions 
-                WHERE 
-                    inputs_count > 0 
-                    AND type != 2 
+            const select_sql = `SELECT (tx_fee - calculated_tx_fee) as disparity
+                FROM
+                    transactions
+                WHERE
+                    inputs_count > 0
+                    AND type != 2
                     AND block_height BETWEEN ? AND ?;`;
             this.query(select_sql, [start.toString(), end.toString()])
-                .then((rows: any[]) =>
-                {
-                    const insert_sql =
-                        `INSERT INTO fee_mean_disparity (height, disparity) VALUES (?, ?);`;
-                    return this.query(insert_sql,
-                        [end.toString(), FeeManager.calculateTrimmedMeanDisparity(rows.map(m => m.disparity))])
+                .then((rows: any[]) => {
+                    const insert_sql = `INSERT INTO fee_mean_disparity (height, disparity) VALUES (?, ?);`;
+                    return this.query(insert_sql, [
+                        end.toString(),
+                        FeeManager.calculateTrimmedMeanDisparity(rows.map((m) => m.disparity)),
+                    ]);
                 })
-                .then(() =>
-                {
+                .then(() => {
                     resolve();
                 })
-                .catch((err) =>
-                {
+                .catch((err) => {
                     reject(err);
                 });
         });
@@ -683,21 +655,15 @@ export class LedgerStorage extends Storages
     /**
      * Gets the mean of disparity from the calculated transaction fee.
      */
-    public getFeeMeanDisparity (): Promise<number>
-    {
-        return new Promise<number>((resolve, reject) =>
-        {
+    public getFeeMeanDisparity(): Promise<number> {
+        return new Promise<number>((resolve, reject) => {
             const sql = `SELECT disparity FROM fee_mean_disparity ORDER BY height DESC LIMIT 1;`;
             this.query(sql, [])
-                .then((rows: any[]) =>
-                {
-                    if (rows.length > 0)
-                        resolve(rows[0].disparity);
-                    else
-                        resolve(0);
+                .then((rows: any[]) => {
+                    if (rows.length > 0) resolve(rows[0].disparity);
+                    else resolve(0);
                 })
-                .catch((err) =>
-                {
+                .catch((err) => {
                     reject(err);
                 });
         });
@@ -706,11 +672,9 @@ export class LedgerStorage extends Storages
     /**
      * Update a preImage to database
      */
-    public updatePreImage (pre_image: PreImageInfo): Promise<number>
-    {
+    public updatePreImage(pre_image: PreImageInfo): Promise<number> {
         let enroll_key = pre_image.utxo.toBinary(Endian.Little);
-        return new Promise<number>((resolve, reject) =>
-        {
+        return new Promise<number>((resolve, reject) => {
             this.run(
                 `UPDATE validators
                     SET preimage_height = ?,
@@ -738,14 +702,13 @@ export class LedgerStorage extends Storages
                     enroll_key,
                     enroll_key,
                     pre_image.height.toString(),
-                    pre_image.height.toString()
-                ])
-                .then((result) =>
-                {
+                    pre_image.height.toString(),
+                ]
+            )
+                .then((result) => {
                     resolve(result.affectedRows);
                 })
-                .catch((err) =>
-                {
+                .catch((err) => {
                     reject(err);
                 });
         });
@@ -758,21 +721,19 @@ export class LedgerStorage extends Storages
      * and if an error occurs the `.catch` is called with an error.
      *
      */
-    public storeCoinMarket (data: IMarketCap): Promise<any>
-    {
-
+    public storeCoinMarket(data: IMarketCap): Promise<any> {
         return new Promise<void>((resolve, reject) => {
-            let sql =
-                `INSERT IGNORE INTO marketcap (last_updated_at, price, market_cap, change_24h, vol_24h)
+            let sql = `INSERT IGNORE INTO marketcap (last_updated_at, price, market_cap, change_24h, vol_24h)
             VALUES (?, ?, ?, ?, ?)
             `;
 
             this.run(sql, [data.last_updated_at, data.price, data.market_cap, data.change_24h, data.vol_24h])
-                .then((result:any) => {
+                .then((result: any) => {
                     resolve(result);
-                }).catch((err) => {
-                    reject(err);
                 })
+                .catch((err) => {
+                    reject(err);
+                });
         });
     }
 
@@ -783,10 +744,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getEnrollments (height: Height): Promise<any[]>
-    {
-        let sql =
-        `SELECT
+    public getEnrollments(height: Height): Promise<any[]> {
+        let sql = `SELECT
             block_height, enrollment_index, utxo_key, commitment, cycle_length, enroll_sig
         FROM
             enrollments
@@ -801,10 +760,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getValidators (height: Height): Promise<any[]>
-    {
-        let sql =
-        `SELECT
+    public getValidators(height: Height): Promise<any[]> {
+        let sql = `SELECT
             enrolled_at, utxo_key, address, amount, preimage_height, preimage_hash
         FROM
             validators
@@ -812,32 +769,25 @@ export class LedgerStorage extends Storages
         return this.query(sql, [height.toString()]);
     }
 
-    public getTransactionFee (tx: Transaction): Promise<[JSBI, JSBI, JSBI]>
-    {
-        return new Promise<[JSBI, JSBI, JSBI]>((resolve, reject) =>
-        {
-            if (tx.inputs.length == 0)
-            {
+    public getTransactionFee(tx: Transaction): Promise<[JSBI, JSBI, JSBI]> {
+        return new Promise<[JSBI, JSBI, JSBI]>((resolve, reject) => {
+            if (tx.inputs.length == 0) {
                 resolve([JSBI.BigInt(0), JSBI.BigInt(0), JSBI.BigInt(0)]);
                 return;
             }
 
-            let utxo = tx.inputs
-                .map(m => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
+            let utxo = tx.inputs.map((m) => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
 
-            let sql =
-                `SELECT
+            let sql = `SELECT
                     IFNULL(SUM(O.amount), 0) as sum_inputs
                 FROM
                     utxos O
                 WHERE
-                    O.utxo_key in (${utxo.join(',')}); `;
+                    O.utxo_key in (${utxo.join(",")}); `;
 
             this.query(sql, [])
-                .then((rows: any) =>
-                {
-                    if (rows.length > 0)
-                    {
+                .then((rows: any) => {
+                    if (rows.length > 0) {
                         let SumOfInput = JSBI.BigInt(rows[0].sum_inputs);
                         let SumOfOutput = tx.outputs.reduce<JSBI>((sum, n) => {
                             return JSBI.add(sum, n.value);
@@ -847,27 +797,22 @@ export class LedgerStorage extends Storages
                         let payload_fee: JSBI;
                         let tx_fee: JSBI;
 
-                        if (JSBI.equal(SumOfInput, JSBI.BigInt(0)))
-                        {
+                        if (JSBI.equal(SumOfInput, JSBI.BigInt(0))) {
                             total_fee = JSBI.BigInt(0);
                             payload_fee = JSBI.BigInt(0);
                             tx_fee = JSBI.BigInt(0);
-                        }
-                        else
-                        {
+                        } else {
                             total_fee = JSBI.subtract(SumOfInput, SumOfOutput);
                             payload_fee = TxPayloadFee.getFee(tx.payload.length);
                             tx_fee = JSBI.subtract(total_fee, payload_fee);
                         }
 
                         resolve([total_fee, tx_fee, payload_fee]);
-                    }
-                    else {
+                    } else {
                         resolve([JSBI.BigInt(0), JSBI.BigInt(0), JSBI.BigInt(0)]);
                     }
                 })
-                .catch((err) =>
-                {
+                .catch((err) => {
                     reject(err);
                 });
         });
@@ -880,26 +825,28 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called and if an error occurs the `.catch`
      * is called with an error.
      */
-    public putTransactions (block: Block): Promise<void>
-    {
-        function save_transaction (storage: LedgerStorage, height: Height, tx_idx:
-            number, hash: Hash, tx: Transaction): Promise<void>
-        {
-            return new Promise<void>(async (resolve, reject) =>
-            {
+    public putTransactions(block: Block): Promise<void> {
+        function save_transaction(
+            storage: LedgerStorage,
+            height: Height,
+            tx_idx: number,
+            hash: Hash,
+            tx: Transaction
+        ): Promise<void> {
+            return new Promise<void>(async (resolve, reject) => {
                 let fees = await storage.getTransactionFee(tx);
                 let tx_size = tx.getNumberOfBytes();
                 let calculated_fee = FeeManager.getTxFee(tx_size, 0)[1];
 
                 let unlock_height_query: string;
-                if (tx.isPayment() && (tx.inputs.length > 0))
-                {
-                    let utxo = tx.inputs
-                        .map(m => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
+                if (tx.isPayment() && tx.inputs.length > 0) {
+                    let utxo = tx.inputs.map((m) => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
 
-                    unlock_height_query =
-                        `(
-                            SELECT '${JSBI.add(height.value, JSBI.BigInt(2016)).toString()}' AS unlock_height WHERE EXISTS
+                    unlock_height_query = `(
+                            SELECT '${JSBI.add(
+                                height.value,
+                                JSBI.BigInt(2016)
+                            ).toString()}' AS unlock_height WHERE EXISTS
                             (
                                 SELECT
                                     *
@@ -909,203 +856,192 @@ export class LedgerStorage extends Storages
                                 WHERE
                                     a.tx_hash = b.tx_hash
                                     and a.type = 1
-                                    and a.utxo_key in (${utxo.join(',')})
+                                    and a.utxo_key in (${utxo.join(",")})
                             )
                             UNION ALL
                             SELECT '${JSBI.add(height.value, JSBI.BigInt(1)).toString()}' AS unlock_height
                             LIMIT 1
                         )`;
-                }
-                else
-                {
-                    unlock_height_query = `( SELECT '${JSBI.add(height.value, JSBI.BigInt(1)).toString()}' AS unlock_height )`;
+                } else {
+                    unlock_height_query = `( SELECT '${JSBI.add(
+                        height.value,
+                        JSBI.BigInt(1)
+                    ).toString()}' AS unlock_height )`;
                 }
 
                 let tx_type: number;
-                if (tx.isFreeze())
-                    tx_type = OutputType.Freeze;
-                else if (tx.isCoinbase())
-                    tx_type = OutputType.Coinbase;
-                else
-                    tx_type = OutputType.Payment;
+                if (tx.isFreeze()) tx_type = OutputType.Freeze;
+                else if (tx.isCoinbase()) tx_type = OutputType.Coinbase;
+                else tx_type = OutputType.Payment;
 
-                storage.run(
-                    `INSERT INTO transactions
+                storage
+                    .run(
+                        `INSERT INTO transactions
                         (block_height, tx_index, tx_hash, type, unlock_height, lock_height, tx_fee, payload_fee, tx_size, calculated_tx_fee, inputs_count, outputs_count, payload_size)
                     VALUES
                         (?, ?, ?, ?, ${unlock_height_query}, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [
-                        height.toString(),
-                        tx_idx,
-                        hash.toBinary(Endian.Little),
-                        tx_type,
-                        tx.lock_height.toString(),
-                        fees[1].toString(),
-                        fees[2].toString(),
-                        tx_size,
-                        calculated_fee,
-                        tx.inputs.length,
-                        tx.outputs.length,
-                        tx.payload.length
-                    ]
-                )
-                    .then(() =>
-                    {
-                        resolve();
-                    })
-                    .catch((err) =>
-                    {
-                        reject(err);
-                    })
-            });
-        }
-
-        function save_input (storage: LedgerStorage, height: Height, tx_idx: number,
-            in_idx: number, hash: Hash, input: TxInput): Promise<void>
-        {
-            return new Promise<void>((resolve, reject) =>
-            {
-                storage.run(
-                    `INSERT INTO tx_inputs
-                        (block_height, tx_index, in_index, tx_hash, utxo, unlock_bytes, unlock_age)
-                    VALUES
-                        (?, ?, ?, ?, ?, ?, ?)`,
-                    [
-                        height.toString(),
-                        tx_idx,
-                        in_idx,
-                        hash.toBinary(Endian.Little),
-                        input.utxo.toBinary(Endian.Little),
-                        input.unlock.bytes,
-                        input.unlock_age
-                    ]
-                )
-                    .then(() =>
-                    {
-                        resolve();
-                    })
-                    .catch((err) =>
-                    {
-                        reject(err);
-                    })
-            });
-        }
-
-        function delete_spend_output (storage: LedgerStorage, input: TxInput): Promise<void>
-        {
-            return new Promise<void>((resolve, reject) =>
-            {
-                storage.run(
-                    `DELETE FROM utxos WHERE utxo_key = ?`,
-                    [
-                        input.utxo.toBinary(Endian.Little)
-                    ])
+                        [
+                            height.toString(),
+                            tx_idx,
+                            hash.toBinary(Endian.Little),
+                            tx_type,
+                            tx.lock_height.toString(),
+                            fees[1].toString(),
+                            fees[2].toString(),
+                            tx_size,
+                            calculated_fee,
+                            tx.inputs.length,
+                            tx.outputs.length,
+                            tx.payload.length,
+                        ]
+                    )
                     .then(() => {
                         resolve();
                     })
-                    .catch((err) =>
-                    {
+                    .catch((err) => {
                         reject(err);
-                    })
+                    });
             });
         }
 
-        function save_output (storage: LedgerStorage, height: Height, tx_idx: number,
-            out_idx: number, hash: Hash, utxo_key: Hash,
-            output: TxOutput): Promise<void>
-        {
-            return new Promise<void>((resolve, reject) =>
-            {
-                let address: string = (output.lock.type == 0)
-                    ? (new PublicKey(output.lock.bytes)).toString()
-                    : "";
+        function save_input(
+            storage: LedgerStorage,
+            height: Height,
+            tx_idx: number,
+            in_idx: number,
+            hash: Hash,
+            input: TxInput
+        ): Promise<void> {
+            return new Promise<void>((resolve, reject) => {
+                storage
+                    .run(
+                        `INSERT INTO tx_inputs
+                        (block_height, tx_index, in_index, tx_hash, utxo, unlock_bytes, unlock_age)
+                    VALUES
+                        (?, ?, ?, ?, ?, ?, ?)`,
+                        [
+                            height.toString(),
+                            tx_idx,
+                            in_idx,
+                            hash.toBinary(Endian.Little),
+                            input.utxo.toBinary(Endian.Little),
+                            input.unlock.bytes,
+                            input.unlock_age,
+                        ]
+                    )
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+            });
+        }
 
-                storage.run(
-                    `INSERT INTO tx_outputs
+        function delete_spend_output(storage: LedgerStorage, input: TxInput): Promise<void> {
+            return new Promise<void>((resolve, reject) => {
+                storage
+                    .run(`DELETE FROM utxos WHERE utxo_key = ?`, [input.utxo.toBinary(Endian.Little)])
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+            });
+        }
+
+        function save_output(
+            storage: LedgerStorage,
+            height: Height,
+            tx_idx: number,
+            out_idx: number,
+            hash: Hash,
+            utxo_key: Hash,
+            output: TxOutput
+        ): Promise<void> {
+            return new Promise<void>((resolve, reject) => {
+                let address: string = output.lock.type == 0 ? new PublicKey(output.lock.bytes).toString() : "";
+
+                storage
+                    .run(
+                        `INSERT INTO tx_outputs
                         (block_height, tx_index, output_index, tx_hash, utxo_key, address, type, amount, lock_type, lock_bytes)
                     VALUES
                         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [
-                        height.toString(),
-                        tx_idx,
-                        out_idx,
-                        hash.toBinary(Endian.Little),
-                        utxo_key.toBinary(Endian.Little),
-                        address,
-                        output.type,
-                        output.value.toString(),
-                        output.lock.type,
-                        output.lock.bytes
-                    ]
-                )
-                    .then(() =>
-                    {
+                        [
+                            height.toString(),
+                            tx_idx,
+                            out_idx,
+                            hash.toBinary(Endian.Little),
+                            utxo_key.toBinary(Endian.Little),
+                            address,
+                            output.type,
+                            output.value.toString(),
+                            output.lock.type,
+                            output.lock.bytes,
+                        ]
+                    )
+                    .then(() => {
                         resolve();
                     })
-                    .catch((err) =>
-                    {
+                    .catch((err) => {
                         reject(err);
-                    })
+                    });
             });
         }
 
-        function is_melting (storage: LedgerStorage, tx: Transaction): Promise<boolean>
-        {
-            return new Promise<boolean>((resolve, reject) =>
-            {
-                if (tx.isPayment() && (tx.inputs.length > 0))
-                {
-                    let utxo = tx.inputs
-                        .map(m => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
+        function is_melting(storage: LedgerStorage, tx: Transaction): Promise<boolean> {
+            return new Promise<boolean>((resolve, reject) => {
+                if (tx.isPayment() && tx.inputs.length > 0) {
+                    let utxo = tx.inputs.map((m) => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
 
-                    let sql =
-                        `SELECT
+                    let sql = `SELECT
                             count(*) as count
                         FROM
                             utxos O
                         WHERE
                             O.type = 1
-                            AND O.utxo_key in (${utxo.join(',')})
+                            AND O.utxo_key in (${utxo.join(",")})
                         `;
 
-                    storage.query(sql, [])
-                        .then((rows: any[]) =>
-                        {
+                    storage
+                        .query(sql, [])
+                        .then((rows: any[]) => {
                             resolve(rows[0].count > 0);
                         })
-                        .catch((err) =>
-                        {
+                        .catch((err) => {
                             reject(err);
                         });
-                }
-                else
-                {
+                } else {
                     resolve(false);
                 }
             });
         }
 
-        function save_utxo (storage: LedgerStorage, melting: boolean, height: Height, tx: Transaction,
-            out_idx: number, tx_hash: Hash, utxo_key: Hash, output: TxOutput): Promise<void>
-        {
-            return new Promise<void>((resolve, reject) =>
-            {
-                let address: string = (output.lock.type == 0)
-                    ? (new PublicKey(output.lock.bytes)).toString()
-                    : "";
+        function save_utxo(
+            storage: LedgerStorage,
+            melting: boolean,
+            height: Height,
+            tx: Transaction,
+            out_idx: number,
+            tx_hash: Hash,
+            utxo_key: Hash,
+            output: TxOutput
+        ): Promise<void> {
+            return new Promise<void>((resolve, reject) => {
+                let address: string = output.lock.type == 0 ? new PublicKey(output.lock.bytes).toString() : "";
 
                 let unlock_height: JSBI;
-                if (melting && address != TxPayloadFee.CommonsBudgetAddress)
-                {
+                if (melting && address != TxPayloadFee.CommonsBudgetAddress) {
                     unlock_height = JSBI.add(height.value, JSBI.BigInt(2016));
-                }
-                else
-                {
+                } else {
                     unlock_height = JSBI.add(height.value, JSBI.BigInt(1));
                 }
 
-                storage.run(
-                    `INSERT INTO utxos
+                storage
+                    .run(
+                        `INSERT INTO utxos
                         (
                             utxo_key,
                             tx_hash,
@@ -1118,89 +1054,100 @@ export class LedgerStorage extends Storages
                         )
                     VALUES
                         (?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [
-                        utxo_key.toBinary(Endian.Little),
-                        tx_hash.toBinary(Endian.Little),
-                        output.type,
-                        unlock_height.toString(),
-                        output.value.toString(),
-                        output.lock.type,
-                        output.lock.bytes,
-                        address
-                    ]
-                )
-                    .then(() =>
-                    {
+                        [
+                            utxo_key.toBinary(Endian.Little),
+                            tx_hash.toBinary(Endian.Little),
+                            output.type,
+                            unlock_height.toString(),
+                            output.value.toString(),
+                            output.lock.type,
+                            output.lock.bytes,
+                            address,
+                        ]
+                    )
+                    .then(() => {
                         resolve();
                     })
-                    .catch((err) =>
-                    {
-                        reject(err);
-                    })
-            });
-        }
-
-        function save_payload (storage: LedgerStorage, tx_hash: Hash, tx: Transaction): Promise<void>
-        {
-            return new Promise<void>((resolve, reject) =>
-            {
-                if (tx.payload.length == 0)
-                    resolve();
-
-                storage.run(
-                    `INSERT INTO payloads
-                        (tx_hash, payload)
-                    VALUES
-                        (?, ?)`,
-                    [
-                        tx_hash.toBinary(Endian.Little),
-                        tx.payload
-                    ]
-                )
-                    .then(() =>
-                    {
-                        resolve();
-                    })
-                    .catch((err) =>
-                    {
+                    .catch((err) => {
                         reject(err);
                     });
             });
         }
 
-        return new Promise<void>((resolve, reject) =>
-        {
-            (async () =>
-            {
-                try
-                {
-                    for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++)
-                    {
+        function save_payload(storage: LedgerStorage, tx_hash: Hash, tx: Transaction): Promise<void> {
+            return new Promise<void>((resolve, reject) => {
+                if (tx.payload.length == 0) resolve();
+
+                storage
+                    .run(
+                        `INSERT INTO payloads
+                        (tx_hash, payload)
+                    VALUES
+                        (?, ?)`,
+                        [tx_hash.toBinary(Endian.Little), tx.payload]
+                    )
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+            });
+        }
+
+        return new Promise<void>((resolve, reject) => {
+            (async () => {
+                try {
+                    for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++) {
                         let melting = await is_melting(this, block.txs[tx_idx]);
 
-                        await save_transaction(this, block.header.height, tx_idx, block.merkle_tree[tx_idx], block.txs[tx_idx]);
+                        await save_transaction(
+                            this,
+                            block.header.height,
+                            tx_idx,
+                            block.merkle_tree[tx_idx],
+                            block.txs[tx_idx]
+                        );
 
                         if (block.txs[tx_idx].payload.length > 0)
                             await save_payload(this, block.merkle_tree[tx_idx], block.txs[tx_idx]);
 
-                        for (let in_idx = 0; in_idx < block.txs[tx_idx].inputs.length; in_idx++)
-                        {
-                            await save_input(this, block.header.height, tx_idx, in_idx, block.merkle_tree[tx_idx], block.txs[tx_idx].inputs[in_idx]);
+                        for (let in_idx = 0; in_idx < block.txs[tx_idx].inputs.length; in_idx++) {
+                            await save_input(
+                                this,
+                                block.header.height,
+                                tx_idx,
+                                in_idx,
+                                block.merkle_tree[tx_idx],
+                                block.txs[tx_idx].inputs[in_idx]
+                            );
                             await delete_spend_output(this, block.txs[tx_idx].inputs[in_idx]);
                         }
 
-                        for (let out_idx = 0; out_idx < block.txs[tx_idx].outputs.length; out_idx++)
-                        {
+                        for (let out_idx = 0; out_idx < block.txs[tx_idx].outputs.length; out_idx++) {
                             let utxo_key = makeUTXOKey(block.merkle_tree[tx_idx], JSBI.BigInt(out_idx));
-                            await save_output(this, block.header.height, tx_idx, out_idx,
-                                block.merkle_tree[tx_idx], utxo_key, block.txs[tx_idx].outputs[out_idx]);
-                            await save_utxo(this, melting, block.header.height, block.txs[tx_idx], out_idx,
-                                block.merkle_tree[tx_idx], utxo_key, block.txs[tx_idx].outputs[out_idx]);
+                            await save_output(
+                                this,
+                                block.header.height,
+                                tx_idx,
+                                out_idx,
+                                block.merkle_tree[tx_idx],
+                                utxo_key,
+                                block.txs[tx_idx].outputs[out_idx]
+                            );
+                            await save_utxo(
+                                this,
+                                melting,
+                                block.header.height,
+                                block.txs[tx_idx],
+                                out_idx,
+                                block.merkle_tree[tx_idx],
+                                utxo_key,
+                                block.txs[tx_idx].outputs[out_idx]
+                            );
                         }
                     }
-                }
-                catch (err)
-                {
+                } catch (err) {
                     reject(err);
                     return;
                 }
@@ -1209,127 +1156,112 @@ export class LedgerStorage extends Storages
         });
     }
 
-        /**
+    /**
      * Put a transaction on transactionPool
      * @param tx: The instance of the `Transaction`
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called and if an error occurs the `.catch`
      * is called with an error.
      */
-    public putTransactionPool (tx: Transaction): Promise<number>
-    {
-        function save_transaction_pool (storage: LedgerStorage, tx: Transaction,
-            hash: Hash): Promise<number>
-        {
-            return new Promise<number>(async (resolve, reject) =>
-            {
+    public putTransactionPool(tx: Transaction): Promise<number> {
+        function save_transaction_pool(storage: LedgerStorage, tx: Transaction, hash: Hash): Promise<number> {
+            return new Promise<number>(async (resolve, reject) => {
                 let fees = await storage.getTransactionFee(tx);
                 let tx_size = tx.getNumberOfBytes();
 
                 let tx_type: number;
-                if (tx.isFreeze())
-                    tx_type = OutputType.Freeze;
-                else if (tx.isCoinbase())
-                    tx_type = OutputType.Coinbase;
-                else
-                    tx_type = OutputType.Payment;
+                if (tx.isFreeze()) tx_type = OutputType.Freeze;
+                else if (tx.isCoinbase()) tx_type = OutputType.Coinbase;
+                else tx_type = OutputType.Payment;
 
-                storage.run(
-                    `INSERT INTO transaction_pool
+                storage
+                    .run(
+                        `INSERT INTO transaction_pool
                         (tx_hash, type, payload, lock_height, received_height, time, tx_fee, payload_fee, tx_size)
                     VALUES
                         (?, ?, ?, ?, (SELECT IFNULL(MAX(height), 0) as height FROM blocks), DATE_FORMAT(now(),'%s'), ?, ?, ?)`,
-                    [
-                        hash.toBinary(Endian.Little),
-                        tx_type,
-                        tx.payload,
-                        tx.lock_height.toString(),
-                        fees[1].toString(),
-                        fees[2].toString(),
-                        tx_size
-                    ])
-                    .then((result) =>
-                    {
+                        [
+                            hash.toBinary(Endian.Little),
+                            tx_type,
+                            tx.payload,
+                            tx.lock_height.toString(),
+                            fees[1].toString(),
+                            fees[2].toString(),
+                            tx_size,
+                        ]
+                    )
+                    .then((result) => {
                         resolve(result.affectedRows);
                     })
-                    .catch((err) =>
-                    {
+                    .catch((err) => {
                         reject(err);
-                    })
+                    });
             });
         }
 
-        function save_input_pool (storage: LedgerStorage, hash: Hash,
-            in_idx: number, input: TxInput): Promise<number>
-        {
-            return new Promise<number>((resolve, reject) =>
-            {
-                storage.run(
-                    `INSERT INTO tx_input_pool
+        function save_input_pool(storage: LedgerStorage, hash: Hash, in_idx: number, input: TxInput): Promise<number> {
+            return new Promise<number>((resolve, reject) => {
+                storage
+                    .run(
+                        `INSERT INTO tx_input_pool
                         (tx_hash, input_index, utxo, unlock_bytes, unlock_age)
                     VALUES
                         (?, ?, ?, ?, ?)`,
-                    [
-                        hash.toBinary(Endian.Little),
-                        in_idx,
-                        input.utxo.toBinary(Endian.Little),
-                        input.unlock.bytes,
-                        input.unlock_age
-                    ]
-                )
-                    .then((result) =>
-                    {
+                        [
+                            hash.toBinary(Endian.Little),
+                            in_idx,
+                            input.utxo.toBinary(Endian.Little),
+                            input.unlock.bytes,
+                            input.unlock_age,
+                        ]
+                    )
+                    .then((result) => {
                         resolve(result.affectedRows);
                     })
-                    .catch((err) =>
-                    {
+                    .catch((err) => {
                         reject(err);
-                    })
+                    });
             });
         }
 
-        function save_output_pool (storage: LedgerStorage, hash: Hash,
-            out_idx: number, output: TxOutput): Promise<number>
-        {
-            return new Promise<number>((resolve, reject) =>
-            {
-                let address: string = (output.lock.type == 0)
-                    ? (new PublicKey(output.lock.bytes)).toString()
-                    : "";
+        function save_output_pool(
+            storage: LedgerStorage,
+            hash: Hash,
+            out_idx: number,
+            output: TxOutput
+        ): Promise<number> {
+            return new Promise<number>((resolve, reject) => {
+                let address: string = output.lock.type == 0 ? new PublicKey(output.lock.bytes).toString() : "";
 
-                storage.run(
-                    `INSERT INTO tx_output_pool
+                storage
+                    .run(
+                        `INSERT INTO tx_output_pool
                         (tx_hash, output_index, type, amount, address, lock_type, lock_bytes)
                     VALUES
                         (?, ?, ?, ?, ?, ?, ?)`,
-                    [
-                        hash.toBinary(Endian.Little),
-                        out_idx,
-                        output.type,
-                        output.value.toString(),
-                        address,
-                        output.lock.type,
-                        output.lock.bytes
-                    ]
-                )
-                    .then((result) =>
-                    {
+                        [
+                            hash.toBinary(Endian.Little),
+                            out_idx,
+                            output.type,
+                            output.value.toString(),
+                            address,
+                            output.lock.type,
+                            output.lock.bytes,
+                        ]
+                    )
+                    .then((result) => {
                         resolve(result.affectedRows);
                     })
-                    .catch((err) =>
-                    {
+                    .catch((err) => {
                         reject(err);
-                    })
+                    });
             });
         }
 
-        return new Promise<number>((resolve, reject) =>
-        {
-            (async () =>
-            {
+        return new Promise<number>((resolve, reject) => {
+            (async () => {
                 let tx_changes, in_changes, out_changes;
-                try
-                {
+                try {
                     await this.begin();
 
                     // Remove pending transactions using the same input.
@@ -1338,25 +1270,18 @@ export class LedgerStorage extends Storages
 
                     let hash = hashFull(tx);
                     tx_changes = await save_transaction_pool(this, tx, hash);
-                    if (tx_changes !== 1)
-                        throw new Error('Failed to save a transaction.');
+                    if (tx_changes !== 1) throw new Error("Failed to save a transaction.");
 
-                    for (let in_idx = 0; in_idx < tx.inputs.length; in_idx++)
-                    {
+                    for (let in_idx = 0; in_idx < tx.inputs.length; in_idx++) {
                         in_changes = await save_input_pool(this, hash, in_idx, tx.inputs[in_idx]);
-                        if (in_changes !== 1)
-                            throw new Error('Failed to save a input on transactionPool.');
+                        if (in_changes !== 1) throw new Error("Failed to save a input on transactionPool.");
                     }
 
-                    for (let out_idx = 0; out_idx < tx.outputs.length; out_idx++)
-                    {
+                    for (let out_idx = 0; out_idx < tx.outputs.length; out_idx++) {
                         out_changes = await save_output_pool(this, hash, out_idx, tx.outputs[out_idx]);
-                        if (out_changes !== 1)
-                            throw new Error('Failed to save a output on transactionPool.');
+                        if (out_changes !== 1) throw new Error("Failed to save a output on transactionPool.");
                     }
-                }
-                catch (err)
-                {
+                } catch (err) {
                     await this.rollback();
                     reject(err);
                     return;
@@ -1375,10 +1300,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getTransactions (height: Height): Promise<any[]>
-    {
-        let sql =
-        `SELECT
+    public getTransactions(height: Height): Promise<any[]> {
+        let sql = `SELECT
             block_height, tx_index, tx_hash, type, unlock_height, lock_height, inputs_count, outputs_count, payload_size
         FROM
             transactions
@@ -1393,10 +1316,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getPayload (tx_hash: Hash): Promise<any[]>
-    {
-        let sql =
-            `SELECT
+    public getPayload(tx_hash: Hash): Promise<any[]> {
+        let sql = `SELECT
                 tx_hash, payload
             FROM
                 payloads
@@ -1412,10 +1333,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getTxInputs (height: Height, tx_index: number): Promise<any[]>
-    {
-        let sql =
-        `SELECT
+    public getTxInputs(height: Height, tx_index: number): Promise<any[]> {
+        let sql = `SELECT
             block_height, tx_index, in_index, utxo, unlock_bytes, unlock_age
         FROM
             tx_inputs
@@ -1428,10 +1347,8 @@ export class LedgerStorage extends Storages
      * @param height The height of the block to get
      * @param tx_index The index of the transaction in the block
      */
-    public getTxOutputs (height: Height, tx_index: number): Promise<any[]>
-    {
-        let sql =
-        `SELECT
+    public getTxOutputs(height: Height, tx_index: number): Promise<any[]> {
+        let sql = `SELECT
             block_height, tx_index, output_index, tx_hash, utxo_key, amount, lock_type, lock_bytes, address
         FROM
             tx_outputs
@@ -1445,15 +1362,13 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getTransactionPool (): Promise<any[]>
-    {
-        let sql =
-        `SELECT
+    public getTransactionPool(): Promise<any[]> {
+        let sql = `SELECT
             tx_hash, type, payload, lock_height, time
         FROM
             transaction_pool
         `;
-        return this.query(sql,[]);
+        return this.query(sql, []);
     }
 
     /**
@@ -1467,22 +1382,21 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getValidatorsAPI (height: Height | null, address: string | null): Promise<any[]>
-    {
+    public getValidatorsAPI(height: Height | null, address: string | null): Promise<any[]> {
         let cur_height: string;
 
-        if (height !== null)
-            cur_height = height.toString();
-        else
-            cur_height = `(SELECT MAX(height) as height FROM blocks)`;
+        if (height !== null) cur_height = height.toString();
+        else cur_height = `(SELECT MAX(height) as height FROM blocks)`;
 
         let sql =
-        `SELECT validators.address,
+            `SELECT validators.address,
                 enrollments.enrolled_at,
                 enrollments.utxo_key as stake,
                 enrollments.commitment,
                 enrollments.avail_height,
-                ` + cur_height + ` as height,
+                ` +
+            cur_height +
+            ` as height,
                 validators.preimage_height,
                 validators.preimage_hash
         FROM (SELECT MAX(block_height) as enrolled_at,
@@ -1497,16 +1411,19 @@ export class LedgerStorage extends Storages
                 cycle_length,
                 enroll_sig
              FROM enrollments
-        GROUP BY utxo_key HAVING avail_height <= ` + cur_height + `
-         AND ` + cur_height + ` < (avail_height + cycle_length)) as enrollments
+        GROUP BY utxo_key HAVING avail_height <= ` +
+            cur_height +
+            `
+         AND ` +
+            cur_height +
+            ` < (avail_height + cycle_length)) as enrollments
         LEFT JOIN validators
             ON enrollments.enrolled_at = validators.enrolled_at
             AND enrollments.utxo_key = validators.utxo_key
         WHERE 1 = 1
         `;
 
-        if (address != null)
-            sql += ` AND validators.address = '` + address + `'`;
+        if (address != null) sql += ` AND validators.address = '` + address + `'`;
 
         sql += ` ORDER BY enrollments.enrolled_at ASC, enrollments.utxo_key ASC;`;
 
@@ -1520,19 +1437,15 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called and if an error occurs the `.catch`
      * is called with an error.
      */
-    public putBlockHeight (height: Height): Promise<void>
-    {
-        return new Promise<void>((resolve, reject) =>
-        {
+    public putBlockHeight(height: Height): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
             let sql = `INSERT INTO information (keyname, value) VALUES (?, ?)
             ON DUPLICATE KEY UPDATE keyname = VALUES(keyname) , value = VALUES(value);`;
             this.run(sql, ["height", height.toString()])
-                .then(() =>
-                {
+                .then(() => {
                     resolve();
                 })
-                .catch((err) =>
-                {
+                .catch((err) => {
                     reject(err);
                 });
         });
@@ -1544,26 +1457,18 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the block height
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getExpectedBlockHeight (): Promise<Height>
-    {
-        return new Promise<Height>((resolve, reject) =>
-        {
+    public getExpectedBlockHeight(): Promise<Height> {
+        return new Promise<Height>((resolve, reject) => {
             let sql = `SELECT value FROM information WHERE keyname = 'height';`;
             this.query(sql, [])
-                .then((rows: any[]) =>
-                {
-                    if ((rows.length > 0) && (rows[0].value !== undefined) &&
-                        Utils.isPositiveInteger(rows[0].value))
-                    {
+                .then((rows: any[]) => {
+                    if (rows.length > 0 && rows[0].value !== undefined && Utils.isPositiveInteger(rows[0].value)) {
                         resolve(new Height(JSBI.add(JSBI.BigInt(rows[0].value), JSBI.BigInt(1)).toString()));
-                    }
-                    else
-                    {
+                    } else {
                         resolve(new Height("0"));
                     }
                 })
-                .catch((err) =>
-                {
+                .catch((err) => {
                     reject(err);
                 });
         });
@@ -1576,10 +1481,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the array of UTXO
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getUTXO (address: string): Promise<any[]>
-    {
-        let sql_utxo =
-            `SELECT
+    public getUTXO(address: string): Promise<any[]> {
+        let sql_utxo = `SELECT
                 O.utxo_key as utxo,
                 O.amount,
                 O.lock_type,
@@ -1597,8 +1500,7 @@ export class LedgerStorage extends Storages
             ORDER BY T.block_height, O.amount
             `;
 
-        let sql_pending =
-            `SELECT
+        let sql_pending = `SELECT
                 S.utxo_key as utxo
             FROM
                 utxos S
@@ -1616,7 +1518,9 @@ export class LedgerStorage extends Storages
                     return this.query(sql_pending, [address]);
                 })
                 .then((pending: any[]) => {
-                    resolve(result.filter(n => pending.find(m => (Buffer.compare(n.utxo, m.utxo) === 0)) === undefined));
+                    resolve(
+                        result.filter((n) => pending.find((m) => Buffer.compare(n.utxo, m.utxo) === 0) === undefined)
+                    );
                 })
                 .catch(reject);
         });
@@ -1629,11 +1533,9 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the array of UTXO
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getUTXOs (utxos: Array<Hash>): Promise<any[]>
-    {
-        let u = utxos.map(m => `x'${m.toBinary(Endian.Little).toString("hex")}'`);
-        let sql_utxo =
-            `SELECT
+    public getUTXOs(utxos: Array<Hash>): Promise<any[]> {
+        let u = utxos.map((m) => `x'${m.toBinary(Endian.Little).toString("hex")}'`);
+        let sql_utxo = `SELECT
                 O.utxo_key as utxo,
                 O.amount,
                 O.lock_type,
@@ -1647,7 +1549,7 @@ export class LedgerStorage extends Storages
                 INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
                 INNER JOIN blocks B ON (B.height = T.block_height)
             WHERE
-                O.utxo_key in (${u.join(',')})
+                O.utxo_key in (${u.join(",")})
             ORDER BY T.block_height, O.amount;`;
 
         return new Promise<any[]>((resolve, reject) => {
@@ -1674,17 +1576,21 @@ export class LedgerStorage extends Storages
      * Peer is the withdrawal address in the inbound transaction and a deposit address
      * in the outbound transaction address of their counterparts.
      */
-    public getWalletTransactionsHistory (address: string, page_size: number, page: number,
-        type: Array<number>, begin?: number, end?: number, peer?: string): Promise<any[]>
-    {
-        let filter_type = 'AND FTX.display_tx_type in (' + type.map(n =>`${n}`).join(',') + ')'
-        let filter_date = ((begin !== undefined) && (end !== undefined))
-            ? `AND B.time_stamp BETWEEN ${begin} AND ${end}`
-            : ``;
+    public getWalletTransactionsHistory(
+        address: string,
+        page_size: number,
+        page: number,
+        type: Array<number>,
+        begin?: number,
+        end?: number,
+        peer?: string
+    ): Promise<any[]> {
+        let filter_type = "AND FTX.display_tx_type in (" + type.map((n) => `${n}`).join(",") + ")";
+        let filter_date =
+            begin !== undefined && end !== undefined ? `AND B.time_stamp BETWEEN ${begin} AND ${end}` : ``;
         let filter_peer_field;
         let filter_peer_condition;
-        if (peer !== undefined)
-        {
+        if (peer !== undefined) {
             filter_peer_field = `,
                     CASE
                         WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
@@ -1699,16 +1605,13 @@ export class LedgerStorage extends Storages
                         )
                     END AS peer_filter
             `;
-            filter_peer_condition = 'AND FTX.peer_filter > 0'
-        }
-        else
-        {
-            filter_peer_field = '';
-            filter_peer_condition = '';
+            filter_peer_condition = "AND FTX.peer_filter > 0";
+        } else {
+            filter_peer_field = "";
+            filter_peer_condition = "";
         }
 
-        let sql =
-            `SELECT
+        let sql = `SELECT
                 FTX.display_tx_type,
                 FTX.address,
                 FTX.height,
@@ -1814,19 +1717,17 @@ export class LedgerStorage extends Storages
                 ${filter_type}
                 ${filter_peer_condition}
             LIMIT ? OFFSET ?;`;
-        return this.query(sql, [page_size, page_size*(page-1)]);
+        return this.query(sql, [page_size, page_size * (page - 1)]);
     }
 
     /**
      * Provides a overview of a transaction.
      * @param tx_hash The hash of the transaction
      */
-    public getWalletTransactionOverview (tx_hash: Hash): Promise<any[]>
-    {
+    public getWalletTransactionOverview(tx_hash: Hash): Promise<any[]> {
         let hash = tx_hash.toBinary(Endian.Little);
 
-        let sql_tx =
-            `SELECT
+        let sql_tx = `SELECT
                 T.block_height as height,
                 B.time_stamp as block_time,
                 T.tx_hash,
@@ -1843,8 +1744,7 @@ export class LedgerStorage extends Storages
                 INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
                 LEFT OUTER JOIN payloads P ON (T.tx_hash = P.tx_hash);`;
 
-        let sql_sender =
-            `SELECT
+        let sql_sender = `SELECT
                 S.address,
                 S.amount,
                 S.utxo_key as utxo,
@@ -1858,8 +1758,7 @@ export class LedgerStorage extends Storages
                 INNER JOIN tx_inputs I ON (T.tx_hash = I.tx_hash)
                 INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key);`;
 
-        let sql_receiver =
-            `SELECT
+        let sql_receiver = `SELECT
                 O.output_index,
                 O.type,
                 O.amount,
@@ -1896,10 +1795,8 @@ export class LedgerStorage extends Storages
      * Lists the total by output address of the pending transactions.
      * @param address The input address of the pending transaction
      */
-    public getWalletTransactionsPending (address: string): Promise<any[]>
-    {
-        let sql =
-            `SELECT
+    public getWalletTransactionsPending(address: string): Promise<any[]> {
+        let sql = `SELECT
                 T.tx_hash,
                 T.time,
                 O.address,
@@ -1933,12 +1830,10 @@ export class LedgerStorage extends Storages
      * Provides a status of a transaction.
      * @param tx_hash The hash of the transaction
      */
-    public getTransactionStatus (tx_hash: Hash): Promise<any>
-    {
+    public getTransactionStatus(tx_hash: Hash): Promise<any> {
         let hash = tx_hash.toBinary(Endian.Little);
 
-        let sql_tx =
-            `SELECT
+        let sql_tx = `SELECT
                 B.hash,
                 T.block_height as height,
                 T.tx_hash
@@ -1946,8 +1841,7 @@ export class LedgerStorage extends Storages
                 blocks B
                 INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?);`;
 
-        let sql_tx_pending =
-            `SELECT
+        let sql_tx_pending = `SELECT
                 T.tx_hash
             FROM
                 transaction_pool T
@@ -1955,37 +1849,27 @@ export class LedgerStorage extends Storages
                 T.tx_hash = ?;`;
 
         let result: any = {};
-        return new Promise<any>(async (resolve, reject) =>
-        {
-            try
-            {
-                let rows = await this.query(sql_tx_pending, [hash])
-                if (rows.length > 0)
-                {
+        return new Promise<any>(async (resolve, reject) => {
+            try {
+                let rows = await this.query(sql_tx_pending, [hash]);
+                if (rows.length > 0) {
                     result.status = "pending";
                     result.tx_hash = rows[0].tx_hash;
                     resolve(result);
-                }
-                else
-                {
+                } else {
                     rows = await this.query(sql_tx, [hash]);
-                    if (rows.length > 0)
-                    {
+                    if (rows.length > 0) {
                         result.status = "confirmed";
                         result.tx_hash = rows[0].tx_hash;
                         result.block = { hash: rows[0].hash, height: rows[0].height };
                         resolve(result);
-                    }
-                    else
-                    {
+                    } else {
                         result.status = "not found";
                         result.tx_hash = hash;
                         resolve(result);
                     }
                 }
-            }
-            catch (error)
-            {
+            } catch (error) {
                 reject(error);
             }
         });
@@ -1998,37 +1882,54 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getTransactionPending (tx_hash: Hash): Promise<Transaction | null>
-    {
-        return new Promise<Transaction | null>(async (resolve, reject) =>
-        {
+    public getTransactionPending(tx_hash: Hash): Promise<Transaction | null> {
+        return new Promise<Transaction | null>(async (resolve, reject) => {
             try {
                 let hash = tx_hash.toBinary(Endian.Little);
-                let rows = await this.query("SELECT tx_hash, type, payload, lock_height, time FROM transaction_pool WHERE tx_hash = ?;", [hash]);
-                if (rows.length > 0)
-                {
-                    let input_rows = await this.query("SELECT tx_hash, utxo, unlock_bytes, unlock_age FROM tx_input_pool WHERE tx_hash = ? ORDER BY input_index;", [hash]);
-                    let output_rows = await this.query("SELECT tx_hash, type, amount, lock_type, lock_bytes FROM tx_output_pool WHERE tx_hash = ? ORDER BY output_index;", [hash]);
+                let rows = await this.query(
+                    "SELECT tx_hash, type, payload, lock_height, time FROM transaction_pool WHERE tx_hash = ?;",
+                    [hash]
+                );
+                if (rows.length > 0) {
+                    let input_rows = await this.query(
+                        "SELECT tx_hash, utxo, unlock_bytes, unlock_age FROM tx_input_pool WHERE tx_hash = ? ORDER BY input_index;",
+                        [hash]
+                    );
+                    let output_rows = await this.query(
+                        "SELECT tx_hash, type, amount, lock_type, lock_bytes FROM tx_output_pool WHERE tx_hash = ? ORDER BY output_index;",
+                        [hash]
+                    );
 
-                    let inputs:Array<TxInput> = [];
+                    let inputs: Array<TxInput> = [];
                     for (let input_row of input_rows)
-                        inputs.push(new TxInput(new Hash(input_row.utxo, Endian.Little), new Unlock(input_row.unlock_bytes), input_row.unlock_age));
-                    let outputs:Array<TxOutput> = [];
+                        inputs.push(
+                            new TxInput(
+                                new Hash(input_row.utxo, Endian.Little),
+                                new Unlock(input_row.unlock_bytes),
+                                input_row.unlock_age
+                            )
+                        );
+                    let outputs: Array<TxOutput> = [];
                     for (let output_row of output_rows)
-                        outputs.push(new TxOutput(output_row.type, output_row.amount, new Lock(output_row.lock_type, output_row.lock_bytes)));
-                    resolve(new Transaction(
-                        inputs,
-                        outputs,
-                        (rows[0].payload !== null) ? (rows[0].payload) : Buffer.alloc(0),
-                        new Height(rows[0].lock_height)));
-                }
-                else
-                {
+                        outputs.push(
+                            new TxOutput(
+                                output_row.type,
+                                output_row.amount,
+                                new Lock(output_row.lock_type, output_row.lock_bytes)
+                            )
+                        );
+                    resolve(
+                        new Transaction(
+                            inputs,
+                            outputs,
+                            rows[0].payload !== null ? rows[0].payload : Buffer.alloc(0),
+                            new Height(rows[0].lock_height)
+                        )
+                    );
+                } else {
                     resolve(null);
                 }
-            }
-            catch (error)
-            {
+            } catch (error) {
                 reject(error);
             }
         });
@@ -2041,10 +1942,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getTransaction (tx_hash: Hash): Promise<Transaction | null>
-    {
-        return new Promise<Transaction | null>(async (resolve, reject) =>
-        {
+    public getTransaction(tx_hash: Hash): Promise<Transaction | null> {
+        return new Promise<Transaction | null>(async (resolve, reject) => {
             try {
                 let hash = tx_hash.toBinary(Endian.Little);
                 let rows = await this.query(
@@ -2053,31 +1952,49 @@ export class LedgerStorage extends Storages
                     transactions T
                     LEFT JOIN payloads P ON (T.tx_hash = P.tx_hash)
                     WHERE
-                        T.tx_hash = ?`, [hash]);
-                if (rows.length > 0)
-                {
-                    let input_rows = await this.query("SELECT tx_hash, utxo, unlock_bytes, unlock_age FROM tx_inputs WHERE tx_hash = ? ORDER BY in_index;", [hash]);
-                    let output_rows = await this.query("SELECT tx_hash, type, amount, lock_type, lock_bytes FROM tx_outputs WHERE tx_hash = ? ORDER BY output_index;", [hash]);
+                        T.tx_hash = ?`,
+                    [hash]
+                );
+                if (rows.length > 0) {
+                    let input_rows = await this.query(
+                        "SELECT tx_hash, utxo, unlock_bytes, unlock_age FROM tx_inputs WHERE tx_hash = ? ORDER BY in_index;",
+                        [hash]
+                    );
+                    let output_rows = await this.query(
+                        "SELECT tx_hash, type, amount, lock_type, lock_bytes FROM tx_outputs WHERE tx_hash = ? ORDER BY output_index;",
+                        [hash]
+                    );
 
-                    let inputs:Array<TxInput> = [];
+                    let inputs: Array<TxInput> = [];
                     for (let input_row of input_rows)
-                        inputs.push(new TxInput(new Hash(input_row.utxo, Endian.Little), new Unlock(input_row.unlock_bytes), input_row.unlock_age));
-                    let outputs:Array<TxOutput> = [];
+                        inputs.push(
+                            new TxInput(
+                                new Hash(input_row.utxo, Endian.Little),
+                                new Unlock(input_row.unlock_bytes),
+                                input_row.unlock_age
+                            )
+                        );
+                    let outputs: Array<TxOutput> = [];
                     for (let output_row of output_rows)
-                        outputs.push(new TxOutput(output_row.type, output_row.amount, new Lock(output_row.lock_type, output_row.lock_bytes)));
-                    resolve(new Transaction(
-                        inputs,
-                        outputs,
-                        (rows[0].payload !== null) ? (rows[0].payload) : Buffer.alloc(0),
-                        new Height(rows[0].lock_height)));
-                }
-                else
-                {
+                        outputs.push(
+                            new TxOutput(
+                                output_row.type,
+                                output_row.amount,
+                                new Lock(output_row.lock_type, output_row.lock_bytes)
+                            )
+                        );
+                    resolve(
+                        new Transaction(
+                            inputs,
+                            outputs,
+                            rows[0].payload !== null ? rows[0].payload : Buffer.alloc(0),
+                            new Height(rows[0].lock_height)
+                        )
+                    );
+                } else {
                     resolve(null);
                 }
-            }
-            catch (error)
-            {
+            } catch (error) {
                 reject(error);
             }
         });
@@ -2091,17 +2008,13 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getWalletBlocksHeaderInfo (height: Height | null): Promise<any[]>
-    {
+    public getWalletBlocksHeaderInfo(height: Height | null): Promise<any[]> {
         let cur_height: string;
 
-        if (height !== null)
-            cur_height = height.toString();
-        else
-            cur_height = `(SELECT MAX(height) as height FROM blocks)`;
+        if (height !== null) cur_height = height.toString();
+        else cur_height = `(SELECT MAX(height) as height FROM blocks)`;
 
-        let sql =
-            `SELECT
+        let sql = `SELECT
                 height, hash, merkle_root, time_stamp
             FROM
                 blocks
@@ -2116,10 +2029,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getBlockHeaderByTxHash (tx_hash: Hash): Promise<any[]>
-    {
-        let sql =
-        `SELECT
+    public getBlockHeaderByTxHash(tx_hash: Hash): Promise<any[]> {
+        let sql = `SELECT
             height, merkle_root, T.tx_index
         FROM
             transactions T
@@ -2138,32 +2049,28 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getLatestBlocks (limit: number, page: number): Promise<any[]>
-    {
-        let sql =
-            `SELECT
+    public getLatestBlocks(limit: number, page: number): Promise<any[]> {
+        let sql = `SELECT
                 height, hash, merkle_root, signature, validators, tx_count,
                 enrollment_count, time_stamp
             FROM
                 blocks
             ORDER BY height DESC
-            LIMIT ? OFFSET ?`
+            LIMIT ? OFFSET ?`;
 
         return this.query(sql, [limit, limit * (page - 1)]);
     }
 
-     /**
-      * Get the Latest transactions
-      * @param limit Maximum record count that can be obtained from one query
-      * @param page The number on the page, this value begins with 1
-      * @returns Returns the Promise. If it is finished successfully the `.then`
-      * of the returned Promise is called with the records
-      * and if an error occurs the `.catch` is called with an error.
-      */
-     public getLatestTransactions (limit: number, page: number): Promise<any[]>
-     {
-        let sql =
-            `SELECT
+    /**
+     * Get the Latest transactions
+     * @param limit Maximum record count that can be obtained from one query
+     * @param page The number on the page, this value begins with 1
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getLatestTransactions(limit: number, page: number): Promise<any[]> {
+        let sql = `SELECT
                 T.block_height, T.tx_hash, T.tx_fee, T.tx_size,
              Sum(IFNULL(O.amount,0)) as amount, B.time_stamp
              FROM
@@ -2172,7 +2079,7 @@ export class LedgerStorage extends Storages
                  INNER JOIN blocks B ON (B.height = T.block_height)
              GROUP BY O.tx_hash
              ORDER BY T.block_height DESC
-             LIMIT ? OFFSET ?;`
+             LIMIT ? OFFSET ?;`;
         return this.query(sql, [limit, limit * (page - 1)]);
     }
 
@@ -2185,10 +2092,8 @@ export class LedgerStorage extends Storages
      * and if an error occurs the `.catch` is called with an error.
      *
      */
-    public getBlockSummary (field: string, value: string | Buffer): Promise<any[]>
-    {
-        let sql =
-            `SELECT B.height, B.hash, B.merkle_root, B.signature, B.prev_block, B.random_seed,
+    public getBlockSummary(field: string, value: string | Buffer): Promise<any[]> {
+        let sql = `SELECT B.height, B.hash, B.merkle_root, B.signature, B.prev_block, B.random_seed,
              B.time_stamp, B.tx_count,
              BS.total_sent, BS.total_received, BS.total_reward, BS.total_fee, BS.total_size
              FROM blocks B
@@ -2206,10 +2111,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getBlockEnrollments (field: string, value: string | Buffer, limit: number, page: number): Promise<any[]>
-    {
-        let sql =
-            `SELECT
+    public getBlockEnrollments(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
+        let sql = `SELECT
                 E.block_height, E.utxo_key, E.commitment, E.cycle_length, E.enroll_sig
             FROM
                 blocks B
@@ -2217,8 +2120,7 @@ export class LedgerStorage extends Storages
                 AND B.${field} = ?
             ORDER BY E.enrollment_index ASC
             LIMIT ? OFFSET ?;`;
-        let countsql =
-                `SELECT IFNULL(count(*),0) as total_records
+        let countsql = `SELECT IFNULL(count(*),0) as total_records
                 FROM
                     blocks B
                     INNER JOIN enrollments E ON (E.block_height = B.height)
@@ -2226,16 +2128,16 @@ export class LedgerStorage extends Storages
 
         let result: any = {};
         return new Promise<any[]>((resolve, reject) => {
-        this.query(sql, [value, limit, limit*(page-1)])
-        .then((rows : any[])=>{
-            result.enrollments = rows;
-            return this.query(countsql,[value]);
-        })
-        .then((rows : any[])=>{
-            result.total_records = rows[0].total_records
-            resolve(result);
+            this.query(sql, [value, limit, limit * (page - 1)])
+                .then((rows: any[]) => {
+                    result.enrollments = rows;
+                    return this.query(countsql, [value]);
+                })
+                .then((rows: any[]) => {
+                    result.total_records = rows[0].total_records;
+                    resolve(result);
+                });
         });
-       });
     }
 
     /**
@@ -2246,10 +2148,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getBlockTransactions (field: string, value: string | Buffer, limit: number, page: number): Promise<any[]>
-    {
-        let sql_tx =
-            `SELECT
+    public getBlockTransactions(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
+        let sql_tx = `SELECT
                 T.block_height, T.tx_hash, SUM(IFNULL(O.amount,0)) as amount,
                 T.tx_fee, T.tx_size, B.time_stamp,
                 JSON_ARRAYAGG(JSON_OBJECT("type", O.type, "address", O.address, "amount", O.amount)) as receiver,
@@ -2272,8 +2172,7 @@ export class LedgerStorage extends Storages
             ORDER BY T.tx_index ASC
             LIMIT ? OFFSET ?;`;
 
-        let sql_count =
-               `SELECT
+        let sql_count = `SELECT
                     IFNULL(count(*),0) as total_records
                 FROM
                     transactions T
@@ -2283,7 +2182,7 @@ export class LedgerStorage extends Storages
 
         let result: any = {};
         return new Promise<any[]>((resolve, reject) => {
-            this.query(sql_tx, [value, value, limit, limit*(page-1)])
+            this.query(sql_tx, [value, value, limit, limit * (page - 1)])
                 .then((rows: any[]) => {
                     result.tx = rows;
                     return this.query(sql_count, [value]);
@@ -2302,10 +2201,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getBOAStats (): Promise<any[]>
-    {
-        let sql =
-            `SELECT max(height) as height,
+    public getBOAStats(): Promise<any[]> {
+        let sql = `SELECT max(height) as height,
              (SELECT count(*) from transactions) as transactions,
              (SELECT count(*) from validators) as validators
             FROM
@@ -2320,10 +2217,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getCoinMarketcap (): Promise<any[]>
-    {
-        let sql =
-            `SELECT * FROM marketcap WHERE last_updated_at = (SELECT MAX(last_updated_at) as time FROM marketcap)`;
+    public getCoinMarketcap(): Promise<any[]> {
+        let sql = `SELECT * FROM marketcap WHERE last_updated_at = (SELECT MAX(last_updated_at) as time FROM marketcap)`;
 
         return this.query(sql, []);
     }
@@ -2334,10 +2229,8 @@ export class LedgerStorage extends Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getCoinMarketChart (from: number, to: number): Promise<any[]>
-    {
-        let sql =
-            `SELECT * FROM marketcap WHERE last_updated_at BETWEEN ? AND ?`;
+    public getCoinMarketChart(from: number, to: number): Promise<any[]> {
+        let sql = `SELECT * FROM marketcap WHERE last_updated_at BETWEEN ? AND ?`;
 
         return this.query(sql, [from, to]);
     }
@@ -2346,10 +2239,8 @@ export class LedgerStorage extends Storages
      * Drop Database
      * @param database The name of database
      */
-    public async dropTestDB (database : any): Promise<any[]>
-    {
-        let sql =
-            `DROP DATABASE ${database}`;
-       return this.run(sql, []);
+    public async dropTestDB(database: any): Promise<any[]> {
+        let sql = `DROP DATABASE ${database}`;
+        return this.run(sql, []);
     }
 }

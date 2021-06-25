@@ -12,12 +12,12 @@
 *******************************************************************************/
 
 let operations = {
-    db: 'DB Operation',
-    connection: 'Connection Operation',
-    block_recovery: 'Block Recovery Operation',
+    db: "DB Operation",
+    connection: "Connection Operation",
+    block_recovery: "Block Recovery Operation",
     block_sync: "Block Sync Operation",
     start: "Stoa Server StartUp",
-    coin_market_data_sync: "Coin Market Cap Operation"
+    coin_market_data_sync: "Coin Market Cap Operation",
 };
 
 export const Operation = operations;

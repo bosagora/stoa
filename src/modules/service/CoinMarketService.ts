@@ -11,14 +11,14 @@
 
 *******************************************************************************/
 
-import { logger, Logger } from '../common/Logger';
+import JSBI from "jsbi";
 import * as cron from "node-cron";
 import Stoa from "../../Stoa";
 import { IMarketCap } from "../../Types";
-import JSBI from 'jsbi';
-import { Time } from '../common/Time';
-import { Operation } from '../common/LogOperation';
-import { HeightManager } from '../common/HeightManager';
+import { HeightManager } from "../common/HeightManager";
+import { logger, Logger } from "../common/Logger";
+import { Operation } from "../common/LogOperation";
+import { Time } from "../common/Time";
 
 export class CoinMarketService {
     /**
@@ -40,8 +40,7 @@ export class CoinMarketService {
      * constructor
      * @param coinMarketClient i.e CoinGeckoMarket
      */
-    constructor (coinMarketClient: any)
-    {
+    constructor(coinMarketClient: any) {
         this.coinMarketClient = coinMarketClient;
         this.status = false;
     }
@@ -50,15 +49,13 @@ export class CoinMarketService {
      * @param StoaInstance
      * Asynchronously start CoinMarket Data sync service
      */
-    public start(stoaInstance: Stoa, time: number = 15): Promise<boolean>
-    {
+    public start(stoaInstance: Stoa, time: number = 15): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
             this.status = false;
             cron.schedule(`*/${time} * * * * *`, async () => {
                 await this.scheduler(stoaInstance);
                 resolve(true);
-            })
-
+            });
         });
     }
 
@@ -68,40 +65,37 @@ export class CoinMarketService {
      * @param stoaInstance
      * @returns
      */
-    public scheduler (stoaInstance: Stoa): Promise<boolean>
-    {
-        return new Promise<boolean>(async (resolve, reject) =>
-        {
-            if (this.status === true)
-                return resolve(true);
+    public scheduler(stoaInstance: Stoa): Promise<boolean> {
+        return new Promise<boolean>(async (resolve, reject) => {
+            if (this.status === true) return resolve(true);
 
             let geckoConnection = await this.coinMarketClient.ping();
             if (!geckoConnection) {
                 logger.warn(`Hints: either api.coingecko.com is available or check you internet connection`);
                 return resolve(true);
-            }
-            else {
+            } else {
                 this.status = true;
-                stoaInstance.ledger_storage.getCoinMarketcap().then(async (rows: any[]) =>
-                {
-                    if (!rows[0]) {
-                        await this.recover24hourData(stoaInstance);
-                        this.status = false;
-                        return resolve(true);
-                    }
-                    else {
-                        let height = await stoaInstance.ledger_storage.getBlockHeight();
-                        this.coinMarketClient.fetch(height).then(async (data: IMarketCap) => {
-                            await stoaInstance.putCoinMarketStats(data);
+                stoaInstance.ledger_storage
+                    .getCoinMarketcap()
+                    .then(async (rows: any[]) => {
+                        if (!rows[0]) {
+                            await this.recover24hourData(stoaInstance);
                             this.status = false;
                             return resolve(true);
-                        });
-                    }
-                }).catch(async (err: any) => {
-                    await this.recover24hourData(stoaInstance);
-                    this.status = false;
-                    resolve(true);
-                });
+                        } else {
+                            let height = await stoaInstance.ledger_storage.getBlockHeight();
+                            this.coinMarketClient.fetch(height).then(async (data: IMarketCap) => {
+                                await stoaInstance.putCoinMarketStats(data);
+                                this.status = false;
+                                return resolve(true);
+                            });
+                        }
+                    })
+                    .catch(async (err: any) => {
+                        await this.recover24hourData(stoaInstance);
+                        this.status = false;
+                        resolve(true);
+                    });
             }
         });
     }
@@ -110,17 +104,18 @@ export class CoinMarketService {
      * @param StoaInstance
      * Asynchronously recover 24 hour CoinMarket Data
      */
-    public recover24hourData (stoaInstance: Stoa): Promise<boolean>
-    {
-        return new Promise<boolean>(async (resolve, reject) =>
-        {
+    public recover24hourData(stoaInstance: Stoa): Promise<boolean> {
+        return new Promise<boolean>(async (resolve, reject) => {
             try {
                 let to = await Time.msToTime(Date.now());
                 let from = await JSBI.subtract(JSBI.BigInt(to.seconds), JSBI.BigInt(60 * 60 * 24));
                 let dt = new Date(to.seconds * 1000);
                 let df = new Date(Number(from.toString()) * 1000);
-                logger.info(`Recovering 24 hour coinmarket cap from: ${df} to: ${dt}`,
-                    { operation: Operation.coin_market_data_sync, height: HeightManager.height.toString(), success: true });
+                logger.info(`Recovering 24 hour coinmarket cap from: ${df} to: ${dt}`, {
+                    operation: Operation.coin_market_data_sync,
+                    height: HeightManager.height.toString(),
+                    success: true,
+                });
                 let marketCap = await this.coinMarketClient.recover(Number(from.toString()), to.seconds);
                 marketCap.forEach(async (element: IMarketCap) => {
                     let time = await Time.msToTime(element.last_updated_at);
@@ -128,10 +123,12 @@ export class CoinMarketService {
                     await stoaInstance.putCoinMarketStats(element);
                 });
                 resolve(true);
-            }
-            catch (err) {
-                logger.error(`Failed to 24-hour coin market data recovery: ${err}`,
-                    { operation: Operation.coin_market_data_sync, height: HeightManager.height.toString(), success: false });
+            } catch (err) {
+                logger.error(`Failed to 24-hour coin market data recovery: ${err}`, {
+                    operation: Operation.coin_market_data_sync,
+                    height: HeightManager.height.toString(),
+                    success: false,
+                });
                 reject(`Failed to 24-hour coin market data recovery`);
             }
         });
@@ -140,23 +137,23 @@ export class CoinMarketService {
      * @param StoaInstance
      * Asynchronously recover CoinMarket Data
      */
-    public recover (stoaInstance: Stoa): Promise<boolean>
-    {
-        return new Promise<boolean>(async (resolve, reject) =>
-        {
+    public recover(stoaInstance: Stoa): Promise<boolean> {
+        return new Promise<boolean>(async (resolve, reject) => {
             try {
                 let rows = await stoaInstance.ledger_storage.getCoinMarketcap();
                 if (!rows[0]) {
                     await this.recover24hourData(stoaInstance);
                     return resolve(true);
-                }
-                else {
-                    let last_updated_at = rows[0].last_updated_at
+                } else {
+                    let last_updated_at = rows[0].last_updated_at;
                     let to = await Time.msToTime(Date.now());
                     let dt = new Date(to.seconds * 1000);
                     let df = new Date(last_updated_at * 1000);
-                    logger.info(`Recovering coinmarket cap from: ${df} to ${dt}`,
-                        { operation: Operation.coin_market_data_sync, height: HeightManager.height.toString(), success: true });
+                    logger.info(`Recovering coinmarket cap from: ${df} to ${dt}`, {
+                        operation: Operation.coin_market_data_sync,
+                        height: HeightManager.height.toString(),
+                        success: true,
+                    });
                     let marketCap = await this.coinMarketClient.recover(last_updated_at, to.seconds);
                     marketCap.forEach(async (element: IMarketCap) => {
                         let time = await Time.msToTime(element.last_updated_at);
@@ -165,24 +162,23 @@ export class CoinMarketService {
                     });
                     return resolve(true);
                 }
-            }
-            catch (err) {
-                logger.error(`Failed to coin market data recovery: ${err}`,
-                    { operation: Operation.connection, height: HeightManager.height.toString(), success: false });
+            } catch (err) {
+                logger.error(`Failed to coin market data recovery: ${err}`, {
+                    operation: Operation.connection,
+                    height: HeightManager.height.toString(),
+                    success: false,
+                });
                 reject(`Failed to coin market data recovery`);
             }
         });
     }
     /*
-    * Stop CoinMarket Data sync service
-    */
-    public async stop ()
-    {
+     * Stop CoinMarket Data sync service
+     */
+    public async stop() {
         if (this.job) {
             this.job.stop();
             return;
-        }
-        else
-            return;
+        } else return;
     }
 }

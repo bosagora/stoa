@@ -11,13 +11,12 @@
 
 *******************************************************************************/
 
-import express from 'express';
-import http  from 'http' ;
-import { SocketIO } from '../service/Socket'
-import { EventDispatcher } from 'event-dispatch';
+import { EventDispatcher } from "event-dispatch";
+import express from "express";
+import http from "http";
+import { SocketIO } from "../service/Socket";
 
-export class WebService
-{
+export class WebService {
     /**
      * The bind address
      */
@@ -41,7 +40,7 @@ export class WebService
     /**
      * The Event Dispatcher
      */
-    protected  eventDispatcher: EventDispatcher;
+    protected eventDispatcher: EventDispatcher;
 
     /**
      * Connection
@@ -55,17 +54,12 @@ export class WebService
      * @param port The bind port
      * @param address The bind address
      */
-    constructor (port: number | string, address?: string)
-    {
-        if (typeof port == "string")
-            this.port = parseInt(port, 10);
-        else
-            this.port = port;
+    constructor(port: number | string, address?: string) {
+        if (typeof port == "string") this.port = parseInt(port, 10);
+        else this.port = port;
 
-        if (address !== undefined)
-            this.address = address;
-        else
-            this.address = "";
+        if (address !== undefined) this.address = address;
+        else this.address = "";
 
         this.app = express();
         this.eventDispatcher = new EventDispatcher();
@@ -75,16 +69,15 @@ export class WebService
     /**
      * Asynchronously start the web server
      */
-    public async start (): Promise<void>
-    {
-        this.app.set('port', this.port);
+    public async start(): Promise<void> {
+        this.app.set("port", this.port);
 
         // Listen on provided this.port on this.address.
         return new Promise<void>((resolve, reject) => {
             // Create HTTP server.
             this.server = http.createServer(this.app);
             this.socket = new SocketIO(this.server);
-            this.server.on('error', reject);
+            this.server.on("error", reject);
             this.server.listen(this.port, this.address, () => {
                 resolve();
             });

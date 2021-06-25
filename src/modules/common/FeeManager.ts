@@ -12,39 +12,33 @@
 
 *******************************************************************************/
 
-import JSBI from 'jsbi';
+import JSBI from "jsbi";
 
 /**
  * Calculate transaction fees and process statistics.
  */
-export class FeeManager
-{
+export class FeeManager {
     /**
      * Calculate the fees according to the transaction size.
      * @param tx_size   The size of the transaction
      * @param disparity The disparity plot calculated from most recent block
      * @returns The fees of [high, medium, low]
      */
-    public static getTxFee (tx_size: number, disparity: number): [JSBI, JSBI, JSBI]
-    {
+    public static getTxFee(tx_size: number, disparity: number): [JSBI, JSBI, JSBI] {
         let size = JSBI.BigInt(tx_size);
         let factor = JSBI.BigInt(200);
-        let minimum = JSBI.BigInt(100_000);     // 0.01BOA
+        let minimum = JSBI.BigInt(100_000); // 0.01BOA
         let medium = JSBI.multiply(size, factor);
-        if (JSBI.lessThan(medium, minimum))
-            medium = JSBI.BigInt(minimum);
+        if (JSBI.lessThan(medium, minimum)) medium = JSBI.BigInt(minimum);
 
         medium = JSBI.add(medium, JSBI.BigInt(disparity));
-        if (JSBI.lessThan(medium, minimum))
-            medium = JSBI.BigInt(minimum);
+        if (JSBI.lessThan(medium, minimum)) medium = JSBI.BigInt(minimum);
 
         let width = JSBI.divide(medium, JSBI.BigInt(10));
         let high = JSBI.add(medium, width);
         let low = JSBI.subtract(medium, width);
-        if (JSBI.lessThan(high, minimum))
-            high = JSBI.BigInt(minimum);
-        if (JSBI.lessThan(low, minimum))
-            low = JSBI.BigInt(minimum);
+        if (JSBI.lessThan(high, minimum)) high = JSBI.BigInt(minimum);
+        if (JSBI.lessThan(low, minimum)) low = JSBI.BigInt(minimum);
 
         return [high, medium, low];
     }
@@ -55,16 +49,14 @@ export class FeeManager
      * @param trim_percent The percent of trim
      * @returns The value of trimmed mean
      */
-    public static calculateTrimmedMeanDisparity (values: Array<number>, trim_percent: number = 5): number
-    {
-        if (values.length === 0)
-            return 0;
+    public static calculateTrimmedMeanDisparity(values: Array<number>, trim_percent: number = 5): number {
+        if (values.length === 0) return 0;
 
         // Sort the array
         values.sort((a, b) => a - b);
 
         // Remove minimum value, maximum
-        for (let idx = 0; idx < Math.floor(values.length * trim_percent / 100.0); idx++) {
+        for (let idx = 0; idx < Math.floor((values.length * trim_percent) / 100.0); idx++) {
             values.shift();
             values.pop();
         }

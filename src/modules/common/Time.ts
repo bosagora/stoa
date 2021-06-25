@@ -1,5 +1,4 @@
-export class Time
-{
+export class Time {
     /**
      * Time in seconds
      */
@@ -15,12 +14,11 @@ export class Time
      */
     public hours: number;
 
-    constructor ()
-    {
+    constructor() {
         let date = Date.now();
-        this.seconds = Math.floor((date / 1000));
-        this.minutes = Math.floor((date / (1000 * 60)));
-        this.hours = Math.floor((date / (1000 * 60 * 60)));
+        this.seconds = Math.floor(date / 1000);
+        this.minutes = Math.floor(date / (1000 * 60));
+        this.hours = Math.floor(date / (1000 * 60 * 60));
     }
 
     /**
@@ -28,11 +26,10 @@ export class Time
      * @param ms
      * @returns Object { hours, minutes, seconds }
      */
-    public static msToTime (ms: number)
-    {
-        let seconds = Math.floor((ms / 1000));
-        let minutes = Math.floor((ms / (1000 * 60)));
-        let hours = Math.floor((ms / (1000 * 60 * 60)));
+    public static msToTime(ms: number) {
+        let seconds = Math.floor(ms / 1000);
+        let minutes = Math.floor(ms / (1000 * 60));
+        let hours = Math.floor(ms / (1000 * 60 * 60));
         return { hours, minutes, seconds };
     }
 }

@@ -13,13 +13,12 @@
 
 *******************************************************************************/
 
-import * as mysql from 'mysql2';
-import { DatabaseConfig, IDatabaseConfig } from '../common/Config';
-import { logger, Logger } from '../common/Logger';
-import { Operation } from '../common/LogOperation';
+import * as mysql from "mysql2";
+import { DatabaseConfig, IDatabaseConfig } from "../common/Config";
+import { logger, Logger } from "../common/Logger";
+import { Operation } from "../common/LogOperation";
 
-export class Storages
-{
+export class Storages {
     /**
      *  The instance of mysql Connection.
      */
@@ -32,39 +31,38 @@ export class Storages
      * the database was opened successfully or when an error occurred.
      * The first argument is an error object. If there is no error, this value is null.
      */
-    constructor(databaseConfig: IDatabaseConfig, callback: (err: Error | null) => void)
-    {
+    constructor(databaseConfig: IDatabaseConfig, callback: (err: Error | null) => void) {
         let dbconfig: IDatabaseConfig = {
             host: databaseConfig.host,
             user: databaseConfig.user,
             password: databaseConfig.password,
             multipleStatements: databaseConfig.multipleStatements,
             port: Number(databaseConfig.port),
-        }
+        };
         this.db = mysql.createConnection(dbconfig);
         this.query(`CREATE DATABASE IF NOT EXISTS \`${databaseConfig.database}\`;`, [])
-        .then(async(result) => {
-            await this.query(`SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,"ONLY_FULL_GROUP_BY",""));`,[]);
-            dbconfig.database = databaseConfig.database;
-            this.db = mysql.createConnection(dbconfig);
-            this.db.connect(function (err) {
-                if (err) throw err;
-                logger.info(`connected to mysql host: ${databaseConfig.host}`,
-                    { operation: Operation.db, height: "", success: true });
-            });
-                this.createTables()
-                    .then(() =>
-                    {
-                        if (callback != null)
-                            callback(null);
-                    })
-                .catch((err: any) => {
-                        if (callback != null)
-                            callback(err);
+            .then(async (result) => {
+                await this.query(`SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,"ONLY_FULL_GROUP_BY",""));`, []);
+                dbconfig.database = databaseConfig.database;
+                this.db = mysql.createConnection(dbconfig);
+                this.db.connect(function (err) {
+                    if (err) throw err;
+                    logger.info(`connected to mysql host: ${databaseConfig.host}`, {
+                        operation: Operation.db,
+                        height: "",
+                        success: true,
                     });
-            }).catch((err)=>{
-                if (callback != null)
-                    callback(err);
+                });
+                this.createTables()
+                    .then(() => {
+                        if (callback != null) callback(null);
+                    })
+                    .catch((err: any) => {
+                        if (callback != null) callback(err);
+                    });
+            })
+            .catch((err) => {
+                if (callback != null) callback(err);
             });
     }
 
@@ -73,39 +71,29 @@ export class Storages
      * The maximum waiting time is about 50 seconds.
      * @param databaseConfig Valid value is of type IDatabaseConfig,
      */
-    public static waiteForConnection (databaseConfig: IDatabaseConfig)
-    {
+    public static waiteForConnection(databaseConfig: IDatabaseConfig) {
         let connection_config: mysql.ConnectionOptions = {
             host: databaseConfig.host,
             user: databaseConfig.user,
             password: databaseConfig.password,
             multipleStatements: databaseConfig.multipleStatements,
-            port: Number(databaseConfig.port)
-        }
+            port: Number(databaseConfig.port),
+        };
 
-        return new Promise<void>((resolve) =>
-        {
+        return new Promise<void>((resolve) => {
             let try_count = 0;
-            let check_connection = () =>
-            {
+            let check_connection = () => {
                 try_count++;
                 const connection = mysql.createConnection(connection_config);
-                connection.connect(function (err)
-                {
-                    if (!err)
-                    {
+                connection.connect(function (err) {
+                    if (!err) {
                         return resolve();
-                    }
-                    else
-                    {
-                        if (try_count < 10)
-                        {
+                    } else {
+                        if (try_count < 10) {
                             setTimeout(() => {
                                 check_connection();
                             }, 5000);
-                        }
-                        else
-                        {
+                        } else {
                             return resolve();
                         }
                     }
@@ -121,10 +109,8 @@ export class Storages
      * of the returned Promise is called and if an error occurs the `.catch`
      * is called with an error.
      */
-    public createTables (): Promise<void>
-    {
-        return new Promise<void>((resolve, reject) =>
-        {
+    public createTables(): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
             resolve();
         });
     }
@@ -132,8 +118,7 @@ export class Storages
     /**
      * Close the database
      */
-    public close ()
-    {
+    public close() {
         this.db.end();
     }
 
@@ -146,16 +131,11 @@ export class Storages
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    protected query (sql: string, params: any): Promise<any[]>
-    {
-        return new Promise<any[]>((resolve, reject) =>
-        {
-            this.db.query(sql, params, (err: Error | null, rows: any[]) =>
-            {
-                if (!err)
-                    resolve(rows);
-                else
-                    reject(err);
+    protected query(sql: string, params: any): Promise<any[]> {
+        return new Promise<any[]>((resolve, reject) => {
+            this.db.query(sql, params, (err: Error | null, rows: any[]) => {
+                if (!err) resolve(rows);
+                else reject(err);
             });
         });
     }
@@ -169,16 +149,11 @@ export class Storages
      * of the returned Promise is called with the result
      * and if an error occurs the `.catch` is called with an error.
      */
-    protected run (sql: string, params: any): Promise<any>
-    {
-        return new Promise<any>((resolve, reject) =>
-        {
-            this.db.query(sql, params, function (err, result)
-            {
-                if (!err)
-                    resolve(result);
-                else
-                    reject(err);
+    protected run(sql: string, params: any): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            this.db.query(sql, params, function (err, result) {
+                if (!err) resolve(result);
+                else reject(err);
             });
         });
     }
@@ -190,16 +165,11 @@ export class Storages
      * of the returned Promise is called and if an error occurs the `.catch`
      * is called with an error.
      */
-    protected exec (sql: string): Promise<void>
-    {
-        return new Promise<void>((resolve, reject) =>
-        {
-            this.db.query(sql, (err: Error | null) =>
-            {
-                if (!err)
-                    resolve();
-                else
-                    reject(err);
+    protected exec(sql: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this.db.query(sql, (err: Error | null) => {
+                if (!err) resolve();
+                else reject(err);
             });
         });
     }
@@ -214,16 +184,11 @@ export class Storages
      * of the returned Promise is called and if an error occurs the `.catch`
      * is called with an error.
      */
-    protected begin (): Promise<void>
-    {
-        return new Promise<void>((resolve, reject) =>
-        {
-            this.db.beginTransaction((err: Error | null) =>
-            {
-                if (err == null)
-                    resolve();
-                else
-                    reject(err);
+    protected begin(): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this.db.beginTransaction((err: Error | null) => {
+                if (err == null) resolve();
+                else reject(err);
             });
         });
     }
@@ -235,16 +200,11 @@ export class Storages
      * of the returned Promise is called and if an error occurs the `.catch`
      * is called with an error.
      */
-    protected commit (): Promise<void>
-    {
-        return new Promise<void>((resolve, reject) =>
-        {
-            this.db.commit((err: Error | null) =>
-            {
-                if (err == null)
-                    resolve();
-                else
-                    reject(err);
+    protected commit(): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this.db.commit((err: Error | null) => {
+                if (err == null) resolve();
+                else reject(err);
             });
         });
     }
@@ -257,18 +217,15 @@ export class Storages
      * of the returned Promise is called and if an error occurs the `.catch`
      * is called with an error.
      */
-    protected rollback (): Promise<void>
-    {
-        return new Promise<void>((resolve, reject) =>
-        {
-             this.db.rollback(()=>{
-                    resolve();
+    protected rollback(): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this.db.rollback(() => {
+                resolve();
             });
         });
     }
 
-    public get connection (): mysql.Connection
-    {
+    public get connection(): mysql.Connection {
         return this.db;
     }
 }

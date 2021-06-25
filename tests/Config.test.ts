@@ -11,32 +11,29 @@
 
  *******************************************************************************/
 
-import { Config } from '../src/modules/common/Config';
-import { Utils } from 'boa-sdk-ts';
+import { Config } from "../src/modules/common/Config";
 
-import * as assert from 'assert';
-import path from "path";
+import * as assert from "assert";
 
-describe('Test of Config', () => {
-    it ('Test parsing the settings of a string', () => {
-        let config_content =
-            [
-                "server:",
-                "   address: 127.0.0.1",
-                "   port:    3838",
-                "   agora_endpoint: http://127.0.0.1:2826",
-                "database:",
-                "   host : 127.0.0.1",
-                "   user : root",
-                "   database : stoa",
-                "   password : 12345678",
-                "   port : 3306",
-                "logging:",
-                "   folder: /stoa/logs/",
-                "   level: debug",
-                "consensus:",
-                "   genesis_timestamp: 1609459200",
-            ].join("\n");
+describe("Test of Config", () => {
+    it("Test parsing the settings of a string", () => {
+        let config_content = [
+            "server:",
+            "   address: 127.0.0.1",
+            "   port:    3838",
+            "   agora_endpoint: http://127.0.0.1:2826",
+            "database:",
+            "   host : 127.0.0.1",
+            "   user : root",
+            "   database : stoa",
+            "   password : 12345678",
+            "   port : 3306",
+            "logging:",
+            "   folder: /stoa/logs/",
+            "   level: debug",
+            "consensus:",
+            "   genesis_timestamp: 1609459200",
+        ].join("\n");
         let config: Config = new Config();
         config.readFromString(config_content);
         assert.strictEqual(config.server.address, "127.0.0.1");
