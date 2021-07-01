@@ -1,19 +1,21 @@
 /*******************************************************************************
-
-    Test that parses config.
-
-    Copyright:
-        Copyright (c) 2020-2021 BOSAGORA Foundation
-        All rights reserved.
-
-    License:
-        MIT License. See LICENSE for details.
-
+ 
+ Test that parses config.
+ 
+ Copyright:
+ Copyright (c) 2020-2021 BOSAGORA Foundation
+ All rights reserved.
+ 
+ License:
+ MIT License. See LICENSE for details.
+ 
  *******************************************************************************/
 
 import { Config } from "../src/modules/common/Config";
+import { Utils } from "boa-sdk-ts";
 
 import * as assert from "assert";
+import * as path from "path";
 
 describe("Test of Config", () => {
     it("Test parsing the settings of a string", () => {
@@ -29,7 +31,7 @@ describe("Test of Config", () => {
             "   password : 12345678",
             "   port : 3306",
             "logging:",
-            "   folder: /stoa/logs/",
+            "   folder: /stoa/logs",
             "   level: debug",
             "consensus:",
             "   genesis_timestamp: 1609459200",
@@ -44,7 +46,7 @@ describe("Test of Config", () => {
         assert.strictEqual(config.database.database, "stoa");
         assert.strictEqual(config.database.port.toString(), "3306");
         assert.strictEqual(config.database.password.toString(), "12345678");
-        assert.strictEqual(config.logging.folder, "/stoa/logs");
+        assert.strictEqual(config.logging.folder, path.resolve(Utils.getInitCWD(), "/stoa/logs"));
         assert.strictEqual(config.logging.level, "debug");
         assert.strictEqual(config.consensus.genesis_timestamp, 1609459200);
     });
