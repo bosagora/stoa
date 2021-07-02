@@ -2363,7 +2363,7 @@ export class LedgerStorage extends Storages {
     public getLatestBlocks(limit: number, page: number): Promise<any[]> {
         let sql = `SELECT
                 height, hash, merkle_root, signature, validators, tx_count,
-                enrollment_count, time_stamp
+                enrollment_count, time_stamp, count(*) OVER() AS full_count
             FROM
                 blocks
             ORDER BY height DESC
@@ -2383,7 +2383,7 @@ export class LedgerStorage extends Storages {
     public getLatestTransactions(limit: number, page: number): Promise<any[]> {
         let sql = `SELECT
                 T.block_height, T.tx_hash, T.tx_fee, T.tx_size,
-             Sum(IFNULL(O.amount,0)) as amount, B.time_stamp
+                Sum(IFNULL(O.amount,0)) as amount, B.time_stamp, count(*) OVER() AS full_count
              FROM
                  tx_outputs O
                  INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
@@ -2423,32 +2423,25 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getBlockEnrollments(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
-        let sql = `SELECT
-                E.block_height, E.utxo_key, E.commitment, E.cycle_length, E.enroll_sig
+        let sql =
+            `SELECT
+                E.block_height, E.utxo_key, E.commitment, E.cycle_length, E.enroll_sig, 
+                count(*) OVER() AS full_count
             FROM
                 blocks B
                 INNER JOIN enrollments E ON (E.block_height = B.height)
                 AND B.${field} = ?
             ORDER BY E.enrollment_index ASC
             LIMIT ? OFFSET ?;`;
-        let countsql = `SELECT IFNULL(count(*),0) as total_records
-                FROM
-                    blocks B
-                    INNER JOIN enrollments E ON (E.block_height = B.height)
-                    AND B.${field} = ?`;
 
         let result: any = {};
         return new Promise<any[]>((resolve, reject) => {
             this.query(sql, [value, limit, limit * (page - 1)])
                 .then((rows: any[]) => {
                     result.enrollments = rows;
-                    return this.query(countsql, [value]);
-                })
-                .then((rows: any[]) => {
-                    result.total_records = rows[0].total_records;
                     resolve(result);
                 });
-        });
+        })
     }
 
     /**
@@ -2462,7 +2455,7 @@ export class LedgerStorage extends Storages {
     public getBlockTransactions(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
         let sql_tx = `SELECT
                 T.block_height, T.tx_hash, SUM(IFNULL(O.amount,0)) as amount,
-                T.tx_fee, T.tx_size, B.time_stamp,
+                T.tx_fee, T.tx_size, B.time_stamp, count(*) OVER() AS full_count,
                 JSON_ARRAYAGG(JSON_OBJECT("type", O.type, "address", O.address, "amount", O.amount)) as receiver,
                 (SELECT
                    JSON_ARRAYAGG(JSON_OBJECT("address", S.address, "amount", S.amount))

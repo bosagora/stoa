@@ -266,7 +266,8 @@ export interface IBlockOverview {
 /**
  * The interface of the enrolled validators of block
  */
-export interface IBlockEnrollmentElements {
+export interface IBlockEnrollment
+{
     /**
      * Block height
      */
@@ -290,21 +291,19 @@ export interface IBlockEnrollmentElements {
     /**
      * Cycle length
      */
-    cycle_length: number;
-}
+    cycle_length: number,
 
-/**
- * The interface of the enrolled validators of block with total_records
- */
-export interface IBlockEnrollment {
-    enrollmentElementList: IBlockEnrollmentElements[];
-    total_data: string;
+    /**
+     * total number of records
+     */
+    full_count: number;
 }
 
 /**
  * The interface of the transaction elements of block
  */
-export interface IBlockTransactionElements {
+export interface IBlockTransactions
+{
     /**
      * Transaction hash
      */
@@ -349,21 +348,11 @@ export interface IBlockTransactionElements {
      * Transaction sender address
      */
     sender_address: string;
-}
-
-/**
- * The interface of the transactions of block
- */
-export interface IBlockTransactions {
-    /**
-     * Transactions record
-     */
-    tx: Array<IBlockTransactionElements>;
 
     /**
-     * Total record
+     * total number of records
      */
-    total_data: string;
+    full_count: number;
 }
 
 /**
@@ -673,6 +662,11 @@ export interface IBlock {
      * timestamp of the block
      */
     time_stamp: string;
+
+    /**
+     * total number of records
+     */
+    full_count: number
 }
 
 /**
@@ -714,6 +708,11 @@ export interface ITransaction {
      * timestamp of the transaction
      */
     time_stamp: string;
+
+    /**
+     * total number of records
+     */
+    full_count: number;
 }
 
 /**
