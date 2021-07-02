@@ -3,7 +3,7 @@ import { Config } from "../src/modules/common/Config";
 
 export let MockDBConfig = () => {
     let config: Config = new Config();
-    config.readFromFile(path.resolve(process.cwd(), "docs/config.example.yaml"));
+    config.readFromFile(path.resolve(process.cwd(), "docs/config.test.yaml"));
     return {
         host: config.database.host,
         database: config.database.database,

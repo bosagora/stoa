@@ -5,32 +5,38 @@ on: [push, pull_request ]
 jobs:
   build:
 
-    runs-on: ubuntu-latest
-
     strategy:
+      fail-fast: false
       matrix:
+        os: [ ubuntu-20.04, windows-2019 ]
         node-version: [ 14.x, 15.x ]
 
-    steps:
-    - uses: actions/checkout@v2
-    - name: Shutdown Ubuntu MySQL (SUDO)
-      run: sudo service mysql stop
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: Set up MySQL 8.0
-      uses: mirromutth/mysql-action@master
-      with:
-        mysql version: 8.0
-        mysql database: root
-        mysql root password: 12345678
+    runs-on: ${{ matrix.os }}
 
-    - name: npm install, build, and test
-      run: |
-        npm install
-        npm run build --if-present
-        npm test
-        echo 'everything is done'
-      env:
-        CI: true
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Setup MySQL 8.0
+        uses: ankane/setup-mysql@v1
+        with:
+          mysql-version: 8.0
+          database: devstoa
+
+      - name: Config MySQL
+        run: |
+          mysqladmin -u root password '12345678'
+          exit;
+
+      - name: npm install, build, and test
+        run: |
+          npm install
+          npm run build --if-present
+          npm test
+          echo 'everything is done'
+        env:
+          CI: true

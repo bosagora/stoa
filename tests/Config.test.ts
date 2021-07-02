@@ -1,14 +1,14 @@
 /*******************************************************************************
  
- Test that parses config.
+    Test that parses config.
  
- Copyright:
- Copyright (c) 2020-2021 BOSAGORA Foundation
- All rights reserved.
+    Copyright:
+        Copyright (c) 2020-2021 BOSAGORA Foundation
+        All rights reserved.
  
- License:
- MIT License. See LICENSE for details.
- 
+    License:
+        MIT License. See LICENSE for details.
+
  *******************************************************************************/
 
 import { Config } from "../src/modules/common/Config";

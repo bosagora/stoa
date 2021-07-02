@@ -265,8 +265,8 @@ export class DatabaseConfig implements IDatabaseConfig {
         return {
             host: "localhost",
             user: "root",
-            password: "12345678",
-            database: "boascan",
+            password: "",
+            database: "stoa",
             port: 3306,
             multipleStatements: true,
         };
