@@ -85,8 +85,11 @@ describe("Test of Stoa API for the wallet", () => {
         let uri = URI(host).port(port).directory("block_externalized");
 
         let url = uri.toString();
-        for (let idx = 0; idx < 10; idx++) await client.post(url, { block: recovery_sample_data[idx] });
-        await delay(1000);
+        for (let idx = 0; idx < 10; idx++)
+        {
+            await client.post(url, { block: recovery_sample_data[idx] });
+            await delay(300);
+        }    
     });
 
     it("Test of the path /wallet/transactions/history", async () => {

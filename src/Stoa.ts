@@ -34,7 +34,8 @@ import {
     IUnspentTxOutput,
     ValidatorData,
     IBOAHolder,
-    IAvgFee
+    IAvgFee,
+    IAccountChart
 } from "./Types";
 
 import bodyParser from "body-parser";
@@ -188,6 +189,7 @@ class Stoa extends WebService {
         this.app.post("/preimage_received", this.putPreImage.bind(this));
         this.app.post("/transaction_received", this.putTransaction.bind(this));
         this.app.get("/holders", this.getBoaHolders.bind(this));
+        this.app.get("/holder_balance_history/:address", this.getHolderBalanceHistory.bind(this));
         this.app.get("/average_fee_chart", this.averageFeeChart.bind(this));
 
         let height: Height = new Height("0");
@@ -2019,6 +2021,113 @@ class Stoa extends WebService {
                 return res.status(500).send("Failed to data lookup");
             })
     }
+    /**
+     * GET /holder_balance_history/:address
+     * Called when a request is received through the `/holder_balance_history/:address` handler
+     * The parameter `date` is the start date of the range of dates to look up.
+     * @returns Returns average transaction fee between range (date - filter)
+     */
+    private async getHolderBalanceHistory(req: express.Request, res: express.Response) {   
+        
+        let address: string = String(req.params.address);
+
+        logger.http(`GET /holder_balance_history/${address}`);
+
+        let filter;
+        let filter_end;
+        let filter_begin;
+
+        if (req.query.filter === undefined) {
+            res.status(400).send(`Parameter filter must also be set.`);
+            return;
+        }
+        else if (req.query.date === undefined) {
+            res.status(400).send(`Parameter endDate must also be set.`);
+            return;
+        }
+        else {
+            if (!Utils.isPositiveInteger(req.query.date.toString())) {
+                res.status(400).send(`Invalid value for parameter 'beginDate': ${req.query.date.toString()}`);
+                return;
+            }
+            
+            filter_end = Number(req.query.date.toString());
+        }
+
+        filter = req.query.filter.toString();
+        filter_end = moment(Number(req.query.date.toString()) * 1000).startOf('D')
+
+        switch (filter) {
+            case 'D': {
+                filter_begin = filter_end.unix() - 86400;
+                break;
+            }
+            case '5D': {
+                filter_begin = filter_end.unix() - 432000;
+                filter = 'D'
+                break;
+            }
+            case 'M': {
+                filter_begin = filter_end.unix() - 2592000;
+                break;
+            }
+            case '3M': {
+                filter_begin = filter_end.unix() - 7776000;
+                filter = 'M'
+                break;
+            }
+            case '6M': {
+                filter_begin = filter_end.unix() - 15552000;
+                filter = 'M'
+                break;
+            }
+            case 'Y': {
+                filter_begin = filter_end.unix() - 31536000;
+                break;
+            }
+            case '5Y': {
+                filter_begin = filter_end.unix() - 157680000;
+                filter = 'Y'
+                break;
+            }
+            default: {
+                filter_begin = filter_end.unix() - 86400;
+                filter = 'H'
+                break;
+            }
+        }
+        this.ledger_storage.getAccountChart(address, filter_begin, moment(filter_end).startOf('D').unix(), filter)
+            .then((data: any) => {
+                if ((data === undefined)) {
+                    res.status(500).send("Failed to data lookup");
+                    return;
+                }
+                else if (data.length === 0) {
+                    return res.status(204).send(`The data does not exist.`);
+                }
+                else {
+                    let accountChartList: Array<IAccountChart> = [];
+                    for (const row of data) {
+                        accountChartList.push(
+                            {
+                                address: row.address,
+                                granularity: row.granularity,
+                                time_stamp: row.time_stamp,
+                                balance: row.balance,
+                                block_height: row.block_height
+                            }
+                        )
+                    }
+                    return res.status(200).send(JSON.stringify(accountChartList));
+                }
+            })
+            .catch((err) => {
+                logger.error("Failed to averageFeeChart data lookup to the DB: " + err,
+                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
+                res.send(500).send("Failed to data lookup")
+            })
+
+    }
 
     /**
      * GET /average_fee_chart
@@ -2056,7 +2165,7 @@ class Stoa extends WebService {
 
         switch (filter) {
             case 'D': {
-                filter_begin = filter_end.unix() - 84000;
+                filter_begin = filter_end.unix() - 86400;
                 break;
             }
             case '5D': {
@@ -2088,7 +2197,8 @@ class Stoa extends WebService {
                 break;
             }
             default: {
-                filter_begin = filter_end.unix() - 84000;
+                filter_begin = filter_end.unix() - 86400;
+                filter = 'H'
                 break;
             }
         }

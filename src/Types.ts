@@ -266,8 +266,7 @@ export interface IBlockOverview {
 /**
  * The interface of the enrolled validators of block
  */
-export interface IBlockEnrollment
-{
+export interface IBlockEnrollment {
     /**
      * Block height
      */
@@ -302,8 +301,7 @@ export interface IBlockEnrollment
 /**
  * The interface of the transaction elements of block
  */
-export interface IBlockTransactions
-{
+export interface IBlockTransactions {
     /**
      * Transaction hash
      */
@@ -929,4 +927,34 @@ export interface IAvgFee {
      * Total Fee
      */
     total_fee: number;
+}
+
+/**
+ * The interface for BOA holder chart 
+ */
+export interface IAccountChart {
+    /**
+     * Address of BOA Holder
+     */
+    address: string;
+
+    /**
+     * Block Height
+     */
+    block_height: number;
+
+    /**
+     * Balance of Account
+     */
+    balance: number;
+
+    /**
+     * Granularity of Record
+     */
+    granularity: string;
+
+    /**
+     * Time in Seconds
+     */
+    time_stamp: number;
 }

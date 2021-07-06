@@ -299,7 +299,16 @@ export class LedgerStorage extends Storages {
             last_updated_at   INTEGER,
             PRIMARY KEY (address(64))
         );
-        
+
+        CREATE TABLE IF NOT EXISTS account_history(
+            address          TEXT,
+            time_stamp       INTEGER     NOT NULL,
+            granularity      TEXT        NOT NULL,
+            block_height     INTEGER     NOT NULL,
+            balance          BIGINT(20)  UNSIGNED NOT NULL,
+            
+            PRIMARY KEY (address(64), time_stamp, granularity(64))
+        );
 
         CREATE TABLE IF NOT EXISTS fees
         (
@@ -377,7 +386,7 @@ export class LedgerStorage extends Storages {
                     await this.begin();
                     for (let tx of block.txs) await this.transaction_pool.remove(this.connection, tx);
                     await saveBlock(this, block, genesis_timestamp);
-                    await this.putfees(block)
+                    await this.putfees(block);
                     await this.putTransactions(block);
                     await this.putEnrollments(block);
                     await this.putBlockHeight(block.header.height);
@@ -431,19 +440,6 @@ export class LedgerStorage extends Storages {
                     });
             });
         }
-        async function applyGranularity(time_stamp: number) {
-            let granularityArray = ['H', 'D', 'M', 'Y'];
-            let date = moment(new Date(time_stamp * 1000));
-            let newEntry: any = [];
-            for (let index = 0; index < granularityArray.length; index++) {
-                let element = granularityArray[index];
-                let unit = date.startOf(element as moment.unitOfTime.StartOf);
-                newEntry.push({ time_stamp: unit.unix(), granularity: granularityArray[index] });
-                if (index === (granularityArray.length - 1)) {
-                    return newEntry;
-                }
-            }
-        }
         return new Promise<void>(async (resolve, reject) => {
             let total_tx_fee: JSBI = JSBI.BigInt(0);
             let total_payload_fee: JSBI = JSBI.BigInt(0);
@@ -459,7 +455,7 @@ export class LedgerStorage extends Storages {
                 }
             }
             const average_tx_fee = JSBI.divide(sum, JSBI.BigInt(block.txs.length));
-            let newEntry = await applyGranularity(block.header.time_offset + this.genesis_timestamp);
+            let newEntry = await this.applyGranularity(block.header.time_offset + this.genesis_timestamp);
             if (newEntry.length > 0) {
                 for (let index = 0; index < newEntry.length; index++) {
                     await save_fee(this, block.header.height, newEntry[index].time_stamp, newEntry[index].granularity,
@@ -468,6 +464,24 @@ export class LedgerStorage extends Storages {
             }
             resolve();
         });
+    }
+    /**
+     * Apply a scale on data on every block recieved.
+     * @param time_stamp 
+     * @returns 
+     */
+    public async applyGranularity(time_stamp: number) {
+        let granularityArray = ['H', 'D', 'M', 'Y'];
+        let date = moment(time_stamp * 1000);
+        let newEntry: any = [];
+        for (let index = 0; index < granularityArray.length; index++) {
+            let element = granularityArray[index];
+            let unit = date.startOf(element as moment.unitOfTime.StartOf);
+            newEntry.push({ time_stamp: unit.unix(), granularity: granularityArray[index] });
+            if (index === (granularityArray.length - 1)) {
+                return newEntry;
+            }
+        }
     }
 
     /**
@@ -689,7 +703,7 @@ export class LedgerStorage extends Storages {
      * @param block: The instance of the `Block`
      */
     public putAccountStats(block: Block): Promise<void> {
-        function save_stats(storage: LedgerStorage, address: string, accountInfo: IAccountInformation, received_amount: JSBI, sent_amount: JSBI, height: Height): Promise<void> {
+        function save_stats(storage: LedgerStorage, address: string, accountInfo: IAccountInformation, received_amount: JSBI, sent_amount: JSBI, height: Height, time_stamp: number): Promise<void> {
             return new Promise<void>((resolve, reject) => {
                 storage.query(
                     `INSERT INTO accounts
@@ -715,20 +729,52 @@ export class LedgerStorage extends Storages {
                         accountInfo.total_frozen.toString(),
                         accountInfo.total_spendable.toString(),
                         accountInfo.total_balance.toString(),
-                        height.value.toString()
+                        height.value.toString(),
 
                     ])
+                    .then(async () => {
+                        let newEntry = await storage.applyGranularity(time_stamp);
+                        if (newEntry.length > 0) {
+                            for (let index = 0; index < newEntry.length; index++) {
+                                await save_account_history(storage, address, height, newEntry[index].time_stamp, accountInfo.total_balance.toString(), newEntry[index].granularity)
+                            }
+                        }
+                        resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+            });
+        }
+
+        function save_account_history(storage: LedgerStorage, address: string, height: Height, time_stamp: number, balance: string, granularity: string) {
+            return new Promise<void>((resolve, reject) => {
+                storage.run(
+                    `INSERT INTO account_history
+                        ( address, block_height, time_stamp, granularity, balance)
+                    VALUES
+                        (?, ?, ?, ?, ?)
+                    ON DUPLICATE KEY 
+                    UPDATE 
+                        balance = VALUES(balance),
+                        block_height = VALUES(block_height)`,
+                    [
+                        address,
+                        height.value.toString(),
+                        time_stamp.toString(),
+                        granularity.toString(),
+                        balance.toString(),
+                    ]
+                )
                     .then(() => {
                         resolve();
                     })
                     .catch((err) => {
                         reject(err);
                     });
-
-                return resolve();
-
             });
         }
+
         function getTXStats(storage: LedgerStorage, tx_hash: Hash) {
             let hash = tx_hash.toBinary(Endian.Little);
             let sql_sender = `
@@ -794,7 +840,8 @@ export class LedgerStorage extends Storages {
                                     if (senders[sender_index].address == receivers[receiver_index].address) {
                                         let total_sent = JSBI.subtract(JSBI.BigInt(senders[sender_index].amount), JSBI.BigInt(receivers[receiver_index].amount));
                                         let accountInfo = await this.getAccountInfo(block.header.height, senders[sender_index].address);
-                                        await save_stats(this, senders[sender_index].address, accountInfo, JSBI.BigInt(0), total_sent, block.header.height);
+
+                                        await save_stats(this, senders[sender_index].address, accountInfo, JSBI.BigInt(0), total_sent, block.header.height, block.header.time_offset + this.genesis_timestamp);
                                         senders.splice(sender_index, 1);
                                         receivers.splice(receiver_index, 1);
                                     }
@@ -802,11 +849,11 @@ export class LedgerStorage extends Storages {
                             }
                             for (var receiver_index = 0; receiver_index < receivers.length; receiver_index++) {
                                 let accountInfo = await this.getAccountInfo(block.header.height, receivers[receiver_index].address);
-                                await save_stats(this, receivers[receiver_index].address, accountInfo, receivers[receiver_index].amount, JSBI.BigInt(0), block.header.height);
+                                await save_stats(this, receivers[receiver_index].address, accountInfo, receivers[receiver_index].amount, JSBI.BigInt(0), block.header.height, block.header.time_offset + this.genesis_timestamp);
                             }
                             for (var sender_index = 0; sender_index < senders.length; sender_index++) {
                                 let accountInfo = await this.getAccountInfo(block.header.height, senders[sender_index].address);
-                                await save_stats(this, senders[sender_index].address, accountInfo, JSBI.BigInt(0), senders[sender_index].amount, block.header.height);
+                                await save_stats(this, senders[sender_index].address, accountInfo, JSBI.BigInt(0), senders[sender_index].amount, block.header.height, block.header.time_offset + this.genesis_timestamp);
                             }
                         }
                         resolve();
@@ -2594,12 +2641,13 @@ export class LedgerStorage extends Storages {
             ORDER BY total_balance DESC, address ASC
             LIMIT ? OFFSET ?`
         return this.query(sql, [limit, limit * (page - 1)])
-    
+
     }
-    /*    
+   /**    
     * Get Average Fees between given time range.
     * @param from Begin date for chart history 
     * @param to End date for chart history
+    * @param filter scale in which data needed to be fetched i.e H, D, M, Y
     */
     public calculateAvgFeeChart(from: number, to: number, filter: string): Promise<any[]> {
         let sql =
@@ -2611,6 +2659,24 @@ export class LedgerStorage extends Storages {
              WHERE
                 time_stamp>=? AND  time_stamp<=? AND  granularity = ?`;
         return this.query(sql, [from, to, filter]);
+    }
+
+    /**    
+     * Get Boa Holder data between given range.
+     * @param address The address of BOA Holder
+     * @param from Begin date for chart history 
+     * @param to End date for chart history
+     * @param filter scale in which data needed to be fetched i.e H, D, M, Y
+     */
+    public getAccountChart(address: string, from: number, to: number, filter: string): Promise<any[]> {
+        let sql =
+            `SELECT
+                address, block_height, time_stamp, balance, granularity
+             FROM
+                account_history
+             WHERE
+              address=? AND time_stamp>=? AND  time_stamp<=? AND  granularity = ?`;
+        return this.query(sql, [address, from, to, filter]);
     }
 
     /**
