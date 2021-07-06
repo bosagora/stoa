@@ -544,3 +544,31 @@ CREATE TABLE IF NOT EXISTS "fees"(
     "total_fee"          BIGINT(20) NOT NULL,
     PRIMARY KEY(height)
 );
+```
+----
+
+## 15. Table **account_history**
+
+### _Schema_
+
+| Column                 | Data Type    | PK | Not NULL | Default  |Description|
+|:-----------------------|:---------    |:--:|:--------:| -------- | --------- |
+|  address               | TEXT         | Y  | Y        |          | Address of Account  |
+|  time_stamp            | INTEGER      | Y  | Y        |          | unix timestamp  |
+|  granularity           | TEXT         | Y  | Y        |          | Total Fee of Transactions in Block  |
+|  block_height          | INTEGER      |    | Y        |          | block height  |
+|  balance               | BIGINT(20)   |    | Y        |          | Balance of user at particular time  |
+
+
+### _Create Script_
+```sql
+CREATE TABLE IF NOT EXISTS "account_history"(
+    "address"            TEXT       NOT NULL,
+    "time_stamp"         INTEGER    NOT NULL,
+    "granularity"        TEXT       NOT NULL,
+    "block_height"       INTEGER    NOT NULL,
+    "balance"            BIGINT(20) NOT NULL,
+    
+    PRIMARY KEY ("address(64)","time_stamp","granularity(64)");
+);
+```

@@ -978,7 +978,7 @@ describe("Test of the path /utxo for freezing", () => {
 
         //  Second Transaction
         //  Refund amount is      40,000 BOA
-        //  Freezing amount is 2,400,000 BOA
+        //  Freezing amount is 2,399,999.9990480 BOA
         let tx2 = new Transaction(
             [new TxInput(new Hash(response.data[0].utxo))],
             [
@@ -989,7 +989,7 @@ describe("Test of the path /utxo for freezing", () => {
                 ),
                 new TxOutput(
                     OutputType.Freeze,
-                    JSBI.BigInt("24000000000000"),
+                    JSBI.BigInt("23999999990480"),
                     new PublicKey("boa1xrard006yhapr2dzttap6yg3l0rv5yf94hdnmmfj5zkwhhyw80sj785segs")
                 ),
             ],
@@ -1039,7 +1039,7 @@ describe("Test of the path /utxo for freezing", () => {
         let utxo_array: Array<any> = response.data;
         assert.strictEqual(utxo_array.length, 2);
 
-        let freeze_utxo = utxo_array.find((m) => m.amount === "24000000000000");
+        let freeze_utxo = utxo_array.find((m) => m.amount === "23999999990480");
         assert.strictEqual(freeze_utxo.type, OutputType.Freeze);
 
         // It was frozen because the amount of the refund was larger than 40,000 BOA.

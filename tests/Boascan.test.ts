@@ -621,7 +621,7 @@ describe("Test of Stoa API Server", () => {
     it("Test for /holders", async () => {
         let uri = URI(host).port(port).directory("/holders");
         let response = await client.get(uri.toString());
-        // console.log(response);
+    
         let expected = [
             {
                 address: 'boa1xpfp00tr86d9zdgv3uy08qs0ld5s3wmx869yte68h3y4erteyn3wkq692jq',
@@ -724,17 +724,35 @@ describe("Test of Stoa API Server", () => {
                 total_balance: 24399999990480
             }
         ];
+        assert.deepStrictEqual(response.data, expected);
+    });
+    it('Test for path /holder_balance_history', async () => {
+        let uri = URI(host)
+            .port(port)
+            .directory("/holder_balance_history")
+            .filename("boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67")
+            .setSearch("date", "1609545600")
+            .setSearch("filter", "H")
+        let response = await client.get(uri.toString());
+        let expected = [{
+                address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67',
+                block_height: 1,
+                granularity: 'H',
+                time_stamp: 1609459200,
+                balance: 0
+            }];
+        assert.deepStrictEqual(response.data, expected);
     });
     it('Test for path /average_fee_chart/', async () => {
         let uri = URI(host)
             .port(port)
             .directory("/average_fee_chart")
             .setSearch("date", "1609459200")
-            .setSearch("filter", "D")
+            .setSearch("filter", "M")
         let response = await client.get(uri.toString());
         let expected = [{
             height: 1,
-            granularity: 'D',
+            granularity: 'M',
             time_stamp: 1609459200,
             average_tx_fee: 188,
             total_tx_fee: 1904000,
