@@ -631,7 +631,9 @@ describe("Test of Stoa API Server", () => {
                 total_reward: 0,
                 total_frozen: 0,
                 total_spendable: 48799999980960,
-                total_balance: 48799999980960
+                total_balance: 48799999980960,
+                percentage: 0,
+                value: 0
             },
             {
                 address: 'boa1xpfq00t5f0uv8v0wzclvt72fl3x2vz4z48harsx5zdks6m5pecxey9vh4e8',
@@ -641,7 +643,9 @@ describe("Test of Stoa API Server", () => {
                 total_reward: 0,
                 total_frozen: 0,
                 total_spendable: 48799999980960,
-                total_balance: 48799999980960
+                total_balance: 48799999980960,
+                percentage: 0,
+                value: 0
             },
             {
                 address: 'boa1xpfr005hadezanqmze3f99st3v4n8q3zu0lrzsc3t4mvcj7fnrn7sseah6p',
@@ -651,7 +655,9 @@ describe("Test of Stoa API Server", () => {
                 total_reward: 0,
                 total_frozen: 0,
                 total_spendable: 48799999980960,
-                total_balance: 48799999980960
+                total_balance: 48799999980960,
+                percentage: 0,
+                value: 0
             },
             {
                 address: 'boa1xqfn00yp3myu4jt2se80flcksf9j2nta3t6yvhfh7gugzllkmzwfskczvk5',
@@ -661,7 +667,9 @@ describe("Test of Stoa API Server", () => {
                 total_reward: 0,
                 total_frozen: 0,
                 total_spendable: 48799999980960,
-                total_balance: 48799999980960
+                total_balance: 48799999980960,
+                percentage: 0,
+                value: 0
             },
             {
                 address: 'boa1xqfs008pm8f73te5dsys46ewdk3ha5wzlfcz2d6atn2z4nayunp66aelwmr',
@@ -671,7 +679,9 @@ describe("Test of Stoa API Server", () => {
                 total_reward: 0,
                 total_frozen: 0,
                 total_spendable: 48799999980960,
-                total_balance: 48799999980960
+                total_balance: 48799999980960,
+                percentage: 0,
+                value: 0
             },
             {
                 address: 'boa1xrft007petq803lnkk4820l8ya6xpshrl3tg9az8yghejm9t7mwgc8wtgrs',
@@ -681,7 +691,9 @@ describe("Test of Stoa API Server", () => {
                 total_reward: 0,
                 total_frozen: 0,
                 total_spendable: 48799999980960,
-                total_balance: 48799999980960
+                total_balance: 48799999980960,
+                percentage: 0,
+                value: 0
             },
             {
                 address: 'boa1xzfu00gaqcea0j0n4jdmveve4hhwsa264tthyaqrtyx9pu0rrc3rsma3zdy',
@@ -691,7 +703,9 @@ describe("Test of Stoa API Server", () => {
                 total_reward: 0,
                 total_frozen: 0,
                 total_spendable: 48799999980960,
-                total_balance: 48799999980960
+                total_balance: 48799999980960,
+                percentage: 0,
+                value: 0
             },
             {
                 address: 'boa1xzfv00s88ky9mf50nqngvztmnmtjzv4yr0w555aet366ssrv5zqaj6zsga3',
@@ -701,7 +715,9 @@ describe("Test of Stoa API Server", () => {
                 total_reward: 0,
                 total_frozen: 0,
                 total_spendable: 48799999980960,
-                total_balance: 48799999980960
+                total_balance: 48799999980960,
+                percentage: 0,
+                value: 0
             },
             {
                 address: 'boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj',
@@ -711,7 +727,9 @@ describe("Test of Stoa API Server", () => {
                 total_reward: 0,
                 total_frozen: 0,
                 total_spendable: 24399999990480,
-                total_balance: 24399999990480
+                total_balance: 24399999990480,
+                percentage: 0,
+                value: 0
             },
             {
                 address: 'boa1xparl00ghmujzcsrt8jacj06sdq002s3s4uljceqn98awvy4vsya5qmvqvu',
@@ -721,7 +739,9 @@ describe("Test of Stoa API Server", () => {
                 total_reward: 0,
                 total_frozen: 0,
                 total_spendable: 24399999990480,
-                total_balance: 24399999990480
+                total_balance: 24399999990480,
+                percentage: 0,
+                value: 0
             }
         ];
         assert.deepStrictEqual(response.data, expected);
@@ -741,6 +761,26 @@ describe("Test of Stoa API Server", () => {
                 time_stamp: 1609459200,
                 balance: 0
             }];
+        assert.deepStrictEqual(response.data, expected);
+    });    
+    it('Test for /holder/:address', async () => {
+        let uri = URI(host)
+            .port(port)
+            .directory("/holder")
+            .filename("boa1xpfp00tr86d9zdgv3uy08qs0ld5s3wmx869yte68h3y4erteyn3wkq692jq")
+        let response =  await client.get(uri.toString());
+        let expected = {
+            address: 'boa1xpfp00tr86d9zdgv3uy08qs0ld5s3wmx869yte68h3y4erteyn3wkq692jq',
+            tx_count: 2,
+            total_received: 48799999980960,
+            total_sent: 0,
+            total_reward: 0,
+            total_spendable: 0,
+            total_frozen: 0,
+            total_balance: 48799999980960,
+            percentage: 0,
+            value: 0
+        };
         assert.deepStrictEqual(response.data, expected);
     });
     it('Test for path /average_fee_chart/', async () => {

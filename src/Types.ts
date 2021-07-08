@@ -843,6 +843,16 @@ export interface IBOAHolder {
      * Total balance of holder
      */
     total_balance: number;
+
+    /**
+     * percentage of holder
+     */
+    percentage: number;
+
+    /**
+     * value of holder
+     */
+    value: number;
 }
 
 /**

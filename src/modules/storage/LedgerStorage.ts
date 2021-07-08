@@ -2643,7 +2643,26 @@ export class LedgerStorage extends Storages {
         return this.query(sql, [limit, limit * (page - 1)])
 
     }
-   /**    
+
+    /**
+     * Get BOA Holder by address.
+     * @param address Address of the holder
+     * @returns returns the Promise with requested data
+     * and if an error occurs the .catch is called with an error. 
+     */
+    public getBOAHolder(address: string): Promise<any> {
+        let sql = `
+            SELECT 
+	            address, tx_count, total_received, total_sent, 
+	            total_reward, total_frozen, total_balance
+            FROM
+                accounts
+            WHERE address = ?`
+        return this.query(sql, [address])
+    
+    }
+
+    /*    
     * Get Average Fees between given time range.
     * @param from Begin date for chart history 
     * @param to End date for chart history
