@@ -1,4 +1,4 @@
-import { Block, Endian, Hash, hash, hashFull, Height, PreImageInfo, Transaction, Utils } from "boa-sdk-ts";
+import { Block, Endian, Hash, hash, hashFull, Height, PreImageInfo, PublicKey, Transaction, Utils } from "boa-sdk-ts";
 import { cors_options } from "./cors";
 import { AgoraClient } from "./modules/agora/AgoraClient";
 import { IDatabaseConfig } from "./modules/common/Config";
@@ -190,6 +190,7 @@ class Stoa extends WebService {
         this.app.post("/transaction_received", this.putTransaction.bind(this));
         this.app.get("/holders", this.getBoaHolders.bind(this));
         this.app.get("/holder_balance_history/:address", this.getHolderBalanceHistory.bind(this));
+        this.app.get("/holder/:address", this.getBoaHolder.bind(this));
         this.app.get("/average_fee_chart", this.averageFeeChart.bind(this));
 
         let height: Height = new Height("0");
@@ -2011,6 +2012,8 @@ class Stoa extends WebService {
                                 total_frozen: row.total_frozen,
                                 total_spendable: row.total_spendable,
                                 total_balance: row.total_balance,
+                                percentage: 0,      //FIX ME static data because of unavailability of real data
+                                value: 0,           //FIX ME static data because of unavailability of real data
                             });
                     }
                     return res.status(200).send(JSON.stringify(holderList));
@@ -2129,6 +2132,49 @@ class Stoa extends WebService {
 
     }
 
+    /* Get BOA Holder
+     * @returns Returns BOA Holder of the ledger.
+     */
+    public async getBoaHolder(req: express.Request, res: express.Response) {
+
+        const address = String(req.params.address);
+
+        logger.http(`GET /holder/${address}`);
+        let holderAddress: PublicKey;
+        try {
+            holderAddress = new PublicKey(address);
+        } catch (error) {
+            res.status(400).send(`Invalid value for parameter 'address': ${address}`);
+            return;
+        }
+        this.ledger_storage.getBOAHolder(address)
+            .then((data: any[]) => {
+                if (data.length === 0) {
+                    return res.status(204).send(`The data does not exist.`);
+                }
+                else {
+                    let holder: IBOAHolder =
+                    {
+                        address: data[0].address,
+                        tx_count: data[0].tx_count,
+                        total_received: data[0].total_received,
+                        total_sent: data[0].total_sent,
+                        total_reward: data[0].total_reward,
+                        total_frozen: data[0].total_frozen,
+                        total_spendable: 0,
+                        total_balance: data[0].total_balance,
+                        percentage: 0,
+                        value: 0,
+                    };
+                    return res.status(200).send(JSON.stringify(holder));
+                }
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err);
+                return res.status(500).send("Failed to data lookup");
+            })
+    }
+
     /**
      * GET /average_fee_chart
      * Called when a request is received through the `/average_fee_chart` handler
@@ -2156,7 +2202,7 @@ class Stoa extends WebService {
                 res.status(400).send(`Invalid value for parameter 'beginDate': ${req.query.date.toString()}`);
                 return;
             }
-            
+
             filter_end = Number(req.query.date.toString());
         }
 
