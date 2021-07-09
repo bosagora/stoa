@@ -2771,7 +2771,7 @@ export class LedgerStorage extends Storages {
         return this.query(sql, [address]);
     }
 
-    /*
+    /**
      * Get Average Fees between given time range.
      * @param from Begin date for chart history
      * @param to End date for chart history
@@ -2803,6 +2803,23 @@ export class LedgerStorage extends Storages {
              WHERE
               address=? AND time_stamp>=? AND  time_stamp<=? AND  granularity = ?`;
         return this.query(sql, [address, from, to, filter]);
+    }
+
+    /**
+     * Get the status of search for block -> hash and transaction -> tx_hash
+     * @param value The hash for searching.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public exist(value: Hash): Promise<any[]> {
+        let hash = value.toBinary(Endian.Little);
+
+        let sql = `SELECT
+                (SELECT IF(EXISTS (SELECT hash FROM blocks WHERE hash= ?), 1, 0)) as block,
+                (SELECT IF(EXISTS (SELECT tx_hash FROM transactions WHERE tx_hash= ?), 1, 0)) as transaction`;
+
+        return this.query(sql, [hash, hash]);
     }
 
     /**

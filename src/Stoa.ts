@@ -192,6 +192,7 @@ class Stoa extends WebService {
         this.app.get("/holder_balance_history/:address", this.getHolderBalanceHistory.bind(this));
         this.app.get("/holder/:address", this.getBoaHolder.bind(this));
         this.app.get("/average_fee_chart", this.averageFeeChart.bind(this));
+        this.app.get("/search/hash/:hash", this.searchHash.bind(this));
 
         let height: Height = new Height("0");
         await HeightManager.init(this);
@@ -2030,8 +2031,8 @@ class Stoa extends WebService {
      * The parameter `date` is the start date of the range of dates to look up.
      * @returns Returns average transaction fee between range (date - filter)
      */
-    private async getHolderBalanceHistory(req: express.Request, res: express.Response) {   
-        
+    private async getHolderBalanceHistory(req: express.Request, res: express.Response) {
+
         let address: string = String(req.params.address);
 
         logger.http(`GET /holder_balance_history/${address}`);
@@ -2053,7 +2054,7 @@ class Stoa extends WebService {
                 res.status(400).send(`Invalid value for parameter 'beginDate': ${req.query.date.toString()}`);
                 return;
             }
-            
+
             filter_end = Number(req.query.date.toString());
         }
 
@@ -2282,6 +2283,48 @@ class Stoa extends WebService {
                 res.send(500).send("Failed to data lookup")
             })
 
+    }
+
+    /**
+     * GET /search/hash
+     * Called when a request is received through the `/search/hash` handler
+     * The parameter `hash` is the hash of block or transaction
+     * Returns block as true if hash matches block hash or transaction as true if hash matches tx_hash 
+     * otherwise it will respond with no data found. 
+     */
+    private searchHash(req: express.Request, res: express.Response) {
+        let hashString: string = String(req.params.hash);
+
+        logger.http(`GET GET /search/hash/${hashString}}}`);
+        let hash: Hash;
+        try {
+            hash = new Hash(hashString);
+        } catch (error) {
+            res.status(400).send(`Invalid value for parameter 'hash': ${hashString}`);
+            return;
+        }
+
+        this.ledger_storage
+            .exist(hash)
+            .then((data: any) => {
+                if (data === undefined) {
+                    res.status(500).send("Failed to data lookup");
+                    return;
+                } else {
+                    if (!(data[0].block || data[0].transaction)) {
+                        return res.status(204).send(`The data does not exist. 'hash': (${hash})`);
+                    }
+                    return res.status(200).send(JSON.stringify(data[0]));
+                }
+            })
+            .catch((err) => {
+                logger.error("Failed to hash search data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    success: false,
+                });
+                res.status(500).send("Failed to data lookup");
+            });
     }
 
     /**
