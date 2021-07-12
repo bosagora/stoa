@@ -12,7 +12,7 @@
 *******************************************************************************/
 
 import {
-    BitField,
+    BitMask,
     Block,
     BlockHeader,
     Enrollment,
@@ -240,7 +240,7 @@ describe("Test of Stoa API Server", () => {
             new Hash(Buffer.alloc(Hash.Width)),
             new Height("19"),
             new Hash(Buffer.alloc(Hash.Width)),
-            new BitField([]),
+            BitMask.fromString(""),
             new Signature(Buffer.alloc(Signature.Width)),
             [enrollment],
             new Hash(Buffer.alloc(Hash.Width)),
