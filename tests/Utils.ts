@@ -18,7 +18,7 @@ import { URL } from "url";
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import {
-    BitField,
+    BitMask,
     Block,
     BlockHeader,
     handleNetworkError,
@@ -442,7 +442,7 @@ export function createBlock(prev_block: Block, txs: Array<Transaction>): Block {
         hashFull(prev_block.header),
         new Height(JSBI.add(prev_block.header.height.value, JSBI.BigInt(1))),
         merkle_root,
-        new BitField([]),
+        BitMask.fromString(""),
         new Signature(Buffer.alloc(Signature.Width)),
         [],
         new Hash(Buffer.alloc(Hash.Width)),
