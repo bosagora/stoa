@@ -1,4 +1,16 @@
-import { Block, Endian, Hash, hash, hashFull, Height, PreImageInfo, PublicKey, Transaction, Utils } from "boa-sdk-ts";
+import {
+    Block,
+    BlockHeader,
+    Endian,
+    Hash,
+    hash,
+    hashFull,
+    Height,
+    PreImageInfo,
+    PublicKey,
+    Transaction,
+    Utils
+} from "boa-sdk-ts";
 import { cors_options } from "./cors";
 import { AgoraClient } from "./modules/agora/AgoraClient";
 import { IDatabaseConfig } from "./modules/common/Config";
@@ -186,6 +198,7 @@ class Stoa extends WebService {
         this.app.get("/coinmarketcap", this.getCoinMarketCap.bind(this));
         this.app.get("/coinmarketchart", this.getBoaPriceChart.bind(this));
         this.app.post("/block_externalized", this.postBlock.bind(this));
+        this.app.post("/block_header_updated", this.postBlockHeaderUpdate.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
         this.app.post("/transaction_received", this.putTransaction.bind(this));
         this.app.get("/holders", this.getBoaHolders.bind(this));
@@ -1254,6 +1267,34 @@ class Stoa extends WebService {
     }
 
     /**
+     * POST /block_header_updated
+     *
+     * When a request is received through the `/block_header_updated` handler
+     * we we call the storage handler asynchronously and  immediately
+     * respond to Agora.
+     */
+    private postBlockHeaderUpdate(req: express.Request, res: express.Response) {
+        if (req.body.header === undefined) {
+            res.status(400).send({
+                statusMessage: "Missing 'header' object in body",
+            });
+            return;
+        }
+
+        logger.http(`POST /block_header_updated header=${req.body.header.toString()}`, {
+            operation: Operation.db,
+            height: "",
+            success: true,
+        });
+
+        this.pending = this.pending.then(() => {
+            return this.task({ type: "block_header", data: req.body.header });
+        });
+
+        res.status(200).send();
+    }
+
+    /**
      * POST /preimage_received
      *
      * When a request is received through the `/preimage_received` handler
@@ -1723,6 +1764,39 @@ class Stoa extends WebService {
                     logger.error("Failed to store the payload of a push to the DB: " + err, {
                         operation: Operation.db,
                         height: HeightManager.height.toString(),
+                        success: false,
+                    });
+                    reject(err);
+                }
+            } else if (stored_data.type === "block_header") {
+                try {
+                    const block_header = BlockHeader.reviver("", stored_data.data);
+                    const updated = await this.ledger_storage.updateBlockHeader(block_header);
+                    const put = await this.ledger_storage.putBlockHeaderHistory(block_header, HeightManager.height);
+                    if (updated)
+                        logger.info(
+                            `Update a blockHeader : ${block_header.toString()}, ` +
+                            `block height : ${block_header.height.toString()}`,
+                            {
+                                operation: Operation.db,
+                                height: block_header.height.toString(),
+                                success: true,
+                            });
+                    if (put)
+                        logger.info(
+                            `puts a blockHeader history : ${block_header.toString()}, ` +
+                            `block height : ${block_header.height.toString()}`,
+                            {
+                                operation: Operation.db,
+                                height: block_header.height.toString(),
+                                success: true,
+                            });
+
+                    resolve();
+                } catch (err) {
+                    logger.error("Failed to store the block_header of a update to the DB: " + err, {
+                        operation: Operation.db,
+                        height: "",
                         success: false,
                     });
                     reject(err);

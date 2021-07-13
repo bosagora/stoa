@@ -279,7 +279,37 @@ CREATE TABLE IF NOT EXISTS "merkle_trees" (
 ```
 ----
 
-## 10. Table **information**
+## 10. Table **blocks_header_updated_history**
+
+### _Schema_
+
+| Column            | Data Type | PK | Not NULL | Default  |Description|
+|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
+| block_height      | INTEGER   | Y  | Y        |          | The updated block height |
+| current_height    | INTEGER   |    | Y        |          | The current block height |
+| signature         | TINYBLOB  | Y  | Y        |          | Schnorr multisig of all validators which signed this block |
+| hash              | TINYBLOB  |    | Y        |          | The hash of the current block |
+| validators        | TEXT      |    | Y        |          | BitMask containing the validators' key indices which signed the block |
+| missing_validators| TEXT      |    | N        |          | List of indices to the validator UTXO set which have not revealed the preimage |
+| updated_time      | INTEGER   | Y  | Y        |          | Updated timestamp |
+
+### _Create Script_
+
+```sql
+CREATE TABLE IF NOT EXISTS "blocks_header_updated_history" 
+    "block_height"        INTEGER  NOT NULL,
+    "current_height"      INTEGER  NOT NULL,
+    "signature"           TINYBLOB NOT NULL,
+    "hash"                TINYBLOB NOT NULL,
+    "validators"          TEXT     NOT NULL,
+    "missing_validators   TEXT     NULL,
+    "updated_time"        INTEGER  NOT NULL,
+    PRIMARY KEY("block_height","signature","updated_time")
+)
+```
+----
+
+## 11. Table **information**
 
 It can store information that is required for operation.
 The following data is recorded when the most recently recorded block height is 100.
@@ -305,7 +335,7 @@ CREATE TABLE IF NOT EXISTS "information" (
 
 ----
 
-## 11. Table **transaction_pool**
+## 12. Table **transaction_pool**
 
 ### _Schema_
 
@@ -340,7 +370,7 @@ CREATE TABLE IF NOT EXISTS "transaction_pool" (
 
 ----
 
-## 12. Table **tx_input_pool**
+## 13. Table **tx_input_pool**
 
 ### _Schema_
 
@@ -367,7 +397,7 @@ CREATE TABLE IF NOT EXISTS "tx_input_pool" (
 
 ----
 
-## 13. Table **tx_output_pool**
+## 14. Table **tx_output_pool**
 
 ### _Schema_
 
@@ -398,7 +428,7 @@ CREATE TABLE IF NOT EXISTS "tx_output_pool" (
 
 ----
 
-## 14. Table **blocks_stats**
+## 15. Table **blocks_stats**
 
 ### _Schema_
 
@@ -426,7 +456,7 @@ Create TABLE IF NOT EXISTS "blocks_stats" (
 ```
 ----
 
-## 15. Table **marketcap**
+## 16. Table **marketcap**
 
 ### _Schema_
 
@@ -451,7 +481,7 @@ Create TABLE IF NOT EXISTS "marketcap" (
 );
 ```
 
-## 16. Table **tx_pool**
+## 17. Table **tx_pool**
 
 ### _Schema_
 
@@ -469,7 +499,7 @@ CREATE TABLE IF NOT EXISTS tx_pool (
     PRIMARY KEY (`key`(64))
 );
 ```
-## 17. Table **fee_mean_disparity**
+## 18. Table **fee_mean_disparity**
 
 ### _Schema_
 
@@ -489,7 +519,7 @@ CREATE TABLE IF NOT EXISTS fee_mean_disparity (
 ```
 ----
 
-## 16. Table **accounts**
+## 19. Table **accounts**
 
 ### Schema
 
@@ -520,7 +550,7 @@ CREATE TABLE IF NOT EXISTS "accounts"(
 );
 ```
 
-## 15. Table **fees**
+## 20. Table **fees**
 
 ### _Schema_
 
@@ -547,7 +577,7 @@ CREATE TABLE IF NOT EXISTS "fees"(
 ```
 ----
 
-## 15. Table **account_history**
+## 21. Table **account_history**
 
 ### _Schema_
 

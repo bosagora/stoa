@@ -12,9 +12,15 @@
 *******************************************************************************/
 
 import * as assert from "assert";
-import { Block, Endian, Hash, Height, JSBI, PreImageInfo, SodiumHelper } from "boa-sdk-ts";
+import { Block, BlockHeader, Endian, Hash, Height, JSBI, PreImageInfo, SodiumHelper } from "boa-sdk-ts";
 import { LedgerStorage } from "../src/modules/storage/LedgerStorage";
-import { sample_data, sample_data2, sample_preImageInfo } from "./Utils";
+import {
+    block1_sample_updated_header_data,
+    block1_sample_updated_header_data_raw,
+    sample_data,
+    sample_data2,
+    sample_preImageInfo
+} from "./Utils";
 
 import { BOASodium } from "boa-sodium-ts";
 import * as fs from "fs";
@@ -439,5 +445,54 @@ describe("Tests storing transaction pools of a transaction", () => {
         // Check the transaction on the transaction pool is cleared
         let after_pool_rows = await ledger_storage.getTransactionPool();
         assert.deepStrictEqual(after_pool_rows.length, 0);
+    });
+});
+
+describe("Tests update blockHeader", () => {
+    let ledger_storage: LedgerStorage;
+    let testDBConfig: IDatabaseConfig;
+
+    before("Wait for the package libsodium to finish loading", async () => {
+        SodiumHelper.assign(new BOASodium());
+        await SodiumHelper.init();
+    });
+
+    before("Preparation the ledgerStorage", async () => {
+        testDBConfig = await MockDBConfig();
+        return LedgerStorage.make(testDBConfig, 1609459200).then((result) => {
+            ledger_storage = result;
+        });
+    });
+
+    after("Close Storage", () => {
+        ledger_storage.dropTestDB(testDBConfig.database);
+        ledger_storage.close();
+    });
+
+    it("Tests to update a blockHeader and put a blockHeader history", async () => {
+        const block0 = Block.reviver("", sample_data[0]);
+        const block1 = Block.reviver("", sample_data[1]);
+        const block_header: BlockHeader = BlockHeader.reviver("",block1_sample_updated_header_data[0].header);
+
+        // Write the Genesis block & block1
+        await ledger_storage.putBlocks(block0);
+        await ledger_storage.putBlocks(block1);
+
+        let changes = await ledger_storage.updateBlockHeader(block_header);
+        let put = await ledger_storage.putBlockHeaderHistory(block_header, new Height("1"));
+
+        assert.strictEqual(changes, 1);
+        assert.strictEqual(put, 1);
+    });
+
+    it("Test to updated a blockHeader", async () => {
+        const block0 = Block.reviver("", sample_data[0]);
+        const block1 = Block.reviver("", sample_data[1]);
+        const block_header: BlockHeader = BlockHeader.reviver("",block1_sample_updated_header_data[0].header);
+
+        let rows = await ledger_storage.getBlock(new Height("1"));
+        assert.deepStrictEqual(rows.length, 1);
+        assert.deepStrictEqual(rows[0].validators, block_header.validators.toString());
+        assert.deepStrictEqual(rows[0].signature.toString(), block_header.signature.toString());
     });
 });

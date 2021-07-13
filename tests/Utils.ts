@@ -43,11 +43,20 @@ export const sample_data_raw = (() => {
         fs.readFileSync("tests/data/Block.1.sample1.json", "utf-8"),
     ];
 })();
+export const block1_sample_updated_header_data_raw = (() => {
+    return [fs.readFileSync("tests/data/Block.1.updated_header.sample.json", "utf-8")];
+})();
 export const marketcap_sample_data_raw = (() => {
     return [fs.readFileSync("tests/data/marketcap.sample1.json", "utf-8")];
 })();
 export const market_cap_history_sample_data_raw = (() => {
     return [fs.readFileSync("tests/data/Recovery.marketcap.sample1.json", "utf-8")];
+})();
+
+export const block1_sample_updated_header_data = (() => {
+    let record = [];
+    for (let elem of block1_sample_updated_header_data_raw) record.push(JSON.parse(elem));
+    return record;
 })();
 
 export const market_cap_sample_data = (() => {

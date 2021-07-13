@@ -13,6 +13,7 @@
 
 import {
     Block,
+    BlockHeader,
     Endian,
     Enrollment,
     Hash,
@@ -212,6 +213,18 @@ export class LedgerStorage extends Storages {
             PRIMARY KEY(block_height, merkle_index)
         );
 
+        CREATE TABLE IF NOT EXISTS blocks_header_updated_history
+        (
+            block_height        INTEGER  NOT NULL,
+            current_height      INTEGER  NOT NULL,
+            signature           TINYBLOB NOT NULL,
+            hash                TINYBLOB NOT NULL,
+            validators          TEXT     NOT NULL,
+            missing_validators  TEXT     NULL,
+            updated_time        INTEGER  NOT NULL,
+            PRIMARY KEY(block_height, signature(64), updated_time)
+        );
+
         CREATE TABLE IF NOT EXISTS information
         (
             keyname             TEXT       NOT NULL,
@@ -391,6 +404,7 @@ export class LedgerStorage extends Storages {
                     await this.putBlockstats(block);
                     await this.putFeeDisparity(block);
                     await this.putAccountStats(block);
+                    await this.putBlockHeaderHistory(block.header, block.header.height);
                     await this.commit();
                 } catch (error) {
                     await this.rollback();
@@ -650,6 +664,75 @@ export class LedgerStorage extends Storages {
                 }
                 resolve();
             })();
+        });
+    }
+
+    /**
+     * Update a blockHeader
+     * The blockheader can have signatures from validators
+     * added even after the block has been externalized.
+     */
+    public updateBlockHeader(block_header: BlockHeader): Promise<number> {
+        return new Promise<number>((resolve, reject) => {
+            this.run(
+                `UPDATE blocks
+                    SET validators = ?,
+                        signature = ?,
+                        missing_validators = ?
+                    WHERE
+                        height = ?`,
+                [
+                    block_header.validators.toString(),
+                    block_header.signature.toString(),
+                    block_header.missing_validators.toString(),
+                    block_header.height.toString(),
+                ]
+            )
+                .then((result) => {
+                    resolve(result.affectedRows);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
+    }
+
+    /**
+     * Puts a block header updated history to database
+     * @param block a block header data
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called and if an error occurs the `.catch`
+     * is called with an error.
+     */
+    public putBlockHeaderHistory(header: BlockHeader, current_height: Height): Promise<number> {
+        return new Promise<number>((resolve, reject) => {
+            // That's not gonna happen. Check if the hash changes.
+            const hash = hashFull(header);
+            this.run(
+                    `INSERT INTO blocks_header_updated_history
+                        (block_height, current_height, signature, hash, validators, missing_validators, updated_time)
+                    VALUES
+                        (?, ?, ?, ?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE
+                         block_height = VALUES(block_height),
+                         signature = VALUES(signature),
+                         updated_time = VALUES(updated_time)`,
+                    [
+                        header.height.toString(),
+                        current_height.toString(),
+                        header.signature.toBinary(Endian.Little),
+                        hash.toBinary(Endian.Little),
+                        header.validators.toString(),
+                        header.missing_validators.toString(),
+                        moment().unix(),
+                    ]
+                )
+                .then((result) => {
+                    resolve(result.affectedRows);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
         });
     }
 
