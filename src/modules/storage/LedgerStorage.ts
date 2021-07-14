@@ -2231,34 +2231,71 @@ export class LedgerStorage extends Storages {
      * @param address The input address of the pending transaction
      */
     public getWalletTransactionsPending(address: string): Promise<any[]> {
-        let sql = `SELECT
+        let sql = `
+        SELECT
+            TX.tx_hash,
+            TX.time,
+            TX.type,
+            TX.tx_fee,
+            TX.payload_fee,
+            TX.received_height,
+            (SELECT IFNULL(MAX(height), 0) as height FROM blocks) as current_height,
+            ABS(SUM(TX.income) - SUM(TX.spend)) as amount,
+            IFNULL(CASE
+                WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
+                (
+                    TX.address
+                )
+                ELSE
+                (
+                    SELECT O.address FROM tx_output_pool O
+                    WHERE TX.tx_hash = O.tx_hash AND O.address != TX.address
+                    ORDER BY O.amount DESC LIMIT 1
+                )
+            END, TX.address) AS address
+        FROM
+        (
+            SELECT
                 T.tx_hash,
                 T.time,
-                O.address,
-                IFNULL(SUM(O.amount), 0) as amount,
+                T.type,
+                S.address,
                 T.tx_fee,
                 T.payload_fee,
                 T.received_height,
-                (SELECT IFNULL(MAX(height), 0) as height FROM blocks) as current_height
+                0 as income,
+                IFNULL(SUM(S.amount), 0) AS spend
             FROM
-                transaction_pool T
-                LEFT OUTER JOIN tx_output_pool O
-                    ON T.tx_hash = O.tx_hash
+                tx_outputs S
+                INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
+                INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
             WHERE
-                T.tx_hash = IFNULL(
-                (
-                    SELECT
-                            I.tx_hash
-                    FROM
-                        utxos O
-                        INNER JOIN tx_input_pool I
-                            ON O.utxo_key = I.utxo
-                    WHERE
-                        O.address = ?
-                ), NULL)
-            GROUP BY T.tx_hash, O.address;`;
+                S.address = ?
+            GROUP BY T.tx_hash
+            
+            UNION ALL
+            
+            SELECT
+                T.tx_hash,
+                T.time,
+                T.type,
+                O.address,
+                T.tx_fee,
+                T.payload_fee,
+                T.received_height,
+                IFNULL(SUM(O.amount), 0) AS income,
+                0 as spend
+            FROM
+                tx_output_pool O
+                INNER JOIN transaction_pool T ON (T.tx_hash = O.tx_hash)
+            WHERE
+                O.address = ?
+            GROUP BY T.tx_hash
+        ) AS TX
+        GROUP BY TX.tx_hash
+        ORDER BY TX.time DESC`;
 
-        return this.query(sql, [address]);
+        return this.query(sql, [address, address]);
     }
 
     /**
