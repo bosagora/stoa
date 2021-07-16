@@ -14,9 +14,10 @@
 
 *******************************************************************************/
 
-import { MongoClient } from "mongodb";
+import mongoose from 'mongoose';
 import path from "path";
 import winston, { config } from "winston";
+import { Config } from './Config';
 import { MongoDB } from "winston-mongodb";
 const { combine, timestamp, label, printf, metadata, json } = winston.format;
 const logFormat = printf(({ level, message, label, timestamp }) => {
@@ -24,6 +25,11 @@ const logFormat = printf(({ level, message, label, timestamp }) => {
 });
 
 export class Logger {
+    /**
+     * MongoDb instance
+     */
+    public static dbInstance: any;
+
     /**
      * Create the 'default' file transport to be added to a logger
      *
@@ -70,30 +76,55 @@ export class Logger {
     }
     /**
      * Create the 'default' database transport to be added to a logger
-     *
-     *
+     * @param mongodb_url
      * @return A transport that can be passed to `logger.add`
      */
     public static defaultDatabaseTransport(mongodb_url: string) {
+        const customLevel: config.AbstractConfigSetLevels =
+        {
+            http: 0,
+            info: 1,
+            error: 2,
+            debug: 3,
+            warn: 4,
+        };
         const options = {
-            level: "http",
+            level: 'info',
             db: mongodb_url,
-            collection: "stoa_logs",
+            collection: 'operation_logs',
+            tryReconnect: true,
+            format: combine(
+                timestamp(),
+                json(),
+                metadata({ fillExcept: ['message', 'level', 'timestamp', 'label'] }),
+            ),
+            options: { useUnifiedTopology: true }
+        };
+        const access_options = {
+            level: 'http',
+            db: mongodb_url,
+            collection: 'access_logs',
             tryReconnect: true,
             format: combine(timestamp(), json(), metadata({ fillExcept: ["message", "level", "timestamp", "label"] })),
             options: { useUnifiedTopology: true },
         };
-        return new MongoDB(options);
+        return winston.createLogger({
+            levels: customLevel,
+            transports: [
+                new MongoDB(options),
+                new MongoDB(access_options),
+            ],
+        });
     }
+
     /**
      * Method build connectivity with logging database.
      * @param mongodb_url
      * @returns Ture if successfull, and return false if connection issue occers.
      */
     public static async BuildDbConnection(mongodb_url: string) {
-        const client = new MongoClient(mongodb_url, { useUnifiedTopology: true });
         try {
-            await client.connect();
+            Logger.dbInstance = await mongoose.connect(mongodb_url, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true });
             return true;
         } catch (err) {
             logger.error(`stoa is unable to build connection for db log. Error:`, err);
