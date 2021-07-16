@@ -59,6 +59,8 @@ import { URL } from "url";
 import events from "./modules/events/events";
 import "./modules/events/handlers";
 import moment from "moment";
+import responseTime from 'response-time';
+import { isBlackList } from '../src/modules/middleware/blacklistMiddleware';
 
 class Stoa extends WebService {
     private _ledger_storage: LedgerStorage | null;
@@ -173,40 +175,45 @@ class Stoa extends WebService {
         this.app.use(bodyParser.json({ limit: "1mb" }));
         this.app.use(cors(cors_options));
 
+        this.app.use(responseTime((req: any, res: any, time: any) => {
+            logger.http(`${req.method} ${req.url}`,
+                { endpoint: req.url, RequesterIP: req.ip, protocol: req.protocol, httpStatusCode: res.statusCode, userAgent: req.headers['user-agent'], accessStatus: res.statusCode !== 200 ? 'Denied' : 'Granted', bytesTransmitted: res.socket?.bytesWritten, responseTime: time });
+        }));
+
         // Prepare routes
-        this.app.get("/block_height", this.getBlockHeight.bind(this));
-        this.app.get("/block_height_at/:time", this.getBlockHeightAt.bind(this));
-        this.app.get("/validators", this.getValidators.bind(this));
-        this.app.get("/validator/:address", this.getValidator.bind(this));
-        this.app.get("/transaction/pending/:hash", this.getTransactionPending.bind(this));
-        this.app.get("/transaction/:hash", this.getTransaction.bind(this));
-        this.app.get("/utxo/:address", this.getUTXO.bind(this));
-        this.app.post("/utxos", this.getUTXOs.bind(this));
-        this.app.get("/transaction/status/:hash", this.getTransactionStatus.bind(this));
-        this.app.get("/transaction/fees/:tx_size", this.getTransactionFees.bind(this));
-        this.app.get("/wallet/transactions/history/:address", this.getWalletTransactionsHistory.bind(this));
-        this.app.get("/wallet/transaction/overview/:hash", this.getWalletTransactionOverview.bind(this));
-        this.app.get("/wallet/transactions/pending/:address", this.getWalletTransactionsPending.bind(this));
-        this.app.get("/wallet/balance/:address", this.getWalletBalance.bind(this));
-        this.app.get("/wallet/blocks/header", this.getWalletBlocksHeader.bind(this));
-        this.app.get("/latest-blocks", this.getLatestBlocks.bind(this));
-        this.app.get("/latest-transactions", this.getLatestTransactions.bind(this));
-        this.app.get("/block-summary", this.getBlockSummary.bind(this));
-        this.app.get("/block-enrollments", this.getBlockEnrollments.bind(this));
-        this.app.get("/block-transactions", this.getBlockTransactions.bind(this));
-        this.app.get("/boa-stats", this.getBOAStats.bind(this));
-        this.app.get("/spv/:hash", this.verifyPayment.bind(this));
-        this.app.get("/coinmarketcap", this.getCoinMarketCap.bind(this));
-        this.app.get("/coinmarketchart", this.getBoaPriceChart.bind(this));
+        this.app.get("/block_height", isBlackList, this.getBlockHeight.bind(this));
+        this.app.get("/block_height_at/:time", isBlackList, this.getBlockHeightAt.bind(this));
+        this.app.get("/validators", isBlackList, this.getValidators.bind(this));
+        this.app.get("/validator/:address", isBlackList, this.getValidator.bind(this));
+        this.app.get("/transaction/pending/:hash", isBlackList, this.getTransactionPending.bind(this));
+        this.app.get("/transaction/:hash", isBlackList, this.getTransaction.bind(this));
+        this.app.get("/utxo/:address", isBlackList, this.getUTXO.bind(this));
+        this.app.post("/utxos", isBlackList, this.getUTXOs.bind(this));
+        this.app.get("/transaction/status/:hash", isBlackList, this.getTransactionStatus.bind(this));
+        this.app.get("/transaction/fees/:tx_size", isBlackList, this.getTransactionFees.bind(this));
+        this.app.get("/wallet/transactions/history/:address", isBlackList, this.getWalletTransactionsHistory.bind(this));
+        this.app.get("/wallet/transaction/overview/:hash", isBlackList, this.getWalletTransactionOverview.bind(this));
+        this.app.get("/wallet/transactions/pending/:address", isBlackList, this.getWalletTransactionsPending.bind(this));
+        this.app.get("/wallet/balance/:address", isBlackList, this.getWalletBalance.bind(this));
+        this.app.get("/wallet/blocks/header", isBlackList, this.getWalletBlocksHeader.bind(this));
+        this.app.get("/latest-blocks", isBlackList, this.getLatestBlocks.bind(this));
+        this.app.get("/latest-transactions", isBlackList, this.getLatestTransactions.bind(this));
+        this.app.get("/block-summary", isBlackList, this.getBlockSummary.bind(this));
+        this.app.get("/block-enrollments", isBlackList, this.getBlockEnrollments.bind(this));
+        this.app.get("/block-transactions", isBlackList, this.getBlockTransactions.bind(this));
+        this.app.get("/boa-stats", isBlackList, this.getBOAStats.bind(this));
+        this.app.get("/spv/:hash", isBlackList, this.verifyPayment.bind(this));
+        this.app.get("/coinmarketcap", isBlackList, this.getCoinMarketCap.bind(this));
+        this.app.get("/coinmarketchart", isBlackList, this.getBoaPriceChart.bind(this));
         this.app.post("/block_externalized", this.postBlock.bind(this));
         this.app.post("/block_header_updated", this.postBlockHeaderUpdate.bind(this));
         this.app.post("/preimage_received", this.putPreImage.bind(this));
         this.app.post("/transaction_received", this.putTransaction.bind(this));
-        this.app.get("/holders", this.getBoaHolders.bind(this));
-        this.app.get("/holder_balance_history/:address", this.getHolderBalanceHistory.bind(this));
-        this.app.get("/holder/:address", this.getBoaHolder.bind(this));
-        this.app.get("/average_fee_chart", this.averageFeeChart.bind(this));
-        this.app.get("/search/hash/:hash", this.searchHash.bind(this));
+        this.app.get("/holders", isBlackList, this.getBoaHolders.bind(this));
+        this.app.get("/holder_balance_history/:address", isBlackList, this.getHolderBalanceHistory.bind(this));
+        this.app.get("/holder/:address", isBlackList, this.getBoaHolder.bind(this));
+        this.app.get("/average_fee_chart", isBlackList, this.averageFeeChart.bind(this));
+        this.app.get("/search/hash/:hash", isBlackList, this.searchHash.bind(this));
 
         let height: Height = new Height("0");
         await HeightManager.init(this);
@@ -269,7 +276,6 @@ class Stoa extends WebService {
         let height = req.query.height !== undefined ? new Height(req.query.height.toString()) : null;
 
         if (height != null) logger.http(`GET /validators height=${height.toString()}`);
-        else logger.http(`GET /validators`);
 
         this.ledger_storage
             .getValidatorsAPI(height, null)
@@ -364,7 +370,6 @@ class Stoa extends WebService {
         let address: string = String(req.params.address);
 
         if (height != null) logger.http(`GET /validator/${address} height=${height.toString()}`);
-        else logger.http(`GET /validator/${address}}`);
 
         this.ledger_storage
             .getValidatorsAPI(height, address)
@@ -450,7 +455,6 @@ class Stoa extends WebService {
     private getTransactionStatus(req: express.Request, res: express.Response) {
         let hash: string = String(req.params.hash);
 
-        logger.http(`GET /transaction/status/${hash}}`);
 
         let tx_hash: Hash;
         try {
@@ -495,7 +499,6 @@ class Stoa extends WebService {
     private getTransactionFees(req: express.Request, res: express.Response) {
         let size: string = req.params.tx_size.toString();
 
-        logger.http(`GET /transaction/fees/${size}}`);
 
         if (!Utils.isPositiveInteger(size)) {
             res.status(400).send(`Invalid value for parameter 'tx_size': ${size}`);
@@ -535,7 +538,6 @@ class Stoa extends WebService {
     private getTransactionPending(req: express.Request, res: express.Response) {
         let hash: string = String(req.params.hash);
 
-        logger.http(`GET /transaction/pending/${hash}}`);
 
         let tx_hash: Hash;
         try {
@@ -575,7 +577,6 @@ class Stoa extends WebService {
     private getTransaction(req: express.Request, res: express.Response) {
         let hash: string = String(req.params.hash);
 
-        logger.http(`GET /transaction/${hash}}`);
 
         let tx_hash: Hash;
         try {
@@ -615,7 +616,6 @@ class Stoa extends WebService {
     private getUTXO(req: express.Request, res: express.Response) {
         let address: string = String(req.params.address);
 
-        logger.http(`GET /utxo/${address}}`);
 
         this.ledger_storage
             .getUTXO(address)
@@ -661,7 +661,6 @@ class Stoa extends WebService {
             return;
         }
 
-        logger.http(`POST /utxos utxos=${req.body.utxos.toString()}`);
 
         let utxos_hash: Array<Hash>;
         try {
@@ -730,7 +729,6 @@ class Stoa extends WebService {
     private async getWalletTransactionsHistory(req: express.Request, res: express.Response) {
         let address: string = String(req.params.address);
 
-        logger.http(`GET /wallet/transactions/history/${address}}`);
 
         let filter_begin: number | undefined;
         let filter_end: number | undefined;
@@ -834,7 +832,6 @@ class Stoa extends WebService {
     private getWalletTransactionOverview(req: express.Request, res: express.Response) {
         let txHash: string = String(req.params.hash);
 
-        logger.http(`GET /wallet/transaction/overview/${txHash}}`);
 
         let tx_hash: Hash;
         try {
@@ -924,7 +921,6 @@ class Stoa extends WebService {
         let field: string;
         let value: string | Buffer;
 
-        logger.http(`GET /block-summary/`);
 
         // Validating Parameter - height
         if (req.query.height !== undefined && Utils.isPositiveInteger(req.query.height.toString())) {
@@ -999,7 +995,6 @@ class Stoa extends WebService {
         let field: string;
         let value: string | Buffer;
 
-        logger.http(`GET /block-enrollments/`);
 
         // Validating Parameter - height
         if (req.query.height !== undefined && Utils.isPositiveInteger(req.query.height.toString())) {
@@ -1069,7 +1064,6 @@ class Stoa extends WebService {
         let field: string;
         let value: string | Buffer;
 
-        logger.http(`GET /block-transactions/`);
 
         // Validating Parameter - height
         if (req.query.height !== undefined && Utils.isPositiveInteger(req.query.height.toString())) {
@@ -1139,7 +1133,6 @@ class Stoa extends WebService {
      * @returns Returns statistics of BOA coin.
      */
     private getBOAStats(req: express.Request, res: express.Response) {
-        logger.http(`GET /boa-stats/`);
 
         this.ledger_storage
             .getBOAStats()
@@ -1170,8 +1163,6 @@ class Stoa extends WebService {
 
     private verifyPayment(req: express.Request, res: express.Response) {
         let hash: string = String(req.params.hash);
-
-        logger.http(`GET /spv/${hash}}`);
 
         let tx_hash: Hash;
 
@@ -1309,7 +1300,6 @@ class Stoa extends WebService {
             return;
         }
 
-        logger.http(`POST /preimage_received preimage=${req.body.preimage.toString()}`);
 
         // To do
         // For a more stable operating environment,
@@ -1366,7 +1356,6 @@ class Stoa extends WebService {
             return;
         }
 
-        logger.http(`POST /transaction_received tx=${req.body.tx.toString()}`);
 
         this.pending = this.pending.then(() => {
             return this.task({ type: "transaction", data: req.body.tx });
@@ -1385,7 +1374,6 @@ class Stoa extends WebService {
     private getWalletTransactionsPending(req: express.Request, res: express.Response) {
         let address: string = String(req.params.address);
 
-        logger.http(`GET /wallet/transactions/pending/${address}}`);
 
         this.ledger_storage
             .getWalletTransactionsPending(address)
@@ -1475,7 +1463,6 @@ class Stoa extends WebService {
         let height = req.query.height !== undefined ? new Height(req.query.height.toString()) : null;
 
         if (height != null) logger.http(`GET /wallet/blocks/header height=${height.toString()}`);
-        else logger.http(`GET /wallet/blocks/header`);
 
         this.ledger_storage
             .getWalletBlocksHeaderInfo(height)
@@ -1509,7 +1496,6 @@ class Stoa extends WebService {
      * Return the highest block height stored in Stoa
      */
     private getBlockHeight(req: express.Request, res: express.Response) {
-        logger.http(`GET /block_height`);
 
         this.ledger_storage
             .getBlockHeight()
@@ -1544,7 +1530,6 @@ class Stoa extends WebService {
         }
 
         const time_stamp = Number(req.params.time.toString());
-        logger.http(`GET /block_height_at time=${time_stamp.toString()}`);
 
         this.ledger_storage
             .getEstimatedBlockHeight(time_stamp)
@@ -2106,7 +2091,6 @@ class Stoa extends WebService {
      */
     public async getBoaHolders(req: express.Request, res: express.Response) {
 
-        logger.http(`GET /holders`);
 
         let pagination: IPagination = await this.paginate(req, res);
         this.ledger_storage.getBOAHolders(pagination.pageSize, pagination.page)
@@ -2150,7 +2134,6 @@ class Stoa extends WebService {
 
         let address: string = String(req.params.address);
 
-        logger.http(`GET /holder_balance_history/${address}`);
 
         let filter;
         let filter_end;
@@ -2255,7 +2238,6 @@ class Stoa extends WebService {
 
         const address = String(req.params.address);
 
-        logger.http(`GET /holder/${address}`);
         let holderAddress: PublicKey;
         try {
             holderAddress = new PublicKey(address);
@@ -2299,7 +2281,6 @@ class Stoa extends WebService {
      */
     private async averageFeeChart(req: express.Request, res: express.Response) {
 
-        logger.http(`GET /average_fee_chart/`);
 
         let filter;
         let filter_end;
@@ -2410,7 +2391,6 @@ class Stoa extends WebService {
     private searchHash(req: express.Request, res: express.Response) {
         let hashString: string = String(req.params.hash);
 
-        logger.http(`GET GET /search/hash/${hashString}}}`);
         let hash: Hash;
         try {
             hash = new Hash(hashString);
