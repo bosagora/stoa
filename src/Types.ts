@@ -853,6 +853,11 @@ export interface IBOAHolder {
      * value of holder
      */
     value: number;
+
+    /**
+     * total number of accounts
+     */
+    full_count?: number;
 }
 
 /**
