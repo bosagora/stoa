@@ -2543,7 +2543,7 @@ export class LedgerStorage extends Storages {
      */
     public getLatestTransactions(limit: number, page: number): Promise<any[]> {
         let sql = `SELECT
-                T.block_height, T.tx_hash, T.tx_fee, T.tx_size,
+                T.block_height, T.tx_hash, T.tx_fee, T.tx_size, T.type,
                 Sum(IFNULL(O.amount,0)) as amount, B.time_stamp, count(*) OVER() AS full_count
              FROM
                  tx_outputs O
@@ -2746,7 +2746,7 @@ export class LedgerStorage extends Storages {
         let sql = `
             SELECT 
 	            address, tx_count, total_received, total_sent, 
-	            total_reward, total_frozen, total_spendable, total_balance
+	            total_reward, total_frozen, total_spendable, total_balance, count(*) OVER() AS full_count
             FROM
                 accounts
             ORDER BY total_balance DESC, address ASC

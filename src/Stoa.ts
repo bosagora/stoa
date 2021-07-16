@@ -2014,6 +2014,7 @@ class Stoa extends WebService {
                                 total_balance: row.total_balance,
                                 percentage: 0,      //FIX ME static data because of unavailability of real data
                                 value: 0,           //FIX ME static data because of unavailability of real data
+                                full_count: row.full_count
                             });
                     }
                     return res.status(200).send(JSON.stringify(holderList));
