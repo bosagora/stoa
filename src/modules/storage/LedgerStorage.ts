@@ -2372,6 +2372,52 @@ export class LedgerStorage extends Storages {
     }
 
     /**
+     * Provides a balance of address
+     * @param address The address to check the balance
+     */
+    public getWalletBalance(address: string): Promise<any[]> {
+        let sql = `
+            SELECT
+                ? as address,
+                IFNULL(SUM(amount), 0) AS balance,
+                IFNULL(SUM(CASE WHEN ((unlock_height <= height + 1) AND ((type = 0) OR (type = 2))) THEN amount ELSE 0 END), 0) AS spendable,
+                IFNULL(SUM(CASE WHEN ((unlock_height <= height + 1) AND ((type = 1))) THEN amount ELSE 0 END), 0) AS frozen,
+                IFNULL(SUM(CASE WHEN ((unlock_height > height + 1) AND ((type = 0) OR (type = 2))) THEN amount ELSE 0 END), 0) AS locked
+            FROM
+            (
+                SELECT
+                    O.utxo_key as utxo,
+                    O.amount,
+                    O.lock_type,
+                    O.lock_bytes,
+                    T.block_height,
+                    B.time_stamp as block_time,
+                    O.type,
+                    O.unlock_height,
+                    (SELECT MAX(height) as height FROM blocks) as height
+                FROM
+                    utxos O
+                    INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
+                    INNER JOIN blocks B ON (B.height = T.block_height)
+                WHERE
+                    O.address = ?
+                    AND O.utxo_key NOT IN 
+                    (
+                        SELECT
+                            S.utxo_key
+                        FROM
+                            utxos S
+                            INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
+                            INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
+                        WHERE
+                            S.address = ?
+                    )
+            ) AS T;`;
+
+        return this.query(sql, [address, address, address]);
+    }
+
+    /**
      * Provides a status of a transaction.
      * @param tx_hash The hash of the transaction
      */

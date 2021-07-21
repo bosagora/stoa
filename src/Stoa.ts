@@ -187,6 +187,7 @@ class Stoa extends WebService {
         this.app.get("/wallet/transactions/history/:address", this.getWalletTransactionsHistory.bind(this));
         this.app.get("/wallet/transaction/overview/:hash", this.getWalletTransactionOverview.bind(this));
         this.app.get("/wallet/transactions/pending/:address", this.getWalletTransactionsPending.bind(this));
+        this.app.get("/wallet/balance/:address", this.getWalletBalance.bind(this));
         this.app.get("/wallet/blocks/header", this.getWalletBlocksHeader.bind(this));
         this.app.get("/latest-blocks", this.getLatestBlocks.bind(this));
         this.app.get("/latest-transactions", this.getLatestTransactions.bind(this));
@@ -1407,6 +1408,45 @@ class Stoa extends WebService {
                     pending_array.push(tx);
                 }
                 res.status(200).send(JSON.stringify(pending_array));
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    success: false,
+                });
+                res.status(500).send("Failed to data lookup");
+            });
+    }
+
+    /**
+     * GET /wallet/balance/:address
+     *
+     * Called when a request is received through the `/wallet/balance/:address` handler
+     *
+     * Returns the balance of the address
+     */
+    private getWalletBalance(req: express.Request, res: express.Response) {
+        let address: string = String(req.params.address);
+
+        logger.http(`GET /wallet/balance/${address}}`);
+
+        this.ledger_storage
+            .getWalletBalance(address)
+            .then((data: any[]) => {
+                if (data.length == 0) {
+                    res.status(500).send("Failed to data lookup");
+                    return;
+                }
+
+                let balance = {
+                    address: data[0].address,
+                    balance: JSBI.BigInt(data[0].balance).toString(),
+                    spendable: JSBI.BigInt(data[0].spendable).toString(),
+                    frozen: JSBI.BigInt(data[0].frozen).toString(),
+                    locked: JSBI.BigInt(data[0].locked).toString(),
+                };
+                res.status(200).send(JSON.stringify(balance));
             })
             .catch((err) => {
                 logger.error("Failed to data lookup to the DB: " + err, {
