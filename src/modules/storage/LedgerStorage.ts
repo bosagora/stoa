@@ -2015,30 +2015,24 @@ export class LedgerStorage extends Storages {
                 INNER JOIN blocks B ON (B.height = T.block_height)
             WHERE
                 O.address = ?
+                AND O.utxo_key NOT IN 
+                (
+                    SELECT
+                        S.utxo_key
+                    FROM
+                        utxos S
+                        INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
+                        INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
+                    WHERE
+                        S.address = ?
+                )
             ORDER BY T.block_height, O.amount
             `;
 
-        let sql_pending = `SELECT
-                S.utxo_key as utxo
-            FROM
-                utxos S
-                INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
-                INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
-            WHERE
-                S.address = ?;
-           `;
-
-        let result: any[];
         return new Promise<any[]>((resolve, reject) => {
-            this.query(sql_utxo, [address])
-                .then((utxos: any[]) => {
-                    result = utxos;
-                    return this.query(sql_pending, [address]);
-                })
-                .then((pending: any[]) => {
-                    resolve(
-                        result.filter((n) => pending.find((m) => Buffer.compare(n.utxo, m.utxo) === 0) === undefined)
-                    );
+            this.query(sql_utxo, [address, address])
+                .then((result: any[]) => {
+                    resolve(result);
                 })
                 .catch(reject);
         });
