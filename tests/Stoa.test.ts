@@ -238,7 +238,7 @@ describe("Test of Stoa API Server", () => {
         const enrollment = new Enrollment(utxo_key, commitment, 20, Sig.fromSignature(enroll_sig));
         const header = new BlockHeader(
             new Hash(Buffer.alloc(Hash.Width)),
-            new Height("19"),
+            new Height("20"),
             new Hash(Buffer.alloc(Hash.Width)),
             BitMask.fromString(""),
             new Signature(Buffer.alloc(Signature.Width)),
@@ -252,18 +252,18 @@ describe("Test of Stoa API Server", () => {
         // put the re-enrollment
         await stoa_server.ledger_storage.putEnrollments(block);
 
-        let uri6 = URI(host).port(port).directory("validators").setSearch("height", "19");
+        let uri6 = URI(host).port(port).directory("validators").setSearch("height", "21");
 
         response = await client.get(uri6.toString());
         validators = response.data;
-        assert.strictEqual(response.data.length, 6);
+        assert.strictEqual(response.data.length, 1);
 
         validator = validators.find(
             (n) => n.address === "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku"
         );
         assert.ok(validator !== undefined);
         assert.strictEqual(validator.stake, enrollment.utxo_key.toString());
-        assert.strictEqual(validator.enrolled_at, "19");
+        assert.strictEqual(validator.enrolled_at, "20");
 
         // let uri7 = URI(host)
         // .port(port)

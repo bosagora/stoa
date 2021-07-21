@@ -1912,33 +1912,29 @@ export class LedgerStorage extends Storages {
                 enrollments.utxo_key as stake,
                 enrollments.commitment,
                 enrollments.avail_height,
-                ` +
-            cur_height +
-            ` as height,
+                ` + cur_height + ` as height,
                 validators.preimage_height,
                 validators.preimage_hash
-        FROM (SELECT MAX(block_height) as enrolled_at,
-                (CASE WHEN block_height = 0 THEN
-                      block_height
-                 ELSE
-                      block_height + 1
-                 END) as avail_height,
-                enrollment_index,
-                utxo_key,
-                commitment,
-                cycle_length,
-                enroll_sig
-             FROM enrollments
-        GROUP BY utxo_key HAVING avail_height <= ` +
-            cur_height +
-            `
-         AND ` +
-            cur_height +
-            ` < (avail_height + cycle_length)) as enrollments
-        LEFT JOIN validators
-            ON enrollments.enrolled_at = validators.enrolled_at
-            AND enrollments.utxo_key = validators.utxo_key
-        WHERE 1 = 1
+            FROM (SELECT MAX(block_height) as enrolled_at,
+                    (CASE WHEN block_height = 0 THEN
+                          block_height
+                    ELSE
+                         block_height + 1
+                    END) as avail_height,
+                    enrollment_index,
+                    utxo_key,
+                    commitment,
+                    cycle_length,
+                    enroll_sig
+                FROM enrollments
+                GROUP BY utxo_key, block_height
+                HAVING avail_height <= ` + cur_height +
+                ` AND ` + cur_height + ` <= (avail_height + cycle_length)
+                ) as enrollments
+            LEFT JOIN validators
+                ON enrollments.enrolled_at = validators.enrolled_at
+                AND enrollments.utxo_key = validators.utxo_key
+            WHERE 1 = 1
         `;
 
         if (address != null) sql += ` AND validators.address = '` + address + `'`;
