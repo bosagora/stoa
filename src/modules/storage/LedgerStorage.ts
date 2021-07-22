@@ -475,7 +475,8 @@ export class LedgerStorage extends Storages {
                     total_fee = JSBI.add(total_fee, fees[0]);
                 }
             }
-            const average_tx_fee = JSBI.divide(sum, JSBI.BigInt(block.txs.length));
+            const average_tx_fee =
+                block.txs.length !== 0 ? JSBI.divide(sum, JSBI.BigInt(block.txs.length)) : JSBI.BigInt(0);
             let newEntry = await this.applyGranularity(block.header.time_offset + this.genesis_timestamp);
             if (newEntry.length > 0) {
                 for (let index = 0; index < newEntry.length; index++) {
