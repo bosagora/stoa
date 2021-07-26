@@ -1068,15 +1068,16 @@ export class LedgerStorage extends Storages {
                 let total_fee = JSBI.BigInt(0);
                 let total_size = JSBI.BigInt(0);
                 let total_received_sql = `SELECT
-                                                SUM(IFNULL(O.amount,0)) as total_received
+                                                IFNULL(SUM(IFNULL(O.amount,0)),0) as total_received
                                                 FROM
                                                 tx_outputs O
                                                     INNER JOIN blocks B ON (O.block_height = B.height)
                                                 WHERE
                                                     block_height = ?;`;
                 let transaction_stats = `SELECT
-                                                SUM(IFNULL(T.tx_fee,0)) as tx_fee,
-                                            SUM(IFNULL(T.payload_fee,0)) as payload_fee, SUM(IFNULL(T.tx_size,0)) as total_size
+                                                IFNULL(SUM(IFNULL(T.tx_fee,0)),0) as tx_fee,
+                                                IFNULL(SUM(IFNULL(T.payload_fee,0)),0) as payload_fee, 
+                                                IFNULL(SUM(IFNULL(T.tx_size,0)),0) as total_size
                                             FROM
                                             transactions T
                                                 Inner join blocks B ON (T.block_height = B.height)
