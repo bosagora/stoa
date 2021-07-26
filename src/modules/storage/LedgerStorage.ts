@@ -300,8 +300,8 @@ export class LedgerStorage extends Storages {
         CREATE TABLE IF NOT EXISTS accounts(
             address          TEXT,
             tx_count         INTEGER,
-            total_received   BIGINT(20) UNSIGNED NOT NULL,
-            total_sent       BIGINT(20) UNSIGNED NOT NULL,
+            total_received   BIGINT(24) UNSIGNED NOT NULL,
+            total_sent       BIGINT(24) UNSIGNED NOT NULL,
             total_reward     BIGINT(20) UNSIGNED NOT NULL,
             total_frozen     BIGINT(20) UNSIGNED NOT NULL,
             total_spendable  BIGINT(20) UNSIGNED NOT NULL,
@@ -949,6 +949,8 @@ export class LedgerStorage extends Storages {
                     .then(async (rows: any[]) => {
                         let senders = [];
                         let receivers = [];
+                        let total_received = JSBI.BigInt(0);
+                        let total_sent = JSBI.BigInt(0);
 
                         for (let tx_index = 0; tx_index < rows.length; tx_index++) {
                             let hash = new Hash(rows[tx_index].tx_hash, Endian.Little);
@@ -959,11 +961,18 @@ export class LedgerStorage extends Storages {
 
                             for (var sender_index = 0; sender_index < senders.length; sender_index++) {
                                 for (var receiver_index = 0; receiver_index < receivers.length; receiver_index++) {
-                                    if (senders[sender_index].address == receivers[receiver_index].address) {
-                                        let total_sent = JSBI.subtract(
-                                            JSBI.BigInt(senders[sender_index].amount),
-                                            JSBI.BigInt(receivers[receiver_index].amount)
-                                        );
+                                    if (senders[sender_index].address === receivers[receiver_index].address) {
+                                        if (senders[sender_index].amount < receivers[receiver_index].amount) {
+                                            total_received = JSBI.subtract(
+                                                JSBI.BigInt(receivers[receiver_index].amount),
+                                                JSBI.BigInt(senders[sender_index].amount)
+                                            );
+                                        } else {
+                                            total_sent = JSBI.subtract(
+                                                JSBI.BigInt(senders[sender_index].amount),
+                                                JSBI.BigInt(receivers[receiver_index].amount)
+                                            );
+                                        }
                                         let accountInfo = await this.getAccountInfo(
                                             block.header.height,
                                             senders[sender_index].address
@@ -973,7 +982,7 @@ export class LedgerStorage extends Storages {
                                             this,
                                             senders[sender_index].address,
                                             accountInfo,
-                                            JSBI.BigInt(0),
+                                            total_received,
                                             total_sent,
                                             block.header.height,
                                             block.header.time_offset + this.genesis_timestamp

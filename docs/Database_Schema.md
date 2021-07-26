@@ -527,8 +527,8 @@ CREATE TABLE IF NOT EXISTS fee_mean_disparity (
 |:-----------------------|:-----------|:--:|:--------:| -------- | --------- |
 |  address               | TEXT       | Y  | Y        |          | Public key of the wallet|
 |  tx_count              | INTEGER    |    | Y        |          | Transaction count of BOA Holder        |
-|  total_received        | BIGINT(20) |    | Y        |          | Total received amount of BOA Holder    |
-|  total_sent            | BIGINT(20) |    | Y        |          | Total sent amount of BOA Holder        |
+|  total_received        | BIGINT(24) |    | Y        |          | Total received amount of BOA Holder    |
+|  total_sent            | BIGINT(24) |    | Y        |          | Total sent amount of BOA Holder        |
 |  total_reward          | BIGINT(20) |    | Y        |          | Total reward amount of BOA Holder      |
 |  total_frozen          | BIGINT(20) |    | Y        |          | Total freeze amount of BOA Holder      |
 |  total_spendable       | BIGINT(20) |    | Y        |          | Total received amount of BOA Holder    |
@@ -540,8 +540,8 @@ CREATE TABLE IF NOT EXISTS fee_mean_disparity (
 CREATE TABLE IF NOT EXISTS "accounts"(
     "address"          TEXT,
     "tx_count"        INTEGER,
-    "total_received"   BIGINT(20) UNSIGNED NOT NULL,
-    "total_sent"       BIGINT(20) UNSIGNED NOT NULL,
+    "total_received"   BIGINT(24) UNSIGNED NOT NULL,
+    "total_sent"       BIGINT(24) UNSIGNED NOT NULL,
     "total_reward"     BIGINT(20) UNSIGNED NOT NULL,
     "total_frozen"     BIGINT(20) UNSIGNED NOT NULL,
     "total_spendable"  BIGINT(20) UNSIGNED NOT NULL,
