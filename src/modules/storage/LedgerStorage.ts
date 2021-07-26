@@ -710,7 +710,7 @@ export class LedgerStorage extends Storages {
             // That's not gonna happen. Check if the hash changes.
             const hash = hashFull(header);
             this.run(
-                    `INSERT INTO blocks_header_updated_history
+                `INSERT INTO blocks_header_updated_history
                         (block_height, current_height, signature, hash, validators, missing_validators, updated_time)
                     VALUES
                         (?, ?, ?, ?, ?, ?, ?)
@@ -718,16 +718,16 @@ export class LedgerStorage extends Storages {
                          block_height = VALUES(block_height),
                          signature = VALUES(signature),
                          updated_time = VALUES(updated_time)`,
-                    [
-                        header.height.toString(),
-                        current_height.toString(),
-                        header.signature.toBinary(Endian.Little),
-                        hash.toBinary(Endian.Little),
-                        header.validators.toString(),
-                        header.missing_validators.toString(),
-                        moment().unix(),
-                    ]
-                )
+                [
+                    header.height.toString(),
+                    current_height.toString(),
+                    header.signature.toBinary(Endian.Little),
+                    hash.toBinary(Endian.Little),
+                    header.validators.toString(),
+                    header.missing_validators.toString(),
+                    moment().unix(),
+                ]
+            )
                 .then((result) => {
                     resolve(result.affectedRows);
                 })
@@ -1209,9 +1209,9 @@ export class LedgerStorage extends Storages {
                     AND validators.enrolled_at =
                         (SELECT block_height
                         FROM enrollments
-                        WHERE enrollments.utxo_key = ?
-                            AND ? < enrollments.cycle_length
-                        ORDER BY block_height DESC
+                        WHERE utxo_key = ?
+                            AND ? < (block_height + cycle_length)
+                        ORDER BY block_height ASC
                         LIMIT 1)
                     AND ? > validators.preimage_height`,
                 [
@@ -1913,7 +1913,9 @@ export class LedgerStorage extends Storages {
                 enrollments.utxo_key as stake,
                 enrollments.commitment,
                 enrollments.avail_height,
-                ` + cur_height + ` as height,
+                ` +
+            cur_height +
+            ` as height,
                 validators.preimage_height,
                 validators.preimage_hash
             FROM (SELECT MAX(block_height) as enrolled_at,
@@ -1929,8 +1931,11 @@ export class LedgerStorage extends Storages {
                     enroll_sig
                 FROM enrollments
                 GROUP BY utxo_key, block_height
-                HAVING avail_height <= ` + cur_height +
-                ` AND ` + cur_height + ` <= (avail_height + cycle_length)
+                HAVING avail_height <= ` +
+            cur_height +
+            ` AND ` +
+            cur_height +
+            ` <= (avail_height + cycle_length)
                 ) as enrollments
             LEFT JOIN validators
                 ON enrollments.enrolled_at = validators.enrolled_at
