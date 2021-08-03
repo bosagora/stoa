@@ -2442,6 +2442,131 @@ export class LedgerStorage extends Storages {
     }
 
     /**
+     * Returns the UTXO of the address.
+     * @param address       The public address to receive UTXO
+     * @param amount        Amount Required
+     * @param balance_type  Balance Type (0: Spendable, 1: Frozen, 2: Locked)
+     * @param filter_last   Last UTXO in previous request, If this is the first request, set this value to undefined.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the array of UTXO
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getWalletUTXO(
+        address: string,
+        amount: JSBI,
+        balance_type: number,
+        filter_last: Hash | undefined
+    ): Promise<any[]> {
+        let sql_utxo = `
+        SELECT 
+            *
+        FROM
+        (
+            SELECT
+                utxo, 
+                amount, 
+                lock_type, 
+                lock_bytes,
+                block_height, 
+                block_time, 
+                type, 
+                unlock_height, 
+                @ACCUM := @ACCUM + TB_FILTERED_UTXO.amount as accumulative,
+                include
+            FROM
+            (
+                SELECT
+                    *
+                FROM
+                (
+                    SELECT
+                        *,
+                        @INCLUDE := CASE WHEN TB_RAW.utxo = ? THEN 1
+                        WHEN @INCLUDE = 1 THEN 2
+                        ELSE @INCLUDE
+                        END AS include
+                    FROM
+                    (
+                        SELECT
+                            O.utxo_key as utxo,
+                            O.amount,
+                            O.lock_type,
+                            O.lock_bytes,
+                            T.block_height,
+                            B.time_stamp as block_time,
+                            O.type,
+                            O.unlock_height
+                        FROM
+                            utxos O
+                            INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
+                            INNER JOIN blocks B ON (B.height = T.block_height)
+                            INNER JOIN (
+                                SELECT MAX(height) as height FROM blocks
+                            ) BH
+                        WHERE
+                            O.address = ?
+                            AND 
+                            (
+                                (
+                                    ? = 0 AND ((O.type = 0) OR (O.type = 2)) AND (O.unlock_height <= BH.height + 1)
+                                ) OR
+                                (
+                                    ? = 1 AND (O.type = 1) AND (O.unlock_height <= BH.height + 1)
+                                ) OR
+                                (
+                                    ? = 2 AND ((O.type = 0) OR (O.type = 2)) AND (O.unlock_height > BH.height + 1)
+                                )
+                            )
+                            AND O.utxo_key NOT IN 
+                            (
+                                SELECT
+                                    S.utxo_key
+                                FROM
+                                    utxos S
+                                    INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
+                                    INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
+                                WHERE
+                                    S.address = ?
+                            )
+                        ORDER BY T.block_height, O.utxo_key
+                    ) AS TB_RAW,
+                    (SELECT @INCLUDE := 0) AS U
+                ) TB_FOR_FILTER_UTXO
+                WHERE 
+                    (
+                        (? <> x'00') AND (include = 2)
+                    ) OR
+                    (
+                        (? = x'00')
+                    )
+            ) AS TB_FILTERED_UTXO,
+            (SELECT @ACCUM := 0) AS R
+        ) AS TB_FOR_FILTER_AMOUNT
+        WHERE accumulative - amount < ?
+        LIMIT 1000;
+        `;
+
+        return new Promise<any[]>((resolve, reject) => {
+            let utxo = filter_last !== undefined ? filter_last.toBinary(Endian.Little) : Buffer.from([0]);
+            this.query(sql_utxo, [
+                utxo,
+                address,
+                balance_type,
+                balance_type,
+                balance_type,
+                address,
+                utxo,
+                utxo,
+                amount.toString(),
+            ])
+                .then((result: any[]) => {
+                    resolve(result);
+                })
+                .catch(reject);
+        });
+    }
+
+    /**
      * Provides a status of a transaction.
      * @param tx_hash The hash of the transaction
      */
