@@ -213,6 +213,7 @@ class Stoa extends WebService {
             this.getWalletTransactionsPending.bind(this)
         );
         this.app.get("/wallet/balance/:address", isBlackList, this.getWalletBalance.bind(this));
+        this.app.get("/wallet/utxo/:address", isBlackList, this.getWalletUTXO.bind(this));
         this.app.get("/wallet/blocks/header", isBlackList, this.getWalletBlocksHeader.bind(this));
         this.app.get("/latest-blocks", isBlackList, this.getLatestBlocks.bind(this));
         this.app.get("/latest-transactions", isBlackList, this.getLatestTransactions.bind(this));
@@ -1437,6 +1438,76 @@ class Stoa extends WebService {
                     locked: JSBI.BigInt(data[0].locked).toString(),
                 };
                 res.status(200).send(JSON.stringify(balance));
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    success: false,
+                });
+                res.status(500).send("Failed to data lookup");
+            });
+    }
+
+    /**
+     * GET /wallet/utxo/:address
+     *
+     * Called when a request is received through the `/utxo/:address` handler
+     *
+     * Returns a set of UTXOs of the address.
+     */
+    private getWalletUTXO(req: express.Request, res: express.Response) {
+        let address: string = String(req.params.address);
+
+        let amount: JSBI;
+        if (req.query.amount === undefined) {
+            res.status(400).send(`Parameters 'amount' is not entered.`);
+            return;
+        } else if (!Utils.isPositiveInteger(req.query.amount.toString())) {
+            res.status(400).send(`Invalid value for parameter 'amount': ${req.query.amount.toString()}`);
+            return;
+        }
+        amount = JSBI.BigInt(req.query.amount.toString());
+
+        // Balance Type (0: Spendable, 1: Frozen, 2: Locked)
+        let balance_type: number;
+        if (req.query.type !== undefined) {
+            balance_type = Number(req.query.type.toString());
+        } else {
+            balance_type = 0;
+        }
+
+        // Last UTXO in previous request
+        let last_utxo: Hash | undefined;
+        if (req.query.last !== undefined) {
+            try {
+                last_utxo = new Hash(String(req.query.last));
+            } catch (error) {
+                res.status(400).send(`Invalid value for parameter 'last': ${req.query.last.toString()}`);
+                return;
+            }
+        } else {
+            last_utxo = undefined;
+        }
+
+        this.ledger_storage
+            .getWalletUTXO(address, amount, balance_type, last_utxo)
+            .then((rows: any[]) => {
+                let utxo_array: Array<IUnspentTxOutput> = [];
+                for (const row of rows) {
+                    let utxo = {
+                        utxo: new Hash(row.utxo, Endian.Little).toString(),
+                        type: row.type,
+                        unlock_height: JSBI.BigInt(row.unlock_height).toString(),
+                        amount: JSBI.BigInt(row.amount).toString(),
+                        height: JSBI.BigInt(row.block_height).toString(),
+                        time: row.block_time,
+                        lock_type: row.lock_type,
+                        lock_bytes: row.lock_bytes.toString("base64"),
+                    };
+                    utxo_array.push(utxo);
+                }
+                res.status(200).send(JSON.stringify(utxo_array));
             })
             .catch((err) => {
                 logger.error("Failed to data lookup to the DB: " + err, {
