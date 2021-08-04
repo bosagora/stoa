@@ -466,6 +466,10 @@ export class LedgerStorage extends Storages {
             let total_payload_fee: JSBI = JSBI.BigInt(0);
             let total_fee: JSBI = JSBI.BigInt(0);
             let sum: JSBI = JSBI.BigInt(0);
+
+            if (Number(block.txs.length) === 0) {
+                return resolve();
+            }
             for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++) {
                 if (!block.txs[tx_idx].isCoinbase()) {
                     let fees = await this.getTransactionFee(block.txs[tx_idx]);
@@ -475,8 +479,7 @@ export class LedgerStorage extends Storages {
                     total_fee = JSBI.add(total_fee, fees[0]);
                 }
             }
-            const average_tx_fee =
-                block.txs.length !== 0 ? JSBI.divide(sum, JSBI.BigInt(block.txs.length)) : JSBI.BigInt(0);
+            const average_tx_fee = JSBI.divide(sum, JSBI.BigInt(block.txs.length));
             let newEntry = await this.applyGranularity(block.header.time_offset + this.genesis_timestamp);
             if (newEntry.length > 0) {
                 for (let index = 0; index < newEntry.length; index++) {
@@ -506,7 +509,7 @@ export class LedgerStorage extends Storages {
         let newEntry: any = [];
         for (let index = 0; index < granularityArray.length; index++) {
             let element = granularityArray[index];
-            let unit = date.startOf(element as moment.unitOfTime.StartOf);
+            let unit = date.startOf(element as moment.unitOfTime.StartOf).utc();
             newEntry.push({ time_stamp: unit.unix(), granularity: granularityArray[index] });
             if (index === granularityArray.length - 1) {
                 return newEntry;
@@ -962,7 +965,12 @@ export class LedgerStorage extends Storages {
                             for (var sender_index = 0; sender_index < senders.length; sender_index++) {
                                 for (var receiver_index = 0; receiver_index < receivers.length; receiver_index++) {
                                     if (senders[sender_index].address === receivers[receiver_index].address) {
-                                        if (senders[sender_index].amount < receivers[receiver_index].amount) {
+                                        if (
+                                            JSBI.LT(
+                                                JSBI.BigInt(senders[sender_index].amount),
+                                                JSBI.BigInt(receivers[receiver_index].amount)
+                                            )
+                                        ) {
                                             total_received = JSBI.subtract(
                                                 JSBI.BigInt(receivers[receiver_index].amount),
                                                 JSBI.BigInt(senders[sender_index].amount)
