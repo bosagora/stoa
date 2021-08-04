@@ -2157,7 +2157,9 @@ class Stoa extends WebService {
         }
 
         filter = req.query.filter.toString();
-        filter_end = moment(Number(req.query.date.toString()) * 1000).startOf('D')
+        filter_end = moment(Number(req.query.date.toString()) * 1000)
+            .utc()
+            .startOf("D");
 
         switch (filter) {
             case 'D': {
@@ -2304,7 +2306,9 @@ class Stoa extends WebService {
         }
 
         filter = req.query.filter.toString();
-        filter_end = moment(Number(req.query.date.toString()) * 1000).startOf('D')
+        filter_end = moment(Number(req.query.date.toString()) * 1000)
+            .utc()
+            .startOf("D");
 
         switch (filter) {
             case 'D': {
