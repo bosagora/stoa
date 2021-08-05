@@ -20,20 +20,10 @@ import { BOASodium } from "boa-sodium-ts";
 import express from "express";
 import URI from "urijs";
 import { URL } from "url";
-import { CoinGeckoMarket } from "../src/modules/coinmarket/CoinGeckoMarket";
 import { IDatabaseConfig } from "../src/modules/common/Config";
 import { CoinMarketService } from "../src/modules/service/CoinMarketService";
 import { MockDBConfig } from "./TestConfig";
-import {
-    delay,
-    market_cap_history_sample_data,
-    market_cap_sample_data,
-    recovery_sample_data,
-    TestAgora,
-    TestClient,
-    TestGeckoServer,
-    TestStoa,
-} from "./Utils";
+import { delay, recovery_sample_data, TestAgora, TestClient, TestStoa } from "./Utils";
 
 /**
  * This is an API server for testing and inherited from Stoa.
@@ -44,7 +34,7 @@ class TestRecoveryStoa extends TestStoa {
         testDBConfig: IDatabaseConfig,
         agora_endpoint: URL,
         port: number | string,
-        coinMarketService: CoinMarketService
+        coinMarketService?: CoinMarketService
     ) {
         super(testDBConfig, agora_endpoint, port, coinMarketService);
 
@@ -73,9 +63,6 @@ describe("Test of Recovery", () => {
     let agora_node: TestAgora;
     let stoa_server: TestRecoveryStoa;
     let testDBConfig: IDatabaseConfig;
-    let gecko_server: TestGeckoServer;
-    let gecko_market: CoinGeckoMarket;
-    let coinMarketService: CoinMarketService;
 
     let client = new TestClient();
 
@@ -92,26 +79,19 @@ describe("Test of Recovery", () => {
     after("Stop TestAgora", async () => {
         await agora_node.stop();
     });
-    before("Start a fake TestCoinGecko", () => {
-        return new Promise<void>((resolve, reject) => {
-            gecko_server = new TestGeckoServer("7876", market_cap_sample_data, market_cap_history_sample_data, resolve);
-            gecko_market = new CoinGeckoMarket(gecko_server);
-        });
-    });
-    before("Start a fake TestCoinGecko", () => {
-        coinMarketService = new CoinMarketService(gecko_market);
-    });
+
     before("Create TestStoa and start it", async () => {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestRecoveryStoa(testDBConfig, agora_addr, stoa_addr.port, coinMarketService);
+        stoa_server = new TestRecoveryStoa(testDBConfig, agora_addr, stoa_addr.port);
         await stoa_server.createStorage();
         await stoa_server.start();
     });
+
     after("Stop TestStoa", async () => {
         await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
         await stoa_server.stop();
-        await gecko_server.stop();
     });
+
     it("Test `getBlocksFrom`", async () => {
         let agora_client = new AgoraClient(agora_addr);
 

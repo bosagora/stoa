@@ -278,7 +278,7 @@ export class TestStoa extends Stoa {
         testDBConfig: IDatabaseConfig,
         agora_endpoint: URL,
         port: number | string,
-        testCoinMarketService: CoinMarketService
+        testCoinMarketService?: CoinMarketService
     ) {
         super(testDBConfig, agora_endpoint, port, "127.0.0.1", 1609459200, testCoinMarketService);
     }
@@ -286,7 +286,7 @@ export class TestStoa extends Stoa {
     public stop(): Promise<void> {
         return new Promise<void>(async (resolve, reject) => {
             if (this.server != null) {
-                await this.coinMarketService.stop();
+                if (this.coinMarketService !== undefined) await this.coinMarketService.stop();
                 this.server.close((err?) => {
                     err === undefined ? resolve() : reject(err);
                 });

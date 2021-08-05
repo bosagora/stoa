@@ -19,7 +19,7 @@ import {
     block1_sample_updated_header_data_raw,
     sample_data,
     sample_data2,
-    sample_preImageInfo
+    sample_preImageInfo,
 } from "./Utils";
 
 import { BOASodium } from "boa-sodium-ts";
@@ -472,7 +472,7 @@ describe("Tests update blockHeader", () => {
     it("Tests to update a blockHeader and put a blockHeader history", async () => {
         const block0 = Block.reviver("", sample_data[0]);
         const block1 = Block.reviver("", sample_data[1]);
-        const block_header: BlockHeader = BlockHeader.reviver("",block1_sample_updated_header_data[0].header);
+        const block_header: BlockHeader = BlockHeader.reviver("", block1_sample_updated_header_data[0].header);
 
         // Write the Genesis block & block1
         await ledger_storage.putBlocks(block0);
@@ -488,7 +488,7 @@ describe("Tests update blockHeader", () => {
     it("Test to updated a blockHeader", async () => {
         const block0 = Block.reviver("", sample_data[0]);
         const block1 = Block.reviver("", sample_data[1]);
-        const block_header: BlockHeader = BlockHeader.reviver("",block1_sample_updated_header_data[0].header);
+        const block_header: BlockHeader = BlockHeader.reviver("", block1_sample_updated_header_data[0].header);
 
         let rows = await ledger_storage.getBlock(new Height("1"));
         assert.deepStrictEqual(rows.length, 1);
