@@ -17,6 +17,7 @@ import {
     recovery_sample_data,
     sample_data,
     sample_data2,
+    FakeBlacklistMiddleware,
     TestAgora,
     TestClient,
     TestStoa,
@@ -36,6 +37,10 @@ describe("Test of Stoa API for the wallet", () => {
     let agora_server: TestAgora;
     let client = new TestClient();
     let testDBConfig: IDatabaseConfig;
+
+    before("Bypassing middleware check", () => {
+        FakeBlacklistMiddleware.assign();
+    });
 
     before("Wait for the package libsodium to finish loading", async () => {
         SodiumHelper.assign(new BOASodium());
@@ -239,6 +244,10 @@ describe("Test of Stoa API for the wallet with `sample_data`", () => {
     let agora_server: TestAgora;
     let client = new TestClient();
     let testDBConfig: IDatabaseConfig;
+
+    before("Bypassing middleware check", () => {
+        FakeBlacklistMiddleware.assign();
+    });
 
     before("Wait for the package libsodium to finish loading", async () => {
         SodiumHelper.assign(new BOASodium());

@@ -36,6 +36,7 @@ import {
     sample_data,
     sample_data2,
     sample_preImageInfo,
+    FakeBlacklistMiddleware,
     TestAgora,
     TestClient,
     TestGeckoServer,
@@ -57,6 +58,10 @@ describe("Test of Stoa API Server", () => {
     let agora_server: TestAgora;
     let client = new TestClient();
     let testDBConfig: IDatabaseConfig;
+
+    before("Bypassing middleware check", () => {
+        FakeBlacklistMiddleware.assign();
+    });
 
     before("Wait for the package libsodium to finish loading", async () => {
         SodiumHelper.assign(new BOASodium());
@@ -692,6 +697,10 @@ describe("Test of the path /utxo", () => {
     let agora_server: TestAgora;
     let client = new TestClient();
     let testDBConfig: IDatabaseConfig;
+
+    before("Bypassing middleware check", () => {
+        FakeBlacklistMiddleware.assign();
+    });
 
     before("Wait for the package libsodium to finish loading", async () => {
         SodiumHelper.assign(new BOASodium());

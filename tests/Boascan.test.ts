@@ -15,7 +15,6 @@ import * as assert from "assert";
 import { SodiumHelper } from "boa-sdk-ts";
 import { BOASodium } from "boa-sodium-ts";
 import URI from "urijs";
-import sinon from "sinon";
 import { URL } from "url";
 import { CoinGeckoMarket } from "../src/modules/coinmarket/CoinGeckoMarket";
 import { IDatabaseConfig } from "../src/modules/common/Config";
@@ -26,13 +25,12 @@ import {
     market_cap_history_sample_data,
     market_cap_sample_data,
     sample_data,
+    FakeBlacklistMiddleware,
     TestAgora,
     TestClient,
     TestGeckoServer,
     TestStoa,
 } from "./Utils";
-import { Request, Response, NextFunction } from "express";
-const blacklistMiddleware = require("../src/modules/middleware/blacklistMiddleware");
 
 describe("Test of Stoa API Server", () => {
     let host: string = "http://localhost";
@@ -45,12 +43,8 @@ describe("Test of Stoa API Server", () => {
     let gecko_market: CoinGeckoMarket;
     let coinMarketService: CoinMarketService;
 
-    before("Bypassing middleware check", async () => {
-        sinon
-            .stub(blacklistMiddleware, "isBlackList")
-            .callsFake(async (req: Request, res: Response, next: NextFunction) => {
-                next();
-            });
+    before("Bypassing middleware check", () => {
+        FakeBlacklistMiddleware.assign();
     });
 
     before("Wait for the package libsodium to finish loading", async () => {

@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import * as fs from "fs";
 import * as http from "http";
 import { URL } from "url";
@@ -36,6 +36,7 @@ import Stoa from "../src/Stoa";
 
 import JSBI from "jsbi";
 import { CoinMarketService } from "../src/modules/service/CoinMarketService";
+import sinon from "sinon";
 
 export const sample_data_raw = (() => {
     return [
@@ -462,4 +463,19 @@ export function createBlock(prev_block: Block, txs: Array<Transaction>): Block {
     let block = new Block(block_header, txs, merkle_tree);
 
     return block;
+}
+
+const blacklistMiddleware = require("../src/modules/middleware/blacklistMiddleware");
+export class FakeBlacklistMiddleware {
+    private static already_assigned = false;
+    public static assign() {
+        if (!FakeBlacklistMiddleware.already_assigned) {
+            FakeBlacklistMiddleware.already_assigned = true;
+            sinon
+                .stub(blacklistMiddleware, "isBlackList")
+                .callsFake(async (req: Request, res: Response, next: NextFunction) => {
+                    next();
+                });
+        }
+    }
 }
