@@ -23,7 +23,7 @@ import { URL } from "url";
 import { IDatabaseConfig } from "../src/modules/common/Config";
 import { CoinMarketService } from "../src/modules/service/CoinMarketService";
 import { MockDBConfig } from "./TestConfig";
-import { delay, recovery_sample_data, TestAgora, TestClient, TestStoa } from "./Utils";
+import { delay, recovery_sample_data, FakeBlacklistMiddleware, TestAgora, TestClient, TestStoa } from "./Utils";
 
 /**
  * This is an API server for testing and inherited from Stoa.
@@ -65,6 +65,10 @@ describe("Test of Recovery", () => {
     let testDBConfig: IDatabaseConfig;
 
     let client = new TestClient();
+
+    before("Bypassing middleware check", () => {
+        FakeBlacklistMiddleware.assign();
+    });
 
     before("Wait for the package libsodium to finish loading", async () => {
         SodiumHelper.assign(new BOASodium());
