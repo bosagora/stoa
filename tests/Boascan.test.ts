@@ -15,7 +15,7 @@ import * as assert from "assert";
 import { SodiumHelper } from "boa-sdk-ts";
 import { BOASodium } from "boa-sodium-ts";
 import URI from "urijs";
-import sinon from 'sinon';
+import sinon from "sinon";
 import { URL } from "url";
 import { CoinGeckoMarket } from "../src/modules/coinmarket/CoinGeckoMarket";
 import { IDatabaseConfig } from "../src/modules/common/Config";
@@ -31,7 +31,7 @@ import {
     TestGeckoServer,
     TestStoa,
 } from "./Utils";
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
 const blacklistMiddleware = require("../src/modules/middleware/blacklistMiddleware");
 
 describe("Test of Stoa API Server", () => {
@@ -46,9 +46,12 @@ describe("Test of Stoa API Server", () => {
     let coinMarketService: CoinMarketService;
 
     before("Bypassing middleware check", async () => {
-        sinon.stub(blacklistMiddleware, 'isBlackList')
-            .callsFake(async (req: Request, res: Response, next: NextFunction) => { next() });
-    })
+        sinon
+            .stub(blacklistMiddleware, "isBlackList")
+            .callsFake(async (req: Request, res: Response, next: NextFunction) => {
+                next();
+            });
+    });
 
     before("Wait for the package libsodium to finish loading", async () => {
         SodiumHelper.assign(new BOASodium());
@@ -871,20 +874,24 @@ describe("Test of Stoa API Server", () => {
         ];
         assert.deepStrictEqual(response.data, expected);
     });
-    it('Test for path /search by block hash', async () => {
+    it("Test for path /search by block hash", async () => {
         let uri = URI(host)
             .port(port)
             .directory("/search/hash/")
-            .filename("0xfca7a6455549ff1886969228b12dc5db03c67470145ed3e8e318f0c356a364eabbf1eeefc06232cfa7f3cdf3017521ee54b2b4542241650781022552ddc3dc99")
+            .filename(
+                "0xfca7a6455549ff1886969228b12dc5db03c67470145ed3e8e318f0c356a364eabbf1eeefc06232cfa7f3cdf3017521ee54b2b4542241650781022552ddc3dc99"
+            );
         let response = await client.get(uri.toString());
         let expected = { block: 1, transaction: 0 };
         assert.deepStrictEqual(response.data, expected);
     });
-    it('Test for path /search by transaction hash', async () => {
+    it("Test for path /search by transaction hash", async () => {
         let uri = URI(host)
             .port(port)
             .directory("/search/hash/")
-            .filename("0x224c72ad879eccd38e9b612047633d235e47e329e68a69517822c4c234c53c2d7d81b0245cdb61857002d58a5e033c8720b462e20517f45a5516df432866b32f")
+            .filename(
+                "0x224c72ad879eccd38e9b612047633d235e47e329e68a69517822c4c234c53c2d7d81b0245cdb61857002d58a5e033c8720b462e20517f45a5516df432866b32f"
+            );
         let response = await client.get(uri.toString());
         let expected = { block: 0, transaction: 1 };
         assert.deepStrictEqual(response.data, expected);

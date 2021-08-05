@@ -9,7 +9,7 @@ import {
     PreImageInfo,
     PublicKey,
     Transaction,
-    Utils
+    Utils,
 } from "boa-sdk-ts";
 import { cors_options } from "./cors";
 import { AgoraClient } from "./modules/agora/AgoraClient";
@@ -47,7 +47,7 @@ import {
     ValidatorData,
     IBOAHolder,
     IAvgFee,
-    IAccountChart
+    IAccountChart,
 } from "./Types";
 
 import bodyParser from "body-parser";
@@ -59,8 +59,8 @@ import { URL } from "url";
 import events from "./modules/events/events";
 import "./modules/events/handlers";
 import moment from "moment";
-import responseTime from 'response-time';
-import { isBlackList } from '../src/modules/middleware/blacklistMiddleware';
+import responseTime from "response-time";
+import { isBlackList } from "../src/modules/middleware/blacklistMiddleware";
 
 class Stoa extends WebService {
     private _ledger_storage: LedgerStorage | null;
@@ -175,10 +175,20 @@ class Stoa extends WebService {
         this.app.use(bodyParser.json({ limit: "1mb" }));
         this.app.use(cors(cors_options));
 
-        this.app.use(responseTime((req: any, res: any, time: any) => {
-            logger.http(`${req.method} ${req.url}`,
-                { endpoint: req.url, RequesterIP: req.ip, protocol: req.protocol, httpStatusCode: res.statusCode, userAgent: req.headers['user-agent'], accessStatus: res.statusCode !== 200 ? 'Denied' : 'Granted', bytesTransmitted: res.socket?.bytesWritten, responseTime: time });
-        }));
+        this.app.use(
+            responseTime((req: any, res: any, time: any) => {
+                logger.http(`${req.method} ${req.url}`, {
+                    endpoint: req.url,
+                    RequesterIP: req.ip,
+                    protocol: req.protocol,
+                    httpStatusCode: res.statusCode,
+                    userAgent: req.headers["user-agent"],
+                    accessStatus: res.statusCode !== 200 ? "Denied" : "Granted",
+                    bytesTransmitted: res.socket?.bytesWritten,
+                    responseTime: time,
+                });
+            })
+        );
 
         // Prepare routes
         this.app.get("/block_height", isBlackList, this.getBlockHeight.bind(this));
@@ -191,9 +201,17 @@ class Stoa extends WebService {
         this.app.post("/utxos", isBlackList, this.getUTXOs.bind(this));
         this.app.get("/transaction/status/:hash", isBlackList, this.getTransactionStatus.bind(this));
         this.app.get("/transaction/fees/:tx_size", isBlackList, this.getTransactionFees.bind(this));
-        this.app.get("/wallet/transactions/history/:address", isBlackList, this.getWalletTransactionsHistory.bind(this));
+        this.app.get(
+            "/wallet/transactions/history/:address",
+            isBlackList,
+            this.getWalletTransactionsHistory.bind(this)
+        );
         this.app.get("/wallet/transaction/overview/:hash", isBlackList, this.getWalletTransactionOverview.bind(this));
-        this.app.get("/wallet/transactions/pending/:address", isBlackList, this.getWalletTransactionsPending.bind(this));
+        this.app.get(
+            "/wallet/transactions/pending/:address",
+            isBlackList,
+            this.getWalletTransactionsPending.bind(this)
+        );
         this.app.get("/wallet/balance/:address", isBlackList, this.getWalletBalance.bind(this));
         this.app.get("/wallet/blocks/header", isBlackList, this.getWalletBlocksHeader.bind(this));
         this.app.get("/latest-blocks", isBlackList, this.getLatestBlocks.bind(this));
@@ -455,7 +473,6 @@ class Stoa extends WebService {
     private getTransactionStatus(req: express.Request, res: express.Response) {
         let hash: string = String(req.params.hash);
 
-
         let tx_hash: Hash;
         try {
             tx_hash = new Hash(hash);
@@ -499,7 +516,6 @@ class Stoa extends WebService {
     private getTransactionFees(req: express.Request, res: express.Response) {
         let size: string = req.params.tx_size.toString();
 
-
         if (!Utils.isPositiveInteger(size)) {
             res.status(400).send(`Invalid value for parameter 'tx_size': ${size}`);
             return;
@@ -537,7 +553,6 @@ class Stoa extends WebService {
      */
     private getTransactionPending(req: express.Request, res: express.Response) {
         let hash: string = String(req.params.hash);
-
 
         let tx_hash: Hash;
         try {
@@ -577,7 +592,6 @@ class Stoa extends WebService {
     private getTransaction(req: express.Request, res: express.Response) {
         let hash: string = String(req.params.hash);
 
-
         let tx_hash: Hash;
         try {
             tx_hash = new Hash(hash);
@@ -615,7 +629,6 @@ class Stoa extends WebService {
      */
     private getUTXO(req: express.Request, res: express.Response) {
         let address: string = String(req.params.address);
-
 
         this.ledger_storage
             .getUTXO(address)
@@ -660,7 +673,6 @@ class Stoa extends WebService {
             });
             return;
         }
-
 
         let utxos_hash: Array<Hash>;
         try {
@@ -729,7 +741,6 @@ class Stoa extends WebService {
     private async getWalletTransactionsHistory(req: express.Request, res: express.Response) {
         let address: string = String(req.params.address);
 
-
         let filter_begin: number | undefined;
         let filter_end: number | undefined;
         let page_size: number;
@@ -770,9 +781,9 @@ class Stoa extends WebService {
         filter_type =
             req.query.type !== undefined
                 ? req.query.type
-                    .toString()
-                    .split(",")
-                    .map((m) => ConvertTypes.toDisplayTxType(m))
+                      .toString()
+                      .split(",")
+                      .map((m) => ConvertTypes.toDisplayTxType(m))
                 : [0, 1, 2, 3];
 
         if (filter_type.find((m) => m < 0) !== undefined) {
@@ -831,7 +842,6 @@ class Stoa extends WebService {
      */
     private getWalletTransactionOverview(req: express.Request, res: express.Response) {
         let txHash: string = String(req.params.hash);
-
 
         let tx_hash: Hash;
         try {
@@ -921,7 +931,6 @@ class Stoa extends WebService {
         let field: string;
         let value: string | Buffer;
 
-
         // Validating Parameter - height
         if (req.query.height !== undefined && Utils.isPositiveInteger(req.query.height.toString())) {
             field = "height";
@@ -995,7 +1004,6 @@ class Stoa extends WebService {
         let field: string;
         let value: string | Buffer;
 
-
         // Validating Parameter - height
         if (req.query.height !== undefined && Utils.isPositiveInteger(req.query.height.toString())) {
             field = "height";
@@ -1019,35 +1027,35 @@ class Stoa extends WebService {
         }
 
         let pagination: IPagination = await this.paginate(req, res);
-        this.ledger_storage.getBlockEnrollments(field, value, pagination.pageSize, pagination.page)
+        this.ledger_storage
+            .getBlockEnrollments(field, value, pagination.pageSize, pagination.page)
             .then((data: any) => {
                 if (data === undefined) {
                     res.status(500).send("Failed to data lookup");
                     return;
-                }
-                else if (data.total_records === 0) {
+                } else if (data.total_records === 0) {
                     return res.status(204).send(`The data does not exist. 'height': (${value})`);
-                }
-                else {
+                } else {
                     let enrollmentElementList: Array<IBlockEnrollment> = [];
                     for (const row of data.enrollments) {
-                        enrollmentElementList.push(
-                            {
-                                height: JSBI.BigInt(row.block_height).toString(),
-                                utxo: new Hash(row.utxo_key, Endian.Little).toString(),
-                                enroll_sig: new Hash(row.enroll_sig, Endian.Little).toString(),
-                                commitment: new Hash(row.commitment, Endian.Little).toString(),
-                                cycle_length: row.cycle_length,
-                                full_count: row.full_count
-                            }
-                        );
+                        enrollmentElementList.push({
+                            height: JSBI.BigInt(row.block_height).toString(),
+                            utxo: new Hash(row.utxo_key, Endian.Little).toString(),
+                            enroll_sig: new Hash(row.enroll_sig, Endian.Little).toString(),
+                            commitment: new Hash(row.commitment, Endian.Little).toString(),
+                            cycle_length: row.cycle_length,
+                            full_count: row.full_count,
+                        });
                     }
                     return res.status(200).send(JSON.stringify(enrollmentElementList));
                 }
             })
             .catch((err) => {
-                logger.error("Failed to data lookup to the DB: " + err,
-                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
+                logger.error("Failed to data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    success: false,
+                });
                 return res.status(500).send("Failed to data lookup");
             });
     }
@@ -1064,7 +1072,6 @@ class Stoa extends WebService {
         let field: string;
         let value: string | Buffer;
 
-
         // Validating Parameter - height
         if (req.query.height !== undefined && Utils.isPositiveInteger(req.query.height.toString())) {
             field = "height";
@@ -1088,39 +1095,39 @@ class Stoa extends WebService {
         }
 
         let pagination: IPagination = await this.paginate(req, res);
-        this.ledger_storage.getBlockTransactions(field, value, pagination.pageSize, pagination.page)
+        this.ledger_storage
+            .getBlockTransactions(field, value, pagination.pageSize, pagination.page)
             .then((data: any) => {
                 if (data === undefined) {
                     res.status(500).send("Failed to data lookup");
                     return;
-                }
-                else if (data.tx.length === 0) {
+                } else if (data.tx.length === 0) {
                     return res.status(204).send(`The data does not exist. 'height': (${value})`);
-                }
-                else {
+                } else {
                     let txs: Array<IBlockTransactions> = [];
                     for (const row of data.tx) {
-                        txs.push(
-                            {
-                                height: JSBI.BigInt(row.block_height).toString(),
-                                tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
-                                amount: row.amount,
-                                type: row.type,
-                                fee: row.tx_fee,
-                                size: row.tx_size,
-                                time: row.time_stamp,
-                                sender_address: row.sender_address,
-                                receiver: row.receiver,
-                                full_count: row.full_count,
-                            }
-                        );
+                        txs.push({
+                            height: JSBI.BigInt(row.block_height).toString(),
+                            tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
+                            amount: row.amount,
+                            type: row.type,
+                            fee: row.tx_fee,
+                            size: row.tx_size,
+                            time: row.time_stamp,
+                            sender_address: row.sender_address,
+                            receiver: row.receiver,
+                            full_count: row.full_count,
+                        });
                     }
                     return res.status(200).send(JSON.stringify(txs));
                 }
             })
             .catch((err) => {
-                logger.error("Failed to data lookup to the DB: " + err,
-                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
+                logger.error("Failed to data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    success: false,
+                });
                 res.status(500).send("Failed to data lookup");
             });
     }
@@ -1133,7 +1140,6 @@ class Stoa extends WebService {
      * @returns Returns statistics of BOA coin.
      */
     private getBOAStats(req: express.Request, res: express.Response) {
-
         this.ledger_storage
             .getBOAStats()
             .then((data: any[]) => {
@@ -1300,7 +1306,6 @@ class Stoa extends WebService {
             return;
         }
 
-
         // To do
         // For a more stable operating environment,
         // it would be necessary to consider organizing the pool
@@ -1356,7 +1361,6 @@ class Stoa extends WebService {
             return;
         }
 
-
         this.pending = this.pending.then(() => {
             return this.task({ type: "transaction", data: req.body.tx });
         });
@@ -1373,7 +1377,6 @@ class Stoa extends WebService {
      */
     private getWalletTransactionsPending(req: express.Request, res: express.Response) {
         let address: string = String(req.params.address);
-
 
         this.ledger_storage
             .getWalletTransactionsPending(address)
@@ -1496,7 +1499,6 @@ class Stoa extends WebService {
      * Return the highest block height stored in Stoa
      */
     private getBlockHeight(req: express.Request, res: express.Response) {
-
         this.ledger_storage
             .getBlockHeight()
             .then((row: Height | null) => {
@@ -1567,35 +1569,30 @@ class Stoa extends WebService {
      */
     private async getLatestBlocks(req: express.Request, res: express.Response) {
         let pagination: IPagination = await this.paginate(req, res);
-        this.ledger_storage.getLatestBlocks(pagination.pageSize, pagination.page)
-            .then((data: any) => {
-                if (data === undefined) {
-                    res.status(500).send("Failed to data lookup");
-                    return;
+        this.ledger_storage.getLatestBlocks(pagination.pageSize, pagination.page).then((data: any) => {
+            if (data === undefined) {
+                res.status(500).send("Failed to data lookup");
+                return;
+            } else if (data.length === 0) {
+                return res.status(204).send(`The data does not exist.`);
+            } else {
+                let blocklist: Array<IBlock> = [];
+                for (const row of data) {
+                    blocklist.push({
+                        height: JSBI.BigInt(row.height).toString(),
+                        hash: new Hash(row.hash, Endian.Little).toString(),
+                        merkle_root: new Hash(row.merkle_root, Endian.Little).toString(),
+                        signature: new Hash(row.signature, Endian.Little).toString(),
+                        validators: row.validators.toString(),
+                        tx_count: row.tx_count.toString(),
+                        enrollment_count: row.enrollment_count.toString(),
+                        time_stamp: row.time_stamp,
+                        full_count: row.full_count,
+                    });
                 }
-                else if (data.length === 0) {
-                    return res.status(204).send(`The data does not exist.`);
-                }
-                else {
-                    let blocklist: Array<IBlock> = [];
-                    for (const row of data) {
-                        blocklist.push(
-                            {
-                                height: JSBI.BigInt(row.height).toString(),
-                                hash: new Hash(row.hash, Endian.Little).toString(),
-                                merkle_root: new Hash(row.merkle_root, Endian.Little).toString(),
-                                signature: new Hash(row.signature, Endian.Little).toString(),
-                                validators: row.validators.toString(),
-                                tx_count: (row.tx_count).toString(),
-                                enrollment_count: (row.enrollment_count).toString(),
-                                time_stamp: row.time_stamp,
-                                full_count: row.full_count,
-                            }
-                        );
-                    }
-                    return res.status(200).send(JSON.stringify(blocklist));
-                }
-            });
+                return res.status(200).send(JSON.stringify(blocklist));
+            }
+        });
     }
 
     /**
@@ -1615,18 +1612,16 @@ class Stoa extends WebService {
             } else {
                 let transactionList: Array<ITransaction> = [];
                 for (const row of data) {
-                    transactionList.push(
-                        {
-                            height: JSBI.BigInt(row.block_height).toString(),
-                            tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
-                            type: row.type,
-                            amount: JSBI.BigInt(row.amount).toString(),
-                            tx_fee: JSBI.BigInt(row.tx_fee).toString(),
-                            tx_size: JSBI.BigInt(row.tx_size).toString(),
-                            time_stamp: row.time_stamp,
-                            full_count: row.full_count,
-                        }
-                    );
+                    transactionList.push({
+                        height: JSBI.BigInt(row.block_height).toString(),
+                        tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
+                        type: row.type,
+                        amount: JSBI.BigInt(row.amount).toString(),
+                        tx_fee: JSBI.BigInt(row.tx_fee).toString(),
+                        tx_size: JSBI.BigInt(row.tx_size).toString(),
+                        time_stamp: row.time_stamp,
+                        full_count: row.full_count,
+                    });
                 }
                 return res.status(200).send(JSON.stringify(transactionList));
             }
@@ -1640,7 +1635,8 @@ class Stoa extends WebService {
      * @returns Returns Coin market cap.
      */
     private async getCoinMarketCap(req: express.Request, res: express.Response) {
-        this.ledger_storage.getCoinMarketcap()
+        this.ledger_storage
+            .getCoinMarketcap()
             .then((rows: any) => {
                 if (rows[0]) {
                     return res.status(200).send(rows[0]);
@@ -1801,21 +1797,23 @@ class Stoa extends WebService {
                     if (updated)
                         logger.info(
                             `Update a blockHeader : ${block_header.toString()}, ` +
-                            `block height : ${block_header.height.toString()}`,
+                                `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
                                 success: true,
-                            });
+                            }
+                        );
                     if (put)
                         logger.info(
                             `puts a blockHeader history : ${block_header.toString()}, ` +
-                            `block height : ${block_header.height.toString()}`,
+                                `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
                                 success: true,
-                            });
+                            }
+                        );
 
                     resolve();
                 } catch (err) {
@@ -1834,8 +1832,9 @@ class Stoa extends WebService {
                     if (changes)
                         logger.info(
                             `Saved a pre-image utxo : ${pre_image.utxo.toString().substr(0, 18)}, ` +
-                            `hash : ${pre_image.hash.toString().substr(0, 18)}, pre-image height : ${pre_image.height
-                            }`,
+                                `hash : ${pre_image.hash.toString().substr(0, 18)}, pre-image height : ${
+                                    pre_image.height
+                                }`,
                             {
                                 operation: Operation.db,
                                 height: HeightManager.height.toString(),
@@ -2090,31 +2089,28 @@ class Stoa extends WebService {
      * @returns Returns BOA Holders of the ledger.
      */
     public async getBoaHolders(req: express.Request, res: express.Response) {
-
-
         let pagination: IPagination = await this.paginate(req, res);
-        this.ledger_storage.getBOAHolders(pagination.pageSize, pagination.page)
+        this.ledger_storage
+            .getBOAHolders(pagination.pageSize, pagination.page)
             .then((data: any[]) => {
                 if (data.length === 0) {
                     return res.status(204).send(`The data does not exist.`);
-                }
-                else {
+                } else {
                     let holderList: Array<IBOAHolder> = [];
                     for (const row of data) {
-                        holderList.push(
-                            {
-                                address: row.address,
-                                tx_count: row.tx_count,
-                                total_received: row.total_received,
-                                total_sent: row.total_sent,
-                                total_reward: row.total_reward,
-                                total_frozen: row.total_frozen,
-                                total_spendable: row.total_spendable,
-                                total_balance: row.total_balance,
-                                percentage: 0,      //FIX ME static data because of unavailability of real data
-                                value: 0,           //FIX ME static data because of unavailability of real data
-                                full_count: row.full_count
-                            });
+                        holderList.push({
+                            address: row.address,
+                            tx_count: row.tx_count,
+                            total_received: row.total_received,
+                            total_sent: row.total_sent,
+                            total_reward: row.total_reward,
+                            total_frozen: row.total_frozen,
+                            total_spendable: row.total_spendable,
+                            total_balance: row.total_balance,
+                            percentage: 0, //FIX ME static data because of unavailability of real data
+                            value: 0, //FIX ME static data because of unavailability of real data
+                            full_count: row.full_count,
+                        });
                     }
                     return res.status(200).send(JSON.stringify(holderList));
                 }
@@ -2122,7 +2118,7 @@ class Stoa extends WebService {
             .catch((err) => {
                 logger.error("Failed to data lookup to the DB: " + err);
                 return res.status(500).send("Failed to data lookup");
-            })
+            });
     }
     /**
      * GET /holder_balance_history/:address
@@ -2131,9 +2127,7 @@ class Stoa extends WebService {
      * @returns Returns average transaction fee between range (date - filter)
      */
     private async getHolderBalanceHistory(req: express.Request, res: express.Response) {
-
         let address: string = String(req.params.address);
-
 
         let filter;
         let filter_end;
@@ -2142,12 +2136,10 @@ class Stoa extends WebService {
         if (req.query.filter === undefined) {
             res.status(400).send(`Parameter filter must also be set.`);
             return;
-        }
-        else if (req.query.date === undefined) {
+        } else if (req.query.date === undefined) {
             res.status(400).send(`Parameter endDate must also be set.`);
             return;
-        }
-        else {
+        } else {
             if (!Utils.isPositiveInteger(req.query.date.toString())) {
                 res.status(400).send(`Invalid value for parameter 'beginDate': ${req.query.date.toString()}`);
                 return;
@@ -2162,82 +2154,80 @@ class Stoa extends WebService {
             .startOf("D");
 
         switch (filter) {
-            case 'D': {
+            case "D": {
                 filter_begin = filter_end.unix() - 86400;
                 break;
             }
-            case '5D': {
+            case "5D": {
                 filter_begin = filter_end.unix() - 432000;
-                filter = 'D'
+                filter = "D";
                 break;
             }
-            case 'M': {
+            case "M": {
                 filter_begin = filter_end.unix() - 2592000;
                 break;
             }
-            case '3M': {
+            case "3M": {
                 filter_begin = filter_end.unix() - 7776000;
-                filter = 'M'
+                filter = "M";
                 break;
             }
-            case '6M': {
+            case "6M": {
                 filter_begin = filter_end.unix() - 15552000;
-                filter = 'M'
+                filter = "M";
                 break;
             }
-            case 'Y': {
+            case "Y": {
                 filter_begin = filter_end.unix() - 31536000;
                 break;
             }
-            case '5Y': {
+            case "5Y": {
                 filter_begin = filter_end.unix() - 157680000;
-                filter = 'Y'
+                filter = "Y";
                 break;
             }
             default: {
                 filter_begin = filter_end.unix() - 86400;
-                filter = 'H'
+                filter = "H";
                 break;
             }
         }
-        this.ledger_storage.getAccountChart(address, filter_begin, moment(filter_end).startOf('D').unix(), filter)
+        this.ledger_storage
+            .getAccountChart(address, filter_begin, moment(filter_end).startOf("D").unix(), filter)
             .then((data: any) => {
-                if ((data === undefined)) {
+                if (data === undefined) {
                     res.status(500).send("Failed to data lookup");
                     return;
-                }
-                else if (data.length === 0) {
+                } else if (data.length === 0) {
                     return res.status(204).send(`The data does not exist.`);
-                }
-                else {
+                } else {
                     let accountChartList: Array<IAccountChart> = [];
                     for (const row of data) {
-                        accountChartList.push(
-                            {
-                                address: row.address,
-                                granularity: row.granularity,
-                                time_stamp: row.time_stamp,
-                                balance: row.balance,
-                                block_height: row.block_height
-                            }
-                        )
+                        accountChartList.push({
+                            address: row.address,
+                            granularity: row.granularity,
+                            time_stamp: row.time_stamp,
+                            balance: row.balance,
+                            block_height: row.block_height,
+                        });
                     }
                     return res.status(200).send(JSON.stringify(accountChartList));
                 }
             })
             .catch((err) => {
-                logger.error("Failed to averageFeeChart data lookup to the DB: " + err,
-                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
-                res.send(500).send("Failed to data lookup")
-            })
-
+                logger.error("Failed to averageFeeChart data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    success: false,
+                });
+                res.send(500).send("Failed to data lookup");
+            });
     }
 
     /* Get BOA Holder
      * @returns Returns BOA Holder of the ledger.
      */
     public async getBoaHolder(req: express.Request, res: express.Response) {
-
         const address = String(req.params.address);
 
         let holderAddress: PublicKey;
@@ -2247,14 +2237,13 @@ class Stoa extends WebService {
             res.status(400).send(`Invalid value for parameter 'address': ${address}`);
             return;
         }
-        this.ledger_storage.getBOAHolder(address)
+        this.ledger_storage
+            .getBOAHolder(address)
             .then((data: any[]) => {
                 if (data.length === 0) {
                     return res.status(204).send(`The data does not exist.`);
-                }
-                else {
-                    let holder: IBOAHolder =
-                    {
+                } else {
+                    let holder: IBOAHolder = {
                         address: data[0].address,
                         tx_count: data[0].tx_count,
                         total_received: data[0].total_received,
@@ -2272,7 +2261,7 @@ class Stoa extends WebService {
             .catch((err) => {
                 logger.error("Failed to data lookup to the DB: " + err);
                 return res.status(500).send("Failed to data lookup");
-            })
+            });
     }
 
     /**
@@ -2282,8 +2271,6 @@ class Stoa extends WebService {
      * @returns Returns average transaction fee between range (date - filter)
      */
     private async averageFeeChart(req: express.Request, res: express.Response) {
-
-
         let filter;
         let filter_end;
         let filter_begin;
@@ -2291,12 +2278,10 @@ class Stoa extends WebService {
         if (req.query.filter === undefined) {
             res.status(400).send(`Parameter filter must also be set.`);
             return;
-        }
-        else if (req.query.date === undefined) {
+        } else if (req.query.date === undefined) {
             res.status(400).send(`Parameter endDate must also be set.`);
             return;
-        }
-        else {
+        } else {
             if (!Utils.isPositiveInteger(req.query.date.toString())) {
                 res.status(400).send(`Invalid value for parameter 'beginDate': ${req.query.date.toString()}`);
                 return;
@@ -2311,86 +2296,85 @@ class Stoa extends WebService {
             .startOf("D");
 
         switch (filter) {
-            case 'D': {
+            case "D": {
                 filter_begin = filter_end.unix() - 86400;
                 break;
             }
-            case '5D': {
+            case "5D": {
                 filter_begin = filter_end.unix() - 432000;
-                filter = 'D'
+                filter = "D";
                 break;
             }
-            case 'M': {
+            case "M": {
                 filter_begin = filter_end.unix() - 2592000;
                 break;
             }
-            case '3M': {
+            case "3M": {
                 filter_begin = filter_end.unix() - 7776000;
-                filter = 'M'
+                filter = "M";
                 break;
             }
-            case '6M': {
+            case "6M": {
                 filter_begin = filter_end.unix() - 15552000;
-                filter = 'M'
+                filter = "M";
                 break;
             }
-            case 'Y': {
+            case "Y": {
                 filter_begin = filter_end.unix() - 31536000;
                 break;
             }
-            case '5Y': {
+            case "5Y": {
                 filter_begin = filter_end.unix() - 157680000;
-                filter = 'Y'
+                filter = "Y";
                 break;
             }
             default: {
                 filter_begin = filter_end.unix() - 86400;
-                filter = 'H'
+                filter = "H";
                 break;
             }
         }
 
-        this.ledger_storage.calculateAvgFeeChart(filter_begin, moment(filter_end).startOf('D').unix(), filter)
+        this.ledger_storage
+            .calculateAvgFeeChart(filter_begin, moment(filter_end).startOf("D").unix(), filter)
             .then((data: any) => {
-                if ((data === undefined)) {
+                if (data === undefined) {
                     res.status(500).send("Failed to data lookup");
                     return;
-                }
-                else if (data.length === 0) {
+                } else if (data.length === 0) {
                     return res.status(204).send(`The data does not exist.`);
-                }
-                else {
+                } else {
                     let avgFeelist: Array<IAvgFee> = [];
                     for (const row of data) {
-                        avgFeelist.push(
-                            {
-                                height: row.height,
-                                granularity: row.granularity,
-                                time_stamp: row.time_stamp,
-                                average_tx_fee: row.average_tx_fee,
-                                total_tx_fee: row.total_tx_fee,
-                                total_payload_fee: row.total_payload_fee,
-                                total_fee: row.total_fee
-                            }
-                        )
+                        avgFeelist.push({
+                            height: row.height,
+                            granularity: row.granularity,
+                            time_stamp: row.time_stamp,
+                            average_tx_fee: row.average_tx_fee,
+                            total_tx_fee: row.total_tx_fee,
+                            total_payload_fee: row.total_payload_fee,
+                            total_fee: row.total_fee,
+                        });
                     }
                     return res.status(200).send(JSON.stringify(avgFeelist));
                 }
             })
             .catch((err) => {
-                logger.error("Failed to averageFeeChart data lookup to the DB: " + err,
-                    { operation: Operation.db, height: HeightManager.height.toString(), success: false });
-                res.send(500).send("Failed to data lookup")
-            })
-
+                logger.error("Failed to averageFeeChart data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    success: false,
+                });
+                res.send(500).send("Failed to data lookup");
+            });
     }
 
     /**
      * GET /search/hash
      * Called when a request is received through the `/search/hash` handler
      * The parameter `hash` is the hash of block or transaction
-     * Returns block as true if hash matches block hash or transaction as true if hash matches tx_hash 
-     * otherwise it will respond with no data found. 
+     * Returns block as true if hash matches block hash or transaction as true if hash matches tx_hash
+     * otherwise it will respond with no data found.
      */
     private searchHash(req: express.Request, res: express.Response) {
         let hashString: string = String(req.params.hash);
