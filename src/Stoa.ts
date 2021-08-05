@@ -77,7 +77,7 @@ class Stoa extends WebService {
     /**
      * Instance of coin Market for stoa
      */
-    public coinMarketService: CoinMarketService;
+    public coinMarketService: CoinMarketService | undefined;
 
     /**
      * Chain of pending store operations
@@ -118,7 +118,7 @@ class Stoa extends WebService {
         port: number | string,
         address: string,
         genesis_timestamp: number,
-        coinMarketService: CoinMarketService
+        coinMarketService?: CoinMarketService
     ) {
         super(port, address);
 
@@ -259,7 +259,7 @@ class Stoa extends WebService {
                 }
             )
             .then(() => {
-                if (!(process.env.NODE_ENV === "test")) {
+                if (this.coinMarketService !== undefined)
                     this.coinMarketService.start(this).catch((err) => {
                         logger.error(`Error: Could not connect to marketcap Client: ${err.toString()}`, {
                             operation: Operation.connection,
@@ -267,10 +267,9 @@ class Stoa extends WebService {
                             success: false,
                         });
                     });
-                    this.socket.io.on(events.client.connection, (socket: Socket) => {
-                        this.eventDispatcher.dispatch(events.client.connection, socket);
-                    });
-                }
+                this.socket.io.on(events.client.connection, (socket: Socket) => {
+                    this.eventDispatcher.dispatch(events.client.connection, socket);
+                });
                 return (this.pending = this.pending.then(() => {
                     return this.catchup(height);
                 }));
