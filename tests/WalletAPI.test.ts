@@ -85,11 +85,10 @@ describe("Test of Stoa API for the wallet", () => {
         let uri = URI(host).port(port).directory("block_externalized");
 
         let url = uri.toString();
-        for (let idx = 0; idx < 10; idx++)
-        {
+        for (let idx = 0; idx < 10; idx++) {
             await client.post(url, { block: recovery_sample_data[idx] });
             await delay(300);
-        }    
+        }
     });
 
     it("Test of the path /wallet/transactions/history", async () => {
@@ -110,7 +109,7 @@ describe("Test of Stoa API for the wallet", () => {
         assert.strictEqual(
             response.data[0].tx_hash,
             "0xed574225c713db7414f507af427ab8056c6adadbc78f45a8dd07397cb7717e3" +
-            "9dc1fce4d03b34c80c68292d6a27b500ee896c0487d28e916c4f71a4b626a1da0"
+                "9dc1fce4d03b34c80c68292d6a27b500ee896c0487d28e916c4f71a4b626a1da0"
         );
         assert.strictEqual(response.data[0].tx_type, "payment");
         assert.strictEqual(response.data[0].amount, "609999999100000");
@@ -201,7 +200,7 @@ describe("Test of Stoa API for the wallet", () => {
         assert.strictEqual(
             response.data[0].tx_hash,
             "0x6ddb999e0f948df8a7c9abb44702dd3dfde02af2ecd3e7e517639202794253a" +
-            "c69e11335b05df71e2826afdebfe42c8a5db3da2465628188f98108ee38b8a9c4"
+                "c69e11335b05df71e2826afdebfe42c8a5db3da2465628188f98108ee38b8a9c4"
         );
     });
 
@@ -227,7 +226,7 @@ describe("Test of Stoa API for the wallet", () => {
         assert.strictEqual(
             response.data[0].tx_hash,
             "0xd972ce624097872d8ae110d3e4cee11cdd0d090bbffa3850b1b80a7f22e6557" +
-            "3c480156e58bcec924fa840214b91d4b36a9d9ddd85037673cdce99959532a0a7"
+                "3c480156e58bcec924fa840214b91d4b36a9d9ddd85037673cdce99959532a0a7"
         );
     });
 
@@ -252,7 +251,7 @@ describe("Test of Stoa API for the wallet", () => {
         assert.strictEqual(
             response.data[0].tx_hash,
             "0xd972ce624097872d8ae110d3e4cee11cdd0d090bbffa3850b1b80a7f22e6557" +
-            "3c480156e58bcec924fa840214b91d4b36a9d9ddd85037673cdce99959532a0a7"
+                "3c480156e58bcec924fa840214b91d4b36a9d9ddd85037673cdce99959532a0a7"
         );
     });
 });
