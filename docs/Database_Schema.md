@@ -1,24 +1,23 @@
-
 # The database schema of Stoa
 
 ## 1. Table **blocks**
 
 ### _Schema_
 
-| Column            | Data Type | PK | Not NULL | Default  |Description|
-|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
-| height            | INTEGER   | Y  | Y        |          | The height of the block |
-| hash              | TINYBLOB  |    | Y        |          | The hash of the current block |
-| prev_block        | TINYBLOB  |    | Y        |          | The hash of the previous block |
-| validators        | TEXT      |    | Y        |          | Bitfield containing the validators' key indices which signed the block |
-| merkle_root       | TINYBLOB  |    | Y        |          | The hash of the merkle root of the transactions|
-| signature         | TINYBLOB  |    | Y        |          | Schnorr multisig of all validators which signed this block |
-| random_seed       | TINYBLOB  |    | Y        |          | Hash of random seed of the preimages for this height |
-| missing_validators| TEXT      |    | N        |          | List of indices to the validator UTXO set which have not revealed the preimage|
-| tx_count          | INTEGER   |    | Y        |          | The number of transactions in the block|
-| enrollment_count  | INTEGER   |    | Y        |          | The number of enrollments in the block|
-| time_offset       | INTEGER   |    | Y        |          | Block seconds offset from Genesis Timestamp |
-| time_stamp        | INTEGER   |    | Y        |          | Block unix timestamp |
+| Column             | Data Type | PK  | Not NULL | Default | Description                                                                    |
+| :----------------- | :-------- | :-: | :------: | ------- | ------------------------------------------------------------------------------ |
+| height             | INTEGER   |  Y  |    Y     |         | The height of the block                                                        |
+| hash               | TINYBLOB  |     |    Y     |         | The hash of the current block                                                  |
+| prev_block         | TINYBLOB  |     |    Y     |         | The hash of the previous block                                                 |
+| validators         | TEXT      |     |    Y     |         | Bitfield containing the validators' key indices which signed the block         |
+| merkle_root        | TINYBLOB  |     |    Y     |         | The hash of the merkle root of the transactions                                |
+| signature          | TINYBLOB  |     |    Y     |         | Schnorr multisig of all validators which signed this block                     |
+| random_seed        | TINYBLOB  |     |    Y     |         | Hash of random seed of the preimages for this height                           |
+| missing_validators | TEXT      |     |    N     |         | List of indices to the validator UTXO set which have not revealed the preimage |
+| tx_count           | INTEGER   |     |    Y     |         | The number of transactions in the block                                        |
+| enrollment_count   | INTEGER   |     |    Y     |         | The number of enrollments in the block                                         |
+| time_offset        | INTEGER   |     |    Y     |         | Block seconds offset from Genesis Timestamp                                    |
+| time_stamp         | INTEGER   |     |    Y     |         | Block unix timestamp                                                           |
 
 ### _Create Script_
 
@@ -39,20 +38,21 @@ CREATE TABLE IF NOT EXISTS "blocks" (
     PRIMARY KEY("height")
 )
 ```
-----
+
+---
 
 ## 2. Table **enrollments**
 
 ### _Schema_
 
-| Column            | Data Type | PK | Not NULL | Default  |Description|
-|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
-| block_height      | INTEGER   | Y  | Y        |          | The height of the block|
-| enrollment_index  | INTEGER   | Y  | Y        |          | The index of enrollment in the block.|
-| utxo_key          | TINYBLOB  |    | Y        |          | K: UTXO hash, A hash of a frozen UTXO|
-| commitment        | TINYBLOB  |    | Y        |          | X: commitment, The nth image of random value|
-| cycle_length      | INTEGER   |    | Y        |          | n: the number of rounds a validator will participate in |
-| enroll_sig        | TINYBLOB  |    | Y        |          | S: A signature for the message H(K, X, n, R) and the key K, using R|
+| Column           | Data Type | PK  | Not NULL | Default | Description                                                         |
+| :--------------- | :-------- | :-: | :------: | ------- | ------------------------------------------------------------------- |
+| block_height     | INTEGER   |  Y  |    Y     |         | The height of the block                                             |
+| enrollment_index | INTEGER   |  Y  |    Y     |         | The index of enrollment in the block.                               |
+| utxo_key         | TINYBLOB  |     |    Y     |         | K: UTXO hash, A hash of a frozen UTXO                               |
+| commitment       | TINYBLOB  |     |    Y     |         | X: commitment, The nth image of random value                        |
+| cycle_length     | INTEGER   |     |    Y     |         | n: the number of rounds a validator will participate in             |
+| enroll_sig       | TINYBLOB  |     |    Y     |         | S: A signature for the message H(K, X, n, R) and the key K, using R |
 
 ### _Create Script_
 
@@ -67,27 +67,28 @@ CREATE TABLE IF NOT EXISTS "enrollments" (
     PRIMARY KEY("block_height","enrollment_index")
 )
 ```
-----
+
+---
 
 ## 3. Table **transactions**
 
 ### _Schema_
 
-| Column            | Data Type | PK | Not NULL | Default  |Description|
-|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
-| block_height      | INTEGER   | Y  | Y        |          | The height of the block|
-| tx_index          | INTEGER   | Y  | Y        |          | The index of transaction in the block |
-| tx_hash           | TINYBLOB  |    | Y        |          | The hash of transaction |
-| type              | INTEGER   |    | Y        |          | The type of transaction |
-| unlock_height     | INTEGER   |    | Y        |          | Height of the block to be unlock|
-| lock_height       | INTEGER   |    | Y        |          | This transaction may only be included in a block with `block_height >= lock_height`|
-| tx_fee            | INTEGER   |    | Y        |          | The fee of this transaction |
-| payload_fee       | INTEGER   |    | Y        |          | The payload fee of this transaction  |
-| tx_size           | INTEGER   |    | Y        |          | The size of this transaction  |
-| calculated_tx_fee | INTEGER   |    | Y        |          | The calculated fee of this transaction |
-| inputs_count      | INTEGER   |    | Y        |          | The number of inputs in the transaction |
-| outputs_count     | INTEGER   |    | Y        |          | The number of outputs in the transaction |
-| payload_size      | INTEGER   |    | Y        |          | The size of data payload in the transaction |
+| Column            | Data Type | PK  | Not NULL | Default | Description                                                                         |
+| :---------------- | :-------- | :-: | :------: | ------- | ----------------------------------------------------------------------------------- |
+| block_height      | INTEGER   |  Y  |    Y     |         | The height of the block                                                             |
+| tx_index          | INTEGER   |  Y  |    Y     |         | The index of transaction in the block                                               |
+| tx_hash           | TINYBLOB  |     |    Y     |         | The hash of transaction                                                             |
+| type              | INTEGER   |     |    Y     |         | The type of transaction                                                             |
+| unlock_height     | INTEGER   |     |    Y     |         | Height of the block to be unlock                                                    |
+| lock_height       | INTEGER   |     |    Y     |         | This transaction may only be included in a block with `block_height >= lock_height` |
+| tx_fee            | INTEGER   |     |    Y     |         | The fee of this transaction                                                         |
+| payload_fee       | INTEGER   |     |    Y     |         | The payload fee of this transaction                                                 |
+| tx_size           | INTEGER   |     |    Y     |         | The size of this transaction                                                        |
+| calculated_tx_fee | INTEGER   |     |    Y     |         | The calculated fee of this transaction                                              |
+| inputs_count      | INTEGER   |     |    Y     |         | The number of inputs in the transaction                                             |
+| outputs_count     | INTEGER   |     |    Y     |         | The number of outputs in the transaction                                            |
+| payload_size      | INTEGER   |     |    Y     |         | The size of data payload in the transaction                                         |
 
 ### _Create Script_
 
@@ -109,21 +110,23 @@ CREATE TABLE IF NOT EXISTS "transactions" (
     PRIMARY KEY("block_height","tx_index")
 )
 ```
-----
+
+---
 
 ## 4. Table **tx_inputs**
 
 ### _Schema_
 
-| Column            | Data Type | PK | Not NULL | Default  |Description|
-|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
-| block_height      | INTEGER   | Y  | Y        |          | The height of the block|
-| tx_index          | INTEGER   | Y  | Y        |          | The index of this transaction in the block's transactions array|
-| in_index          | INTEGER   | Y  | Y        |          | The index of this input in the Transaction's inputs array|
-| tx_hash           | TINYBLOB  |    | Y        |          | The hash of transaction |
-| utxo              | TINYBLOB  | Y  | Y        |          | The hash of the UTXO to be spent|
-| unlock_bytes      | TINYBLOB  |    | Y        |          | The unlock script, which will be ran together with the matching Input's lock script in the execution engine|
-| unlock_age        | INTEGER   |    | Y        |          | Use for implementing relative time locks |
+| Column       | Data Type | PK  | Not NULL | Default | Description                                                                                                 |
+| :----------- | :-------- | :-: | :------: | ------- | ----------------------------------------------------------------------------------------------------------- |
+| block_height | INTEGER   |  Y  |    Y     |         | The height of the block                                                                                     |
+| tx_index     | INTEGER   |  Y  |    Y     |         | The index of this transaction in the block's transactions array                                             |
+| in_index     | INTEGER   |  Y  |    Y     |         | The index of this input in the Transaction's inputs array                                                   |
+| tx_hash      | TINYBLOB  |     |    Y     |         | The hash of transaction                                                                                     |
+| utxo         | TINYBLOB  |  Y  |    Y     |         | The hash of the UTXO to be spent                                                                            |
+| unlock_bytes | TINYBLOB  |     |    Y     |         | The unlock script, which will be ran together with the matching Input's lock script in the execution engine |
+| unlock_age   | INTEGER   |     |    Y     |         | Use for implementing relative time locks                                                                    |
+
 ### _Create Script_
 
 ```sql
@@ -138,24 +141,25 @@ CREATE TABLE IF NOT EXISTS "tx_inputs" (
     PRIMARY KEY("block_height","tx_index","in_index","utxo(64)")
 )
 ```
-----
+
+---
 
 ## 5. Table **tx_outputs**
 
 ### _Schema_
 
-| Column            | Data Type | PK | Not NULL | Default  |Description|
-|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
-|  block_height     | INTEGER   | Y  | Y        |          | The height of the block|
-|  tx_index         | INTEGER   | Y  | Y        |          | The index of transaction in the block.|
-|  output_index     | INTEGER   | Y  | Y        |          | The index of output in the outputs.|
-|  tx_hash          | TINYBLOB  |    | Y        |          | The hash of transaction |
-|  utxo_key         | BLOB      |    | Y        |          | The hash of the UTXO|
-|  type             | INTEGER   |    | Y        |          | The type of transaction output  |
-|  amount           | NUMERIC   |    | Y        |          | The monetary value of this output, in 1/10^7|
-|  lock_type        | INTEGER   |    | Y        |          | (0: Key; 1: Hash of Key; 2: Script; 3: Hash of Script) |
-|  lock_bytes       | TINYBLOB  |    | Y        |          | The bytes of lock |
-|  address          | TEXT      |    | Y        |          | The public key, Valid only when lock type is 0. Other than that, it's a blank.|
+| Column       | Data Type | PK  | Not NULL | Default | Description                                                                    |
+| :----------- | :-------- | :-: | :------: | ------- | ------------------------------------------------------------------------------ |
+| block_height | INTEGER   |  Y  |    Y     |         | The height of the block                                                        |
+| tx_index     | INTEGER   |  Y  |    Y     |         | The index of transaction in the block.                                         |
+| output_index | INTEGER   |  Y  |    Y     |         | The index of output in the outputs.                                            |
+| tx_hash      | TINYBLOB  |     |    Y     |         | The hash of transaction                                                        |
+| utxo_key     | BLOB      |     |    Y     |         | The hash of the UTXO                                                           |
+| type         | INTEGER   |     |    Y     |         | The type of transaction output                                                 |
+| amount       | NUMERIC   |     |    Y     |         | The monetary value of this output, in 1/10^7                                   |
+| lock_type    | INTEGER   |     |    Y     |         | (0: Key; 1: Hash of Key; 2: Script; 3: Hash of Script)                         |
+| lock_bytes   | TINYBLOB  |     |    Y     |         | The bytes of lock                                                              |
+| address      | TEXT      |     |    Y     |         | The public key, Valid only when lock type is 0. Other than that, it's a blank. |
 
 ### _Create Script_
 
@@ -174,22 +178,23 @@ CREATE TABLE IF NOT EXISTS "tx_outputs" (
     PRIMARY KEY("block_height","tx_index","output_index")
 )
 ```
-----
+
+---
 
 ## 6. Table **utxos**
 
 ### _Schema_
 
-| Column            | Data Type | PK | Not NULL | Default  |Description|
-|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
-|  utxo_key         | TINYBLOB  | Y  | Y        |          | The hash of the UTXO|
-|  tx_hash          | TINYBLOB  |    | Y        |          | The hash of transaction |
-|  type             | INTEGER   |    | Y        |          | The type of UTXO (0: Payment, 1: Freeze) If the type of transaction is `Freeze` and the refund output is less than 40,000 BOA, it is `Payment`. Others are the same as the transaction type. |
-|  unlock_height    | INTEGER   |    | Y        |          | Height of the block to be unlock|
-|  amount           | BIGINT(20)|    | Y        |          | The monetary value of this output, in 1/10^7|
-|  lock_type        | INTEGER   |    | Y        |          | (0: Key; 1: Hash of Key; 2: Script; 3: Hash of Script) |
-|  lock_bytes       | TINYBLOB  |    | Y        |          | The bytes of lock |
-|  address          | TEXT      |    | Y        |          | The public key, Valid only when lock type is 0. Other than that, it's a blank.|
+| Column        | Data Type  | PK  | Not NULL | Default | Description                                                                                                                                                                                  |
+| :------------ | :--------- | :-: | :------: | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| utxo_key      | TINYBLOB   |  Y  |    Y     |         | The hash of the UTXO                                                                                                                                                                         |
+| tx_hash       | TINYBLOB   |     |    Y     |         | The hash of transaction                                                                                                                                                                      |
+| type          | INTEGER    |     |    Y     |         | The type of UTXO (0: Payment, 1: Freeze) If the type of transaction is `Freeze` and the refund output is less than 40,000 BOA, it is `Payment`. Others are the same as the transaction type. |
+| unlock_height | INTEGER    |     |    Y     |         | Height of the block to be unlock                                                                                                                                                             |
+| amount        | BIGINT(20) |     |    Y     |         | The monetary value of this output, in 1/10^7                                                                                                                                                 |
+| lock_type     | INTEGER    |     |    Y     |         | (0: Key; 1: Hash of Key; 2: Script; 3: Hash of Script)                                                                                                                                       |
+| lock_bytes    | TINYBLOB   |     |    Y     |         | The bytes of lock                                                                                                                                                                            |
+| address       | TEXT       |     |    Y     |         | The public key, Valid only when lock type is 0. Other than that, it's a blank.                                                                                                               |
 
 ### _Create Script_
 
@@ -206,20 +211,21 @@ CREATE TABLE IF NOT EXISTS "utxos" (
     PRIMARY KEY("utxo_key(64)")
 )
 ```
-----
+
+---
 
 ## 7. Table **validators**
 
 ### _Schema_
 
-| Column            | Data Type | PK | Not NULL | Default  |Description|
-|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
-|  enrolled_at      | INTEGER   | Y  | Y        |          | The height this validator enrolled at |
-|  utxo_key         | TINYBLOB  | Y  | Y        |          | The hash of the UTXO|
-|  address          | TEXT      |    | Y        |          | The public key that can redeem this UTXO|
-|  stake            | BIGINT(20)|    | Y        |          | The amount of the UTXO|
-|  preimage_height  | INTEGER   |    | Y        |          | The height of the preimage|
-|  preimage_hash    | TINYBLOB  |    | Y        |          | The hash of the preimage|
+| Column          | Data Type  | PK  | Not NULL | Default | Description                              |
+| :-------------- | :--------- | :-: | :------: | ------- | ---------------------------------------- |
+| enrolled_at     | INTEGER    |  Y  |    Y     |         | The height this validator enrolled at    |
+| utxo_key        | TINYBLOB   |  Y  |    Y     |         | The hash of the UTXO                     |
+| address         | TEXT       |     |    Y     |         | The public key that can redeem this UTXO |
+| stake           | BIGINT(20) |     |    Y     |         | The amount of the UTXO                   |
+| preimage_height | INTEGER    |     |    Y     |         | The height of the preimage               |
+| preimage_hash   | TINYBLOB   |     |    Y     |         | The hash of the preimage                 |
 
 ### _Create Script_
 
@@ -234,16 +240,17 @@ CREATE TABLE IF NOT EXISTS "validators" (
     PRIMARY KEY("enrolled_at","utxo_key(64)")
 )
 ```
-----
+
+---
 
 ## 8. Table **payloads**
 
 ### _Schema_
 
-| Column            | Data Type | PK | Not NULL | Default  |Description|
-|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
-|  tx_hash          | TINYBLOB  | Y  | Y        |          | The hash of transaction |
-|  payload          | BLOB      |    | Y        |          | The transaction data payload |
+| Column  | Data Type | PK  | Not NULL | Default | Description                  |
+| :------ | :-------- | :-: | :------: | ------- | ---------------------------- |
+| tx_hash | TINYBLOB  |  Y  |    Y     |         | The hash of transaction      |
+| payload | BLOB      |     |    Y     |         | The transaction data payload |
 
 ### _Create Script_
 
@@ -255,17 +262,17 @@ CREATE TABLE IF NOT EXISTS "payloads" (
 )
 ```
 
-----
+---
 
 ## 9. Table **merkle_trees**
 
 ### _Schema_
 
-| Column            | Data Type | PK | Not NULL | Default  |Description|
-|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
-| block_height      | INTEGER   | Y  | Y        |          | The height of the block |
-| merkle_index      | INTEGER   | Y  | Y        |          | The index of merkleTree in the block |
-| merkle_hash       | TINYBLOB  |    | Y        |          | The merkle tree |
+| Column       | Data Type | PK  | Not NULL | Default | Description                          |
+| :----------- | :-------- | :-: | :------: | ------- | ------------------------------------ |
+| block_height | INTEGER   |  Y  |    Y     |         | The height of the block              |
+| merkle_index | INTEGER   |  Y  |    Y     |         | The index of merkleTree in the block |
+| merkle_hash  | TINYBLOB  |     |    Y     |         | The merkle tree                      |
 
 ### _Create Script_
 
@@ -277,26 +284,27 @@ CREATE TABLE IF NOT EXISTS "merkle_trees" (
     PRIMARY KEY("block_height","merkle_index")
 )
 ```
-----
+
+---
 
 ## 10. Table **blocks_header_updated_history**
 
 ### _Schema_
 
-| Column            | Data Type | PK | Not NULL | Default  |Description|
-|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
-| block_height      | INTEGER   | Y  | Y        |          | The updated block height |
-| current_height    | INTEGER   |    | Y        |          | The current block height |
-| signature         | TINYBLOB  | Y  | Y        |          | Schnorr multisig of all validators which signed this block |
-| hash              | TINYBLOB  |    | Y        |          | The hash of the current block |
-| validators        | TEXT      |    | Y        |          | BitMask containing the validators' key indices which signed the block |
-| missing_validators| TEXT      |    | N        |          | List of indices to the validator UTXO set which have not revealed the preimage |
-| updated_time      | INTEGER   | Y  | Y        |          | Updated timestamp |
+| Column             | Data Type | PK  | Not NULL | Default | Description                                                                    |
+| :----------------- | :-------- | :-: | :------: | ------- | ------------------------------------------------------------------------------ |
+| block_height       | INTEGER   |  Y  |    Y     |         | The updated block height                                                       |
+| current_height     | INTEGER   |     |    Y     |         | The current block height                                                       |
+| signature          | TINYBLOB  |  Y  |    Y     |         | Schnorr multisig of all validators which signed this block                     |
+| hash               | TINYBLOB  |     |    Y     |         | The hash of the current block                                                  |
+| validators         | TEXT      |     |    Y     |         | BitMask containing the validators' key indices which signed the block          |
+| missing_validators | TEXT      |     |    N     |         | List of indices to the validator UTXO set which have not revealed the preimage |
+| updated_time       | INTEGER   |  Y  |    Y     |         | Updated timestamp                                                              |
 
 ### _Create Script_
 
 ```sql
-CREATE TABLE IF NOT EXISTS "blocks_header_updated_history" 
+CREATE TABLE IF NOT EXISTS "blocks_header_updated_history"
     "block_height"        INTEGER  NOT NULL,
     "current_height"      INTEGER  NOT NULL,
     "signature"           TINYBLOB NOT NULL,
@@ -307,7 +315,8 @@ CREATE TABLE IF NOT EXISTS "blocks_header_updated_history"
     PRIMARY KEY("block_height","signature","updated_time")
 )
 ```
-----
+
+---
 
 ## 11. Table **information**
 
@@ -318,10 +327,10 @@ The following data is recorded when the most recently recorded block height is 1
 
 ### _Schema_
 
-| Column            | Data Type | PK | Not NULL | Default  |Description|
-|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
-|  key              | TEXT      | Y  | Y        |          | The key   |
-|  value            | TEXT      |    | Y        |          | The value |
+| Column | Data Type | PK  | Not NULL | Default | Description |
+| :----- | :-------- | :-: | :------: | ------- | ----------- |
+| key    | TEXT      |  Y  |    Y     |         | The key     |
+| value  | TEXT      |     |    Y     |         | The value   |
 
 ### _Create Script_
 
@@ -333,23 +342,23 @@ CREATE TABLE IF NOT EXISTS "information" (
 )
 ```
 
-----
+---
 
 ## 12. Table **transaction_pool**
 
 ### _Schema_
 
-| Column            | Data Type | PK | Not NULL | Default  |Description|
-|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
-| tx_hash           | TINYBLOB  | Y  | Y        |          | The hash of transaction |
-| type              | INTEGER   |    | Y        |          | The type of transaction |
-| payload           | BLOB      |    | Y        |          | The transaction data payload |
-| lock_height       | INTEGER   |    | Y        |          | This transaction may only be included in a block with `block_height >= lock_height`|
-| received_height   | INTEGER   |    | Y        |          | The height of the block on receipt |
-| time              | INTEGER   |    | Y        |          | Received time |
-| tx_fee            | INTEGER   |    | Y        |          | The fee of this transaction |
-| payload_fee       | INTEGER   |    | Y        |          | The payload fee of this transaction  |
-| tx_size           | INTEGER   |    | Y        |          | The size of this transaction  |
+| Column          | Data Type | PK  | Not NULL | Default | Description                                                                         |
+| :-------------- | :-------- | :-: | :------: | ------- | ----------------------------------------------------------------------------------- |
+| tx_hash         | TINYBLOB  |  Y  |    Y     |         | The hash of transaction                                                             |
+| type            | INTEGER   |     |    Y     |         | The type of transaction                                                             |
+| payload         | BLOB      |     |    Y     |         | The transaction data payload                                                        |
+| lock_height     | INTEGER   |     |    Y     |         | This transaction may only be included in a block with `block_height >= lock_height` |
+| received_height | INTEGER   |     |    Y     |         | The height of the block on receipt                                                  |
+| time            | INTEGER   |     |    Y     |         | Received time                                                                       |
+| tx_fee          | INTEGER   |     |    Y     |         | The fee of this transaction                                                         |
+| payload_fee     | INTEGER   |     |    Y     |         | The payload fee of this transaction                                                 |
+| tx_size         | INTEGER   |     |    Y     |         | The size of this transaction                                                        |
 
 ### _Create Script_
 
@@ -368,19 +377,19 @@ CREATE TABLE IF NOT EXISTS "transaction_pool" (
 )
 ```
 
-----
+---
 
 ## 13. Table **tx_input_pool**
 
 ### _Schema_
 
-| Column            | Data Type | PK | Not NULL | Default  |Description|
-|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
-| tx_hash           | TINYBLOB  | Y  | Y        |          | The hash of transaction|
-| input_index       | INTEGER   | Y  | Y        |          | The index of input in the inputs|
-| utxo              | TINYBLOB  |    | Y        |          | The hash of the UTXO to be spent|
-| unlock_bytes      | TINYBLOB  |    | Y        |          | The unlock script, which will be ran together with the matching Input's lock script in the execution engine|
-| unlock_age        | INTEGER   |    | Y        |          | Use for implementing relative time locks |
+| Column       | Data Type | PK  | Not NULL | Default | Description                                                                                                 |
+| :----------- | :-------- | :-: | :------: | ------- | ----------------------------------------------------------------------------------------------------------- |
+| tx_hash      | TINYBLOB  |  Y  |    Y     |         | The hash of transaction                                                                                     |
+| input_index  | INTEGER   |  Y  |    Y     |         | The index of input in the inputs                                                                            |
+| utxo         | TINYBLOB  |     |    Y     |         | The hash of the UTXO to be spent                                                                            |
+| unlock_bytes | TINYBLOB  |     |    Y     |         | The unlock script, which will be ran together with the matching Input's lock script in the execution engine |
+| unlock_age   | INTEGER   |     |    Y     |         | Use for implementing relative time locks                                                                    |
 
 ### _Create Script_
 
@@ -395,21 +404,21 @@ CREATE TABLE IF NOT EXISTS "tx_input_pool" (
 )
 ```
 
-----
+---
 
 ## 14. Table **tx_output_pool**
 
 ### _Schema_
 
-| Column            | Data Type | PK | Not NULL | Default  |Description|
-|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
-|  tx_hash          | TINYBLOB  | Y  | Y        |          | The hash of transaction|
-|  output_index     | INTEGER   | Y  | Y        |          | The index of output in the outputs|
-|  type             | INTEGER   |    | Y        |          | The type of transaction output |
-|  amount           | BIGINT(20)|    | Y        |          | The monetary value of this output, in 1/10^7|
-|  lock_type        | INTEGER   |    | Y        |          | (0: Key; 1: Hash of Key; 2: Script; 3: Hash of Script) |
-|  lock_bytes       | TINYBLOB  |    | Y        |          | The bytes of lock |
-|  address          | TEXT      |    | Y        |          | The public key that can redeem this output|
+| Column       | Data Type  | PK  | Not NULL | Default | Description                                            |
+| :----------- | :--------- | :-: | :------: | ------- | ------------------------------------------------------ |
+| tx_hash      | TINYBLOB   |  Y  |    Y     |         | The hash of transaction                                |
+| output_index | INTEGER    |  Y  |    Y     |         | The index of output in the outputs                     |
+| type         | INTEGER    |     |    Y     |         | The type of transaction output                         |
+| amount       | BIGINT(20) |     |    Y     |         | The monetary value of this output, in 1/10^7           |
+| lock_type    | INTEGER    |     |    Y     |         | (0: Key; 1: Hash of Key; 2: Script; 3: Hash of Script) |
+| lock_bytes   | TINYBLOB   |     |    Y     |         | The bytes of lock                                      |
+| address      | TEXT       |     |    Y     |         | The public key that can redeem this output             |
 
 ### _Create Script_
 
@@ -426,20 +435,20 @@ CREATE TABLE IF NOT EXISTS "tx_output_pool" (
 )
 ```
 
-----
+---
 
 ## 15. Table **blocks_stats**
 
 ### _Schema_
 
-| Column                 | Data Type | PK | Not NULL | Default  |Description|
-|:-----------------------|:--------- |:--:|:--------:| -------- | --------- |
-|  block_height          | INTEGER   | Y  | Y        |          | The block height  |
-|  total_sent            | BIGINT(20)|    | Y        |          | Total sent   |
-|  total_received        | BIGINT(20)|    | Y        |          | Total received  |
-|  total_reward          | BIGINT(20)|    | Y        |          | Total reward |
-|  total_fee             | BIGINT(20)|    | Y        |          | Total fee  |
-|  total_size            | BIGINT(20)|    | Y        |          | Total block size  |
+| Column         | Data Type  | PK  | Not NULL | Default | Description      |
+| :------------- | :--------- | :-: | :------: | ------- | ---------------- |
+| block_height   | INTEGER    |  Y  |    Y     |         | The block height |
+| total_sent     | BIGINT(20) |     |    Y     |         | Total sent       |
+| total_received | BIGINT(20) |     |    Y     |         | Total received   |
+| total_reward   | BIGINT(20) |     |    Y     |         | Total reward     |
+| total_fee      | BIGINT(20) |     |    Y     |         | Total fee        |
+| total_size     | BIGINT(20) |     |    Y     |         | Total block size |
 
 ### _Create Script_
 
@@ -454,19 +463,20 @@ Create TABLE IF NOT EXISTS "blocks_stats" (
     PRIMARY KEY ("block_height")
 );
 ```
-----
+
+---
 
 ## 16. Table **marketcap**
 
 ### _Schema_
 
-| Column                 | Data Type    | PK | Not NULL | Default  |Description|
-|:-----------------------|:---------    |:--:|:--------:| -------- | --------- |
-|  last_updated_at       | INTEGER      | Y  | Y        |          | Time of last update  |
-|  price                 | DECIMAL(14,6)|    | Y        |          | Price of BOA in USD  |
-|  market_cap            | BIGINT(20)   |    | Y        |          | Market cap 24 hour amount  |
-|  vol_24h               | BIGINT(20)   |    | Y        |          | 24 hours Volume  |
-|  change_24h            | BIGINT(20)   |    |          |          | Market cap change for last 24 hours |
+| Column          | Data Type     | PK  | Not NULL | Default | Description                         |
+| :-------------- | :------------ | :-: | :------: | ------- | ----------------------------------- |
+| last_updated_at | INTEGER       |  Y  |    Y     |         | Time of last update                 |
+| price           | DECIMAL(14,6) |     |    Y     |         | Price of BOA in USD                 |
+| market_cap      | BIGINT(20)    |     |    Y     |         | Market cap 24 hour amount           |
+| vol_24h         | BIGINT(20)    |     |    Y     |         | 24 hours Volume                     |
+| change_24h      | BIGINT(20)    |     |          |         | Market cap change for last 24 hours |
 
 ### _Create Script_
 
@@ -485,10 +495,10 @@ Create TABLE IF NOT EXISTS "marketcap" (
 
 ### _Schema_
 
-| Column            | Data Type | PK | Not NULL | Default  |Description|
-|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
-| key               | TINYBLOB  | Y  | Y        |          | The hash of transaction |
-| val               | BLOB      |    | Y        |          | The transaction serialized to binary |
+| Column | Data Type | PK  | Not NULL | Default | Description                          |
+| :----- | :-------- | :-: | :------: | ------- | ------------------------------------ |
+| key    | TINYBLOB  |  Y  |    Y     |         | The hash of transaction              |
+| val    | BLOB      |     |    Y     |         | The transaction serialized to binary |
 
 ### _Create Script_
 
@@ -499,14 +509,15 @@ CREATE TABLE IF NOT EXISTS tx_pool (
     PRIMARY KEY (`key`(64))
 );
 ```
+
 ## 18. Table **fee_mean_disparity**
 
 ### _Schema_
 
-| Column            | Data Type | PK | Not NULL | Default  |Description|
-|:----------------- |:--------- |:--:|:--------:| -------- | --------- |
-| height            | INTEGER   | Y  | Y        |          | The height of the block |
-| disparity         | INTEGER   |    | Y        |          | The disparity of transaction fee |
+| Column    | Data Type | PK  | Not NULL | Default | Description                      |
+| :-------- | :-------- | :-: | :------: | ------- | -------------------------------- |
+| height    | INTEGER   |  Y  |    Y     |         | The height of the block          |
+| disparity | INTEGER   |     |    Y     |         | The disparity of transaction fee |
 
 ### _Create Script_
 
@@ -517,22 +528,23 @@ CREATE TABLE IF NOT EXISTS fee_mean_disparity (
     PRIMARY KEY (height)
 )
 ```
-----
+
+---
 
 ## 19. Table **accounts**
 
 ### Schema
 
-| Column                 | Data Type  | PK | Not NULL | Default  |Description|
-|:-----------------------|:-----------|:--:|:--------:| -------- | --------- |
-|  address               | TEXT       | Y  | Y        |          | Public key of the wallet|
-|  tx_count              | INTEGER    |    | Y        |          | Transaction count of BOA Holder        |
-|  total_received        | BIGINT(24) |    | Y        |          | Total received amount of BOA Holder    |
-|  total_sent            | BIGINT(24) |    | Y        |          | Total sent amount of BOA Holder        |
-|  total_reward          | BIGINT(20) |    | Y        |          | Total reward amount of BOA Holder      |
-|  total_frozen          | BIGINT(20) |    | Y        |          | Total freeze amount of BOA Holder      |
-|  total_spendable       | BIGINT(20) |    | Y        |          | Total received amount of BOA Holder    |
-|  total_balance         | BIGINT(20) |    | Y        |          | Total balance of wallet of BOA Holder  | 
+| Column          | Data Type  | PK  | Not NULL | Default | Description                           |
+| :-------------- | :--------- | :-: | :------: | ------- | ------------------------------------- |
+| address         | TEXT       |  Y  |    Y     |         | Public key of the wallet              |
+| tx_count        | INTEGER    |     |    Y     |         | Transaction count of BOA Holder       |
+| total_received  | BIGINT(24) |     |    Y     |         | Total received amount of BOA Holder   |
+| total_sent      | BIGINT(24) |     |    Y     |         | Total sent amount of BOA Holder       |
+| total_reward    | BIGINT(20) |     |    Y     |         | Total reward amount of BOA Holder     |
+| total_frozen    | BIGINT(20) |     |    Y     |         | Total freeze amount of BOA Holder     |
+| total_spendable | BIGINT(20) |     |    Y     |         | Total received amount of BOA Holder   |
+| total_balance   | BIGINT(20) |     |    Y     |         | Total balance of wallet of BOA Holder |
 
 ### _Create Script_
 
@@ -554,16 +566,17 @@ CREATE TABLE IF NOT EXISTS "accounts"(
 
 ### _Schema_
 
-| Column                 | Data Type    | PK | Not NULL | Default  |Description|
-|:-----------------------|:---------    |:--:|:--------:| -------- | --------- |
-|  height                | TEXT         | Y  | Y        |          | Height of Block  |
-|  time_stamp            | INTEGER      |    | Y        |          | Block unix timestamp  |
-|  average_tx_fee        | BIGINT(20)   |    | Y        |          | Average Fee of All Fees  |
-|  total_tx_fee          | BIGINT(20)   |    | Y        |          | Total Fee of Transactions in Block  |
-|  total_payload_fee     | BIGINT(20)   |    | Y        |          | Total Payload Fee  |
-|  total_fee             | BIGINT(20)   |    | Y        |          | Total Fee  |
+| Column            | Data Type  | PK  | Not NULL | Default | Description                        |
+| :---------------- | :--------- | :-: | :------: | ------- | ---------------------------------- |
+| height            | TEXT       |  Y  |    Y     |         | Height of Block                    |
+| time_stamp        | INTEGER    |     |    Y     |         | Block unix timestamp               |
+| average_tx_fee    | BIGINT(20) |     |    Y     |         | Average Fee of All Fees            |
+| total_tx_fee      | BIGINT(20) |     |    Y     |         | Total Fee of Transactions in Block |
+| total_payload_fee | BIGINT(20) |     |    Y     |         | Total Payload Fee                  |
+| total_fee         | BIGINT(20) |     |    Y     |         | Total Fee                          |
 
 ### _Create Script_
+
 ```sql
 CREATE TABLE IF NOT EXISTS "fees"(
     "height"             INTEGER    NOT NULL,
@@ -575,22 +588,23 @@ CREATE TABLE IF NOT EXISTS "fees"(
     PRIMARY KEY(height)
 );
 ```
-----
+
+---
 
 ## 21. Table **account_history**
 
 ### _Schema_
 
-| Column                 | Data Type    | PK | Not NULL | Default  |Description|
-|:-----------------------|:---------    |:--:|:--------:| -------- | --------- |
-|  address               | TEXT         | Y  | Y        |          | Address of Account  |
-|  time_stamp            | INTEGER      | Y  | Y        |          | unix timestamp  |
-|  granularity           | TEXT         | Y  | Y        |          | Total Fee of Transactions in Block  |
-|  block_height          | INTEGER      |    | Y        |          | block height  |
-|  balance               | BIGINT(20)   |    | Y        |          | Balance of user at particular time  |
-
+| Column       | Data Type  | PK  | Not NULL | Default | Description                        |
+| :----------- | :--------- | :-: | :------: | ------- | ---------------------------------- |
+| address      | TEXT       |  Y  |    Y     |         | Address of Account                 |
+| time_stamp   | INTEGER    |  Y  |    Y     |         | unix timestamp                     |
+| granularity  | TEXT       |  Y  |    Y     |         | Total Fee of Transactions in Block |
+| block_height | INTEGER    |     |    Y     |         | block height                       |
+| balance      | BIGINT(20) |     |    Y     |         | Balance of user at particular time |
 
 ### _Create Script_
+
 ```sql
 CREATE TABLE IF NOT EXISTS "account_history"(
     "address"            TEXT       NOT NULL,
@@ -598,7 +612,115 @@ CREATE TABLE IF NOT EXISTS "account_history"(
     "granularity"        TEXT       NOT NULL,
     "block_height"       INTEGER    NOT NULL,
     "balance"            BIGINT(20) NOT NULL,
-    
+
     PRIMARY KEY ("address(64)","time_stamp","granularity(64)");
+);
+```
+
+---
+
+## 22. Table **proposals**
+
+### _Schema_
+
+| Column              | Data Type | PK  | Not NULL | Default | Description                   |
+| :------------------ | :-------- | :-: | :------: | ------- | ----------------------------- |
+| proposal_id         | TEXT      |  Y  |    Y     |         | Proposal id                   |
+| proposer_address    | TEXT      |     |    Y     |         | Proposer address              |
+| tx_hash             | TINYBLOB  |     |    Y     |         | Transaction hash              |
+| title               | TEXT      |     |    Y     |         | Proposal title                |
+| type                | TEXT      |     |    Y     |         | Proposal type                 |
+| status              | TEXT      |     |    Y     |         | Proposal status               |
+| voting_start        | DATETIME  |     |    Y     |         | Voting start time             |
+| voting_end          | DATETIME  |     |    Y     |         | Voting end time               |
+| submit_time         | TEXT      |     |    Y     |         | Submit time                   |
+| detail              | TEXT      |     |    Y     |         | Proposal description          |
+| fee_tx_hash         | TEXT      |     |    Y     |         | Proposal fee transaction hash |
+| vote_fee            | BigInt(20)|     |    Y     |         | Voting fee                    |
+| funding_amount      | BigInt(20)|     |    Y     |         | Funding amount                |
+| voting_start_height | INTEGER   |     |    Y     |         | Vote start height             |
+| voting_end_height   | INTEGER   |     |    Y     |         | Vote end height               |
+| proposer_id         | INTEGER   |     |    Y     |         | Proposer id                   |
+| proposal_result     | TEXT      |     |          |         | Proposal result               |
+
+### _Create Script_
+
+```sql
+CREATE TABLE IF NOT EXISTS "proposals"(
+    "proposal_id"          TEXT        NOT NULL,
+    "proposer_address"     TEXT        NOT NULL,
+    "tx_hash"              TINYBLOB    NOT NULL,
+    "title"                TEXT        NOT NULL,
+    "type"                 TEXT        NOT NULL,
+    "status"               TEXT        NOT NULL,
+    "voting_start"         DATETIME    NOT NULL,
+    "voting_end"           DATETIME    NOT NULL,
+    "submit_time"          TEXT        NOT NULL,
+    "detail"               TEXT        NOT NULL,
+    "fee_tx_hash"          TEXT        NOT NULL,
+    "vote_fee"             BigInt(20)  NOT NULL,
+    "funding_amount"       BigInt(20)  NOT NULL,
+    "voting_start_height"  INTEGER     NOT NULL,
+    "voting_end_height"    INTEGER     NOT NULL,
+    "proposer_id"          INTEGER     NOT NULL,
+    "proposal_result"      TEXT,
+
+    PRIMARY KEY ("proposal_id(64)");
+);
+```
+---
+
+## 23. Table **proposer**
+
+### _Schema_
+
+| Column              | Data Type | PK  | Not NULL | Default | Description                   |
+| :------------------ | :-------- | :-: | :------: | ------- | ----------------------------- |
+| proposer_id         | TEXT      |  Y  |    Y     |         | Proposer id                   |
+| proposer_name       | TEXT      |     |    Y     |         | Proposer name                 |
+| wallet_address      | TEXT      |     |    Y     |         | Wallet address                |
+
+### _Create Script_
+
+```sql
+CREATE TABLE IF NOT EXISTS "proposer"(
+    "proposer_id"       TEXT    NOT NULL,
+    "proposer_name"     TEXT    NOT NULL,
+    "wallet_address"    TEXT    NOT NULL,
+    PRIMARY KEY ("proposer_id(64)");
+);
+```
+---
+
+## 24. Table **vote**
+
+### _Schema_
+
+| Column              | Data Type | PK  | Not NULL | Default | Description                   |
+| :------------------ | :-------- | :-: | :------: | ------- | ----------------------------- |
+| vote_id             | INTEGER   |  Y  |    Y     |         | Vote id                       |
+| proposal_id         | TEXT      |  Y  |    Y     |         | Proposal id                   |
+| app_name            | TEXT      |     |    Y     |         | App name                      |
+| voter_utxo          | TINYBLOB  |     |    Y     |         | Voter UTXO key                |
+| tx_hash             | TINYBLOB  |     |    Y     |         | Vote tx hash                  |
+| voter_address       | TEXT      |     |    Y     |         | Voter address                 |
+| sequence            | INTEGER   |     |    Y     |         | Sequence                      | 
+| ballot_answer       | BLOB      |     |    Y     |         | Ballot answer                 |
+| voting_time         | TEXT      |     |    Y     |         | Voting time                   |
+
+### _Create Script_
+
+```sql
+CREATE TABLE IF NOT EXISTS "proposer"(
+    "vote_id"        TEXT    NOT NULL,
+    "proposal_id"    TEXT    NOT NULL,
+    "app_name"       TEXT    NOT NULL,
+    "voter_utxo"     TEXT    NOT NULL,
+    "tx_hash"        TEXT    NOT NULL,
+    "voter_address"  TEXT    NOT NULL,
+    "sequence"       TEXT    NOT NULL,
+    "ballot_answer"  TEXT    NOT NULL,
+    "voting_time"    TEXT    NOT NULL,
+    PRIMARY KEY(vote_id, proposal_id(64));
 );
 ```

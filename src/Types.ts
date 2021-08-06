@@ -11,7 +11,7 @@
 
  *******************************************************************************/
 
-import { Height, OutputType, BlockHeader, Block, Transaction, JSBI } from 'boa-sdk-ts';
+import { Height, OutputType, BlockHeader, Block, Transaction, JSBI, Hash } from 'boa-sdk-ts';
 
 /**
  * The interface of the Validator
@@ -616,6 +616,332 @@ export interface ISPVStatus {
      */
     message: string;
 }
+
+/**
+ * The interface of the proposal validator
+ */
+export interface IProposalValidator {
+    /**
+     * Address
+     */
+    address: string;
+
+    /**
+     * The validates number of blocks
+     */
+    validates: number;
+
+    /**
+     * Validation ratio
+     */
+    validation_ratio?: boolean;
+
+    /**
+     * If no validator's preimage 'false' else 'true'
+     */
+    valid_preimage?: boolean;
+}
+
+/**
+ * The interface of the proposal validator
+ */
+export interface IProposalVote {
+    /**
+     * Voter UTXO key
+     */
+    utxo_key: string;
+
+    /**
+     * Voter address
+     */
+    address: string;
+
+    /**
+     * Sequence
+     */
+    sequence: number;
+
+    /**
+     * Tx_hash
+     */
+    tx_hash: string
+
+    /**
+     * Voting time
+     */
+    voting_time: string
+}
+
+/**
+ * The interface of the proposal data
+ */
+export interface IProposalData {
+    /**
+     * Proposal id
+     */
+    proposalId: string;
+
+    /**
+     * Proposer address
+     */
+    proposer_address: string;
+
+    /**
+     * The proposal transasaction hash
+     */
+    tx_hash: Hash;
+
+    /**
+     * Proposal name
+     */
+    name: string;
+
+    /**
+     * Proposal type
+     */
+    type: string
+
+    /**
+     * Proposal status
+     */
+    status: string
+
+    /**
+     * Proposal voting start time
+     */
+    voting_start: Date
+
+    /**
+     * Proposal voting end time
+     */
+    voting_end: Date
+
+    /**
+     * Proposal submission time
+     */
+    submit_time: Date
+
+    /**
+     * Proposal description 
+     */
+    detail: string
+
+    /**
+     * Proposal fee transaction 
+     */
+    fee_tx: string
+
+    /**
+     * Proposal fee 
+     */
+    vote_fee: number
+
+    /**
+     * Proposal funding amount 
+     */
+    funding_amount: JSBI
+
+    /**
+     *  Proposal voting start height
+     */
+    voting_start_height: number
+
+    /**
+     * Proposal voting eng height
+     */
+    voting_end_height: number
+
+    /**
+     * Proposal's proposer id 
+     */
+    proposer_id: number
+
+    /**
+    * Proposal's proposer name
+     */
+    proposer_name?: string
+}
+
+/**
+ * The interface of the proposal data by Id 
+ */
+export interface IProposalAPI {
+    /**
+     * Proposal id
+     */
+    proposalId: string;
+
+    /**
+     * Proposal name
+     */
+    name: string;
+
+    /**
+     * The proposal transasaction hash
+     */
+    tx_hash: string;
+
+    /**
+     * Proposal type
+     */
+    type: string
+
+    /**
+     * Proposal status
+     */
+    status: string
+
+    /**
+     * Proposal voting start time
+     */
+    voting_start: Date
+
+    /**
+     * Proposal voting end time
+     */
+    voting_end: Date
+
+    /**
+     * Proposal submission time
+     */
+    submit_time: string
+
+    /**
+     * Proposal description 
+     */
+    detail: string
+
+    /**
+     * Proposal fee transaction 
+     */
+    fee_tx: string
+
+    /**
+     * Proposal fee 
+     */
+    vote_fee: number
+
+    /**
+     * Proposal funding amount 
+     */
+    funding_amount: JSBI
+
+    /**
+     *  Proposal voting start height
+     */
+    voting_start_height: number
+
+    /**
+     * Proposal voting eng height
+     */
+    voting_end_height: number
+
+    /**
+    * Proposal's proposer name
+     */
+    proposer_name: string
+}
+
+/**
+ * The interface of the proposal data API
+ */
+export interface IProposalDataAPI {
+    /**
+     * Proposal id
+     */
+    proposalId: string;
+
+    /**
+     * Proposal name
+     */
+    name: string;
+
+    /**
+     * Proposal type
+     */
+    type: string
+
+    /**
+     * Proposal status
+     */
+    status: string
+
+    /**
+     * Proposal submission time
+     */
+    submit_time: Date
+
+    /**
+     * Proposal funding amount 
+     */
+    funding_amount: JSBI
+
+    /**
+     *  Proposal voting start height
+     */
+    voting_start_height: number
+
+    /**
+     * Proposal voting eng height
+     */
+    voting_end_height: number
+
+    /**
+    * Proposal's proposer name
+     */
+    proposer_name: string
+}
+
+/**
+ * The interface of the Ballot data
+ */
+export interface IBallot {
+    /**
+     * vote id
+     */
+    vote_id: number;
+
+    /**
+     * proposal id
+     */
+    proposal_id: string;
+
+    /**
+     * proposal id
+     */
+    app_name: string;
+
+    /**
+     * The Voter utxo
+     */
+    voter_utxo: Hash;
+
+    /**
+     * The ballot answer
+     */
+    ballot_answer: Buffer;
+
+    /**
+     * The transasaction hash
+     */
+    tx_hash: Hash;
+
+    /**
+     * The voter address
+     */
+    voter_address: string;
+
+    /**
+     * The sequence
+     */
+    sequence: number;
+
+    /**
+     * The voting time
+     */
+    voting_time: Date;
+}
+
 /**
  * The interface of block
  */

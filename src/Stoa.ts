@@ -48,6 +48,9 @@ import {
     IBOAHolder,
     IAvgFee,
     IAccountChart,
+    IProposalDataAPI,
+    IProposalAPI,
+    IProposalVote
 } from "./Types";
 
 import bodyParser from "body-parser";
@@ -233,6 +236,9 @@ class Stoa extends WebService {
         this.app.get("/holder/:address", isBlackList, this.getBoaHolder.bind(this));
         this.app.get("/average_fee_chart", isBlackList, this.averageFeeChart.bind(this));
         this.app.get("/search/hash/:hash", isBlackList, this.searchHash.bind(this));
+        this.app.get("/proposals", isBlackList, this.getProposals.bind(this));
+        this.app.get("/proposal/:proposal", isBlackList, this.getProposalById.bind(this));
+        this.app.get("/proposal/:proposal", isBlackList, this.getProposalVotes.bind(this));
 
         let height: Height = new Height("0");
         await HeightManager.init(this);
@@ -781,9 +787,9 @@ class Stoa extends WebService {
         filter_type =
             req.query.type !== undefined
                 ? req.query.type
-                      .toString()
-                      .split(",")
-                      .map((m) => ConvertTypes.toDisplayTxType(m))
+                    .toString()
+                    .split(",")
+                    .map((m) => ConvertTypes.toDisplayTxType(m))
                 : [0, 1, 2, 3];
 
         if (filter_type.find((m) => m < 0) !== undefined) {
@@ -1869,7 +1875,7 @@ class Stoa extends WebService {
                     if (updated)
                         logger.info(
                             `Update a blockHeader : ${block_header.toString()}, ` +
-                                `block height : ${block_header.height.toString()}`,
+                            `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -1879,7 +1885,7 @@ class Stoa extends WebService {
                     if (put)
                         logger.info(
                             `puts a blockHeader history : ${block_header.toString()}, ` +
-                                `block height : ${block_header.height.toString()}`,
+                            `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -1904,9 +1910,8 @@ class Stoa extends WebService {
                     if (changes)
                         logger.info(
                             `Saved a pre-image utxo : ${pre_image.utxo.toString().substr(0, 18)}, ` +
-                                `hash : ${pre_image.hash.toString().substr(0, 18)}, pre-image height : ${
-                                    pre_image.height
-                                }`,
+                            `hash : ${pre_image.hash.toString().substr(0, 18)}, pre-image height : ${pre_image.height
+                            }`,
                             {
                                 operation: Operation.db,
                                 height: HeightManager.height.toString(),
@@ -2334,6 +2339,114 @@ class Stoa extends WebService {
                 logger.error("Failed to data lookup to the DB: " + err);
                 return res.status(500).send("Failed to data lookup");
             });
+    }
+
+    /* Get all proposals
+     * @returns Returns proposal of the ledger.
+     */
+    public async getProposals(req: express.Request, res: express.Response) {
+
+        let pagination: IPagination = await this.paginate(req, res);
+        this.ledger_storage.getProposals(pagination.pageSize, pagination.page)
+            .then((data: any[]) => {
+                if (data.length === 0) {
+                    return res.status(204).send(`The data does not exist.`);
+                }
+                else {
+                    let proposalList: Array<IProposalDataAPI> = [];
+                    for (const row of data) {
+                        proposalList.push({
+                            proposalId: row.proposal_id,
+                            name: row.title,
+                            proposer_name: row.proposer_name,
+                            type: row.type,
+                            funding_amount: row.funding_amount,
+                            submit_time: row.submit_time,
+                            voting_start_height: row.voting_start_height,
+                            voting_end_height: row.voting_end_height,
+                            status: row.status,
+                        })
+                    }
+                    return res.status(200).send(JSON.stringify(proposalList));
+                }
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err);
+                return res.status(500).send("Failed to data lookup");
+            })
+    }
+
+    /* Get proposal by proposal id
+     * @returns Returns proposal of the ledger.
+     */
+    public async getProposalById(req: express.Request, res: express.Response) {
+
+        const proposal_id = String(req.params.proposal);
+        this.ledger_storage.getProposalById(proposal_id)
+            .then((data: any[]) => {
+                if (data.length === 0) {
+                    return res.status(204).send(`The data does not exist.`);
+                }
+                else {
+                    let proposal: IProposalAPI =
+                    {
+                        name: data[0].title,
+                        proposalId: data[0].proposal_id,
+                        detail: data[0].detail,
+                        tx_hash: new Hash(data[0].tx_hash, Endian.Little).toString(),
+                        fee_tx: data[0].fee_tx,
+                        funding_amount: data[0].funding_amount,
+                        vote_fee: data[0].vote_fee,
+                        status: data[0].status,
+                        type: data[0].type,
+                        voting_start_height: data[0].voting_start_height,
+                        voting_start: data[0].voting_start,
+                        voting_end_height: data[0].voting_end_height,
+                        voting_end: data[0].voting_end,
+                        submit_time: data[0].submit_time,
+                        proposer_name: data[0].proposer_name,
+                    };
+                    return res.status(200).send(JSON.stringify(proposal));
+                }
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err);
+                return res.status(500).send("Failed to data lookup");
+            })
+    }
+
+    /* Get proposal votes
+     * @returns Returns proposal votes of the ledger.
+     */
+    public async getProposalVotes(req: express.Request, res: express.Response) {
+
+        const proposal_id = String(req.params.proposal);
+        let pagination: IPagination = await this.paginate(req, res);
+
+        this.ledger_storage.getProposalVotesAPI(proposal_id, pagination.pageSize, pagination.page)
+            .then((data: any[]) => {
+                if (data.length === 0) {
+                    return res.status(204).send(`The data does not exist.`);
+                }
+                else {
+                    let voteList: Array<IProposalVote> = [];
+                    for (const row of data) {
+                        voteList.push(
+                            {
+                                utxo_key: row.voter_utxo,
+                                address: row.voter_address,
+                                sequence: row.sequence,
+                                tx_hash: row.tx_hash,
+                                voting_time: row.voting_time,
+                            });
+                    }
+                    return res.status(200).send(JSON.stringify(voteList));
+                }
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err);
+                return res.status(500).send("Failed to data lookup");
+            })
     }
 
     /**
