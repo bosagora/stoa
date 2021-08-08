@@ -1784,12 +1784,14 @@ class Stoa extends WebService {
                         }
                         resolve(true);
                     } else {
-                        HeightManager.height = new Height(block.header.height.toString());
-                        logger.info(`Save of block ${height.toString()} postponed to`, {
-                            operation: Operation.block_sync,
-                            height: HeightManager.height.toString(),
-                            success: true,
-                        });
+                        if (block !== null) {
+                            HeightManager.height = new Height(block.header.height.toString());
+                            logger.info(`Save of block ${height.toString()} postponed to`, {
+                                operation: Operation.block_sync,
+                                height: HeightManager.height.toString(),
+                                success: true,
+                            });
+                        }
                         resolve(false);
                     }
                 } catch (err) {
