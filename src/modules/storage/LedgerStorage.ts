@@ -1716,12 +1716,13 @@ export class LedgerStorage extends Storages {
                         `INSERT INTO transaction_pool
                         (tx_hash, type, payload, lock_height, received_height, time, tx_fee, payload_fee, tx_size)
                     VALUES
-                        (?, ?, ?, ?, (SELECT IFNULL(MAX(height), 0) as height FROM blocks), DATE_FORMAT(now(),'%s'), ?, ?, ?)`,
+                        (?, ?, ?, ?, (SELECT IFNULL(MAX(height), 0) as height FROM blocks), ?, ?, ?, ?)`,
                         [
                             hash.toBinary(Endian.Little),
                             tx_type,
                             tx.payload,
                             tx.lock_height.toString(),
+                            moment().utc().unix(),
                             fees[1].toString(),
                             fees[2].toString(),
                             tx_size,
