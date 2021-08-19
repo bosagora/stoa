@@ -42,10 +42,10 @@ export class TransactionPool {
     public async add(connection: mysql.Connection, tx: Transaction) {
         this.updateSpenderList(tx);
 
-        let buffer = new SmartBuffer();
+        const buffer = new SmartBuffer();
         tx.serialize(buffer);
 
-        let tx_hash = hashFull(tx);
+        const tx_hash = hashFull(tx);
         await this.query(connection, "INSERT INTO tx_pool (`key`, `val`) VALUES (?, ?);", [
             tx_hash.toBinary(Endian.Little),
             buffer.toBuffer(),
@@ -60,8 +60,8 @@ export class TransactionPool {
      */
     public async remove(connection: mysql.Connection, key: Transaction | Hash, rm_double_spent: boolean = true) {
         if (key instanceof Transaction) {
-            let tx_hash = hashFull(key);
-            let tx_hash_data = tx_hash.toBinary(Endian.Little);
+            const tx_hash = hashFull(key);
+            const tx_hash_data = tx_hash.toBinary(Endian.Little);
             await this.query(
                 connection,
                 `
@@ -73,25 +73,25 @@ export class TransactionPool {
             );
 
             if (rm_double_spent) {
-                let inv_txs = new Set<string>();
+                const inv_txs = new Set<string>();
                 this.gatherDoubleSpentTXs(key, inv_txs);
                 for (const input of key.inputs) this.spenders.delete(hashFull(input).toString());
                 for (const inv_tx_hash_string of inv_txs)
                     await this.remove(connection, new Hash(inv_tx_hash_string), false);
             } else {
-                let tx_hash_string = tx_hash.toString();
+                const tx_hash_string = tx_hash.toString();
                 for (const input of key.inputs) {
-                    let in_hash_string = hashFull(input).toString();
-                    let set = this.spenders.get(in_hash_string);
+                    const in_hash_string = hashFull(input).toString();
+                    const set = this.spenders.get(in_hash_string);
                     if (set !== undefined && set.has(tx_hash_string)) set.delete(tx_hash_string);
                 }
             }
         } else {
-            let rows = await this.query(connection, `SELECT \`val\` FROM tx_pool WHERE \`key\` = ?;`, [
+            const rows = await this.query(connection, `SELECT \`val\` FROM tx_pool WHERE \`key\` = ?;`, [
                 key.toBinary(Endian.Little),
             ]);
             if (rows.length !== 0) {
-                let tx = Transaction.deserialize(SmartBuffer.fromBuffer(rows[0].val));
+                const tx = Transaction.deserialize(SmartBuffer.fromBuffer(rows[0].val));
                 await this.remove(connection, tx, rm_double_spent);
             }
         }
@@ -103,9 +103,9 @@ export class TransactionPool {
      */
     public async loadSpenderList(connection: mysql.Connection) {
         this.spenders.clear();
-        let rows = await this.query(connection, "SELECT `key`, `val` FROM tx_pool;", []);
-        for (let row of rows) {
-            let tx = Transaction.deserialize(SmartBuffer.fromBuffer(row.tx));
+        const rows = await this.query(connection, "SELECT `key`, `val` FROM tx_pool;", []);
+        for (const row of rows) {
+            const tx = Transaction.deserialize(SmartBuffer.fromBuffer(row.tx));
             await this.updateSpenderList(tx);
         }
     }
@@ -115,7 +115,7 @@ export class TransactionPool {
      * @param tx the transaction to add
      */
     public updateSpenderList(tx: Transaction) {
-        let tx_hash_string = hashFull(tx).toString();
+        const tx_hash_string = hashFull(tx).toString();
 
         // insert each input information of the transaction
         for (const input of tx.inputs) {
@@ -143,9 +143,9 @@ export class TransactionPool {
         const tx_hash_string = hashFull(tx).toString();
         for (const input of tx.inputs) {
             const in_hash_string = hashFull(input).toString();
-            let set = this.spenders.get(in_hash_string);
+            const set = this.spenders.get(in_hash_string);
             if (set !== undefined) {
-                for (let spender of set) if (spender != tx_hash_string) double_spent_txs.add(spender);
+                for (const spender of set) if (spender != tx_hash_string) double_spent_txs.add(spender);
             }
         }
 

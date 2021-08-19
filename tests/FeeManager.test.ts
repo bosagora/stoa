@@ -31,14 +31,14 @@ describe("Test of FeeManager", () => {
     });
 
     it("Test of FeeManager.calculateTrimmedMeanDisparity()", async () => {
-        let data = [];
+        const data = [];
         for (let idx = 0; idx < 100; idx++) data.push(idx);
 
         // Remove 5% minimum value, 5% maximum
         // Calculate an average
         let sum = 0;
         for (let n = 5; n <= 94; n++) sum += n;
-        let avg = Math.floor(sum / 90);
+        const avg = Math.floor(sum / 90);
         assert.deepStrictEqual(FeeManager.calculateTrimmedMeanDisparity(data), avg);
     });
 });

@@ -11,15 +11,15 @@
 
  *******************************************************************************/
 
-import { Config } from "../src/modules/common/Config";
 import { Utils } from "boa-sdk-ts";
+import { Config } from "../src/modules/common/Config";
 
 import * as assert from "assert";
 import * as path from "path";
 
 describe("Test of Config", () => {
     it("Test parsing the settings of a string", () => {
-        let config_content = [
+        const config_content = [
             "server:",
             "   address: 127.0.0.1",
             "   port:    3838",
@@ -36,7 +36,7 @@ describe("Test of Config", () => {
             "consensus:",
             "   genesis_timestamp: 1609459200",
         ].join("\n");
-        let config: Config = new Config();
+        const config: Config = new Config();
         config.readFromString(config_content);
         assert.strictEqual(config.server.address, "127.0.0.1");
         assert.strictEqual(config.server.port.toString(), "3838");

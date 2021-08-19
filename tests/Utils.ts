@@ -35,8 +35,8 @@ import { IDatabaseConfig } from "../src/modules/common/Config";
 import Stoa from "../src/Stoa";
 
 import JSBI from "jsbi";
-import { CoinMarketService } from "../src/modules/service/CoinMarketService";
 import sinon from "sinon";
+import { CoinMarketService } from "../src/modules/service/CoinMarketService";
 
 export const sample_data_raw = (() => {
     return [
@@ -55,36 +55,36 @@ export const market_cap_history_sample_data_raw = (() => {
 })();
 
 export const block1_sample_updated_header_data = (() => {
-    let record = [];
-    for (let elem of block1_sample_updated_header_data_raw) record.push(JSON.parse(elem));
+    const record = [];
+    for (const elem of block1_sample_updated_header_data_raw) record.push(JSON.parse(elem));
     return record;
 })();
 
 export const market_cap_sample_data = (() => {
-    let record = [];
-    for (let elem of marketcap_sample_data_raw) record.push(JSON.parse(elem));
+    const record = [];
+    for (const elem of marketcap_sample_data_raw) record.push(JSON.parse(elem));
     return record;
 })();
 
 export const market_cap_history_sample_data = (() => {
-    let record = [];
-    for (let elem of market_cap_history_sample_data_raw) record.push(JSON.parse(elem));
+    const record = [];
+    for (const elem of market_cap_history_sample_data_raw) record.push(JSON.parse(elem));
     return record;
 })();
 
 export const sample_data = (() => {
-    let record = [];
-    for (let elem of sample_data_raw) record.push(JSON.parse(elem));
+    const record = [];
+    for (const elem of sample_data_raw) record.push(JSON.parse(elem));
     return record;
 })();
 
 export const sample_data2 = (() => {
-    let data: string = fs.readFileSync("tests/data/Block.2.sample1.json", "utf-8");
+    const data: string = fs.readFileSync("tests/data/Block.2.sample1.json", "utf-8");
     return JSON.parse(data);
 })();
 
 export const recovery_sample_data = (() => {
-    let data: string = fs.readFileSync("tests/data/Recovery.blocks.sample10.json", "utf-8");
+    const data: string = fs.readFileSync("tests/data/Recovery.blocks.sample10.json", "utf-8");
     return JSON.parse(data);
 })();
 
@@ -159,7 +159,7 @@ export class TestAgora implements FullNodeAPI {
                 return;
             }
 
-            let height = new Height(JSBI.BigInt(req.query.height.toString()));
+            const height = new Height(JSBI.BigInt(req.query.height.toString()));
             if (JSBI.lessThan(height.value, JSBI.BigInt(0))) {
                 res.status(400).json({ statusText: "Query parameter block_height must not be negative" });
                 return;
@@ -167,7 +167,7 @@ export class TestAgora implements FullNodeAPI {
 
             // Slightly stricter requirement than Agora (strictly positive instead of positive)
             // as we don't want Stoa to request 0 blocks
-            let max_blocks = Number(req.query.max_blocks);
+            const max_blocks = Number(req.query.max_blocks);
             if (max_blocks <= 0) {
                 res.status(400).json({ statusText: "Query parameter max_block must be strictly positive" });
                 return;
@@ -194,7 +194,7 @@ export class TestAgora implements FullNodeAPI {
                 return;
             }
 
-            let block_height = new Height(JSBI.BigInt(req.query.height.toString()));
+            const block_height = new Height(JSBI.BigInt(req.query.height.toString()));
             if (JSBI.lessThan(block_height.value, JSBI.BigInt(0))) {
                 res.status(400).json({ statusText: "Query parameter block_height must not be negative" });
                 return;
@@ -247,7 +247,7 @@ export class TestAgora implements FullNodeAPI {
 
     /// Implements FullNodeAPI.getMerklePath
     public getMerklePath(block_height: Height, hash: Hash): Promise<Hash[]> {
-        let sample_merkle_tree = this.blocks[1].merkle_tree;
+        const sample_merkle_tree = this.blocks[1].merkle_tree;
 
         return Promise.resolve([
             new Hash(sample_merkle_tree[1]),
@@ -419,8 +419,8 @@ export function delay(interval: number): Promise<void> {
  * Build the merkle tree
  * @param tx_hash_list The array of the transactions hash
  */
-export function buildMerkleTree(tx_hash_list: Array<Hash>): Array<Hash> {
-    let merkle_tree: Array<Hash> = [];
+export function buildMerkleTree(tx_hash_list: Hash[]): Hash[] {
+    const merkle_tree: Hash[] = [];
     merkle_tree.push(...tx_hash_list);
 
     if (merkle_tree.length == 1) {
@@ -431,7 +431,7 @@ export function buildMerkleTree(tx_hash_list: Array<Hash>): Array<Hash> {
     let offset = 0;
     for (let length = merkle_tree.length; length > 1; length = Math.floor((length + 1) / 2)) {
         for (let left = 0; left < length; left += 2) {
-            let right = Math.min(left + 1, length - 1);
+            const right = Math.min(left + 1, length - 1);
             merkle_tree.push(hashMulti(merkle_tree[offset + left].data, merkle_tree[offset + right].data));
         }
         offset += length;
@@ -444,11 +444,11 @@ export function buildMerkleTree(tx_hash_list: Array<Hash>): Array<Hash> {
  * @param prev_block The previous block
  * @param txs The array of the transactions
  */
-export function createBlock(prev_block: Block, txs: Array<Transaction>): Block {
-    let tx_hash_list = txs.map((tx) => hashFull(tx));
-    let merkle_tree = buildMerkleTree(tx_hash_list);
-    let merkle_root = merkle_tree.length > 0 ? merkle_tree[merkle_tree.length - 1] : new Hash(Buffer.alloc(Hash.Width));
-    let block_header = new BlockHeader(
+export function createBlock(prev_block: Block, txs: Transaction[]): Block {
+    const tx_hash_list = txs.map((tx) => hashFull(tx));
+    const merkle_tree = buildMerkleTree(tx_hash_list);
+    const merkle_root = merkle_tree.length > 0 ? merkle_tree[merkle_tree.length - 1] : new Hash(Buffer.alloc(Hash.Width));
+    const block_header = new BlockHeader(
         hashFull(prev_block.header),
         new Height(JSBI.add(prev_block.header.height.value, JSBI.BigInt(1))),
         merkle_root,
@@ -460,7 +460,7 @@ export function createBlock(prev_block: Block, txs: Array<Transaction>): Block {
         prev_block.header.time_offset + 10 * 60
     );
 
-    let block = new Block(block_header, txs, merkle_tree);
+    const block = new Block(block_header, txs, merkle_tree);
 
     return block;
 }

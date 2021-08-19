@@ -11,7 +11,7 @@ import { Storages } from "./modules/storage/Storages";
 import Stoa from "./Stoa";
 
 // Create with the arguments and read from file
-let config = Config.createWithArgument();
+const config = Config.createWithArgument();
 
 // Now configure the logger with the expected transports
 switch (process.env.NODE_ENV) {

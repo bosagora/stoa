@@ -29,17 +29,17 @@ import {
     TxOutput,
     TxPayloadFee,
     Unlock,
-    Utils,
     UnspentTxOutput,
+    Utils,
     UTXOManager,
 } from "boa-sdk-ts";
-import { IMarketCap, IAccountInformation } from "../../Types";
+import moment from "moment";
+import { IAccountInformation, IMarketCap } from "../../Types";
 import { IDatabaseConfig } from "../common/Config";
 import { FeeManager } from "../common/FeeManager";
 import { logger } from "../common/Logger";
 import { Storages } from "./Storages";
 import { TransactionPool } from "./TransactionPool";
-import moment from "moment";
 
 import JSBI from "jsbi";
 
@@ -70,7 +70,7 @@ export class LedgerStorage extends Storages {
      */
     public static make(databaseConfig: IDatabaseConfig, genesis_timestamp: number): Promise<LedgerStorage> {
         return new Promise<LedgerStorage>((resolve, reject) => {
-            let result = new LedgerStorage(databaseConfig, genesis_timestamp, async (err: Error | null) => {
+            const result = new LedgerStorage(databaseConfig, genesis_timestamp, async (err: Error | null) => {
                 if (err) reject(err);
                 else {
                     result._transaction_pool = new TransactionPool();
@@ -102,7 +102,7 @@ export class LedgerStorage extends Storages {
      * is called with an error.
      */
     public createTables(): Promise<void> {
-        let sql = `CREATE TABLE IF NOT EXISTS blocks
+        const sql = `CREATE TABLE IF NOT EXISTS blocks
         (
             height              INTEGER  NOT NULL,
             hash                TINYBLOB NOT NULL,
@@ -296,7 +296,7 @@ export class LedgerStorage extends Storages {
             \`val\`     BLOB        NOT NULL,
             PRIMARY KEY(\`key\`(64))
         );
-        
+
         CREATE TABLE IF NOT EXISTS accounts(
             address          TEXT,
             tx_count         INTEGER,
@@ -316,7 +316,7 @@ export class LedgerStorage extends Storages {
             granularity      TEXT        NOT NULL,
             block_height     INTEGER     NOT NULL,
             balance          BIGINT(20)  UNSIGNED NOT NULL,
-            
+
             PRIMARY KEY (address(64), time_stamp, granularity(64))
         );
 
@@ -354,11 +354,11 @@ export class LedgerStorage extends Storages {
      * is called with an error.
      */
     public putBlocks(block: Block): Promise<void> {
-        let genesis_timestamp: number = this.genesis_timestamp;
+        const genesis_timestamp: number = this.genesis_timestamp;
 
         function saveBlock(storage: LedgerStorage, block: Block, genesis_timestamp: number): Promise<void> {
             return new Promise<void>((resolve, reject) => {
-                let block_hash = hashFull(block.header);
+                const block_hash = hashFull(block.header);
                 storage
                     .query(
                         `INSERT INTO blocks
@@ -394,7 +394,7 @@ export class LedgerStorage extends Storages {
             (async () => {
                 try {
                     await this.begin();
-                    for (let tx of block.txs) await this.transaction_pool.remove(this.connection, tx);
+                    for (const tx of block.txs) await this.transaction_pool.remove(this.connection, tx);
                     await saveBlock(this, block, genesis_timestamp);
                     await this.putfees(block);
                     await this.putTransactions(block);
@@ -436,8 +436,8 @@ export class LedgerStorage extends Storages {
                         ( height, time_stamp, granularity,  average_tx_fee, total_tx_fee, total_payload_fee, total_fee)
                     VALUES
                         (?,?,?,?,?,?,?)
-                    ON DUPLICATE KEY 
-                    UPDATE 
+                    ON DUPLICATE KEY
+                    UPDATE
                         height = VALUES(height),
                         average_tx_fee = VALUES(average_tx_fee),
                         total_tx_fee = VALUES(total_tx_fee),
@@ -472,7 +472,7 @@ export class LedgerStorage extends Storages {
             }
             for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++) {
                 if (!block.txs[tx_idx].isCoinbase()) {
-                    let fees = await this.getTransactionFee(block.txs[tx_idx]);
+                    const fees = await this.getTransactionFee(block.txs[tx_idx]);
                     sum = JSBI.add(sum, JSBI.divide(fees[1], JSBI.BigInt(block.txs[tx_idx].getNumberOfBytes())));
                     total_tx_fee = JSBI.add(total_tx_fee, fees[1]);
                     total_payload_fee = JSBI.add(total_payload_fee, fees[2]);
@@ -480,7 +480,7 @@ export class LedgerStorage extends Storages {
                 }
             }
             const average_tx_fee = JSBI.divide(sum, JSBI.BigInt(block.txs.length));
-            let newEntry = await this.applyGranularity(block.header.time_offset + this.genesis_timestamp);
+            const newEntry = await this.applyGranularity(block.header.time_offset + this.genesis_timestamp);
             if (newEntry.length > 0) {
                 for (let index = 0; index < newEntry.length; index++) {
                     await save_fee(
@@ -504,12 +504,12 @@ export class LedgerStorage extends Storages {
      * @returns
      */
     public async applyGranularity(time_stamp: number) {
-        let granularityArray = ["H", "D", "M", "Y"];
-        let date = moment(time_stamp * 1000);
-        let newEntry: any = [];
+        const granularityArray = ["H", "D", "M", "Y"];
+        const date = moment(time_stamp * 1000);
+        const newEntry: any = [];
         for (let index = 0; index < granularityArray.length; index++) {
-            let element = granularityArray[index];
-            let unit = date.startOf(element as moment.unitOfTime.StartOf).utc();
+            const element = granularityArray[index];
+            const unit = date.startOf(element as moment.unitOfTime.StartOf).utc();
             newEntry.push({ time_stamp: unit.unix(), granularity: granularityArray[index] });
             if (index === granularityArray.length - 1) {
                 return newEntry;
@@ -525,7 +525,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getBlock(height: Height): Promise<any[]> {
-        let sql = `SELECT
+        const sql = `SELECT
             height, hash, prev_block, validators, merkle_root, signature, random_seed,
             missing_validators,  tx_count, enrollment_count, time_offset, time_stamp
         FROM
@@ -542,7 +542,7 @@ export class LedgerStorage extends Storages {
      */
     public getBlockHeight(): Promise<Height | null> {
         return new Promise<Height | null>((resolve, reject) => {
-            let sql = `SELECT MAX(height) as height FROM blocks`;
+            const sql = `SELECT MAX(height) as height FROM blocks`;
             this.query(sql, [])
                 .then((row: any[]) => {
                     if (row[0].height !== null) resolve(new Height(JSBI.BigInt(row[0].height)));
@@ -748,7 +748,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getMerkleTree(height: Height): Promise<any[]> {
-        let sql = `SELECT
+        const sql = `SELECT
                 block_height, merkle_index, merkle_hash
              FROM
                 merkle_trees
@@ -821,8 +821,8 @@ export class LedgerStorage extends Storages {
                             (address, tx_count, total_received, total_sent, total_reward, total_frozen, total_spendable, total_balance, last_updated_at)
                         VALUES
                             (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        ON DUPLICATE KEY UPDATE 
-                                    address = VALUES(address), 
+                        ON DUPLICATE KEY UPDATE
+                                    address = VALUES(address),
                                     tx_count = IF(last_updated_at = VALUES(last_updated_at), tx_count, (tx_count + VALUES(tx_count))),
                                     total_received = total_received + VALUES(total_received),
                                     total_sent = total_sent + VALUES(total_sent),
@@ -836,7 +836,7 @@ export class LedgerStorage extends Storages {
                             accountInfo.tx_count,
                             received_amount.toString(),
                             sent_amount.toString(),
-                            "0", //FIX ME
+                            "0", // FIX ME
                             accountInfo.total_frozen.toString(),
                             accountInfo.total_spendable.toString(),
                             accountInfo.total_balance.toString(),
@@ -844,7 +844,7 @@ export class LedgerStorage extends Storages {
                         ]
                     )
                     .then(async () => {
-                        let newEntry = await storage.applyGranularity(time_stamp);
+                        const newEntry = await storage.applyGranularity(time_stamp);
                         if (newEntry.length > 0) {
                             for (let index = 0; index < newEntry.length; index++) {
                                 await save_account_history(
@@ -880,8 +880,8 @@ export class LedgerStorage extends Storages {
                         ( address, block_height, time_stamp, granularity, balance)
                     VALUES
                         (?, ?, ?, ?, ?)
-                    ON DUPLICATE KEY 
-                    UPDATE 
+                    ON DUPLICATE KEY
+                    UPDATE
                         balance = VALUES(balance),
                         block_height = VALUES(block_height)`,
                         [
@@ -902,8 +902,8 @@ export class LedgerStorage extends Storages {
         }
 
         function getTXStats(storage: LedgerStorage, tx_hash: Hash) {
-            let hash = tx_hash.toBinary(Endian.Little);
-            let sql_sender = `
+            const hash = tx_hash.toBinary(Endian.Little);
+            const sql_sender = `
                       SELECT
                           S.address,
                           SUM(IFNULL(S.amount,0)) as amount
@@ -914,7 +914,7 @@ export class LedgerStorage extends Storages {
                           INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key)
                           GROUP BY address`;
 
-            let sql_receiver = `
+            const sql_receiver = `
                        SELECT
                            SUM(IFNULL(O.amount,0)) as amount,
                            O.address
@@ -925,7 +925,7 @@ export class LedgerStorage extends Storages {
                            GROUP BY address;`;
 
             return new Promise<any[]>((resolve, reject) => {
-                let result: any = {};
+                const result: any = {};
                 storage
                     .query(sql_sender, hash)
                     .then((rows: any[]) => {
@@ -942,10 +942,10 @@ export class LedgerStorage extends Storages {
 
         return new Promise<void>((resolve, reject) => {
             (async () => {
-                let block_transactions = `SELECT
+                const block_transactions = `SELECT
 	                                        T.block_height, T.tx_hash, T.tx_fee, T.tx_size, B.time_stamp
-                                          From 
-                                             blocks B INNER JOIN transactions T ON(B.height = T.block_height) 
+                                          From
+                                             blocks B INNER JOIN transactions T ON(B.height = T.block_height)
                                           Where B.height = ?`;
 
                 this.query(block_transactions, [block.header.height.value.toString()])
@@ -956,14 +956,14 @@ export class LedgerStorage extends Storages {
                         let total_sent = JSBI.BigInt(0);
 
                         for (let tx_index = 0; tx_index < rows.length; tx_index++) {
-                            let hash = new Hash(rows[tx_index].tx_hash, Endian.Little);
-                            let txStats: any = await getTXStats(this, hash);
+                            const hash = new Hash(rows[tx_index].tx_hash, Endian.Little);
+                            const txStats: any = await getTXStats(this, hash);
 
                             senders = txStats.senders;
                             receivers = txStats.receivers;
 
-                            for (var sender_index = 0; sender_index < senders.length; sender_index++) {
-                                for (var receiver_index = 0; receiver_index < receivers.length; receiver_index++) {
+                            for (let sender_index = 0; sender_index < senders.length; sender_index++) {
+                                for (let receiver_index = 0; receiver_index < receivers.length; receiver_index++) {
                                     if (senders[sender_index].address === receivers[receiver_index].address) {
                                         if (
                                             JSBI.LT(
@@ -981,7 +981,7 @@ export class LedgerStorage extends Storages {
                                                 JSBI.BigInt(receivers[receiver_index].amount)
                                             );
                                         }
-                                        let accountInfo = await this.getAccountInfo(
+                                        const accountInfo = await this.getAccountInfo(
                                             block.header.height,
                                             senders[sender_index].address
                                         );
@@ -1000,8 +1000,8 @@ export class LedgerStorage extends Storages {
                                     }
                                 }
                             }
-                            for (var receiver_index = 0; receiver_index < receivers.length; receiver_index++) {
-                                let accountInfo = await this.getAccountInfo(
+                            for (let receiver_index = 0; receiver_index < receivers.length; receiver_index++) {
+                                const accountInfo = await this.getAccountInfo(
                                     block.header.height,
                                     receivers[receiver_index].address
                                 );
@@ -1015,8 +1015,8 @@ export class LedgerStorage extends Storages {
                                     block.header.time_offset + this.genesis_timestamp
                                 );
                             }
-                            for (var sender_index = 0; sender_index < senders.length; sender_index++) {
-                                let accountInfo = await this.getAccountInfo(
+                            for (let sender_index = 0; sender_index < senders.length; sender_index++) {
+                                const accountInfo = await this.getAccountInfo(
                                     block.header.height,
                                     senders[sender_index].address
                                 );
@@ -1084,16 +1084,16 @@ export class LedgerStorage extends Storages {
                 let total_sent = JSBI.BigInt(0);
                 let total_fee = JSBI.BigInt(0);
                 let total_size = JSBI.BigInt(0);
-                let total_received_sql = `SELECT
+                const total_received_sql = `SELECT
                                                 IFNULL(SUM(IFNULL(O.amount,0)),0) as total_received
                                                 FROM
                                                 tx_outputs O
                                                     INNER JOIN blocks B ON (O.block_height = B.height)
                                                 WHERE
                                                     block_height = ?;`;
-                let transaction_stats = `SELECT
+                const transaction_stats = `SELECT
                                                 IFNULL(SUM(IFNULL(T.tx_fee,0)),0) as tx_fee,
-                                                IFNULL(SUM(IFNULL(T.payload_fee,0)),0) as payload_fee, 
+                                                IFNULL(SUM(IFNULL(T.payload_fee,0)),0) as payload_fee,
                                                 IFNULL(SUM(IFNULL(T.tx_size,0)),0) as total_size
                                             FROM
                                             transactions T
@@ -1175,11 +1175,11 @@ export class LedgerStorage extends Storages {
      */
     public async getAccountInfo(height: Height, address: string): Promise<IAccountInformation> {
         return new Promise<IAccountInformation>(async (resolve, reject) => {
-            let utxo_array: Array<UnspentTxOutput> = [];
+            const utxo_array: UnspentTxOutput[] = [];
             await this.getUTXO(address)
                 .then((rows: any[]) => {
                     for (const row of rows) {
-                        let utxo: UnspentTxOutput = new UnspentTxOutput(
+                        const utxo: UnspentTxOutput = new UnspentTxOutput(
                             new Hash(row.utxo, Endian.Little),
                             row.type,
                             JSBI.BigInt(row.unlock_height),
@@ -1193,10 +1193,10 @@ export class LedgerStorage extends Storages {
                     reject(err);
                 });
 
-            let utxo_manager: UTXOManager = new UTXOManager(utxo_array);
-            let getSum: Array<JSBI> = await utxo_manager.getSum(JSBI.add(height.value, JSBI.BigInt(1)));
-            let total_txs = await this.getTxCount(height, address);
-            let accountInfo: IAccountInformation = {
+            const utxo_manager: UTXOManager = new UTXOManager(utxo_array);
+            const getSum: JSBI[] = await utxo_manager.getSum(JSBI.add(height.value, JSBI.BigInt(1)));
+            const total_txs = await this.getTxCount(height, address);
+            const accountInfo: IAccountInformation = {
                 total_balance: JSBI.add(JSBI.add(getSum[0], getSum[1]), getSum[2]),
                 total_spendable: JSBI.BigInt(getSum[0]),
                 total_frozen: JSBI.BigInt(getSum[1]),
@@ -1210,7 +1210,7 @@ export class LedgerStorage extends Storages {
      * Update a preImage to database
      */
     public updatePreImage(pre_image: PreImageInfo): Promise<number> {
-        let enroll_key = pre_image.utxo.toBinary(Endian.Little);
+        const enroll_key = pre_image.utxo.toBinary(Endian.Little);
         return new Promise<number>((resolve, reject) => {
             this.run(
                 `UPDATE validators
@@ -1260,7 +1260,7 @@ export class LedgerStorage extends Storages {
      */
     public storeCoinMarket(data: IMarketCap): Promise<any> {
         return new Promise<void>((resolve, reject) => {
-            let sql = `INSERT IGNORE INTO marketcap (last_updated_at, price, market_cap, change_24h, vol_24h)
+            const sql = `INSERT IGNORE INTO marketcap (last_updated_at, price, market_cap, change_24h, vol_24h)
             VALUES (?, ?, ?, ?, ?)
             `;
 
@@ -1282,7 +1282,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getEnrollments(height: Height): Promise<any[]> {
-        let sql = `SELECT
+        const sql = `SELECT
             block_height, enrollment_index, utxo_key, commitment, cycle_length, enroll_sig
         FROM
             enrollments
@@ -1298,7 +1298,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getValidators(height: Height): Promise<any[]> {
-        let sql = `SELECT
+        const sql = `SELECT
             enrolled_at, utxo_key, address, amount, preimage_height, preimage_hash
         FROM
             validators
@@ -1313,9 +1313,9 @@ export class LedgerStorage extends Storages {
                 return;
             }
 
-            let utxo = tx.inputs.map((m) => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
+            const utxo = tx.inputs.map((m) => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
 
-            let sql = `SELECT
+            const sql = `SELECT
                     IFNULL(SUM(O.amount), 0) as sum_inputs
                 FROM
                     utxos O
@@ -1325,8 +1325,8 @@ export class LedgerStorage extends Storages {
             this.query(sql, [])
                 .then((rows: any) => {
                     if (rows.length > 0) {
-                        let SumOfInput = JSBI.BigInt(rows[0].sum_inputs);
-                        let SumOfOutput = tx.outputs.reduce<JSBI>((sum, n) => {
+                        const SumOfInput = JSBI.BigInt(rows[0].sum_inputs);
+                        const SumOfOutput = tx.outputs.reduce<JSBI>((sum, n) => {
                             return JSBI.add(sum, n.value);
                         }, JSBI.BigInt(0));
 
@@ -1371,13 +1371,13 @@ export class LedgerStorage extends Storages {
             tx: Transaction
         ): Promise<void> {
             return new Promise<void>(async (resolve, reject) => {
-                let fees = await storage.getTransactionFee(tx);
-                let tx_size = tx.getNumberOfBytes();
-                let calculated_fee = FeeManager.getTxFee(tx_size, 0)[1];
+                const fees = await storage.getTransactionFee(tx);
+                const tx_size = tx.getNumberOfBytes();
+                const calculated_fee = FeeManager.getTxFee(tx_size, 0)[1];
 
                 let unlock_height_query: string;
                 if (tx.isPayment() && tx.inputs.length > 0) {
-                    let utxo = tx.inputs.map((m) => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
+                    const utxo = tx.inputs.map((m) => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
 
                     unlock_height_query = `(
                             SELECT '${JSBI.add(
@@ -1498,7 +1498,7 @@ export class LedgerStorage extends Storages {
             output: TxOutput
         ): Promise<void> {
             return new Promise<void>((resolve, reject) => {
-                let address: string = output.lock.type == 0 ? new PublicKey(output.lock.bytes).toString() : "";
+                const address: string = output.lock.type == 0 ? new PublicKey(output.lock.bytes).toString() : "";
 
                 storage
                     .run(
@@ -1531,9 +1531,9 @@ export class LedgerStorage extends Storages {
         function is_melting(storage: LedgerStorage, tx: Transaction): Promise<boolean> {
             return new Promise<boolean>((resolve, reject) => {
                 if (tx.isPayment() && tx.inputs.length > 0) {
-                    let utxo = tx.inputs.map((m) => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
+                    const utxo = tx.inputs.map((m) => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
 
-                    let sql = `SELECT
+                    const sql = `SELECT
                             count(*) as count
                         FROM
                             utxos O
@@ -1567,7 +1567,7 @@ export class LedgerStorage extends Storages {
             output: TxOutput
         ): Promise<void> {
             return new Promise<void>((resolve, reject) => {
-                let address: string = output.lock.type == 0 ? new PublicKey(output.lock.bytes).toString() : "";
+                const address: string = output.lock.type == 0 ? new PublicKey(output.lock.bytes).toString() : "";
 
                 let unlock_height: JSBI;
                 if (melting && address != TxPayloadFee.CommonsBudgetAddress) {
@@ -1636,7 +1636,7 @@ export class LedgerStorage extends Storages {
             (async () => {
                 try {
                     for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++) {
-                        let melting = await is_melting(this, block.txs[tx_idx]);
+                        const melting = await is_melting(this, block.txs[tx_idx]);
 
                         await save_transaction(
                             this,
@@ -1662,7 +1662,7 @@ export class LedgerStorage extends Storages {
                         }
 
                         for (let out_idx = 0; out_idx < block.txs[tx_idx].outputs.length; out_idx++) {
-                            let utxo_key = makeUTXOKey(block.merkle_tree[tx_idx], JSBI.BigInt(out_idx));
+                            const utxo_key = makeUTXOKey(block.merkle_tree[tx_idx], JSBI.BigInt(out_idx));
                             await save_output(
                                 this,
                                 block.header.height,
@@ -1703,8 +1703,8 @@ export class LedgerStorage extends Storages {
     public putTransactionPool(tx: Transaction): Promise<number> {
         function save_transaction_pool(storage: LedgerStorage, tx: Transaction, hash: Hash): Promise<number> {
             return new Promise<number>(async (resolve, reject) => {
-                let fees = await storage.getTransactionFee(tx);
-                let tx_size = tx.getNumberOfBytes();
+                const fees = await storage.getTransactionFee(tx);
+                const tx_size = tx.getNumberOfBytes();
 
                 let tx_type: number;
                 if (tx.isFreeze()) tx_type = OutputType.Freeze;
@@ -1769,7 +1769,7 @@ export class LedgerStorage extends Storages {
             output: TxOutput
         ): Promise<number> {
             return new Promise<number>((resolve, reject) => {
-                let address: string = output.lock.type == 0 ? new PublicKey(output.lock.bytes).toString() : "";
+                const address: string = output.lock.type == 0 ? new PublicKey(output.lock.bytes).toString() : "";
 
                 storage
                     .run(
@@ -1806,7 +1806,7 @@ export class LedgerStorage extends Storages {
                     await this.transaction_pool.remove(this.connection, tx, true);
                     await this.transaction_pool.add(this.connection, tx);
 
-                    let hash = hashFull(tx);
+                    const hash = hashFull(tx);
                     tx_changes = await save_transaction_pool(this, tx, hash);
                     if (tx_changes !== 1) throw new Error("Failed to save a transaction.");
 
@@ -1839,7 +1839,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getTransactions(height: Height): Promise<any[]> {
-        let sql = `SELECT
+        const sql = `SELECT
             block_height, tx_index, tx_hash, type, unlock_height, lock_height, inputs_count, outputs_count, payload_size
         FROM
             transactions
@@ -1855,7 +1855,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getPayload(tx_hash: Hash): Promise<any[]> {
-        let sql = `SELECT
+        const sql = `SELECT
                 tx_hash, payload
             FROM
                 payloads
@@ -1872,7 +1872,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getTxInputs(height: Height, tx_index: number): Promise<any[]> {
-        let sql = `SELECT
+        const sql = `SELECT
             block_height, tx_index, in_index, utxo, unlock_bytes, unlock_age
         FROM
             tx_inputs
@@ -1886,7 +1886,7 @@ export class LedgerStorage extends Storages {
      * @param tx_index The index of the transaction in the block
      */
     public getTxOutputs(height: Height, tx_index: number): Promise<any[]> {
-        let sql = `SELECT
+        const sql = `SELECT
             block_height, tx_index, output_index, tx_hash, utxo_key, amount, lock_type, lock_bytes, address
         FROM
             tx_outputs
@@ -1901,7 +1901,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getTransactionPool(): Promise<any[]> {
-        let sql = `SELECT
+        const sql = `SELECT
             tx_hash, type, payload, lock_height, time
         FROM
             transaction_pool
@@ -1978,7 +1978,7 @@ export class LedgerStorage extends Storages {
      */
     public putBlockHeight(height: Height): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            let sql = `INSERT INTO information (keyname, value) VALUES (?, ?)
+            const sql = `INSERT INTO information (keyname, value) VALUES (?, ?)
             ON DUPLICATE KEY UPDATE keyname = VALUES(keyname) , value = VALUES(value);`;
             this.run(sql, ["height", height.toString()])
                 .then(() => {
@@ -1998,7 +1998,7 @@ export class LedgerStorage extends Storages {
      */
     public getExpectedBlockHeight(): Promise<Height> {
         return new Promise<Height>((resolve, reject) => {
-            let sql = `SELECT value FROM information WHERE keyname = 'height';`;
+            const sql = `SELECT value FROM information WHERE keyname = 'height';`;
             this.query(sql, [])
                 .then((rows: any[]) => {
                     if (rows.length > 0 && rows[0].value !== undefined && Utils.isPositiveInteger(rows[0].value)) {
@@ -2021,7 +2021,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getUTXO(address: string): Promise<any[]> {
-        let sql_utxo = `SELECT
+        const sql_utxo = `SELECT
                 O.utxo_key as utxo,
                 O.amount,
                 O.lock_type,
@@ -2036,7 +2036,7 @@ export class LedgerStorage extends Storages {
                 INNER JOIN blocks B ON (B.height = T.block_height)
             WHERE
                 O.address = ?
-                AND O.utxo_key NOT IN 
+                AND O.utxo_key NOT IN
                 (
                     SELECT
                         S.utxo_key
@@ -2066,9 +2066,9 @@ export class LedgerStorage extends Storages {
      * of the returned Promise is called with the array of UTXO
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getUTXOs(utxos: Array<Hash>): Promise<any[]> {
-        let u = utxos.map((m) => `x'${m.toBinary(Endian.Little).toString("hex")}'`);
-        let sql_utxo = `SELECT
+    public getUTXOs(utxos: Hash[]): Promise<any[]> {
+        const u = utxos.map((m) => `x'${m.toBinary(Endian.Little).toString("hex")}'`);
+        const sql_utxo = `SELECT
                 O.utxo_key as utxo,
                 O.amount,
                 O.lock_type,
@@ -2113,13 +2113,13 @@ export class LedgerStorage extends Storages {
         address: string,
         page_size: number,
         page: number,
-        type: Array<number>,
+        type: number[],
         begin?: number,
         end?: number,
         peer?: string
     ): Promise<any[]> {
-        let filter_type = "AND FTX.display_tx_type in (" + type.map((n) => `${n}`).join(",") + ")";
-        let filter_date =
+        const filter_type = "AND FTX.display_tx_type in (" + type.map((n) => `${n}`).join(",") + ")";
+        const filter_date =
             begin !== undefined && end !== undefined ? `AND B.time_stamp BETWEEN ${begin} AND ${end}` : ``;
         let filter_peer_field;
         let filter_peer_condition;
@@ -2144,7 +2144,7 @@ export class LedgerStorage extends Storages {
             filter_peer_condition = "";
         }
 
-        let sql = `SELECT
+        const sql = `SELECT
                 FTX.display_tx_type,
                 FTX.address,
                 FTX.height,
@@ -2258,9 +2258,9 @@ export class LedgerStorage extends Storages {
      * @param tx_hash The hash of the transaction
      */
     public getWalletTransactionOverview(tx_hash: Hash): Promise<any[]> {
-        let hash = tx_hash.toBinary(Endian.Little);
+        const hash = tx_hash.toBinary(Endian.Little);
 
-        let sql_tx = `SELECT
+        const sql_tx = `SELECT
                 T.block_height as height,
                 B.time_stamp as block_time,
                 T.tx_hash,
@@ -2277,7 +2277,7 @@ export class LedgerStorage extends Storages {
                 INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
                 LEFT OUTER JOIN payloads P ON (T.tx_hash = P.tx_hash);`;
 
-        let sql_sender = `SELECT
+        const sql_sender = `SELECT
                 S.address,
                 S.amount,
                 S.utxo_key as utxo,
@@ -2291,7 +2291,7 @@ export class LedgerStorage extends Storages {
                 INNER JOIN tx_inputs I ON (T.tx_hash = I.tx_hash)
                 INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key);`;
 
-        let sql_receiver = `SELECT
+        const sql_receiver = `SELECT
                 O.output_index,
                 O.type,
                 O.amount,
@@ -2304,7 +2304,7 @@ export class LedgerStorage extends Storages {
                 INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
                 INNER JOIN tx_outputs O ON (T.tx_hash = O.tx_hash);`;
 
-        let result: any = {};
+        const result: any = {};
         return new Promise<any[]>((resolve, reject) => {
             this.query(sql_tx, [hash])
                 .then((rows: any[]) => {
@@ -2329,7 +2329,7 @@ export class LedgerStorage extends Storages {
      * @param address The input address of the pending transaction
      */
     public getWalletTransactionsPending(address: string): Promise<any[]> {
-        let sql = `
+        const sql = `
         SELECT
             TX.tx_hash,
             TX.time,
@@ -2370,9 +2370,9 @@ export class LedgerStorage extends Storages {
             WHERE
                 S.address = ?
             GROUP BY T.tx_hash
-            
+
             UNION ALL
-            
+
             SELECT
                 T.tx_hash,
                 T.time,
@@ -2401,7 +2401,7 @@ export class LedgerStorage extends Storages {
      * @param address The address to check the balance
      */
     public getWalletBalance(address: string): Promise<any[]> {
-        let sql = `
+        const sql = `
             SELECT
                 ? as address,
                 IFNULL(SUM(amount), 0) AS balance,
@@ -2426,7 +2426,7 @@ export class LedgerStorage extends Storages {
                     INNER JOIN blocks B ON (B.height = T.block_height)
                 WHERE
                     O.address = ?
-                    AND O.utxo_key NOT IN 
+                    AND O.utxo_key NOT IN
                     (
                         SELECT
                             S.utxo_key
@@ -2458,20 +2458,20 @@ export class LedgerStorage extends Storages {
         balance_type: number,
         filter_last: Hash | undefined
     ): Promise<any[]> {
-        let sql_utxo = `
-        SELECT 
+        const sql_utxo = `
+        SELECT
             *
         FROM
         (
             SELECT
-                utxo, 
-                amount, 
-                lock_type, 
+                utxo,
+                amount,
+                lock_type,
                 lock_bytes,
-                block_height, 
-                block_time, 
-                type, 
-                unlock_height, 
+                block_height,
+                block_time,
+                type,
+                unlock_height,
                 @ACCUM := @ACCUM + TB_FILTERED_UTXO.amount as accumulative,
                 include
             FROM
@@ -2506,7 +2506,7 @@ export class LedgerStorage extends Storages {
                             ) BH
                         WHERE
                             O.address = ?
-                            AND 
+                            AND
                             (
                                 (
                                     ? = 0 AND ((O.type = 0) OR (O.type = 2)) AND (O.unlock_height <= BH.height + 1)
@@ -2518,7 +2518,7 @@ export class LedgerStorage extends Storages {
                                     ? = 2 AND ((O.type = 0) OR (O.type = 2)) AND (O.unlock_height > BH.height + 1)
                                 )
                             )
-                            AND O.utxo_key NOT IN 
+                            AND O.utxo_key NOT IN
                             (
                                 SELECT
                                     S.utxo_key
@@ -2533,7 +2533,7 @@ export class LedgerStorage extends Storages {
                     ) AS TB_RAW,
                     (SELECT @INCLUDE := 0) AS U
                 ) TB_FOR_FILTER_UTXO
-                WHERE 
+                WHERE
                     (
                         (? <> x'00') AND (include = 2)
                     ) OR
@@ -2548,7 +2548,7 @@ export class LedgerStorage extends Storages {
         `;
 
         return new Promise<any[]>((resolve, reject) => {
-            let utxo = filter_last !== undefined ? filter_last.toBinary(Endian.Little) : Buffer.from([0]);
+            const utxo = filter_last !== undefined ? filter_last.toBinary(Endian.Little) : Buffer.from([0]);
             this.query(sql_utxo, [
                 utxo,
                 address,
@@ -2572,9 +2572,9 @@ export class LedgerStorage extends Storages {
      * @param tx_hash The hash of the transaction
      */
     public getTransactionStatus(tx_hash: Hash): Promise<any> {
-        let hash = tx_hash.toBinary(Endian.Little);
+        const hash = tx_hash.toBinary(Endian.Little);
 
-        let sql_tx = `SELECT
+        const sql_tx = `SELECT
                 B.hash,
                 T.block_height as height,
                 T.tx_hash
@@ -2582,14 +2582,14 @@ export class LedgerStorage extends Storages {
                 blocks B
                 INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?);`;
 
-        let sql_tx_pending = `SELECT
+        const sql_tx_pending = `SELECT
                 T.tx_hash
             FROM
                 transaction_pool T
             WHERE
                 T.tx_hash = ?;`;
 
-        let result: any = {};
+        const result: any = {};
         return new Promise<any>(async (resolve, reject) => {
             try {
                 let rows = await this.query(sql_tx_pending, [hash]);
@@ -2626,23 +2626,23 @@ export class LedgerStorage extends Storages {
     public getTransactionPending(tx_hash: Hash): Promise<Transaction | null> {
         return new Promise<Transaction | null>(async (resolve, reject) => {
             try {
-                let hash = tx_hash.toBinary(Endian.Little);
-                let rows = await this.query(
+                const hash = tx_hash.toBinary(Endian.Little);
+                const rows = await this.query(
                     "SELECT tx_hash, type, payload, lock_height, time FROM transaction_pool WHERE tx_hash = ?;",
                     [hash]
                 );
                 if (rows.length > 0) {
-                    let input_rows = await this.query(
+                    const input_rows = await this.query(
                         "SELECT tx_hash, utxo, unlock_bytes, unlock_age FROM tx_input_pool WHERE tx_hash = ? ORDER BY input_index;",
                         [hash]
                     );
-                    let output_rows = await this.query(
+                    const output_rows = await this.query(
                         "SELECT tx_hash, type, amount, lock_type, lock_bytes FROM tx_output_pool WHERE tx_hash = ? ORDER BY output_index;",
                         [hash]
                     );
 
-                    let inputs: Array<TxInput> = [];
-                    for (let input_row of input_rows)
+                    const inputs: TxInput[] = [];
+                    for (const input_row of input_rows)
                         inputs.push(
                             new TxInput(
                                 new Hash(input_row.utxo, Endian.Little),
@@ -2650,8 +2650,8 @@ export class LedgerStorage extends Storages {
                                 input_row.unlock_age
                             )
                         );
-                    let outputs: Array<TxOutput> = [];
-                    for (let output_row of output_rows)
+                    const outputs: TxOutput[] = [];
+                    for (const output_row of output_rows)
                         outputs.push(
                             new TxOutput(
                                 output_row.type,
@@ -2686,8 +2686,8 @@ export class LedgerStorage extends Storages {
     public getTransaction(tx_hash: Hash): Promise<Transaction | null> {
         return new Promise<Transaction | null>(async (resolve, reject) => {
             try {
-                let hash = tx_hash.toBinary(Endian.Little);
-                let rows = await this.query(
+                const hash = tx_hash.toBinary(Endian.Little);
+                const rows = await this.query(
                     `SELECT
                         T.tx_hash, T.lock_height, P.payload FROM
                     transactions T
@@ -2697,17 +2697,17 @@ export class LedgerStorage extends Storages {
                     [hash]
                 );
                 if (rows.length > 0) {
-                    let input_rows = await this.query(
+                    const input_rows = await this.query(
                         "SELECT tx_hash, utxo, unlock_bytes, unlock_age FROM tx_inputs WHERE tx_hash = ? ORDER BY in_index;",
                         [hash]
                     );
-                    let output_rows = await this.query(
+                    const output_rows = await this.query(
                         "SELECT tx_hash, type, amount, lock_type, lock_bytes FROM tx_outputs WHERE tx_hash = ? ORDER BY output_index;",
                         [hash]
                     );
 
-                    let inputs: Array<TxInput> = [];
-                    for (let input_row of input_rows)
+                    const inputs: TxInput[] = [];
+                    for (const input_row of input_rows)
                         inputs.push(
                             new TxInput(
                                 new Hash(input_row.utxo, Endian.Little),
@@ -2715,8 +2715,8 @@ export class LedgerStorage extends Storages {
                                 input_row.unlock_age
                             )
                         );
-                    let outputs: Array<TxOutput> = [];
-                    for (let output_row of output_rows)
+                    const outputs: TxOutput[] = [];
+                    for (const output_row of output_rows)
                         outputs.push(
                             new TxOutput(
                                 output_row.type,
@@ -2755,7 +2755,7 @@ export class LedgerStorage extends Storages {
         if (height !== null) cur_height = height.toString();
         else cur_height = `(SELECT MAX(height) as height FROM blocks)`;
 
-        let sql = `SELECT
+        const sql = `SELECT
                 height, hash, merkle_root, time_stamp
             FROM
                 blocks
@@ -2771,7 +2771,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getBlockHeaderByTxHash(tx_hash: Hash): Promise<any[]> {
-        let sql = `SELECT
+        const sql = `SELECT
             height, merkle_root, T.tx_index
         FROM
             transactions T
@@ -2791,7 +2791,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getLatestBlocks(limit: number, page: number): Promise<any[]> {
-        let sql = `SELECT
+        const sql = `SELECT
                 height, hash, merkle_root, signature, validators, tx_count,
                 enrollment_count, time_stamp, count(*) OVER() AS full_count
             FROM
@@ -2811,7 +2811,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getLatestTransactions(limit: number, page: number): Promise<any[]> {
-        let sql = `SELECT
+        const sql = `SELECT
                 T.block_height, T.tx_hash, T.tx_fee, T.tx_size, T.type,
                 Sum(IFNULL(O.amount,0)) as amount, B.time_stamp, count(*) OVER() AS full_count
              FROM
@@ -2834,7 +2834,7 @@ export class LedgerStorage extends Storages {
      *
      */
     public getBlockSummary(field: string, value: string | Buffer): Promise<any[]> {
-        let sql = `SELECT B.height, B.hash, B.merkle_root, B.signature, B.prev_block, B.random_seed,
+        const sql = `SELECT B.height, B.hash, B.merkle_root, B.signature, B.prev_block, B.random_seed,
              B.time_stamp, B.tx_count,
              BS.total_sent, BS.total_received, BS.total_reward, BS.total_fee, BS.total_size
              FROM blocks B
@@ -2853,8 +2853,8 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getBlockEnrollments(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
-        let sql = `SELECT
-                E.block_height, E.utxo_key, E.commitment, E.cycle_length, E.enroll_sig, 
+        const sql = `SELECT
+                E.block_height, E.utxo_key, E.commitment, E.cycle_length, E.enroll_sig,
                 count(*) OVER() AS full_count
             FROM
                 blocks B
@@ -2863,7 +2863,7 @@ export class LedgerStorage extends Storages {
             ORDER BY E.enrollment_index ASC
             LIMIT ? OFFSET ?;`;
 
-        let result: any = {};
+        const result: any = {};
         return new Promise<any[]>((resolve, reject) => {
             this.query(sql, [value, limit, limit * (page - 1)]).then((rows: any[]) => {
                 result.enrollments = rows;
@@ -2881,7 +2881,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getBlockTransactions(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
-        let sql_tx = `SELECT
+        const sql_tx = `SELECT
                 T.block_height, T.tx_hash, SUM(IFNULL(O.amount,0)) as amount,
                 T.tx_fee, T.tx_size, B.time_stamp, count(*) OVER() AS full_count,
                 JSON_ARRAYAGG(JSON_OBJECT("type", O.type, "address", O.address, "amount", O.amount)) as receiver,
@@ -2904,7 +2904,7 @@ export class LedgerStorage extends Storages {
             ORDER BY T.tx_index ASC
             LIMIT ? OFFSET ?;`;
 
-        let sql_count = `SELECT
+        const sql_count = `SELECT
                     IFNULL(count(*),0) as total_records
                 FROM
                     transactions T
@@ -2912,7 +2912,7 @@ export class LedgerStorage extends Storages {
                 WHERE
                     ${field} = ?;`;
 
-        let result: any = {};
+        const result: any = {};
         return new Promise<any[]>((resolve, reject) => {
             this.query(sql_tx, [value, value, limit, limit * (page - 1)])
                 .then((rows: any[]) => {
@@ -2934,7 +2934,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getBOAStats(): Promise<any[]> {
-        let sql = `SELECT max(height) as height,
+        const sql = `SELECT max(height) as height,
              (SELECT count(*) from transactions) as transactions,
              (SELECT count(*) from validators) as validators
             FROM
@@ -2950,7 +2950,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getCoinMarketcap(): Promise<any[]> {
-        let sql = `SELECT * FROM marketcap WHERE last_updated_at = (SELECT MAX(last_updated_at) as time FROM marketcap)`;
+        const sql = `SELECT * FROM marketcap WHERE last_updated_at = (SELECT MAX(last_updated_at) as time FROM marketcap)`;
 
         return this.query(sql, []);
     }
@@ -2962,7 +2962,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getCoinMarketChart(from: number, to: number): Promise<any[]> {
-        let sql = `SELECT * FROM marketcap WHERE last_updated_at BETWEEN ? AND ?`;
+        const sql = `SELECT * FROM marketcap WHERE last_updated_at BETWEEN ? AND ?`;
 
         return this.query(sql, [from, to]);
     }
@@ -2974,7 +2974,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getTxCount(height: Height, address: string): Promise<any[]> {
-        let sql = `SELECT
+        const sql = `SELECT
                COUNT(DISTINCT(tx_hash)) AS tx_count
             FROM
             (
@@ -2988,9 +2988,9 @@ export class LedgerStorage extends Storages {
                     T.block_height = ?
                     AND S.address = ?
                 GROUP BY T.tx_hash, S.address
-                
+
                 UNION ALL
-                
+
                 SELECT
                     T.tx_hash
                 FROM
@@ -3012,9 +3012,9 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the .catch is called with an error.
      */
     public getBOAHolders(limit: number, page: number): Promise<any> {
-        let sql = `
-            SELECT 
-	            address, tx_count, total_received, total_sent, 
+        const sql = `
+            SELECT
+	            address, tx_count, total_received, total_sent,
 	            total_reward, total_frozen, total_spendable, total_balance, count(*) OVER() AS full_count
             FROM
                 accounts
@@ -3030,9 +3030,9 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the .catch is called with an error.
      */
     public getBOAHolder(address: string): Promise<any> {
-        let sql = `
-            SELECT 
-	            address, tx_count, total_received, total_sent, 
+        const sql = `
+            SELECT
+	            address, tx_count, total_received, total_sent,
 	            total_reward, total_frozen, total_balance
             FROM
                 accounts
@@ -3047,7 +3047,7 @@ export class LedgerStorage extends Storages {
      * @param filter scale in which data needed to be fetched i.e H, D, M, Y
      */
     public calculateAvgFeeChart(from: number, to: number, filter: string): Promise<any[]> {
-        let sql = `SELECT
+        const sql = `SELECT
                 height, time_stamp, average_tx_fee,
                 granularity, total_tx_fee, total_payload_fee, total_fee
              FROM
@@ -3065,7 +3065,7 @@ export class LedgerStorage extends Storages {
      * @param filter scale in which data needed to be fetched i.e H, D, M, Y
      */
     public getAccountChart(address: string, from: number, to: number, filter: string): Promise<any[]> {
-        let sql = `SELECT
+        const sql = `SELECT
                 address, block_height, time_stamp, balance, granularity
              FROM
                 account_history
@@ -3082,9 +3082,9 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public exist(value: Hash): Promise<any[]> {
-        let hash = value.toBinary(Endian.Little);
+        const hash = value.toBinary(Endian.Little);
 
-        let sql = `SELECT
+        const sql = `SELECT
                 (SELECT IF(EXISTS (SELECT hash FROM blocks WHERE hash= ?), 1, 0)) as block,
                 (SELECT IF(EXISTS (SELECT tx_hash FROM transactions WHERE tx_hash= ?), 1, 0)) as transaction`;
 
@@ -3096,7 +3096,7 @@ export class LedgerStorage extends Storages {
      * @param database The name of database
      */
     public async dropTestDB(database: any): Promise<any[]> {
-        let sql = `DROP DATABASE ${database}`;
+        const sql = `DROP DATABASE ${database}`;
         return this.run(sql, []);
     }
 }

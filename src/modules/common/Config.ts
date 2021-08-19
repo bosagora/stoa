@@ -60,7 +60,7 @@ export class Config implements IConfig {
      * @param config_file The file name of configuration
      */
     public readFromFile(config_file: string) {
-        let config_content = fs.readFileSync(path.resolve(Utils.getInitCWD(), config_file), "utf8");
+        const config_content = fs.readFileSync(path.resolve(Utils.getInitCWD(), config_file), "utf8");
         this.readFromString(config_content);
     }
 
@@ -86,7 +86,7 @@ export class Config implements IConfig {
             default: "config.yaml",
             help: "Path to the config file to use",
         });
-        let args = parser.parse_args();
+        const args = parser.parse_args();
 
         const configPath = path.resolve(Utils.getInitCWD(), args.config);
         if (!fs.existsSync(configPath)) {
@@ -94,7 +94,7 @@ export class Config implements IConfig {
             process.exit(1);
         }
 
-        let cfg = new Config();
+        const cfg = new Config();
         try {
             cfg.readFromFile(configPath);
         } catch (error) {
@@ -134,8 +134,8 @@ export class ServerConfig implements IServerConfig {
      * @param agora_endpoint The endpoint of Agora
      */
     constructor(address?: string, port?: number, agora_endpoint?: string) {
-        let conf = extend(true, {}, ServerConfig.defaultValue());
-        extend(true, conf, { address: address, port: port, agora_endpoint: agora_endpoint });
+        const conf = extend(true, {}, ServerConfig.defaultValue());
+        extend(true, conf, { address, port, agora_endpoint });
 
         if (!ip.isV4Format(conf.address) && !ip.isV6Format(conf.address)) {
             console.error(`${conf.address}' is not appropriate to use as an IP address.`);
@@ -152,7 +152,7 @@ export class ServerConfig implements IServerConfig {
      * @param config The object of IServerConfig
      */
     public readFromObject(config: IServerConfig) {
-        let conf = extend(true, {}, ServerConfig.defaultValue());
+        const conf = extend(true, {}, ServerConfig.defaultValue());
         extend(true, conf, config);
 
         if (!ip.isV4Format(conf.address) && !ip.isV6Format(conf.address)) {
@@ -226,14 +226,14 @@ export class DatabaseConfig implements IDatabaseConfig {
         port?: number,
         multipleStatements?: boolean
     ) {
-        let conf = extend(true, {}, DatabaseConfig.defaultValue());
+        const conf = extend(true, {}, DatabaseConfig.defaultValue());
         extend(true, conf, {
-            host: host,
-            user: user,
-            password: password,
-            database: database,
-            port: port,
-            multipleStatements: multipleStatements,
+            host,
+            user,
+            password,
+            database,
+            port,
+            multipleStatements,
         });
         this.host = conf.host;
         this.user = conf.user;
@@ -248,7 +248,7 @@ export class DatabaseConfig implements IDatabaseConfig {
      * @param config The object of IDatabaseConfig
      */
     public readFromObject(config: IDatabaseConfig) {
-        let conf = extend(true, {}, DatabaseConfig.defaultValue());
+        const conf = extend(true, {}, DatabaseConfig.defaultValue());
         extend(true, conf, config);
         this.host = conf.host;
         this.user = conf.user;
@@ -363,7 +363,7 @@ export class ConsensusConfig implements IConsensusConfig {
      * @param config The object of IConsensusConfig
      */
     public readFromObject(config: IConsensusConfig) {
-        let conf = extend(true, {}, ConsensusConfig.defaultValue());
+        const conf = extend(true, {}, ConsensusConfig.defaultValue());
         extend(true, conf, config);
         this.genesis_timestamp = conf.genesis_timestamp;
     }

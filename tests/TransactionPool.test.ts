@@ -73,7 +73,7 @@ describe("Test TransactionPool", () => {
     });
 
     it("Test for deletion of a pending transaction that all use the same input", async () => {
-        let tx1 = new Transaction(
+        const tx1 = new Transaction(
             [
                 new TxInput(
                     new Hash(
@@ -95,7 +95,7 @@ describe("Test TransactionPool", () => {
         await transaction_pool.add(ledger_storage.connection, tx1);
         assert.strictEqual(await transaction_pool.getLength(ledger_storage.connection), 1);
 
-        let tx2 = new Transaction(
+        const tx2 = new Transaction(
             [
                 new TxInput(
                     new Hash(
@@ -122,7 +122,7 @@ describe("Test TransactionPool", () => {
     });
 
     it("Test for deletion of a pending transaction that use some of the same inputs", async () => {
-        let tx1 = new Transaction(
+        const tx1 = new Transaction(
             [
                 new TxInput(
                     new Hash(
@@ -151,7 +151,7 @@ describe("Test TransactionPool", () => {
         await transaction_pool.add(ledger_storage.connection, tx1);
         assert.strictEqual(await transaction_pool.getLength(ledger_storage.connection), 2);
 
-        let tx2 = new Transaction(
+        const tx2 = new Transaction(
             [
                 new TxInput(
                     new Hash(
@@ -179,11 +179,11 @@ describe("Test TransactionPool", () => {
 });
 
 describe("Test of double spending transaction", () => {
-    let host: string = "http://localhost";
-    let port: string = "3837";
+    const host: string = "http://localhost";
+    const port: string = "3837";
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
-    let client = new TestClient();
+    const client = new TestClient();
     let testDBConfig: IDatabaseConfig;
     let gecko_server: TestGeckoServer;
     let gecko_market: CoinGeckoMarket;
@@ -231,9 +231,9 @@ describe("Test of double spending transaction", () => {
     });
 
     it("Test of the path /block_externalized", async () => {
-        let uri = URI(host).port(port).directory("block_externalized");
+        const uri = URI(host).port(port).directory("block_externalized");
 
-        let url = uri.toString();
+        const url = uri.toString();
         await client.post(url, { block: sample_data[0] });
         await client.post(url, { block: sample_data[1] });
         // Wait for the block to be stored in the database for the next test.
@@ -241,7 +241,7 @@ describe("Test of double spending transaction", () => {
     });
 
     it("Send the first transaction", async () => {
-        let tx = new Transaction(
+        const tx = new Transaction(
             [
                 new TxInput(
                     block.txs[0].inputs[0].utxo,
@@ -258,20 +258,20 @@ describe("Test of double spending transaction", () => {
             Buffer.alloc(0)
         );
 
-        let uri = URI(host).port(port).directory("transaction_received");
+        const uri = URI(host).port(port).directory("transaction_received");
 
-        let url = uri.toString();
-        await client.post(url, { tx: tx });
+        const url = uri.toString();
+        await client.post(url, { tx });
         await delay(100);
     });
 
     it("Check if the pending transaction is the first transaction", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("/wallet/transactions/pending")
             .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
 
-        let response = await client.get(uri.toString());
+        const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 1);
         assert.strictEqual(
             response.data[0].tx_hash,
@@ -283,22 +283,22 @@ describe("Test of double spending transaction", () => {
     });
 
     it("Send a second transaction with the same input as the first transaction", async () => {
-        let tx = block.txs[0];
+        const tx = block.txs[0];
 
-        let uri = URI(host).port(port).directory("transaction_received");
+        const uri = URI(host).port(port).directory("transaction_received");
 
-        let url = uri.toString();
-        await client.post(url, { tx: tx });
+        const url = uri.toString();
+        await client.post(url, { tx });
         await delay(100);
     });
 
     it("Check if there is only a second transaction.", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("/wallet/transactions/pending")
             .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
 
-        let response = await client.get(uri.toString());
+        const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 1);
         assert.strictEqual(
             response.data[0].tx_hash,

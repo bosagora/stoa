@@ -32,7 +32,7 @@ export class Storages {
      * The first argument is an error object. If there is no error, this value is null.
      */
     constructor(databaseConfig: IDatabaseConfig, callback: (err: Error | null) => void) {
-        let dbconfig: IDatabaseConfig = {
+        const dbconfig: IDatabaseConfig = {
             host: databaseConfig.host,
             user: databaseConfig.user,
             password: databaseConfig.password,
@@ -72,7 +72,7 @@ export class Storages {
      * @param databaseConfig Valid value is of type IDatabaseConfig,
      */
     public static waiteForConnection(databaseConfig: IDatabaseConfig) {
-        let connection_config: mysql.ConnectionOptions = {
+        const connection_config: mysql.ConnectionOptions = {
             host: databaseConfig.host,
             user: databaseConfig.user,
             password: databaseConfig.password,
@@ -82,7 +82,7 @@ export class Storages {
 
         return new Promise<void>((resolve) => {
             let try_count = 0;
-            let check_connection = () => {
+            const check_connection = () => {
                 try_count++;
                 const connection = mysql.createConnection(connection_config);
                 connection.connect(function (err) {
