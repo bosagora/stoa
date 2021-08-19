@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-let operations = {
+const operations = {
     db: "DB Operation",
     connection: "Connection Operation",
     block_recovery: "Block Recovery Operation",

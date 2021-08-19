@@ -81,13 +81,13 @@ export class AgoraClient implements FullNodeAPI {
      */
     public getBlocksFrom(height: Height, max_blocks: number): Promise<Block[]> {
         return new Promise<Block[]>((resolve, reject) => {
-            let uri = URI("/blocks_from").addSearch("height", height.toString()).addSearch("max_blocks", max_blocks);
+            const uri = URI("/blocks_from").addSearch("height", height.toString()).addSearch("max_blocks", max_blocks);
 
             this.client
                 .get(uri.toString())
                 .then((response: AxiosResponse) => {
                     if (response.status == 200) resolve(response.data.map((entry: any) => Block.reviver("", entry)));
-                    else reject(handleNetworkError({ response: response }));
+                    else reject(handleNetworkError({ response }));
                 })
                 .catch((reason: any) => {
                     reject(handleNetworkError(reason));
@@ -102,11 +102,11 @@ export class AgoraClient implements FullNodeAPI {
      */
     public getMerklePath(height: Height, hash: Hash): Promise<Hash[]> {
         return new Promise<Hash[]>((resolve, reject) => {
-            let uri = URI("/merkle_path").addSearch("height", height.toString()).addSearch("hash", hash.toString());
+            const uri = URI("/merkle_path").addSearch("height", height.toString()).addSearch("hash", hash.toString());
 
             this.client.get(uri.toString()).then((response: AxiosResponse) => {
                 if (response.status == 200) resolve(response.data.map((entry: any) => new Hash(entry)));
-                else reject(handleNetworkError({ response: response }));
+                else reject(handleNetworkError({ response }));
             });
         });
     }
@@ -119,13 +119,13 @@ export class AgoraClient implements FullNodeAPI {
      */
     public getPreimage(enroll_key: Hash): Promise<PreImageInfo> {
         return new Promise<PreImageInfo>((resolve, reject) => {
-            let uri = URI("/preimage").addSearch("enroll_key", enroll_key);
+            const uri = URI("/preimage").addSearch("enroll_key", enroll_key);
 
             this.client
                 .get(uri.toString())
                 .then((response: AxiosResponse) => {
                     if (response.status == 200) resolve(PreImageInfo.reviver("", response.data));
-                    else reject(handleNetworkError({ response: response }));
+                    else reject(handleNetworkError({ response }));
                 })
                 .catch((reason: any) => {
                     reject(handleNetworkError(reason));
@@ -133,7 +133,7 @@ export class AgoraClient implements FullNodeAPI {
         });
     }
 
-    public static checkMerklePath(merkle_path: Array<Hash>, tx_hash: Hash, tx_index: number): Hash {
+    public static checkMerklePath(merkle_path: Hash[], tx_hash: Hash, tx_index: number): Hash {
         let root: Hash = tx_hash;
         for (const otherside of merkle_path) {
             if (tx_index & 1) root = hashMulti(otherside.data, root.data);

@@ -25,16 +25,16 @@ export class FeeManager {
      * @returns The fees of [high, medium, low]
      */
     public static getTxFee(tx_size: number, disparity: number): [JSBI, JSBI, JSBI] {
-        let size = JSBI.BigInt(tx_size);
-        let factor = JSBI.BigInt(200);
-        let minimum = JSBI.BigInt(100_000); // 0.01BOA
+        const size = JSBI.BigInt(tx_size);
+        const factor = JSBI.BigInt(200);
+        const minimum = JSBI.BigInt(100_000); // 0.01BOA
         let medium = JSBI.multiply(size, factor);
         if (JSBI.lessThan(medium, minimum)) medium = JSBI.BigInt(minimum);
 
         medium = JSBI.add(medium, JSBI.BigInt(disparity));
         if (JSBI.lessThan(medium, minimum)) medium = JSBI.BigInt(minimum);
 
-        let width = JSBI.divide(medium, JSBI.BigInt(10));
+        const width = JSBI.divide(medium, JSBI.BigInt(10));
         let high = JSBI.add(medium, width);
         let low = JSBI.subtract(medium, width);
         if (JSBI.lessThan(high, minimum)) high = JSBI.BigInt(minimum);
@@ -49,7 +49,7 @@ export class FeeManager {
      * @param trim_percent The percent of trim
      * @returns The value of trimmed mean
      */
-    public static calculateTrimmedMeanDisparity(values: Array<number>, trim_percent: number = 5): number {
+    public static calculateTrimmedMeanDisparity(values: number[], trim_percent: number = 5): number {
         if (values.length === 0) return 0;
 
         // Sort the array
@@ -62,7 +62,7 @@ export class FeeManager {
         }
 
         // Calculate an average
-        let sum = values.reduce((s, v) => s + v, 0);
+        const sum = values.reduce((s, v) => s + v, 0);
         return Math.floor(sum / values.length);
     }
 }

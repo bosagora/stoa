@@ -67,7 +67,7 @@ export class CoinGeckoMarket implements CoinMarket {
      */
     public fetch(): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
-            let marketCap = await this.coinMarketClient.simplePrice({
+            const marketCap = await this.coinMarketClient.simplePrice({
                 ids: "bosagora",
                 vs_currencies: "usd",
                 include_market_cap: true,
@@ -76,7 +76,7 @@ export class CoinGeckoMarket implements CoinMarket {
                 include_last_updated_at: true,
             });
             if (marketCap) {
-                let coinMarketStat: IMarketCap = {
+                const coinMarketStat: IMarketCap = {
                     price: marketCap.bosagora.usd,
                     market_cap: marketCap.bosagora.usd_market_cap,
                     vol_24h: marketCap.bosagora.usd_24h_vol,
@@ -100,14 +100,14 @@ export class CoinGeckoMarket implements CoinMarket {
      */
     public recover(from: number, to: number): Promise<IMarketCap[]> {
         return new Promise<IMarketCap[]>(async (resolve, reject) => {
-            let marketCapChartRange = await this.coinMarketClient.coinIdMarketChartRange({
+            const marketCapChartRange = await this.coinMarketClient.coinIdMarketChartRange({
                 id: "bosagora",
                 vs_currency: "usd",
-                from: from,
-                to: to,
+                from,
+                to,
             });
             if (marketCapChartRange) {
-                let coinMarketStat: Array<IMarketCap> = [];
+                const coinMarketStat: IMarketCap[] = [];
                 marketCapChartRange.prices.forEach((price: any, index: number) => {
                     coinMarketStat.push({
                         price: price[1],

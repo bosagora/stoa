@@ -23,7 +23,7 @@ import { URL } from "url";
 import { IDatabaseConfig } from "../src/modules/common/Config";
 import { CoinMarketService } from "../src/modules/service/CoinMarketService";
 import { MockDBConfig } from "./TestConfig";
-import { delay, recovery_sample_data, FakeBlacklistMiddleware, TestAgora, TestClient, TestStoa } from "./Utils";
+import { delay, FakeBlacklistMiddleware, recovery_sample_data, TestAgora, TestClient, TestStoa } from "./Utils";
 
 /**
  * This is an API server for testing and inherited from Stoa.
@@ -44,10 +44,10 @@ class TestRecoveryStoa extends TestStoa {
                 return;
             }
 
-            let block_height = new Height(req.query.block_height.toString());
+            const block_height = new Height(req.query.block_height.toString());
 
             try {
-                let rows = await this.ledger_storage.getBlock(block_height);
+                const rows = await this.ledger_storage.getBlock(block_height);
                 if (rows.length > 0) res.status(200).send(rows[0]);
                 else res.status(400).send();
             } catch (error) {
@@ -64,7 +64,7 @@ describe("Test of Recovery", () => {
     let stoa_server: TestRecoveryStoa;
     let testDBConfig: IDatabaseConfig;
 
-    let client = new TestClient();
+    const client = new TestClient();
 
     before("Bypassing middleware check", () => {
         FakeBlacklistMiddleware.assign();
@@ -97,13 +97,13 @@ describe("Test of Recovery", () => {
     });
 
     it("Test `getBlocksFrom`", async () => {
-        let agora_client = new AgoraClient(agora_addr);
+        const agora_client = new AgoraClient(agora_addr);
 
-        let blocks: Array<Block> = await agora_client.getBlocksFrom(new Height("1"), 3);
+        const blocks: Block[] = await agora_client.getBlocksFrom(new Height("1"), 3);
         // The number of blocks is three.
         assert.strictEqual(blocks.length, 3);
-        let expected_height: Height = new Height("1");
-        for (let block of blocks) {
+        const expected_height: Height = new Height("1");
+        for (const block of blocks) {
             // Make sure that the received block height is equal to the expected value.
             assert.deepEqual(block.header.height, expected_height);
             expected_height.value = JSBI.add(expected_height.value, JSBI.BigInt(1));
@@ -125,16 +125,16 @@ describe("Test of Recovery", () => {
         for (let idx = 0; idx <= 4; idx++) {
             const uri = URI(stoa_addr).directory("block").addSearch("block_height", idx);
 
-            let response = await client.get(uri.toString());
+            const response = await client.get(uri.toString());
             assert.strictEqual(response.status, 200);
             assert.strictEqual(response.data.height, idx);
         }
     });
 
     it("Test for continuous recovery and write", async () => {
-        let uri = URI(stoa_addr).directory("block_externalized");
+        const uri = URI(stoa_addr).directory("block_externalized");
 
-        let url = uri.toString();
+        const url = uri.toString();
 
         await client.post(url, { block: recovery_sample_data[2] });
         await client.post(url, { block: recovery_sample_data[4] });
@@ -145,9 +145,9 @@ describe("Test of Recovery", () => {
 
         // Verifies that all sent blocks are wrote
         for (let idx = 0; idx <= 8; idx++) {
-            let uri = URI(stoa_addr).directory("block").addSearch("block_height", idx);
+            const uri = URI(stoa_addr).directory("block").addSearch("block_height", idx);
 
-            let response = await client.get(uri.toString());
+            const response = await client.get(uri.toString());
             assert.strictEqual(response.status, 200);
             assert.strictEqual(response.data.height, idx);
         }
@@ -156,9 +156,9 @@ describe("Test of Recovery", () => {
     it("Test for ignoring already wrote block data", async () => {
         agora_node.delay = 100;
 
-        let uri = URI(stoa_addr).directory("block_externalized");
+        const uri = URI(stoa_addr).directory("block_externalized");
 
-        let url = uri.toString();
+        const url = uri.toString();
 
         await client.post(url, { block: recovery_sample_data[0] });
         await client.post(url, { block: recovery_sample_data[1] });
@@ -174,9 +174,9 @@ describe("Test of Recovery", () => {
 
         // Verifies that all sent blocks are wrote
         for (let idx = 0; idx <= 4; idx++) {
-            let uri = URI(stoa_addr).directory("block").addSearch("block_height", idx);
+            const uri = URI(stoa_addr).directory("block").addSearch("block_height", idx);
 
-            let response = await client.get(uri.toString());
+            const response = await client.get(uri.toString());
             assert.strictEqual(response.status, 200);
             assert.strictEqual(response.data.height, idx);
         }
@@ -186,9 +186,9 @@ describe("Test of Recovery", () => {
         stoa_server.max_count_on_recovery = 2;
         agora_node.delay = 0;
 
-        let uri = URI(stoa_addr).directory("block_externalized");
+        const uri = URI(stoa_addr).directory("block_externalized");
 
-        let url = uri.toString();
+        const url = uri.toString();
 
         await client.post(url, { block: recovery_sample_data[0] });
         await client.post(url, { block: recovery_sample_data[9] });
@@ -196,9 +196,9 @@ describe("Test of Recovery", () => {
 
         // Verifies that all sent blocks are wrote
         for (let idx = 0; idx <= 9; idx++) {
-            let uri = URI(stoa_addr).directory("block").addSearch("block_height", idx);
+            const uri = URI(stoa_addr).directory("block").addSearch("block_height", idx);
 
-            let response = await client.get(uri.toString());
+            const response = await client.get(uri.toString());
             assert.strictEqual(response.status, 200);
             assert.strictEqual(response.data.height, idx);
         }

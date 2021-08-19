@@ -22,10 +22,10 @@ import { CoinMarketService } from "../src/modules/service/CoinMarketService";
 import { IMarketCap } from "../src/Types";
 import { MockDBConfig } from "./TestConfig";
 import {
+    FakeBlacklistMiddleware,
     market_cap_history_sample_data,
     market_cap_sample_data,
     sample_data,
-    FakeBlacklistMiddleware,
     TestAgora,
     TestClient,
     TestGeckoServer,
@@ -33,11 +33,11 @@ import {
 } from "./Utils";
 
 describe("Test of Stoa API Server", () => {
-    let host: string = "http://localhost";
-    let port: string = "3837";
+    const host: string = "http://localhost";
+    const port: string = "3837";
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
-    let client = new TestClient();
+    const client = new TestClient();
     let testDBConfig: IDatabaseConfig;
     let gecko_server: TestGeckoServer;
     let gecko_market: CoinGeckoMarket;
@@ -87,10 +87,10 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /latest-blocks", async () => {
-        let uri = URI(host).port(port).directory("/latest-blocks").addSearch("page", "1").addSearch("limit", "10");
+        const uri = URI(host).port(port).directory("/latest-blocks").addSearch("page", "1").addSearch("limit", "10");
 
-        let response = await client.get(uri.toString());
-        let expected = [
+        const response = await client.get(uri.toString());
+        const expected = [
             {
                 height: "1",
                 hash: "0x5e57db5e2c2effd180f831330ddf2ea2686817b4f14c8ee60700ecb5c4e9130ce5fe1b9785bc2b5cc6c5fd8c1682647b258419cafa637f07f0aa4e88c9a7de9f",
@@ -122,14 +122,14 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /latest-transactions", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("/latest-transactions")
             .addSearch("page", "1")
             .addSearch("limit", "10");
 
-        let response = await client.get(uri.toString());
-        let expected = [
+        const response = await client.get(uri.toString());
+        const expected = [
             {
                 height: "1",
                 tx_hash:
@@ -245,10 +245,10 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /block-summary with block height", async () => {
-        let uri = URI(host).port(port).directory("block-summary").addSearch("height", "1");
+        const uri = URI(host).port(port).directory("block-summary").addSearch("height", "1");
 
-        let response = await client.get(uri.toString());
-        let expected = {
+        const response = await client.get(uri.toString());
+        const expected = {
             height: "1",
             total_transactions: 8,
             hash: "0x5e57db5e2c2effd180f831330ddf2ea2686817b4f14c8ee60700ecb5c4e9130ce5fe1b9785bc2b5cc6c5fd8c1682647b258419cafa637f07f0aa4e88c9a7de9f",
@@ -272,14 +272,14 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /block-enrollments with block height", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("block-enrollments")
             .addSearch("height", "0")
             .addSearch("page", "1")
             .addSearch("page_size", "10");
-        let response = await client.get(uri.toString());
-        let expected = [
+        const response = await client.get(uri.toString());
+        const expected = [
             {
                 height: "0",
                 utxo: "0x70455f0b03f4b8d54b164b251e813b3fecd447d4bfe7b173ef86654429d2f5c3866d3ea406bf02163221a2d4029f0e0930a48304b2ea0f9277c2b32795c4005f",
@@ -344,7 +344,7 @@ describe("Test of Stoa API Server", () => {
         assert.deepStrictEqual(response.data, expected);
     });
     it("Test of the path /block-enrollments with block hash", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("block-enrollments")
             .addSearch(
@@ -353,8 +353,8 @@ describe("Test of Stoa API Server", () => {
             )
             .addSearch("page", "1")
             .addSearch("page_size", "10");
-        let response = await client.get(uri.toString());
-        let expected = [
+        const response = await client.get(uri.toString());
+        const expected = [
             {
                 height: "0",
                 utxo: "0x70455f0b03f4b8d54b164b251e813b3fecd447d4bfe7b173ef86654429d2f5c3866d3ea406bf02163221a2d4029f0e0930a48304b2ea0f9277c2b32795c4005f",
@@ -419,14 +419,14 @@ describe("Test of Stoa API Server", () => {
         assert.deepStrictEqual(response.data, expected);
     });
     it("Test of the path /block-transactions with block height", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("block-transactions")
             .addSearch("height", "0")
             .addSearch("page", "1")
             .addSearch("page_size", "10");
-        let response = await client.get(uri.toString());
-        let expected = [
+        const response = await client.get(uri.toString());
+        const expected = [
             {
                 height: "0",
                 tx_hash:
@@ -528,7 +528,7 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /block-transactions with block hash", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("block-transactions")
             .addSearch(
@@ -537,8 +537,8 @@ describe("Test of Stoa API Server", () => {
             )
             .addSearch("page", "1")
             .addSearch("page_size", "10");
-        let response = await client.get(uri.toString());
-        let expected = [
+        const response = await client.get(uri.toString());
+        const expected = [
             {
                 height: "0",
                 tx_hash:
@@ -640,9 +640,9 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /boa-stats", async () => {
-        let uri = URI(host).port(port).directory("boa-stats");
-        let response = await client.get(uri.toString());
-        let expected = {
+        const uri = URI(host).port(port).directory("boa-stats");
+        const response = await client.get(uri.toString());
+        const expected = {
             height: 1,
             transactions: 10,
             validators: 6,
@@ -654,15 +654,15 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test for putCoinMarketStats method", async () => {
-        let data: IMarketCap = await gecko_market.fetch();
-        let response = await stoa_server.putCoinMarketStats(data);
+        const data: IMarketCap = await gecko_market.fetch();
+        const response = await stoa_server.putCoinMarketStats(data);
         assert.deepStrictEqual(response.affectedRows, 1);
     });
 
     it("Test for /coinmarketcap", async () => {
-        let uri = URI(host).port(port).directory("/coinmarketcap");
-        let response = await client.get(uri.toString());
-        let expected = {
+        const uri = URI(host).port(port).directory("/coinmarketcap");
+        const response = await client.get(uri.toString());
+        const expected = {
             last_updated_at: 1622599176,
             price: "0.239252",
             market_cap: 72635724,
@@ -672,10 +672,10 @@ describe("Test of Stoa API Server", () => {
         assert.deepStrictEqual(response.data, expected);
     });
     it("Test for /holders", async () => {
-        let uri = URI(host).port(port).directory("/holders");
-        let response = await client.get(uri.toString());
+        const uri = URI(host).port(port).directory("/holders");
+        const response = await client.get(uri.toString());
 
-        let expected = [
+        const expected = [
             {
                 address: "boa1xpfp00tr86d9zdgv3uy08qs0ld5s3wmx869yte68h3y4erteyn3wkq692jq",
                 tx_count: 2,
@@ -810,14 +810,14 @@ describe("Test of Stoa API Server", () => {
         assert.deepStrictEqual(response.data, expected);
     });
     it("Test for path /holder_balance_history", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("/holder_balance_history")
             .filename("boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67")
             .setSearch("date", "1609545600")
             .setSearch("filter", "H");
-        let response = await client.get(uri.toString());
-        let expected = [
+        const response = await client.get(uri.toString());
+        const expected = [
             {
                 address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
                 block_height: 1,
@@ -829,12 +829,12 @@ describe("Test of Stoa API Server", () => {
         assert.deepStrictEqual(response.data, expected);
     });
     it("Test for /holder/:address", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("/holder")
             .filename("boa1xpfp00tr86d9zdgv3uy08qs0ld5s3wmx869yte68h3y4erteyn3wkq692jq");
-        let response = await client.get(uri.toString());
-        let expected = {
+        const response = await client.get(uri.toString());
+        const expected = {
             address: "boa1xpfp00tr86d9zdgv3uy08qs0ld5s3wmx869yte68h3y4erteyn3wkq692jq",
             tx_count: 2,
             total_received: 48799999980960,
@@ -849,13 +849,13 @@ describe("Test of Stoa API Server", () => {
         assert.deepStrictEqual(response.data, expected);
     });
     it("Test for path /average_fee_chart/", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("/average_fee_chart")
             .setSearch("date", "1609459200")
             .setSearch("filter", "M");
-        let response = await client.get(uri.toString());
-        let expected = [
+        const response = await client.get(uri.toString());
+        const expected = [
             {
                 height: 1,
                 granularity: "M",
@@ -869,25 +869,25 @@ describe("Test of Stoa API Server", () => {
         assert.deepStrictEqual(response.data, expected);
     });
     it("Test for path /search by block hash", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("/search/hash/")
             .filename(
                 "0xfca7a6455549ff1886969228b12dc5db03c67470145ed3e8e318f0c356a364eabbf1eeefc06232cfa7f3cdf3017521ee54b2b4542241650781022552ddc3dc99"
             );
-        let response = await client.get(uri.toString());
-        let expected = { block: 1, transaction: 0 };
+        const response = await client.get(uri.toString());
+        const expected = { block: 1, transaction: 0 };
         assert.deepStrictEqual(response.data, expected);
     });
     it("Test for path /search by transaction hash", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("/search/hash/")
             .filename(
                 "0x224c72ad879eccd38e9b612047633d235e47e329e68a69517822c4c234c53c2d7d81b0245cdb61857002d58a5e033c8720b462e20517f45a5516df432866b32f"
             );
-        let response = await client.get(uri.toString());
-        let expected = { block: 0, transaction: 1 };
+        const response = await client.get(uri.toString());
+        const expected = { block: 0, transaction: 1 };
         assert.deepStrictEqual(response.data, expected);
     });
 });

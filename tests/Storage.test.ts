@@ -49,11 +49,11 @@ describe("Test ledger storage and inquiry function.", () => {
     });
 
     it("Test for saving of all blocks", async () => {
-        for (let elem of sample_data) await ledger_storage.putBlocks(Block.reviver("", elem));
+        for (const elem of sample_data) await ledger_storage.putBlocks(Block.reviver("", elem));
 
-        let height_value = 1;
-        let height = new Height(JSBI.BigInt(height_value));
-        let rows = await ledger_storage.getBlock(height);
+        const height_value = 1;
+        const height = new Height(JSBI.BigInt(height_value));
+        const rows = await ledger_storage.getBlock(height);
         assert.strictEqual(rows.length, 1);
         assert.strictEqual(rows[0].height, height_value);
         assert.strictEqual(
@@ -70,7 +70,7 @@ describe("Test ledger storage and inquiry function.", () => {
     });
 
     it("Test for transaction", async () => {
-        let rows3 = await ledger_storage.getTransactions(new Height("0"));
+        const rows3 = await ledger_storage.getTransactions(new Height("0"));
         assert.strictEqual(rows3.length, 2);
         assert.strictEqual(
             new Hash(rows3[0].tx_hash, Endian.Little).toString(),
@@ -78,7 +78,7 @@ describe("Test ledger storage and inquiry function.", () => {
                 "d7d81b0245cdb61857002d58a5e033c8720b462e20517f45a5516df432866b32f"
         );
 
-        let rows4 = await ledger_storage.getTxInputs(new Height("1"), 0);
+        const rows4 = await ledger_storage.getTxInputs(new Height("1"), 0);
         assert.strictEqual(rows4.length, 1);
         assert.strictEqual(
             new Hash(rows4[0].utxo, Endian.Little).toString(),
@@ -86,7 +86,7 @@ describe("Test ledger storage and inquiry function.", () => {
                 "6d278cdd4c22c7e9885fceb307368e4130aaebd7800905c27c6a6e09870d8d9ca"
         );
 
-        let rows5 = await ledger_storage.getTxOutputs(new Height("0"), 1);
+        const rows5 = await ledger_storage.getTxOutputs(new Height("0"), 1);
         assert.strictEqual(rows5.length, 8);
         assert.strictEqual(
             new Hash(rows5[0].utxo_key, Endian.Little).toString(),
@@ -102,8 +102,8 @@ describe("Test ledger storage and inquiry function.", () => {
     });
 
     it("Test for enrollment", async () => {
-        let height_value = 0;
-        let height = new Height(JSBI.BigInt(height_value));
+        const height_value = 0;
+        const height = new Height(JSBI.BigInt(height_value));
         let rows = await ledger_storage.getEnrollments(height);
         assert.strictEqual(rows.length, 6);
         assert.strictEqual(rows[0].block_height, height_value);
@@ -125,11 +125,11 @@ describe("Test ledger storage and inquiry function.", () => {
     });
 
     it("Test for validator", async () => {
-        let address: string = "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku";
+        const address: string = "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku";
 
         let rows = await ledger_storage.getValidatorsAPI(new Height("1"), null);
         assert.ok(rows.length > 0);
-        let validator = rows.find((n) => n.address === address);
+        const validator = rows.find((n) => n.address === address);
         assert.ok(validator !== undefined);
         assert.strictEqual(validator.address, address);
         assert.strictEqual(validator.enrolled_at, 0);
@@ -150,9 +150,9 @@ describe("Test ledger storage and inquiry function.", () => {
     });
 
     it("Test for merkle tree", async () => {
-        let height_value = 0;
-        let height = new Height(JSBI.BigInt(height_value));
-        let rows = await ledger_storage.getMerkleTree(height);
+        const height_value = 0;
+        const height = new Height(JSBI.BigInt(height_value));
+        const rows = await ledger_storage.getMerkleTree(height);
         assert.strictEqual(rows.length, 3);
         assert.strictEqual(rows[0].block_height, height_value);
         assert.strictEqual(rows[0].merkle_index, 0);
@@ -201,17 +201,17 @@ describe("Test ledger storage and inquiry function.", () => {
     });
 
     it("Test for saving of a block with transaction data payload", async () => {
-        let data: string = fs.readFileSync("tests/data/Block.2.sample1.json", "utf-8");
-        let block: Block = Block.reviver("", JSON.parse(data));
+        const data: string = fs.readFileSync("tests/data/Block.2.sample1.json", "utf-8");
+        const block: Block = Block.reviver("", JSON.parse(data));
         await ledger_storage.putBlocks(block);
-        let rows = await ledger_storage.getPayload(block.merkle_tree[0]);
+        const rows = await ledger_storage.getPayload(block.merkle_tree[0]);
         assert.strictEqual(rows.length, 1);
         assert.deepStrictEqual(rows[0].payload, block.txs[0].payload);
     });
 
     it("Test for UTXO", async () => {
-        let address: string = "boa1xzrf00m4sh4xh7ey8t8zrnknu27yhjrt0qqjffvn3kd3cacp9vm22fc2d2d";
-        let rows = await ledger_storage.getUTXO(address);
+        const address: string = "boa1xzrf00m4sh4xh7ey8t8zrnknu27yhjrt0qqjffvn3kd3cacp9vm22fc2d2d";
+        const rows = await ledger_storage.getUTXO(address);
         assert.strictEqual(rows.length, 1);
         assert.strictEqual(rows[0].type, 0);
         assert.strictEqual(rows[0].unlock_height, 2);
@@ -224,8 +224,8 @@ describe("Test ledger storage and inquiry function.", () => {
     });
 
     it("Test for UTXO in melting", async () => {
-        let address: string = "boa1xzvald7hxvgnzk50sy04ha7ezgyytxt5sgw323zy8dlj3ya2q40e6elltwq";
-        let rows = await ledger_storage.getUTXO(address);
+        const address: string = "boa1xzvald7hxvgnzk50sy04ha7ezgyytxt5sgw323zy8dlj3ya2q40e6elltwq";
+        const rows = await ledger_storage.getUTXO(address);
         assert.strictEqual(rows.length, 5);
         assert.strictEqual(rows[0].type, 0);
         assert.strictEqual(rows[0].unlock_height, 2018);
@@ -238,11 +238,11 @@ describe("Test ledger storage and inquiry function.", () => {
     });
 
     it("Test for getting block height and merkle root with transaction hash", async () => {
-        let tx_hash = new Hash(
+        const tx_hash = new Hash(
             "0xfbaaebc15bb1618465077fed2425a826d88c7f5ae0197634f056bfbad12a7a7" +
                 "4b28cc82951e889255e149707bd3ef64eb01121875c766b5d24afed176d7d255c"
         );
-        let rows = await ledger_storage.getBlockHeaderByTxHash(tx_hash);
+        const rows = await ledger_storage.getBlockHeaderByTxHash(tx_hash);
         assert.strictEqual(rows.length, 1);
         assert.strictEqual(rows[0].height, 1);
         assert.strictEqual(
@@ -273,7 +273,7 @@ describe("Test for storing block data in the database", () => {
     });
 
     it("Error-handling test when writing a transaction.", async () => {
-        let block = Block.reviver("", sample_data[0]);
+        const block = Block.reviver("", sample_data[0]);
 
         await ledger_storage.putTransactions(block);
         await assert.rejects(ledger_storage.putTransactions(block), {
@@ -282,7 +282,7 @@ describe("Test for storing block data in the database", () => {
     });
 
     it("Error-handling test when writing a enrollment.", async () => {
-        let block = Block.reviver("", sample_data[0]);
+        const block = Block.reviver("", sample_data[0]);
 
         await ledger_storage.putEnrollments(block);
         await assert.rejects(ledger_storage.putEnrollments(block), {
@@ -306,11 +306,11 @@ describe("Test for storing block data in the database", () => {
             message: "Duplicate entry '0-0' for key 'enrollments.PRIMARY'",
         });
 
-        let rows0: any[] = await ledger_storage.getBlock(new Height("0"));
+        const rows0: any[] = await ledger_storage.getBlock(new Height("0"));
         assert.strictEqual(rows0.length, 0);
 
         await ledger_storage.putTransactions(block);
-        let rows1: any[] = await ledger_storage.getTransactions(new Height("0"));
+        const rows1: any[] = await ledger_storage.getTransactions(new Height("0"));
         assert.strictEqual(rows1.length, 2);
     });
 
@@ -322,7 +322,7 @@ describe("Test for storing block data in the database", () => {
         await ledger_storage.putBlocks(block0);
 
         // The block is read from the database.
-        let rows = await ledger_storage.getBlock(new Height("0"));
+        const rows = await ledger_storage.getBlock(new Height("0"));
         if (rows.length > 0) {
             // Check that the `prev_block` of block1 is the same as the hash value of the database.
             assert.deepStrictEqual(block1.header.prev_block, new Hash(rows[0].hash, Endian.Little));
@@ -343,7 +343,7 @@ describe("Tests that sending a pre-image", () => {
     before("Start sending a pre-image", async () => {
         testDBConfig = await MockDBConfig();
         ledger_storage = await LedgerStorage.make(testDBConfig, 1609459200);
-        for (let elem of sample_data) await ledger_storage.putBlocks(Block.reviver("", elem));
+        for (const elem of sample_data) await ledger_storage.putBlocks(Block.reviver("", elem));
         await ledger_storage.getEnrollments(height);
     });
 
@@ -353,12 +353,12 @@ describe("Tests that sending a pre-image", () => {
     });
 
     it("Tests that sending a pre-image with a height of 6 works", async () => {
-        let pre_image: PreImageInfo = PreImageInfo.reviver("", sample_preImageInfo);
+        const pre_image: PreImageInfo = PreImageInfo.reviver("", sample_preImageInfo);
         return ledger_storage.updatePreImage(pre_image);
 
-        let rows = await ledger_storage.getValidators(height);
+        const rows = await ledger_storage.getValidators(height);
         assert.strictEqual(rows.length, 6);
-        let validator = rows.find(
+        const validator = rows.find(
             (n) => n.address === "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku"
         );
         assert.ok(validator !== undefined);
@@ -368,12 +368,12 @@ describe("Tests that sending a pre-image", () => {
 
     it("Fail tests that sending a pre-image with a height of 5 works", async () => {
         sample_preImageInfo.height = "5";
-        let pre_image: PreImageInfo = PreImageInfo.reviver("", sample_preImageInfo);
+        const pre_image: PreImageInfo = PreImageInfo.reviver("", sample_preImageInfo);
         await ledger_storage.updatePreImage(pre_image);
 
-        let rows = await ledger_storage.getValidators(height);
+        const rows = await ledger_storage.getValidators(height);
         assert.strictEqual(rows.length, 6);
-        let validator = rows.find(
+        const validator = rows.find(
             (n) => n.address === "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku"
         );
         assert.ok(validator !== undefined);
@@ -384,12 +384,12 @@ describe("Tests that sending a pre-image", () => {
     it("Fail tests that sending a pre-image with a height of 1008 works", async () => {
         // Pre-image height test out of cycle_length range Test
         sample_preImageInfo.height = "1008";
-        let pre_image: PreImageInfo = PreImageInfo.reviver("", sample_preImageInfo);
+        const pre_image: PreImageInfo = PreImageInfo.reviver("", sample_preImageInfo);
         await ledger_storage.updatePreImage(pre_image);
 
-        let rows = await ledger_storage.getValidators(height);
+        const rows = await ledger_storage.getValidators(height);
         assert.strictEqual(rows.length, 6);
-        let validator = rows.find(
+        const validator = rows.find(
             (n) => n.address === "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku"
         );
         assert.ok(validator !== undefined);
@@ -426,12 +426,12 @@ describe("Tests storing transaction pools of a transaction", () => {
         // Write the Genesis block.
         await ledger_storage.putBlocks(block0);
 
-        let changes = await ledger_storage.putTransactionPool(block1.txs[0]);
+        const changes = await ledger_storage.putTransactionPool(block1.txs[0]);
         assert.strictEqual(changes, 1);
     });
 
     it("Test to transaction pool deletion trigger", async () => {
-        let before_pool_rows = await ledger_storage.getTransactionPool();
+        const before_pool_rows = await ledger_storage.getTransactionPool();
         assert.deepStrictEqual(before_pool_rows.length, 1);
 
         // Write the block 1.
@@ -439,11 +439,11 @@ describe("Tests storing transaction pools of a transaction", () => {
         await ledger_storage.putBlocks(block1);
 
         // The block is read from the database.
-        let rows = await ledger_storage.getBlock(new Height("1"));
+        const rows = await ledger_storage.getBlock(new Height("1"));
         assert.deepStrictEqual(rows.length, 1);
 
         // Check the transaction on the transaction pool is cleared
-        let after_pool_rows = await ledger_storage.getTransactionPool();
+        const after_pool_rows = await ledger_storage.getTransactionPool();
         assert.deepStrictEqual(after_pool_rows.length, 0);
     });
 });
@@ -478,8 +478,8 @@ describe("Tests update blockHeader", () => {
         await ledger_storage.putBlocks(block0);
         await ledger_storage.putBlocks(block1);
 
-        let changes = await ledger_storage.updateBlockHeader(block_header);
-        let put = await ledger_storage.putBlockHeaderHistory(block_header, new Height("1"));
+        const changes = await ledger_storage.updateBlockHeader(block_header);
+        const put = await ledger_storage.putBlockHeaderHistory(block_header, new Height("1"));
 
         assert.strictEqual(changes, 1);
         assert.strictEqual(put, 1);
@@ -490,7 +490,7 @@ describe("Tests update blockHeader", () => {
         const block1 = Block.reviver("", sample_data[1]);
         const block_header: BlockHeader = BlockHeader.reviver("", block1_sample_updated_header_data[0].header);
 
-        let rows = await ledger_storage.getBlock(new Height("1"));
+        const rows = await ledger_storage.getBlock(new Height("1"));
         assert.deepStrictEqual(rows.length, 1);
         assert.deepStrictEqual(rows[0].validators, block_header.validators.toString());
         assert.deepStrictEqual(rows[0].signature.toString(), block_header.signature.toString());

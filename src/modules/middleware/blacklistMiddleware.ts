@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { logger, Logger } from "../common/Logger";
 
 /**
@@ -6,7 +6,7 @@ import { logger, Logger } from "../common/Logger";
  *
  */
 export const isBlackList = async (req: Request, res: Response, next: NextFunction) => {
-    let ipAddress = String(req.ip);
+    const ipAddress = String(req.ip);
     if (
         Logger.dbInstance === undefined ||
         Logger.dbInstance.connection === undefined ||
@@ -15,8 +15,8 @@ export const isBlackList = async (req: Request, res: Response, next: NextFunctio
         next();
         return;
     } else {
-        let db = Logger.dbInstance.connection.db;
-        let isBlackListed = await db.collection("blacklists").findOne({ ipAddress });
+        const db = Logger.dbInstance.connection.db;
+        const isBlackListed = await db.collection("blacklists").findOne({ ipAddress });
         if (!isBlackListed) next();
         else {
             res.status(403).send("Your request has been rejected.");

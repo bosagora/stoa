@@ -11,13 +11,13 @@
 
 *******************************************************************************/
 
-import { SodiumHelper, JSBI } from "boa-sdk-ts";
+import { JSBI, SodiumHelper } from "boa-sdk-ts";
 import {
     delay,
+    FakeBlacklistMiddleware,
     recovery_sample_data,
     sample_data,
     sample_data2,
-    FakeBlacklistMiddleware,
     TestAgora,
     TestClient,
     TestStoa,
@@ -31,11 +31,11 @@ import { IDatabaseConfig } from "../src/modules/common/Config";
 import { MockDBConfig } from "./TestConfig";
 
 describe("Test of Stoa API for the wallet", () => {
-    let host: string = "http://localhost";
-    let port: string = "3837";
+    const host: string = "http://localhost";
+    const port: string = "3837";
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
-    let client = new TestClient();
+    const client = new TestClient();
     let testDBConfig: IDatabaseConfig;
 
     before("Bypassing middleware check", () => {
@@ -67,9 +67,9 @@ describe("Test of Stoa API for the wallet", () => {
     });
 
     it("Store blocks", async () => {
-        let uri = URI(host).port(port).directory("block_externalized");
+        const uri = URI(host).port(port).directory("block_externalized");
 
-        let url = uri.toString();
+        const url = uri.toString();
         for (let idx = 0; idx < 10; idx++) {
             await client.post(url, { block: recovery_sample_data[idx] });
             await delay(300);
@@ -77,14 +77,14 @@ describe("Test of Stoa API for the wallet", () => {
     });
 
     it("Test of the path /wallet/transactions/history", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("/wallet/transactions/history")
             .filename("boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k")
             .setSearch("pageSize", "10")
             .setSearch("page", "1");
 
-        let response = await client.get(uri.toString());
+        const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 9);
         assert.strictEqual(response.data[0].display_tx_type, "inbound");
         assert.strictEqual(response.data[0].address, "boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k");
@@ -101,15 +101,15 @@ describe("Test of Stoa API for the wallet", () => {
     });
 
     it("Test of the path /wallet/transaction/overview", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("/wallet/transaction/overview")
             .filename(
                 "0x405ee9d66e83abd8c9a97c68db41de53c70c93c2f5bbe59eb134867ea1bf7f227ef06cc6babc34da81a43f1037e0f620eebe7f01368f9df498caaaef16fe9695"
             );
 
-        let response = await client.get(uri.toString());
-        let expected = {
+        const response = await client.get(uri.toString());
+        const expected = {
             status: "Confirmed",
             height: "9",
             time: 1609464600,
@@ -150,7 +150,7 @@ describe("Test of Stoa API for the wallet", () => {
     });
 
     it("Test of the path /wallet/transactions/history - Filtering - Wrong TransactionType", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("/wallet/transactions/history")
             .filename("boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k")
@@ -164,7 +164,7 @@ describe("Test of Stoa API for the wallet", () => {
     });
 
     it("Test of the path /wallet/transactions/history - Filtering - TransactionType", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("/wallet/transactions/history")
             .filename("boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k")
@@ -172,7 +172,7 @@ describe("Test of Stoa API for the wallet", () => {
             .setSearch("page", "1")
             .setSearch("type", "outbound");
 
-        let response = await client.get(uri.toString());
+        const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 4);
         assert.strictEqual(response.data[0].display_tx_type, "outbound");
         assert.strictEqual(response.data[0].address, "boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k");
@@ -188,7 +188,7 @@ describe("Test of Stoa API for the wallet", () => {
     });
 
     it("Test of the path /wallet/transactions/history - Filtering - Date", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("/wallet/transactions/history")
             .filename("boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k")
@@ -197,7 +197,7 @@ describe("Test of Stoa API for the wallet", () => {
             .setSearch("beginDate", "1609459200")
             .setSearch("endDate", "1609459900");
 
-        let response = await client.get(uri.toString());
+        const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 1);
         assert.strictEqual(response.data[0].display_tx_type, "inbound");
         assert.strictEqual(response.data[0].address, "boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k");
@@ -213,7 +213,7 @@ describe("Test of Stoa API for the wallet", () => {
     });
 
     it("Test of the path /wallet/transactions/history - Filtering - Peer", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("/wallet/transactions/history")
             .filename("boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k")
@@ -221,7 +221,7 @@ describe("Test of Stoa API for the wallet", () => {
             .setSearch("page", "1")
             .setSearch("peer", "boa1xzgenes5cf8xel37");
 
-        let response = await client.get(uri.toString());
+        const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 1);
         assert.strictEqual(response.data[0].display_tx_type, "inbound");
         assert.strictEqual(response.data[0].address, "boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k");
@@ -238,11 +238,11 @@ describe("Test of Stoa API for the wallet", () => {
 });
 
 describe("Test of Stoa API for the wallet with `sample_data`", () => {
-    let host: string = "http://localhost";
-    let port: string = "3837";
+    const host: string = "http://localhost";
+    const port: string = "3837";
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
-    let client = new TestClient();
+    const client = new TestClient();
     let testDBConfig: IDatabaseConfig;
 
     before("Bypassing middleware check", () => {
@@ -275,9 +275,9 @@ describe("Test of Stoa API for the wallet with `sample_data`", () => {
     });
 
     it("Store blocks", async () => {
-        let uri = URI(host).port(port).directory("block_externalized");
+        const uri = URI(host).port(port).directory("block_externalized");
 
-        let url = uri.toString();
+        const url = uri.toString();
 
         await client.post(url, { block: sample_data[0] });
         await client.post(url, { block: sample_data[1] });
@@ -286,15 +286,15 @@ describe("Test of Stoa API for the wallet with `sample_data`", () => {
     });
 
     it("Test of the path /wallet/transaction/overview with payload", async () => {
-        let uri = URI(host)
+        const uri = URI(host)
             .port(port)
             .directory("/wallet/transaction/overview")
             .filename(
                 "0x35917fba7333947cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a7"
             );
 
-        let response = await client.get(uri.toString());
-        let expected = {
+        const response = await client.get(uri.toString());
+        const expected = {
             status: "Confirmed",
             height: "2",
             time: 1609460400,
@@ -369,15 +369,15 @@ describe("Test of Stoa API for the wallet with `sample_data`", () => {
     });
 
     it("Test of the path /wallet/utxo - Two UTXO", async () => {
-        let amount = JSBI.BigInt("24399999990481");
-        let uri = URI(host)
+        const amount = JSBI.BigInt("24399999990481");
+        const uri = URI(host)
             .port(port)
             .directory("/wallet/utxo")
             .filename("boa1xzfv00s88ky9mf50nqngvztmnmtjzv4yr0w555aet366ssrv5zqaj6zsga3")
             .setSearch("amount", amount.toString());
 
-        let response = await client.get(uri.toString());
-        let expected = [
+        const response = await client.get(uri.toString());
+        const expected = [
             {
                 utxo: "0xa8d769089ccd2c8dd1bde0fd94fabe3e7ae414f7ce6143a9d65b32dc8ec998e34e9bbddb253fdb46058582f0f69de959d2b5af9edea4e8e5f951b1228aa7fe5a",
                 type: 0,
@@ -409,15 +409,15 @@ describe("Test of Stoa API for the wallet with `sample_data`", () => {
     });
 
     it("Test of the path /wallet/utxo - One UTXO", async () => {
-        let amount = JSBI.BigInt("24399999990480");
-        let uri = URI(host)
+        const amount = JSBI.BigInt("24399999990480");
+        const uri = URI(host)
             .port(port)
             .directory("/wallet/utxo")
             .filename("boa1xzfv00s88ky9mf50nqngvztmnmtjzv4yr0w555aet366ssrv5zqaj6zsga3")
             .setSearch("amount", amount.toString());
 
-        let response = await client.get(uri.toString());
-        let expected = [
+        const response = await client.get(uri.toString());
+        const expected = [
             {
                 utxo: "0xa8d769089ccd2c8dd1bde0fd94fabe3e7ae414f7ce6143a9d65b32dc8ec998e34e9bbddb253fdb46058582f0f69de959d2b5af9edea4e8e5f951b1228aa7fe5a",
                 type: 0,
@@ -439,8 +439,8 @@ describe("Test of Stoa API for the wallet with `sample_data`", () => {
     });
 
     it("Test of the path /wallet/utxo - Use filter last", async () => {
-        let amount = JSBI.BigInt("24399999990480");
-        let uri = URI(host)
+        const amount = JSBI.BigInt("24399999990480");
+        const uri = URI(host)
             .port(port)
             .directory("/wallet/utxo")
             .filename("boa1xzfv00s88ky9mf50nqngvztmnmtjzv4yr0w555aet366ssrv5zqaj6zsga3")
@@ -450,8 +450,8 @@ describe("Test of Stoa API for the wallet with `sample_data`", () => {
                 "0xa8d769089ccd2c8dd1bde0fd94fabe3e7ae414f7ce6143a9d65b32dc8ec998e34e9bbddb253fdb46058582f0f69de959d2b5af9edea4e8e5f951b1228aa7fe5a"
             );
 
-        let response = await client.get(uri.toString());
-        let expected = [
+        const response = await client.get(uri.toString());
+        const expected = [
             {
                 utxo: "0xe681a6b99e8f4ee51a54d4c3d0876566e08571b794f8446c3916457739bb7872fa3040845400d9b8ee3ca310f6e4e852c1dbc25bbb8cc255bbaa6b32196264c6",
                 type: 0,
@@ -473,16 +473,16 @@ describe("Test of Stoa API for the wallet with `sample_data`", () => {
     });
 
     it("Test of the path /wallet/utxo - Get frozen UTXO", async () => {
-        let amount = JSBI.BigInt("10000");
-        let uri = URI(host)
+        const amount = JSBI.BigInt("10000");
+        const uri = URI(host)
             .port(port)
             .directory("/wallet/utxo")
             .filename("boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t")
             .setSearch("amount", amount.toString())
             .setSearch("type", "1");
 
-        let response = await client.get(uri.toString());
-        let expected = [
+        const response = await client.get(uri.toString());
+        const expected = [
             {
                 utxo: "0x00bac393977fbd1e0edc70a34c7ca802dafe57f2b4a2aabf1adaac54892cb1cbae72cdeeb212904101382690d18d2d2c6ac99b83227ca73b307fde0807c4af03",
                 type: 1,
@@ -498,16 +498,16 @@ describe("Test of Stoa API for the wallet with `sample_data`", () => {
     });
 
     it("Test of the path /wallet/utxo - Get locked UTXO", async () => {
-        let amount = JSBI.BigInt("10000");
-        let uri = URI(host)
+        const amount = JSBI.BigInt("10000");
+        const uri = URI(host)
             .port(port)
             .directory("/wallet/utxo")
             .filename("boa1xzvald7hxvgnzk50sy04ha7ezgyytxt5sgw323zy8dlj3ya2q40e6elltwq")
             .setSearch("amount", amount.toString())
             .setSearch("type", "2");
 
-        let response = await client.get(uri.toString());
-        let expected = [
+        const response = await client.get(uri.toString());
+        const expected = [
             {
                 utxo: "0x009b3800b3f1f3b4eaf6f449244902b5e9a632fac59c3366d06cf31b9d683d7205cb86e4bf424a9d04aec8ff91e896705780f8ac9b55199decf2c1fef21a0a40",
                 type: 0,
