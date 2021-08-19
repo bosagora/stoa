@@ -24,7 +24,17 @@
             }
         ],
         "quotemark": [true, "double"],
-        "no-trailing-whitespace": [true, "ignore-comments"]
+        "no-trailing-whitespace": [true, "ignore-comments"],
+        "max-classes-per-file": [true, 5],
+        "prefer-conditional-expression": false,
+        "no-bitwise": false,
+        "variable-name": [
+            true,
+            "allow-leading-underscore",
+            "allow-pascal-case",
+            "allow-snake-case",
+            "check-format"
+        ]
     },
     "rulesDirectory": []
 }
