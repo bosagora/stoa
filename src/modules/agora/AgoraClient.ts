@@ -86,7 +86,7 @@ export class AgoraClient implements FullNodeAPI {
             this.client
                 .get(uri.toString())
                 .then((response: AxiosResponse) => {
-                    if (response.status == 200) resolve(response.data.map((entry: any) => Block.reviver("", entry)));
+                    if (response.status === 200) resolve(response.data.map((entry: any) => Block.reviver("", entry)));
                     else reject(handleNetworkError({ response }));
                 })
                 .catch((reason: any) => {
@@ -105,7 +105,7 @@ export class AgoraClient implements FullNodeAPI {
             const uri = URI("/merkle_path").addSearch("height", height.toString()).addSearch("hash", hash.toString());
 
             this.client.get(uri.toString()).then((response: AxiosResponse) => {
-                if (response.status == 200) resolve(response.data.map((entry: any) => new Hash(entry)));
+                if (response.status === 200) resolve(response.data.map((entry: any) => new Hash(entry)));
                 else reject(handleNetworkError({ response }));
             });
         });
@@ -124,7 +124,7 @@ export class AgoraClient implements FullNodeAPI {
             this.client
                 .get(uri.toString())
                 .then((response: AxiosResponse) => {
-                    if (response.status == 200) resolve(PreImageInfo.reviver("", response.data));
+                    if (response.status === 200) resolve(PreImageInfo.reviver("", response.data));
                     else reject(handleNetworkError({ response }));
                 })
                 .catch((reason: any) => {

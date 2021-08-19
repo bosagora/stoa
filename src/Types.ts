@@ -11,7 +11,7 @@
 
  *******************************************************************************/
 
-import { Height, OutputType, BlockHeader, Block, Transaction, JSBI } from 'boa-sdk-ts';
+import { Block, Height, JSBI, OutputType, Transaction } from "boa-sdk-ts";
 
 /**
  * The interface of the Validator
@@ -290,7 +290,7 @@ export interface IBlockEnrollment {
     /**
      * Cycle length
      */
-    cycle_length: number,
+    cycle_length: number;
 
     /**
      * total number of records
@@ -410,12 +410,12 @@ export interface ITxOverview {
     /**
      * The address and amount of the output associated with the transaction input
      */
-    senders: Array<ITxOverviewInputElement>;
+    senders: ITxOverviewInputElement[];
 
     /**
      * The address and amount of transaction output
      */
-    receivers: Array<ITxOverviewOutputElement>;
+    receivers: ITxOverviewOutputElement[];
 
     /**
      * Transaction fee
@@ -559,8 +559,8 @@ export enum DisplayTxType {
  * Class that converts various enum values into strings
  */
 export class ConvertTypes {
-    static tx_types: Array<string> = ["payment", "freeze"];
-    static display_tx_type: Array<string> = ["inbound", "outbound", "freeze", "payload"];
+    static tx_types: string[] = ["payment", "freeze"];
+    static display_tx_type: string[] = ["inbound", "outbound", "freeze", "payload"];
 
     public static DisplayTxTypeToString(type: OutputType): string {
         if (type < ConvertTypes.display_tx_type.length) return ConvertTypes.display_tx_type[type];
@@ -664,7 +664,7 @@ export interface IBlock {
     /**
      * total number of records
      */
-    full_count: number
+    full_count: number;
 }
 
 /**

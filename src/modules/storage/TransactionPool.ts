@@ -145,7 +145,7 @@ export class TransactionPool {
             const in_hash_string = hashFull(input).toString();
             const set = this.spenders.get(in_hash_string);
             if (set !== undefined) {
-                for (const spender of set) if (spender != tx_hash_string) double_spent_txs.add(spender);
+                for (const spender of set) if (spender !== tx_hash_string) double_spent_txs.add(spender);
             }
         }
 

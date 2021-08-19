@@ -127,7 +127,7 @@ class Stoa extends WebService {
         this.databaseConfig = databaseConfig;
         this.coinMarketService = coinMarketService;
         // Instantiate a dummy promise for chaining
-        this.pending = new Promise<void>(function (resolve, reject) {
+        this.pending = new Promise<void>(function (resolve, reject):void {
             resolve();
         });
         // Do this last, as it is possible it will fail, and we only want failure
@@ -346,7 +346,7 @@ class Stoa extends WebService {
                     const preimage: IPreimage = {
                         height: preimage_height_str,
                         hash: result_preimage_hash.toString(),
-                    } as IPreimage;
+                    };
 
                     const validator: ValidatorData = new ValidatorData(
                         row.address,
@@ -440,7 +440,7 @@ class Stoa extends WebService {
                     const preimage: IPreimage = {
                         height: preimage_height_str,
                         hash: result_preimage_hash.toString(),
-                    } as IPreimage;
+                    };
 
                     const validator: ValidatorData = new ValidatorData(
                         row.address,
@@ -471,11 +471,11 @@ class Stoa extends WebService {
      * Returns a transaction status.
      */
     private getTransactionStatus(req: express.Request, res: express.Response) {
-        const hash: string = String(req.params.hash);
+        const req_hash: string = String(req.params.hash);
 
         let tx_hash: Hash;
         try {
-            tx_hash = new Hash(hash);
+            tx_hash = new Hash(req_hash);
         } catch (error) {
             res.status(400).send(`Invalid value for parameter 'hash': ${hash}`);
             return;
@@ -552,11 +552,11 @@ class Stoa extends WebService {
      * Returns a pending transaction by the transaction hash.
      */
     private getTransactionPending(req: express.Request, res: express.Response) {
-        const hash: string = String(req.params.hash);
+        const req_hash: string = String(req.params.hash);
 
         let tx_hash: Hash;
         try {
-            tx_hash = new Hash(hash);
+            tx_hash = new Hash(req_hash);
         } catch (error) {
             res.status(400).send(`Invalid value for parameter 'hash': ${hash}`);
             return;
@@ -590,11 +590,11 @@ class Stoa extends WebService {
      * Returns a transaction by the transaction hash.
      */
     private getTransaction(req: express.Request, res: express.Response) {
-        const hash: string = String(req.params.hash);
+        const req_hash: string = String(req.params.hash);
 
         let tx_hash: Hash;
         try {
-            tx_hash = new Hash(hash);
+            tx_hash = new Hash(req_hash);
         } catch (error) {
             res.status(400).send(`Invalid value for parameter 'hash': ${hash}`);
             return;
@@ -743,8 +743,6 @@ class Stoa extends WebService {
 
         let filter_begin: number | undefined;
         let filter_end: number | undefined;
-        let page_size: number;
-        let page: number;
         let filter_type: DisplayTxType[];
 
         // Validating Parameter - beginDate, endDate
@@ -864,7 +862,7 @@ class Stoa extends WebService {
                     return;
                 }
 
-                if (data.tx.length == 0) {
+                if (data.tx.length === 0) {
                     res.status(204).send(`The data does not exist. 'hash': (${tx_hash})`);
                     return;
                 }
@@ -940,8 +938,8 @@ class Stoa extends WebService {
         else if (req.query.hash !== undefined) {
             field = "hash";
             try {
-                const hash: string = String(req.query.hash);
-                value = new Hash(hash).toBinary(Endian.Little);
+                const req_hash: string = String(req.query.hash);
+                value = new Hash(req_hash).toBinary(Endian.Little);
             } catch (error) {
                 res.status(400).send(`Invalid value for parameter 'hash': ${req.query.hash}`);
                 return;
@@ -998,7 +996,7 @@ class Stoa extends WebService {
      * Called when a request is received through the `/block-enrollments` handler
      * The parameter `height` is the height and `hash` is the hash of block
      *
-     *@returns Returns enrolled validators of block.
+     *@returns enrolled validators of block.
      */
     private async getBlockEnrollments(req: express.Request, res: express.Response) {
         let field: string;
@@ -1013,8 +1011,8 @@ class Stoa extends WebService {
         else if (req.query.hash !== undefined) {
             field = "hash";
             try {
-                const hash: string = String(req.query.hash);
-                value = new Hash(hash).toBinary(Endian.Little);
+                const req_hash: string = String(req.query.hash);
+                value = new Hash(req_hash).toBinary(Endian.Little);
             } catch (error) {
                 res.status(400).send(`Invalid value for parameter 'hash': ${req.query.hash}`);
                 return;
@@ -1081,8 +1079,8 @@ class Stoa extends WebService {
         else if (req.query.hash !== undefined) {
             field = "hash";
             try {
-                const hash: string = String(req.query.hash);
-                value = new Hash(hash).toBinary(Endian.Little);
+                const req_hash: string = String(req.query.hash);
+                value = new Hash(req_hash).toBinary(Endian.Little);
             } catch (error) {
                 res.status(400).send(`Invalid value for parameter 'hash': ${req.query.hash}`);
                 return;
@@ -1168,12 +1166,12 @@ class Stoa extends WebService {
     }
 
     private verifyPayment(req: express.Request, res: express.Response) {
-        const hash: string = String(req.params.hash);
+        const req_hash: string = String(req.params.hash);
 
         let tx_hash: Hash;
 
         try {
-            tx_hash = new Hash(hash);
+            tx_hash = new Hash(req_hash);
         } catch (error) {
             res.status(400).send(`Invalid value for parameter 'hash': ${hash}`);
             return;
@@ -1182,7 +1180,7 @@ class Stoa extends WebService {
         this.ledger_storage
             .getBlockHeaderByTxHash(tx_hash)
             .then((rows: any) => {
-                if (rows.length == 0) {
+                if (rows.length === 0) {
                     const status: ISPVStatus = {
                         result: false,
                         message: "Transaction does not exist in block",
@@ -1425,7 +1423,7 @@ class Stoa extends WebService {
         this.ledger_storage
             .getWalletBalance(address)
             .then((data: any[]) => {
-                if (data.length == 0) {
+                if (data.length === 0) {
                     res.status(500).send("Failed to data lookup");
                     return;
                 }
@@ -1749,15 +1747,15 @@ class Stoa extends WebService {
                         const blocks = await this.agora.getBlocksFrom(expected_height, Number(max_blocks));
 
                         // Save previous block
-                        for (const block of blocks) {
-                            if (JSBI.equal(block.header.height.value, expected_height.value)) {
-                                await this.ledger_storage.putBlocks(block);
-                                await this.emitBlock(block);
+                        for (const data of blocks) {
+                            if (JSBI.equal(data.header.height.value, expected_height.value)) {
+                                await this.ledger_storage.putBlocks(data);
+                                await this.emitBlock(data);
                                 await this.emitBoaStats();
                                 expected_height.value = JSBI.add(expected_height.value, JSBI.BigInt(1));
-                                HeightManager.height = new Height(block.header.height.toString());
+                                HeightManager.height = new Height(data.header.height.toString());
                                 logger.info(
-                                    `Recovered a block with block height of ${block.header.height.toString()}`,
+                                    `Recovered a block with block height of ${data.header.height.toString()}`,
                                     {
                                         operation: Operation.block_recovery,
                                         height: HeightManager.height.toString(),
@@ -2449,18 +2447,18 @@ class Stoa extends WebService {
      * otherwise it will respond with no data found.
      */
     private searchHash(req: express.Request, res: express.Response) {
-        const hashString: string = String(req.params.hash);
+        const req_hash: string = String(req.params.hash);
 
-        let hash: Hash;
+        let search_hash: Hash;
         try {
-            hash = new Hash(hashString);
+            search_hash = new Hash(req_hash);
         } catch (error) {
-            res.status(400).send(`Invalid value for parameter 'hash': ${hashString}`);
+            res.status(400).send(`Invalid value for parameter 'hash': ${req_hash}`);
             return;
         }
 
         this.ledger_storage
-            .exist(hash)
+            .exist(search_hash)
             .then((data: any) => {
                 if (data === undefined) {
                     res.status(500).send("Failed to data lookup");

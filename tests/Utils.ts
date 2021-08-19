@@ -423,7 +423,7 @@ export function buildMerkleTree(tx_hash_list: Hash[]): Hash[] {
     const merkle_tree: Hash[] = [];
     merkle_tree.push(...tx_hash_list);
 
-    if (merkle_tree.length == 1) {
+    if (merkle_tree.length === 1) {
         merkle_tree.push(hashMulti(merkle_tree[0].data, merkle_tree[0].data));
         return merkle_tree;
     }
@@ -460,9 +460,7 @@ export function createBlock(prev_block: Block, txs: Transaction[]): Block {
         prev_block.header.time_offset + 10 * 60
     );
 
-    const block = new Block(block_header, txs, merkle_tree);
-
-    return block;
+    return new Block(block_header, txs, merkle_tree);
 }
 
 const blacklistMiddleware = require("../src/modules/middleware/blacklistMiddleware");

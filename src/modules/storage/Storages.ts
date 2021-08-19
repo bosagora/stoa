@@ -14,7 +14,7 @@
 *******************************************************************************/
 
 import * as mysql from "mysql2";
-import { DatabaseConfig, IDatabaseConfig } from "../common/Config";
+import { IDatabaseConfig } from "../common/Config";
 import { logger, Logger } from "../common/Logger";
 import { Operation } from "../common/LogOperation";
 

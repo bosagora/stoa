@@ -1308,7 +1308,7 @@ export class LedgerStorage extends Storages {
 
     public getTransactionFee(tx: Transaction): Promise<[JSBI, JSBI, JSBI]> {
         return new Promise<[JSBI, JSBI, JSBI]>((resolve, reject) => {
-            if (tx.inputs.length == 0) {
+            if (tx.inputs.length === 0) {
                 resolve([JSBI.BigInt(0), JSBI.BigInt(0), JSBI.BigInt(0)]);
                 return;
             }
@@ -1498,7 +1498,7 @@ export class LedgerStorage extends Storages {
             output: TxOutput
         ): Promise<void> {
             return new Promise<void>((resolve, reject) => {
-                const address: string = output.lock.type == 0 ? new PublicKey(output.lock.bytes).toString() : "";
+                const address: string = output.lock.type === 0 ? new PublicKey(output.lock.bytes).toString() : "";
 
                 storage
                     .run(
@@ -1567,10 +1567,10 @@ export class LedgerStorage extends Storages {
             output: TxOutput
         ): Promise<void> {
             return new Promise<void>((resolve, reject) => {
-                const address: string = output.lock.type == 0 ? new PublicKey(output.lock.bytes).toString() : "";
+                const address: string = output.lock.type === 0 ? new PublicKey(output.lock.bytes).toString() : "";
 
                 let unlock_height: JSBI;
-                if (melting && address != TxPayloadFee.CommonsBudgetAddress) {
+                if (melting && address !== TxPayloadFee.CommonsBudgetAddress) {
                     unlock_height = JSBI.add(height.value, JSBI.BigInt(2016));
                 } else {
                     unlock_height = JSBI.add(height.value, JSBI.BigInt(1));
@@ -1613,7 +1613,7 @@ export class LedgerStorage extends Storages {
 
         function save_payload(storage: LedgerStorage, tx_hash: Hash, tx: Transaction): Promise<void> {
             return new Promise<void>((resolve, reject) => {
-                if (tx.payload.length == 0) resolve();
+                if (tx.payload.length === 0) resolve();
 
                 storage
                     .run(
@@ -1769,7 +1769,7 @@ export class LedgerStorage extends Storages {
             output: TxOutput
         ): Promise<number> {
             return new Promise<number>((resolve, reject) => {
-                const address: string = output.lock.type == 0 ? new PublicKey(output.lock.bytes).toString() : "";
+                const address: string = output.lock.type === 0 ? new PublicKey(output.lock.bytes).toString() : "";
 
                 storage
                     .run(
