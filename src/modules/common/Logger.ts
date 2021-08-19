@@ -14,10 +14,9 @@
 
 *******************************************************************************/
 
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 import path from "path";
 import winston, { config } from "winston";
-import { Config } from './Config';
 import { MongoDB } from "winston-mongodb";
 const { combine, timestamp, label, printf, metadata, json } = winston.format;
 const logFormat = printf(({ level, message, label, timestamp }) => {
@@ -89,21 +88,21 @@ export class Logger {
             warn: 4,
         };
         const options = {
-            level: 'info',
+            level: "info",
             db: mongodb_url,
-            collection: 'operation_logs',
+            collection: "operation_logs",
             tryReconnect: true,
             format: combine(
                 timestamp(),
                 json(),
-                metadata({ fillExcept: ['message', 'level', 'timestamp', 'label'] }),
+                metadata({ fillExcept: ["message", "level", "timestamp", "label"] })
             ),
-            options: { useUnifiedTopology: true }
+            options: { useUnifiedTopology: true },
         };
         const access_options = {
-            level: 'http',
+            level: "http",
             db: mongodb_url,
-            collection: 'access_logs',
+            collection: "access_logs",
             tryReconnect: true,
             format: combine(timestamp(), json(), metadata({ fillExcept: ["message", "level", "timestamp", "label"] })),
             options: { useUnifiedTopology: true },

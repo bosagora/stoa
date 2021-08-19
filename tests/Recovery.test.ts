@@ -145,9 +145,9 @@ describe("Test of Recovery", () => {
 
         // Verifies that all sent blocks are wrote
         for (let idx = 0; idx <= 8; idx++) {
-            const uri = URI(stoa_addr).directory("block").addSearch("block_height", idx);
+            const tmp_uri = URI(stoa_addr).directory("block").addSearch("block_height", idx);
 
-            const response = await client.get(uri.toString());
+            const response = await client.get(tmp_uri.toString());
             assert.strictEqual(response.status, 200);
             assert.strictEqual(response.data.height, idx);
         }
@@ -174,9 +174,9 @@ describe("Test of Recovery", () => {
 
         // Verifies that all sent blocks are wrote
         for (let idx = 0; idx <= 4; idx++) {
-            const uri = URI(stoa_addr).directory("block").addSearch("block_height", idx);
+            const tmp_uri = URI(stoa_addr).directory("block").addSearch("block_height", idx);
 
-            const response = await client.get(uri.toString());
+            const response = await client.get(tmp_uri.toString());
             assert.strictEqual(response.status, 200);
             assert.strictEqual(response.data.height, idx);
         }

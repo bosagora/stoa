@@ -70,7 +70,7 @@ SodiumHelper.assign(new BOASodium());
 SodiumHelper.init()
     .then(async () => {
         await Storages.waiteForConnection(config.database);
-        return await stoa.createStorage().catch((error: any) => {
+        return stoa.createStorage().catch((error: any) => {
             logger.error(`Failed to create LedgerStorage: ${error}`, {
                 operation: Operation.start,
                 height: "",

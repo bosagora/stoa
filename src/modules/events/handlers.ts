@@ -1,5 +1,4 @@
-import { EventSubscriber, On } from "event-dispatch";
-import { EventDispatcher } from "event-dispatch";
+import { EventDispatcher, EventSubscriber, On } from "event-dispatch";
 import { Socket } from "socket.io";
 import events from "./events";
 
@@ -23,6 +22,6 @@ export default class Handler {
 
     @On(events.client.ping)
     public async pingHandler() {
-        //TODO: yet to define
+        // TODO: yet to define
     }
 }

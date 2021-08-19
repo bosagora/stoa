@@ -32,14 +32,11 @@ import {
     createBlock,
     delay,
     FakeBlacklistMiddleware,
-    market_cap_history_sample_data,
-    market_cap_sample_data,
     sample_data,
     sample_data2,
     sample_preImageInfo,
     TestAgora,
     TestClient,
-    TestGeckoServer,
     TestStoa,
 } from "./Utils";
 
@@ -288,37 +285,36 @@ describe("Test of Stoa API Server", () => {
         //     {statusMessage: "No validator exists for block height."}
         // );
 
-        /**
-         * To do
-         * The preimage_reserved service requires improvement and modification.
-         * See Stoa.ts putPreImage(req, res);
-         *
+        // /**
+        //  * To do
+        //  * The preimage_reserved service requires improvement and modification.
+        //  * See Stoa.ts putPreImage(req, res);
+        //  */
         // Wait for the data added to the pool to be processed.
-        setTimeout(async () =>
-        {
-            // push the re-enroll's preImage
-            let uri10 = URI(host)
-            .port(port)
-            .directory("preimage_received");
-            let response = await client.post (uri10.toString(), {preimage: sample_reEnroll_preImageInfo});
-            assert.strictEqual(response.status, 200);
-        }, 200);
-
-        // Wait for the data added to the pool to be processed.
-        setTimeout(async () =>
-        {
-            let uri11 = URI(host)
-            .port(port)
-            .directory("validators")
-            .setSearch("height", "21");
-
-            let response = await client.get (uri11.toString());
-            assert.strictEqual(response.data.length, 1);
-            console.log(response.data);
-            assert.strictEqual(response.data[0].preimage.height, 1);
-            assert.strictEqual(response.data[0].preimage.hash, sample_reEnroll_preImageInfo.hash);
-        }, 300);
-        **/
+        // setTimeout(async () =>
+        // {
+        //     // push the re-enroll's preImage
+        //     let uri10 = URI(host)
+        //     .port(port)
+        //     .directory("preimage_received");
+        //     let response = await client.post (uri10.toString(), {preimage: sample_reEnroll_preImageInfo});
+        //     assert.strictEqual(response.status, 200);
+        // }, 200);
+        //
+        // // Wait for the data added to the pool to be processed.
+        // setTimeout(async () =>
+        // {
+        //     let uri11 = URI(host)
+        //     .port(port)
+        //     .directory("validators")
+        //     .setSearch("height", "21");
+        //
+        //     let response = await client.get (uri11.toString());
+        //     assert.strictEqual(response.data.length, 1);
+        //     console.log(response.data);
+        //     assert.strictEqual(response.data[0].preimage.height, 1);
+        //     assert.strictEqual(response.data[0].preimage.hash, sample_reEnroll_preImageInfo.hash);
+        // }, 300);
     });
 
     it("Test of the path /wallet/blocks/header", async () => {

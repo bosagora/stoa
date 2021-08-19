@@ -486,8 +486,6 @@ describe("Tests update blockHeader", () => {
     });
 
     it("Test to updated a blockHeader", async () => {
-        const block0 = Block.reviver("", sample_data[0]);
-        const block1 = Block.reviver("", sample_data[1]);
         const block_header: BlockHeader = BlockHeader.reviver("", block1_sample_updated_header_data[0].header);
 
         const rows = await ledger_storage.getBlock(new Height("1"));
