@@ -279,7 +279,7 @@ describe("Test of double spending transaction", () => {
                 "25e470aeb36bea739c9c0f094b56fc1f8097bbbbc7721bf99208154ec74801950"
         );
         assert.strictEqual(response.data[0].address, "boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
-        assert.strictEqual(response.data[0].amount, "9520");
+        assert.strictEqual(response.data[0].amount, "24399999990480");
     });
 
     it("Send a second transaction with the same input as the first transaction", async () => {
