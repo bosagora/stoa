@@ -2370,25 +2370,6 @@ export class LedgerStorage extends Storages {
             WHERE
                 S.address = ?
             GROUP BY T.tx_hash
-
-            UNION ALL
-
-            SELECT
-                T.tx_hash,
-                T.time,
-                T.type,
-                O.address,
-                T.tx_fee,
-                T.payload_fee,
-                T.received_height,
-                IFNULL(SUM(O.amount), 0) AS income,
-                0 as spend
-            FROM
-                tx_output_pool O
-                INNER JOIN transaction_pool T ON (T.tx_hash = O.tx_hash)
-            WHERE
-                O.address = ?
-            GROUP BY T.tx_hash
         ) AS TX
         GROUP BY TX.tx_hash
         ORDER BY TX.time DESC`;
