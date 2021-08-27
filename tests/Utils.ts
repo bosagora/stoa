@@ -26,6 +26,7 @@ import {
     hashFull,
     hashMulti,
     Height,
+    JSBI,
     PreImageInfo,
     Signature,
     Transaction,
@@ -34,7 +35,6 @@ import { FullNodeAPI } from "../src/modules/agora/AgoraClient";
 import { IDatabaseConfig } from "../src/modules/common/Config";
 import Stoa from "../src/Stoa";
 
-import JSBI from "jsbi";
 import sinon from "sinon";
 import { CoinMarketService } from "../src/modules/service/CoinMarketService";
 
@@ -447,7 +447,8 @@ export function buildMerkleTree(tx_hash_list: Hash[]): Hash[] {
 export function createBlock(prev_block: Block, txs: Transaction[]): Block {
     const tx_hash_list = txs.map((tx) => hashFull(tx));
     const merkle_tree = buildMerkleTree(tx_hash_list);
-    const merkle_root = merkle_tree.length > 0 ? merkle_tree[merkle_tree.length - 1] : new Hash(Buffer.alloc(Hash.Width));
+    const merkle_root =
+        merkle_tree.length > 0 ? merkle_tree[merkle_tree.length - 1] : new Hash(Buffer.alloc(Hash.Width));
     const block_header = new BlockHeader(
         hashFull(prev_block.header),
         new Height(JSBI.add(prev_block.header.height.value, JSBI.BigInt(1))),

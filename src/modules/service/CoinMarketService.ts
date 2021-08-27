@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import JSBI from "jsbi";
+import { JSBI } from "boa-sdk-ts";
 import * as cron from "node-cron";
 import Stoa from "../../Stoa";
 import { IMarketCap } from "../../Types";
