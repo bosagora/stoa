@@ -12,7 +12,7 @@
 
 *******************************************************************************/
 
-import JSBI from "jsbi";
+import { JSBI } from "boa-sdk-ts";
 
 /**
  * Calculate transaction fees and process statistics.

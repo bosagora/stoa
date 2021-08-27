@@ -6,6 +6,7 @@ import {
     hash,
     hashFull,
     Height,
+    JSBI,
     PreImageInfo,
     PublicKey,
     Transaction,
@@ -53,7 +54,6 @@ import {
 import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
-import JSBI from "jsbi";
 import moment from "moment";
 import responseTime from "response-time";
 import { Socket } from "socket.io";
@@ -127,7 +127,7 @@ class Stoa extends WebService {
         this.databaseConfig = databaseConfig;
         this.coinMarketService = coinMarketService;
         // Instantiate a dummy promise for chaining
-        this.pending = new Promise<void>(function (resolve, reject):void {
+        this.pending = new Promise<void>(function (resolve, reject): void {
             resolve();
         });
         // Do this last, as it is possible it will fail, and we only want failure
@@ -1754,14 +1754,11 @@ class Stoa extends WebService {
                                 await this.emitBoaStats();
                                 expected_height.value = JSBI.add(expected_height.value, JSBI.BigInt(1));
                                 HeightManager.height = new Height(data.header.height.toString());
-                                logger.info(
-                                    `Recovered a block with block height of ${data.header.height.toString()}`,
-                                    {
-                                        operation: Operation.block_recovery,
-                                        height: HeightManager.height.toString(),
-                                        success: true,
-                                    }
-                                );
+                                logger.info(`Recovered a block with block height of ${data.header.height.toString()}`, {
+                                    operation: Operation.block_recovery,
+                                    height: HeightManager.height.toString(),
+                                    success: true,
+                                });
                             } else {
                                 resolve(false);
                                 return;

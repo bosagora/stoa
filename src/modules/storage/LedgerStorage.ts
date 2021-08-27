@@ -12,6 +12,7 @@
 *******************************************************************************/
 
 import {
+    Amount,
     Block,
     BlockHeader,
     Endian,
@@ -19,6 +20,7 @@ import {
     Hash,
     hashFull,
     Height,
+    JSBI,
     Lock,
     makeUTXOKey,
     OutputType,
@@ -40,8 +42,6 @@ import { FeeManager } from "../common/FeeManager";
 import { logger } from "../common/Logger";
 import { Storages } from "./Storages";
 import { TransactionPool } from "./TransactionPool";
-
-import JSBI from "jsbi";
 
 /**
  * The class that inserts and reads the ledger into the database.
@@ -1183,7 +1183,7 @@ export class LedgerStorage extends Storages {
                             new Hash(row.utxo, Endian.Little),
                             row.type,
                             JSBI.BigInt(row.unlock_height),
-                            JSBI.BigInt(row.amount),
+                            Amount.make(row.amount),
                             JSBI.BigInt(row.block_height)
                         );
                         utxo_array.push(utxo);
@@ -1194,10 +1194,10 @@ export class LedgerStorage extends Storages {
                 });
 
             const utxo_manager: UTXOManager = new UTXOManager(utxo_array);
-            const getSum: JSBI[] = await utxo_manager.getSum(JSBI.add(height.value, JSBI.BigInt(1)));
+            const getSum: Amount[] = await utxo_manager.getSum(JSBI.add(height.value, JSBI.BigInt(1)));
             const total_txs = await this.getTxCount(height, address);
             const accountInfo: IAccountInformation = {
-                total_balance: JSBI.add(JSBI.add(getSum[0], getSum[1]), getSum[2]),
+                total_balance: JSBI.add(JSBI.add(getSum[0].value, getSum[1].value), getSum[2].value),
                 total_spendable: JSBI.BigInt(getSum[0]),
                 total_frozen: JSBI.BigInt(getSum[1]),
                 tx_count: total_txs[0].tx_count ? total_txs[0].tx_count : 0,
@@ -1327,7 +1327,7 @@ export class LedgerStorage extends Storages {
                     if (rows.length > 0) {
                         const SumOfInput = JSBI.BigInt(rows[0].sum_inputs);
                         const SumOfOutput = tx.outputs.reduce<JSBI>((sum, n) => {
-                            return JSBI.add(sum, n.value);
+                            return JSBI.add(sum, n.value.value);
                         }, JSBI.BigInt(0));
 
                         let total_fee: JSBI;
