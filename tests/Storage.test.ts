@@ -45,7 +45,7 @@ describe("Test ledger storage and inquiry function.", () => {
 
     after("Close Storage", async () => {
         await ledger_storage.dropTestDB(testDBConfig.database);
-        await ledger_storage.close();
+        ledger_storage.close();
     });
 
     it("Test for saving of all blocks", async () => {
@@ -267,8 +267,8 @@ describe("Test for storing block data in the database", () => {
         ledger_storage = await LedgerStorage.make(testDBConfig, 1609459200);
     });
 
-    afterEach("Close Storage", () => {
-        ledger_storage.dropTestDB(testDBConfig.database);
+    afterEach("Close Storage", async () => {
+        await ledger_storage.dropTestDB(testDBConfig.database);
         ledger_storage.close();
     });
 
@@ -347,8 +347,8 @@ describe("Tests that sending a pre-image", () => {
         await ledger_storage.getEnrollments(height);
     });
 
-    after("Close Storage", () => {
-        ledger_storage.dropTestDB(testDBConfig.database);
+    after("Close Storage", async () => {
+        await ledger_storage.dropTestDB(testDBConfig.database);
         ledger_storage.close();
     });
 
@@ -414,8 +414,8 @@ describe("Tests storing transaction pools of a transaction", () => {
         });
     });
 
-    after("Close Storage", () => {
-        ledger_storage.dropTestDB(testDBConfig.database);
+    after("Close Storage", async () => {
+        await ledger_storage.dropTestDB(testDBConfig.database);
         ledger_storage.close();
     });
 
@@ -464,8 +464,8 @@ describe("Tests update blockHeader", () => {
         });
     });
 
-    after("Close Storage", () => {
-        ledger_storage.dropTestDB(testDBConfig.database);
+    after("Close Storage", async () => {
+        await ledger_storage.dropTestDB(testDBConfig.database);
         ledger_storage.close();
     });
 

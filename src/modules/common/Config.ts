@@ -211,6 +211,23 @@ export class DatabaseConfig implements IDatabaseConfig {
     multipleStatements: boolean;
 
     /**
+     * The maximum number of connections to create at once.
+     */
+    waitForConnections: boolean;
+
+    /**
+     * The maximum number of connections
+     */
+    connectionLimit: number;
+
+    /**
+     * The maximum number of connection requests the pool
+     * will queue before returning an error from getConnection.
+     * If set to 0, there is no limit to the number of queued connection requests.
+     */
+    queueLimit: number;
+
+    /**
      * Constructor
      * @param host Mysql database host
      * @param user Mysql database user
@@ -224,7 +241,10 @@ export class DatabaseConfig implements IDatabaseConfig {
         password?: string,
         database?: string,
         port?: number,
-        multipleStatements?: boolean
+        multipleStatements?: boolean,
+        waitForConnections?: boolean,
+        connectionLimit?: number,
+        queueLimit?: number
     ) {
         const conf = extend(true, {}, DatabaseConfig.defaultValue());
         extend(true, conf, {
@@ -234,6 +254,9 @@ export class DatabaseConfig implements IDatabaseConfig {
             database,
             port,
             multipleStatements,
+            waitForConnections,
+            connectionLimit,
+            queueLimit,
         });
         this.host = conf.host;
         this.user = conf.user;
@@ -241,6 +264,9 @@ export class DatabaseConfig implements IDatabaseConfig {
         this.database = conf.database;
         this.port = conf.port;
         this.multipleStatements = conf.multipleStatements;
+        this.waitForConnections = conf.waitForConnections;
+        this.connectionLimit = conf.connectionLimit;
+        this.queueLimit = conf.queueLimit;
     }
 
     /**
@@ -256,6 +282,9 @@ export class DatabaseConfig implements IDatabaseConfig {
         this.database = conf.database;
         this.port = conf.port;
         this.multipleStatements = conf.multipleStatements;
+        this.waitForConnections = conf.waitForConnections;
+        this.connectionLimit = conf.connectionLimit;
+        this.queueLimit = conf.queueLimit;
     }
 
     /**
@@ -269,6 +298,9 @@ export class DatabaseConfig implements IDatabaseConfig {
             database: "stoa",
             port: 3306,
             multipleStatements: true,
+            waitForConnections: true,
+            connectionLimit: 10,
+            queueLimit: 0,
         };
     }
 }
@@ -431,6 +463,23 @@ export interface IDatabaseConfig {
      * Multiple Statements execution statement Option
      */
     multipleStatements: boolean;
+
+    /**
+     * The maximum number of connections to create at once.
+     */
+    waitForConnections: boolean;
+
+    /**
+     * The maximum number of connections
+     */
+    connectionLimit: number;
+
+    /**
+     * The maximum number of connection requests the pool
+     * will queue before returning an error from getConnection.
+     * If set to 0, there is no limit to the number of queued connection requests.
+     */
+    queueLimit: number;
 }
 
 /**

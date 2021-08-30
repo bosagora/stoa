@@ -69,14 +69,14 @@ describe("Test of Stoa API Server", () => {
         coinMarketService = new CoinMarketService(gecko_market);
     });
 
-    before("Create TestStoa", async () => {
-        testDBConfig = await MockDBConfig();
+    before("Create TestStoa", () => {
+        testDBConfig = MockDBConfig();
         stoa_server = new TestStoa(testDBConfig, new URL("http://127.0.0.1:2826"), port, coinMarketService);
-        await stoa_server.createStorage();
+        return stoa_server.createStorage();
     });
 
-    before("Start TestStoa", async () => {
-        await stoa_server.start();
+    before("Start TestStoa", () => {
+        return stoa_server.start();
     });
 
     after("Stop Stoa and Agora server instances", async () => {

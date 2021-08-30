@@ -916,7 +916,7 @@ export interface IAvgFee {
     /**
      * Granularity of Record
      */
-    granularity: string
+    granularity: string;
 
     /**
      * Block unix timestamp

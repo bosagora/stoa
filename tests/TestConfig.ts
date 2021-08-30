@@ -10,6 +10,9 @@ export let MockDBConfig = () => {
         password: config.database.password,
         user: config.database.user,
         port: config.database.port,
-        multipleStatements: true,
+        multipleStatements: config.database.multipleStatements,
+        waitForConnections: config.database.waitForConnections,
+        connectionLimit: config.database.connectionLimit,
+        queueLimit: config.database.queueLimit,
     };
 };
