@@ -17,6 +17,7 @@ import { Endian, Hash, hashFull, Transaction } from "boa-sdk-ts";
 import { SmartBuffer } from "smart-buffer";
 
 import * as mysql from "mysql2";
+import { LedgerStorage } from "./LedgerStorage";
 
 /**
  * It was added to remove double-spending transactions that use the same input.
@@ -28,56 +29,62 @@ export class TransactionPool {
     private spenders: Map<string, Set<string>>;
 
     /**
+     * The instance of LedgerStorage
+     */
+    private storage: LedgerStorage;
+
+    /**
      * Constructor
      */
-    constructor() {
+    constructor(storage: LedgerStorage) {
         this.spenders = new Map<string, Set<string>>();
+        this.storage = storage;
     }
 
     /**
      * Add a transaction to the pool
-     * @param connection MySQL connection
+     * @param conn MySQL connection
      * @param tx the transaction to add
      */
-    public async add(connection: mysql.Connection, tx: Transaction) {
+    public async add(conn: mysql.PoolConnection, tx: Transaction) {
         this.updateSpenderList(tx);
 
         const buffer = new SmartBuffer();
         tx.serialize(buffer);
 
         const tx_hash = hashFull(tx);
-        await this.query(connection, "INSERT INTO tx_pool (`key`, `val`) VALUES (?, ?);", [
-            tx_hash.toBinary(Endian.Little),
-            buffer.toBuffer(),
-        ]);
+        await this.storage.query(
+            "INSERT INTO tx_pool (`key`, `val`) VALUES (?, ?);",
+            [tx_hash.toBinary(Endian.Little), buffer.toBuffer()],
+            conn
+        );
     }
 
     /**
      * Remove the transaction with the given key from the pool
-     * @param connection MySQL connection
+     * @param connection MySQL pool connection
      * @param key the transaction to remove
      * @param rm_double_spent  remove the TXs that use the same inputs
      */
-    public async remove(connection: mysql.Connection, key: Transaction | Hash, rm_double_spent: boolean = true) {
+    public async remove(conn: mysql.PoolConnection, key: Transaction | Hash, rm_double_spent: boolean = true) {
         if (key instanceof Transaction) {
             const tx_hash = hashFull(key);
             const tx_hash_data = tx_hash.toBinary(Endian.Little);
-            await this.query(
-                connection,
+            await this.storage.query(
                 `
                 DELETE FROM tx_pool WHERE \`key\` = ?;
                 DELETE FROM transaction_pool WHERE tx_hash = ?;
                 DELETE FROM tx_input_pool WHERE tx_hash = ?;
                 DELETE FROM tx_output_pool WHERE tx_hash = ?;`,
-                [tx_hash_data, tx_hash_data, tx_hash_data, tx_hash_data]
+                [tx_hash_data, tx_hash_data, tx_hash_data, tx_hash_data],
+                conn
             );
 
             if (rm_double_spent) {
                 const inv_txs = new Set<string>();
                 this.gatherDoubleSpentTXs(key, inv_txs);
                 for (const input of key.inputs) this.spenders.delete(hashFull(input).toString());
-                for (const inv_tx_hash_string of inv_txs)
-                    await this.remove(connection, new Hash(inv_tx_hash_string), false);
+                for (const inv_tx_hash_string of inv_txs) await this.remove(conn, new Hash(inv_tx_hash_string), false);
             } else {
                 const tx_hash_string = tx_hash.toString();
                 for (const input of key.inputs) {
@@ -87,23 +94,24 @@ export class TransactionPool {
                 }
             }
         } else {
-            const rows = await this.query(connection, `SELECT \`val\` FROM tx_pool WHERE \`key\` = ?;`, [
-                key.toBinary(Endian.Little),
-            ]);
+            const rows = await this.storage.query(
+                `SELECT \`val\` FROM tx_pool WHERE \`key\` = ?;`,
+                [key.toBinary(Endian.Little)],
+                conn
+            );
             if (rows.length !== 0) {
                 const tx = Transaction.deserialize(SmartBuffer.fromBuffer(rows[0].val));
-                await this.remove(connection, tx, rm_double_spent);
+                await this.remove(conn, tx, rm_double_spent);
             }
         }
     }
 
     /**
      * Load transactions and make the spender list
-     * @param connection MySQL connection
      */
-    public async loadSpenderList(connection: mysql.Connection) {
+    public async loadSpenderList() {
         this.spenders.clear();
-        const rows = await this.query(connection, "SELECT `key`, `val` FROM tx_pool;", []);
+        const rows = await this.storage.query("SELECT `key`, `val` FROM tx_pool;", []);
         for (const row of rows) {
             const tx = Transaction.deserialize(SmartBuffer.fromBuffer(row.val));
             await this.updateSpenderList(tx);
@@ -156,9 +164,10 @@ export class TransactionPool {
      * Return the number of transactions in the pool
      * @param connection MySQL connection
      */
-    public getLength(connection: mysql.Connection): Promise<number> {
+    public getLength(conn: mysql.PoolConnection): Promise<number> {
         return new Promise<number>((resolve, reject) => {
-            this.query(connection, `SELECT count(*) as value FROM tx_pool;`, [])
+            this.storage
+                .query(`SELECT count(*) as value FROM tx_pool;`, [], conn)
                 .then((rows: any[]) => {
                     if (rows.length > 0 && rows[0].value !== undefined) {
                         resolve(rows[0].value);
@@ -169,25 +178,6 @@ export class TransactionPool {
                 .catch((err) => {
                     reject(err);
                 });
-        });
-    }
-
-    /**
-     * Execute SQL to query the database for data.
-     * @param connection MySQL connection
-     * @param sql The SQL query to run.
-     * @param params When the SQL statement contains placeholders,
-     * you can pass them in here.
-     * @returns Returns the Promise. If it is finished successfully the `.then`
-     * of the returned Promise is called with the records
-     * and if an error occurs the `.catch` is called with an error.
-     */
-    protected query(connection: mysql.Connection, sql: string, params: any): Promise<any> {
-        return new Promise<any>((resolve, reject) => {
-            connection.query(sql, params, (err: Error | null, rows: any) => {
-                if (!err) resolve(rows);
-                else reject(err);
-            });
         });
     }
 }

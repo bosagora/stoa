@@ -19,6 +19,9 @@ database:
    database : devstoa
    password : "12345678"
    port : 3306
+   waitForConnections : true
+   connectionLimit : 10
+   queueLimit : 0
 
 ################################################################################
 ##                               Logging options                              ##

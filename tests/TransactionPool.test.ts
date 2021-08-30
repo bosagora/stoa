@@ -47,6 +47,7 @@ import {
 import * as assert from "assert";
 import URI from "urijs";
 import { URL } from "url";
+import * as mysql from "mysql2";
 
 describe("Test TransactionPool", () => {
     let ledger_storage: LedgerStorage;
@@ -60,10 +61,10 @@ describe("Test TransactionPool", () => {
 
     before("Prepare Storage", async () => {
         testDBConfig = await MockDBConfig();
-        return LedgerStorage.make(testDBConfig, 1609459200).then((result) => {
+        return LedgerStorage.make(testDBConfig, 1609459200).then(async (result) => {
             ledger_storage = result;
-            transaction_pool = new TransactionPool();
-            return transaction_pool.loadSpenderList(ledger_storage.connection);
+            transaction_pool = new TransactionPool(ledger_storage);
+            return transaction_pool.loadSpenderList();
         });
     });
 
@@ -92,8 +93,9 @@ describe("Test TransactionPool", () => {
             ],
             Buffer.alloc(0)
         );
-        await transaction_pool.add(ledger_storage.connection, tx1);
-        assert.strictEqual(await transaction_pool.getLength(ledger_storage.connection), 1);
+        let conn: mysql.PoolConnection = await ledger_storage.getConnection();
+        await transaction_pool.add(conn, tx1);
+        assert.strictEqual(await transaction_pool.getLength(conn), 1);
 
         const tx2 = new Transaction(
             [
@@ -114,11 +116,12 @@ describe("Test TransactionPool", () => {
             ],
             Buffer.alloc(0)
         );
-        await transaction_pool.remove(ledger_storage.connection, tx2, true);
-        assert.strictEqual(await transaction_pool.getLength(ledger_storage.connection), 0);
+        await transaction_pool.remove(conn, tx2, true);
+        assert.strictEqual(await transaction_pool.getLength(conn), 0);
 
-        await transaction_pool.add(ledger_storage.connection, tx2);
-        assert.strictEqual(await transaction_pool.getLength(ledger_storage.connection), 1);
+        await transaction_pool.add(conn, tx2);
+        assert.strictEqual(await transaction_pool.getLength(conn), 1);
+        conn.release();
     });
 
     it("Test for deletion of a pending transaction that use some of the same inputs", async () => {
@@ -148,8 +151,10 @@ describe("Test TransactionPool", () => {
             ],
             Buffer.alloc(0)
         );
-        await transaction_pool.add(ledger_storage.connection, tx1);
-        assert.strictEqual(await transaction_pool.getLength(ledger_storage.connection), 2);
+        let conn: mysql.PoolConnection = await ledger_storage.getConnection();
+
+        await transaction_pool.add(conn, tx1);
+        assert.strictEqual(await transaction_pool.getLength(conn), 2);
 
         const tx2 = new Transaction(
             [
@@ -170,17 +175,20 @@ describe("Test TransactionPool", () => {
             ],
             Buffer.alloc(0)
         );
-        await transaction_pool.remove(ledger_storage.connection, tx2, true);
-        assert.strictEqual(await transaction_pool.getLength(ledger_storage.connection), 0);
+        await transaction_pool.remove(conn, tx2, true);
+        assert.strictEqual(await transaction_pool.getLength(conn), 0);
 
-        await transaction_pool.add(ledger_storage.connection, tx2);
-        assert.strictEqual(await transaction_pool.getLength(ledger_storage.connection), 1);
+        await transaction_pool.add(conn, tx2);
+        assert.strictEqual(await transaction_pool.getLength(conn), 1);
+        conn.release();
     });
 
     it("Test for TransactionPool.loadSpenderList()", async () => {
-        assert.strictEqual(await transaction_pool.getLength(ledger_storage.connection), 1);
-        const other_pool = new TransactionPool();
-        return other_pool.loadSpenderList(ledger_storage.connection);
+        let conn: mysql.PoolConnection = await ledger_storage.getConnection();
+        assert.strictEqual(await transaction_pool.getLength(conn), 1);
+        const other_pool = new TransactionPool(ledger_storage);
+        other_pool.loadSpenderList();
+        conn.release();
     });
 });
 
