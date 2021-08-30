@@ -9,6 +9,7 @@ import {
     JSBI,
     PreImageInfo,
     PublicKey,
+    Signature,
     Transaction,
     Utils,
 } from "boa-sdk-ts";
@@ -888,10 +889,10 @@ class Stoa extends WebService {
                         address: elem.address,
                         amount: elem.amount,
                         utxo: new Hash(elem.utxo, Endian.Little).toString(),
-                        signature: new Hash(elem.signature, Endian.Little).toString(),
+                        signature: new Signature(elem.signature, Endian.Little).toString(),
                         index: elem.in_index,
                         unlock_age: elem.unlock_age,
-                        bytes: new Hash(elem.bytes, Endian.Little).toString(),
+                        bytes: elem.bytes.toString("base64"),
                     });
 
                 for (const elem of data.receivers)
@@ -902,7 +903,7 @@ class Stoa extends WebService {
                         amount: elem.amount,
                         utxo: new Hash(elem.utxo, Endian.Little).toString(),
                         index: elem.output_index,
-                        bytes: hash(elem.bytes).toString(),
+                        bytes: elem.bytes.toString("base64"),
                     });
 
                 res.status(200).send(JSON.stringify(overview));
@@ -967,7 +968,7 @@ class Stoa extends WebService {
                         hash: new Hash(data[0].hash, Endian.Little).toString(),
                         prev_hash: new Hash(data[0].prev_block, Endian.Little).toString(),
                         merkle_root: new Hash(data[0].merkle_root, Endian.Little).toString(),
-                        signature: new Hash(data[0].signature, Endian.Little).toString(),
+                        signature: new Signature(data[0].signature, Endian.Little).toString(),
                         random_seed: new Hash(data[0].random_seed, Endian.Little).toString(),
                         time: data[0].time_stamp,
                         version: "v0.x.x",
