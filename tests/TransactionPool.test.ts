@@ -176,6 +176,12 @@ describe("Test TransactionPool", () => {
         await transaction_pool.add(ledger_storage.connection, tx2);
         assert.strictEqual(await transaction_pool.getLength(ledger_storage.connection), 1);
     });
+
+    it("Test for TransactionPool.loadSpenderList()", async () => {
+        assert.strictEqual(await transaction_pool.getLength(ledger_storage.connection), 1);
+        const other_pool = new TransactionPool();
+        return other_pool.loadSpenderList(ledger_storage.connection);
+    });
 });
 
 describe("Test of double spending transaction", () => {
