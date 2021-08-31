@@ -105,7 +105,7 @@ export class TransactionPool {
         this.spenders.clear();
         const rows = await this.query(connection, "SELECT `key`, `val` FROM tx_pool;", []);
         for (const row of rows) {
-            const tx = Transaction.deserialize(SmartBuffer.fromBuffer(row.tx));
+            const tx = Transaction.deserialize(SmartBuffer.fromBuffer(row.val));
             await this.updateSpenderList(tx);
         }
     }
