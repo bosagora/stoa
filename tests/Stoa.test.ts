@@ -374,7 +374,7 @@ describe("Test of Stoa API Server", () => {
             "0x35917fba7333947cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a7"
         );
         assert.strictEqual(response.data[0].address, "boa1xqcmmns5swnm03zay5wjplgupe65uw4w0dafzsdsqtwq6gv3h3lcz24a8ch");
-        assert.strictEqual(response.data[0].amount, "24399999990480");
+        assert.strictEqual(response.data[0].amount, "24398336340880");
         assert.strictEqual(response.data[0].fee, "1663649600");
         assert.strictEqual(response.data[0].block_delay, 0);
     });

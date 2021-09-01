@@ -265,7 +265,12 @@ describe("Test of double spending transaction", () => {
             [
                 new TxOutput(
                     OutputType.Payment,
-                    JSBI.BigInt(24_400_000_000_000),
+                    JSBI.BigInt(10_000_000_000_000),
+                    new PublicKey("boa1xqej00jh50l2me46pkd3dmkpdl6n4ugqss2ev3utuvpuvwhe93l9gjlmxzu")
+                ),
+                new TxOutput(
+                    OutputType.Payment,
+                    JSBI.BigInt(14_399_999_970_480),
                     new PublicKey("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj")
                 ),
             ],
@@ -289,11 +294,10 @@ describe("Test of double spending transaction", () => {
         assert.strictEqual(response.data.length, 1);
         assert.strictEqual(
             response.data[0].tx_hash,
-            "0xfe9f5b40bcd1dfe68be7aa4a08b65d2a7ea31aac52431bc6dae1a9e3ebe4742" +
-                "25e470aeb36bea739c9c0f094b56fc1f8097bbbbc7721bf99208154ec74801950"
+            "0xaa4bf9e18419e3ed65ac4235830e0ad4286052df2613b1c2413ec48a2cb005c6ece7e8578ec390b10775c1a49538e3a6b74ee55dedec0e466075f05896b2b872"
         );
-        assert.strictEqual(response.data[0].address, "boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
-        assert.strictEqual(response.data[0].amount, "24399999990480");
+        assert.strictEqual(response.data[0].address, "boa1xqej00jh50l2me46pkd3dmkpdl6n4ugqss2ev3utuvpuvwhe93l9gjlmxzu");
+        assert.strictEqual(response.data[0].amount, "10000000000000");
     });
 
     it("Send a second transaction with the same input as the first transaction", async () => {
@@ -316,10 +320,9 @@ describe("Test of double spending transaction", () => {
         assert.strictEqual(response.data.length, 1);
         assert.strictEqual(
             response.data[0].tx_hash,
-            "0x35917fba7333947cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e95" +
-                "6c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a7"
+            "0x35917fba7333947cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a7"
         );
         assert.strictEqual(response.data[0].address, "boa1xqcmmns5swnm03zay5wjplgupe65uw4w0dafzsdsqtwq6gv3h3lcz24a8ch");
-        assert.strictEqual(response.data[0].amount, "24399999990480");
+        assert.strictEqual(response.data[0].amount, "24398336340880");
     });
 });

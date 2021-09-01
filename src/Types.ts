@@ -513,6 +513,7 @@ export interface IPendingTxs {
     amount: string;
     fee: string;
     block_delay: number;
+    peer_count: number;
 }
 
 /**
@@ -795,7 +796,7 @@ export interface IAccountInformation {
     total_frozen: JSBI;
 
     /**
-     * Tranaction count of account  
+     * Tranaction count of account
      */
     tx_count: JSBI;
 }
@@ -945,7 +946,7 @@ export interface IAvgFee {
 }
 
 /**
- * The interface for BOA holder chart 
+ * The interface for BOA holder chart
  */
 export interface IAccountChart {
     /**

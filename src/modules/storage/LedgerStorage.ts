@@ -2408,38 +2408,37 @@ export class LedgerStorage extends Storages {
     public getWalletTransactionsPending(address: string): Promise<any[]> {
         const sql = `
         SELECT
-            TX.tx_hash,
-            TX.time,
-            TX.type,
-            TX.tx_fee,
-            TX.payload_fee,
-            TX.received_height,
-            (SELECT IFNULL(MAX(height), 0) as height FROM blocks) as current_height,
-            ABS(SUM(TX.income) - SUM(TX.spend)) as amount,
-            IFNULL(CASE
-                WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
-                (
-                    TX.address
-                )
-                ELSE
-                (
-                    SELECT O.address FROM tx_output_pool O
-                    WHERE TX.tx_hash = O.tx_hash AND O.address != TX.address
-                    ORDER BY O.amount DESC LIMIT 1
-                )
-            END, TX.address) AS address
+            TF.tx_hash,
+            TF.time,
+            TF.type,
+            TF.tx_fee,
+            TF.payload_fee,
+            TF.received_height,
+            (SELECT IFNULL(MAX(height), 0) AS height FROM blocks) AS current_height,
+            TF.peer_count,
+            CASE TF.peer_count WHEN 0 THEN
+                0
+            ELSE
+                (SELECT IFNULL(SUM(O.amount), 0) FROM tx_output_pool O WHERE O.tx_hash = TF.tx_hash AND O.address != TF.sender GROUP BY O.tx_hash)
+            END AS amount,
+            CASE TF.peer_count WHEN 0 THEN
+                ''
+            ELSE
+                (SELECT O.address FROM tx_output_pool O WHERE O.tx_hash = TF.tx_hash AND O.address != TF.sender ORDER BY O.amount DESC LIMIT 1)
+            END AS address
         FROM
         (
             SELECT
                 T.tx_hash,
                 T.time,
                 T.type,
-                S.address,
                 T.tx_fee,
                 T.payload_fee,
                 T.received_height,
-                0 as income,
-                IFNULL(SUM(S.amount), 0) AS spend
+                S.address AS sender,
+                (
+                    SELECT count(*) FROM tx_output_pool O WHERE O.tx_hash = T.tx_hash AND S.address != O.address
+                ) AS peer_count
             FROM
                 tx_outputs S
                 INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
@@ -2447,11 +2446,10 @@ export class LedgerStorage extends Storages {
             WHERE
                 S.address = ?
             GROUP BY T.tx_hash
-        ) AS TX
-        GROUP BY TX.tx_hash
-        ORDER BY TX.time DESC`;
+            ORDER BY T.time DESC
+        ) AS TF;`;
 
-        return this.query(sql, [address, address]);
+        return this.query(sql, [address]);
     }
 
     /**
