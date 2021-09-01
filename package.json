@@ -8,7 +8,9 @@
         "debug": "cross-env NODE_ENV=development mocha -r ts-node/register tests/**/*.test.ts",
         "start": "cross-env NODE_ENV=production ts-node src/main.ts",
         "convert": "ts-node .npm/convert-stoa-sample-data/convert-blocks.ts .npm/convert-stoa-sample-data/old/sample.json .npm/convert-stoa-sample-data/old/sample_utxo.json",
-        "tsc": "tsc"
+        "tsc": "tsc",
+        "lint": "tslint --config tslint.json \"{src,tests}/**/*.ts\"",
+        "lint-fix": "tslint --fix --config tslint.json \"{src,tests}/**/*.ts\""
     },
     "repository": {
         "type": "git",
