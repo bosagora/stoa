@@ -733,23 +733,6 @@ describe("Test of the path /utxo", () => {
         await delay(1500);
     });
 
-    it("Test of the path /wallet/balance no pending transaction ", async () => {
-        const uri = URI(host)
-            .port(port)
-            .directory("wallet/balance")
-            .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
-
-        const response = await client.get(uri.toString());
-        const expected = {
-            address: "boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj",
-            balance: "24399999990480",
-            spendable: "24399999990480",
-            frozen: "0",
-            locked: "0",
-        };
-        assert.deepStrictEqual(response.data, expected);
-    });
-
     it("Test of the path /utxo no pending transaction ", async () => {
         const uri = URI(host)
             .port(port)
@@ -778,23 +761,6 @@ describe("Test of the path /utxo", () => {
         const url = uri.toString();
         await client.post(url, { tx: Block.reviver("", sample_data2).txs[0] });
         await delay(500);
-    });
-
-    it("Test of the path /wallet/balance with pending transaction ", async () => {
-        const uri = URI(host)
-            .port(port)
-            .directory("wallet/balance")
-            .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
-
-        const response = await client.get(uri.toString());
-        const expected = {
-            address: "boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj",
-            balance: "0",
-            spendable: "0",
-            frozen: "0",
-            locked: "0",
-        };
-        assert.deepStrictEqual(response.data, expected);
     });
 
     it("Test of the path /utxo with pending transaction ", async () => {
