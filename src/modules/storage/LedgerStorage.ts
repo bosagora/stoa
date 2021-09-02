@@ -943,17 +943,17 @@ export class LedgerStorage extends Storages {
                           blocks B
                           INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
                           INNER JOIN tx_inputs I ON (T.tx_hash = I.tx_hash)
-                          INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key)
+                          INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key AND (S.address IS NOT NULL OR S.address != ''))
                           GROUP BY address`;
 
             const sql_receiver = `
                        SELECT
-                           SUM(IFNULL(O.amount,0)) as amount,
-                           O.address
+                           O.address,
+                           SUM(IFNULL(O.amount,0)) as amount
                        FROM
                            blocks B
                            INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
-                           INNER JOIN tx_outputs O ON (T.tx_hash = O.tx_hash)
+                           INNER JOIN tx_outputs O ON (T.tx_hash = O.tx_hash AND (O.address IS NOT NULL OR O.address != ''))
                            GROUP BY address;`;
 
             return new Promise<any[]>((resolve, reject) => {
