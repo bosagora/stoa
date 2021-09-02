@@ -2460,44 +2460,68 @@ export class LedgerStorage extends Storages {
      */
     public getWalletBalance(address: string): Promise<any[]> {
         const sql = `
+        SELECT
+            TF.address,
+            TF.balance - TF.send + TF.receive AS balance,
+            TF.spendable - TF.send AS spendable,
+            TF.frozen,
+            TF.locked + TF.receive AS locked
+        FROM
+        (
             SELECT
-                ? as address,
+                ? AS address,
                 IFNULL(SUM(amount), 0) AS balance,
                 IFNULL(SUM(CASE WHEN ((unlock_height <= height + 1) AND ((type = 0) OR (type = 2))) THEN amount ELSE 0 END), 0) AS spendable,
                 IFNULL(SUM(CASE WHEN ((unlock_height <= height + 1) AND ((type = 1))) THEN amount ELSE 0 END), 0) AS frozen,
-                IFNULL(SUM(CASE WHEN ((unlock_height > height + 1) AND ((type = 0) OR (type = 2))) THEN amount ELSE 0 END), 0) AS locked
+                IFNULL(SUM(CASE WHEN ((unlock_height > height + 1) AND ((type = 0) OR (type = 2))) THEN amount ELSE 0 END), 0) AS locked,
+                IFNULL(SUM(send), 0) AS send,
+                IFNULL(SUM(receive), 0) AS receive
             FROM
             (
                 SELECT
-                    O.utxo_key as utxo,
+                    O.utxo_key AS utxo,
                     O.amount,
                     O.lock_type,
                     O.lock_bytes,
                     T.block_height,
-                    B.time_stamp as block_time,
+                    B.time_stamp AS block_time,
                     O.type,
                     O.unlock_height,
-                    (SELECT MAX(height) as height FROM blocks) as height
+                    (SELECT MAX(height) AS height FROM blocks) AS height,
+                    IFNULL(
+                    (
+                        SELECT
+                            SUM(S.amount)
+                        FROM
+                            tx_outputs S
+                            INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
+                            INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
+                        WHERE
+                            S.address = ?
+                        GROUP BY S.address
+                    ), 0) AS send,
+                    IFNULL(
+                    (
+                        SELECT
+                            SUM(O.amount)
+                        FROM
+                            tx_output_pool O
+                            INNER JOIN transaction_pool T ON (T.tx_hash = O.tx_hash)
+                        WHERE
+                            O.address = ?
+                        GROUP BY O.address
+                    ), 0) AS receive
                 FROM
                     utxos O
                     INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
                     INNER JOIN blocks B ON (B.height = T.block_height)
                 WHERE
                     O.address = ?
-                    AND O.utxo_key NOT IN
-                    (
-                        SELECT
-                            S.utxo_key
-                        FROM
-                            utxos S
-                            INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
-                            INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
-                        WHERE
-                            S.address = ?
-                    )
-            ) AS T;`;
+                GROUP BY O.address
+            ) AS T
+        ) AS TF;`;
 
-        return this.query(sql, [address, address, address]);
+        return this.query(sql, [address, address, address, address]);
     }
 
     /**
