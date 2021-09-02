@@ -730,7 +730,7 @@ describe("Test of the path /utxo", () => {
         await client.post(url, { block: sample_data[0] });
         await client.post(url, { block: sample_data[1] });
         // Wait for the block to be stored in the database for the next test.
-        await delay(1500);
+        await delay(2000);
     });
 
     it("Test of the path /utxo no pending transaction ", async () => {
@@ -1192,7 +1192,7 @@ describe("Test of the path /wallet/balance:address", () => {
         await client.post(url, { block: blocks[0] });
         await client.post(url, { block: blocks[1] });
         // Wait for the block to be stored in the database for the next test.
-        await delay(1500);
+        await delay(2000);
     });
 
     it("Test of the path /wallet/balance no pending transaction", async () => {
