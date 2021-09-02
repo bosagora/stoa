@@ -27,6 +27,7 @@ import {
     Transaction,
     TxInput,
     TxOutput,
+    Unlock,
 } from "boa-sdk-ts";
 import {
     createBlock,
@@ -1175,6 +1176,148 @@ describe("Test of the path /merkle_path", () => {
             message: "Transaction does not exist in block",
         };
 
+        assert.deepStrictEqual(response.data, expected);
+    });
+});
+
+describe("Test of the path /wallet/balance:address", () => {
+    const host: string = "http://localhost";
+    const port: string = "3837";
+    let stoa_server: TestStoa;
+    let agora_server: TestAgora;
+    const client = new TestClient();
+    let testDBConfig: IDatabaseConfig;
+    const blocks: Block[] = [];
+
+    before("Bypassing middleware check", () => {
+        FakeBlacklistMiddleware.assign();
+    });
+
+    before("Wait for the package libsodium to finish loading", async () => {
+        SodiumHelper.assign(new BOASodium());
+        await SodiumHelper.init();
+    });
+
+    before("Start a fake Agora", () => {
+        return new Promise<void>((resolve, reject) => {
+            agora_server = new TestAgora("2826", [], resolve);
+        });
+    });
+
+    before("Create TestStoa", async () => {
+        testDBConfig = await MockDBConfig();
+        stoa_server = new TestStoa(testDBConfig, new URL("http://127.0.0.1:2826"), port);
+        await stoa_server.createStorage();
+        await stoa_server.start();
+    });
+
+    after("Stop Stoa and Agora server instances", async () => {
+        await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
+        await stoa_server.stop();
+        await agora_server.stop();
+    });
+
+    it("Store two blocks", async () => {
+        blocks.push(Block.reviver("", sample_data[0]));
+        blocks.push(Block.reviver("", sample_data[1]));
+        const uri = URI(host).port(port).directory("block_externalized");
+
+        const url = uri.toString();
+        await client.post(url, { block: blocks[0] });
+        await client.post(url, { block: blocks[1] });
+        // Wait for the block to be stored in the database for the next test.
+        await delay(1500);
+    });
+
+    it("Test of the path /wallet/balance no pending transaction", async () => {
+        const uri = URI(host)
+            .port(port)
+            .directory("wallet/balance")
+            .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
+
+        const response = await client.get(uri.toString());
+        const expected = {
+            address: "boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj",
+            balance: "24399999990480",
+            spendable: "24399999990480",
+            frozen: "0",
+            locked: "0",
+        };
+        assert.deepStrictEqual(response.data, expected);
+    });
+
+    it("Store one pending transaction with refund output", async () => {
+        const last_block = Block.reviver("", sample_data2);
+        const tx = new Transaction(
+            [
+                new TxInput(
+                    last_block.txs[0].inputs[0].utxo,
+                    Unlock.fromSignature(new Signature(Buffer.alloc(Signature.Width)))
+                ),
+            ],
+            [
+                new TxOutput(
+                    OutputType.Payment,
+                    JSBI.BigInt(10_000_000_000_000),
+                    new PublicKey("boa1xqej00jh50l2me46pkd3dmkpdl6n4ugqss2ev3utuvpuvwhe93l9gjlmxzu")
+                ),
+                new TxOutput(
+                    OutputType.Payment,
+                    JSBI.BigInt(14_399_999_970_480),
+                    new PublicKey("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj")
+                ),
+            ],
+            Buffer.alloc(0)
+        );
+        blocks.push(createBlock(blocks[1], [tx]));
+
+        const uri = URI(host).port(port).directory("transaction_received");
+
+        const url = uri.toString();
+        await client.post(url, { tx });
+        await delay(500);
+    });
+
+    it("Test of the path /wallet/balance with pending transaction ", async () => {
+        const uri = URI(host)
+            .port(port)
+            .directory("wallet/balance")
+            .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
+
+        const response = await client.get(uri.toString());
+        const expected = {
+            address: "boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj",
+            balance: "14399999970480",
+            spendable: "0",
+            frozen: "0",
+            locked: "14399999970480",
+        };
+        assert.deepStrictEqual(response.data, expected);
+    });
+
+    it("Store one block - the pending transactions stored in the last block", async () => {
+        const uri = URI(host).port(port).directory("block_externalized");
+
+        const url = uri.toString();
+        await client.post(url, { block: blocks[2] });
+        // Wait for the block to be stored in the database for the next test.
+        await delay(500);
+    });
+
+    it("Test of balance after a pending transaction is stored in the last block", async () => {
+        const uri = URI(host)
+            .port(port)
+            .directory("wallet/balance")
+            .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
+
+        const response = await client.get(uri.toString());
+        const expected = {
+            address: "boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj",
+            balance: "14399999970480",
+            spendable: "14399999970480",
+            frozen: "0",
+            locked: "0",
+        };
         assert.deepStrictEqual(response.data, expected);
     });
 });
