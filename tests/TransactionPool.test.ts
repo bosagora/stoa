@@ -251,7 +251,7 @@ describe("Test of double spending transaction", () => {
         await client.post(url, { block: sample_data[0] });
         await client.post(url, { block: sample_data[1] });
         // Wait for the block to be stored in the database for the next test.
-        await delay(100);
+        await delay(2000);
     });
 
     it("Send the first transaction", async () => {
@@ -276,7 +276,7 @@ describe("Test of double spending transaction", () => {
 
         const url = uri.toString();
         await client.post(url, { tx });
-        await delay(100);
+        await delay(500);
     });
 
     it("Check if the pending transaction is the first transaction", async () => {
@@ -303,7 +303,7 @@ describe("Test of double spending transaction", () => {
 
         const url = uri.toString();
         await client.post(url, { tx });
-        await delay(100);
+        await delay(500);
     });
 
     it("Check if there is only a second transaction.", async () => {
