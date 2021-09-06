@@ -203,7 +203,7 @@ describe("Test of double spending transaction", () => {
     let gecko_market: CoinGeckoMarket;
     let coinMarketService: CoinMarketService;
 
-    const block = Block.reviver("", sample_data2);
+    let block: Block;
 
     before("Wait for the package libsodium to finish loading", async () => {
         SodiumHelper.assign(new BOASodium());
@@ -245,6 +245,8 @@ describe("Test of double spending transaction", () => {
     });
 
     it("Test of the path /block_externalized", async () => {
+        block = Block.reviver("", sample_data2);
+
         const uri = URI(host).port(port).directory("block_externalized");
 
         const url = uri.toString();
