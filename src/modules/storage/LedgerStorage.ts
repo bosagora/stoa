@@ -631,7 +631,7 @@ export class LedgerStorage extends Storages {
                             enroll.utxo_key.toBinary(Endian.Little),
                             enroll.commitment.toBinary(Endian.Little),
                             enroll.cycle_length,
-                            enroll.enroll_sig.toSignature().toBinary(Endian.Little),
+                            enroll.enroll_sig.toBinary(Endian.Little),
                         ],
                         conn
                     )

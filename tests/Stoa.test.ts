@@ -21,7 +21,6 @@ import {
     JSBI,
     OutputType,
     PublicKey,
-    Sig,
     Signature,
     SodiumHelper,
     Transaction,
@@ -223,7 +222,7 @@ describe("Test of Stoa API Server", () => {
         const commitment = new Hash(
             "0xe0c04a5bd47ffc5b065b7d397e251016310c43dc77220bf803b73f1183da00b0e67602b1f95cb18a0059aa1cdf2f9adafe979998364b38cd5c15d92b9b8fd815"
         );
-        const enrollment = new Enrollment(utxo_key, commitment, 20, Sig.fromSignature(enroll_sig));
+        const enrollment = new Enrollment(utxo_key, commitment, 20, enroll_sig);
         const header = new BlockHeader(
             new Hash(Buffer.alloc(Hash.Width)),
             new Height("20"),
