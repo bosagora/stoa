@@ -2503,10 +2503,13 @@ export class LedgerStorage extends Storages {
                         SELECT
                             SUM(O.amount)
                         FROM
-                            tx_output_pool O
-                            INNER JOIN transaction_pool T ON (T.tx_hash = O.tx_hash)
+                            tx_outputs S
+                            INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
+                            INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
+                            INNER JOIN tx_output_pool O ON (T.tx_hash = O.tx_hash)
                         WHERE
-                            O.address = ?
+                            S.address = ?
+                            AND S.address = O.address
                         GROUP BY O.address
                     ), 0) AS receive
                 FROM
