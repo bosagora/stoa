@@ -2515,7 +2515,6 @@ export class LedgerStorage extends Storages {
                     INNER JOIN blocks B ON (B.height = T.block_height)
                 WHERE
                     O.address = ?
-                GROUP BY O.address
             ) AS T
         ) AS TF;`;
 
