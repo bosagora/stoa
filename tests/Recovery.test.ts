@@ -58,8 +58,8 @@ class TestRecoveryStoa extends TestStoa {
 }
 
 describe("Test of Recovery", () => {
-    const agora_addr: URL = new URL("http://localhost:2820");
-    const stoa_addr: URL = new URL("http://localhost:3837/");
+    const agora_addr: URL = new URL("http://localhost:2801");
+    const stoa_addr: URL = new URL("http://localhost:3801");
     let agora_node: TestAgora;
     let stoa_server: TestRecoveryStoa;
     let testDBConfig: IDatabaseConfig;

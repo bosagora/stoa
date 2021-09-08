@@ -49,8 +49,8 @@ import { IDatabaseConfig } from "../src/modules/common/Config";
 import { MockDBConfig } from "./TestConfig";
 
 describe("Test of Stoa API Server", () => {
-    const host: string = "http://localhost";
-    const port: string = "3837";
+    const agora_addr: URL = new URL("http://localhost:2802");
+    const stoa_addr: URL = new URL("http://localhost:3802");
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
@@ -67,13 +67,13 @@ describe("Test of Stoa API Server", () => {
 
     before("Start a fake Agora", () => {
         return new Promise<void>((resolve, reject) => {
-            agora_server = new TestAgora("2826", sample_data, resolve);
+            agora_server = new TestAgora(agora_addr.port, sample_data, resolve);
         });
     });
 
     before("Create TestStoa", async () => {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig, new URL("http://127.0.0.1:2826"), port);
+        stoa_server = new TestStoa(testDBConfig, agora_addr, stoa_addr.port);
         await stoa_server.createStorage();
     });
 
@@ -88,7 +88,7 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /block_externalized", async () => {
-        const uri = URI(host).port(port).directory("block_externalized");
+        const uri = URI(stoa_addr).directory("block_externalized");
 
         const url = uri.toString();
         await client.post(url, { block: sample_data[0] });
@@ -98,7 +98,7 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /block_height", async () => {
-        const uri = URI(host).port(port).filename("block_height");
+        const uri = URI(stoa_addr).filename("block_height");
 
         const url = uri.toString();
         const response = await client.get(url);
@@ -106,7 +106,7 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /validators", async () => {
-        const uri = URI(host).port(port).directory("validators").setSearch("height", "10");
+        const uri = URI(stoa_addr).directory("validators").setSearch("height", "10");
 
         const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 6);
@@ -115,14 +115,12 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /validator", async () => {
-        const uri = URI(host)
-            .port(port)
+        const uri = URI(stoa_addr)
             .directory("validator")
             .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
             .setSearch("height", "10");
 
-        const fail_uri = URI(host)
-            .port(port)
+        const fail_uri = URI(stoa_addr)
             .directory("validator")
             .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
             .setSearch("height", "99");
@@ -139,15 +137,14 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Tests that sending a pre-image with get /validator and /validators", async () => {
-        const uri = URI(host).port(port).directory("preimage_received");
+        const uri = URI(stoa_addr).directory("preimage_received");
         const response1 = await client.post(uri.toString(), { preimage: sample_preImageInfo });
         assert.strictEqual(response1.status, 200);
 
         await delay(200);
 
         // Wait for the data added to the pool to be processed.
-        const uri1 = URI(host)
-            .port(port)
+        const uri1 = URI(stoa_addr)
             .directory("validator")
             .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
             .setSearch("height", "0");
@@ -161,8 +158,7 @@ describe("Test of Stoa API Server", () => {
             "0x0a8201f9f5096e1ce8e8de4147694940a57a188b78293a55144fc8777a774f2349b3a910fb1fb208514fb16deaf49eb05882cdb6796a81f913c6daac3eb74328"
         );
 
-        const uri2 = URI(host)
-            .port(port)
+        const uri2 = URI(stoa_addr)
             .directory("validator")
             .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
             .setSearch("height", "6");
@@ -175,8 +171,7 @@ describe("Test of Stoa API Server", () => {
             "0x790ab7c8f8ddbf012561e70c944c1835fd1a873ca55c973c828164906f8b35b924df7bddcafade688ad92cfb4414b2cf69a02d115dc214bbd00d82167f645e7e"
         );
 
-        const uri3 = URI(host)
-            .port(port)
+        const uri3 = URI(stoa_addr)
             .directory("validator")
             .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
             .setSearch("height", "1");
@@ -188,8 +183,7 @@ describe("Test of Stoa API Server", () => {
             "0x314e30482fd0b498361e8537961d875e52b7e82edb8260cd548d3edacb451c80f41dd0ba9c5700adfb646066d41b0031120b65cba2df91def9bd83263fb306bd"
         );
 
-        const uri4 = URI(host)
-            .port(port)
+        const uri4 = URI(stoa_addr)
             .directory("validator")
             .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
             .setSearch("height", "8");
@@ -198,7 +192,7 @@ describe("Test of Stoa API Server", () => {
         assert.strictEqual(response.data[0].preimage.height, "");
         assert.strictEqual(response.data[0].preimage.hash, new Hash(Buffer.alloc(Hash.Width)).toString());
 
-        const uri5 = URI(host).port(port).directory("validators");
+        const uri5 = URI(stoa_addr).directory("validators");
         response = await client.get(uri5.toString());
         let validators: any[] = response.data;
         assert.strictEqual(response.data.length, 6);
@@ -239,7 +233,7 @@ describe("Test of Stoa API Server", () => {
         // put the re-enrollment
         await stoa_server.ledger_storage.putEnrollments(block);
 
-        const uri6 = URI(host).port(port).directory("validators").setSearch("height", "21");
+        const uri6 = URI(stoa_addr).directory("validators").setSearch("height", "21");
 
         response = await client.get(uri6.toString());
         validators = response.data;
@@ -318,7 +312,7 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /wallet/blocks/header", async () => {
-        let uri = URI(host).port(port).directory("/wallet/blocks/header");
+        let uri = URI(stoa_addr).directory("/wallet/blocks/header");
 
         let response = await client.get(uri.toString());
         assert.strictEqual(response.data.height, "1");
@@ -334,7 +328,7 @@ describe("Test of Stoa API Server", () => {
         );
         assert.strictEqual(response.data.time_stamp, 1609459800);
 
-        uri = URI(host).port(port).directory("/wallet/blocks/header").setSearch("height", "0");
+        uri = URI(stoa_addr).directory("/wallet/blocks/header").setSearch("height", "0");
 
         response = await client.get(uri.toString());
         assert.strictEqual(response.data.height, "0");
@@ -352,7 +346,7 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /transaction_received", async () => {
-        const uri = URI(host).port(port).directory("transaction_received");
+        const uri = URI(stoa_addr).directory("transaction_received");
 
         const url = uri.toString();
         const block = Block.reviver("", sample_data2);
@@ -361,8 +355,7 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /wallet/transactions/pending/:address", async () => {
-        const uri = URI(host)
-            .port(port)
+        const uri = URI(stoa_addr)
             .directory("/wallet/transactions/pending")
             .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
 
@@ -379,8 +372,7 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /transaction/status/:hash", async () => {
-        let uri = URI(host)
-            .port(port)
+        let uri = URI(stoa_addr)
             .directory("/transaction/status")
             .filename(
                 "0x35917fba7333947cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a7"
@@ -394,8 +386,7 @@ describe("Test of Stoa API Server", () => {
         };
         assert.deepStrictEqual(response_pending.data, expected_pending);
 
-        uri = URI(host)
-            .port(port)
+        uri = URI(stoa_addr)
             .directory("/transaction/status")
             .filename(
                 "0xfbaaebc15bb1618465077fed2425a826d88c7f5ae0197634f056bfbad12a7a74b28cc82951e889255e149707bd3ef64eb01121875c766b5d24afed176d7d255c"
@@ -415,8 +406,7 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /transaction/pending/:hash", async () => {
-        const uri = URI(host)
-            .port(port)
+        const uri = URI(stoa_addr)
             .directory("/transaction/pending")
             .filename(
                 "0x35917fba7333947cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a7"
@@ -459,8 +449,7 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /transaction/:hash", async () => {
-        const uri = URI(host)
-            .port(port)
+        const uri = URI(stoa_addr)
             .directory("/transaction")
             .filename(
                 "0xfbaaebc15bb1618465077fed2425a826d88c7f5ae0197634f056bfbad12a7a74b28cc82951e889255e149707bd3ef64eb01121875c766b5d24afed176d7d255c"
@@ -687,8 +676,8 @@ describe("Test of Stoa API Server", () => {
 });
 
 describe("Test of the path /utxo", () => {
-    const host: string = "http://localhost";
-    const port: string = "3837";
+    const agora_addr: URL = new URL("http://localhost:2803");
+    const stoa_addr: URL = new URL("http://localhost:3803");
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
@@ -705,13 +694,13 @@ describe("Test of the path /utxo", () => {
 
     before("Start a fake Agora", () => {
         return new Promise<void>((resolve, reject) => {
-            agora_server = new TestAgora("2826", [], resolve);
+            agora_server = new TestAgora(agora_addr.port, [], resolve);
         });
     });
 
     before("Create TestStoa", async () => {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig, new URL("http://127.0.0.1:2826"), port);
+        stoa_server = new TestStoa(testDBConfig, agora_addr, stoa_addr.port);
         await stoa_server.createStorage();
         await stoa_server.start();
     });
@@ -723,7 +712,7 @@ describe("Test of the path /utxo", () => {
     });
 
     it("Store two blocks", async () => {
-        const uri = URI(host).port(port).directory("block_externalized");
+        const uri = URI(stoa_addr).directory("block_externalized");
 
         const url = uri.toString();
         await client.post(url, { block: sample_data[0] });
@@ -733,8 +722,7 @@ describe("Test of the path /utxo", () => {
     });
 
     it("Test of the path /utxo no pending transaction ", async () => {
-        const uri = URI(host)
-            .port(port)
+        const uri = URI(stoa_addr)
             .directory("utxo")
             .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
 
@@ -755,7 +743,7 @@ describe("Test of the path /utxo", () => {
     });
 
     it("Store one pending transaction", async () => {
-        const uri = URI(host).port(port).directory("transaction_received");
+        const uri = URI(stoa_addr).directory("transaction_received");
 
         const url = uri.toString();
         await client.post(url, { tx: Block.reviver("", sample_data2).txs[0] });
@@ -763,8 +751,7 @@ describe("Test of the path /utxo", () => {
     });
 
     it("Test of the path /utxo with pending transaction ", async () => {
-        const uri = URI(host)
-            .port(port)
+        const uri = URI(stoa_addr)
             .directory("utxo")
             .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
 
@@ -773,7 +760,7 @@ describe("Test of the path /utxo", () => {
     });
 
     it("Test getting fees of the transaction", async () => {
-        const uri = URI(host).port(port).directory("transaction/fees").filename("1000");
+        const uri = URI(stoa_addr).directory("transaction/fees").filename("1000");
 
         const response = await client.get(uri.toString());
         assert.strictEqual(response.data.medium, "185000");
@@ -786,44 +773,44 @@ describe("Test of the path /utxo", () => {
         const one = zero + 10 * 60;
 
         const no_exist = zero - 10 * 60;
-        let uri = URI(host).port(port).directory("block_height_at").filename(no_exist.toString());
+        let uri = URI(stoa_addr).directory("block_height_at").filename(no_exist.toString());
         let response = await client.get(uri.toString());
         assert.strictEqual(response.statusText, "No Content");
 
-        uri = URI(host).port(port).directory("block_height_at").filename(one.toString());
+        uri = URI(stoa_addr).directory("block_height_at").filename(one.toString());
         response = await client.get(uri.toString());
         assert.strictEqual(response.data, "1");
 
         const one_alpha = one + 1;
-        uri = URI(host).port(port).directory("block_height_at").filename(one_alpha.toString());
+        uri = URI(stoa_addr).directory("block_height_at").filename(one_alpha.toString());
         response = await client.get(uri.toString());
         assert.strictEqual(response.data, "1");
 
         const one_beta = one - 1;
-        uri = URI(host).port(port).directory("block_height_at").filename(one_beta.toString());
+        uri = URI(stoa_addr).directory("block_height_at").filename(one_beta.toString());
         response = await client.get(uri.toString());
         assert.strictEqual(response.data, "0");
 
         const hundred = zero + 100 * 10 * 60;
-        uri = URI(host).port(port).directory("block_height_at").filename(hundred.toString());
+        uri = URI(stoa_addr).directory("block_height_at").filename(hundred.toString());
         response = await client.get(uri.toString());
         assert.strictEqual(response.data, "100");
 
         const hundred_alpha = hundred + 1;
-        uri = URI(host).port(port).directory("block_height_at").filename(hundred_alpha.toString());
+        uri = URI(stoa_addr).directory("block_height_at").filename(hundred_alpha.toString());
         response = await client.get(uri.toString());
         assert.strictEqual(response.data, "100");
 
         const hundred_beta = hundred - 1;
-        uri = URI(host).port(port).directory("block_height_at").filename(hundred_beta.toString());
+        uri = URI(stoa_addr).directory("block_height_at").filename(hundred_beta.toString());
         response = await client.get(uri.toString());
         assert.strictEqual(response.data, "99");
     });
 });
 
 describe("Test of the path /utxo for freezing", () => {
-    const host: string = "http://localhost";
-    const port: string = "3837";
+    const agora_addr: URL = new URL("http://localhost:2804");
+    const stoa_addr: URL = new URL("http://localhost:3804");
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
@@ -841,13 +828,13 @@ describe("Test of the path /utxo for freezing", () => {
 
     before("Start a fake Agora", () => {
         return new Promise<void>((resolve, reject) => {
-            agora_server = new TestAgora("2826", [], resolve);
+            agora_server = new TestAgora(agora_addr.port, [], resolve);
         });
     });
 
     before("Create TestStoa", async () => {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig, new URL("http://127.0.0.1:2826"), port);
+        stoa_server = new TestStoa(testDBConfig, agora_addr, stoa_addr.port);
         await stoa_server.createStorage();
         await stoa_server.start();
     });
@@ -859,7 +846,7 @@ describe("Test of the path /utxo for freezing", () => {
     });
 
     it("Store two blocks", async () => {
-        const uri = URI(host).port(port).directory("block_externalized");
+        const uri = URI(stoa_addr).directory("block_externalized");
 
         const url = uri.toString();
         await client.post(url, { block: sample_data[0] });
@@ -869,7 +856,7 @@ describe("Test of the path /utxo for freezing", () => {
     });
 
     it("Test of /utxos - Get UTXO information", async () => {
-        const uri = URI(host).port(port).directory("utxos");
+        const uri = URI(stoa_addr).directory("utxos");
 
         const utxo_hash = [
             "0x6c985ecd25f0dbfd201bc73b6c994c7ac40bcaf7506712afbcc25ebbb1a00435440868c4943c8b851ffb9401d192d27ca9473627972401508e0b022047bd88b6",
@@ -904,8 +891,7 @@ describe("Test of the path /utxo for freezing", () => {
     });
 
     it("Create a block with a freeze transaction", async () => {
-        let uri = URI(host)
-            .port(port)
+        let uri = URI(stoa_addr)
             .directory("utxo")
             .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
 
@@ -931,8 +917,7 @@ describe("Test of the path /utxo for freezing", () => {
             Buffer.alloc(0)
         );
 
-        uri = URI(host)
-            .port(port)
+        uri = URI(stoa_addr)
             .directory("utxo")
             .filename("boa1xrard006yhapr2dzttap6yg3l0rv5yf94hdnmmfj5zkwhhyw80sj785segs");
 
@@ -960,13 +945,13 @@ describe("Test of the path /utxo for freezing", () => {
 
         // Create block with two transactions
         blocks.push(createBlock(blocks[1], [tx1, tx2]));
-        uri = URI(host).port(port).directory("block_externalized");
+        uri = URI(stoa_addr).directory("block_externalized");
         await client.post(uri.toString(), { block: blocks[2] });
         await delay(100);
     });
 
     it("Check the height of the block", async () => {
-        const uri = URI(host).port(port).filename("block_height");
+        const uri = URI(stoa_addr).filename("block_height");
 
         const url = uri.toString();
         const response = await client.get(url);
@@ -974,8 +959,7 @@ describe("Test of the path /utxo for freezing", () => {
     });
 
     it("Check the UTXO included in the freeze transaction, when refund amount less then 40,000 BOA", async () => {
-        const uri = URI(host)
-            .port(port)
+        const uri = URI(stoa_addr)
             .directory("utxo")
             .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
 
@@ -992,8 +976,7 @@ describe("Test of the path /utxo for freezing", () => {
     });
 
     it("Check the UTXO included in the freeze transaction, when refund amount greater or equal then 40,000 BOA", async () => {
-        const uri = URI(host)
-            .port(port)
+        const uri = URI(stoa_addr)
             .directory("utxo")
             .filename("boa1xrard006yhapr2dzttap6yg3l0rv5yf94hdnmmfj5zkwhhyw80sj785segs");
 
@@ -1011,10 +994,8 @@ describe("Test of the path /utxo for freezing", () => {
 });
 
 describe("Test of the path /merkle_path", () => {
-    const host: string = "http://localhost";
-    const port: string = "3837";
-    const agora_host: string = "http://localhost";
-    const agora_port: string = "2826";
+    const agora_addr: URL = new URL("http://localhost:2805");
+    const stoa_addr: URL = new URL("http://localhost:3805");
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
@@ -1027,13 +1008,13 @@ describe("Test of the path /merkle_path", () => {
 
     before("Start a fake Agora", () => {
         return new Promise<void>((resolve, reject) => {
-            agora_server = new TestAgora(agora_port, sample_data, resolve);
+            agora_server = new TestAgora(agora_addr.port, sample_data, resolve);
         });
     });
 
     before("Create TestStoa", async () => {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig, new URL("http://127.0.0.1:2826"), port);
+        stoa_server = new TestStoa(testDBConfig, agora_addr, stoa_addr.port);
         await stoa_server.createStorage();
         await stoa_server.start();
     });
@@ -1045,8 +1026,7 @@ describe("Test of the path /merkle_path", () => {
     });
 
     it("Test of the path /merkle_path", async () => {
-        const uri = URI(agora_host)
-            .port(agora_port)
+        const uri = URI(agora_addr)
             .directory("merkle_path")
             .setSearch("height", "1")
             .setSearch(
@@ -1066,7 +1046,6 @@ describe("Test of the path /merkle_path", () => {
     });
 
     it("Test of the path /merkle_path by AgoraClient", async () => {
-        const agora_addr: URL = new URL("http://localhost:2826");
         const agora_client = new AgoraClient(agora_addr);
         const merkle_path: Hash[] = await agora_client.getMerklePath(
             new Height("1"),
@@ -1091,8 +1070,7 @@ describe("Test of the path /merkle_path", () => {
     });
 
     it("Test of the path /spv with a Merkle path transaction", async () => {
-        const uri = URI(host)
-            .port(port)
+        const uri = URI(stoa_addr)
             .directory("spv")
             .filename(
                 "0xfbaaebc15bb1618465077fed2425a826d88c7f5ae0197634f056bfbad12a7a74b28cc82951e889255e149707bd3ef64eb01121875c766b5d24afed176d7d255c"
@@ -1109,8 +1087,7 @@ describe("Test of the path /merkle_path", () => {
     });
 
     it("Test of the path /spv with a non-Merkle path transaction", async () => {
-        const uri = URI(host)
-            .port(port)
+        const uri = URI(stoa_addr)
             .directory("spv")
             .filename(
                 "0x25ba9352ec7a92efd273b62de9bb30c62a2c468030e2ac0711563453102299abcb9e014a59b9c0ba43e2041c1444535098bf6f0e5532e7e4dce10ebac751f747 "
@@ -1127,8 +1104,7 @@ describe("Test of the path /merkle_path", () => {
     });
 
     it("Test of the path /spv with an invalid transaction ", async () => {
-        const uri = URI(host)
-            .port(port)
+        const uri = URI(stoa_addr)
             .directory("spv")
             .filename(
                 "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
@@ -1146,8 +1122,8 @@ describe("Test of the path /merkle_path", () => {
 });
 
 describe("Test of the path /wallet/balance:address", () => {
-    const host: string = "http://localhost";
-    const port: string = "3837";
+    const agora_addr: URL = new URL("http://localhost:2806");
+    const stoa_addr: URL = new URL("http://localhost:3806");
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
@@ -1165,13 +1141,13 @@ describe("Test of the path /wallet/balance:address", () => {
 
     before("Start a fake Agora", () => {
         return new Promise<void>((resolve, reject) => {
-            agora_server = new TestAgora("2826", [], resolve);
+            agora_server = new TestAgora(agora_addr.port, [], resolve);
         });
     });
 
     before("Create TestStoa", async () => {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig, new URL("http://127.0.0.1:2826"), port);
+        stoa_server = new TestStoa(testDBConfig, agora_addr, stoa_addr.port);
         await stoa_server.createStorage();
         await stoa_server.start();
     });
@@ -1185,7 +1161,7 @@ describe("Test of the path /wallet/balance:address", () => {
     it("Store two blocks", async () => {
         blocks.push(Block.reviver("", sample_data[0]));
         blocks.push(Block.reviver("", sample_data[1]));
-        const uri = URI(host).port(port).directory("block_externalized");
+        const uri = URI(stoa_addr).directory("block_externalized");
 
         const url = uri.toString();
         await client.post(url, { block: blocks[0] });
@@ -1195,8 +1171,7 @@ describe("Test of the path /wallet/balance:address", () => {
     });
 
     it("Test of the path /wallet/balance no pending transaction", async () => {
-        const uri = URI(host)
-            .port(port)
+        const uri = URI(stoa_addr)
             .directory("wallet/balance")
             .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
 
@@ -1236,7 +1211,7 @@ describe("Test of the path /wallet/balance:address", () => {
         );
         blocks.push(createBlock(blocks[1], [tx]));
 
-        const uri = URI(host).port(port).directory("transaction_received");
+        const uri = URI(stoa_addr).directory("transaction_received");
 
         const url = uri.toString();
         await client.post(url, { tx });
@@ -1244,8 +1219,7 @@ describe("Test of the path /wallet/balance:address", () => {
     });
 
     it("Test of the path /wallet/balance with pending transaction ", async () => {
-        const uri = URI(host)
-            .port(port)
+        const uri = URI(stoa_addr)
             .directory("wallet/balance")
             .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
 
@@ -1261,7 +1235,7 @@ describe("Test of the path /wallet/balance:address", () => {
     });
 
     it("Store one block - the pending transactions stored in the last block", async () => {
-        const uri = URI(host).port(port).directory("block_externalized");
+        const uri = URI(stoa_addr).directory("block_externalized");
 
         const url = uri.toString();
         await client.post(url, { block: blocks[2] });
@@ -1270,8 +1244,7 @@ describe("Test of the path /wallet/balance:address", () => {
     });
 
     it("Test of balance after a pending transaction is stored in the last block", async () => {
-        const uri = URI(host)
-            .port(port)
+        const uri = URI(stoa_addr)
             .directory("wallet/balance")
             .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
 
