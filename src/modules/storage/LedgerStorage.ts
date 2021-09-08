@@ -2204,7 +2204,7 @@ export class LedgerStorage extends Storages {
         if (peer !== undefined) {
             filter_peer_field = `,
                     CASE
-                        WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
+                        WHEN (IFNULL(SUM(TX.income),0) - IFNULL(SUM(TX.spend),0)) > 0 THEN
                         (
                             SELECT COUNT(S.address) FROM tx_inputs I, tx_outputs S WHERE TX.tx_hash = I.tx_hash AND I.utxo = S.utxo_key
                             AND S.address LIKE '${peer}%'
@@ -2213,12 +2213,21 @@ export class LedgerStorage extends Storages {
                         (
                             SELECT COUNT(O.address) FROM tx_outputs O WHERE TX.tx_hash = O.tx_hash
                             AND O.address LIKE '${peer}%'
+                            AND O.address NOT IN (
+                                SELECT
+                                    S.address
+                                FROM
+                                    tx_outputs S
+                                    INNER JOIN tx_inputs I ON (I.utxo = S.utxo_key)
+                                WHERE
+                                    TX.tx_hash = I.tx_hash
+                            )
                         )
                     END AS peer_filter
             `;
             filter_peer_condition = "AND FTX.peer_filter > 0";
             filter_peer_value = `IFNULL(CASE
-                        WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
+                        WHEN (IFNULL(SUM(TX.income),0) - IFNULL(SUM(TX.spend),0)) > 0 THEN
                         (
                             SELECT S.address FROM tx_inputs I, tx_outputs S
                             WHERE TX.tx_hash = I.tx_hash AND I.utxo = S.utxo_key AND S.address LIKE '${peer}%'
@@ -2228,6 +2237,15 @@ export class LedgerStorage extends Storages {
                         (
                             SELECT O.address FROM tx_outputs O
                             WHERE TX.tx_hash = O.tx_hash AND O.address LIKE '${peer}%'
+                            AND O.address NOT IN (
+                                SELECT
+                                    S.address
+                                FROM
+                                    tx_outputs S
+                                    INNER JOIN tx_inputs I ON (I.utxo = S.utxo_key)
+                                WHERE
+                                    TX.tx_hash = I.tx_hash
+                            )
                             ORDER BY O.amount DESC LIMIT 1
                         )
                     END, TX.address) AS peer`;
@@ -2235,7 +2253,7 @@ export class LedgerStorage extends Storages {
             filter_peer_field = "";
             filter_peer_condition = "";
             filter_peer_value = `IFNULL(CASE
-                        WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
+                        WHEN (IFNULL(SUM(TX.income),0) - IFNULL(SUM(TX.spend),0)) > 0 THEN
                         (
                             SELECT S.address FROM tx_inputs I, tx_outputs S
                             WHERE TX.tx_hash = I.tx_hash AND I.utxo = S.utxo_key AND S.address != TX.address
@@ -2245,6 +2263,15 @@ export class LedgerStorage extends Storages {
                         (
                             SELECT O.address FROM tx_outputs O
                             WHERE TX.tx_hash = O.tx_hash AND O.address != TX.address
+                            AND O.address NOT IN (
+                                SELECT
+                                    S.address
+                                FROM
+                                    tx_outputs S
+                                    INNER JOIN tx_inputs I ON (I.utxo = S.utxo_key)
+                                WHERE
+                                    TX.tx_hash = I.tx_hash
+                            )
                             ORDER BY O.amount DESC LIMIT 1
                         )
                     END, TX.address) AS peer`;
@@ -2272,22 +2299,31 @@ export class LedgerStorage extends Storages {
                     TX.type,
                     TX.unlock_height,
                     (TX.time_stamp + (TX.unlock_height - TX.block_height) * 10 * 60) as unlock_time,
-                    (SUM(TX.income) - SUM(TX.spend)) as amount,
+                    (IFNULL(SUM(TX.income),0) - IFNULL(SUM(TX.spend),0)) as amount,
                     ${filter_peer_value},
                     CASE
-                        WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
+                        WHEN (IFNULL(SUM(TX.income),0) - IFNULL(SUM(TX.spend),0)) > 0 THEN
                         (
                             SELECT COUNT(S.address) FROM tx_inputs I, tx_outputs S WHERE TX.tx_hash = I.tx_hash AND I.utxo = S.utxo_key
                         )
                         ELSE
                         (
                             SELECT COUNT(O.address) FROM tx_outputs O WHERE TX.tx_hash = O.tx_hash
+                            AND O.address NOT IN (
+                                SELECT
+                                    S.address
+                                FROM
+                                    tx_outputs S
+                                    INNER JOIN tx_inputs I ON (I.utxo = S.utxo_key)
+                                WHERE
+                                    TX.tx_hash = I.tx_hash
+                            )
                         )
                     END AS peer_count,
                     CASE
                         WHEN (TX.type = 1) THEN 2
                         WHEN (TX.payload_size) > 0 THEN 3
-                        WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN 0
+                        WHEN (IFNULL(SUM(TX.income),0) - IFNULL(SUM(TX.spend),0)) > 0 THEN 0
                         ELSE 1
                     END AS display_tx_type
                     ${filter_peer_field}
