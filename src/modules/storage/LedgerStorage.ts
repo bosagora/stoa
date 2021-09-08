@@ -2200,6 +2200,7 @@ export class LedgerStorage extends Storages {
             begin !== undefined && end !== undefined ? `AND B.time_stamp BETWEEN ${begin} AND ${end}` : ``;
         let filter_peer_field;
         let filter_peer_condition;
+        let filter_peer_value;
         if (peer !== undefined) {
             filter_peer_field = `,
                     CASE
@@ -2216,9 +2217,37 @@ export class LedgerStorage extends Storages {
                     END AS peer_filter
             `;
             filter_peer_condition = "AND FTX.peer_filter > 0";
+            filter_peer_value = `IFNULL(CASE
+                        WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
+                        (
+                            SELECT S.address FROM tx_inputs I, tx_outputs S
+                            WHERE TX.tx_hash = I.tx_hash AND I.utxo = S.utxo_key AND S.address LIKE '${peer}%'
+                            ORDER BY S.amount DESC LIMIT 1
+                        )
+                        ELSE
+                        (
+                            SELECT O.address FROM tx_outputs O
+                            WHERE TX.tx_hash = O.tx_hash AND O.address LIKE '${peer}%'
+                            ORDER BY O.amount DESC LIMIT 1
+                        )
+                    END, TX.address) AS peer`;
         } else {
             filter_peer_field = "";
             filter_peer_condition = "";
+            filter_peer_value = `IFNULL(CASE
+                        WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
+                        (
+                            SELECT S.address FROM tx_inputs I, tx_outputs S
+                            WHERE TX.tx_hash = I.tx_hash AND I.utxo = S.utxo_key AND S.address != TX.address
+                            ORDER BY S.amount DESC LIMIT 1
+                        )
+                        ELSE
+                        (
+                            SELECT O.address FROM tx_outputs O
+                            WHERE TX.tx_hash = O.tx_hash AND O.address != TX.address
+                            ORDER BY O.amount DESC LIMIT 1
+                        )
+                    END, TX.address) AS peer`;
         }
 
         const sql = `SELECT
@@ -2244,20 +2273,7 @@ export class LedgerStorage extends Storages {
                     TX.unlock_height,
                     (TX.time_stamp + (TX.unlock_height - TX.block_height) * 10 * 60) as unlock_time,
                     (SUM(TX.income) - SUM(TX.spend)) as amount,
-                    IFNULL(CASE
-                        WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
-                        (
-                            SELECT S.address FROM tx_inputs I, tx_outputs S
-                            WHERE TX.tx_hash = I.tx_hash AND I.utxo = S.utxo_key AND S.address != TX.address
-                            ORDER BY S.amount DESC LIMIT 1
-                        )
-                        ELSE
-                        (
-                            SELECT O.address FROM tx_outputs O
-                            WHERE TX.tx_hash = O.tx_hash AND O.address != TX.address
-                            ORDER BY O.amount DESC LIMIT 1
-                        )
-                    END, TX.address) AS peer,
+                    ${filter_peer_value},
                     CASE
                         WHEN (SUM(TX.income) - SUM(TX.spend)) > 0 THEN
                         (
