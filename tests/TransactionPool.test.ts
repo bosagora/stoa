@@ -55,7 +55,7 @@ describe("Test TransactionPool", () => {
     let testDBConfig: IDatabaseConfig;
 
     before("Wait for the package libsodium to finish loading", async () => {
-        SodiumHelper.assign(new BOASodium());
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -206,7 +206,7 @@ describe("Test of double spending transaction", () => {
     let block: Block;
 
     before("Wait for the package libsodium to finish loading", async () => {
-        SodiumHelper.assign(new BOASodium());
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 

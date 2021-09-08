@@ -61,7 +61,7 @@ describe("Test of Stoa API Server", () => {
     });
 
     before("Wait for the package libsodium to finish loading", async () => {
-        SodiumHelper.assign(new BOASodium());
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -699,7 +699,7 @@ describe("Test of the path /utxo", () => {
     });
 
     before("Wait for the package libsodium to finish loading", async () => {
-        SodiumHelper.assign(new BOASodium());
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -832,7 +832,7 @@ describe("Test of the path /utxo for freezing", () => {
     const blocks: Block[] = [];
 
     before("Wait for the package libsodium to finish loading", async () => {
-        SodiumHelper.assign(new BOASodium());
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
 
         blocks.push(Block.reviver("", sample_data[0]));
@@ -1021,7 +1021,7 @@ describe("Test of the path /merkle_path", () => {
     let testDBConfig: IDatabaseConfig;
 
     before("Wait for the package libsodium to finish loading", async () => {
-        SodiumHelper.assign(new BOASodium());
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -1159,7 +1159,7 @@ describe("Test of the path /wallet/balance:address", () => {
     });
 
     before("Wait for the package libsodium to finish loading", async () => {
-        SodiumHelper.assign(new BOASodium());
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 

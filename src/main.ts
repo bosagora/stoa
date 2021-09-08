@@ -66,7 +66,7 @@ const stoa: Stoa = new Stoa(
     )
 );
 
-SodiumHelper.assign(new BOASodium());
+if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
 SodiumHelper.init()
     .then(async () => {
         await Storages.waiteForConnection(config.database);
