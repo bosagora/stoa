@@ -71,7 +71,7 @@ describe("Test of Recovery", () => {
     });
 
     before("Wait for the package libsodium to finish loading", async () => {
-        SodiumHelper.assign(new BOASodium());
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 

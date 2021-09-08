@@ -32,7 +32,7 @@ describe("Test ledger storage and inquiry function.", () => {
     let testDBConfig: IDatabaseConfig;
 
     before("Wait for the package libsodium to finish loading", async () => {
-        SodiumHelper.assign(new BOASodium());
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -258,7 +258,7 @@ describe("Test for storing block data in the database", () => {
     let testDBConfig: IDatabaseConfig;
 
     before("Wait for the package libsodium to finish loading", async () => {
-        SodiumHelper.assign(new BOASodium());
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -336,7 +336,7 @@ describe("Tests that sending a pre-image", () => {
     const height = new Height("0");
 
     before("Wait for the package libsodium to finish loading", async () => {
-        SodiumHelper.assign(new BOASodium());
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -403,7 +403,7 @@ describe("Tests storing transaction pools of a transaction", () => {
     let testDBConfig: IDatabaseConfig;
 
     before("Wait for the package libsodium to finish loading", async () => {
-        SodiumHelper.assign(new BOASodium());
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -453,7 +453,7 @@ describe("Tests update blockHeader", () => {
     let testDBConfig: IDatabaseConfig;
 
     before("Wait for the package libsodium to finish loading", async () => {
-        SodiumHelper.assign(new BOASodium());
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 

@@ -43,7 +43,7 @@ describe("Test of Stoa API for the wallet", () => {
     });
 
     before("Wait for the package libsodium to finish loading", async () => {
-        SodiumHelper.assign(new BOASodium());
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
@@ -250,7 +250,7 @@ describe("Test of Stoa API for the wallet with `sample_data`", () => {
     });
 
     before("Wait for the package libsodium to finish loading", async () => {
-        SodiumHelper.assign(new BOASodium());
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
         await SodiumHelper.init();
     });
 
