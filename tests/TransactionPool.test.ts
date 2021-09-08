@@ -193,15 +193,12 @@ describe("Test TransactionPool", () => {
 });
 
 describe("Test of double spending transaction", () => {
-    const host: string = "http://localhost";
-    const port: string = "3837";
+    const agora_addr: URL = new URL("http://localhost:2821");
+    const stoa_addr: URL = new URL("http://localhost:3821");
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
     let testDBConfig: IDatabaseConfig;
-    let gecko_server: TestGeckoServer;
-    let gecko_market: CoinGeckoMarket;
-    let coinMarketService: CoinMarketService;
 
     let block: Block;
 
@@ -210,26 +207,19 @@ describe("Test of double spending transaction", () => {
         await SodiumHelper.init();
     });
 
-    before("Start a fake Agora", () => {
+    before("Start TestAgora", () => {
         return new Promise<void>((resolve, reject) => {
-            agora_server = new TestAgora("2826", sample_data, resolve);
+            agora_server = new TestAgora(agora_addr.port, sample_data, resolve);
         });
     });
 
-    before("Start a fake TestCoinGecko", () => {
-        return new Promise<void>((resolve, reject) => {
-            gecko_server = new TestGeckoServer("7876", market_cap_sample_data, market_cap_history_sample_data, resolve);
-            gecko_market = new CoinGeckoMarket(gecko_server);
-        });
-    });
-
-    before("Start a fake coinMarketService", () => {
-        coinMarketService = new CoinMarketService(gecko_market);
+    after("Stop TestAgora", async () => {
+        await agora_server.stop();
     });
 
     before("Create TestStoa", async () => {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig, new URL("http://127.0.0.1:2826"), port, coinMarketService);
+        stoa_server = new TestStoa(testDBConfig, agora_addr, stoa_addr.port);
         await stoa_server.createStorage();
     });
 
@@ -240,14 +230,12 @@ describe("Test of double spending transaction", () => {
     after("Stop Stoa and Agora server instances", async () => {
         await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
         await stoa_server.stop();
-        await agora_server.stop();
-        await gecko_server.stop();
     });
 
     it("Test of the path /block_externalized", async () => {
         block = Block.reviver("", sample_data2);
 
-        const uri = URI(host).port(port).directory("block_externalized");
+        const uri = URI(stoa_addr).directory("block_externalized");
 
         const url = uri.toString();
         await client.post(url, { block: sample_data[0] });
@@ -279,7 +267,7 @@ describe("Test of double spending transaction", () => {
             Buffer.alloc(0)
         );
 
-        const uri = URI(host).port(port).directory("transaction_received");
+        const uri = URI(stoa_addr).directory("transaction_received");
 
         const url = uri.toString();
         await client.post(url, { tx });
@@ -287,8 +275,7 @@ describe("Test of double spending transaction", () => {
     });
 
     it("Check if the pending transaction is the first transaction", async () => {
-        const uri = URI(host)
-            .port(port)
+        const uri = URI(stoa_addr)
             .directory("/wallet/transactions/pending")
             .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
 
@@ -305,7 +292,7 @@ describe("Test of double spending transaction", () => {
     it("Send a second transaction with the same input as the first transaction", async () => {
         const tx = block.txs[0];
 
-        const uri = URI(host).port(port).directory("transaction_received");
+        const uri = URI(stoa_addr).directory("transaction_received");
 
         const url = uri.toString();
         await client.post(url, { tx });
@@ -313,8 +300,7 @@ describe("Test of double spending transaction", () => {
     });
 
     it("Check if there is only a second transaction.", async () => {
-        const uri = URI(host)
-            .port(port)
+        const uri = URI(stoa_addr)
             .directory("/wallet/transactions/pending")
             .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
 
