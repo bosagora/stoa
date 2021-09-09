@@ -38,6 +38,7 @@ import {
     TestAgora,
     TestClient,
     TestStoa,
+    TestVoteraServer,
 } from "./Utils";
 
 import * as assert from "assert";
@@ -47,6 +48,7 @@ import { URL } from "url";
 import { AgoraClient } from "../src/modules/agora/AgoraClient";
 import { IDatabaseConfig } from "../src/modules/common/Config";
 import { MockDBConfig } from "./TestConfig";
+import { VoteraService } from "../src/modules/service/VoteraService";
 
 describe("Test of Stoa API Server", () => {
     const agora_addr: URL = new URL("http://localhost:2802");
@@ -950,7 +952,7 @@ describe("Test of the path /utxo for freezing", () => {
         blocks.push(createBlock(blocks[1], [tx1, tx2]));
         uri = URI(stoa_private_addr).directory("block_externalized");
         await client.post(uri.toString(), { block: blocks[2] });
-        await delay(100);
+        await delay(200);
     });
 
     it("Check the height of the block", async () => {

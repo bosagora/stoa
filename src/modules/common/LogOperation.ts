@@ -18,6 +18,7 @@ const operations = {
     block_sync: "Block Sync Operation",
     start: "Stoa Server StartUp",
     coin_market_data_sync: "Coin Market Cap Operation",
+    votera_request:"Votera Proposal request"
 };
 
 export const Operation = operations;

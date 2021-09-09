@@ -12,30 +12,39 @@
 *******************************************************************************/
 
 import * as assert from "assert";
-import { SodiumHelper } from "boa-sdk-ts";
+import { SodiumHelper, ProposalType, JSBI, ProposalData, Hash, PublicKey, Endian } from "boa-sdk-ts";
 import { BOASodium } from "boa-sodium-ts";
+import moment from "moment";
 import URI from "urijs";
 import { URL } from "url";
 import { CoinGeckoMarket } from "../src/modules/coinmarket/CoinGeckoMarket";
 import { IDatabaseConfig } from "../src/modules/common/Config";
 import { CoinMarketService } from "../src/modules/service/CoinMarketService";
-import { IMarketCap } from "../src/Types";
+import { VoteraService } from "../src/modules/service/VoteraService";
+import { IMarketCap, IMetaData, IPendingProposal } from "../src/Types";
 import { MockDBConfig } from "./TestConfig";
 import {
     FakeBlacklistMiddleware,
     market_cap_history_sample_data,
     market_cap_sample_data,
     sample_data,
+    sample_data2,
+    sample_data3,
+    sample_data4,
     TestAgora,
     TestClient,
     TestGeckoServer,
     TestStoa,
+    delay,
+    TestVoteraServer
 } from "./Utils";
 
 describe("Test of Stoa API Server", () => {
     const host: string = "http://localhost";
     const agora_addr: URL = new URL("http://localhost:2800");
     const stoa_addr: URL = new URL("http://localhost:3800");
+    const stoa_private_addr: URL = new URL("http://localhost:4800");
+    const votera_addr: URL = new URL("http://127.0.0.1:1337/");
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
@@ -43,6 +52,8 @@ describe("Test of Stoa API Server", () => {
     let gecko_server: TestGeckoServer;
     let gecko_market: CoinGeckoMarket;
     let coinMarketService: CoinMarketService;
+    let votera_server: TestVoteraServer;
+    let votera_service: VoteraService;
 
     before("Bypassing middleware check", () => {
         FakeBlacklistMiddleware.assign();
@@ -70,18 +81,27 @@ describe("Test of Stoa API Server", () => {
         coinMarketService = new CoinMarketService(gecko_market);
     });
 
+    before("Start a fake votera Server and Service", () => {
+        return new Promise<void>(async (resolve, reject) => {
+            votera_server = new TestVoteraServer(1337, votera_addr, resolve);
+            votera_service = new VoteraService(votera_addr);
+        });
+    });
     before("Create TestStoa", () => {
         testDBConfig = MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig, agora_addr, parseInt(stoa_addr.port, 10), coinMarketService);
+        stoa_server = new TestStoa(testDBConfig, agora_addr, parseInt(stoa_addr.port, 10), votera_service, coinMarketService);
         return stoa_server.createStorage();
     });
 
-    before("Start TestStoa", () => {
-        return stoa_server.start();
+    before("Start TestStoa", async () => {
+        await stoa_server.start();
+        return;
     });
 
     after("Stop Stoa and Agora server instances", async () => {
         await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
+        await stoa_server.voteraService?.stop();
+        await votera_server.stop();
         await stoa_server.stop();
         await gecko_server.stop();
         await agora_server.stop();
@@ -877,5 +897,99 @@ describe("Test of Stoa API Server", () => {
         const response = await client.get(uri.toString());
         const expected = { block: 0, transaction: 1 };
         assert.deepStrictEqual(response.data, expected);
+    });
+    it("Test for writing Proposal fee transactions block", async () => {
+        const url = URI(stoa_private_addr).directory("block_externalized").toString();
+
+        await client.post(url, { block: sample_data2 });
+        await client.post(url, { block: sample_data3 });
+
+        await delay(200);
+
+        //  Verifies that all sent blocks are wrote
+        const uri = URI(stoa_addr).directory("/block_height")
+        const response = await client.get(uri.toString());
+
+        assert.strictEqual(response.status, 200);
+        assert.strictEqual(response.data, "3");
+    });
+    it("Test for writing Proposal Data transactions block", async () => {
+        const url = URI(stoa_private_addr).directory("block_externalized").toString();
+
+        await client.post(url, { block: sample_data4 });
+
+        await delay(200);
+
+        //  Verifies that all sent blocks are wrote
+        const uri = URI(stoa_addr).directory("/block_height")
+        const response = await client.get(uri.toString());
+
+        assert.strictEqual(response.status, 200);
+        assert.strictEqual(response.data, "4");
+    });
+    it("Test for getMetaData Method", async () => {
+        let proposal = new ProposalData(
+            "Votera",
+            ProposalType.Fund,
+            "ID1234567890",
+            "Title",
+            JSBI.BigInt(1000),
+            JSBI.BigInt(3026),
+            new Hash(Buffer.alloc(Hash.Width)),
+            JSBI.BigInt(10000000000000),
+            JSBI.BigInt(100000000000),
+            JSBI.BigInt(27000000),
+            new Hash(Buffer.alloc(Hash.Width)),
+            new PublicKey("boa1xrw66w303s5x05ej9uu6djc54kue29j72kah22xqqcrtqj57ztwm5uh524e"),
+            new PublicKey("boa1xrzwvvw6l6d9k84ansqgs9yrtsetpv44wfn8zm9a7lehuej3ssskxth867s")
+        );
+        let pendingProposal: IPendingProposal = {
+            app_name: proposal.app_name,
+            proposal_type: proposal.proposal_type,
+            proposal_id: proposal.proposal_id,
+            proposal_title: proposal.proposal_title,
+            vote_start_height: Number(proposal.vote_start_height),
+            vote_end_height: Number(proposal.vote_start_height),
+            doc_hash: proposal.doc_hash,
+            fund_amount: proposal.fund_amount,
+            proposal_fee: proposal.proposal_fee,
+            vote_fee: proposal.vote_fee,
+            proposal_fee_tx_hash: proposal.tx_hash_proposal_fee,
+            proposer_address: proposal.proposer_address.toString(),
+            proposal_fee_address: proposal.proposal_fee_address.toString(),
+
+        }
+        let data = await votera_service.getMetadata(pendingProposal);
+        let expected: IMetaData = {
+            proposal_id: 'ID1234567890',
+            voting_start_date: moment('2021-07-26').utc().unix(),
+            voting_end_date: moment('2021-08-02').utc().unix(),
+            voting_fee_hash: new Hash('0x8b6a2e1ecc3616ad63c73d606c4019407ebfd06a122519e7bd88d99af92d19d9621323d7c2e68593053a570522b6bc8575d1ee45a74ee38726f297a5ce08e33d'),
+            detail: 'Description Make better world!',
+            submit_time: moment('2021-07-23T04:49:26.634Z').utc().unix(),
+            ave_pre_evaluation_score: 7,
+            pre_evaluation_start_time: moment('2021-08-18').utc().unix(),
+            pre_evaluation_end_time: moment('2021-08-18').utc().unix(),
+            proposer_name: 'test',
+            assessResult: {
+                assess_node_count: 2,
+                assess_average_score: 7,
+                assess_completeness_score: 6,
+                assess_realization_score: 6.5,
+                assess_profitability_score: 7,
+                assess_attractiveness_score: 7.5,
+                assess_expansion_score: 8
+            },
+            proposal_attachments: [
+                {
+                    attachment_id: '61f6724251k789',
+                    name: 'Make the world better',
+                    url: 'https://s3.ap-northeast-2.amazonaws.com/com.kosac.defora.beta.upload-image/BOASCAN_Requirements_Documentation_Version1_0_EN_copy_fb69a8a7d5.pdf',
+                    mime: 'application/pdf',
+                    doc_hash: '5b5073302c8570a269a5d028cc256d80b7d5d22aaa05e279fac7ced94d7df7c9'
+                }
+            ]
+        }
+        assert.deepStrictEqual(data, expected);
     });
 });

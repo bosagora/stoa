@@ -24,6 +24,7 @@ import { IDatabaseConfig } from "../src/modules/common/Config";
 import { CoinMarketService } from "../src/modules/service/CoinMarketService";
 import { MockDBConfig } from "./TestConfig";
 import { delay, FakeBlacklistMiddleware, recovery_sample_data, TestAgora, TestClient, TestStoa } from "./Utils";
+import { VoteraService } from "../src/modules/service/VoteraService";
 
 /**
  * This is an API server for testing and inherited from Stoa.
@@ -34,9 +35,10 @@ class TestRecoveryStoa extends TestStoa {
         testDBConfig: IDatabaseConfig,
         agora_endpoint: URL,
         port: number | string,
+        votera_endpoint?: VoteraService,
         coinMarketService?: CoinMarketService
     ) {
-        super(testDBConfig, agora_endpoint, port, coinMarketService);
+        super(testDBConfig, agora_endpoint, port, votera_endpoint, coinMarketService);
 
         this.app.get("/block", async (req: express.Request, res: express.Response) => {
             if (req.query.block_height === undefined || !Utils.isPositiveInteger(req.query.block_height.toString())) {

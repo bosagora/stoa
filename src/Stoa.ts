@@ -8,6 +8,7 @@ import {
     Height,
     JSBI,
     PreImageInfo,
+    ProposalData,
     PublicKey,
     Signature,
     Transaction,
@@ -23,6 +24,7 @@ import { Operation } from "./modules/common/LogOperation";
 import { Time } from "./modules/common/Time";
 import { CoinMarketService } from "./modules/service/CoinMarketService";
 import { WebService } from "./modules/service/WebService";
+import { VoteraService } from "./modules/service/VoteraService";
 import { LedgerStorage } from "./modules/storage/LedgerStorage";
 import {
     ConvertTypes,
@@ -50,6 +52,7 @@ import {
     ITxStatus,
     IUnspentTxOutput,
     ValidatorData,
+    IPendingProposal
 } from "./Types";
 
 import bodyParser from "body-parser";
@@ -101,6 +104,11 @@ class Stoa extends WebService {
     private databaseConfig: IDatabaseConfig;
 
     /**
+     * The Votera endpoint
+     */
+    public voteraService?: VoteraService | undefined;
+
+    /**
      * The genesis timestamp
      */
     private readonly genesis_timestamp: number;
@@ -120,7 +128,8 @@ class Stoa extends WebService {
         private_port: number | string,
         address: string,
         genesis_timestamp: number,
-        coinMarketService?: CoinMarketService
+        votera_service?: VoteraService,
+        coinMarketService?: CoinMarketService,
     ) {
         super(port, private_port, address);
 
@@ -128,6 +137,7 @@ class Stoa extends WebService {
         this._ledger_storage = null;
         this.databaseConfig = databaseConfig;
         this.coinMarketService = coinMarketService;
+        this.voteraService = votera_service;
         // Instantiate a dummy promise for chaining
         this.pending = new Promise<void>(function (resolve, reject): void {
             resolve();
@@ -291,6 +301,15 @@ class Stoa extends WebService {
                             success: false,
                         });
                     });
+                if (this.voteraService !== undefined) {
+                    this.voteraService?.start(this).catch((err) => {
+                        logger.error(`Error: Could not connect to votera : ${err.toString()}`, {
+                            operation: Operation.connection,
+                            height: HeightManager.height.toString(),
+                            success: false,
+                        });
+                    });
+                }
                 this.socket.io.on(events.client.connection, (socket: Socket) => {
                     this.eventDispatcher.dispatch(events.client.connection, socket);
                 });
@@ -1898,7 +1917,7 @@ class Stoa extends WebService {
                     if (put)
                         logger.info(
                             `puts a blockHeader history : ${block_header.toString()}, ` +
-                                `block height : ${block_header.height.toString()}`,
+                              `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -2458,6 +2477,38 @@ class Stoa extends WebService {
                 });
                 res.send(500).send("Failed to data lookup");
             });
+    }
+
+    /**
+     * The method to get the proposal with data collection status as pending
+     */
+    public getPendingProposal(): Promise<IPendingProposal[]> {
+        return new Promise<IPendingProposal[]>((resolve, reject) => {
+            this.ledger_storage.getPendingProposal()
+                .then((data: any[]) => {
+                    const proposals: IPendingProposal[] = [];
+                    for (const row of data) {
+                        proposals.push({
+                            app_name: row.app_name.toString(),
+                            proposal_id: row.proposal_id.toString(),
+                            proposal_type: row.proposal_type,
+                            proposal_title: row.proposal_title,
+                            vote_start_height: row.vote_start_height,
+                            vote_end_height: row.vote_end_height,
+                            doc_hash: new Hash(row.doc_hash, Endian.Little),
+                            fund_amount: JSBI.BigInt(row.fund_amount),
+                            proposal_fee: JSBI.BigInt(row.proposal_fee),
+                            vote_fee: JSBI.BigInt(row.vote_fee),
+                            proposal_fee_tx_hash: new Hash(row.proposal_fee_tx_hash, Endian.Little),
+                            proposer_address: row.proposer_address,
+                            proposal_fee_address: row.proposal_fee_address
+                        });
+                    }
+                    resolve(proposals)
+                }).catch((err) => {
+                    reject(err);
+                })
+        })
     }
 
     /**

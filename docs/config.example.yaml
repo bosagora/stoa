@@ -11,6 +11,9 @@ server:
   # Endpoint of Agora
   agora_endpoint: http://127.1.1.1:4567
 
+  #Votera required
+  require_votera: true
+
 ################################################################################
 ##                               Database options                             ##
 ################################################################################
@@ -46,3 +49,17 @@ logging:
 consensus:
   # 2021-01-01:00:00:00 GMT
   genesis_timestamp: 1609459200
+
+################################################################################
+##                               Votrea server config                         ##
+################################################################################
+votera:
+    # Address to which we bind (default: 127.0.0.1)
+    address: "127.0.0.1"
+
+    # Port on which we bind (default: 3836)
+    port: 1337
+
+    # Endpoint of Agora
+    votera_endpoint: http://dev-votera.bosagora.com:1337/
+    

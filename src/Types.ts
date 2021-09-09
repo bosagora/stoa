@@ -11,7 +11,7 @@
 
  *******************************************************************************/
 
-import { Block, Height, JSBI, OutputType, Transaction } from "boa-sdk-ts";
+import { Block, Hash, Height, JSBI, OutputType, ProposalType, Transaction } from "boa-sdk-ts";
 
 /**
  * The interface of the Validator
@@ -561,6 +561,7 @@ export enum DisplayTxType {
  */
 export class ConvertTypes {
     static tx_types: string[] = ["payment", "freeze"];
+    static proposal_types: string[] = ["system", "fund"];
     static display_tx_type: string[] = ["inbound", "outbound", "freeze", "payload"];
 
     public static DisplayTxTypeToString(type: OutputType): string {
@@ -575,6 +576,10 @@ export class ConvertTypes {
 
     public static toDisplayTxType(type: string): DisplayTxType {
         return ConvertTypes.display_tx_type.findIndex((m) => m === type.trim().toLowerCase());
+    }
+    public static ProposalTypetoString(type: ProposalType): string {
+        if (type < ConvertTypes.proposal_types.length) return ConvertTypes.proposal_types[type];
+        else return "";
     }
 }
 
@@ -978,4 +983,65 @@ export interface IAccountChart {
      * Time in Seconds
      */
     time_stamp: number;
+}
+
+/**
+ * The Interface for a Proposal
+ */
+export interface IPendingProposal {
+    proposal_id: string;
+    app_name: string;
+    proposal_type: ProposalType;
+    proposal_title: string;
+    vote_start_height: number;
+    vote_end_height: number;
+    doc_hash: Hash;
+    fund_amount: JSBI;
+    proposal_fee: JSBI;
+    vote_fee: JSBI;
+    proposal_fee_tx_hash: Hash;
+    proposer_address: string;
+    proposal_fee_address: string;
+}
+
+/**
+ * The Interface for a Proposal's metadata
+ */
+export interface IMetaData {
+    proposal_id: string;
+    voting_start_date: number;
+    voting_end_date: number;
+    voting_fee_hash: Hash;
+    detail: string;
+    submit_time: number;
+    ave_pre_evaluation_score: number;
+    pre_evaluation_start_time: number;
+    pre_evaluation_end_time: number;
+    proposer_name: string;
+    assessResult: IProposalAssessResult;
+    proposal_attachments: IProposalAttachment[];
+}
+
+/**
+ * The Interface for a Proposal's Attachments
+ */
+export interface IProposalAttachment {
+    attachment_id: string;
+    name: string;
+    url: string;
+    mime: string;
+    doc_hash: string;
+}
+
+/**
+ * The Interface for a Proposal's Attachments
+ */
+export interface IProposalAssessResult {
+    assess_average_score: number;
+    assess_node_count: number;
+    assess_completeness_score: number;
+    assess_realization_score: number;
+    assess_profitability_score: number;
+    assess_attractiveness_score: number;
+    assess_expansion_score: number;
 }

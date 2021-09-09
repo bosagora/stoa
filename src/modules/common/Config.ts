@@ -46,6 +46,11 @@ export class Config implements IConfig {
     public consensus: ConsensusConfig;
 
     /**
+     * Votera server config
+     */
+    public votera?: VoteraConfig;
+
+    /**
      * Constructor
      */
     constructor() {
@@ -53,6 +58,7 @@ export class Config implements IConfig {
         this.database = new DatabaseConfig();
         this.logging = new LoggingConfig();
         this.consensus = new ConsensusConfig();
+        this.votera = new VoteraConfig();
     }
 
     /**
@@ -74,6 +80,8 @@ export class Config implements IConfig {
         this.database.readFromObject(cfg.database);
         this.logging.readFromObject(cfg.logging);
         this.consensus.readFromObject(cfg.consensus);
+        if (cfg.server.require_votera && cfg.votera)
+            this.votera?.readFromObject(cfg.votera)
     }
 
     /**
@@ -133,6 +141,11 @@ export class ServerConfig implements IServerConfig {
     public agora_endpoint: URL;
 
     /**
+     * The votera required status
+     */
+    public require_votera: boolean;
+
+    /**
      * Constructor
      * @param address The address to which we bind
      * @param port The port on which we bind
@@ -151,6 +164,7 @@ export class ServerConfig implements IServerConfig {
         this.port = conf.port;
         this.private_port = conf.private_port;
         this.agora_endpoint = conf.agora_endpoint;
+        this.require_votera = conf.require_votera;
     }
 
     /**
@@ -169,6 +183,7 @@ export class ServerConfig implements IServerConfig {
         this.port = conf.port;
         this.private_port = conf.private_port;
         this.agora_endpoint = conf.agora_endpoint;
+        this.require_votera = conf.require_votera;
     }
 
     /**
@@ -180,6 +195,7 @@ export class ServerConfig implements IServerConfig {
             port: 3836,
             private_port: 3835,
             agora_endpoint: new URL("http://127.0.0.1:2826"),
+            require_votera: false,
         };
     }
 }
@@ -419,6 +435,67 @@ export class ConsensusConfig implements IConsensusConfig {
 }
 
 /**
+ * Votera config
+ */
+export class VoteraConfig implements IVoteraConfig {
+    /**
+     * The address to which we bind
+     */
+    address: string;
+
+    /**
+     * The port on which we bind
+     */
+    port: number;
+
+    /**
+     * The endpoint of Votera
+     */
+    votera_endpoint: URL;
+
+    /**
+     * Constructor
+     * @param address The address to which we bind
+     * @param port The port on which we bind
+     * @param votera_endpoint The endpoint of votera
+     */
+    constructor() {
+        const defaults = VoteraConfig.defaultValue();
+        this.address = defaults.address;
+        this.port = defaults.port;
+        this.votera_endpoint = defaults.votera_endpoint;
+    }
+
+    /**
+     * Reads from Object
+     * @param config The object of IVoteraConfig
+     */
+    public readFromObject(config: IVoteraConfig) {
+        const conf = extend(true, {}, VoteraConfig.defaultValue());
+        extend(true, conf, config);
+
+        if (!ip.isV4Format(conf.address) && !ip.isV6Format(conf.address)) {
+            console.error(`${conf.address}' is not appropriate to use as an IP address.`);
+            process.exit(1);
+        }
+        this.address = conf.address;
+        this.port = conf.port;
+        this.votera_endpoint = conf.votera_endpoint;
+    }
+
+    /**
+     * Returns default value
+     */
+    public static defaultValue(): IVoteraConfig {
+       return {
+            address: "127.0.0.1",
+            port: 5000,
+            votera_endpoint: new URL("http://127.0.0.1:5000"),
+        };
+    }
+}
+
+/**
  * The interface of server config
  */
 export interface IServerConfig {
@@ -441,6 +518,11 @@ export interface IServerConfig {
      * The endpoint of Agora
      */
     agora_endpoint: URL;
+
+    /**
+     * The votera required status
+     */
+    require_votera: boolean;
 }
 
 /**
@@ -558,4 +640,28 @@ export interface IConfig {
      * Consensus config
      */
     consensus: IConsensusConfig;
+    /**
+     * Votera config
+     */
+    votera?: IVoteraConfig;
+}
+
+/**
+ * The interface of Votera 
+ */
+export interface IVoteraConfig {
+    /**
+     * The address to which we bind
+     */
+    address: string;
+
+    /**
+     * The port on which we bind
+     */
+    port: number;
+
+    /**
+     * The endpoint of votera
+     */
+    votera_endpoint: URL;
 }
