@@ -7,6 +7,7 @@ import { Config } from "./modules/common/Config";
 import { logger, Logger } from "./modules/common/Logger";
 import { Operation } from "./modules/common/LogOperation";
 import { CoinMarketService } from "./modules/service/CoinMarketService";
+import { VoteraService } from "./modules/service/VoteraService";
 import { Storages } from "./modules/storage/Storages";
 import Stoa from "./Stoa";
 
@@ -57,6 +58,7 @@ const stoa: Stoa = new Stoa(
     config.server.private_port,
     config.server.address,
     config.consensus.genesis_timestamp,
+    (config.server.require_votera && config.votera) ? new VoteraService(config.votera.votera_endpoint) : undefined,
     new CoinMarketService(
         new CoinGeckoMarket(
             new CoinGeckoClient({

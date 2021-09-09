@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import express, { NextFunction, Request, Response } from "express";
+import express, { NextFunction, Request, response, Response } from "express";
 import * as fs from "fs";
 import * as http from "http";
 import { Schema } from "mongoose";
@@ -38,6 +38,7 @@ import Stoa from "../src/Stoa";
 
 import sinon from "sinon";
 import { CoinMarketService } from "../src/modules/service/CoinMarketService";
+import { VoteraService } from "../src/modules/service/VoteraService";
 
 export const sample_data_raw = (() => {
     return [
@@ -81,6 +82,14 @@ export const sample_data = (() => {
 
 export const sample_data2 = (() => {
     const data: string = fs.readFileSync("tests/data/Block.2.sample1.json", "utf-8");
+    return JSON.parse(data);
+})();
+export const sample_data3 = (() => {
+    const data: string = fs.readFileSync("tests/data/Block.3.sample1.json", "utf-8");
+    return JSON.parse(data);
+})();
+export const sample_data4 = (() => {
+    const data: string = fs.readFileSync("tests/data/Block.4.sample1.json", "utf-8");
     return JSON.parse(data);
 })();
 
@@ -280,9 +289,10 @@ export class TestStoa extends Stoa {
         testDBConfig: IDatabaseConfig,
         agora_endpoint: URL,
         port: number | string,
+        testVoteraService?: VoteraService,
         testCoinMarketService?: CoinMarketService
     ) {
-        super(testDBConfig, agora_endpoint, port, Number(port) + 1000, "127.0.0.1", 1609459200, testCoinMarketService);
+        super(testDBConfig, agora_endpoint, port, Number(port) + 1000, "127.0.0.1", 1609459200, testVoteraService, testCoinMarketService);
     }
 
     public stop(): Promise<void> {
@@ -301,6 +311,76 @@ export class TestStoa extends Stoa {
         });
     }
 }
+
+/**
+ * This is an API server for testing and inherited from Stoa.
+ * The test code allows the API server to be started and shut down.
+ */
+export class TestVoteraServer {
+
+    private server: http.Server;
+
+    private app: express.Application;
+
+    constructor(
+        port: number,
+        votera_endpoint: URL,
+        done: () => void
+    ) {
+        this.app = express();
+        this.server = http.createServer(this.app);
+        this.server.listen(port, () => {
+            done();
+        });
+        this.app.get('/votera-proposal/ID1234567890', (req: Request, res: Response) => {
+            const response = {
+                proposalId: '1234567890',
+                proposer_address: 'boa1xrval7gwhjz4k9raqukcnv2n4rl4fxt74m2y9eay6l5mqdf4gntnzhhscrh',
+                name: 'Make better world!',
+                type: 'BUSINESS',
+                status: 'closed',
+                votePeriod: { begin: '2021-07-26', end: '2021-08-02' },
+                createdAt: '2021-07-23T04:49:26.634Z',
+                description: 'Description Make better world!',
+                proposal_fee_tx_hash: '0x11c6b0395c8e1716978c41958eab84e869755c09f7131b3bbdc882a647cb3f2c46c450607c6da71d34d1eab28fbfdf14376b444ef46ed1d0a7d2237ab430ebf5',
+                vote_fee: 100,
+                fundingAmount: 100000,
+                voting_start_height: 3,
+                voting_end_height: 6,
+                tx_hash_vote_fee: '0x8b6a2e1ecc3616ad63c73d606c4019407ebfd06a122519e7bd88d99af92d19d9621323d7c2e68593053a570522b6bc8575d1ee45a74ee38726f297a5ce08e33d',
+                assessResult: {
+                    average: 7,
+                    nodeCount: 2,
+                    completeness: 6,
+                    realization: 6.5,
+                    profitability: 7,
+                    attractiveness: 7.5,
+                    expansion: 8
+                },
+                assessPeriod: { begin: '2021-08-18', end: '2021-08-18' },
+                creator: { username: 'test' },
+                attachment: [{
+                    id: "61f6724251k789",
+                    name: 'Make the world better',
+                    url: 'https://s3.ap-northeast-2.amazonaws.com/com.kosac.defora.beta.upload-image/BOASCAN_Requirements_Documentation_Version1_0_EN_copy_fb69a8a7d5.pdf',
+                    mime: 'application/pdf',
+                    doc_hash: '5b5073302c8570a269a5d028cc256d80b7d5d22aaa05e279fac7ced94d7df7c9'
+                }]
+            }
+            return res.status(200).send(response);
+        })
+    }
+
+    // Shut down
+    public stop(): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this.server.close((err?) => {
+                err === undefined ? resolve() : reject(err);
+            });
+        });
+    }
+}
+
 /**
  * This is an Agora node for testing.
  * The test code allows the Agora node to be started and shut down.

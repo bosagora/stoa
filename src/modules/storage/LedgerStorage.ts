@@ -34,15 +34,24 @@ import {
     UnspentTxOutput,
     Utils,
     UTXOManager,
+    ProposalFeeData,
+    ProposalData,
+    BallotData,
+    VarInt,
 } from "boa-sdk-ts";
 import moment from "moment";
 import * as mysql from "mysql2";
-import { IAccountInformation, IMarketCap } from "../../Types";
+import { IAccountInformation, IMarketCap, IMetaData, IPendingProposal, IProposalAttachment } from "../../Types";
 import { IDatabaseConfig } from "../common/Config";
 import { FeeManager } from "../common/FeeManager";
 import { logger } from "../common/Logger";
 import { Storages } from "./Storages";
 import { TransactionPool } from "./TransactionPool";
+import { SmartBuffer } from "smart-buffer";
+import { DataCollectionStatus, ProposalStatus } from "../common/enum";
+import { HeightManager } from "../common/HeightManager";
+import { Operation } from "../common/LogOperation";
+
 /**
  * The class that inserts and reads the ledger into the database.
  */
@@ -335,6 +344,73 @@ export class LedgerStorage extends Storages {
             PRIMARY KEY(time_stamp, granularity(64))
         );
 
+        CREATE TABLE IF NOT EXISTS proposal_fee
+        (
+            proposal_id          TEXT      NOT NULL,
+            block_height         INTEGER   NOT NULL,
+            tx_hash              TINYBLOB  NOT NULL,
+
+            PRIMARY KEY(proposal_id(64), block_height, tx_hash(64))
+        );
+
+        CREATE TABLE IF NOT EXISTS proposal
+        (
+            proposal_id              TEXT        NOT NULL,
+            block_height             INTEGER     NOT NULL,
+            tx_hash                  TINYBLOB    NOT NULL,
+            app_name                 TEXT        NOT NULL,
+            proposal_type            INTEGER     NOT NULL,
+            proposal_title           TEXT        NOT NULL,
+            vote_start_height        INTEGER     NOT NULL,
+            vote_end_height          INTEGER     NOT NULL,
+            doc_hash                 TINYBLOB    NOT NULL,
+            fund_amount              BIGINT(20)  NOT NULL,
+            proposal_fee             BIGINT(20)  NOT NULL,
+            vote_fee                 BIGINT(20)  NOT NULL,
+            proposal_fee_tx_hash     TINYBLOB    NOT NULL,
+            proposer_address         TEXT        NOT NULL,
+            proposal_fee_address     TEXT        NOT NULL,
+            proposal_status          TEXT        NOT NULL,
+            data_collection_status   TEXT        NOT NULL,
+
+            PRIMARY KEY(block_height, proposal_id(64), app_name(64))
+        );
+        
+        CREATE TABLE IF NOT EXISTS proposal_metadata
+        (
+            proposal_id                 TEXT           NOT NULL,
+            voting_start_date           INTEGER        NOT NULL,
+            voting_end_date             INTEGER        NOT NULL,
+            voting_fee_hash             TINYBLOB       NOT NULL,
+            detail                      TEXT           NOT NULL,
+            submit_time                 INTEGER        NOT NULL,
+            ave_pre_evaluation_score    INTEGER        NOT NULL,
+            pre_evaluation_start_time   INTEGER        NOT NULL,
+            pre_evaluation_end_time     INTEGER        NOT NULL,
+            assess_node_count           INTEGER        NOT NULL,
+            assess_average_score        DECIMAL(10,4)  NOT NULL,
+            assess_completeness_score   DECIMAL(10,4)  NOT NULL,
+            assess_realization_score    DECIMAL(10,4)  NOT NULL,
+            assess_profitability_score  DECIMAL(10,4)  NOT NULL,
+            assess_attractiveness_score DECIMAL(10,4)  NOT NULL,
+            assess_expansion_score      DECIMAL(10,4)  NOT NULL,
+            proposer_name               TEXT,
+
+            PRIMARY KEY(proposal_id(64))
+        );
+
+        CREATE TABLE IF NOT EXISTS proposal_attachments
+        (
+            attachment_id   TEXT      NOT NULL,
+            proposal_id     TEXT      NOT NULL,
+            name            TEXT      NOT NULL,
+            url             TEXT      NOT NULL,
+            mime            TEXT      NOT NULL,
+            doc_hash        TEXT      NOT NULL,
+            
+            PRIMARY KEY(proposal_id(64), attachment_id(64))
+        );
+
        DROP TRIGGER IF EXISTS tx_trigger;
        CREATE TRIGGER tx_trigger AFTER INSERT
        ON transactions
@@ -344,8 +420,15 @@ export class LedgerStorage extends Storages {
             DELETE FROM tx_input_pool WHERE tx_hash = NEW.tx_hash;
             DELETE FROM tx_output_pool WHERE tx_hash = NEW.tx_hash;
         END;
-        `;
 
+       DROP TRIGGER IF EXISTS proposal_trigger;
+       CREATE TRIGGER proposal_trigger AFTER INSERT ON
+       proposal_metadata 
+       FOR EACH ROW
+       BEGIN
+           UPDATE proposal SET data_collection_status = '${DataCollectionStatus.COMPLETED}' WHERE proposal_id = NEW.proposal_id;
+       END;
+        `;
         return this.exec(sql);
     }
 
@@ -420,6 +503,9 @@ export class LedgerStorage extends Storages {
                 await this.putFeeDisparity(block, conn);
                 await this.putAccountStats(block, conn);
                 await this.putBlockHeaderHistory(block.header, block.header.height, conn);
+                await this.commit(conn);
+                await this.begin(conn);
+                await this.putProposals(block, conn);
                 await this.commit(conn);
                 return resolve();
             } catch (err) {
@@ -996,6 +1082,9 @@ export class LedgerStorage extends Storages {
 
                             for (let sender_index = 0; sender_index < senders.length; sender_index++) {
                                 for (let receiver_index = 0; receiver_index < receivers.length; receiver_index++) {
+                                    if (!(senders.length) || !(receivers.length)) {
+                                        break;
+                                    }
                                     if (senders[sender_index].address === receivers[receiver_index].address) {
                                         if (
                                             JSBI.LT(
@@ -2063,6 +2152,141 @@ export class LedgerStorage extends Storages {
                 .catch((err) => {
                     reject(err);
                 });
+        });
+    }
+
+    /**
+     * Saving Proposal fee
+     * @param block: The instance of the `Block`
+     * @param conn Use this if it are providing a db connection.
+     */
+    public putProposals(block: Block, conn?: mysql.PoolConnection) {
+        function save_proposal_fee(
+            storage: LedgerStorage,
+            block_height: Height,
+            tx_hash: Hash,
+            proposal_id: string
+        ): Promise<void> {
+            return new Promise<void>((resolve, reject) => {
+
+                storage
+                    .query(
+                        `INSERT INTO proposal_fee
+                        (proposal_id, block_height, tx_hash)
+                    VALUES
+                        (?, ?, ?)`,
+                        [proposal_id, block_height.value, tx_hash.toBinary(Endian.Little)]
+                    )
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+            });
+        }
+
+        function save_proposal_data(
+            storage: LedgerStorage,
+            block_height: Height,
+            tx_hash: Hash,
+            proposalData: ProposalData
+        ): Promise<void> {
+            return new Promise<void>((resolve, reject) => {
+                storage
+                    .query(
+                        `INSERT INTO proposal
+                        (proposal_id, block_height, tx_hash, app_name,
+                         proposal_type, proposal_title, vote_start_height, vote_end_height, doc_hash,
+                         fund_amount, proposal_fee, vote_fee, proposal_fee_tx_hash, proposer_address, 
+                         proposal_fee_address, proposal_status, data_collection_status)
+                         VALUES
+                        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [
+                            proposalData.proposal_id,
+                            block_height.value.toString(),
+                            tx_hash.toBinary(Endian.Little),
+                            proposalData.app_name,
+                            proposalData.proposal_type.toString(),
+                            proposalData.proposal_title,
+                            proposalData.vote_start_height.toString(),
+                            proposalData.vote_end_height.toString(),
+                            proposalData.doc_hash.toBinary(Endian.Little),
+                            proposalData.fund_amount.toString(),
+                            proposalData.proposal_fee.toString(),
+                            proposalData.vote_fee.toString(),
+                            proposalData.tx_hash_proposal_fee.toBinary(Endian.Little),
+                            proposalData.proposer_address.toString(),
+                            proposalData.proposal_fee_address.toString(),
+                            ProposalStatus.ONGOING,
+                            DataCollectionStatus.PENDING,
+                        ]
+                    )
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+            });
+        }
+        function putPayload(storage: LedgerStorage, block_height: Height, tx_hash: Hash, tx: Transaction) {
+            return new Promise<void>(async (resolve, reject) => {
+                try {
+                    let buffer = SmartBuffer.fromBuffer(tx.payload);
+                    let length = VarInt.toNumber(buffer);
+                    let header = Utils.readBuffer(buffer, length);
+
+                    switch (header.toString()) {
+                        case ProposalFeeData.HEADER: {
+                            let buffer = SmartBuffer.fromBuffer(tx.payload);
+                            let proposal_fee = ProposalFeeData.deserialize(buffer);
+                            await save_proposal_fee(storage, block_height, tx_hash, proposal_fee.proposal_id)
+                            break;
+                        }
+                        case ProposalData.HEADER:
+                            {
+                                let buffer = SmartBuffer.fromBuffer(tx.payload);
+                                let proposalData: ProposalData = ProposalData.deserialize(buffer);
+                                await save_proposal_data(storage, block_height, tx_hash, proposalData);
+                                break;
+                            }
+                        case BallotData.HEADER:
+                            {
+                                //TODO
+                                break;
+                            }
+                        default: {
+                            break;
+                        }
+                    }
+                    resolve();
+                }
+                catch (err) {
+                    logger.error("Failed to put proposal's information:" + err, {
+                        operation: Operation.block_sync,
+                        height: HeightManager.height.toString(),
+                        success: false,
+                    });
+                    reject(err);
+                }
+            });
+        }
+        return new Promise<void>((resolve, reject) => {
+            (async () => {
+                try {
+                    for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++) {
+                        if (block.txs[tx_idx].payload.length > 0) {
+                            await putPayload(this, block.header.height, block.merkle_tree[tx_idx], block.txs[tx_idx]);
+                        }
+                    }
+                } catch (err) {
+                    reject(err);
+                    return;
+                }
+                resolve();
+            })();
+
         });
     }
 
@@ -3172,6 +3396,110 @@ export class LedgerStorage extends Storages {
             ORDER BY total_balance DESC, address ASC
             LIMIT ? OFFSET ?`;
         return this.query(sql, [limit, limit * (page - 1)]);
+    }
+
+    /**
+     * Get Pending proposals list
+     * @returns returns the Promise with requested data
+     * and if an error occurs the .catch is called with an error.
+     */
+    public getPendingProposal(): Promise<any[]> {
+        const sql = `
+            SELECT
+	            proposal_id, block_height, tx_hash, app_name, proposal_type, proposal_title,
+                vote_start_height, vote_end_height, doc_hash, fund_amount, proposal_fee, proposal_fee_tx_hash,
+                proposer_address, vote_fee, proposal_fee_address, proposal_status, data_collection_status
+            FROM
+                proposal
+            WHERE data_collection_status = ?
+            `;
+        return this.query(sql, [DataCollectionStatus.PENDING]);
+    }
+
+    /**
+     * Put the MetaData for proposal
+     * @returns returns the Promise with requested data
+     * and if an error occurs the .catch is called with an error.
+     */
+    public putProposalMetaData(storage: LedgerStorage, metadata: IMetaData): Promise<void> {
+        function putMetaData(storage: LedgerStorage, metadata: IMetaData) {
+            return new Promise<void>((resolve, reject) => {
+                storage
+                    .query(
+                        `INSERT INTO proposal_metadata
+                        ( proposal_id, voting_start_date, voting_end_date, voting_fee_hash, detail,
+                        submit_time, ave_pre_evaluation_score, pre_evaluation_start_time, pre_evaluation_end_time,
+                        assess_node_count, assess_average_score, assess_completeness_score, assess_realization_score,
+                        assess_profitability_score, assess_attractiveness_score, assess_expansion_score, proposer_name )
+                    VALUES
+                        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [
+                            metadata.proposal_id,
+                            metadata.voting_start_date,
+                            metadata.voting_end_date,
+                            metadata.voting_fee_hash.toBinary(Endian.Little),
+                            metadata.detail.toString(),
+                            metadata.submit_time,
+                            metadata.ave_pre_evaluation_score,
+                            metadata.pre_evaluation_start_time,
+                            metadata.pre_evaluation_end_time,
+                            metadata.assessResult.assess_node_count,
+                            metadata.assessResult.assess_average_score,
+                            metadata.assessResult.assess_completeness_score,
+                            metadata.assessResult.assess_realization_score,
+                            metadata.assessResult.assess_profitability_score,
+                            metadata.assessResult.assess_attractiveness_score,
+                            metadata.assessResult.assess_expansion_score,
+                            metadata.proposer_name.toString()
+                        ],
+                    )
+                    .then(() => {
+                        return resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+            });
+        }
+        function putAttachments(storage: LedgerStorage, proposal_id: string, attachments: IProposalAttachment) {
+            return new Promise<void>((resolve, reject) => {
+                storage
+                    .query(
+                        `INSERT INTO proposal_attachments
+                         ( attachment_id, proposal_id, name, url, mime, doc_hash )
+                    VALUES
+                        (?, ?, ?, ?, ?, ?)`,
+                        [
+                            attachments.attachment_id,
+                            proposal_id,
+                            attachments.name,
+                            attachments.url,
+                            attachments.mime,
+                            attachments.doc_hash,
+                        ],
+                    )
+                    .then(() => {
+                        return resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+            });
+        }
+        return new Promise<void>(async (resolve, reject) => {
+
+            try {
+                await putMetaData(storage, metadata);
+                for (let attachment_index = 0; attachment_index < metadata.proposal_attachments.length; attachment_index++) {
+                    await putAttachments(storage, metadata.proposal_id, metadata.proposal_attachments[attachment_index]);
+                }
+                return resolve();
+            }
+            catch (err) {
+                return reject(err);
+
+            }
+        });
     }
 
     /**

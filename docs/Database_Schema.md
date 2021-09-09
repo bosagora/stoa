@@ -602,3 +602,159 @@ CREATE TABLE IF NOT EXISTS "account_history"(
     PRIMARY KEY ("address(64)","time_stamp","granularity(64)");
 );
 ```
+----
+
+## 22. Table **proposal_fee**
+
+### _Schema_
+
+| Column                 | Data Type | PK | Not NULL | Default  |Description|
+|:-----------------------|:--------- |:--:|:--------:| -------- | --------- |
+|  proposal_id           | TEXT      | Y  | Y        |          | The Proposal ID  |
+|  tx_hash               | TINYBLOB  | Y  | Y        |          | The hash of transaction|
+|  block_height          | INTEGER   |    | Y        |          | The block height  |
+
+
+### _Create Script_
+```sql
+CREATE TABLE IF NOT EXISTS "proposal_fee"(
+    "proposal_id"            TEXT       NOT NULL,
+    "block_height"           INTEGER    NOT NULL,
+    "tx_hash"                TINYBLOB   NOT NULL,
+    
+    PRIMARY KEY ("proposal_id(64)","tx_hash(64)");
+);
+```
+----
+
+## 23. Table **proposal**
+
+### _Schema_
+
+| Column                  | Data Type | PK | Not NULL | Default  |Description|
+|:------------------------|:--------- |:--:|:--------:| -------- | --------- |
+|  proposal_id            | TEXT      | Y  | Y        |          | The Proposal ID  |
+|  app_name               | TEXT      | Y  | Y        |          | The name of App  |
+|  block_height           | INTEGER   |    | Y        |          | The block height  |
+|  tx_hash                | TINYBLOB  |    | Y        |          | The hash of transaction |
+|  proposal_type          | INTEGER   |    | Y        |          | The type of Proposal   |
+|  proposal_title         | TEXT      |    | Y        |          | The title of Proposal  |
+|  vote_start_height      | INTEGER   |    | Y        |          | The vote start height of proposal|
+|  vote_end_height        | INTEGER   |    | Y        |          | The vote end height of proposal  |
+|  doc_hash               | TINYBLOB  |    | Y        |          | The doc hash of proposal         |
+|  fund_amount            | BIGINT(20)|    | Y        |          | The fund amount of proposal      |
+|  proposal_fee           | BIGINT(20)|    | Y        |          | The proposal fee |
+|  vote_fee               | BIGINT(20)|    | Y        |          | The vote fee |
+|  proposal_fee_tx_hash   | TINYBLOB  |    | Y        |          | The tx hash of proposal_fee |
+|  proposer_address       | TEXT      |    | Y        |          | The address of proposer |
+|  proposal_fee_address   | TEXT      |    | Y        |          | The proposer fee address|
+|  status                 | TEXT      |    | Y        |          | The status of proposal  |
+|  data_collection_status | TEXT      |    | Y        |          | The status of proposal data collection  |
+
+### _Create Script_
+```sql
+CREATE TABLE IF NOT EXISTS "proposal"(
+        "proposal_id"            TEXT        NOT NULL,
+        "block_height"           INTEGER     NOT NULL,
+        "tx_hash"                TINYBLOB    NOT NULL,
+        "app_name"               TEXT        NOT NULL,
+        "proposal_type"          INTEGER     NOT NULL,
+        "proposal_title"         TEXT        NOT NULL,
+        "vote_start_height"      INTEGER     NOT NULL,
+        "vote_end_height"        INTEGER     NOT NULL,
+        "doc_hash"               TINYBLOB    NOT NULL,
+        "fund_amount"            BIGINT(20)  NOT NULL,
+        "proposal_fee"           BIGINT(20)  NOT NULL,
+        "vote_fee"               BIGINT(20)  NOT NULL,
+        "proposal_fee_tx_hash"   TINYBLOB    NOT NULL,
+        "proposer_address"       TEXT        NOT NULL,
+        "proposal_fee_address"   TEXT        NOT NULL,
+        "status"                 TEXT        NOT NULL,
+        "data_collection_status" TEXT        NOT NULL,
+    
+        PRIMARY KEY ("proposal_id(64)", "app_name(64)");
+);
+```
+----
+
+## 23. Table **proposal_metadata**
+
+### _Schema_
+
+| Column                      | Data Type | PK | Not NULL | Default  |Description|
+|:----------------------------|:--------- |:--:|:--------:| -------- | --------- |
+|  proposal_id                | TEXT      | Y  | Y        |          | The Proposal ID  |
+|  block_height               | INTEGER   |    | Y        |          | The block height  |
+|  voting_fee_hash            | TINYBLOB  |    | Y        |          | The hash of voting fee |
+|  vote_start_date            | INTEGER   |    | Y        |          | The vote start date of proposal |
+|  vote_end_date              | INTEGER   |    | Y        |          | The vote end date of proposal |
+|  detail                     | TEXT      |    | Y        |          | The Proposal detial  |
+|  submit_time                | INTEGER   |    | Y        |          | The Proposal submition time  |
+|  ave_pre_evaluation_score   | INTEGER   |    | Y        |          | The Proposal pre evaluation score  |
+|  pre_evaluation_start_time  | INTEGER   |    | Y        |          | The Proposal pre evaluation start time |
+|  pre_evaluation_end_time    | INTEGER   |    | Y        |          | The Proposal pre evaluation end time  |
+|  assess_node_count          | INTEGER   |    | Y        |          | The proposer assess result node count |
+|  assess_average_score       | DECIMAL   |    | Y        |          | The proposer assess result node average score |
+|  assess_completeness_score  | DECIMAL   |    | Y        |          | The proposer assess result completeness   |
+|  assess_realization_score   | DECIMAL   |    | Y        |          | The proposer assess result realization    |
+|  assess_profitability_score | DECIMAL   |    | Y        |          | The proposer assess result profitability  |
+|  assess_attractiveness_score| DECIMAL   |    | Y        |          | The proposer assess result attractiveness |
+|  assess_expansion_score     | DECIMAL   |    | Y        |          | The proposer assess result expansion |
+|  proposer_name              | TEXT      |    | Y        |          | The proposer name |
+
+
+### _Create Script_
+```sql
+CREATE TABLE IF NOT EXISTS "proposal_metadata"(
+        "proposal_id"                 TEXT          NOT NULL,
+        "voting_start_date"           INTEGER       NOT NULL,
+        "voting_end_date"             INTEGER       NOT NULL,
+        "voting_fee_hash"             TINYBLOB      NOT NULL,
+        "detail"                      TEXT          NOT NULL,
+        "submit_time"                 INTEGER       NOT NULL,
+        "ave_pre_evaluation_score"    INTEGER       NOT NULL,
+        "pre_evaluation_start_time"   INTEGER       NOT NULL,
+        "pre_evaluation_end_time"     INTEGER       NOT NULL,
+        "assess_node_count"           INTEGER        NOT NULL,
+        "assess_average_score"        DECIMAL(10,4)  NOT NULL,
+        "assess_completeness_score"   DECIMAL(10,4)  NOT NULL,
+        "assess_realization_score"    DECIMAL(10,4)  NOT NULL,
+        "assess_profitability_score"  DECIMAL(10,4)  NOT NULL,
+        "assess_attractiveness_score" DECIMAL(10,4)  NOT NULL,
+        "assess_expansion_score"      DECIMAL(10,4)  NOT NULL,
+        "proposer_name"               TEXT,
+
+        PRIMARY KEY("proposal_id(64)")
+);
+```
+----
+
+## 24. Table **proposal_attachments**
+
+### _Schema_
+
+| Column                     | Data Type | PK | Not NULL | Default  | Description |
+|:---------------------------|:--------- |:--:|:--------:| -------- | ----------- |
+|  attachment_id             | TEXT      | Y  | Y        |          | The proposal's attachment id |
+|  proposal_id               | TEXT      | Y  | Y        |          | The Proposal ID  |
+|  name                      | TEXT      |    | Y        |          | The attachment name  |
+|  url                       | TEXT      |    | Y        |          | The attachment url   |
+|  mime                      | TEXT      |    | Y        |          | The attachment mime  |
+
+### _Create Script_
+```sql
+CREATE TABLE IF NOT EXISTS proposal_attachments
+        (
+            "attachment_id"   TEXT      NOT NULL,
+            "proposal_id"     TEXT      NOT NULL,
+            "name"            TEXT      NOT NULL,
+            "url"             TEXT      NOT NULL,
+            "mime"            TEXT      NOT NULL,
+            "doc_hash"        TEXT      NOT NULL,
+            
+            PRIMARY KEY("proposal_id(64)", "attachment_id(64)")
+        );
+);
+```
+----
+
