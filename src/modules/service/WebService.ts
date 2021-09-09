@@ -15,8 +15,9 @@ import { EventDispatcher } from "event-dispatch";
 import express from "express";
 import http from "http";
 import { logger } from "../common/Logger";
-import { Operation } from "../common/LogOperation";
+import { Operation, Status } from "../common/LogOperation";
 import { SocketIO } from "./Socket";
+import moment from "moment";
 
 export class WebService {
     /**
@@ -88,7 +89,12 @@ export class WebService {
     public get socket(): SocketIO {
         if (this._socket !== null) return this._socket;
         else {
-            logger.error("SocketIO is not ready yet.", { operation: Operation.start, height: "", success: false });
+            logger.error("SocketIO is not ready yet.", {
+                operation: Operation.start,
+                height: "",
+                status: Status.Error,
+                responseTime: Number(moment().utc().unix() * 1000),
+            });
             process.exit(1);
         }
     }
