@@ -5,11 +5,12 @@ import "source-map-support/register";
 import { CoinGeckoMarket } from "./modules/coinmarket/CoinGeckoMarket";
 import { Config } from "./modules/common/Config";
 import { logger, Logger } from "./modules/common/Logger";
-import { Operation } from "./modules/common/LogOperation";
+import { Operation, Status } from "./modules/common/LogOperation";
 import { CoinMarketService } from "./modules/service/CoinMarketService";
 import { VoteraService } from "./modules/service/VoteraService";
 import { Storages } from "./modules/storage/Storages";
 import Stoa from "./Stoa";
+import moment, { months } from "moment";
 
 // Create with the arguments and read from file
 const config = Config.createWithArgument();
@@ -43,12 +44,14 @@ logger.transports.forEach((tp) => {
 logger.info(`Agora endpoint: ${config.server.agora_endpoint.toString()}`, {
     operation: Operation.connection,
     height: "",
-    success: true,
+    status: Status.Success,
+    responseTime: Number(moment().utc().unix() * 1000),
 });
 logger.info(`mysql database host: ${config.database.database}`, {
     operation: Operation.connection,
     height: "",
-    success: true,
+    status: Status.Success,
+    responseTime: Number(moment().utc().unix() * 1000),
 });
 
 const stoa: Stoa = new Stoa(
@@ -77,7 +80,8 @@ SodiumHelper.init()
             logger.error(`Failed to create LedgerStorage: ${error}`, {
                 operation: Operation.start,
                 height: "",
-                success: false,
+                status: Status.Error,
+                responseTime: Number(moment().utc().unix() * 1000),
             });
             process.exit(1);
         });
@@ -90,21 +94,24 @@ SodiumHelper.init()
                     logger.error(`${config.server.port} requires elevated privileges`, {
                         operation: Operation.start,
                         height: "",
-                        success: false,
+                        status: Status.Error,
+                        responseTime: Number(moment().utc().unix() * 1000),
                     });
                     break;
                 case "EADDRINUSE":
                     logger.error(`Port ${config.server.port} is already in use`, {
                         operation: Operation.start,
                         height: "",
-                        success: false,
+                        status: Status.Error,
+                        responseTime: Number(moment().utc().unix() * 1000),
                     });
                     break;
                 default:
                     logger.error(`An error occured while starting the server: ${error.stack}`, {
                         operation: Operation.start,
                         height: "",
-                        success: false,
+                        status: Status.Error,
+                        responseTime: Number(moment().utc().unix() * 1000),
                     });
             }
             process.exit(1);
@@ -114,7 +121,8 @@ SodiumHelper.init()
         logger.error(`Failed to load Sodium library: ${error}`, {
             operation: Operation.start,
             height: "",
-            success: false,
+            status: Status.Error,
+            responseTime: Number(moment().utc().unix() * 1000),
         });
         process.exit(1);
     });

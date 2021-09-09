@@ -17,8 +17,9 @@ import Stoa from "../../Stoa";
 import { IMarketCap } from "../../Types";
 import { HeightManager } from "../common/HeightManager";
 import { logger, Logger } from "../common/Logger";
-import { Operation } from "../common/LogOperation";
+import { Operation, Status } from "../common/LogOperation";
 import { Time } from "../common/Time";
+import moment from "moment";
 
 export class CoinMarketService {
     /**
@@ -114,7 +115,8 @@ export class CoinMarketService {
                 logger.info(`Recovering 24 hour coinmarket cap from: ${df} to: ${dt}`, {
                     operation: Operation.coin_market_data_sync,
                     height: HeightManager.height.toString(),
-                    success: true,
+                    status: Status.Success,
+                    responseTime: Number(moment().utc().unix() * 1000),
                 });
                 const marketCap = await this.coinMarketClient.recover(Number(from.toString()), to.seconds);
                 marketCap.forEach(async (element: IMarketCap) => {
@@ -127,7 +129,8 @@ export class CoinMarketService {
                 logger.error(`Failed to 24-hour coin market data recovery: ${err}`, {
                     operation: Operation.coin_market_data_sync,
                     height: HeightManager.height.toString(),
-                    success: false,
+                    status: Status.Error,
+                    responseTime: Number(moment().utc().unix() * 1000),
                 });
                 reject(`Failed to 24-hour coin market data recovery`);
             }
@@ -152,7 +155,8 @@ export class CoinMarketService {
                     logger.info(`Recovering coinmarket cap from: ${df} to ${dt}`, {
                         operation: Operation.coin_market_data_sync,
                         height: HeightManager.height.toString(),
-                        success: true,
+                        status: Status.Success,
+                        responseTime: Number(moment().utc().unix() * 1000),
                     });
                     const marketCap = await this.coinMarketClient.recover(last_updated_at, to.seconds);
                     marketCap.forEach(async (element: IMarketCap) => {
@@ -166,7 +170,8 @@ export class CoinMarketService {
                 logger.error(`Failed to coin market data recovery: ${err}`, {
                     operation: Operation.connection,
                     height: HeightManager.height.toString(),
-                    success: false,
+                    status: Status.Error,
+                    responseTime: Number(moment().utc().unix() * 1000),
                 });
                 reject(`Failed to coin market data recovery`);
             }

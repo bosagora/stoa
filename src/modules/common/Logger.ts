@@ -16,8 +16,10 @@
 
 import mongoose from "mongoose";
 import path from "path";
+import moment from "moment";
 import winston, { config } from "winston";
 import { MongoDB } from "winston-mongodb";
+import { Operation, Status } from "./LogOperation";
 const { combine, timestamp, label, printf, metadata, json } = winston.format;
 const logFormat = printf(({ level, message, label, timestamp }) => {
     return `[${label}] ${timestamp} ${level} ${message}`;
@@ -82,8 +84,8 @@ export class Logger {
         const customLevel: config.AbstractConfigSetLevels =
         {
             http: 0,
-            info: 1,
-            error: 2,
+            error: 1,
+            info: 2,
             debug: 3,
             warn: 4,
         };
@@ -126,7 +128,12 @@ export class Logger {
             Logger.dbInstance = await mongoose.connect(mongodb_url, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true });
             return true;
         } catch (err) {
-            logger.error(`stoa is unable to build connection for db log. Error:`, err);
+            logger.error(`stoa is unable to build connection for db log. Error:`, err, {
+                operation: Operation.connection,
+                height: "",
+                status: Status.Error,
+                responseTime: Number(moment().utc().unix() * 1000),
+            });
             return false;
         }
     }

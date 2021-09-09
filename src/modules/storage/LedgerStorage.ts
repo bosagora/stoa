@@ -45,12 +45,12 @@ import { IAccountInformation, IMarketCap, IMetaData, IPendingProposal, IProposal
 import { IDatabaseConfig } from "../common/Config";
 import { FeeManager } from "../common/FeeManager";
 import { logger } from "../common/Logger";
+import { Operation, Status } from "../common/LogOperation";
 import { Storages } from "./Storages";
 import { TransactionPool } from "./TransactionPool";
 import { SmartBuffer } from "smart-buffer";
 import { DataCollectionStatus, ProposalStatus } from "../common/enum";
 import { HeightManager } from "../common/HeightManager";
-import { Operation } from "../common/LogOperation";
 
 /**
  * The class that inserts and reads the ledger into the database.
@@ -102,7 +102,12 @@ export class LedgerStorage extends Storages {
     public get transaction_pool(): TransactionPool {
         if (this._transaction_pool !== null) return this._transaction_pool;
         else {
-            logger.error("TransactionPool is not ready yet.");
+            logger.error("TransactionPool is not ready yet.", {
+                operation: Operation.start,
+                height: "",
+                status: Status.Error,
+                responseTime: Number(moment().utc().unix() * 1000),
+            });
             process.exit(1);
         }
     }
@@ -1515,9 +1520,9 @@ export class LedgerStorage extends Storages {
 
                     unlock_height_query = `(
                             SELECT '${JSBI.add(
-                                height.value,
-                                JSBI.BigInt(2016)
-                            ).toString()}' AS unlock_height WHERE EXISTS
+                        height.value,
+                        JSBI.BigInt(2016)
+                    ).toString()}' AS unlock_height WHERE EXISTS
                             (
                                 SELECT
                                     *

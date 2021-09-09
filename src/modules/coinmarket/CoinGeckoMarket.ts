@@ -14,7 +14,8 @@
 
 import { IMarketCap } from "../../Types";
 import { logger } from "../common/Logger";
-
+import { Operation, Status } from "../common/LogOperation";
+import moment from "moment";
 export interface CoinMarket {
     /**
      * Method to ping the coin market
@@ -53,7 +54,12 @@ export class CoinGeckoMarket implements CoinMarket {
                     }
                 })
                 .catch((err: any) => {
-                    logger.error(`Stoa is unable to ping gecko coin market`);
+                    logger.error(`Stoa is unable to ping gecko coin market`, {
+                        operation: Operation.coin_market_data_sync,
+                        height: "",
+                        status: Status.Error,
+                        responseTime: Number(moment().utc().unix() * 1000),
+                    });
                     resolve(false);
                 });
         });
@@ -83,10 +89,20 @@ export class CoinGeckoMarket implements CoinMarket {
                     change_24h: marketCap.bosagora.usd_24h_change,
                     last_updated_at: marketCap.bosagora.last_updated_at,
                 };
-                logger.info(`CoinMarket: Data Fetch Completed at ${marketCap.bosagora.last_updated_at}`);
+                logger.info(`CoinMarket: Data Fetch Completed at ${marketCap.bosagora.last_updated_at}`, {
+                    operation: Operation.coin_market_data_sync,
+                    height: "",
+                    status: Status.Success,
+                    responseTime: Number(moment().utc().unix() * 1000),
+                });
                 return resolve(coinMarketStat);
             } else {
-                logger.error(`Fail to fetch CoinMarket data`);
+                logger.error(`Fail to fetch CoinMarket data`, {
+                    operation: Operation.coin_market_data_sync,
+                    height: "",
+                    status: Status.Error,
+                    responseTime: Number(moment().utc().unix() * 1000),
+                });
                 reject(`Fail to fetch CoinMarket data`);
             }
         });
@@ -116,10 +132,20 @@ export class CoinGeckoMarket implements CoinMarket {
                         vol_24h: marketCapChartRange.total_volumes[index][1],
                     });
                 });
-                logger.info(`CoinMarket: Data recover Completed: length(${coinMarketStat.length})`);
+                logger.info(`CoinMarket: Data recover Completed: length(${coinMarketStat.length})`, {
+                    operation: Operation.coin_market_data_sync,
+                    height: "",
+                    status: Status.Success,
+                    responseTime: Number(moment().utc().unix() * 1000),
+                });
                 return resolve(coinMarketStat);
             } else {
-                logger.error(`Fail to fetch CoinMarket data`);
+                logger.error(`Fail to fetch CoinMarket data`, {
+                    operation: Operation.coin_market_data_sync,
+                    height: "",
+                    status: Status.Error,
+                    responseTime: Number(moment().utc().unix() * 1000),
+                });
                 reject(`Fail to fetch CoinMarket data`);
             }
         });

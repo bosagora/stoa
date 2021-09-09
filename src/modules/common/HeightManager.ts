@@ -14,8 +14,8 @@
 import { Height } from "boa-sdk-ts";
 import Stoa from "../../Stoa";
 import { logger } from "./Logger";
-import { Operation } from "./LogOperation";
-
+import { Operation, Status } from "./LogOperation";
+import moment from "moment";
 export class HeightManager {
     /**
      * Stoa Block height
@@ -39,7 +39,8 @@ export class HeightManager {
                     logger.error("Failed to data lookup to the DB: " + err, {
                         operation: Operation.db,
                         height: HeightManager.height.toString(),
-                        success: false,
+                        status: Status.Error,
+                        responseTime: Number(moment().utc().unix() * 1000),
                     });
                 });
         });
