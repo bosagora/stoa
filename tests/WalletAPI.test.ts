@@ -33,6 +33,7 @@ import { MockDBConfig } from "./TestConfig";
 describe("Test of Stoa API for the wallet", () => {
     const agora_addr: URL = new URL("http://localhost:2831");
     const stoa_addr: URL = new URL("http://localhost:3831");
+    const stoa_private_addr: URL = new URL("http://localhost:4831");
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
@@ -67,7 +68,7 @@ describe("Test of Stoa API for the wallet", () => {
     });
 
     it("Store blocks", async () => {
-        const uri = URI(stoa_addr).directory("block_externalized");
+        const uri = URI(stoa_private_addr).directory("block_externalized");
 
         const url = uri.toString();
         for (let idx = 0; idx < 10; idx++) {
@@ -234,6 +235,7 @@ describe("Test of Stoa API for the wallet", () => {
 describe("Test of Stoa API for the wallet with `sample_data`", () => {
     const agora_addr: URL = new URL("http://localhost:2832");
     const stoa_addr: URL = new URL("http://localhost:3832");
+    const stoa_private_addr: URL = new URL("http://localhost:4832");
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
@@ -269,7 +271,7 @@ describe("Test of Stoa API for the wallet with `sample_data`", () => {
     });
 
     it("Store blocks", async () => {
-        const uri = URI(stoa_addr).directory("block_externalized");
+        const uri = URI(stoa_private_addr).directory("block_externalized");
 
         const url = uri.toString();
 

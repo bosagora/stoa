@@ -195,6 +195,7 @@ describe("Test TransactionPool", () => {
 describe("Test of double spending transaction", () => {
     const agora_addr: URL = new URL("http://localhost:2821");
     const stoa_addr: URL = new URL("http://localhost:3821");
+    const stoa_private_addr: URL = new URL("http://localhost:4821");
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
@@ -235,7 +236,7 @@ describe("Test of double spending transaction", () => {
     it("Test of the path /block_externalized", async () => {
         block = Block.reviver("", sample_data2);
 
-        const uri = URI(stoa_addr).directory("block_externalized");
+        const uri = URI(stoa_private_addr).directory("block_externalized");
 
         const url = uri.toString();
         await client.post(url, { block: sample_data[0] });
@@ -267,7 +268,7 @@ describe("Test of double spending transaction", () => {
             Buffer.alloc(0)
         );
 
-        const uri = URI(stoa_addr).directory("transaction_received");
+        const uri = URI(stoa_private_addr).directory("transaction_received");
 
         const url = uri.toString();
         await client.post(url, { tx });
@@ -292,7 +293,7 @@ describe("Test of double spending transaction", () => {
     it("Send a second transaction with the same input as the first transaction", async () => {
         const tx = block.txs[0];
 
-        const uri = URI(stoa_addr).directory("transaction_received");
+        const uri = URI(stoa_private_addr).directory("transaction_received");
 
         const url = uri.toString();
         await client.post(url, { tx });

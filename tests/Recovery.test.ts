@@ -60,6 +60,7 @@ class TestRecoveryStoa extends TestStoa {
 describe("Test of Recovery", () => {
     const agora_addr: URL = new URL("http://localhost:2801");
     const stoa_addr: URL = new URL("http://localhost:3801");
+    const stoa_private_addr: URL = new URL("http://localhost:4801");
     let agora_node: TestAgora;
     let stoa_server: TestRecoveryStoa;
     let testDBConfig: IDatabaseConfig;
@@ -111,7 +112,7 @@ describe("Test of Recovery", () => {
     });
 
     it("Test for continuous write", async () => {
-        const url = URI(stoa_addr).directory("block_externalized").toString();
+        const url = URI(stoa_private_addr).directory("block_externalized").toString();
 
         await client.post(url, { block: recovery_sample_data[0] });
         await client.post(url, { block: recovery_sample_data[1] });
@@ -132,7 +133,7 @@ describe("Test of Recovery", () => {
     });
 
     it("Test for continuous recovery and write", async () => {
-        const uri = URI(stoa_addr).directory("block_externalized");
+        const uri = URI(stoa_private_addr).directory("block_externalized");
 
         const url = uri.toString();
 
@@ -156,7 +157,7 @@ describe("Test of Recovery", () => {
     it("Test for ignoring already wrote block data", async () => {
         agora_node.delay = 100;
 
-        const uri = URI(stoa_addr).directory("block_externalized");
+        const uri = URI(stoa_private_addr).directory("block_externalized");
 
         const url = uri.toString();
 
@@ -186,7 +187,7 @@ describe("Test of Recovery", () => {
         stoa_server.max_count_on_recovery = 2;
         agora_node.delay = 0;
 
-        const uri = URI(stoa_addr).directory("block_externalized");
+        const uri = URI(stoa_private_addr).directory("block_externalized");
 
         const url = uri.toString();
 
