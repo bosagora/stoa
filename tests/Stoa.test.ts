@@ -51,6 +51,7 @@ import { MockDBConfig } from "./TestConfig";
 describe("Test of Stoa API Server", () => {
     const agora_addr: URL = new URL("http://localhost:2802");
     const stoa_addr: URL = new URL("http://localhost:3802");
+    const stoa_private_addr: URL = new URL("http://localhost:4802");
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
@@ -88,7 +89,7 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /block_externalized", async () => {
-        const uri = URI(stoa_addr).directory("block_externalized");
+        const uri = URI(stoa_private_addr).directory("block_externalized");
 
         const url = uri.toString();
         await client.post(url, { block: sample_data[0] });
@@ -137,7 +138,7 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Tests that sending a pre-image with get /validator and /validators", async () => {
-        const uri = URI(stoa_addr).directory("preimage_received");
+        const uri = URI(stoa_private_addr).directory("preimage_received");
         const response1 = await client.post(uri.toString(), { preimage: sample_preImageInfo });
         assert.strictEqual(response1.status, 200);
 
@@ -346,7 +347,7 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /transaction_received", async () => {
-        const uri = URI(stoa_addr).directory("transaction_received");
+        const uri = URI(stoa_private_addr).directory("transaction_received");
 
         const url = uri.toString();
         const block = Block.reviver("", sample_data2);
@@ -678,6 +679,7 @@ describe("Test of Stoa API Server", () => {
 describe("Test of the path /utxo", () => {
     const agora_addr: URL = new URL("http://localhost:2803");
     const stoa_addr: URL = new URL("http://localhost:3803");
+    const stoa_private_addr: URL = new URL("http://localhost:4803");
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
@@ -712,7 +714,7 @@ describe("Test of the path /utxo", () => {
     });
 
     it("Store two blocks", async () => {
-        const uri = URI(stoa_addr).directory("block_externalized");
+        const uri = URI(stoa_private_addr).directory("block_externalized");
 
         const url = uri.toString();
         await client.post(url, { block: sample_data[0] });
@@ -743,7 +745,7 @@ describe("Test of the path /utxo", () => {
     });
 
     it("Store one pending transaction", async () => {
-        const uri = URI(stoa_addr).directory("transaction_received");
+        const uri = URI(stoa_private_addr).directory("transaction_received");
 
         const url = uri.toString();
         await client.post(url, { tx: Block.reviver("", sample_data2).txs[0] });
@@ -811,6 +813,7 @@ describe("Test of the path /utxo", () => {
 describe("Test of the path /utxo for freezing", () => {
     const agora_addr: URL = new URL("http://localhost:2804");
     const stoa_addr: URL = new URL("http://localhost:3804");
+    const stoa_private_addr: URL = new URL("http://localhost:4804");
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
@@ -846,7 +849,7 @@ describe("Test of the path /utxo for freezing", () => {
     });
 
     it("Store two blocks", async () => {
-        const uri = URI(stoa_addr).directory("block_externalized");
+        const uri = URI(stoa_private_addr).directory("block_externalized");
 
         const url = uri.toString();
         await client.post(url, { block: sample_data[0] });
@@ -945,7 +948,7 @@ describe("Test of the path /utxo for freezing", () => {
 
         // Create block with two transactions
         blocks.push(createBlock(blocks[1], [tx1, tx2]));
-        uri = URI(stoa_addr).directory("block_externalized");
+        uri = URI(stoa_private_addr).directory("block_externalized");
         await client.post(uri.toString(), { block: blocks[2] });
         await delay(100);
     });
@@ -1124,6 +1127,7 @@ describe("Test of the path /merkle_path", () => {
 describe("Test of the path /wallet/balance:address", () => {
     const agora_addr: URL = new URL("http://localhost:2806");
     const stoa_addr: URL = new URL("http://localhost:3806");
+    const stoa_private_addr: URL = new URL("http://localhost:4806");
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
@@ -1161,7 +1165,7 @@ describe("Test of the path /wallet/balance:address", () => {
     it("Store two blocks", async () => {
         blocks.push(Block.reviver("", sample_data[0]));
         blocks.push(Block.reviver("", sample_data[1]));
-        const uri = URI(stoa_addr).directory("block_externalized");
+        const uri = URI(stoa_private_addr).directory("block_externalized");
 
         const url = uri.toString();
         await client.post(url, { block: blocks[0] });
@@ -1211,7 +1215,7 @@ describe("Test of the path /wallet/balance:address", () => {
         );
         blocks.push(createBlock(blocks[1], [tx]));
 
-        const uri = URI(stoa_addr).directory("transaction_received");
+        const uri = URI(stoa_private_addr).directory("transaction_received");
 
         const url = uri.toString();
         await client.post(url, { tx });
@@ -1235,7 +1239,7 @@ describe("Test of the path /wallet/balance:address", () => {
     });
 
     it("Store one block - the pending transactions stored in the last block", async () => {
-        const uri = URI(stoa_addr).directory("block_externalized");
+        const uri = URI(stoa_private_addr).directory("block_externalized");
 
         const url = uri.toString();
         await client.post(url, { block: blocks[2] });

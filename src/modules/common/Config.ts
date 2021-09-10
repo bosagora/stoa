@@ -123,6 +123,11 @@ export class ServerConfig implements IServerConfig {
     public port: number;
 
     /**
+     * The private port on which bind
+     */
+    public private_port: number;
+
+    /**
      * The endpoint of Agora
      */
     public agora_endpoint: URL;
@@ -133,7 +138,7 @@ export class ServerConfig implements IServerConfig {
      * @param port The port on which we bind
      * @param agora_endpoint The endpoint of Agora
      */
-    constructor(address?: string, port?: number, agora_endpoint?: string) {
+    constructor(address?: string, port?: number, private_port?: number, agora_endpoint?: string) {
         const conf = extend(true, {}, ServerConfig.defaultValue());
         extend(true, conf, { address, port, agora_endpoint });
 
@@ -144,6 +149,7 @@ export class ServerConfig implements IServerConfig {
 
         this.address = conf.address;
         this.port = conf.port;
+        this.private_port = conf.private_port;
         this.agora_endpoint = conf.agora_endpoint;
     }
 
@@ -161,6 +167,7 @@ export class ServerConfig implements IServerConfig {
         }
         this.address = conf.address;
         this.port = conf.port;
+        this.private_port = conf.private_port;
         this.agora_endpoint = conf.agora_endpoint;
     }
 
@@ -171,6 +178,7 @@ export class ServerConfig implements IServerConfig {
         return {
             address: "127.0.0.1",
             port: 3836,
+            private_port: 3835,
             agora_endpoint: new URL("http://127.0.0.1:2826"),
         };
     }
@@ -423,6 +431,11 @@ export interface IServerConfig {
      * The port on which we bind
      */
     port: number;
+
+    /**
+     * The priavte port on which bind
+     */
+    private_port: number;
 
     /**
      * The endpoint of Agora

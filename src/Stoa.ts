@@ -13,7 +13,7 @@ import {
     Transaction,
     Utils,
 } from "boa-sdk-ts";
-import { cors_options } from "./cors";
+import { cors_options, cors_private_options } from "./cors";
 import { AgoraClient } from "./modules/agora/AgoraClient";
 import { IDatabaseConfig } from "./modules/common/Config";
 import { FeeManager } from "./modules/common/FeeManager";
@@ -117,11 +117,12 @@ class Stoa extends WebService {
         databaseConfig: IDatabaseConfig,
         agora_endpoint: URL,
         port: number | string,
+        private_port: number | string,
         address: string,
         genesis_timestamp: number,
         coinMarketService?: CoinMarketService
     ) {
-        super(port, address);
+        super(port, private_port, address);
 
         this.genesis_timestamp = genesis_timestamp;
         this._ledger_storage = null;
@@ -172,11 +173,30 @@ class Stoa extends WebService {
 
         // parse application/x-www-form-urlencoded
         this.app.use(bodyParser.urlencoded({ extended: false, limit: "1mb" }));
+        this.private_app.use(bodyParser.urlencoded({ extended: false, limit: "10mb" }));
+
         // parse application/json
         this.app.use(bodyParser.json({ limit: "1mb" }));
+        this.private_app.use(bodyParser.json({ limit: "10mb" }));
         this.app.use(cors(cors_options));
+        this.private_app.use(cors(cors_private_options));
 
         this.app.use(
+            responseTime((req: any, res: any, time: any) => {
+                logger.http(`${req.method} ${req.url}`, {
+                    endpoint: req.url,
+                    RequesterIP: req.ip,
+                    protocol: req.protocol,
+                    httpStatusCode: res.statusCode,
+                    userAgent: req.headers["user-agent"],
+                    accessStatus: res.statusCode !== 200 ? "Denied" : "Granted",
+                    bytesTransmitted: res.socket?.bytesWritten,
+                    responseTime: time,
+                });
+            })
+        );
+
+        this.private_app.use(
             responseTime((req: any, res: any, time: any) => {
                 logger.http(`${req.method} ${req.url}`, {
                     endpoint: req.url,
@@ -225,15 +245,17 @@ class Stoa extends WebService {
         this.app.get("/spv/:hash", isBlackList, this.verifyPayment.bind(this));
         this.app.get("/coinmarketcap", isBlackList, this.getCoinMarketCap.bind(this));
         this.app.get("/coinmarketchart", isBlackList, this.getBoaPriceChart.bind(this));
-        this.app.post("/block_externalized", this.postBlock.bind(this));
-        this.app.post("/block_header_updated", this.postBlockHeaderUpdate.bind(this));
-        this.app.post("/preimage_received", this.putPreImage.bind(this));
-        this.app.post("/transaction_received", this.putTransaction.bind(this));
         this.app.get("/holders", isBlackList, this.getBoaHolders.bind(this));
         this.app.get("/holder_balance_history/:address", isBlackList, this.getHolderBalanceHistory.bind(this));
         this.app.get("/holder/:address", isBlackList, this.getBoaHolder.bind(this));
         this.app.get("/average_fee_chart", isBlackList, this.averageFeeChart.bind(this));
         this.app.get("/search/hash/:hash", isBlackList, this.searchHash.bind(this));
+
+        // It operates on a private port
+        this.private_app.post("/block_externalized", this.postBlock.bind(this));
+        this.private_app.post("/block_header_updated", this.postBlockHeaderUpdate.bind(this));
+        this.private_app.post("/preimage_received", this.putPreImage.bind(this));
+        this.private_app.post("/transaction_received", this.putTransaction.bind(this));
 
         const height: Height = new Height("0");
         await HeightManager.init(this);

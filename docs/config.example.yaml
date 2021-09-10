@@ -5,8 +5,9 @@ server:
   # Address to which we bind (default: 127.0.0.1)
   address: "0.0.0.0"
   # Port on which we bind (default: 3836)
-  port:    4242
-
+  port: 3836
+  # Private port on which we bind (default: 4836)
+  private_port: 4836
   # Endpoint of Agora
   agora_endpoint: http://127.1.1.1:4567
 

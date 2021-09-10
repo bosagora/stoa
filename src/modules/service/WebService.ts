@@ -30,14 +30,29 @@ export class WebService {
     private readonly port: number;
 
     /**
+     * The bind private port
+     */
+    private readonly private_port: number;
+
+    /**
      * The application of express module
      */
     protected app: express.Application;
 
     /**
+     * The private application of express module
+     */
+    protected private_app: express.Application;
+
+    /**
      * The Http server
      */
     protected server: http.Server | null = null;
+
+    /**
+     * The Http private server
+     */
+    protected private_server: http.Server | null = null;
 
     /**
      * The Event Dispatcher
@@ -52,16 +67,21 @@ export class WebService {
     /**
      * Constructor
      * @param port The bind port
+     * @param private_port The bind private port
      * @param address The bind address
      */
-    constructor(port: number | string, address?: string) {
+    constructor(port: number | string, private_port: number | string, address?: string) {
         if (typeof port === "string") this.port = parseInt(port, 10);
         else this.port = port;
+
+        if (typeof private_port === "string") this.private_port = parseInt(private_port, 10);
+        else this.private_port = private_port;
 
         if (address !== undefined) this.address = address;
         else this.address = "";
 
         this.app = express();
+        this.private_app = express();
         this.eventDispatcher = new EventDispatcher();
     }
 
@@ -77,16 +97,23 @@ export class WebService {
      * Asynchronously start the web server
      */
     public async start(): Promise<void> {
-        this.app.set("port", this.port);
-
-        // Listen on provided this.port on this.address.
         return new Promise<void>((resolve, reject) => {
-            // Create HTTP server.
+            // Create HTTP servers
+            this.app.set("port", this.port);
+            this.private_app.set("port", this.private_port);
             this.server = http.createServer(this.app);
-            this._socket = new SocketIO(this.server);
+            this.private_server = http.createServer(this.private_app);
             this.server.on("error", reject);
-            this.server.listen(this.port, this.address, () => {
-                resolve();
+            this.private_server.on("error", reject);
+            this.private_server.listen(this.private_port, this.address, () => {
+                logger.info("Listening on Stoa private port : " + this.private_port);
+                if (this.server && this.private_server)
+                    this.server.listen(this.port, this.address, () => {
+                        logger.info("Listening on Stoa port : " + this.port);
+                        // Open soketIO
+                        if (this.server) this._socket = new SocketIO(this.server);
+                        return resolve();
+                    });
             });
         });
     }

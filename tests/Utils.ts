@@ -14,6 +14,7 @@
 import express, { NextFunction, Request, Response } from "express";
 import * as fs from "fs";
 import * as http from "http";
+import { Schema } from "mongoose";
 import { URL } from "url";
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
@@ -281,7 +282,7 @@ export class TestStoa extends Stoa {
         port: number | string,
         testCoinMarketService?: CoinMarketService
     ) {
-        super(testDBConfig, agora_endpoint, port, "127.0.0.1", 1609459200, testCoinMarketService);
+        super(testDBConfig, agora_endpoint, port, Number(port) + 1000, "127.0.0.1", 1609459200, testCoinMarketService);
     }
 
     public stop(): Promise<void> {
@@ -289,7 +290,12 @@ export class TestStoa extends Stoa {
             if (this.server != null) {
                 if (this.coinMarketService !== undefined) await this.coinMarketService.stop();
                 this.server.close((err?) => {
-                    err === undefined ? resolve() : reject(err);
+                    if (err) reject(err);
+                    if (this.private_server != null) {
+                        this.private_server.close((error?) => {
+                            error === undefined ? resolve() : reject(err);
+                        });
+                    } else resolve();
                 });
             } else resolve();
         });

@@ -72,7 +72,7 @@ describe("Test of Stoa API Server", () => {
 
     before("Create TestStoa", () => {
         testDBConfig = MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig, agora_addr, stoa_addr.port, coinMarketService);
+        stoa_server = new TestStoa(testDBConfig, agora_addr, parseInt(stoa_addr.port, 10), coinMarketService);
         return stoa_server.createStorage();
     });
 

@@ -54,6 +54,7 @@ const stoa: Stoa = new Stoa(
     config.database,
     config.server.agora_endpoint,
     config.server.port,
+    config.server.private_port,
     config.server.address,
     config.consensus.genesis_timestamp,
     new CoinMarketService(

@@ -13,11 +13,20 @@
 
 import cors from "cors";
 
-// CORS policy for stoa
+// CORS policy for public stoa
 export const cors_options: cors.CorsOptions = {
     allowedHeaders: "*",
     credentials: true,
     methods: "GET, POST",
+    origin: "*",
+    preflightContinue: false,
+};
+
+// CORS policy for private stoa
+export const cors_private_options: cors.CorsOptions = {
+    allowedHeaders: "*",
+    credentials: true,
+    methods: "POST",
     origin: "*",
     preflightContinue: false,
 };
