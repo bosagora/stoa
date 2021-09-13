@@ -763,9 +763,9 @@ describe("Test of the path /utxo", () => {
         const uri = URI(stoa_addr).directory("transaction/fees").filename("1000");
 
         const response = await client.get(uri.toString());
-        assert.strictEqual(response.data.medium, "185000");
-        assert.strictEqual(response.data.low, "166500");
-        assert.strictEqual(response.data.high, "203500");
+        assert.strictEqual(response.data.medium, "700000");
+        assert.strictEqual(response.data.low, "700000");
+        assert.strictEqual(response.data.high, "770000");
     });
 
     it("Test getting height at", async () => {

@@ -26,12 +26,9 @@ export class FeeManager {
      */
     public static getTxFee(tx_size: number, disparity: number): [JSBI, JSBI, JSBI] {
         const size = JSBI.BigInt(tx_size);
-        const factor = JSBI.BigInt(200);
-        const minimum = JSBI.BigInt(100_000); // 0.01BOA
-        let medium = JSBI.multiply(size, factor);
-        if (JSBI.lessThan(medium, minimum)) medium = JSBI.BigInt(minimum);
-
-        medium = JSBI.add(medium, JSBI.BigInt(disparity));
+        const rate = JSBI.BigInt(700);
+        const minimum = JSBI.multiply(size, rate);
+        let medium = JSBI.multiply(size, rate);
         if (JSBI.lessThan(medium, minimum)) medium = JSBI.BigInt(minimum);
 
         const width = JSBI.divide(medium, JSBI.BigInt(10));

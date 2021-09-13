@@ -19,14 +19,14 @@ import * as assert from "assert";
 describe("Test of FeeManager", () => {
     it("Test of FeeManager.getTxFee()", async () => {
         assert.deepStrictEqual(FeeManager.getTxFee(500, 0), [
-            JSBI.BigInt(110_000),
-            JSBI.BigInt(100_000),
-            JSBI.BigInt(100_000),
+            JSBI.BigInt(385_000),
+            JSBI.BigInt(350_000),
+            JSBI.BigInt(350_000),
         ]);
         assert.deepStrictEqual(FeeManager.getTxFee(500, 100_000), [
-            JSBI.BigInt(220_000),
-            JSBI.BigInt(200_000),
-            JSBI.BigInt(180_000),
+            JSBI.BigInt(385_000),
+            JSBI.BigInt(350_000),
+            JSBI.BigInt(350_000),
         ]);
     });
 
