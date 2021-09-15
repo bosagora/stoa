@@ -2512,9 +2512,9 @@ export class LedgerStorage extends Storages {
         const sql = `
         SELECT
             TF.address,
-            TF.balance - TF.send + TF.receive AS balance,
-            TF.spendable - TF.send AS spendable,
-            TF.frozen,
+            TF.balance - TF.send_other - TF.send_unfreeze + TF.receive AS balance,
+            TF.spendable - TF.send_other AS spendable,
+            TF.frozen - TF.send_unfreeze AS frozen,
             TF.locked + TF.receive AS locked
         FROM
         (
@@ -2524,7 +2524,8 @@ export class LedgerStorage extends Storages {
                 IFNULL(SUM(CASE WHEN ((unlock_height <= height + 1) AND ((type = 0) OR (type = 2))) THEN amount ELSE 0 END), 0) AS spendable,
                 IFNULL(SUM(CASE WHEN ((unlock_height <= height + 1) AND ((type = 1))) THEN amount ELSE 0 END), 0) AS frozen,
                 IFNULL(SUM(CASE WHEN ((unlock_height > height + 1) AND ((type = 0) OR (type = 2))) THEN amount ELSE 0 END), 0) AS locked,
-                IFNULL(SUM(send), 0) AS send,
+                IFNULL(SUM(send_unfreeze), 0) AS send_unfreeze,
+                IFNULL(SUM(send_other), 0) AS send_other,
                 IFNULL(SUM(receive), 0) AS receive
             FROM
             (
@@ -2548,8 +2549,21 @@ export class LedgerStorage extends Storages {
                             INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
                         WHERE
                             S.address = ?
+                            AND S.type = 1
                         GROUP BY S.address
-                    ), 0) AS send,
+                    ), 0) AS send_unfreeze,
+                    IFNULL(
+                    (
+                        SELECT
+                            SUM(S.amount)
+                        FROM
+                            tx_outputs S
+                            INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
+                            INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
+                        WHERE
+                            S.address = ?
+                            AND S.type != 1
+                    ), 0) AS send_other,
                     IFNULL(
                     (
                         SELECT
@@ -2573,7 +2587,7 @@ export class LedgerStorage extends Storages {
             ) AS T
         ) AS TF;`;
 
-        return this.query(sql, [address, address, address, address]);
+        return this.query(sql, [address, address, address, address, address]);
     }
 
     /**
