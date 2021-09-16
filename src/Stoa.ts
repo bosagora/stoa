@@ -1945,7 +1945,6 @@ class Stoa extends WebService {
                 try {
                     const tx = Transaction.reviver("", stored_data.data);
                     const changes = await this.ledger_storage.putTransactionPool(tx);
-                    const height = await this.agora.getBlockHeight();
 
                     if (changes)
                         logger.info(
