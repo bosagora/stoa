@@ -81,10 +81,10 @@ CREATE TABLE IF NOT EXISTS "enrollments" (
 | type              | INTEGER   |    | Y        |          | The type of transaction |
 | unlock_height     | INTEGER   |    | Y        |          | Height of the block to be unlock|
 | lock_height       | INTEGER   |    | Y        |          | This transaction may only be included in a block with `block_height >= lock_height`|
-| tx_fee            | INTEGER   |    | Y        |          | The fee of this transaction |
-| payload_fee       | INTEGER   |    | Y        |          | The payload fee of this transaction  |
+| tx_fee            | BIGINT(20)|    | Y        |          | The fee of this transaction |
+| payload_fee       | BIGINT(20)|    | Y        |          | The payload fee of this transaction  |
 | tx_size           | INTEGER   |    | Y        |          | The size of this transaction  |
-| calculated_tx_fee | INTEGER   |    | Y        |          | The calculated fee of this transaction |
+| calculated_tx_fee | BIGINT(20)|    | Y        |          | The calculated fee of this transaction |
 | inputs_count      | INTEGER   |    | Y        |          | The number of inputs in the transaction |
 | outputs_count     | INTEGER   |    | Y        |          | The number of outputs in the transaction |
 | payload_size      | INTEGER   |    | Y        |          | The size of data payload in the transaction |
@@ -99,10 +99,10 @@ CREATE TABLE IF NOT EXISTS "transactions" (
     "type"                  INTEGER  NOT NULL,
     "unlock_height"         INTEGER  NOT NULL,
     "lock_height"           INTEGER  NOT NULL,
-    "tx_fee"                INTEGER  NOT NULL,
-    "payload_fee"           INTEGER  NOT NULL,
+    "tx_fee"                BIGINT(20)  NOT NULL,
+    "payload_fee"           BIGINT(20)  NOT NULL,
     "tx_size"               INTEGER  NOT NULL,
-    "calculated_tx_fee"     INTEGER  NOT NULL,
+    "calculated_tx_fee"     BIGINT(20)  NOT NULL,
     "inputs_count"          INTEGER  NOT NULL,
     "outputs_count"         INTEGER  NOT NULL,
     "payload_size"          INTEGER  NOT NULL,
@@ -152,7 +152,7 @@ CREATE TABLE IF NOT EXISTS "tx_inputs" (
 |  tx_hash          | TINYBLOB  |    | Y        |          | The hash of transaction |
 |  utxo_key         | BLOB      |    | Y        |          | The hash of the UTXO|
 |  type             | INTEGER   |    | Y        |          | The type of transaction output  |
-|  amount           | NUMERIC   |    | Y        |          | The monetary value of this output, in 1/10^7|
+|  amount           | BIGINT(20)|    | Y        |          | The monetary value of this output, in 1/10^7|
 |  lock_type        | INTEGER   |    | Y        |          | (0: Key; 1: Hash of Key; 2: Script; 3: Hash of Script) |
 |  lock_bytes       | TINYBLOB  |    | Y        |          | The bytes of lock |
 |  address          | TEXT      |    | Y        |          | The public key, Valid only when lock type is 0. Other than that, it's a blank.|
@@ -167,7 +167,7 @@ CREATE TABLE IF NOT EXISTS "tx_outputs" (
     "tx_hash"               TINYBLOB NOT NULL,
     "utxo_key"              TINYBLOB NOT NULL,
     "type"                  INTEGER  NOT NULL,
-    "amount"                NUMERIC  NOT NULL,
+    "amount"                BIGINT(20)  NOT NULL,
     "lock_type"             INTEGER  NOT NULL,
     "lock_bytes"            TINYBLOB NOT NULL,
     "address"               TEXT     NOT NULL,
@@ -347,8 +347,8 @@ CREATE TABLE IF NOT EXISTS "information" (
 | lock_height       | INTEGER   |    | Y        |          | This transaction may only be included in a block with `block_height >= lock_height`|
 | received_height   | INTEGER   |    | Y        |          | The height of the block on receipt |
 | time              | INTEGER   |    | Y        |          | Received time |
-| tx_fee            | INTEGER   |    | Y        |          | The fee of this transaction |
-| payload_fee       | INTEGER   |    | Y        |          | The payload fee of this transaction  |
+| tx_fee            | BIGINT(20)|    | Y        |          | The fee of this transaction |
+| payload_fee       | BIGINT(20)|    | Y        |          | The payload fee of this transaction  |
 | tx_size           | INTEGER   |    | Y        |          | The size of this transaction  |
 
 ### _Create Script_
@@ -361,8 +361,8 @@ CREATE TABLE IF NOT EXISTS "transaction_pool" (
     "lock_height"           INTEGER  NOT NULL,
     "received_height"       INTEGER  NOT NULL,
     "time"                  INTEGER  NOT NULL,
-    "tx_fee"                INTEGER  NOT NULL,
-    "payload_fee"           INTEGER  NOT NULL,
+    "tx_fee"                BIGINT(20)  NOT NULL,
+    "payload_fee"           BIGINT(20)  NOT NULL,
     "tx_size"               INTEGER  NOT NULL,
     PRIMARY KEY("tx_hash(64)")
 )
@@ -506,14 +506,14 @@ CREATE TABLE IF NOT EXISTS tx_pool (
 | Column            | Data Type | PK | Not NULL | Default  |Description|
 |:----------------- |:--------- |:--:|:--------:| -------- | --------- |
 | height            | INTEGER   | Y  | Y        |          | The height of the block |
-| disparity         | INTEGER   |    | Y        |          | The disparity of transaction fee |
+| disparity         | BIGINT(20)|    | Y        |          | The disparity of transaction fee |
 
 ### _Create Script_
 
 ```sql
 CREATE TABLE IF NOT EXISTS fee_mean_disparity (
     height      INTEGER    NOT NULL,
-    disparity   INTEGER    NOT NULL,
+    disparity   BIGINT(20) NOT NULL,
     PRIMARY KEY (height)
 )
 ```

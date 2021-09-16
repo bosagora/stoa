@@ -141,10 +141,10 @@ export class LedgerStorage extends Storages {
             type                INTEGER  NOT NULL,
             unlock_height       INTEGER  NOT NULL,
             lock_height         INTEGER  NOT NULL,
-            tx_fee              INTEGER  NOT NULL,
-            payload_fee         INTEGER  NOT NULL,
+            tx_fee              BIGINT(20)  NOT NULL,
+            payload_fee         BIGINT(20)  NOT NULL,
             tx_size             INTEGER  NOT NULL,
-            calculated_tx_fee   INTEGER  NOT NULL,
+            calculated_tx_fee   BIGINT(20)  NOT NULL,
             inputs_count        INTEGER  NOT NULL,
             outputs_count       INTEGER  NOT NULL,
             payload_size        INTEGER  NOT NULL,
@@ -242,8 +242,8 @@ export class LedgerStorage extends Storages {
             lock_height         INTEGER    NOT NULL,
             received_height     INTEGER    NOT NULL,
             time                INTEGER    NOT NULL,
-            tx_fee              INTEGER    NOT NULL,
-            payload_fee         INTEGER    NOT NULL,
+            tx_fee              BIGINT(20)     NOT NULL,
+            payload_fee         BIGINT(20)     NOT NULL,
             tx_size             INTEGER    NOT NULL,
             PRIMARY KEY(tx_hash(64))
         );
@@ -289,7 +289,7 @@ export class LedgerStorage extends Storages {
 
         CREATE TABLE IF NOT EXISTS fee_mean_disparity (
             height      INTEGER    NOT NULL,
-            disparity   INTEGER    NOT NULL,
+            disparity   BIGINT(20) NOT NULL,
             PRIMARY KEY (height)
         );
 
