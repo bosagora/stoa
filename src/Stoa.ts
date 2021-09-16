@@ -2166,6 +2166,7 @@ class Stoa extends WebService {
                     height: block.header.height.toString(),
                     hash: block_hash.toString(),
                     tx_hash: block.merkle_tree[tx_idx].toString(),
+                    time_stamp: this.genesis_timestamp + block.header.time_offset,
                     transaction: block.txs[tx_idx],
                 };
                 blockTransactions.push(EmitTransaction);
