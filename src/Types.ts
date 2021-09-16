@@ -902,6 +902,11 @@ export interface IEmitTransaction {
      */
     tx_hash: string;
 
+    /**
+     * Time stamp of the block
+     */
+    time_stamp: number;
+
     transaction: Transaction;
 }
 
