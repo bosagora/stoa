@@ -101,14 +101,15 @@ describe("Test of Stoa API Server", () => {
 
     before("Start TestStoa", async () => {
         await stoa_server.start();
-        return;
+        await stoa_server.voteraService?.stop();
+        await stoa_server.voteraService?.start(stoa_server, 1);
     });
 
     after("Stop Stoa and Agora server instances", async () => {
-        await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
         await stoa_server.voteraService?.stop();
-        await votera_server.stop();
+        await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
         await stoa_server.stop();
+        await votera_server.stop();
         await gecko_server.stop();
         await agora_server.stop();
     });
@@ -986,5 +987,61 @@ describe("Test of Stoa API Server", () => {
             ],
         };
         assert.deepStrictEqual(data, expected);
+        await delay(500);
+    });
+
+    it("Test for path /proposals", async () => {
+        await delay(500);
+        const uri = URI(stoa_addr)
+            .directory("/proposals")
+        const response = await client.get(uri.toString());
+        let expected = {
+            proposal_id: 'ID1234567890',
+            proposal_title: 'Title',
+            proposal_type: 1,
+            fund_amount: 45161676009963520,
+            vote_start_height: 59395,
+            vote_end_height: 53771,
+            proposal_status: 'Ongoing',
+            proposal_date: 1627015766,
+            proposer_name: 'test',
+            full_count: 1
+        }
+        assert.deepStrictEqual(response.data[0], expected);
+    });
+
+    it("Test for path /proposal/:proposal_id", async () => {
+        const uri = URI(stoa_addr)
+            .directory("/proposal")
+            .filename("ID1234567890");
+        const response = await client.get(uri.toString());
+        let expected = {
+            proposal_title: 'Title',
+            proposal_id: 'ID1234567890',
+            detail: 'Description Make better world!',
+            proposal_tx_hash: '0x917fba7333947d00cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a',
+            fee_tx_hash: '0x8b6a2e1ecc3616ad63c73d606c4019407ebfd06a122519e7bd88d99af92d19d9621323d7c2e68593053a570522b6bc8575d1ee45a74ee38726f297a5ce08e33d',
+            proposer_name: 'test',
+            fund_amount: 45161676009963520,
+            proposal_fee: 65432246592471040,
+            proposal_type: 'Fund',
+            vote_start_height: 59395,
+            voting_start_date: moment('2021-07-26').utc().unix(),
+            vote_end_height: 53771,
+            voting_end_date: moment('2021-08-02').utc().unix(),
+            proposal_status: 'Ongoing',
+            proposal_date: 1627015766,
+            pre_evaluation_start_time: moment("2021-08-18").utc().unix(),
+            pre_evaluation_end_time: moment("2021-08-18").utc().unix(),
+            ave_pre_evaluation_score: 7,
+            proposer_address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67',
+            proposal_fee_address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67',
+            urls: [
+                {
+                    url: 'https://s3.ap-northeast-2.amazonaws.com/com.kosac.defora.beta.upload-image/BOASCAN_Requirements_Documentation_Version1_0_EN_copy_fb69a8a7d5.pdf'
+                }
+            ]
+        }
+        assert.deepStrictEqual(response.data, expected);
     });
 });
