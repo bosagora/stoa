@@ -1546,9 +1546,9 @@ export class LedgerStorage extends Storages {
 
                     unlock_height_query = `(
                             SELECT '${JSBI.add(
-                                height.value,
-                                JSBI.BigInt(2016)
-                            ).toString()}' AS unlock_height WHERE EXISTS
+                        height.value,
+                        JSBI.BigInt(2016)
+                    ).toString()}' AS unlock_height WHERE EXISTS
                             (
                                 SELECT
                                     *
@@ -3586,6 +3586,87 @@ export class LedgerStorage extends Storages {
             } catch (err) {
                 return reject(err);
             }
+        });
+    }
+
+    /**
+     * Get proposal list
+     * @param limit Maximum record count that can be obtained from one query
+     * @param page The number on the page, this value begins with 1
+     * @returns returns the Promise with requested data
+     * and if an error occurs the .catch is called with an error.
+     */
+    public getProposals(limit: number, page: number): Promise<any[]> {
+        const sql = `
+                SELECT 
+                    P.proposal_id,
+                    P.proposal_title,
+                    P.proposal_type,
+                    P.fund_amount,
+                    P.vote_start_height,
+                    P.vote_end_height,
+                    P.proposal_status,
+                    M.submit_time,
+                    M.proposer_name,
+                    count(*) OVER() AS full_count
+                    FROM proposal P
+                    LEFT OUTER JOIN proposal_metadata M
+                    ON(P.proposal_id = M.proposal_id)
+                    LIMIT ? OFFSET ?
+            `;
+        return this.query(sql, [limit, limit * (page - 1)]);
+    }
+
+    /**
+     * Get proposal by proposal_id
+     * @param proposal_id Id of the requested proposal
+     * @returns returns the Promise with requested data
+     * and if an error occurs the .catch is called with an error.
+     */
+    public getProposalById(proposal_id: string): Promise<any> {
+        const sql = `
+                SELECT P.proposal_title, 
+                    P.proposal_id,
+                    M.detail,
+                    P.tx_hash,
+                    M.voting_fee_hash,
+                    M.proposer_name,
+                    P.fund_amount,
+                    P.proposal_fee,
+                    P.proposal_type,
+                    P.vote_start_height,
+                    M.voting_start_date,
+                    P.vote_end_height,
+                    M.voting_end_date,
+                    M.submit_time,
+                    P.proposal_status,
+                    M.pre_evaluation_start_time,
+                    M.pre_evaluation_end_time,
+                    M.ave_pre_evaluation_score,
+                    P.proposer_address,
+                    P.proposal_fee_address
+                FROM proposal P 
+                LEFT OUTER JOIN proposal_metadata M
+                ON (P.proposal_id = M.proposal_id)
+                WHERE P.proposal_id = ?
+            `;
+        const urls = `
+                SELECT url
+                FROM proposal_attachments
+                WHERE proposal_id=?`
+        const result: any = {};
+        // return this.query(sql, [proposal_id]);
+        return new Promise<any>((resolve, reject) => {
+            this.query(sql, [proposal_id.toString()])
+                .then((rows: any) => {
+                    result.proposalData = rows;
+                    return this.query(urls, [proposal_id.toString()]);
+                })
+                .then((rows: any[]) => {
+                    result.url = rows;
+                    resolve(result);
+                })
+                .catch(reject);
         });
     }
 

@@ -556,7 +556,7 @@ export enum DisplayTxType {
  */
 export class ConvertTypes {
     static tx_types: string[] = ["payment", "freeze"];
-    static proposal_types: string[] = ["system", "fund"];
+    static proposal_types: string[] = ["System", "Fund"];
     static display_tx_type: string[] = ["inbound", "outbound", "freeze", "payload"];
 
     public static DisplayTxTypeToString(type: OutputType): string {
@@ -881,6 +881,172 @@ export interface IEmitBlock {
     time_stamp: number;
 
     block: Block;
+}
+
+/**
+ * Interface for Proposal List
+ */
+export interface IProposalList {
+    /**
+     * Proposal id
+     */
+    proposal_id: string;
+
+    /**
+     * Title of the proposal
+     */
+    proposal_title: string;
+
+    /**
+     * Proposal type
+     */
+    proposal_type: number;
+
+    /**
+     * Proposal fund amount
+     */
+    fund_amount: number;
+
+    /**
+     * Proposal voting start height
+     */
+    vote_start_height: number;
+
+    /**
+     * Proposal voting end height
+     */
+    vote_end_height: number;
+
+    /**
+     * Proposal status
+     */
+    proposal_status: number;
+
+    /**
+     * Proposal date
+     */
+    proposal_date: number;
+
+    /**
+     * Proposer name 
+     */
+    proposer_name: string;
+
+    /**
+     * Full count
+     */
+    full_count: number;
+}
+
+/**
+ * Interface for Proposal
+ */
+export interface IProposalAPI {
+    /**
+     * Proposal id
+     */
+    proposal_id: string;
+
+    /**
+     * Title of the proposal
+     */
+    proposal_title: string;
+
+    /**
+     * Proposal type
+     */
+    proposal_type: string;
+
+    /**
+     * Proposal fund amount
+     */
+    fund_amount: number;
+
+    /**
+     * Proposal voting start height
+     */
+    vote_start_height: number;
+
+    /**
+     * Proposal voting end height
+     */
+    vote_end_height: number;
+
+    /**
+     * Proposal status
+     */
+    proposal_status: number;
+
+    /**
+     * Proposal date
+     */
+    proposal_date: number;
+
+    /**
+     * Proposal detail
+     */
+    detail: string;
+
+    /**
+     * Proposal transaction hash
+     */
+    proposal_tx_hash: string;
+
+    /**
+     * Proposer name 
+     */
+    proposer_name: string;
+
+    /**
+     * Proposal Fee transaction hash
+     */
+    fee_tx_hash: string;
+
+    /**
+     * Proposal fee
+     */
+    proposal_fee: number;
+
+    /**
+     * Proposal voting start date
+     */
+    voting_start_date: number;
+
+    /**
+     * Proposal voting end date
+     */
+    voting_end_date: number;
+
+    /**
+     * Proposal pre evaluation start time
+     */
+    pre_evaluation_start_time: number;
+
+    /**
+     * Proposal pre evaluation end time
+     */
+    pre_evaluation_end_time: number;
+
+    /**
+     * Proposal pre evaluation average score
+     */
+    ave_pre_evaluation_score: number;
+
+    /**
+     * Proposer address
+     */
+    proposer_address: string;
+
+    /**
+     * Wallet address to desposit
+     */
+    proposal_fee_address: string;
+
+    /**
+     * Attachment URLs
+     */
+    urls: string[];
+
 }
 
 /**
