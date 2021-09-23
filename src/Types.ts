@@ -889,6 +889,141 @@ export interface IEmitBlock {
 }
 
 /**
+ * Interface for Proposal List
+ */
+export interface IProposalList {
+    /**
+     * Proposal id
+     */
+    proposal_id: string;
+
+    /**
+     * Title of the proposal
+     */
+    proposal_title: string;
+
+    /**
+     * Proposal type
+     */
+    proposal_type: number;
+
+    /**
+     * Proposal fund amount
+     */
+    fund_amount: number;
+
+    /**
+     * Proposal voting start height
+     */
+    vote_start_height: number;
+
+    /**
+     * Proposal voting end height
+     */
+    vote_end_height: number;
+
+    /**
+     * Proposal status
+     */
+    proposal_status: number;
+
+    /**
+     * Proposal date
+     */
+    proposal_date: number;
+
+    /**
+     * Proposer name 
+     */
+    proposer_name: string;
+
+    /**
+     * Full count
+     */
+    full_count: number;
+}
+
+/**
+ * Interface for Proposal
+ */
+export interface IProposalAPI {
+    /**
+     * Proposal id
+     */
+    proposal_id: string;
+
+    /**
+     * Title of the proposal
+     */
+    proposal_title: string;
+
+    /**
+     * Proposal type
+     */
+    proposal_type: number;
+
+    /**
+     * Proposal fund amount
+     */
+    fund_amount: number;
+
+    /**
+     * Proposal voting start height
+     */
+    vote_start_height: number;
+
+    /**
+     * Proposal voting end height
+     */
+    vote_end_height: number;
+
+    /**
+     * Proposal status
+     */
+    proposal_status: number;
+
+    /**
+     * Proposal date
+     */
+    proposal_date: number;
+
+    /**
+     * Proposal detail
+     */
+    detail: string;
+
+    /**
+     * Proposal transaction hash
+     */
+    proposal_tx_hash: string;
+
+    /**
+     * Proposer name 
+     */
+    proposer_name: string;
+
+    /**
+     * Proposal fee tx hash
+     */
+    proposal_fee_tx_hash: string;
+
+    /**
+     * Proposal fee
+     */
+    proposal_fee: number;
+
+    /**
+     * Proposal start date
+     */
+    voting_start_date: number;
+
+    /**
+     * Proposal end date
+     */
+    voting_end_date: number;
+}
+
+/**
  * Interface for new Transaction Emit
  */
 export interface IEmitTransaction {
