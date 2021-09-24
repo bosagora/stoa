@@ -31,7 +31,7 @@
         "argparse": "^2.0.1",
         "assert": "^2.0.0",
         "axios": "^0.21.2",
-        "boa-sdk-ts": "^0.1.7",
+        "boa-sdk-ts": "^0.2.0",
         "boa-sodium-ts": "^0.1.1",
         "body-parser": "^1.19.0",
         "coingecko-api-v3": "0.0.11",

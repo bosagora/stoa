@@ -52,7 +52,7 @@ import {
     ITxStatus,
     IUnspentTxOutput,
     ValidatorData,
-    IPendingProposal
+    IPendingProposal,
 } from "./Types";
 
 import bodyParser from "body-parser";
@@ -114,6 +114,11 @@ class Stoa extends WebService {
     private readonly genesis_timestamp: number;
 
     /**
+     * The cycle length for a validator
+     */
+    private readonly validator_cycle: number;
+
+    /**
      * Constructor
      * @param databaseConfig Mysql database configuration
      * @param agora_endpoint The network endpoint to connect to Agora
@@ -128,12 +133,14 @@ class Stoa extends WebService {
         private_port: number | string,
         address: string,
         genesis_timestamp: number,
+        validator_cycle: number,
         votera_service?: VoteraService,
-        coinMarketService?: CoinMarketService,
+        coinMarketService?: CoinMarketService
     ) {
         super(port, private_port, address);
 
         this.genesis_timestamp = genesis_timestamp;
+        this.validator_cycle = validator_cycle;
         this._ledger_storage = null;
         this.databaseConfig = databaseConfig;
         this.coinMarketService = coinMarketService;
@@ -151,7 +158,7 @@ class Stoa extends WebService {
      * Creates a instance of LedgerStorage
      */
     public createStorage(): Promise<void> {
-        return LedgerStorage.make(this.databaseConfig, this.genesis_timestamp).then((storage) => {
+        return LedgerStorage.make(this.databaseConfig, this.genesis_timestamp, this.validator_cycle).then((storage) => {
             this._ledger_storage = storage;
         });
     }
@@ -205,7 +212,7 @@ class Stoa extends WebService {
                     time: `${time / 1000} seconds`,
                     responseTime: Number(moment().utc().unix() * 1000),
                     height: HeightManager.height.toString(),
-                    operation: Operation.Http_request
+                    operation: Operation.Http_request,
                 });
             })
         );
@@ -342,12 +349,13 @@ class Stoa extends WebService {
 
         const height = req.query.height !== undefined ? new Height(req.query.height.toString()) : null;
 
-        if (height != null) logger.http(`GET /validators height=${height.toString()}`, {
-            operation: Operation.Http_request,
-            height: HeightManager.height.toString(),
-            status: Status.Error,
-            responseTime: Number(moment().utc().unix() * 1000),
-        });
+        if (height != null)
+            logger.http(`GET /validators height=${height.toString()}`, {
+                operation: Operation.Http_request,
+                height: HeightManager.height.toString(),
+                status: Status.Error,
+                responseTime: Number(moment().utc().unix() * 1000),
+            });
 
         this.ledger_storage
             .getValidatorsAPI(height, null)
@@ -442,12 +450,13 @@ class Stoa extends WebService {
 
         const address: string = String(req.params.address);
 
-        if (height != null) logger.http(`GET /validator/${address} height=${height.toString()}`, {
-            operation: Operation.connection,
-            height: HeightManager.height.toString(),
-            status: Status.Error,
-            responseTime: Number(moment().utc().unix() * 1000),
-        });
+        if (height != null)
+            logger.http(`GET /validator/${address} height=${height.toString()}`, {
+                operation: Operation.connection,
+                height: HeightManager.height.toString(),
+                status: Status.Error,
+                responseTime: Number(moment().utc().unix() * 1000),
+            });
 
         this.ledger_storage
             .getValidatorsAPI(height, address)
@@ -846,9 +855,9 @@ class Stoa extends WebService {
         filter_type =
             req.query.type !== undefined
                 ? req.query.type
-                    .toString()
-                    .split(",")
-                    .map((m) => ConvertTypes.toDisplayTxType(m))
+                      .toString()
+                      .split(",")
+                      .map((m) => ConvertTypes.toDisplayTxType(m))
                 : [0, 1, 2, 3];
 
         if (filter_type.find((m) => m < 0) !== undefined) {
@@ -1111,7 +1120,6 @@ class Stoa extends WebService {
                             utxo: new Hash(row.utxo_key, Endian.Little).toString(),
                             enroll_sig: new Hash(row.enroll_sig, Endian.Little).toString(),
                             commitment: new Hash(row.commitment, Endian.Little).toString(),
-                            cycle_length: row.cycle_length,
                             full_count: row.full_count,
                         });
                     }
@@ -1613,12 +1621,13 @@ class Stoa extends WebService {
 
         const height = req.query.height !== undefined ? new Height(req.query.height.toString()) : null;
 
-        if (height != null) logger.http(`GET /wallet/blocks/header height=${height.toString()}`, {
-            operation: Operation.Http_request,
-            height: HeightManager.height.toString(),
-            status: Status.Error,
-            responseTime: Number(moment().utc().unix() * 1000),
-        });
+        if (height != null)
+            logger.http(`GET /wallet/blocks/header height=${height.toString()}`, {
+                operation: Operation.Http_request,
+                height: HeightManager.height.toString(),
+                status: Status.Error,
+                responseTime: Number(moment().utc().unix() * 1000),
+            });
 
         this.ledger_storage
             .getWalletBlocksHeaderInfo(height)
@@ -1959,7 +1968,7 @@ class Stoa extends WebService {
                     if (updated)
                         logger.info(
                             `Update a blockHeader : ${block_header.toString()}, ` +
-                            `block height : ${block_header.height.toString()}`,
+                                `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -1970,7 +1979,7 @@ class Stoa extends WebService {
                     if (put)
                         logger.info(
                             `puts a blockHeader history : ${block_header.toString()}, ` +
-                            `block height : ${block_header.height.toString()}`,
+                                `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -1997,8 +2006,9 @@ class Stoa extends WebService {
                     if (changes)
                         logger.info(
                             `Saved a pre-image utxo : ${pre_image.utxo.toString().substr(0, 18)}, ` +
-                            `hash : ${pre_image.hash.toString().substr(0, 18)}, pre-image height : ${pre_image.height
-                            }`,
+                                `hash : ${pre_image.hash.toString().substr(0, 18)}, pre-image height : ${
+                                    pre_image.height
+                                }`,
                             {
                                 operation: Operation.db,
                                 height: HeightManager.height.toString(),
@@ -2582,7 +2592,8 @@ class Stoa extends WebService {
      */
     public getPendingProposal(): Promise<IPendingProposal[]> {
         return new Promise<IPendingProposal[]>((resolve, reject) => {
-            this.ledger_storage.getPendingProposal()
+            this.ledger_storage
+                .getPendingProposal()
                 .then((data: any[]) => {
                     const proposals: IPendingProposal[] = [];
                     for (const row of data) {
@@ -2599,14 +2610,15 @@ class Stoa extends WebService {
                             vote_fee: JSBI.BigInt(row.vote_fee),
                             proposal_fee_tx_hash: new Hash(row.proposal_fee_tx_hash, Endian.Little),
                             proposer_address: row.proposer_address,
-                            proposal_fee_address: row.proposal_fee_address
+                            proposal_fee_address: row.proposal_fee_address,
                         });
                     }
-                    resolve(proposals)
-                }).catch((err) => {
-                    reject(err);
+                    resolve(proposals);
                 })
-        })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
     }
 
     /**

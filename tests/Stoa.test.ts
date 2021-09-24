@@ -219,7 +219,7 @@ describe("Test of Stoa API Server", () => {
         const commitment = new Hash(
             "0xe0c04a5bd47ffc5b065b7d397e251016310c43dc77220bf803b73f1183da00b0e67602b1f95cb18a0059aa1cdf2f9adafe979998364b38cd5c15d92b9b8fd815"
         );
-        const enrollment = new Enrollment(utxo_key, commitment, 20, enroll_sig);
+        const enrollment = new Enrollment(utxo_key, commitment, enroll_sig);
         const header = new BlockHeader(
             new Hash(Buffer.alloc(Hash.Width)),
             new Height("20"),
@@ -321,13 +321,11 @@ describe("Test of Stoa API Server", () => {
         assert.strictEqual(response.data.height, "1");
         assert.strictEqual(
             response.data.hash,
-            "0x5e57db5e2c2effd180f831330ddf2ea2686817b4f14c8ee60700ecb5c4e9130" +
-                "ce5fe1b9785bc2b5cc6c5fd8c1682647b258419cafa637f07f0aa4e88c9a7de9f"
+            "0x100057b7dfdcee4174231ed110d48e420276745ebfa5c307e28754facbeb4b33267cde253d91da336b1f3a5ad6a0fb6cb514b611b1d70638659becd09780c11d"
         );
         assert.strictEqual(
             response.data.merkle_root,
-            "0x515a30d31fbd031d63f041b92184f32baf00d08e4120da9299bc336c6f980f2" +
-                "245b11e70bb1dcb7c2279ead9dab1c37b62dee8414083ae8346d166cf033cddfb"
+            "0x515a30d31fbd031d63f041b92184f32baf00d08e4120da9299bc336c6f980f2245b11e70bb1dcb7c2279ead9dab1c37b62dee8414083ae8346d166cf033cddfb"
         );
         assert.strictEqual(response.data.time_stamp, 1609459800);
 
@@ -337,13 +335,11 @@ describe("Test of Stoa API Server", () => {
         assert.strictEqual(response.data.height, "0");
         assert.strictEqual(
             response.data.hash,
-            "0xfca7a6455549ff1886969228b12dc5db03c67470145ed3e8e318f0c356a364e" +
-                "abbf1eeefc06232cfa7f3cdf3017521ee54b2b4542241650781022552ddc3dc99"
+            "0x891808f2bada31adeab0e312775cef39ba5c301bf6cce97d06b54c626ec2ed53a5475b224f63f779d405f1441d2121e1285f173347e650b65e77d00f344fdaea"
         );
         assert.strictEqual(
             response.data.merkle_root,
-            "0x67218493be437c25dc5884abdc8ee40e61f0af79aa9af8ab9bd8b0632eaaca2" +
-                "38b4c054f114b046da0d5911b1b205ba540d07c5dc01560beafe564e5f3d101c9"
+            "0x67218493be437c25dc5884abdc8ee40e61f0af79aa9af8ab9bd8b0632eaaca238b4c054f114b046da0d5911b1b205ba540d07c5dc01560beafe564e5f3d101c9"
         );
         assert.strictEqual(response.data.time_stamp, 1609459200);
     });
@@ -402,7 +398,7 @@ describe("Test of Stoa API Server", () => {
                 "0xfbaaebc15bb1618465077fed2425a826d88c7f5ae0197634f056bfbad12a7a74b28cc82951e889255e149707bd3ef64eb01121875c766b5d24afed176d7d255c",
             block: {
                 height: 1,
-                hash: "0x5e57db5e2c2effd180f831330ddf2ea2686817b4f14c8ee60700ecb5c4e9130ce5fe1b9785bc2b5cc6c5fd8c1682647b258419cafa637f07f0aa4e88c9a7de9f",
+                hash: "0x100057b7dfdcee4174231ed110d48e420276745ebfa5c307e28754facbeb4b33267cde253d91da336b1f3a5ad6a0fb6cb514b611b1d70638659becd09780c11d",
             },
         };
         assert.deepStrictEqual(response_confirmed.data, expected_confirmed);

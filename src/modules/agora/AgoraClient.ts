@@ -136,8 +136,8 @@ export class AgoraClient implements FullNodeAPI {
     public static checkMerklePath(merkle_path: Hash[], tx_hash: Hash, tx_index: number): Hash {
         let root: Hash = tx_hash;
         for (const otherside of merkle_path) {
-            if (tx_index & 1) root = hashMulti(otherside.data, root.data);
-            else root = hashMulti(root.data, otherside.data);
+            if (tx_index & 1) root = hashMulti(otherside, root);
+            else root = hashMulti(root, otherside);
 
             tx_index >>= 1;
         }

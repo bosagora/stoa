@@ -61,7 +61,7 @@ describe("Test TransactionPool", () => {
 
     before("Prepare Storage", async () => {
         testDBConfig = await MockDBConfig();
-        return LedgerStorage.make(testDBConfig, 1609459200).then(async (result) => {
+        return LedgerStorage.make(testDBConfig, 1609459200, 20).then(async (result) => {
             ledger_storage = result;
             transaction_pool = new TransactionPool(ledger_storage);
             return transaction_pool.loadSpenderList();

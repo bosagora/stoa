@@ -59,7 +59,12 @@ export class LedgerStorage extends Storages {
     /**
      * The genesis timestamp
      */
-    private genesis_timestamp: number;
+    private readonly genesis_timestamp: number;
+
+    /**
+     * The cycle length for a validator
+     */
+    private readonly validator_cycle: number;
 
     /**
      * The pool of transactions to manage double-spent transactions.
@@ -69,19 +74,30 @@ export class LedgerStorage extends Storages {
     /**
      * Construct an instance of `LedgerStorage`, exposes callback API.
      */
-    constructor(databaseConfig: IDatabaseConfig, genesis_timestamp: number, callback: (err: Error | null) => void) {
+    constructor(
+        databaseConfig: IDatabaseConfig,
+        genesis_timestamp: number,
+        validator_cycle: number,
+        callback: (err: Error | null) => void
+    ) {
         super(databaseConfig, callback);
         this.genesis_timestamp = genesis_timestamp;
+        this.validator_cycle = validator_cycle;
     }
 
     /**
      * Construct an instance of `LedgerStorage` using `Promise` API.
      */
-    public static make(databaseConfig: IDatabaseConfig, genesis_timestamp: number): Promise<LedgerStorage> {
+    public static make(
+        databaseConfig: IDatabaseConfig,
+        genesis_timestamp: number,
+        validator_cycle: number
+    ): Promise<LedgerStorage> {
         return new Promise<LedgerStorage>((resolve, reject) => {
             const result: LedgerStorage = new LedgerStorage(
                 databaseConfig,
                 genesis_timestamp,
+                validator_cycle,
                 async (err: Error | null) => {
                     if (err) reject(err);
                     else {
@@ -142,7 +158,6 @@ export class LedgerStorage extends Storages {
             enrollment_index    INTEGER  NOT NULL,
             utxo_key            TINYBLOB NOT NULL,
             commitment          TINYBLOB NOT NULL,
-            cycle_length        INTEGER  NOT NULL,
             enroll_sig          TINYBLOB NOT NULL,
             PRIMARY KEY(block_height, enrollment_index)
         );
@@ -380,7 +395,7 @@ export class LedgerStorage extends Storages {
 
             PRIMARY KEY(block_height, proposal_id(64), app_name(64))
         );
-        
+
         CREATE TABLE IF NOT EXISTS proposal_metadata
         (
             proposal_id                 TEXT           NOT NULL,
@@ -412,7 +427,7 @@ export class LedgerStorage extends Storages {
             url             TEXT      NOT NULL,
             mime            TEXT      NOT NULL,
             doc_hash        TEXT      NOT NULL,
-            
+
             PRIMARY KEY(proposal_id(64), attachment_id(64))
         );
 
@@ -428,7 +443,7 @@ export class LedgerStorage extends Storages {
 
        DROP TRIGGER IF EXISTS proposal_trigger;
        CREATE TRIGGER proposal_trigger AFTER INSERT ON
-       proposal_metadata 
+       proposal_metadata
        FOR EACH ROW
        BEGIN
            UPDATE proposal SET data_collection_status = '${DataCollectionStatus.COMPLETED}' WHERE proposal_id = NEW.proposal_id;
@@ -713,15 +728,14 @@ export class LedgerStorage extends Storages {
                 storage
                     .query(
                         `INSERT INTO enrollments
-                        (block_height, enrollment_index, utxo_key, commitment, cycle_length, enroll_sig)
+                        (block_height, enrollment_index, utxo_key, commitment, enroll_sig)
                     VALUES
-                        (?, ?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?)`,
                         [
                             height.toString(),
                             enroll_idx,
                             enroll.utxo_key.toBinary(Endian.Little),
                             enroll.commitment.toBinary(Endian.Little),
-                            enroll.cycle_length,
                             enroll.enroll_sig.toBinary(Endian.Little),
                         ],
                         conn
@@ -1087,7 +1101,7 @@ export class LedgerStorage extends Storages {
 
                             for (let sender_index = 0; sender_index < senders.length; sender_index++) {
                                 for (let receiver_index = 0; receiver_index < receivers.length; receiver_index++) {
-                                    if (!(senders.length) || !(receivers.length)) {
+                                    if (!senders.length || !receivers.length) {
                                         break;
                                     }
                                     if (senders[sender_index].address === receivers[receiver_index].address) {
@@ -1366,7 +1380,7 @@ export class LedgerStorage extends Storages {
                         (SELECT block_height
                         FROM enrollments
                         WHERE utxo_key = ?
-                            AND ? < (block_height + cycle_length)
+                            AND ? < (block_height + ?)
                         ORDER BY block_height ASC
                         LIMIT 1)
                     AND ? > validators.preimage_height`,
@@ -1377,6 +1391,7 @@ export class LedgerStorage extends Storages {
                     enroll_key,
                     enroll_key,
                     pre_image.height.toString(),
+                    this.validator_cycle,
                     pre_image.height.toString(),
                 ]
             )
@@ -1421,7 +1436,7 @@ export class LedgerStorage extends Storages {
      */
     public getEnrollments(height: Height): Promise<any[]> {
         const sql = `SELECT
-            block_height, enrollment_index, utxo_key, commitment, cycle_length, enroll_sig
+            block_height, enrollment_index, utxo_key, commitment, enroll_sig
         FROM
             enrollments
         WHERE block_height = ?`;
@@ -1520,9 +1535,9 @@ export class LedgerStorage extends Storages {
 
                     unlock_height_query = `(
                             SELECT '${JSBI.add(
-                        height.value,
-                        JSBI.BigInt(2016)
-                    ).toString()}' AS unlock_height WHERE EXISTS
+                                height.value,
+                                JSBI.BigInt(2016)
+                            ).toString()}' AS unlock_height WHERE EXISTS
                             (
                                 SELECT
                                     *
@@ -2115,7 +2130,6 @@ export class LedgerStorage extends Storages {
                     enrollment_index,
                     utxo_key,
                     commitment,
-                    cycle_length,
                     enroll_sig
                 FROM enrollments
                 GROUP BY utxo_key, block_height
@@ -2123,7 +2137,7 @@ export class LedgerStorage extends Storages {
             cur_height +
             ` AND ` +
             cur_height +
-            ` <= (avail_height + cycle_length)
+            ` <= (avail_height + ?)
                 ) as enrollments
             LEFT JOIN validators
                 ON enrollments.enrolled_at = validators.enrolled_at
@@ -2135,7 +2149,7 @@ export class LedgerStorage extends Storages {
 
         sql += ` ORDER BY enrollments.enrolled_at ASC, enrollments.utxo_key ASC;`;
 
-        return this.query(sql, []);
+        return this.query(sql, [this.validator_cycle]);
     }
 
     /**
@@ -2173,7 +2187,6 @@ export class LedgerStorage extends Storages {
             proposal_id: string
         ): Promise<void> {
             return new Promise<void>((resolve, reject) => {
-
                 storage
                     .query(
                         `INSERT INTO proposal_fee
@@ -2246,28 +2259,25 @@ export class LedgerStorage extends Storages {
                         case ProposalFeeData.HEADER: {
                             let buffer = SmartBuffer.fromBuffer(tx.payload);
                             let proposal_fee = ProposalFeeData.deserialize(buffer);
-                            await save_proposal_fee(storage, block_height, tx_hash, proposal_fee.proposal_id)
+                            await save_proposal_fee(storage, block_height, tx_hash, proposal_fee.proposal_id);
                             break;
                         }
-                        case ProposalData.HEADER:
-                            {
-                                let buffer = SmartBuffer.fromBuffer(tx.payload);
-                                let proposalData: ProposalData = ProposalData.deserialize(buffer);
-                                await save_proposal_data(storage, block_height, tx_hash, proposalData);
-                                break;
-                            }
-                        case BallotData.HEADER:
-                            {
-                                //TODO
-                                break;
-                            }
+                        case ProposalData.HEADER: {
+                            let buffer = SmartBuffer.fromBuffer(tx.payload);
+                            let proposalData: ProposalData = ProposalData.deserialize(buffer);
+                            await save_proposal_data(storage, block_height, tx_hash, proposalData);
+                            break;
+                        }
+                        case BallotData.HEADER: {
+                            //TODO
+                            break;
+                        }
                         default: {
                             break;
                         }
                     }
                     resolve();
-                }
-                catch (err) {
+                } catch (err) {
                     logger.error("Failed to put proposal's information:" + err, {
                         operation: Operation.block_sync,
                         height: HeightManager.height.toString(),
@@ -2291,7 +2301,6 @@ export class LedgerStorage extends Storages {
                 }
                 resolve();
             })();
-
         });
     }
 
@@ -3231,7 +3240,7 @@ export class LedgerStorage extends Storages {
      */
     public getBlockEnrollments(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
         const sql = `SELECT
-                E.block_height, E.utxo_key, E.commitment, E.cycle_length, E.enroll_sig,
+                E.block_height, E.utxo_key, E.commitment, E.enroll_sig,
                 count(*) OVER() AS full_count
             FROM
                 blocks B
@@ -3455,8 +3464,8 @@ export class LedgerStorage extends Storages {
                             metadata.assessResult.assess_profitability_score,
                             metadata.assessResult.assess_attractiveness_score,
                             metadata.assessResult.assess_expansion_score,
-                            metadata.proposer_name.toString()
-                        ],
+                            metadata.proposer_name.toString(),
+                        ]
                     )
                     .then(() => {
                         return resolve();
@@ -3481,7 +3490,7 @@ export class LedgerStorage extends Storages {
                             attachments.url,
                             attachments.mime,
                             attachments.doc_hash,
-                        ],
+                        ]
                     )
                     .then(() => {
                         return resolve();
@@ -3492,17 +3501,22 @@ export class LedgerStorage extends Storages {
             });
         }
         return new Promise<void>(async (resolve, reject) => {
-
             try {
                 await putMetaData(storage, metadata);
-                for (let attachment_index = 0; attachment_index < metadata.proposal_attachments.length; attachment_index++) {
-                    await putAttachments(storage, metadata.proposal_id, metadata.proposal_attachments[attachment_index]);
+                for (
+                    let attachment_index = 0;
+                    attachment_index < metadata.proposal_attachments.length;
+                    attachment_index++
+                ) {
+                    await putAttachments(
+                        storage,
+                        metadata.proposal_id,
+                        metadata.proposal_attachments[attachment_index]
+                    );
                 }
                 return resolve();
-            }
-            catch (err) {
+            } catch (err) {
                 return reject(err);
-
             }
         });
     }

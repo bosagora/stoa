@@ -51,7 +51,6 @@ CREATE TABLE IF NOT EXISTS "blocks" (
 | enrollment_index  | INTEGER   | Y  | Y        |          | The index of enrollment in the block.|
 | utxo_key          | TINYBLOB  |    | Y        |          | K: UTXO hash, A hash of a frozen UTXO|
 | commitment        | TINYBLOB  |    | Y        |          | X: commitment, The nth image of random value|
-| cycle_length      | INTEGER   |    | Y        |          | n: the number of rounds a validator will participate in |
 | enroll_sig        | TINYBLOB  |    | Y        |          | S: A signature for the message H(K, X, n, R) and the key K, using R|
 
 ### _Create Script_
@@ -62,7 +61,6 @@ CREATE TABLE IF NOT EXISTS "enrollments" (
     "enrollment_index"      INTEGER  NOT NULL,
     "utxo_key"              TINYBLOB NOT NULL,
     "commitment"            TINYBLOB NOT NULL,
-    "cycle_length"          INTEGER  NOT NULL,
     "enroll_sig"            TINYBLOB NOT NULL,
     PRIMARY KEY("block_height","enrollment_index")
 )
