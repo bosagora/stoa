@@ -61,7 +61,8 @@ const stoa: Stoa = new Stoa(
     config.server.private_port,
     config.server.address,
     config.consensus.genesis_timestamp,
-    (config.server.require_votera && config.votera) ? new VoteraService(config.votera.votera_endpoint) : undefined,
+    config.consensus.validator_cycle,
+    config.server.require_votera && config.votera ? new VoteraService(config.votera.votera_endpoint) : undefined,
     new CoinMarketService(
         new CoinGeckoMarket(
             new CoinGeckoClient({
