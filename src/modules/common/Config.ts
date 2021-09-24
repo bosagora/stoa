@@ -80,8 +80,7 @@ export class Config implements IConfig {
         this.database.readFromObject(cfg.database);
         this.logging.readFromObject(cfg.logging);
         this.consensus.readFromObject(cfg.consensus);
-        if (cfg.server.require_votera && cfg.votera)
-            this.votera?.readFromObject(cfg.votera)
+        if (cfg.server.require_votera && cfg.votera) this.votera?.readFromObject(cfg.votera);
     }
 
     /**
@@ -406,12 +405,18 @@ export class ConsensusConfig implements IConsensusConfig {
     public genesis_timestamp: number;
 
     /**
+     * The cycle length for a validator
+     */
+    public validator_cycle: number;
+
+    /**
      * Constructor
      * @param genesis_timestamp The genesis timestamp
      */
     constructor() {
         const defaults = ConsensusConfig.defaultValue();
         this.genesis_timestamp = defaults.genesis_timestamp;
+        this.validator_cycle = defaults.validator_cycle;
     }
 
     /**
@@ -422,6 +427,7 @@ export class ConsensusConfig implements IConsensusConfig {
         const conf = extend(true, {}, ConsensusConfig.defaultValue());
         extend(true, conf, config);
         this.genesis_timestamp = conf.genesis_timestamp;
+        this.validator_cycle = conf.validator_cycle;
     }
 
     /**
@@ -430,6 +436,7 @@ export class ConsensusConfig implements IConsensusConfig {
     public static defaultValue(): IConsensusConfig {
         return {
             genesis_timestamp: 1609459200,
+            validator_cycle: 1008,
         };
     }
 }
@@ -487,7 +494,7 @@ export class VoteraConfig implements IVoteraConfig {
      * Returns default value
      */
     public static defaultValue(): IVoteraConfig {
-       return {
+        return {
             address: "127.0.0.1",
             port: 5000,
             votera_endpoint: new URL("http://127.0.0.1:5000"),
@@ -615,6 +622,11 @@ export interface IConsensusConfig {
      * The genesis timestamp
      */
     genesis_timestamp: number;
+
+    /**
+     * The cycle length for a validator
+     */
+    validator_cycle: number;
 }
 
 /**
@@ -647,7 +659,7 @@ export interface IConfig {
 }
 
 /**
- * The interface of Votera 
+ * The interface of Votera
  */
 export interface IVoteraConfig {
     /**
