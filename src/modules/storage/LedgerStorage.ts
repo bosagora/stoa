@@ -2762,9 +2762,59 @@ export class LedgerStorage extends Storages {
                 IFNULL(SUM(CASE WHEN ((unlock_height <= height + 1) AND ((type = 0) OR (type = 2))) THEN amount ELSE 0 END), 0) AS spendable,
                 IFNULL(SUM(CASE WHEN ((unlock_height <= height + 1) AND ((type = 1))) THEN amount ELSE 0 END), 0) AS frozen,
                 IFNULL(SUM(CASE WHEN ((unlock_height > height + 1) AND ((type = 0) OR (type = 2))) THEN amount ELSE 0 END), 0) AS locked,
-                IFNULL(SUM(send_unfreeze), 0) AS send_unfreeze,
-                IFNULL(SUM(send_other), 0) AS send_other,
-                IFNULL(SUM(receive), 0) AS receive
+                IFNULL(
+                (
+                    SELECT
+                        SUM(S.amount)
+                    FROM
+                        tx_outputs S
+                        INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
+                        INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
+                    WHERE
+                        S.address = ?
+                        AND S.type = 1
+                    GROUP BY S.address
+                ), 0) AS send_unfreeze,
+                IFNULL(
+                (
+                    SELECT
+                        SUM(S.amount)
+                    FROM
+                        tx_outputs S
+                        INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
+                        INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
+                    WHERE
+                        S.address = ?
+                        AND S.type != 1
+                ), 0) AS send_other,
+                IFNULL(
+                (
+                    SELECT
+                        SUM(TTO.amount)
+                    FROM
+                    (
+                        SELECT
+                            O.tx_hash,
+                            O.address,
+                            O.amount
+                        FROM
+                            tx_output_pool O
+                            INNER JOIN transaction_pool T ON (T.tx_hash = O.tx_hash)
+                        WHERE
+                            O.address = ?
+                    ) TTO
+                    INNER JOIN  (
+                        SELECT
+                            DISTINCT T.tx_hash
+                        FROM
+                            tx_outputs S
+                            INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
+                            INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
+                        WHERE
+                            S.address = ?
+                    ) TTX ON (TTO.tx_hash = TTX.tx_hash)
+                    GROUP BY TTO.address
+                ), 0) AS receive
             FROM
             (
                 SELECT
@@ -2776,46 +2826,7 @@ export class LedgerStorage extends Storages {
                     B.time_stamp AS block_time,
                     O.type,
                     O.unlock_height,
-                    (SELECT MAX(height) AS height FROM blocks) AS height,
-                    IFNULL(
-                    (
-                        SELECT
-                            SUM(S.amount)
-                        FROM
-                            tx_outputs S
-                            INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
-                            INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
-                        WHERE
-                            S.address = ?
-                            AND S.type = 1
-                        GROUP BY S.address
-                    ), 0) AS send_unfreeze,
-                    IFNULL(
-                    (
-                        SELECT
-                            SUM(S.amount)
-                        FROM
-                            tx_outputs S
-                            INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
-                            INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
-                        WHERE
-                            S.address = ?
-                            AND S.type != 1
-                    ), 0) AS send_other,
-                    IFNULL(
-                    (
-                        SELECT
-                            SUM(O.amount)
-                        FROM
-                            tx_outputs S
-                            INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
-                            INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
-                            INNER JOIN tx_output_pool O ON (T.tx_hash = O.tx_hash)
-                        WHERE
-                            S.address = ?
-                            AND S.address = O.address
-                        GROUP BY O.address
-                    ), 0) AS receive
+                    (SELECT MAX(height) AS height FROM blocks) AS height
                 FROM
                     utxos O
                     INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
@@ -2825,7 +2836,7 @@ export class LedgerStorage extends Storages {
             ) AS T
         ) AS TF;`;
 
-        return this.query(sql, [address, address, address, address, address]);
+        return this.query(sql, [address, address, address, address, address, address]);
     }
 
     /**
