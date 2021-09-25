@@ -96,7 +96,7 @@ describe("Test of Stoa API Server", () => {
         await client.post(url, { block: sample_data[0] });
         await client.post(url, { block: sample_data[1] });
         // Wait for the block to be stored in the database for the next test.
-        await delay(100);
+        await delay(500);
     });
 
     it("Test of the path /block_height", async () => {
@@ -143,7 +143,7 @@ describe("Test of Stoa API Server", () => {
         const response1 = await client.post(uri.toString(), { preimage: sample_preImageInfo });
         assert.strictEqual(response1.status, 200);
 
-        await delay(200);
+        await delay(500);
 
         // Wait for the data added to the pool to be processed.
         const uri1 = URI(stoa_addr)
@@ -349,7 +349,7 @@ describe("Test of Stoa API Server", () => {
         const url = uri.toString();
         const block = Block.reviver("", sample_data2);
         await client.post(url, { tx: block.txs[0] });
-        await delay(100);
+        await delay(500);
     });
 
     it("Test of the path /wallet/transactions/pending/:address", async () => {
@@ -947,7 +947,7 @@ describe("Test of the path /utxo for freezing", () => {
         blocks.push(createBlock(blocks[1], [tx1, tx2]));
         uri = URI(stoa_private_addr).directory("block_externalized");
         await client.post(uri.toString(), { block: blocks[2] });
-        await delay(200);
+        await delay(500);
     });
 
     it("Check the height of the block", async () => {
