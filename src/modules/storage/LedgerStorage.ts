@@ -207,7 +207,7 @@ export class LedgerStorage extends Storages {
             amount              BIGINT(20)  UNSIGNED NOT NULL,
             lock_type           INTEGER NOT NULL,
             lock_bytes          TINYBLOB    NOT NULL,
-            address             TEXT        NOT NULL,
+            address             VARCHAR(64) NOT NULL,
             PRIMARY KEY(block_height, tx_index, output_index),
             KEY tx_outputs_tx_hash (tx_hash(64)),
             KEY tx_outputs_utxo (utxo_key(64)),
@@ -223,7 +223,7 @@ export class LedgerStorage extends Storages {
             amount              BIGINT(20)  UNSIGNED NOT NULL,
             lock_type           INTEGER     NOT NULL,
             lock_bytes          TINYBLOB    NOT NULL,
-            address             TEXT        NOT NULL,
+            address             VARCHAR(64) NOT NULL,
             PRIMARY KEY(utxo_key(64)),
             KEY utxo_tx_hash (tx_hash(64)),
             KEY utxo_address (address(64))
@@ -233,7 +233,7 @@ export class LedgerStorage extends Storages {
         (
             enrolled_at         INTEGER     NOT NULL,
             utxo_key            TINYBLOB    NOT NULL,
-            address             TEXT        NOT NULL,
+            address             VARCHAR(64)        NOT NULL,
             amount              BIGINT(20)  UNSIGNED NOT NULL,
             preimage_height     INTEGER      NOT NULL,
             preimage_hash       TINYBLOB    NOT NULL,
@@ -303,7 +303,7 @@ export class LedgerStorage extends Storages {
             amount              BIGINT(20) UNSIGNED NOT NULL,
             lock_type           INTEGER    NOT NULL,
             lock_bytes          TINYBLOB   NOT NULL,
-            address             TEXT       NOT NULL,
+            address             VARCHAR(64) NOT NULL,
             PRIMARY KEY(tx_hash(64), output_index),
             KEY tx_output_pool_address (address(64))
         );
@@ -341,7 +341,7 @@ export class LedgerStorage extends Storages {
         );
 
         CREATE TABLE IF NOT EXISTS accounts(
-            address          TEXT,
+            address          VARCHAR(64),
             tx_count         INTEGER,
             total_received   BIGINT(24) UNSIGNED NOT NULL,
             total_sent       BIGINT(24) UNSIGNED NOT NULL,
@@ -354,7 +354,7 @@ export class LedgerStorage extends Storages {
         );
 
         CREATE TABLE IF NOT EXISTS account_history(
-            address          TEXT,
+            address          VARCHAR(64),
             time_stamp       INTEGER     NOT NULL,
             granularity      TEXT        NOT NULL,
             block_height     INTEGER     NOT NULL,
@@ -399,8 +399,8 @@ export class LedgerStorage extends Storages {
             proposal_fee             BIGINT(20)  NOT NULL,
             vote_fee                 BIGINT(20)  NOT NULL,
             proposal_fee_tx_hash     TINYBLOB    NOT NULL,
-            proposer_address         TEXT        NOT NULL,
-            proposal_fee_address     TEXT        NOT NULL,
+            proposer_address         VARCHAR(64) NOT NULL,
+            proposal_fee_address     VARCHAR(64) NOT NULL,
             proposal_status          TEXT        NOT NULL,
             data_collection_status   TEXT        NOT NULL,
 
