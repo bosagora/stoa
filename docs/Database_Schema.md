@@ -36,7 +36,8 @@ CREATE TABLE IF NOT EXISTS "blocks" (
     "enrollment_count"      INTEGER  NOT NULL,
     "time_offset"           INTEGER  NOT NULL,
     "time_stamp"            INTEGER  NOT NULL,
-    PRIMARY KEY("height")
+    PRIMARY KEY("height"),
+    KEY blocks_hash (hash(64))
 )
 ```
 ----
@@ -104,7 +105,9 @@ CREATE TABLE IF NOT EXISTS "transactions" (
     "inputs_count"          INTEGER  NOT NULL,
     "outputs_count"         INTEGER  NOT NULL,
     "payload_size"          INTEGER  NOT NULL,
-    PRIMARY KEY("block_height","tx_index")
+    PRIMARY KEY("block_height","tx_index"),
+    KEY tx_inputs_tx_hash ("tx_hash(64)"),
+    KEY tx_inputs_utxo ("utxo(64)")
 )
 ```
 ----
@@ -133,7 +136,9 @@ CREATE TABLE IF NOT EXISTS "tx_inputs" (
     "utxo"                  TINYBLOB NOT NULL,
     "unlock_bytes"          TINYBLOB NOT NULL,
     "unlock_age"            INTEGER  NOT NULL,
-    PRIMARY KEY("block_height","tx_index","in_index","utxo(64)")
+    PRIMARY KEY("block_height","tx_index","in_index","utxo(64)"),
+    KEY tx_inputs_tx_hash ("tx_hash(64)"),
+    KEY tx_inputs_utxo ("utxo(64)")
 )
 ```
 ----
@@ -169,7 +174,10 @@ CREATE TABLE IF NOT EXISTS "tx_outputs" (
     "lock_type"             INTEGER  NOT NULL,
     "lock_bytes"            TINYBLOB NOT NULL,
     "address"               TEXT     NOT NULL,
-    PRIMARY KEY("block_height","tx_index","output_index")
+    PRIMARY KEY("block_height","tx_index","output_index"),
+    KEY tx_outputs_tx_hash ("tx_hash(64)"),
+    KEY tx_outputs_utxo ("utxo_key(64)"),
+    KEY tx_outputs_address ("address(64)")
 )
 ```
 ----
@@ -201,7 +209,9 @@ CREATE TABLE IF NOT EXISTS "utxos" (
     "lock_type"             INTEGER    NOT NULL,
     "lock_bytes"            TINYBLOB   NOT NULL,
     "address"               TEXT       NOT NULL,
-    PRIMARY KEY("utxo_key(64)")
+    PRIMARY KEY("utxo_key(64)"),
+    KEY utxo_tx_hash ("tx_hash(64)"),
+    KEY utxo_address ("address(64)")
 )
 ```
 ----
@@ -389,7 +399,8 @@ CREATE TABLE IF NOT EXISTS "tx_input_pool" (
     "utxo"                  TINYBLOB NOT NULL,
     "unlock_bytes"          TINYBLOB NOT NULL,
     "unlock_age"            INTEGER  NOT NULL,
-    PRIMARY KEY("tx_hash(64)","input_index")
+    PRIMARY KEY("tx_hash(64)","input_index"),
+    KEY tx_input_pool_utxo ("utxo"(64))
 )
 ```
 
@@ -420,7 +431,8 @@ CREATE TABLE IF NOT EXISTS "tx_output_pool" (
     "lock_type"             INTEGER    NOT NULL,
     "lock_bytes"            TINYBLOB   NOT NULL,
     "address"               TEXT       NOT NULL,
-    PRIMARY KEY("tx_hash(64)","output_index")
+    PRIMARY KEY("tx_hash(64)","output_index"),
+    KEY tx_output_pool_address ("address(64)")
 )
 ```
 
