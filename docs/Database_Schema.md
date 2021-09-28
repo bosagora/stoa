@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS "tx_inputs" (
 |  amount           | BIGINT(20)|    | Y        |          | The monetary value of this output, in 1/10^7|
 |  lock_type        | INTEGER   |    | Y        |          | (0: Key; 1: Hash of Key; 2: Script; 3: Hash of Script) |
 |  lock_bytes       | TINYBLOB  |    | Y        |          | The bytes of lock |
-|  address          | TEXT      |    | Y        |          | The public key, Valid only when lock type is 0. Other than that, it's a blank.|
+|  address          | VARCHAR(64)|    | Y        |          | The public key, Valid only when lock type is 0. Other than that, it's a blank.|
 
 ### _Create Script_
 
@@ -173,7 +173,7 @@ CREATE TABLE IF NOT EXISTS "tx_outputs" (
     "amount"                BIGINT(20)  NOT NULL,
     "lock_type"             INTEGER  NOT NULL,
     "lock_bytes"            TINYBLOB NOT NULL,
-    "address"               TEXT     NOT NULL,
+    "address"               VARCHAR(64) NOT NULL,
     PRIMARY KEY("block_height","tx_index","output_index"),
     KEY tx_outputs_tx_hash ("tx_hash(64)"),
     KEY tx_outputs_utxo ("utxo_key(64)"),
@@ -195,7 +195,7 @@ CREATE TABLE IF NOT EXISTS "tx_outputs" (
 |  amount           | BIGINT(20)|    | Y        |          | The monetary value of this output, in 1/10^7|
 |  lock_type        | INTEGER   |    | Y        |          | (0: Key; 1: Hash of Key; 2: Script; 3: Hash of Script) |
 |  lock_bytes       | TINYBLOB  |    | Y        |          | The bytes of lock |
-|  address          | TEXT      |    | Y        |          | The public key, Valid only when lock type is 0. Other than that, it's a blank.|
+|  address          | VARCHAR(64)      |    | Y        |          | The public key, Valid only when lock type is 0. Other than that, it's a blank.|
 
 ### _Create Script_
 
@@ -208,7 +208,7 @@ CREATE TABLE IF NOT EXISTS "utxos" (
     "amount"                BIGINT(20) NOT NULL,
     "lock_type"             INTEGER    NOT NULL,
     "lock_bytes"            TINYBLOB   NOT NULL,
-    "address"               TEXT       NOT NULL,
+    "address"               VARCHAR(64)  NOT NULL,
     PRIMARY KEY("utxo_key(64)"),
     KEY utxo_tx_hash ("tx_hash(64)"),
     KEY utxo_address ("address(64)")
@@ -224,7 +224,7 @@ CREATE TABLE IF NOT EXISTS "utxos" (
 |:----------------- |:--------- |:--:|:--------:| -------- | --------- |
 |  enrolled_at      | INTEGER   | Y  | Y        |          | The height this validator enrolled at |
 |  utxo_key         | TINYBLOB  | Y  | Y        |          | The hash of the UTXO|
-|  address          | TEXT      |    | Y        |          | The public key that can redeem this UTXO|
+|  address          | VARCHAR(64)      |    | Y        |          | The public key that can redeem this UTXO|
 |  stake            | BIGINT(20)|    | Y        |          | The amount of the UTXO|
 |  preimage_height  | INTEGER   |    | Y        |          | The height of the preimage|
 |  preimage_hash    | TINYBLOB  |    | Y        |          | The hash of the preimage|
@@ -235,7 +235,7 @@ CREATE TABLE IF NOT EXISTS "utxos" (
 CREATE TABLE IF NOT EXISTS "validators" (
     "enrolled_at"           INTEGER    NOT NULL,
     "utxo_key"              TINYBLOB   NOT NULL,
-    "address"               TEXT       NOT NULL,
+    "address"               VARCHAR(64)NOT NULL,
     "stake"                 BIGINT(20) NOT NULL,
     "preimage_height"       INTEGER    NOT NULL,
     "preimage_hash"         TINYBLOB   NOT NULL,
@@ -418,7 +418,7 @@ CREATE TABLE IF NOT EXISTS "tx_input_pool" (
 |  amount           | BIGINT(20)|    | Y        |          | The monetary value of this output, in 1/10^7|
 |  lock_type        | INTEGER   |    | Y        |          | (0: Key; 1: Hash of Key; 2: Script; 3: Hash of Script) |
 |  lock_bytes       | TINYBLOB  |    | Y        |          | The bytes of lock |
-|  address          | TEXT      |    | Y        |          | The public key that can redeem this output|
+|  address          | VARCHAR(64)|    | Y        |          | The public key that can redeem this output|
 
 ### _Create Script_
 
@@ -430,7 +430,7 @@ CREATE TABLE IF NOT EXISTS "tx_output_pool" (
     "amount"                BIGINT(20) NOT NULL,
     "lock_type"             INTEGER    NOT NULL,
     "lock_bytes"            TINYBLOB   NOT NULL,
-    "address"               TEXT       NOT NULL,
+    "address"               VARCHAR(64) NOT NULL,
     PRIMARY KEY("tx_hash(64)","output_index"),
     KEY tx_output_pool_address ("address(64)")
 )
@@ -535,7 +535,7 @@ CREATE TABLE IF NOT EXISTS fee_mean_disparity (
 
 | Column                 | Data Type  | PK | Not NULL | Default  |Description|
 |:-----------------------|:-----------|:--:|:--------:| -------- | --------- |
-|  address               | TEXT       | Y  | Y        |          | Public key of the wallet|
+|  address               | VARCHAR(64)| Y  | Y        |          | Public key of the wallet|
 |  tx_count              | INTEGER    |    | Y        |          | Transaction count of BOA Holder        |
 |  total_received        | BIGINT(24) |    | Y        |          | Total received amount of BOA Holder    |
 |  total_sent            | BIGINT(24) |    | Y        |          | Total sent amount of BOA Holder        |
@@ -548,7 +548,7 @@ CREATE TABLE IF NOT EXISTS fee_mean_disparity (
 
 ```sql
 CREATE TABLE IF NOT EXISTS "accounts"(
-    "address"          TEXT,
+    "address"          VARCHAR(64),
     "tx_count"        INTEGER,
     "total_received"   BIGINT(24) UNSIGNED NOT NULL,
     "total_sent"       BIGINT(24) UNSIGNED NOT NULL,
@@ -593,7 +593,7 @@ CREATE TABLE IF NOT EXISTS "fees"(
 
 | Column                 | Data Type    | PK | Not NULL | Default  |Description|
 |:-----------------------|:---------    |:--:|:--------:| -------- | --------- |
-|  address               | TEXT         | Y  | Y        |          | Address of Account  |
+|  address               | VARCHAR(64)         | Y  | Y        |          | Address of Account  |
 |  time_stamp            | INTEGER      | Y  | Y        |          | unix timestamp  |
 |  granularity           | TEXT         | Y  | Y        |          | Total Fee of Transactions in Block  |
 |  block_height          | INTEGER      |    | Y        |          | block height  |
@@ -603,7 +603,7 @@ CREATE TABLE IF NOT EXISTS "fees"(
 ### _Create Script_
 ```sql
 CREATE TABLE IF NOT EXISTS "account_history"(
-    "address"            TEXT       NOT NULL,
+    "address"            VARCHAR(64)       NOT NULL,
     "time_stamp"         INTEGER    NOT NULL,
     "granularity"        TEXT       NOT NULL,
     "block_height"       INTEGER    NOT NULL,
@@ -656,8 +656,8 @@ CREATE TABLE IF NOT EXISTS "proposal_fee"(
 |  proposal_fee           | BIGINT(20)|    | Y        |          | The proposal fee |
 |  vote_fee               | BIGINT(20)|    | Y        |          | The vote fee |
 |  proposal_fee_tx_hash   | TINYBLOB  |    | Y        |          | The tx hash of proposal_fee |
-|  proposer_address       | TEXT      |    | Y        |          | The address of proposer |
-|  proposal_fee_address   | TEXT      |    | Y        |          | The proposer fee address|
+|  proposer_address       | VARCHAR(64)      |    | Y        |          | The address of proposer |
+|  proposal_fee_address   | VARCHAR(64)      |    | Y        |          | The proposer fee address|
 |  status                 | TEXT      |    | Y        |          | The status of proposal  |
 |  data_collection_status | TEXT      |    | Y        |          | The status of proposal data collection  |
 
@@ -677,8 +677,8 @@ CREATE TABLE IF NOT EXISTS "proposal"(
         "proposal_fee"           BIGINT(20)  NOT NULL,
         "vote_fee"               BIGINT(20)  NOT NULL,
         "proposal_fee_tx_hash"   TINYBLOB    NOT NULL,
-        "proposer_address"       TEXT        NOT NULL,
-        "proposal_fee_address"   TEXT        NOT NULL,
+        "proposer_address"       VARCHAR(64)        NOT NULL,
+        "proposal_fee_address"   VARCHAR(64)        NOT NULL,
         "status"                 TEXT        NOT NULL,
         "data_collection_status" TEXT        NOT NULL,
     
