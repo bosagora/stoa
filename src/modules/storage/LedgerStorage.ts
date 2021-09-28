@@ -2449,17 +2449,29 @@ export class LedgerStorage extends Storages {
                         )
                         ELSE
                         (
-                            SELECT COUNT(O.address) FROM tx_outputs O WHERE TX.tx_hash = O.tx_hash
-                            AND O.address LIKE '${peer}%'
-                            AND O.address NOT IN (
+                            SELECT
+                                COUNT(B.address)
+                            FROM
+                            (
                                 SELECT
-                                    S.address
+                                    DISTINCT S.address
                                 FROM
-                                    tx_outputs S
-                                    INNER JOIN tx_inputs I ON (I.utxo = S.utxo_key)
+                                    tx_inputs I
+                                    INNER JOIN  tx_outputs S ON (I.utxo = S.utxo_key)
                                 WHERE
                                     TX.tx_hash = I.tx_hash
-                            )
+
+                            ) A
+                            INNER JOIN  (
+                                SELECT
+                                    O.address,
+                                    O.amount
+                                FROM
+                                    tx_outputs O
+                                WHERE
+                                    TX.tx_hash = O.tx_hash AND O.address LIKE '${peer}%'
+                            ) B
+                            ON A.address != B.address
                         )
                     END AS peer_filter
             `;
@@ -2473,18 +2485,29 @@ export class LedgerStorage extends Storages {
                         )
                         ELSE
                         (
-                            SELECT O.address FROM tx_outputs O
-                            WHERE TX.tx_hash = O.tx_hash AND O.address LIKE '${peer}%'
-                            AND O.address NOT IN (
+                            SELECT
+                                B.address
+                            FROM
+                            (
                                 SELECT
-                                    S.address
+                                    DISTINCT S.address
                                 FROM
-                                    tx_outputs S
-                                    INNER JOIN tx_inputs I ON (I.utxo = S.utxo_key)
+                                    tx_inputs I
+                                    INNER JOIN  tx_outputs S ON (I.utxo = S.utxo_key)
                                 WHERE
                                     TX.tx_hash = I.tx_hash
-                            )
-                            ORDER BY O.amount DESC LIMIT 1
+                            ) A
+                            INNER JOIN  (
+                                SELECT
+                                    O.address,
+                                    O.amount
+                                FROM
+                                    tx_outputs O
+                                WHERE
+                                    TX.tx_hash = O.tx_hash AND O.address LIKE '${peer}%'
+                            ) B
+                            ON A.address != B.address
+                            ORDER BY B.amount DESC LIMIT 1
                         )
                     END, TX.address) AS peer`;
         } else {
@@ -2499,18 +2522,29 @@ export class LedgerStorage extends Storages {
                         )
                         ELSE
                         (
-                            SELECT O.address FROM tx_outputs O
-                            WHERE TX.tx_hash = O.tx_hash AND O.address != TX.address
-                            AND O.address NOT IN (
+                            SELECT
+                                B.address
+                            FROM
+                            (
                                 SELECT
-                                    S.address
+                                    DISTINCT S.address
                                 FROM
-                                    tx_outputs S
-                                    INNER JOIN tx_inputs I ON (I.utxo = S.utxo_key)
+                                    tx_inputs I
+                                    INNER JOIN  tx_outputs S ON (I.utxo = S.utxo_key)
                                 WHERE
                                     TX.tx_hash = I.tx_hash
-                            )
-                            ORDER BY O.amount DESC LIMIT 1
+                            ) A
+                            INNER JOIN  (
+                                SELECT
+                                    O.address,
+                                    O.amount
+                                FROM
+                                    tx_outputs O
+                                WHERE
+                                    TX.tx_hash = O.tx_hash
+                            ) B
+                            ON A.address != B.address
+                            ORDER BY B.amount DESC LIMIT 1
                         )
                     END, TX.address) AS peer`;
         }
@@ -2546,16 +2580,28 @@ export class LedgerStorage extends Storages {
                         )
                         ELSE
                         (
-                            SELECT COUNT(O.address) FROM tx_outputs O WHERE TX.tx_hash = O.tx_hash
-                            AND O.address NOT IN (
+                            SELECT
+                                COUNT(B.address)
+                            FROM
+                            (
                                 SELECT
-                                    S.address
+                                    DISTINCT S.address
                                 FROM
-                                    tx_outputs S
-                                    INNER JOIN tx_inputs I ON (I.utxo = S.utxo_key)
+                                    tx_inputs I
+                                    INNER JOIN  tx_outputs S ON (I.utxo = S.utxo_key)
                                 WHERE
                                     TX.tx_hash = I.tx_hash
-                            )
+                            ) A
+                            INNER JOIN  (
+                                SELECT
+                                    O.address,
+                                    O.amount
+                                FROM
+                                    tx_outputs O
+                                WHERE
+                                    TX.tx_hash = O.tx_hash
+                            ) B
+                            ON A.address != B.address
                         )
                     END AS peer_count,
                     CASE
