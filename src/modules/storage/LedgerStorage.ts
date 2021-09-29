@@ -151,7 +151,7 @@ export class LedgerStorage extends Storages {
             time_stamp          INTEGER  NOT NULL,
             PRIMARY KEY(height),
             KEY blocks_hash (hash(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS enrollments
         (
@@ -161,7 +161,7 @@ export class LedgerStorage extends Storages {
             commitment          TINYBLOB NOT NULL,
             enroll_sig          TINYBLOB NOT NULL,
             PRIMARY KEY(block_height, enrollment_index)
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS transactions
         (
@@ -180,7 +180,7 @@ export class LedgerStorage extends Storages {
             payload_size        INTEGER  NOT NULL,
             PRIMARY KEY(block_height, tx_index),
             KEY transaction_tx_hash (tx_hash(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS tx_inputs
         (
@@ -194,7 +194,7 @@ export class LedgerStorage extends Storages {
             PRIMARY KEY(block_height, tx_index, in_index, utxo(64)),
             KEY tx_inputs_tx_hash (tx_hash(64)),
             KEY tx_inputs_utxo  (utxo(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS tx_outputs
         (
@@ -212,7 +212,7 @@ export class LedgerStorage extends Storages {
             KEY tx_outputs_tx_hash (tx_hash(64)),
             KEY tx_outputs_utxo (utxo_key(64)),
             KEY tx_outputs_address (address(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS utxos
         (
@@ -227,7 +227,7 @@ export class LedgerStorage extends Storages {
             PRIMARY KEY(utxo_key(64)),
             KEY utxo_tx_hash (tx_hash(64)),
             KEY utxo_address (address(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS validators
         (
@@ -238,13 +238,13 @@ export class LedgerStorage extends Storages {
             preimage_height     INTEGER      NOT NULL,
             preimage_hash       TINYBLOB    NOT NULL,
             PRIMARY KEY(enrolled_at, utxo_key(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS payloads (
             tx_hash             TINYBLOB    NOT NULL,
             payload             BLOB        NOT NULL,
             PRIMARY KEY(tx_hash(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS merkle_trees
         (
@@ -252,7 +252,7 @@ export class LedgerStorage extends Storages {
             merkle_index        INTEGER     NOT NULL,
             merkle_hash         TINYBLOB    NOT NULL,
             PRIMARY KEY(block_height, merkle_index)
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS blocks_header_updated_history
         (
@@ -264,14 +264,14 @@ export class LedgerStorage extends Storages {
             missing_validators  TEXT     NULL,
             updated_time        INTEGER  NOT NULL,
             PRIMARY KEY(block_height, signature(64), updated_time)
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS information
         (
             keyname             TEXT       NOT NULL,
             value               TEXT       NOT NULL,
             PRIMARY KEY(keyname(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS transaction_pool (
             tx_hash             TINYBLOB   NOT NULL,
@@ -284,7 +284,7 @@ export class LedgerStorage extends Storages {
             payload_fee         BIGINT(20)     NOT NULL,
             tx_size             INTEGER    NOT NULL,
             PRIMARY KEY(tx_hash(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS tx_input_pool (
             tx_hash             TINYBLOB   NOT NULL,
@@ -294,7 +294,7 @@ export class LedgerStorage extends Storages {
             unlock_age          INTEGER    NOT NULL,
             PRIMARY KEY(tx_hash(64), input_index),
             KEY tx_input_pool_utxo (utxo(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS tx_output_pool (
             tx_hash             TINYBLOB   NOT NULL,
@@ -306,7 +306,7 @@ export class LedgerStorage extends Storages {
             address             VARCHAR(64) NOT NULL,
             PRIMARY KEY(tx_hash(64), output_index),
             KEY tx_output_pool_address (address(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
        CREATE TABLE IF NOT EXISTS blocks_stats(
             block_height        INTEGER,
@@ -316,7 +316,7 @@ export class LedgerStorage extends Storages {
             total_fee           BIGINT(20)  NOT NULL,
             total_size          BIGINT(20)  UNSIGNED NOT NULL,
             PRIMARY KEY(block_height)
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS marketcap (
             last_updated_at INTEGER NOT NULL,
@@ -325,20 +325,20 @@ export class LedgerStorage extends Storages {
             vol_24h         BIGINT(20) UNSIGNED NOT NULL,
             change_24h      BIGINT(20),
             PRIMARY KEY (last_updated_at)
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS fee_mean_disparity (
             height      INTEGER    NOT NULL,
             disparity   BIGINT(20) NOT NULL,
             PRIMARY KEY (height)
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS tx_pool
         (
             \`key\`     TINYBLOB    NOT NULL,
             \`val\`     BLOB        NOT NULL,
             PRIMARY KEY(\`key\`(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS accounts(
             address          VARCHAR(64),
@@ -351,7 +351,7 @@ export class LedgerStorage extends Storages {
             total_balance    BIGINT(20) UNSIGNED NOT NULL,
             last_updated_at   INTEGER,
             PRIMARY KEY (address(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS account_history(
             address          VARCHAR(64),
@@ -361,7 +361,7 @@ export class LedgerStorage extends Storages {
             balance          BIGINT(20)  UNSIGNED NOT NULL,
 
             PRIMARY KEY (address(64), time_stamp, granularity(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS fees
         (
@@ -373,7 +373,7 @@ export class LedgerStorage extends Storages {
             total_payload_fee  BIGINT(20) NOT NULL,
             total_fee          BIGINT(20) NOT NULL,
             PRIMARY KEY(time_stamp, granularity(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS proposal_fee
         (
@@ -382,7 +382,7 @@ export class LedgerStorage extends Storages {
             tx_hash              TINYBLOB  NOT NULL,
 
             PRIMARY KEY(proposal_id(64), block_height, tx_hash(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS proposal
         (
@@ -405,7 +405,7 @@ export class LedgerStorage extends Storages {
             data_collection_status   TEXT        NOT NULL,
 
             PRIMARY KEY(block_height, proposal_id(64), app_name(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS proposal_metadata
         (
@@ -428,7 +428,7 @@ export class LedgerStorage extends Storages {
             proposer_name               TEXT,
 
             PRIMARY KEY(proposal_id(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS proposal_attachments
         (
@@ -440,7 +440,7 @@ export class LedgerStorage extends Storages {
             doc_hash        TEXT      NOT NULL,
 
             PRIMARY KEY(proposal_id(64), attachment_id(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
        DROP TRIGGER IF EXISTS tx_trigger;
        CREATE TRIGGER tx_trigger AFTER INSERT
