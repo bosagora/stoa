@@ -2501,13 +2501,15 @@ class Stoa extends WebService {
                         proposals.push({
                             proposal_id: row.proposal_id,
                             proposal_title: row.proposal_title,
-                            proposal_type: row.proposal_type,
+                            proposal_type: ConvertTypes.ProposalTypetoString(row.proposal_type),
                             fund_amount: row.fund_amount,
                             vote_start_height: row.vote_start_height,
                             vote_end_height: row.vote_end_height,
                             proposal_status: row.proposal_status,
                             proposal_date: row.submit_time,
                             proposer_name: row.proposer_name,
+                            voting_start_date: row.voting_start_date,
+                            voting_end_date: row.voting_end_date,
                             full_count: row.full_count
                         })
                     }
@@ -2600,7 +2602,6 @@ class Stoa extends WebService {
                 res.status(400).send(`Invalid value for parameter 'beginDate': ${req.query.date.toString()}`);
                 return;
             }
-
             filter_end = Number(req.query.date.toString());
         }
 

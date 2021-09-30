@@ -972,6 +972,7 @@ export class LedgerStorage extends Storages {
                                     tx_count = IF(last_updated_at = VALUES(last_updated_at), tx_count, (tx_count + VALUES(tx_count))),
                                     total_received = total_received + VALUES(total_received),
                                     total_sent = total_sent + VALUES(total_sent),
+                                    total_reward = total_reward + VALUES(total_reward),
                                     total_frozen = VALUES(total_frozen),
                                     total_spendable = VALUES(total_spendable),
                                     total_balance = VALUES(total_balance),
@@ -982,7 +983,7 @@ export class LedgerStorage extends Storages {
                             accountInfo.tx_count,
                             received_amount.toString(),
                             sent_amount.toString(),
-                            "0", // FIX ME
+                            accountInfo.total_reward.toString(),
                             accountInfo.total_frozen.toString(),
                             accountInfo.total_spendable.toString(),
                             accountInfo.total_balance.toString(),
@@ -1137,7 +1138,6 @@ export class LedgerStorage extends Storages {
                                             senders[sender_index].address,
                                             conn
                                         );
-
                                         await save_stats(
                                             this,
                                             senders[sender_index].address,
@@ -1355,16 +1355,34 @@ export class LedgerStorage extends Storages {
                 .catch((err) => {
                     reject(err);
                 });
-
-            const utxo_manager: UTXOManager = new UTXOManager(utxo_array);
-            const getSum: Amount[] = await utxo_manager.getSum(JSBI.add(height.value, JSBI.BigInt(1)));
             const total_txs = await this.getTxCount(height, address, conn);
-            const accountInfo: IAccountInformation = {
-                total_balance: JSBI.add(JSBI.add(getSum[0].value, getSum[1].value), getSum[2].value),
-                total_spendable: JSBI.BigInt(getSum[0]),
-                total_frozen: JSBI.BigInt(getSum[1]),
+            let accountInfo: IAccountInformation = {
+                total_balance: JSBI.BigInt(0),
+                total_spendable: JSBI.BigInt(0),
+                total_frozen: JSBI.BigInt(0),
+                total_reward: JSBI.BigInt(0),
                 tx_count: total_txs[0].tx_count ? total_txs[0].tx_count : 0,
             };
+            utxo_array.map((elem) => {
+                switch (elem.type) {
+                    case OutputType.Payment: {
+                        accountInfo.total_spendable = JSBI.add(accountInfo.total_spendable, elem.amount.value);
+                        break;
+                    }
+                    case OutputType.Freeze: {
+                        accountInfo.total_frozen = JSBI.add(accountInfo.total_frozen, elem.amount.value);
+                        break;
+                    }
+                    case OutputType.Coinbase: {
+                        accountInfo.total_reward = JSBI.add(accountInfo.total_reward, elem.amount.value);
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+            });
+            accountInfo.total_balance = JSBI.add(JSBI.add(accountInfo.total_spendable, accountInfo.total_frozen), accountInfo.total_reward);
             return resolve(accountInfo);
         });
     }
@@ -3608,6 +3626,8 @@ export class LedgerStorage extends Storages {
                     P.proposal_status,
                     M.submit_time,
                     M.proposer_name,
+                    M.voting_start_date,
+                    M.voting_end_date,
                     count(*) OVER() AS full_count
                     FROM proposal P
                     LEFT OUTER JOIN proposal_metadata M

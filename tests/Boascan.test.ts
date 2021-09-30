@@ -998,13 +998,15 @@ describe("Test of Stoa API Server", () => {
         let expected = {
             proposal_id: 'ID1234567890',
             proposal_title: 'Title',
-            proposal_type: 1,
+            proposal_type: 'Fund',
             fund_amount: 45161676009963520,
             vote_start_height: 59395,
             vote_end_height: 53771,
             proposal_status: 'Ongoing',
             proposal_date: 1627015766,
             proposer_name: 'test',
+            voting_start_date: moment('2021-07-26').utc().unix(),
+            voting_end_date: moment('2021-08-02').utc().unix(),
             full_count: 1
         }
         assert.deepStrictEqual(response.data[0], expected);

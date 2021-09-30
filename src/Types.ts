@@ -796,6 +796,11 @@ export interface IAccountInformation {
     total_frozen: JSBI;
 
     /**
+     * Total reward amount of account
+     */
+    total_reward: JSBI;
+
+    /**
      * Tranaction count of account
      */
     tx_count: JSBI;
@@ -900,7 +905,7 @@ export interface IProposalList {
     /**
      * Proposal type
      */
-    proposal_type: number;
+    proposal_type: string;
 
     /**
      * Proposal fund amount
@@ -931,6 +936,16 @@ export interface IProposalList {
      * Proposer name 
      */
     proposer_name: string;
+
+    /**
+     * Proposal voting start date
+     */
+    voting_start_date: number;
+
+    /**
+     * Proposal voting end date
+     */
+    voting_end_date: number;
 
     /**
      * Full count
