@@ -2759,6 +2759,7 @@ class Stoa extends WebService {
                         vote_end_height: data.proposalData[0].vote_end_height,
                         voting_end_date: data.proposalData[0].voting_end_date,
                         proposal_status: data.proposalData[0].proposal_status,
+                        proposal_result: data.proposalData[0].proposal_result,
                         proposal_date: data.proposalData[0].submit_time,
                         pre_evaluation_start_time: data.proposalData[0].pre_evaluation_start_time,
                         pre_evaluation_end_time: data.proposalData[0].pre_evaluation_end_time,
