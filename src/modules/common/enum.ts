@@ -22,3 +22,19 @@ export enum DataCollectionStatus {
     PENDING = 'Pending',
     COMPLETED = 'Completed',
 }
+
+export enum SignStatus {
+    UNSIGNED = 0,
+    SIGNED = 1,
+}
+
+export enum ValidatorStatus {
+    SLASHED = 1,
+    ACTIVE = 0,
+}
+
+export enum ProposalResult {
+    PENDING = 'Pending',
+    PASSED = 'Passed',
+    REJECTED = 'Rejected',
+}

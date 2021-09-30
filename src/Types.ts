@@ -12,7 +12,7 @@
  *******************************************************************************/
 
 import { Block, Hash, Height, JSBI, OutputType, ProposalType, Transaction } from "boa-sdk-ts";
-
+import { SignStatus, ValidatorStatus } from "./modules/common/enum";
 /**
  * The interface of the Validator
  */
@@ -1297,7 +1297,12 @@ export interface IProposalAPI {
     /**
      * Proposal status
      */
-    proposal_status: number;
+    proposal_status: string;
+
+    /**
+     * Proposal result
+     */
+    proposal_result: string;
 
     /**
      * Proposal date
@@ -1526,4 +1531,228 @@ export interface IProposalAssessResult {
     assess_profitability_score: number;
     assess_attractiveness_score: number;
     assess_expansion_score: number;
+}
+
+/**
+ * The interface of the Validator
+ */
+export interface IValidator {
+    /**
+     * Address of validator
+     */
+    address: string;
+
+    /**
+     * enrollment height
+     */
+    enrolled_at: Height;
+
+    /**
+     * The staked utxo 
+     */
+    stake: string;
+
+    /**
+     * preimage of validator
+     */
+    preimage?: IPreimage;
+}
+
+/**
+ * The interface of the Ballot data
+ */
+export interface IBallot {
+    /**
+     * proposal id
+     */
+    proposal_id: string;
+
+    /**
+     * app name 
+     */
+    app_name: string;
+
+    /**
+     * block height 
+     */
+    block_height: Height;
+
+    /**
+     * The ballot
+     */
+    ballot: Buffer;
+
+    /**
+     * The transasaction hash
+     */
+    tx_hash: Hash;
+
+    /**
+     * The voter address
+     */
+    voter_address: string;
+
+    /**
+     * The sequence
+     */
+    sequence: number;
+
+    /**
+     * Signature
+     */
+    signature: any;
+
+    /**
+     * The voting time
+     */
+    voting_time: number;
+
+    /**
+     * The ballot answer
+     */
+    ballot_answer?: number;
+}
+
+/**
+ * Interface for validator by Block
+ */
+export interface IValidatorByBlock {
+    /**
+     * The block Height
+     */
+    block_height: Height;
+
+    /**
+     * The enrollement height
+     */
+    enrolled_height: Height;
+
+    /**
+     * The address of Validator 
+     */
+    address: string;
+
+    /**
+     * The utxo key of validator
+     */
+    utxo_key: string;
+
+    /**
+     * The sign status of validator for the block
+     */
+    signed: SignStatus;
+
+    /**
+     * The validator status i.e active or slashed
+     */
+    slashed: ValidatorStatus;
+}
+
+/**
+ * Interface for a proposal
+ */
+export interface IProposal {
+    /**
+     * The proposal id 
+     */
+    proposal_id: string;
+
+    /**
+     * The name of the app
+     */
+    app_name: string;
+
+    /**
+     * The block height at which proposal was recieved
+     */
+    block_height: number
+
+    /**
+     * The Proposal type
+     */
+    proposal_type: ProposalType;
+
+    /**
+     * The title of the proposal 
+     */
+    proposal_title: string;
+
+    /**
+     * The voting start height 
+     */
+    vote_start_height: number;
+
+    /**
+     * The voting end height 
+     */
+    vote_end_height: number;
+
+    /**
+     * The doc hash 
+     */
+    doc_hash: string;
+
+    /**
+     * The fund amount 
+     */
+    fund_amount: JSBI;
+
+    /**
+     * The proposal fee
+     */
+    proposal_fee: JSBI;
+
+    /**
+     * The voting fee
+     */
+    vote_fee: JSBI;
+
+    /**
+     * The Proposal fee transaction hash 
+     */
+    proposal_fee_tx_hash: string;
+
+    /**
+     * The proposer address
+     */
+    proposer_address: string;
+
+    /**
+     * The proposal fee address
+     */
+    proposal_fee_address: string;
+
+    /**
+     * The proposal status
+     */
+    proposal_status: string
+    /**
+     * The proposal data colletion status
+     */
+    data_collection_status: string;
+
+    /**
+     * The proposal result
+     */
+    proposal_result: string;
+}
+
+/**
+ * The interface for voting result
+ */
+export interface IVotingResult {
+    /**
+     * The approved votes
+     */
+    approved: JSBI;
+
+    /**
+     * The opposed votes
+     */
+    opposed: JSBI;
+
+    /**
+     * The abstain votes
+     */
+    abstain: JSBI;
 }

@@ -224,6 +224,8 @@ CREATE TABLE IF NOT EXISTS "utxos" (
 |  stake            | BIGINT(20)|    | Y        |          | The amount of the UTXO|
 |  preimage_height  | INTEGER   |    | Y        |          | The height of the preimage|
 |  preimage_hash    | TINYBLOB  |    | Y        |          | The hash of the preimage|
+|  signed           | INTEGER   |    |          |          | The validator sign status    |
+|  slashed          | INTEGER   |    |          |          | The validator slash status   |
 
 ### _Create Script_
 
@@ -235,6 +237,8 @@ CREATE TABLE IF NOT EXISTS "validators" (
     "stake"                 BIGINT(20) NOT NULL,
     "preimage_height"       INTEGER    NOT NULL,
     "preimage_hash"         TINYBLOB   NOT NULL,
+    "signed"                INTEGER,
+    "slashed"               INTEGER,
     PRIMARY KEY("enrolled_at","utxo_key(64)")
 )
 ```
@@ -656,6 +660,7 @@ CREATE TABLE IF NOT EXISTS "proposal_fee"(
 |  proposal_fee_address   | VARCHAR(64)      |    | Y        |          | The proposer fee address|
 |  status                 | TEXT      |    | Y        |          | The status of proposal  |
 |  data_collection_status | TEXT      |    | Y        |          | The status of proposal data collection  |
+|  proposal_result        | TEXT      |    | Y        |          | The proposal result  |
 
 ### _Create Script_
 ```sql
@@ -677,6 +682,7 @@ CREATE TABLE IF NOT EXISTS "proposal"(
         "proposal_fee_address"   VARCHAR(64)        NOT NULL,
         "status"                 TEXT        NOT NULL,
         "data_collection_status" TEXT        NOT NULL,
+        "proposal_result"          TEXT        NOT NULL,
     
         PRIMARY KEY ("proposal_id(64)", "app_name(64)");
 );
@@ -762,9 +768,38 @@ CREATE TABLE IF NOT EXISTS proposal_attachments
         );
 );
 ```
-----
+---
 
-## 25. Table **preimages**
+## 25. Table **validator_by_block**
+
+### _Schema_
+
+| Column           | Data Type  | PK  | Not NULL | Default | Description                  |
+| :----------------| :----------| :-: | :------: | ------- | ---------------------------- |
+| block_height     | INTEGER    |  Y  |    Y     |         | The Block height             |
+| address          | VARCHAR(64)|  Y  |    Y     |         | The validator address       |
+| utxo_key         | TINYBLOB   |  Y  |    Y     |         | The utxo key of validator    |
+| enrolled_height  | INTEGER    |     |    Y     |         | The Enrollment Height        |
+| signed           | INTEGER    |     |    Y     |         | The validator sign status    |
+| slashed          | INTEGER    |     |    Y     |         | The validator slash status   |
+
+### _Create Script_
+
+```sql
+  CREATE TABLE IF NOT EXISTS validator_by_block
+        (
+            "block_height"        INTEGER     NOT NULL,
+            "enrolled_height"     INTEGER     NOT NULL,
+            "address"             VARCHAR(64) NOT NULL,
+            "utxo_key"            TINYBLOB    NOT NULL,
+            "signed"              INTEGER     NOT NULL,
+            "slashed"             INTEGER     NOT NULL,
+            PRIMARY KEY("block_height", "address(64)", "utxo_key(64)")
+        );
+```
+---
+
+## 26. Table **preimages**
 
 ### _Schema_
 
@@ -775,8 +810,6 @@ CREATE TABLE IF NOT EXISTS proposal_attachments
 |  preimage_hash    | TINYBLOB   |    | Y        |          | The hash of the preimage |
 |  address          | VARCHAR(64)|    | Y        |          | The public key that can redeem this UTXO |
 
-### _Create Script_
-
 ```sql
 CREATE TABLE IF NOT EXISTS "preimages" (
     "block_height"          INTEGER     NOT NULL,
@@ -786,4 +819,39 @@ CREATE TABLE IF NOT EXISTS "preimages" (
     PRIMARY KEY("block_height", "utxo_key(64)")
 )
 ```
-----
+
+## 27. Table **ballots**
+
+### _Schema_
+
+| Column           | Data Type  | PK  | Not NULL | Default | Description                  |
+| :----------------| :----------| :-: | :------: | ------- | ---------------------------- |
+| proposal_id      | TEXT       |  Y  |    Y     |         | The Proposal id              |
+| block_height     | INTEGER    |  Y  |    Y     |         | The block height             |
+| voter_address    | VARCHAR(64)|  Y  |    Y     |         | The validator address        |
+| app_name         | TEXT       |  Y  |    Y     |         | The app name                 |
+| tx_hash          | TINYBLOB   |     |    Y     |         | The tx hash of transaction   |
+| sequence         | INTEGER    |     |    Y     |         | The sequence of the ballot   |
+| ballot           | BLOB       |     |    Y     |         | The ballot                   |
+| signature        | TINYBLOB   |     |    Y     |         | The signature                |
+| voting_time      | INTEGER    |     |    Y     |         | The voting time              |
+| ballot_answer    | INTEGER    |     |    Y     |         | The answer of the ballot     |
+
+### _Create Script_
+```sql
+    CREATE TABLE IF NOT EXISTS ballots
+        (
+        "proposal_id"         TEXT        NOT NULL,
+        "block_height"        INTEGER     NOT NULL,
+        "app_name"            TEXT        NOT NULL,
+        "tx_hash"             TINYBLOB    NOT NULL,
+        "voter_address"       VARCHAR(64) NOT NULL,
+        "sequence"            INTEGER     NOT NULL,
+        "ballot"              BLOB        NOT NULL,
+        "signature"           TINYBLOB    NOT NULL,
+        "voting_time"         INTEGER     NOT NULL,
+        "ballot_answer"       INTEGER,
+        PRIMARY KEY("block_height", "voter_address(64)", "proposal_id(64)", "app_name(64)");
+    );
+    ```
+---
