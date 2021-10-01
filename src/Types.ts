@@ -807,6 +807,41 @@ export interface IAccountInformation {
 }
 
 /**
+ * Interface for Validator Reward
+ */
+export interface IValidatorReward {
+    /**
+     * Block height
+     */
+    block_height: number;
+
+    /**
+     * The amount of steaking
+     */
+    steaking_amount: number;
+
+    /**
+     * Total block reward
+     */
+    block_reward: number;
+
+    /**
+     * Total block fee
+     */
+    block_fee: number;
+
+    /**
+     * Validator reward amount
+     */
+    validator_reward: number;
+
+    /**
+     * Total record count
+     */
+    total_count: number;
+}
+
+/**
  * Interface for BOA Holder API
  */
 export interface IBOAHolder {

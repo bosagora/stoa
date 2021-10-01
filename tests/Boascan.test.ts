@@ -31,6 +31,7 @@ import {
     sample_data2,
     sample_data3,
     sample_data4,
+    sample_data5,
     TestAgora,
     TestClient,
     TestGeckoServer,
@@ -1044,6 +1045,39 @@ describe("Test of Stoa API Server", () => {
                 }
             ]
         }
+        assert.deepStrictEqual(response.data, expected);
+    });
+
+    it("Test for writing reward transactions block", async () => {
+        const url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(url, { block: sample_data5 });
+
+        await delay(200);
+
+        //  Verifies that all sent blocks are wrote
+        const uri = URI(stoa_addr).directory("/block_height");
+        const response = await client.get(uri.toString());
+
+        assert.strictEqual(response.status, 200);
+        assert.strictEqual(response.data, "5");
+    });
+
+    it("Test for path /validator/reward/:address", async () => {
+        const uri = URI(stoa_addr)
+            .directory("/validator/reward")
+            .filename("boa1xzval3ah8z7ewhuzx6mywveyr79f24w49rdypwgurhjkr8z2ke2mycftv9n");
+        const response = await client.get(uri.toString());
+        let expected = [
+            {
+                block_height: 5,
+                steaking_amount: 0,
+                block_reward: 8717784200000,
+                block_fee: 0,
+                validator_reward: 12962823333,
+                total_count: 1
+            }
+        ]
+
         assert.deepStrictEqual(response.data, expected);
     });
 });
