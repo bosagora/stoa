@@ -972,7 +972,7 @@ export class LedgerStorage extends Storages {
                                     tx_count = IF(last_updated_at = VALUES(last_updated_at), tx_count, (tx_count + VALUES(tx_count))),
                                     total_received = total_received + VALUES(total_received),
                                     total_sent = total_sent + VALUES(total_sent),
-                                    total_reward = total_reward + VALUES(total_reward),
+                                    total_reward = VALUES(total_reward),
                                     total_frozen = VALUES(total_frozen),
                                     total_spendable = VALUES(total_spendable),
                                     total_balance = VALUES(total_balance),
@@ -1206,7 +1206,8 @@ export class LedgerStorage extends Storages {
             total_sent: JSBI,
             total_received: JSBI,
             total_size: JSBI,
-            total_fee: JSBI
+            total_fee: JSBI,
+            total_reward: JSBI
         ): Promise<void> {
             return new Promise<void>((resolve, reject) => {
                 storage
@@ -1221,7 +1222,7 @@ export class LedgerStorage extends Storages {
                             total_received.toString(),
                             total_size.toString(),
                             total_fee.toString(),
-                            "0",
+                            total_reward.toString(),
                         ],
                         conn
                     )
@@ -1237,11 +1238,13 @@ export class LedgerStorage extends Storages {
         return new Promise<void>((resolve, reject) => {
             (async () => {
                 let total_received = JSBI.BigInt(0);
+                let total_reward = JSBI.BigInt(0);
                 let total_sent = JSBI.BigInt(0);
                 let total_fee = JSBI.BigInt(0);
                 let total_size = JSBI.BigInt(0);
                 const total_received_sql = `SELECT
-                                                IFNULL(SUM(IFNULL(O.amount,0)),0) as total_received
+                                                IFNULL(SUM(IFNULL(O.amount,0)),0) as total_amount,
+                                                O.type
                                                 FROM
                                                 tx_outputs O
                                                     INNER JOIN blocks B ON (O.block_height = B.height)
@@ -1259,14 +1262,26 @@ export class LedgerStorage extends Storages {
 
                 this.query(total_received_sql, [block.header.height.toString()], conn)
                     .then((row: any) => {
-                        total_received = JSBI.BigInt(row[0].total_received);
+                        switch (row[0].type) {
+                            case OutputType.Payment: {
+                                total_received = JSBI.BigInt(row[0].total_amount);
+                                break;
+                            }
+                            case OutputType.Coinbase: {
+                                total_reward = JSBI.BigInt(row[0].total_amount);
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
+                        }
                         return this.query(transaction_stats, [block.header.height.toString()], conn);
                     })
                     .then((row: any) => {
                         total_fee = JSBI.ADD(JSBI.BigInt(row[0].tx_fee), JSBI.BigInt(row[0].payload_fee));
                         total_size = JSBI.BigInt(row[0].total_size);
                         total_sent = JSBI.ADD(total_received, total_fee);
-                        save_blockstats(this, block.header.height, total_sent, total_received, total_size, total_fee);
+                        save_blockstats(this, block.header.height, total_sent, total_received, total_size, total_fee, total_reward);
                         resolve();
                     });
             })();
@@ -1383,6 +1398,7 @@ export class LedgerStorage extends Storages {
                 }
             });
             accountInfo.total_balance = JSBI.add(JSBI.add(accountInfo.total_spendable, accountInfo.total_frozen), accountInfo.total_reward);
+            accountInfo.total_spendable = JSBI.add(accountInfo.total_spendable, accountInfo.total_reward);
             return resolve(accountInfo);
         });
     }
@@ -3664,7 +3680,6 @@ export class LedgerStorage extends Storages {
                 FROM proposal_attachments
                 WHERE proposal_id=?`
         const result: any = {};
-        // return this.query(sql, [proposal_id]);
         return new Promise<any>((resolve, reject) => {
             this.query(sql, [proposal_id.toString()])
                 .then((rows: any) => {
@@ -3694,6 +3709,39 @@ export class LedgerStorage extends Storages {
                 accounts
             WHERE address = ?`;
         return this.query(sql, [address]);
+    }
+
+    /**
+     * Get validator reward
+     * @param address Address of the validator
+     * @param limit Maximum record count that can be obtained from one query
+     * @param page The number on the page, this value begins with 1
+     * @returns returns the Promise with requested data
+     * and if an error occurs the .catch is called with an error.
+     */
+    public getValidatorReward(address: string, limit: number, page: number): Promise<any> {
+        const sql = `
+                SELECT 
+                V.amount stake_amount, 
+                O.block_height,
+                O.amount as validator_reward,
+                B.total_reward,
+                B.total_fee,
+                count(*) OVER() AS full_count
+                FROM tx_outputs O
+                LEFT OUTER JOIN validators V ON
+                (V.address = O.address
+                AND V.enrolled_at >= (O.block_height - ${this.validator_cycle})
+                AND V.enrolled_at < O.block_height
+                )
+                INNER JOIN blocks_stats B 
+                ON(O.block_height = B.block_height)
+                WHERE 
+                (O.address = ?
+                AND O.type = 2)
+                ORDER BY O.block_height ASC
+                LIMIT ? OFFSET ?`;
+        return this.query(sql, [address, limit, limit * (page - 1)]);
     }
 
     /**
