@@ -2262,29 +2262,18 @@ export class LedgerStorage extends Storages {
         function putPayload(storage: LedgerStorage, block_height: Height, tx_hash: Hash, tx: Transaction) {
             return new Promise<void>(async (resolve, reject) => {
                 try {
-                    let buffer = SmartBuffer.fromBuffer(tx.payload);
-                    let length = VarInt.toNumber(buffer);
-                    let header = Utils.readBuffer(buffer, length);
-
-                    switch (header.toString()) {
-                        case ProposalFeeData.HEADER: {
-                            let buffer = SmartBuffer.fromBuffer(tx.payload);
-                            let proposal_fee = ProposalFeeData.deserialize(buffer);
+                    if (tx.payload.length >= 9) {
+                        const header = tx.payload.slice(1, 9);
+                        if (Buffer.compare(Buffer.from(ProposalFeeData.HEADER), header) === 0) {
+                            const buffer = SmartBuffer.fromBuffer(tx.payload);
+                            const proposal_fee = ProposalFeeData.deserialize(buffer);
                             await save_proposal_fee(storage, block_height, tx_hash, proposal_fee.proposal_id);
-                            break;
-                        }
-                        case ProposalData.HEADER: {
-                            let buffer = SmartBuffer.fromBuffer(tx.payload);
-                            let proposalData: ProposalData = ProposalData.deserialize(buffer);
+                        } else if (Buffer.compare(Buffer.from(ProposalData.HEADER), header) === 0) {
+                            const buffer = SmartBuffer.fromBuffer(tx.payload);
+                            const proposalData: ProposalData = ProposalData.deserialize(buffer);
                             await save_proposal_data(storage, block_height, tx_hash, proposalData);
-                            break;
-                        }
-                        case BallotData.HEADER: {
-                            //TODO
-                            break;
-                        }
-                        default: {
-                            break;
+                        } else if (Buffer.compare(Buffer.from(BallotData.HEADER), header) === 0) {
+                            // TODO
                         }
                     }
                     resolve();
