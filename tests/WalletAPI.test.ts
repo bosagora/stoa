@@ -102,7 +102,7 @@ describe("Test of Stoa API for the wallet", () => {
 
         const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 9);
-        assert.strictEqual(response.data[0].display_tx_type, "inbound");
+        assert.strictEqual(response.data[0].display_tx_type, "Inbound");
         assert.strictEqual(response.data[0].address, "boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k");
         assert.strictEqual(response.data[0].peer, "boa1xpr00rxtcprlf99dnceuma0ftm9sv03zhtlwfytd5p0dkvzt4ryp595zpjp");
         assert.strictEqual(response.data[0].peer_count, 1);
@@ -111,9 +111,12 @@ describe("Test of Stoa API for the wallet", () => {
             response.data[0].tx_hash,
             "0xed574225c713db7414f507af427ab8056c6adadbc78f45a8dd07397cb7717e39dc1fce4d03b34c80c68292d6a27b500ee896c0487d28e916c4f71a4b626a1da0"
         );
-        assert.strictEqual(response.data[0].tx_type, "payment");
+        assert.strictEqual(response.data[0].tx_type, "Payment");
         assert.strictEqual(response.data[0].amount, "609999999100000");
         assert.strictEqual(response.data[0].unlock_height, "10");
+        assert.strictEqual(response.data[0].tx_fee, 100000);
+        assert.strictEqual(response.data[0].tx_size, 185);
+        assert.strictEqual(response.data[0].full_count, 9);
     });
 
     it("Test of the path /wallet/transaction/overview", async () => {
@@ -130,7 +133,7 @@ describe("Test of Stoa API for the wallet", () => {
             time: 1609464600,
             tx_hash:
                 "0x405ee9d66e83abd8c9a97c68db41de53c70c93c2f5bbe59eb134867ea1bf7f227ef06cc6babc34da81a43f1037e0f620eebe7f01368f9df498caaaef16fe9695",
-            tx_type: "payment",
+            tx_type: "Payment",
             tx_size: 185,
             unlock_height: "10",
             lock_height: "0",
@@ -187,12 +190,12 @@ describe("Test of Stoa API for the wallet", () => {
 
         const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 4);
-        assert.strictEqual(response.data[0].display_tx_type, "outbound");
+        assert.strictEqual(response.data[0].display_tx_type, "Outbound");
         assert.strictEqual(response.data[0].address, "boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k");
         assert.strictEqual(response.data[0].peer, "boa1xpr00rxtcprlf99dnceuma0ftm9sv03zhtlwfytd5p0dkvzt4ryp595zpjp");
         assert.strictEqual(response.data[0].peer_count, 1);
         assert.strictEqual(response.data[0].height, "8");
-        assert.strictEqual(response.data[0].tx_type, "payment");
+        assert.strictEqual(response.data[0].tx_type, "Payment");
         assert.strictEqual(response.data[0].amount, "-609999999300000");
         assert.strictEqual(
             response.data[0].tx_hash,
@@ -211,12 +214,12 @@ describe("Test of Stoa API for the wallet", () => {
 
         const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 1);
-        assert.strictEqual(response.data[0].display_tx_type, "inbound");
+        assert.strictEqual(response.data[0].display_tx_type, "Inbound");
         assert.strictEqual(response.data[0].address, "boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k");
         assert.strictEqual(response.data[0].peer, "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67");
         assert.strictEqual(response.data[0].peer_count, 1);
         assert.strictEqual(response.data[0].height, "1");
-        assert.strictEqual(response.data[0].tx_type, "payment");
+        assert.strictEqual(response.data[0].tx_type, "Payment");
         assert.strictEqual(response.data[0].amount, "609999999900000");
         assert.strictEqual(
             response.data[0].tx_hash,
@@ -234,12 +237,12 @@ describe("Test of Stoa API for the wallet", () => {
 
         const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 1);
-        assert.strictEqual(response.data[0].display_tx_type, "inbound");
+        assert.strictEqual(response.data[0].display_tx_type, "Inbound");
         assert.strictEqual(response.data[0].address, "boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k");
         assert.strictEqual(response.data[0].peer, "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67");
         assert.strictEqual(response.data[0].peer_count, 1);
         assert.strictEqual(response.data[0].height, "1");
-        assert.strictEqual(response.data[0].tx_type, "payment");
+        assert.strictEqual(response.data[0].tx_type, "Payment");
         assert.strictEqual(response.data[0].amount, "609999999900000");
         assert.strictEqual(
             response.data[0].tx_hash,
@@ -311,7 +314,7 @@ describe("Test of Stoa API for the wallet with `sample_data`", () => {
             time: 1609460400,
             tx_hash:
                 "0x35917fba7333947cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a7",
-            tx_type: "payment",
+            tx_type: "Payment",
             tx_size: 1254,
             unlock_height: "3",
             lock_height: "0",
