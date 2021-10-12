@@ -983,7 +983,7 @@ export interface IProposalList {
     proposal_date: number;
 
     /**
-     * Proposer name 
+     * Proposer name
      */
     proposer_name: string;
 
@@ -1058,7 +1058,7 @@ export interface IProposalAPI {
     proposal_tx_hash: string;
 
     /**
-     * Proposer name 
+     * Proposer name
      */
     proposer_name: string;
 
@@ -1111,7 +1111,6 @@ export interface IProposalAPI {
      * Attachment URLs
      */
     urls: string[];
-
 }
 
 /**
