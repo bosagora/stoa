@@ -555,7 +555,7 @@ export enum DisplayTxType {
  * Class that converts various enum values into strings
  */
 export class ConvertTypes {
-    static tx_types: string[] = ["payment", "freeze"];
+    static tx_types: string[] = ["payment", "freeze", "coinbase"];
     static proposal_types: string[] = ["System", "Fund"];
     static display_tx_type: string[] = ["inbound", "outbound", "freeze", "payload"];
 
@@ -968,7 +968,7 @@ export interface IProposalList {
     proposal_date: number;
 
     /**
-     * Proposer name 
+     * Proposer name
      */
     proposer_name: string;
 
@@ -1043,7 +1043,7 @@ export interface IProposalAPI {
     proposal_tx_hash: string;
 
     /**
-     * Proposer name 
+     * Proposer name
      */
     proposer_name: string;
 
@@ -1096,7 +1096,6 @@ export interface IProposalAPI {
      * Attachment URLs
      */
     urls: string[];
-
 }
 
 /**
