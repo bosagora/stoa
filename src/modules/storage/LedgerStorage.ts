@@ -2594,7 +2594,10 @@ export class LedgerStorage extends Storages {
                 FTX.peer,
                 FTX.peer_count,
                 FTX.tx_hash,
-                FTX.type
+                FTX.type,
+                FTX.tx_fee,
+                FTX.tx_size,
+                count(*) OVER() AS full_count
             FROM
             (
                 SELECT
@@ -2643,7 +2646,9 @@ export class LedgerStorage extends Storages {
                         WHEN (TX.payload_size) > 0 THEN 3
                         WHEN (IFNULL(SUM(TX.income),0) - IFNULL(SUM(TX.spend),0)) > 0 THEN 0
                         ELSE 1
-                    END AS display_tx_type
+                    END AS display_tx_type,
+                    TX.tx_fee,
+                    TX.tx_size
                     ${filter_peer_field}
                 FROM
                 (
@@ -2657,7 +2662,9 @@ export class LedgerStorage extends Storages {
                         T.unlock_height,
                         T.payload_size,
                         0 as income,
-                        IFNULL(SUM(S.amount), 0) AS spend
+                        IFNULL(SUM(S.amount), 0) AS spend,
+                        T.tx_fee,
+                        T.tx_size
                     FROM
                         tx_outputs S
                         INNER JOIN tx_inputs I ON (I.utxo = S.utxo_key)
@@ -2680,7 +2687,9 @@ export class LedgerStorage extends Storages {
                         T.unlock_height,
                         T.payload_size,
                         IFNULL(SUM(O.amount), 0) AS income,
-                        0 as spend
+                        0 as spend,
+                        T.tx_fee,
+                        T.tx_size
                     FROM
                         tx_outputs O
                         INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
