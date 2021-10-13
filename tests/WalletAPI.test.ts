@@ -119,9 +119,9 @@ describe("Test of Stoa API for the wallet", () => {
         assert.strictEqual(response.data[0].full_count, 9);
     });
 
-    it("Test of the path /wallet/transaction/overview", async () => {
+    it("Test of the path /wallet/transaction/detail", async () => {
         const uri = URI(stoa_addr)
-            .directory("/wallet/transaction/overview")
+            .directory("/wallet/transaction/detail")
             .filename(
                 "0x405ee9d66e83abd8c9a97c68db41de53c70c93c2f5bbe59eb134867ea1bf7f227ef06cc6babc34da81a43f1037e0f620eebe7f01368f9df498caaaef16fe9695"
             );
@@ -163,6 +163,8 @@ describe("Test of Stoa API for the wallet", () => {
                 },
             ],
             fee: "100000",
+            tx_fee: "100000",
+            payload_fee: "0",
         };
         assert.deepStrictEqual(response.data, expected);
     });
@@ -300,9 +302,9 @@ describe("Test of Stoa API for the wallet with `sample_data`", () => {
         await delay(2000);
     });
 
-    it("Test of the path /wallet/transaction/overview with payload", async () => {
+    it("Test of the path /wallet/transaction/detail with payload", async () => {
         const uri = URI(stoa_addr)
-            .directory("/wallet/transaction/overview")
+            .directory("/wallet/transaction/detail")
             .filename(
                 "0x35917fba7333947cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a7"
             );
@@ -354,6 +356,8 @@ describe("Test of Stoa API for the wallet with `sample_data`", () => {
                 },
             ],
             fee: "1663649600",
+            tx_fee: "249600",
+            payload_fee: "1663400000",
         };
         assert.deepStrictEqual(response.data, expected);
     });
