@@ -2780,6 +2780,76 @@ export class LedgerStorage extends Storages {
     }
 
     /**
+     * Provides a detail of a transaction.
+     * @param tx_hash The hash of the transaction
+     */
+    public getWalletTransactionDetail(tx_hash: Hash): Promise<any[]> {
+        const hash = tx_hash.toBinary(Endian.Little);
+
+        const sql_tx = `SELECT
+                T.block_height as height,
+                B.time_stamp as block_time,
+                T.tx_hash,
+                T.tx_size,
+                T.type,
+                T.unlock_height,
+                T.lock_height,
+                (B.time_stamp + (T.unlock_height - T.block_height) * 10 * 60) as unlock_time,
+                P.payload,
+                T.tx_fee,
+                T.payload_fee
+            FROM
+                blocks B
+                INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
+                LEFT OUTER JOIN payloads P ON (T.tx_hash = P.tx_hash);`;
+
+        const sql_sender = `SELECT
+                S.address,
+                S.amount,
+                S.utxo_key as utxo,
+				B.signature,
+				I.in_index,
+				I.unlock_age,
+				I.unlock_bytes as bytes
+            FROM
+                blocks B
+                INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
+                INNER JOIN tx_inputs I ON (T.tx_hash = I.tx_hash)
+                INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key);`;
+
+        const sql_receiver = `SELECT
+                O.output_index,
+                O.type,
+                O.amount,
+				O.lock_type,
+				O.lock_bytes as bytes,
+                O.utxo_key as utxo,
+                O.address
+            FROM
+                blocks B
+                INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
+                INNER JOIN tx_outputs O ON (T.tx_hash = O.tx_hash);`;
+
+        const result: any = {};
+        return new Promise<any[]>((resolve, reject) => {
+            this.query(sql_tx, [hash])
+                .then((rows: any[]) => {
+                    result.tx = rows;
+                    return this.query(sql_sender, [hash]);
+                })
+                .then((rows: any[]) => {
+                    result.senders = rows;
+                    return this.query(sql_receiver, [hash]);
+                })
+                .then((rows: any[]) => {
+                    result.receivers = rows;
+                    resolve(result);
+                })
+                .catch(reject);
+        });
+    }
+
+    /**
      * Provides pending of transactions.
      * Lists the total by output address of the pending transactions.
      * @param address The input address of the pending transaction

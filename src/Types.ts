@@ -514,6 +514,166 @@ export interface ITxOverviewInputElement {
 }
 
 /**
+ * The interface of the transaction detail
+ */
+export interface ITxDetail {
+    /**
+     * Transaction status
+     */
+    status: string;
+
+    /**
+     * Block height
+     */
+    height: string;
+
+    /**
+     * Transaction time
+     */
+    time: number;
+
+    /**
+     * Transaction hash
+     */
+    tx_hash: string;
+
+    /**
+     * Transaction type
+     */
+    tx_type: string;
+
+    /**
+     * Transaction type
+     */
+    tx_size: number;
+
+    /**
+     * Block height at which the output of the transaction becomes available
+     */
+    unlock_height: string;
+
+    /**
+     * Transaction lock height
+     */
+    lock_height: string;
+
+    /**
+     * Time at which the output of the transaction becomes available
+     */
+    unlock_time: number;
+
+    /**
+     * The transaction data payload
+     */
+    payload: string;
+
+    /**
+     * The address and amount of the output associated with the transaction input
+     */
+    senders: ITxDetailInputElement[];
+
+    /**
+     * The address and amount of transaction output
+     */
+    receivers: ITxDetailOutputElement[];
+
+    /**
+     * Total fee
+     */
+    fee: string;
+
+    /**
+     * Transaction fee
+     */
+    tx_fee: string;
+
+    /**
+     * Payload fee
+     */
+    payload_fee: string;
+}
+
+/**
+ * The interface of the transaction detail output element
+ */
+export interface ITxDetailOutputElement {
+    /**
+     * Output type
+     */
+    type: number;
+
+    /**
+     * Address, Public key
+     */
+    address: string;
+
+    /**
+     * Lock type
+     */
+    lock_type: number;
+
+    /**
+     * Lock type
+     */
+    index: number;
+
+    /**
+     * Lock bytes
+     */
+    bytes: string;
+
+    /**
+     * The hash of UTXO
+     */
+    utxo: string;
+
+    /**
+     * Amount
+     */
+    amount: string;
+}
+
+/**
+ * The interface of the transaction detail input element
+ */
+export interface ITxDetailInputElement {
+    /**
+     * Address, Public key
+     */
+    address: string;
+
+    /**
+     * Amount
+     */
+    amount: number;
+
+    /**
+     * The hash of UTXO
+     */
+    utxo: string;
+
+    /**
+     * Signature of block
+     */
+    signature: string;
+
+    /**
+     * Input index
+     */
+    index: number;
+
+    /**
+     * Unlock age
+     */
+    unlock_age: number;
+
+    /**
+     * Unlock bytes
+     */
+    bytes: string;
+}
+
+/**
  * The interface of the pending transactions
  */
 export interface IPendingTxs {

@@ -48,6 +48,7 @@ import {
     ITransaction,
     ITransactionFee,
     ITxHistoryElement,
+    ITxDetail,
     ITxOverview,
     ITxStatus,
     IUnspentTxOutput,
@@ -252,6 +253,7 @@ class Stoa extends WebService {
             this.getWalletTransactionsHistory.bind(this)
         );
         this.app.get("/wallet/transaction/overview/:hash", isBlackList, this.getWalletTransactionOverview.bind(this));
+        this.app.get("/wallet/transaction/detail/:hash", isBlackList, this.getWalletTransactionDetail.bind(this));
         this.app.get(
             "/wallet/transactions/pending/:address",
             isBlackList,
@@ -923,6 +925,7 @@ class Stoa extends WebService {
      * The parameter `hash` is the hash of the transaction
      *
      * Returns a transaction overview.
+     * @deprecated Use getWalletTransactionDetail
      */
     private getWalletTransactionOverview(req: express.Request, res: express.Response) {
         const txHash: string = String(req.params.hash);
@@ -992,6 +995,96 @@ class Stoa extends WebService {
                     });
 
                 res.status(200).send(JSON.stringify(overview));
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    status: Status.Error,
+                    responseTime: Number(moment().utc().unix() * 1000),
+                });
+                res.status(500).send("Failed to data lookup");
+            });
+    }
+
+    /**
+     * GET /wallet/transaction/detail/:hash
+     *
+     * Called when a request is received through the `/wallet/transaction/detail/:hash` handler
+     * The parameter `hash` is the hash of the transaction
+     *
+     * Returns a transaction overview.
+     */
+    private getWalletTransactionDetail(req: express.Request, res: express.Response) {
+        const txHash: string = String(req.params.hash);
+
+        let tx_hash: Hash;
+        try {
+            tx_hash = new Hash(txHash);
+        } catch (error) {
+            res.status(400).send(`Invalid value for parameter 'hash': ${txHash}`);
+            return;
+        }
+
+        this.ledger_storage
+            .getWalletTransactionDetail(tx_hash)
+            .then((data: any) => {
+                if (
+                    data === undefined ||
+                    data.tx === undefined ||
+                    data.senders === undefined ||
+                    data.receivers === undefined
+                ) {
+                    res.status(500).send("Failed to data lookup");
+                    return;
+                }
+
+                if (data.tx.length === 0) {
+                    res.status(204).send(`The data does not exist. 'hash': (${tx_hash})`);
+                    return;
+                }
+
+                const detail: ITxDetail = {
+                    status: "Confirmed",
+                    height: JSBI.BigInt(data.tx[0].height).toString(),
+                    time: data.tx[0].block_time,
+                    tx_hash: new Hash(data.tx[0].tx_hash, Endian.Little).toString(),
+                    tx_type: _.capitalize(ConvertTypes.TxTypeToString(data.tx[0].type)),
+                    tx_size: data.tx[0].tx_size,
+                    unlock_height: JSBI.BigInt(data.tx[0].unlock_height).toString(),
+                    lock_height: JSBI.BigInt(data.tx[0].lock_height).toString(),
+                    unlock_time: data.tx[0].unlock_time,
+                    payload: data.tx[0].payload !== null ? data.tx[0].payload.toString("base64") : "",
+                    senders: [],
+                    receivers: [],
+                    fee: JSBI.add(JSBI.BigInt(data.tx[0].tx_fee), JSBI.BigInt(data.tx[0].payload_fee)).toString(),
+                    tx_fee: JSBI.BigInt(data.tx[0].tx_fee).toString(),
+                    payload_fee: JSBI.BigInt(data.tx[0].payload_fee).toString(),
+                };
+
+                for (const elem of data.senders)
+                    detail.senders.push({
+                        address: elem.address,
+                        amount: elem.amount,
+                        utxo: new Hash(elem.utxo, Endian.Little).toString(),
+                        signature: new Signature(elem.signature, Endian.Little).toString(),
+                        index: elem.in_index,
+                        unlock_age: elem.unlock_age,
+                        bytes: elem.bytes.toString("base64"),
+                    });
+
+                for (const elem of data.receivers)
+                    detail.receivers.push({
+                        type: elem.type,
+                        address: elem.address,
+                        lock_type: elem.lock_type,
+                        amount: elem.amount,
+                        utxo: new Hash(elem.utxo, Endian.Little).toString(),
+                        index: elem.output_index,
+                        bytes: elem.bytes.toString("base64"),
+                    });
+
+                res.status(200).send(JSON.stringify(detail));
             })
             .catch((err) => {
                 logger.error("Failed to data lookup to the DB: " + err, {
