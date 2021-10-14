@@ -52,8 +52,7 @@ export class CoinMarketService {
      */
     public start(stoaInstance: Stoa, time: number = 15): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
-            this.status = false;
-            cron.schedule(`*/${time} * * * * *`, async () => {
+            this.job = cron.schedule(`*/${time} * * * * *`, async () => {
                 await this.scheduler(stoaInstance);
                 resolve(true);
             });
@@ -76,26 +75,24 @@ export class CoinMarketService {
                 return resolve(true);
             } else {
                 this.status = true;
-                stoaInstance.ledger_storage
+                await stoaInstance.ledger_storage
                     .getCoinMarketcap()
                     .then(async (rows: any[]) => {
                         if (!rows[0]) {
                             await this.recover24hourData(stoaInstance);
-                            this.status = false;
-                            return resolve(true);
                         } else {
                             const height = await stoaInstance.ledger_storage.getBlockHeight();
                             this.coinMarketClient.fetch(height).then(async (data: IMarketCap) => {
                                 await stoaInstance.putCoinMarketStats(data);
-                                this.status = false;
-                                return resolve(true);
                             });
                         }
+                        this.status = false;
+                        return resolve(true);
                     })
                     .catch(async (err: any) => {
                         await this.recover24hourData(stoaInstance);
                         this.status = false;
-                        resolve(true);
+                        return resolve(true);
                     });
             }
         });

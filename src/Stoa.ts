@@ -836,9 +836,9 @@ class Stoa extends WebService {
         filter_type =
             req.query.type !== undefined
                 ? req.query.type
-                      .toString()
-                      .split(",")
-                      .map((m) => ConvertTypes.toDisplayTxType(m))
+                    .toString()
+                    .split(",")
+                    .map((m) => ConvertTypes.toDisplayTxType(m))
                 : [0, 1, 2, 3];
 
         if (filter_type.find((m) => m < 0) !== undefined) {
@@ -1303,7 +1303,8 @@ class Stoa extends WebService {
                         height: data[0].height,
                         transactions: data[0].transactions,
                         validators: data[0].validators,
-                        frozen_coin: 5283595, // FIX ME static data because of unavailability of real data
+                        frozen_coin: data[0].total_frozen,
+                        total_reward: data[0].total_reward,
                         circulating_supply: 5283535,
                         active_validators: 155055,
                     };
@@ -2043,7 +2044,7 @@ class Stoa extends WebService {
                     if (updated)
                         logger.info(
                             `Update a blockHeader : ${block_header.toString()}, ` +
-                                `block height : ${block_header.height.toString()}`,
+                            `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -2054,7 +2055,7 @@ class Stoa extends WebService {
                     if (put)
                         logger.info(
                             `puts a blockHeader history : ${block_header.toString()}, ` +
-                                `block height : ${block_header.height.toString()}`,
+                            `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -2081,9 +2082,8 @@ class Stoa extends WebService {
                     if (changes)
                         logger.info(
                             `Saved a pre-image utxo : ${pre_image.utxo.toString().substr(0, 18)}, ` +
-                                `hash : ${pre_image.hash.toString().substr(0, 18)}, pre-image height : ${
-                                    pre_image.height
-                                }`,
+                            `hash : ${pre_image.hash.toString()}, pre-image height : ${pre_image.height
+                            }`,
                             {
                                 operation: Operation.db,
                                 height: HeightManager.height.toString(),
@@ -2266,7 +2266,8 @@ class Stoa extends WebService {
                             height: data[0].height,
                             transactions: data[0].transactions,
                             validators: data[0].validators,
-                            frozen_coin: 5283595, // FIX ME static data because of unavailability of real data
+                            frozen_coin: data[0].total_frozen,
+                            total_reward: data[0].total_reward,
                             circulating_supply: 5283535,
                             active_validators: 155055,
                         };
