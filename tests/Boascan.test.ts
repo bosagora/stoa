@@ -653,9 +653,10 @@ describe("Test of Stoa API Server", () => {
         const response = await client.get(uri.toString());
         const expected = {
             height: 1,
-            transactions: 10,
+            transactions: "10",
             validators: 6,
-            frozen_coin: 5283595,
+            frozen_coin: '120000000000000',
+            total_reward: '0',
             circulating_supply: 5283535,
             active_validators: 155055,
         };

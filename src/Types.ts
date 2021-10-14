@@ -285,6 +285,11 @@ export interface IBOAStats {
     frozen_coin: number;
 
     /**
+     * Total Reward amount
+     */
+    total_reward: number;
+
+    /**
      * Total no. of active validators
      */
     active_validators: number;

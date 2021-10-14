@@ -1591,9 +1591,9 @@ export class LedgerStorage extends Storages {
 
                     unlock_height_query = `(
                             SELECT '${JSBI.add(
-                                height.value,
-                                JSBI.BigInt(2016)
-                            ).toString()}' AS unlock_height WHERE EXISTS
+                        height.value,
+                        JSBI.BigInt(2016)
+                    ).toString()}' AS unlock_height WHERE EXISTS
                             (
                                 SELECT
                                     *
@@ -3501,11 +3501,16 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public getBOAStats(): Promise<any[]> {
-        const sql = `SELECT max(height) as height,
-             (SELECT count(*) from transactions) as transactions,
-             (SELECT count(*) from validators) as validators
-            FROM
-                blocks;`;
+        const sql = `
+                SELECT MAX(B.height) as height,
+                    SUM(B.tx_count) as transactions,
+	                SUM(BS.total_reward) as total_reward,
+                    (SELECT SUM(total_frozen) as total_frozen from accounts) as total_frozen,
+                    (SELECT COUNT(DISTINCT address) from validators) as validators
+                    FROM
+                    blocks B
+                    LEFT OUTER JOIN blocks_stats BS
+                    ON(B.height = BS.block_height);`;
 
         return this.query(sql, []);
     }
