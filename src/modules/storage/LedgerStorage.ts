@@ -1281,7 +1281,15 @@ export class LedgerStorage extends Storages {
                         total_fee = JSBI.ADD(JSBI.BigInt(row[0].tx_fee), JSBI.BigInt(row[0].payload_fee));
                         total_size = JSBI.BigInt(row[0].total_size);
                         total_sent = JSBI.ADD(total_received, total_fee);
-                        save_blockstats(this, block.header.height, total_sent, total_received, total_size, total_fee, total_reward);
+                        save_blockstats(
+                            this,
+                            block.header.height,
+                            total_sent,
+                            total_received,
+                            total_size,
+                            total_fee,
+                            total_reward
+                        );
                         resolve();
                     });
             })();
@@ -1397,7 +1405,10 @@ export class LedgerStorage extends Storages {
                     }
                 }
             });
-            accountInfo.total_balance = JSBI.add(JSBI.add(accountInfo.total_spendable, accountInfo.total_frozen), accountInfo.total_reward);
+            accountInfo.total_balance = JSBI.add(
+                JSBI.add(accountInfo.total_spendable, accountInfo.total_frozen),
+                accountInfo.total_reward
+            );
             accountInfo.total_spendable = JSBI.add(accountInfo.total_spendable, accountInfo.total_reward);
             return resolve(accountInfo);
         });
@@ -1580,9 +1591,9 @@ export class LedgerStorage extends Storages {
 
                     unlock_height_query = `(
                             SELECT '${JSBI.add(
-                        height.value,
-                        JSBI.BigInt(2016)
-                    ).toString()}' AS unlock_height WHERE EXISTS
+                                height.value,
+                                JSBI.BigInt(2016)
+                            ).toString()}' AS unlock_height WHERE EXISTS
                             (
                                 SELECT
                                     *
@@ -2182,7 +2193,7 @@ export class LedgerStorage extends Storages {
             cur_height +
             ` AND ` +
             cur_height +
-            ` <= (avail_height + ?)
+            ` < (avail_height + ?)
                 ) as enrollments
             LEFT JOIN validators
                 ON enrollments.enrolled_at = validators.enrolled_at
@@ -3757,7 +3768,7 @@ export class LedgerStorage extends Storages {
         const urls = `
                 SELECT url
                 FROM proposal_attachments
-                WHERE proposal_id=?`
+                WHERE proposal_id=?`;
         const result: any = {};
         return new Promise<any>((resolve, reject) => {
             this.query(sql, [proposal_id.toString()])

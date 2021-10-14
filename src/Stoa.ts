@@ -58,7 +58,7 @@ import {
     IValidatorReward,
     ValidatorData,
 } from "./Types";
-import lodash from 'lodash';
+import lodash from "lodash";
 import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
@@ -383,34 +383,20 @@ class Stoa extends WebService {
                     let preimage_height: JSBI = JSBI.BigInt(row.preimage_height);
                     const target_height: Height = new Height(row.height);
                     let result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
-                    const avail_height = JSBI.BigInt(row.avail_height);
                     let preimage_height_str: string;
 
                     // Hashing preImage
-                    if (
-                        JSBI.greaterThanOrEqual(target_height.value, avail_height) &&
-                        JSBI.greaterThanOrEqual(
-                            JSBI.add(avail_height, JSBI.BigInt(preimage_height)),
-                            target_height.value
-                        )
-                    ) {
+                    if (JSBI.greaterThanOrEqual(JSBI.BigInt(preimage_height), target_height.value)) {
                         result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                        const count = JSBI.toNumber(
-                            JSBI.subtract(JSBI.add(avail_height, JSBI.BigInt(preimage_height)), target_height.value)
-                        );
+                        const count = JSBI.toNumber(JSBI.subtract(JSBI.BigInt(preimage_height), target_height.value));
                         for (let i = 0; i < count; i++) {
                             result_preimage_hash = hash(result_preimage_hash.data);
                             preimage_height = JSBI.subtract(preimage_height, JSBI.BigInt(1));
                         }
                         preimage_height_str = preimage_height.toString();
                     } else {
-                        if (JSBI.equal(target_height.value, JSBI.BigInt(row.enrolled_at))) {
-                            preimage_height_str = "0";
-                            result_preimage_hash.fromBinary(row.commitment, Endian.Little);
-                        } else {
-                            preimage_height_str = "";
-                            result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
-                        }
+                        preimage_height_str = "";
+                        result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
                     }
 
                     const preimage: IPreimage = {
@@ -479,39 +465,26 @@ class Stoa extends WebService {
 
                 const out_put: ValidatorData[] = new Array<ValidatorData>();
 
-                for (const row of rows) {
+                if (rows.length > 0) {
+                    const row = rows[0];
                     const preimage_hash: Buffer = row.preimage_hash;
                     let preimage_height: JSBI = JSBI.BigInt(row.preimage_height);
                     const target_height: Height = new Height(row.height);
                     let result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
-                    const avail_height = JSBI.BigInt(row.avail_height);
                     let preimage_height_str: string;
 
                     // Hashing preImage
-                    if (
-                        JSBI.greaterThanOrEqual(target_height.value, avail_height) &&
-                        JSBI.greaterThanOrEqual(
-                            JSBI.add(avail_height, JSBI.BigInt(preimage_height)),
-                            target_height.value
-                        )
-                    ) {
+                    if (JSBI.greaterThanOrEqual(JSBI.BigInt(preimage_height), target_height.value)) {
                         result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                        const count = JSBI.toNumber(
-                            JSBI.subtract(JSBI.add(avail_height, JSBI.BigInt(preimage_height)), target_height.value)
-                        );
+                        const count = JSBI.toNumber(JSBI.subtract(JSBI.BigInt(preimage_height), target_height.value));
                         for (let i = 0; i < count; i++) {
                             result_preimage_hash = hash(result_preimage_hash.data);
                             preimage_height = JSBI.subtract(preimage_height, JSBI.BigInt(1));
                         }
                         preimage_height_str = preimage_height.toString();
                     } else {
-                        if (JSBI.equal(target_height.value, JSBI.BigInt(row.enrolled_at))) {
-                            preimage_height_str = "0";
-                            result_preimage_hash.fromBinary(row.commitment, Endian.Little);
-                        } else {
-                            preimage_height_str = "";
-                            result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
-                        }
+                        preimage_height_str = "";
+                        result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
                     }
 
                     const preimage: IPreimage = {
@@ -863,9 +836,9 @@ class Stoa extends WebService {
         filter_type =
             req.query.type !== undefined
                 ? req.query.type
-                    .toString()
-                    .split(",")
-                    .map((m) => ConvertTypes.toDisplayTxType(m))
+                      .toString()
+                      .split(",")
+                      .map((m) => ConvertTypes.toDisplayTxType(m))
                 : [0, 1, 2, 3];
 
         if (filter_type.find((m) => m < 0) !== undefined) {
@@ -2070,7 +2043,7 @@ class Stoa extends WebService {
                     if (updated)
                         logger.info(
                             `Update a blockHeader : ${block_header.toString()}, ` +
-                            `block height : ${block_header.height.toString()}`,
+                                `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -2081,7 +2054,7 @@ class Stoa extends WebService {
                     if (put)
                         logger.info(
                             `puts a blockHeader history : ${block_header.toString()}, ` +
-                            `block height : ${block_header.height.toString()}`,
+                                `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -2108,8 +2081,9 @@ class Stoa extends WebService {
                     if (changes)
                         logger.info(
                             `Saved a pre-image utxo : ${pre_image.utxo.toString().substr(0, 18)}, ` +
-                            `hash : ${pre_image.hash.toString().substr(0, 18)}, pre-image height : ${pre_image.height
-                            }`,
+                                `hash : ${pre_image.hash.toString().substr(0, 18)}, pre-image height : ${
+                                    pre_image.height
+                                }`,
                             {
                                 operation: Operation.db,
                                 height: HeightManager.height.toString(),
@@ -2616,8 +2590,8 @@ class Stoa extends WebService {
                             proposer_name: row.proposer_name,
                             voting_start_date: row.voting_start_date,
                             voting_end_date: row.voting_end_date,
-                            full_count: row.full_count
-                        })
+                            full_count: row.full_count,
+                        });
                     }
                     return res.status(200).send(JSON.stringify(proposals));
                 }
@@ -2648,8 +2622,7 @@ class Stoa extends WebService {
                 if (data.length === 0) {
                     return res.status(204).send(`The data does not exist.`);
                 } else {
-                    let proposal: IProposalAPI =
-                    {
+                    let proposal: IProposalAPI = {
                         proposal_title: data.proposalData[0].proposal_title,
                         proposal_id: data.proposalData[0].proposal_id,
                         detail: data.proposalData[0].detail,
@@ -2670,8 +2643,8 @@ class Stoa extends WebService {
                         ave_pre_evaluation_score: data.proposalData[0].ave_pre_evaluation_score,
                         proposer_address: data.proposalData[0].proposer_address,
                         proposal_fee_address: data.proposalData[0].proposal_fee_address,
-                        urls: data.url
-                    }
+                        urls: data.url,
+                    };
                     return res.status(200).send(JSON.stringify(proposal));
                 }
             })
@@ -2706,7 +2679,7 @@ class Stoa extends WebService {
                 if (data.length === 0) {
                     return res.status(204).send(`The data does not exist.`);
                 } else {
-                    let rewards: IValidatorReward[] = []
+                    let rewards: IValidatorReward[] = [];
                     for (const row of data) {
                         rewards.push({
                             block_height: row.block_height,
@@ -2714,7 +2687,7 @@ class Stoa extends WebService {
                             block_reward: row.total_reward,
                             block_fee: row.total_fee,
                             validator_reward: row.validator_reward,
-                            total_count: row.full_count
+                            total_count: row.full_count,
                         });
                     }
                     return res.status(200).send(JSON.stringify(rewards));
