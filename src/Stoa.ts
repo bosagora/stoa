@@ -1185,7 +1185,7 @@ class Stoa extends WebService {
                     height: JSBI.BigInt(data.tx[0].height).toString(),
                     time: data.tx[0].block_time,
                     tx_hash: new Hash(data.tx[0].tx_hash, Endian.Little).toString(),
-                    tx_type: lodash.capitalize(ConvertTypes.TxTypeToString(data.tx[0].type)),
+                    tx_type: ConvertTypes.TxTypeToString(data.tx[0].type),
                     tx_size: data.tx[0].tx_size,
                     unlock_height: JSBI.BigInt(data.tx[0].unlock_height).toString(),
                     lock_height: JSBI.BigInt(data.tx[0].lock_height).toString(),
