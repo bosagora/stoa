@@ -56,7 +56,7 @@ import {
     IProposalAPI,
     IProposalList,
     IValidatorReward,
-    ValidatorData,
+    ValidatorData, ITxHistory, ITxHistoryItem, ITxHistoryHeader,
 } from "./Types";
 import lodash from "lodash";
 import bodyParser from "body-parser";
@@ -251,6 +251,11 @@ class Stoa extends WebService {
             "/wallet/transactions/history/:address",
             isBlackList,
             this.getWalletTransactionsHistory.bind(this)
+        );
+        this.app.get(
+            "/wallet/transaction/history/:address",
+            isBlackList,
+            this.getWalletTransactionHistory.bind(this)
         );
         this.app.get("/wallet/transaction/overview/:hash", isBlackList, this.getWalletTransactionOverview.bind(this));
         this.app.get("/wallet/transaction/detail/:hash", isBlackList, this.getWalletTransactionDetail.bind(this));
@@ -769,6 +774,8 @@ class Stoa extends WebService {
     }
 
     /**
+     * @deprecated Use getWalletTransactionHistory
+     *
      * GET /wallet/transactions/history/:address
      *
      * Called when a request is received through the `/wallet/transactions/history/:address` handler
@@ -879,6 +886,162 @@ class Stoa extends WebService {
                     });
                 }
                 res.status(200).send(JSON.stringify(out_put));
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    status: Status.Error,
+                    responseTime: Number(moment().utc().unix() * 1000),
+                });
+                res.status(500).send("Failed to data lookup");
+            });
+    }
+
+    /**
+     * GET /wallet/transaction/history/:address
+     *
+     * Called when a request is received through the `/wallet/transaction/history/:address` handler
+     * ```
+     * The parameter `address` are the address to query.
+     * The parameter `pageSize` is the maximum size that can be obtained
+     *      from one query, default is 10
+     * The parameter `page` is the number on the page, this value begins with 1,
+     *      default is 1
+     * The parameter `type` is the type of transaction to query.
+     *      This can include multiple types.
+     *      Transaction types include "inbound", "outbound", "freeze", "payload".
+     *      The "inbound" is an increased transaction of funds at the address.
+     *      The "outbound" is a transaction with reduced funds at the address.
+     *      Users can select only "inbound", "outbound".
+     *      The "freeze", "payload" are always included.
+     *      default is "inbound,outbound,freeze,payload"
+     * The parameter `beginDate` is the start date of the range of dates to look up.
+     * The parameter `endDate` is the end date of the range of dates to look up.
+     * The parameter `peer` is used when users want to look up only specific
+     *      address of their counterparts.
+     *      Peer is the withdrawal address in the inbound transaction and
+     *      a deposit address in the outbound transaction
+     * Returns a set of transactions history of the addresses.
+     * ```
+     */
+    private async getWalletTransactionHistory(req: express.Request, res: express.Response) {
+        const address: string = String(req.params.address);
+
+        let filter_begin: number | undefined;
+        let filter_end: number | undefined;
+        let filter_type: DisplayTxType[];
+
+        // Validating Parameter - beginDate, endDate
+        if (req.query.beginDate !== undefined && req.query.endDate !== undefined) {
+            if (!Utils.isPositiveInteger(req.query.beginDate.toString())) {
+                res.status(400).send(`Invalid value for parameter 'beginDate': ${req.query.beginDate.toString()}`);
+                return;
+            }
+
+            if (!Utils.isPositiveInteger(req.query.endDate.toString())) {
+                res.status(400).send(`Invalid value for parameter 'endDate': ${req.query.endDate.toString()}`);
+                return;
+            }
+
+            filter_begin = Number(req.query.beginDate.toString());
+            filter_end = Number(req.query.endDate.toString());
+
+            if (filter_begin > filter_end) {
+                res.status(400).send(
+                    `Parameter beginDate must be less than a parameter endDate. 'beginDate': (${filter_begin}), 'endDate': (${filter_end})`
+                );
+                return;
+            }
+        } else if (req.query.beginDate !== undefined && req.query.endDate === undefined) {
+            res.status(400).send(`Parameter endDate must also be set.`);
+            return;
+        } else if (req.query.beginDate === undefined && req.query.endDate !== undefined) {
+            res.status(400).send(`Parameter beginDate must also be set.`);
+            return;
+        } else {
+            filter_begin = undefined;
+            filter_end = undefined;
+        }
+        filter_type =
+            req.query.type !== undefined
+                ? req.query.type
+                    .toString()
+                    .split(",")
+                    .map((m) => ConvertTypes.toDisplayTxType(m))
+                : [0, 1, 2, 3];
+
+        if (filter_type.find((m) => m < 0) !== undefined) {
+            res.status(400).send(`Invalid transaction type: ${req.query.type}`);
+            return;
+        }
+
+        const filter_peer = req.query.peer !== undefined ? req.query.peer.toString() : undefined;
+        const pagination: IPagination = await this.paginate(req, res);
+        this.ledger_storage
+            .getWalletTransactionsHistory(
+                address,
+                pagination.pageSize,
+                pagination.page,
+                filter_type,
+                filter_begin,
+                filter_end,
+                filter_peer
+            )
+            .then(async (rows: any[]) => {
+                let full_count = 0;
+                if (rows.length === 0) {
+                    if (pagination.page > 1) {
+                        const rows_second = await this.ledger_storage
+                            .getWalletTransactionsHistory(
+                                address,
+                                pagination.pageSize,
+                                1,
+                                filter_type,
+                                filter_begin,
+                                filter_end,
+                                filter_peer
+                            );
+                        full_count = (rows_second.length > 0) ? rows_second[0].full_count : 0;
+                    }
+                } else {
+                    full_count = rows[0].full_count;
+                }
+
+                const total_page = (full_count === 0) ? 0 : Math.floor((full_count - 1) / pagination.pageSize) + 1;
+                const header: ITxHistoryHeader = {
+                    address,
+                    page_size: pagination.pageSize,
+                    page: pagination.page,
+                    total_page,
+                    type: filter_type.map((m: DisplayTxType) => ConvertTypes.DisplayTxTypeToString(m)),
+                    begin_date: filter_begin,
+                    end_date: filter_end,
+                    peer: filter_peer,
+                };
+
+                const items: ITxHistoryItem[] = [];
+                for (const row of rows) {
+                    items.push({
+                        display_tx_type: ConvertTypes.DisplayTxTypeToString(row.display_tx_type),
+                        address: row.address,
+                        peer: row.peer,
+                        peer_count: row.peer_count,
+                        height: JSBI.BigInt(row.height).toString(),
+                        time: row.block_time,
+                        tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
+                        tx_type: ConvertTypes.TxTypeToString(row.type),
+                        amount: JSBI.BigInt(row.amount).toString(),
+                        unlock_height: JSBI.BigInt(row.unlock_height).toString(),
+                        unlock_time: row.unlock_time,
+                        tx_fee: row.tx_fee,
+                        tx_size: row.tx_size,
+                    });
+                }
+                const history: ITxHistory = {
+                    header, items,
+                };
+                res.status(200).send(JSON.stringify(history));
             })
             .catch((err) => {
                 logger.error("Failed to data lookup to the DB: " + err, {

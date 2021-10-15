@@ -251,6 +251,169 @@ describe("Test of Stoa API for the wallet", () => {
             "0xd972ce624097872d8ae110d3e4cee11cdd0d090bbffa3850b1b80a7f22e65573c480156e58bcec924fa840214b91d4b36a9d9ddd85037673cdce99959532a0a7"
         );
     });
+
+    it("Test of the path /wallet/transaction/history", async () => {
+        const uri = URI(stoa_addr)
+            .directory("/wallet/transaction/history")
+            .filename("boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k")
+            .setSearch("pageSize", "10")
+            .setSearch("page", "1");
+
+        const response = await client.get(uri.toString());
+        assert.deepStrictEqual(response.data.header, {
+            address: "boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k",
+            page_size: 10,
+            page: 1,
+            total_page: 1,
+            type: ["inbound", "outbound", "freeze", "payload"],
+        });
+        assert.strictEqual(response.data.items.length, 9);
+        assert.strictEqual(response.data.items[0].display_tx_type, "inbound");
+        assert.strictEqual(
+            response.data.items[0].address,
+            "boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k"
+        );
+        assert.strictEqual(
+            response.data.items[0].peer,
+            "boa1xpr00rxtcprlf99dnceuma0ftm9sv03zhtlwfytd5p0dkvzt4ryp595zpjp"
+        );
+        assert.strictEqual(response.data.items[0].peer_count, 1);
+        assert.strictEqual(response.data.items[0].height, "9");
+        assert.strictEqual(
+            response.data.items[0].tx_hash,
+            "0xed574225c713db7414f507af427ab8056c6adadbc78f45a8dd07397cb7717e39dc1fce4d03b34c80c68292d6a27b500ee896c0487d28e916c4f71a4b626a1da0"
+        );
+        assert.strictEqual(response.data.items[0].tx_type, "payment");
+        assert.strictEqual(response.data.items[0].amount, "609999999100000");
+        assert.strictEqual(response.data.items[0].unlock_height, "10");
+        assert.strictEqual(response.data.items[0].tx_fee, 100000);
+        assert.strictEqual(response.data.items[0].tx_size, 185);
+    });
+
+    it("Test of the path /wallet/transaction/history - Filtering - Wrong TransactionType", async () => {
+        const uri = URI(stoa_addr)
+            .directory("/wallet/transaction/history")
+            .filename("boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k")
+            .setSearch("pageSize", "10")
+            .setSearch("page", "1")
+            .setSearch("type", "in,out");
+
+        await assert.rejects(client.get(uri.toString()), {
+            statusMessage: "Invalid transaction type: in,out",
+        });
+    });
+
+    it("Test of the path /wallet/transaction/history - Filtering - TransactionType", async () => {
+        const uri = URI(stoa_addr)
+            .directory("/wallet/transaction/history")
+            .filename("boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k")
+            .setSearch("pageSize", "10")
+            .setSearch("page", "1")
+            .setSearch("type", "outbound");
+
+        const response = await client.get(uri.toString());
+        assert.deepStrictEqual(response.data.header, {
+            address: "boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k",
+            page_size: 10,
+            page: 1,
+            total_page: 1,
+            type: ["outbound"],
+        });
+        assert.strictEqual(response.data.items.length, 4);
+        assert.strictEqual(response.data.items[0].display_tx_type, "outbound");
+        assert.strictEqual(
+            response.data.items[0].address,
+            "boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k"
+        );
+        assert.strictEqual(
+            response.data.items[0].peer,
+            "boa1xpr00rxtcprlf99dnceuma0ftm9sv03zhtlwfytd5p0dkvzt4ryp595zpjp"
+        );
+        assert.strictEqual(response.data.items[0].peer_count, 1);
+        assert.strictEqual(response.data.items[0].height, "8");
+        assert.strictEqual(response.data.items[0].tx_type, "payment");
+        assert.strictEqual(response.data.items[0].amount, "-609999999300000");
+        assert.strictEqual(
+            response.data.items[0].tx_hash,
+            "0x6ddb999e0f948df8a7c9abb44702dd3dfde02af2ecd3e7e517639202794253ac69e11335b05df71e2826afdebfe42c8a5db3da2465628188f98108ee38b8a9c4"
+        );
+    });
+
+    it("Test of the path /wallet/transaction/history - Filtering - Date", async () => {
+        const uri = URI(stoa_addr)
+            .directory("/wallet/transaction/history")
+            .filename("boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k")
+            .setSearch("pageSize", "10")
+            .setSearch("page", "1")
+            .setSearch("beginDate", "1609459200")
+            .setSearch("endDate", "1609459900");
+
+        const response = await client.get(uri.toString());
+        assert.deepStrictEqual(response.data.header, {
+            address: "boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k",
+            page_size: 10,
+            page: 1,
+            total_page: 1,
+            type: ["inbound", "outbound", "freeze", "payload"],
+            begin_date: 1609459200,
+            end_date: 1609459900,
+        });
+        assert.strictEqual(response.data.items.length, 1);
+        assert.strictEqual(response.data.items[0].display_tx_type, "inbound");
+        assert.strictEqual(
+            response.data.items[0].address,
+            "boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k"
+        );
+        assert.strictEqual(
+            response.data.items[0].peer,
+            "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67"
+        );
+        assert.strictEqual(response.data.items[0].peer_count, 1);
+        assert.strictEqual(response.data.items[0].height, "1");
+        assert.strictEqual(response.data.items[0].tx_type, "payment");
+        assert.strictEqual(response.data.items[0].amount, "609999999900000");
+        assert.strictEqual(
+            response.data.items[0].tx_hash,
+            "0xd972ce624097872d8ae110d3e4cee11cdd0d090bbffa3850b1b80a7f22e65573c480156e58bcec924fa840214b91d4b36a9d9ddd85037673cdce99959532a0a7"
+        );
+    });
+
+    it("Test of the path /wallet/transaction/history - Filtering - Peer", async () => {
+        const uri = URI(stoa_addr)
+            .directory("/wallet/transaction/history")
+            .filename("boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k")
+            .setSearch("pageSize", "10")
+            .setSearch("page", "1")
+            .setSearch("peer", "boa1xzgenes5cf8xel37");
+
+        const response = await client.get(uri.toString());
+        assert.deepStrictEqual(response.data.header, {
+            address: "boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k",
+            page_size: 10,
+            page: 1,
+            total_page: 1,
+            type: ["inbound", "outbound", "freeze", "payload"],
+            peer: "boa1xzgenes5cf8xel37",
+        });
+        assert.strictEqual(response.data.items.length, 1);
+        assert.strictEqual(response.data.items[0].display_tx_type, "inbound");
+        assert.strictEqual(
+            response.data.items[0].address,
+            "boa1xph007vhkq4j58eyhwxx8eg5hjc0p5etp5kss0w8fh2ux6xjf2v4wlxm25k"
+        );
+        assert.strictEqual(
+            response.data.items[0].peer,
+            "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67"
+        );
+        assert.strictEqual(response.data.items[0].peer_count, 1);
+        assert.strictEqual(response.data.items[0].height, "1");
+        assert.strictEqual(response.data.items[0].tx_type, "payment");
+        assert.strictEqual(response.data.items[0].amount, "609999999900000");
+        assert.strictEqual(
+            response.data.items[0].tx_hash,
+            "0xd972ce624097872d8ae110d3e4cee11cdd0d090bbffa3850b1b80a7f22e65573c480156e58bcec924fa840214b91d4b36a9d9ddd85037673cdce99959532a0a7"
+        );
+    });
 });
 
 describe("Test of Stoa API for the wallet with `sample_data`", () => {

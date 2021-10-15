@@ -169,6 +169,98 @@ export interface ITxHistoryElement {
 }
 
 /**
+ * The interface of the transaction history
+ */
+export interface ITxHistory {
+    header: ITxHistoryHeader;
+    items: ITxHistoryItem[];
+}
+
+/**
+ * The interface of the transaction history element
+ */
+export interface ITxHistoryHeader {
+    address: string;
+    page_size: number;
+    page: number;
+    total_page: number;
+    type?: string[];
+    begin_date?: number;
+    end_date?: number;
+    peer?: string;
+}
+
+/**
+ * The interface of the transaction history item
+ */
+export interface ITxHistoryItem {
+    /**
+     * The transaction type of wallet ('inbound', 'outbound', 'freeze', 'payload')
+     */
+    display_tx_type: string;
+
+    /**
+     * Address, Public key
+     */
+    address: string;
+
+    /**
+     * The address that sent (or received) the funds
+     */
+    peer: string;
+
+    /**
+     * The number of the peer
+     */
+    peer_count: number;
+
+    /**
+     * Block height
+     */
+    height: string;
+
+    /**
+     * Transaction time
+     */
+    time: number;
+
+    /**
+     * Transaction hash
+     */
+    tx_hash: string;
+
+    /**
+     * Transaction type
+     */
+    tx_type: string;
+
+    /**
+     * Amount
+     */
+    amount: string;
+
+    /**
+     * Block height at which the output of the transaction becomes available
+     */
+    unlock_height: string;
+
+    /**
+     * Time at which the output of the transaction becomes available
+     */
+    unlock_time: number;
+
+    /**
+     * Transaction fee
+     */
+    tx_fee: number;
+
+    /**
+     * Transaction size
+     */
+    tx_size: number;
+}
+
+/**
  * The interface of the statistics of BOA coin
  */
 export interface IBOAStats {
@@ -734,7 +826,7 @@ export class ConvertTypes {
     static proposal_types: string[] = ["System", "Fund"];
     static display_tx_type: string[] = ["inbound", "outbound", "freeze", "payload"];
 
-    public static DisplayTxTypeToString(type: OutputType): string {
+    public static DisplayTxTypeToString(type: DisplayTxType): string {
         if (type < ConvertTypes.display_tx_type.length) return ConvertTypes.display_tx_type[type];
         else return "";
     }
