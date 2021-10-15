@@ -133,7 +133,7 @@ describe("Test of Stoa API for the wallet", () => {
             time: 1609464600,
             tx_hash:
                 "0x405ee9d66e83abd8c9a97c68db41de53c70c93c2f5bbe59eb134867ea1bf7f227ef06cc6babc34da81a43f1037e0f620eebe7f01368f9df498caaaef16fe9695",
-            tx_type: "Payment",
+            tx_type: "payment",
             tx_size: 185,
             unlock_height: "10",
             lock_height: "0",
@@ -479,7 +479,7 @@ describe("Test of Stoa API for the wallet with `sample_data`", () => {
             time: 1609460400,
             tx_hash:
                 "0x35917fba7333947cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a7",
-            tx_type: "Payment",
+            tx_type: "payment",
             tx_size: 1254,
             unlock_height: "3",
             lock_height: "0",
