@@ -46,7 +46,8 @@ import { IDatabaseConfig } from "../src/modules/common/Config";
 import { MockDBConfig } from "./TestConfig";
 import { IUnspentTxOutput } from "../src/Types";
 
-describe("Test of Stoa API for the wallet", () => {
+describe("Test of Stoa API for the wallet", function() {
+    this.timeout(5000);
     const agora_addr: URL = new URL("http://localhost:2831");
     const stoa_addr: URL = new URL("http://localhost:3831");
     const stoa_private_addr: URL = new URL("http://localhost:4831");
@@ -416,7 +417,8 @@ describe("Test of Stoa API for the wallet", () => {
     });
 });
 
-describe("Test of Stoa API for the wallet with `sample_data`", () => {
+describe("Test of Stoa API for the wallet with `sample_data`", function() {
+    this.timeout(5000);
     const agora_addr: URL = new URL("http://localhost:2832");
     const stoa_addr: URL = new URL("http://localhost:3832");
     const stoa_private_addr: URL = new URL("http://localhost:4832");
@@ -697,7 +699,8 @@ describe("Test of Stoa API for the wallet with `sample_data`", () => {
     });
 });
 
-describe("Test of the path /wallet/balance:address for payment", () => {
+describe("Test of the path /wallet/balance:address for payment", function() {
+    this.timeout(5000);
     const agora_addr: URL = new URL("http://localhost:2901");
     const stoa_addr: URL = new URL("http://localhost:3901");
     const stoa_private_addr: URL = new URL("http://localhost:4901");
@@ -925,7 +928,8 @@ describe("Test of the path /wallet/balance:address for payment", () => {
     });
 });
 
-describe("Test of the path /wallet/balance:address for freeze and unfreeze", () => {
+describe("Test of the path /wallet/balance:address for freeze and unfreeze", function() {
+    this.timeout(5000);
     const agora_addr: URL = new URL("http://localhost:2902");
     const stoa_addr: URL = new URL("http://localhost:3902");
     const stoa_private_addr: URL = new URL("http://localhost:4902");
@@ -1140,7 +1144,8 @@ describe("Test of the path /wallet/balance:address for freeze and unfreeze", () 
     });
 });
 
-describe("Test of the path /wallet/balance:address for double spending", () => {
+describe("Test of the path /wallet/balance:address for double spending", function () {
+    this.timeout(5000);
     const agora_addr: URL = new URL("http://localhost:2904");
     const stoa_addr: URL = new URL("http://localhost:3904");
     const stoa_private_addr: URL = new URL("http://localhost:4904");
