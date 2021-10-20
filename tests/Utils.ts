@@ -568,12 +568,11 @@ export function createBlock(prev_block: Block, txs: Transaction[]): Block {
         merkle_tree.length > 0 ? merkle_tree[merkle_tree.length - 1] : new Hash(Buffer.alloc(Hash.Width));
     const block_header = new BlockHeader(
         hashFull(prev_block.header),
-        new Height(JSBI.add(prev_block.header.height.value, JSBI.BigInt(1))),
         merkle_root,
-        BitMask.fromString(""),
         new Signature(Buffer.alloc(Signature.Width)),
+        BitMask.fromString(""),
+        new Height(JSBI.add(prev_block.header.height.value, JSBI.BigInt(1))),
         [],
-        new Hash(Buffer.alloc(Hash.Width)),
         [],
         prev_block.header.time_offset + 10 * 60
     );
@@ -1736,8 +1735,7 @@ export class BlockManager {
     public saveBlock(
         txs: Transaction[],
         enrollments: Enrollment[],
-        validators: BitMask,
-        missing_validators: number[] = []
+        validators: BitMask
     ): Block {
         const tx_hash_list = txs.map((tx) => hashFull(tx));
         const merkle_tree = buildMerkleTree(tx_hash_list);
@@ -1745,13 +1743,12 @@ export class BlockManager {
             merkle_tree.length > 0 ? merkle_tree[merkle_tree.length - 1] : new Hash(Buffer.alloc(Hash.Width));
         const block_header = new BlockHeader(
             hashFull(this.blocks[this.blocks.length - 1].header),
-            new Height(JSBI.BigInt(this.height + 1)),
             merkle_root,
-            validators,
             new Signature(Buffer.alloc(Signature.Width)),
+            validators,
+            new Height(JSBI.BigInt(this.height + 1)),
+            [new Hash(Buffer.alloc(Hash.Width))],
             enrollments,
-            new Hash(Buffer.alloc(Hash.Width)),
-            missing_validators,
             this.blocks[this.blocks.length - 1].header.time_offset + 10 * 60
         );
         const new_block = new Block(block_header, txs, merkle_tree);

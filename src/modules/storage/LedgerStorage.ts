@@ -143,8 +143,6 @@ export class LedgerStorage extends Storages {
             validators          TEXT     NOT NULL,
             merkle_root         TINYBLOB NOT NULL,
             signature           TINYBLOB NOT NULL,
-            random_seed         TINYBLOB NOT NULL,
-            missing_validators  TEXT     NULL,
             tx_count            INTEGER  NOT NULL,
             enrollment_count    INTEGER  NOT NULL,
             time_offset         INTEGER  NOT NULL,
@@ -261,7 +259,6 @@ export class LedgerStorage extends Storages {
             signature           TINYBLOB NOT NULL,
             hash                TINYBLOB NOT NULL,
             validators          TEXT     NOT NULL,
-            missing_validators  TEXT     NULL,
             updated_time        INTEGER  NOT NULL,
             PRIMARY KEY(block_height, signature(64), updated_time)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -485,9 +482,9 @@ export class LedgerStorage extends Storages {
                     .query(
                         `INSERT INTO blocks
                         (height, hash, prev_block, validators, merkle_root, signature,
-                         random_seed, missing_validators, tx_count, enrollment_count, time_offset, time_stamp)
+                         tx_count, enrollment_count, time_offset, time_stamp)
                     VALUES
-                        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                         [
                             block.header.height.toString(),
                             block_hash.toBinary(Endian.Little),
@@ -495,8 +492,6 @@ export class LedgerStorage extends Storages {
                             block.header.validators.toString(),
                             block.header.merkle_root.toBinary(Endian.Little),
                             block.header.signature.toBinary(Endian.Little),
-                            block.header.random_seed.toBinary(Endian.Little),
-                            block.header.missing_validators.toString(),
                             block.txs.length,
                             block.header.enrollments.length,
                             block.header.time_offset,
@@ -661,8 +656,8 @@ export class LedgerStorage extends Storages {
      */
     public getBlock(height: Height): Promise<any[]> {
         const sql = `SELECT
-            height, hash, prev_block, validators, merkle_root, signature, random_seed,
-            missing_validators,  tx_count, enrollment_count, time_offset, time_stamp
+            height, hash, prev_block, validators, merkle_root, signature,
+            tx_count, enrollment_count, time_offset, time_stamp
         FROM
             blocks
         WHERE height = ?`;
@@ -818,15 +813,13 @@ export class LedgerStorage extends Storages {
             this.query(
                 `UPDATE blocks
                     SET validators = ?,
-                        signature = ?,
-                        missing_validators = ?
+                        signature = ?
                     WHERE
                         height = ?`,
                 [
                     block_header.validators.toString(),
                     block_header.signature.toBinary(Endian.Little),
-                    block_header.missing_validators.toString(),
-                    block_header.height.toString(),
+                    block_header.height.toString()
                 ]
             )
                 .then((result: any) => {
@@ -856,9 +849,9 @@ export class LedgerStorage extends Storages {
             const hash = hashFull(header);
             this.query(
                 `INSERT INTO blocks_header_updated_history
-                        (block_height, current_height, signature, hash, validators, missing_validators, updated_time)
+                        (block_height, current_height, signature, hash, validators, updated_time)
                     VALUES
-                        (?, ?, ?, ?, ?, ?, ?)
+                        (?, ?, ?, ?, ?, ?)
                     ON DUPLICATE KEY UPDATE
                          block_height = VALUES(block_height),
                          signature = VALUES(signature),
@@ -869,7 +862,6 @@ export class LedgerStorage extends Storages {
                     header.signature.toBinary(Endian.Little),
                     hash.toBinary(Endian.Little),
                     header.validators.toString(),
-                    header.missing_validators.toString(),
                     moment().unix(),
                 ],
                 conn
@@ -1591,9 +1583,9 @@ export class LedgerStorage extends Storages {
 
                     unlock_height_query = `(
                             SELECT '${JSBI.add(
-                        height.value,
-                        JSBI.BigInt(2016)
-                    ).toString()}' AS unlock_height WHERE EXISTS
+                                height.value,
+                                JSBI.BigInt(2016)
+                            ).toString()}' AS unlock_height WHERE EXISTS
                             (
                                 SELECT
                                     *
@@ -3408,7 +3400,7 @@ export class LedgerStorage extends Storages {
      *
      */
     public getBlockSummary(field: string, value: string | Buffer): Promise<any[]> {
-        const sql = `SELECT B.height, B.hash, B.merkle_root, B.signature, B.prev_block, B.random_seed,
+        const sql = `SELECT B.height, B.hash, B.merkle_root, B.signature, B.prev_block,
              B.time_stamp, B.tx_count,
              BS.total_sent, BS.total_received, BS.total_reward, BS.total_fee, BS.total_size
              FROM blocks B

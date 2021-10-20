@@ -56,7 +56,10 @@ import {
     IProposalAPI,
     IProposalList,
     IValidatorReward,
-    ValidatorData, ITxHistory, ITxHistoryItem, ITxHistoryHeader,
+    ValidatorData,
+    ITxHistory,
+    ITxHistoryItem,
+    ITxHistoryHeader,
 } from "./Types";
 import lodash from "lodash";
 import bodyParser from "body-parser";
@@ -252,11 +255,7 @@ class Stoa extends WebService {
             isBlackList,
             this.getWalletTransactionsHistory.bind(this)
         );
-        this.app.get(
-            "/wallet/transaction/history/:address",
-            isBlackList,
-            this.getWalletTransactionHistory.bind(this)
-        );
+        this.app.get("/wallet/transaction/history/:address", isBlackList, this.getWalletTransactionHistory.bind(this));
         this.app.get("/wallet/transaction/overview/:hash", isBlackList, this.getWalletTransactionOverview.bind(this));
         this.app.get("/wallet/transaction/detail/:hash", isBlackList, this.getWalletTransactionDetail.bind(this));
         this.app.get(
@@ -843,9 +842,9 @@ class Stoa extends WebService {
         filter_type =
             req.query.type !== undefined
                 ? req.query.type
-                    .toString()
-                    .split(",")
-                    .map((m) => ConvertTypes.toDisplayTxType(m))
+                      .toString()
+                      .split(",")
+                      .map((m) => ConvertTypes.toDisplayTxType(m))
                 : [0, 1, 2, 3];
 
         if (filter_type.find((m) => m < 0) !== undefined) {
@@ -966,9 +965,9 @@ class Stoa extends WebService {
         filter_type =
             req.query.type !== undefined
                 ? req.query.type
-                    .toString()
-                    .split(",")
-                    .map((m) => ConvertTypes.toDisplayTxType(m))
+                      .toString()
+                      .split(",")
+                      .map((m) => ConvertTypes.toDisplayTxType(m))
                 : [0, 1, 2, 3];
 
         if (filter_type.find((m) => m < 0) !== undefined) {
@@ -992,23 +991,22 @@ class Stoa extends WebService {
                 let full_count = 0;
                 if (rows.length === 0) {
                     if (pagination.page > 1) {
-                        const rows_second = await this.ledger_storage
-                            .getWalletTransactionsHistory(
-                                address,
-                                pagination.pageSize,
-                                1,
-                                filter_type,
-                                filter_begin,
-                                filter_end,
-                                filter_peer
-                            );
-                        full_count = (rows_second.length > 0) ? rows_second[0].full_count : 0;
+                        const rows_second = await this.ledger_storage.getWalletTransactionsHistory(
+                            address,
+                            pagination.pageSize,
+                            1,
+                            filter_type,
+                            filter_begin,
+                            filter_end,
+                            filter_peer
+                        );
+                        full_count = rows_second.length > 0 ? rows_second[0].full_count : 0;
                     }
                 } else {
                     full_count = rows[0].full_count;
                 }
 
-                const total_page = (full_count === 0) ? 0 : Math.floor((full_count - 1) / pagination.pageSize) + 1;
+                const total_page = full_count === 0 ? 0 : Math.floor((full_count - 1) / pagination.pageSize) + 1;
                 const header: ITxHistoryHeader = {
                     address,
                     page_size: pagination.pageSize,
@@ -1039,7 +1037,8 @@ class Stoa extends WebService {
                     });
                 }
                 const history: ITxHistory = {
-                    header, items,
+                    header,
+                    items,
                 };
                 res.status(200).send(JSON.stringify(history));
             })
@@ -1284,7 +1283,7 @@ class Stoa extends WebService {
                         prev_hash: new Hash(data[0].prev_block, Endian.Little).toString(),
                         merkle_root: new Hash(data[0].merkle_root, Endian.Little).toString(),
                         signature: new Signature(data[0].signature, Endian.Little).toString(),
-                        random_seed: new Hash(data[0].random_seed, Endian.Little).toString(),
+                        random_seed: "",
                         time: data[0].time_stamp,
                         version: "v0.x.x",
                         total_sent: data[0].total_sent,
@@ -2202,7 +2201,7 @@ class Stoa extends WebService {
                     if (updated)
                         logger.info(
                             `Update a blockHeader : ${block_header.toString()}, ` +
-                            `block height : ${block_header.height.toString()}`,
+                                `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -2213,7 +2212,7 @@ class Stoa extends WebService {
                     if (put)
                         logger.info(
                             `puts a blockHeader history : ${block_header.toString()}, ` +
-                            `block height : ${block_header.height.toString()}`,
+                                `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -2240,8 +2239,7 @@ class Stoa extends WebService {
                     if (changes)
                         logger.info(
                             `Saved a pre-image utxo : ${pre_image.utxo.toString().substr(0, 18)}, ` +
-                            `hash : ${pre_image.hash.toString()}, pre-image height : ${pre_image.height
-                            }`,
+                                `hash : ${pre_image.hash.toString()}, pre-image height : ${pre_image.height}`,
                             {
                                 operation: Operation.db,
                                 height: HeightManager.height.toString(),

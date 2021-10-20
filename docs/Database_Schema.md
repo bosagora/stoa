@@ -13,8 +13,6 @@
 | validators        | TEXT      |    | Y        |          | Bitfield containing the validators' key indices which signed the block |
 | merkle_root       | TINYBLOB  |    | Y        |          | The hash of the merkle root of the transactions|
 | signature         | TINYBLOB  |    | Y        |          | Schnorr multisig of all validators which signed this block |
-| random_seed       | TINYBLOB  |    | Y        |          | Hash of random seed of the preimages for this height |
-| missing_validators| TEXT      |    | N        |          | List of indices to the validator UTXO set which have not revealed the preimage|
 | tx_count          | INTEGER   |    | Y        |          | The number of transactions in the block|
 | enrollment_count  | INTEGER   |    | Y        |          | The number of enrollments in the block|
 | time_offset       | INTEGER   |    | Y        |          | Block seconds offset from Genesis Timestamp |
@@ -30,8 +28,6 @@ CREATE TABLE IF NOT EXISTS "blocks" (
     "validators"            TEXT     NOT NULL,
     "merkle_root"           TINYBLOB NOT NULL,
     "signature"             TINYBLOB NOT NULL,
-    "random_seed"           TINYBLOB NOT NULL,
-    "missing_validators"    TEXT     NULL,
     "tx_count"              INTEGER  NOT NULL,
     "enrollment_count"      INTEGER  NOT NULL,
     "time_offset"           INTEGER  NOT NULL,
