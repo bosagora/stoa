@@ -25,7 +25,7 @@
         ],
         "quotemark": [true, "double"],
         "no-trailing-whitespace": [true, "ignore-comments"],
-        "max-classes-per-file": [true, 5],
+        "max-classes-per-file": [false],
         "prefer-conditional-expression": false,
         "no-bitwise": false,
         "variable-name": [
