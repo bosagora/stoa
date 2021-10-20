@@ -25,7 +25,7 @@ import {
     SodiumHelper,
     Transaction,
     TxInput,
-    TxOutput
+    TxOutput,
 } from "boa-sdk-ts";
 import {
     createBlock,
@@ -221,13 +221,12 @@ describe("Test of Stoa API Server", () => {
         const enrollment = new Enrollment(utxo_key, commitment, enroll_sig);
         const header = new BlockHeader(
             new Hash(Buffer.alloc(Hash.Width)),
-            new Height("20"),
             new Hash(Buffer.alloc(Hash.Width)),
-            BitMask.fromString(""),
             new Signature(Buffer.alloc(Signature.Width)),
+            BitMask.fromString(""),
+            new Height("20"),
+            [new Hash(Buffer.alloc(Hash.Width))],
             [enrollment],
-            new Hash(Buffer.alloc(Hash.Width)),
-            [],
             0
         );
         const block = new Block(header, [], []);
@@ -320,7 +319,7 @@ describe("Test of Stoa API Server", () => {
         assert.strictEqual(response.data.height, "1");
         assert.strictEqual(
             response.data.hash,
-            "0x100057b7dfdcee4174231ed110d48e420276745ebfa5c307e28754facbeb4b33267cde253d91da336b1f3a5ad6a0fb6cb514b611b1d70638659becd09780c11d"
+            "0x400467a06c564be843689d17671ffe20b3f87e5163ec7899e2fc1675fa69e450dfb5c3d1dc9fb3f252c8c42db83a9dc1ca20eb36f6b4323a1a63f155ec98dbdc"
         );
         assert.strictEqual(
             response.data.merkle_root,
@@ -334,7 +333,7 @@ describe("Test of Stoa API Server", () => {
         assert.strictEqual(response.data.height, "0");
         assert.strictEqual(
             response.data.hash,
-            "0x891808f2bada31adeab0e312775cef39ba5c301bf6cce97d06b54c626ec2ed53a5475b224f63f779d405f1441d2121e1285f173347e650b65e77d00f344fdaea"
+            "0x3cf900495dbd46d36e6477c042f766a64ee7c4bb6bd5a7be00df3d1ef55293700ddad11462c6b6ccc4b06f54f1b089c8a2a997a67dd065aca4c6453775dcd565"
         );
         assert.strictEqual(
             response.data.merkle_root,
@@ -397,7 +396,7 @@ describe("Test of Stoa API Server", () => {
                 "0xfbaaebc15bb1618465077fed2425a826d88c7f5ae0197634f056bfbad12a7a74b28cc82951e889255e149707bd3ef64eb01121875c766b5d24afed176d7d255c",
             block: {
                 height: 1,
-                hash: "0x100057b7dfdcee4174231ed110d48e420276745ebfa5c307e28754facbeb4b33267cde253d91da336b1f3a5ad6a0fb6cb514b611b1d70638659becd09780c11d",
+                hash: "0x400467a06c564be843689d17671ffe20b3f87e5163ec7899e2fc1675fa69e450dfb5c3d1dc9fb3f252c8c42db83a9dc1ca20eb36f6b4323a1a63f155ec98dbdc",
             },
         };
         assert.deepStrictEqual(response_confirmed.data, expected_confirmed);

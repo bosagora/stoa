@@ -1,13 +1,18 @@
 {
     "header": {
-        "prev_block": "0x8b35c5db6e274b1de858e13d3b7b10453a312cabe8bebd6980665fb48d62aed89495d232641252c86f385f44b71dee12190317bb979bba6444294d1ae9bcb7f2",
-        "height": "5",
+        "prev_block": "0x2df2ef90d425cf9e672c35ca54b0da3dac3d415efc42b456646ec6521ca8c56d8fd002dc9387c9f372b7e996f65c6ccab8e7c7ad08020af591e45dab45f7164f",
         "merkle_root": "0x5df908e0cba81c56907479653612546b75da646b53389f599783299a4042fee613c4045aedf6569270f1fbf01ce1f75413dc0c7e6e0b30b16cc4d43c9f4d1cd8",
-        "validators": "111111",
         "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "validators": "11111",
+        "height": "5",
+        "preimages": [
+            "0xb86ead0d966337c8258f3eaf9cee3013eb24a0c8639715bea636b535d3fe9d64cfca80365b96323a67a5bf9b68fe8a9be5599d1fc882dc963db91da5ff249909",
+            "0x19094d13b8535f2c4d98a857579fb0744cda33b90a6ad9013b42fdb15b424b3f94446d152bbd1b299cbf1307423af96673cd088af715071512e86242ccaf4f4b",
+            "0x5dce4a983cc0f3f1f5615a8816ed6feddd53bb82f2b00194479cb746ed476bc0c95dd72bc4c846dbcc22042153cb6f2ad7e39cf3e18ea74d4aa36619c4c97a72",
+            "0x6c78a04fc9a68ed406cf5c47df2c7a514107e4cb5e8439168c7aa5340aefe8d7735bf583cbb9fe6ddf5ca0de0151ea8869cf61935438092401e6a3d0d00eb8e8",
+            "0x10c6a8ea71daa49388acaa5792d380af4f23eb2dc8c9d4549dabc9e03534b127190bf6b4aaa5f4ce68b2fb6cff9891cc6e8d961e854373d556ee09af249bd73f"
+        ],
         "enrollments": [],
-        "random_seed": "0x2506879330de67c44ab2e73b38a7ffdf6de3be1f2a5b8926d215d4cb870c64b517f3fe71a9e90a0fb68988fb643dfe9ac58def0992319d75d0ff7d7383a9c256",
-        "missing_validators": [],
         "time_offset": 1200
     },
     "txs": [
@@ -24,38 +29,59 @@
             "outputs": [
                 {
                     "type": 2,
-                    "lock": { "type": 0, "bytes": "Mb3OFIOnt8RdJR0g/RwOdU46rnt6kUGwAtwNIZG8f4E=" },
-                    "value": "8640007260002"
+                    "value": "8640007260002",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "Mb3OFIOnt8RdJR0g/RwOdU46rnt6kUGwAtwNIZG8f4E="
+                    }
                 },
                 {
                     "type": 2,
-                    "lock": { "type": 0, "bytes": "md+rscNMxR56h8elO/gUP2jLjLexx9ALiKlFkUP6QJw=" },
-                    "value": "12962823333"
+                    "value": "12962823333",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "md+rscNMxR56h8elO/gUP2jLjLexx9ALiKlFkUP6QJw="
+                    }
                 },
                 {
                     "type": 2,
-                    "lock": { "type": 0, "bytes": "md/Htzi9l1+CNrZHMyQfipVV1SjaQLkcHeVhnEq2VbI=" },
-                    "value": "12962823333"
+                    "value": "12962823333",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "md/Htzi9l1+CNrZHMyQfipVV1SjaQLkcHeVhnEq2VbI="
+                    }
                 },
                 {
                     "type": 2,
-                    "lock": { "type": 0, "bytes": "md/WbB8VmRdvGFYPX6vlrdZnYyMwuqTw2QkbELhdOPg=" },
-                    "value": "12962823333"
+                    "value": "12962823333",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "md/WbB8VmRdvGFYPX6vlrdZnYyMwuqTw2QkbELhdOPg="
+                    }
                 },
                 {
                     "type": 2,
-                    "lock": { "type": 0, "bytes": "2d/QYt76oor16BDI7Zjo7u69xxoXckflZ2UUkckpy1I=" },
-                    "value": "12962823333"
+                    "value": "12962823333",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2d/QYt76oor16BDI7Zjo7u69xxoXckflZ2UUkckpy1I="
+                    }
                 },
                 {
                     "type": 2,
-                    "lock": { "type": 0, "bytes": "2d/q7TwE3NlkFoqZgk4Ccyvyo2DC7/b3KO/eiEFkKI0=" },
-                    "value": "12962823333"
+                    "value": "12962823333",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2d/q7TwE3NlkFoqZgk4Ccyvyo2DC7/b3KO/eiEFkKI0="
+                    }
                 },
                 {
                     "type": 2,
-                    "lock": { "type": 0, "bytes": "2d/5DryFWxR9By2JsVOo/1SZfq7UQuek1+mwNTVE1zE=" },
-                    "value": "12962823333"
+                    "value": "12962823333",
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2d/5DryFWxR9By2JsVOo/1SZfq7UQuek1+mwNTVE1zE="
+                    }
                 }
             ],
             "payload": "",

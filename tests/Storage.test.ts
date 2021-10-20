@@ -60,11 +60,6 @@ describe("Test ledger storage and inquiry function.", () => {
             new Hash(rows[0].merkle_root, Endian.Little).toString(),
             "0x515a30d31fbd031d63f041b92184f32baf00d08e4120da9299bc336c6f980f2245b11e70bb1dcb7c2279ead9dab1c37b62dee8414083ae8346d166cf033cddfb"
         );
-        assert.strictEqual(
-            new Hash(rows[0].random_seed, Endian.Little).toString(),
-            "0x691775809b9498f45a2c5ef8b8d552e318ebaf0b1b2fb15dcc39e0ec962ae9812d7edffa5f053590a895c9ff72c1b0838ce8f5c709579d4529f9f4caf0fab13d"
-        );
-        assert.strictEqual(rows[0].missing_validators, "");
     });
 
     it("Test for transaction", async () => {
@@ -168,7 +163,7 @@ describe("Test ledger storage and inquiry function.", () => {
         );
         assert.strictEqual(
             new Hash(rows[0].hash, Endian.Little).toString(),
-            "0x100057b7dfdcee4174231ed110d48e420276745ebfa5c307e28754facbeb4b33267cde253d91da336b1f3a5ad6a0fb6cb514b611b1d70638659becd09780c11d"
+            "0x400467a06c564be843689d17671ffe20b3f87e5163ec7899e2fc1675fa69e450dfb5c3d1dc9fb3f252c8c42db83a9dc1ca20eb36f6b4323a1a63f155ec98dbdc"
         );
 
         rows = await ledger_storage.getWalletBlocksHeaderInfo(new Height("0"));
@@ -181,7 +176,7 @@ describe("Test ledger storage and inquiry function.", () => {
         );
         assert.strictEqual(
             new Hash(rows[0].hash, Endian.Little).toString(),
-            "0x891808f2bada31adeab0e312775cef39ba5c301bf6cce97d06b54c626ec2ed53a5475b224f63f779d405f1441d2121e1285f173347e650b65e77d00f344fdaea"
+            "0x3cf900495dbd46d36e6477c042f766a64ee7c4bb6bd5a7be00df3d1ef55293700ddad11462c6b6ccc4b06f54f1b089c8a2a997a67dd065aca4c6453775dcd565"
         );
     });
 
