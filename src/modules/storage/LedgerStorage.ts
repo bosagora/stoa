@@ -3098,11 +3098,15 @@ export class LedgerStorage extends Storages {
                             )
                         ORDER BY T.block_height, O.utxo_key
                     ) AS TB_RAW,
-                    (SELECT @INCLUDE := 0) AS U
+                    (SELECT @INCLUDE := 0) AS U,
+                    (SELECT EXISTS (SELECT * FROM utxos WHERE utxo_key = ? AND address = ? LIMIT 1) as exists_prev) AS TB_EXIST_UTXO
                 ) TB_FOR_FILTER_UTXO
                 WHERE
                     (
-                        (? <> x'00') AND (include = 2)
+                        (? <> x'00') AND (include = 2) AND (exists_prev = 1)
+                    ) OR
+                    (
+                        (? <> x'00') AND (exists_prev = 0)
                     ) OR
                     (
                         (? = x'00')
@@ -3123,6 +3127,9 @@ export class LedgerStorage extends Storages {
                 balance_type,
                 balance_type,
                 address,
+                utxo,
+                address,
+                utxo,
                 utxo,
                 utxo,
                 amount.toString(),
