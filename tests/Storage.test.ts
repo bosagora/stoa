@@ -472,6 +472,6 @@ describe("Tests update blockHeader", () => {
         const rows = await ledger_storage.getBlock(new Height("1"));
         assert.deepStrictEqual(rows.length, 1);
         assert.deepStrictEqual(rows[0].validators, block_header.validators.toString());
-        assert.deepStrictEqual(rows[0].signature.toString(), block_header.signature.toString());
+        assert.deepStrictEqual(new Hash(rows[0].signature, Endian.Little).toString(), block_header.signature.toString());
     });
 });
