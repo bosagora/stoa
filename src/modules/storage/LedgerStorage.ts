@@ -824,7 +824,7 @@ export class LedgerStorage extends Storages {
                         height = ?`,
                 [
                     block_header.validators.toString(),
-                    block_header.signature.toString(),
+                    block_header.signature.toBinary(Endian.Little),
                     block_header.missing_validators.toString(),
                     block_header.height.toString(),
                 ]
