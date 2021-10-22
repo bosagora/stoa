@@ -133,7 +133,7 @@ describe("Test for the addition of validators", () => {
         // Create a frozen transaction
         const tx = block_manager.addValidators(add_validators, utxos, gen_keypair);
         const enrollments: Enrollment[] = [];
-        const bits = block_manager.getBitMask(block_manager.getNextBlockHeight());
+        const bits = block_manager.getBitMask();
 
         // Create new validator's enrollment data.
         enrollments.push(...block_manager.getNewEnrollment());
@@ -176,7 +176,7 @@ describe("Test for the addition of validators", () => {
             // Create a frozen transaction
             const tx = block_manager.addValidators(add_validators, utxos, gen_keypair);
             const enrollments: Enrollment[] = [];
-            const bits = block_manager.getBitMask(block_manager.getNextBlockHeight());
+            const bits = block_manager.getBitMask();
 
             // Create new validator's enrollment data.
             const new_enrolls = block_manager.getNewEnrollment();
@@ -249,7 +249,7 @@ describe("Test for the creation a proposal and the voting", () => {
     }
 
     async function createDummyBlock(expected_block_height: number) {
-        const bits = block_manager.getBitMask(block_manager.getNextBlockHeight());
+        const bits = block_manager.getBitMask();
         const new_block = block_manager.saveBlock([], [], bits);
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -317,7 +317,7 @@ describe("Test for the creation a proposal and the voting", () => {
         });
 
         const tx = builder.sign(OutputType.Payment, BOA(10));
-        const bits = block_manager.getBitMask(block_manager.getNextBlockHeight());
+        const bits = block_manager.getBitMask();
         const new_block = block_manager.saveBlock([tx], [], bits);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
@@ -351,7 +351,7 @@ describe("Test for the creation a proposal and the voting", () => {
 
         tx_hash_proposal_fee = hashFull(tx);
 
-        const bits = block_manager.getBitMask(block_manager.getNextBlockHeight());
+        const bits = block_manager.getBitMask();
         const new_block = block_manager.saveBlock([tx], [], bits);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
@@ -413,7 +413,7 @@ describe("Test for the creation a proposal and the voting", () => {
 
         const tx = builder.sign(OutputType.Payment, tx_total_fee);
 
-        const bits = block_manager.getBitMask(block_manager.getNextBlockHeight());
+        const bits = block_manager.getBitMask();
         const new_block = block_manager.saveBlock([tx], [], bits);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
@@ -461,7 +461,7 @@ describe("Test for the creation a proposal and the voting", () => {
 
         const tx = builder.sign(OutputType.Payment, BOA(5));
 
-        const bits = block_manager.getBitMask(block_manager.getNextBlockHeight());
+        const bits = block_manager.getBitMask();
         const new_block = block_manager.saveBlock([tx], [], bits);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();

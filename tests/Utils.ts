@@ -1768,6 +1768,7 @@ export class BlockManager {
 
     public getValidatorsAtNextBlock(height?: number): IValidatorAggregate[] {
         if (height === undefined) height = this.height;
+        if (height > this.height) height = this.height;
         const res: IValidatorAggregate[] = [];
 
         // Get previous validators
@@ -1845,7 +1846,10 @@ export class BlockManager {
      */
     public getBitMask(height?: number): BitMask {
         if (height === undefined) height = this.height;
+        if (height > this.height) height = this.height;
+
         const validators = this.getValidatorsAtNextBlock(height);
+
         const bits = new BitMask(validators.length);
         validators.forEach((validator, idx) => {
             if (validator.action >= 0) bits.set(idx, true);
