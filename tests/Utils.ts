@@ -1710,7 +1710,7 @@ export class BlockManager {
                 this.pre_images.createPreImages(k, utxo_key);
 
                 this.enrolled_validators.add(this.getNextBlockHeight(), k);
-                this.added_validators.add(this.getNextBlockHeight() + 1, k);
+                this.added_validators.add(this.getNextBlockHeight(), k);
             }
         });
 
@@ -1739,7 +1739,7 @@ export class BlockManager {
             merkle_tree.length > 0 ? merkle_tree[merkle_tree.length - 1] : new Hash(Buffer.alloc(Hash.Width));
 
         const pre_images: Hash[] = [];
-        const validators = this.getValidatorsAtNextBlock();
+        const validators = this.getValidatorsAtNextBlock(this.height);
         const bits = new BitMask(validators.length);
         validators.forEach((validator, idx) => {
             if (validator.action === ValdatorAction.ADD || validator.action === ValdatorAction.ALREADY_EXIST) {
@@ -1805,6 +1805,13 @@ export class BlockManager {
             });
         }
 
+        this.added_validators.get(height).forEach((added) => {
+            const found = res.find((m) => Buffer.compare(m.validator.secret.data, added.secret.data) === 0);
+            if (found === undefined) {
+                res.push({ validator: added, action: ValdatorAction.ADD });
+            }
+        });
+
         res.sort((a, b) => {
             return Utils.compareBuffer(a.validator.address.data, b.validator.address.data);
         });
@@ -1822,12 +1829,6 @@ export class BlockManager {
                 validators.push(elem.validator);
             }
         }
-
-        this.added_validators.get(height + 1).forEach((added) => {
-            if (validators.find((m) => Buffer.compare(m.secret.data, added.secret.data) === 0) === undefined) {
-                validators.push(added);
-            }
-        });
 
         validators.sort((a, b) => {
             return Utils.compareBuffer(a.secret.data, b.secret.data);
