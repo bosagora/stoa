@@ -1642,11 +1642,11 @@ export class BlockManager {
             this.added_validators.add(1, validator);
         });
 
-        this.validators.set(0, []);
-        this.lastedValidators.push(...this.added_validators.get(1));
-        this.lastedValidators.sort((a, b) => {
-            return Utils.compareBuffer(a.secret.data, b.secret.data);
-        });
+        this.validators.set(
+            this.height,
+            iota(0, 6).map((m) => ValidatorKey.keys(m))
+        );
+        this.lastedValidators = this.validators.get(this.height).map((m) => m);
     }
 
     private createReEnrollments() {
@@ -1732,22 +1732,38 @@ export class BlockManager {
     /**
      * Store in the block and increase the height by 1.
      */
-    public saveBlock(
-        txs: Transaction[],
-        enrollments: Enrollment[],
-        validators: BitMask
-    ): Block {
+    public saveBlock(txs: Transaction[], enrollments: Enrollment[], b?: BitMask): Block {
         const tx_hash_list = txs.map((tx) => hashFull(tx));
         const merkle_tree = buildMerkleTree(tx_hash_list);
         const merkle_root =
             merkle_tree.length > 0 ? merkle_tree[merkle_tree.length - 1] : new Hash(Buffer.alloc(Hash.Width));
+
+        const pre_images: Hash[] = [];
+        const validators = this.getValidatorsAtNextBlock();
+        const bits = new BitMask(validators.length);
+        validators.forEach((validator, idx) => {
+            if (validator.action === ValdatorAction.ADD || validator.action === ValdatorAction.ALREADY_EXIST) {
+                const pre_image = this.pre_images.getImage(validator.validator.address, this.getNextBlockHeight());
+                if (pre_image !== undefined) {
+                    pre_images.push(pre_image.hash);
+                    bits.set(idx, true);
+                } else {
+                    pre_images.push(new Hash(Buffer.alloc(Hash.Width)));
+                    bits.set(idx, false);
+                }
+            } else {
+                pre_images.push(new Hash(Buffer.alloc(Hash.Width)));
+                bits.set(idx, false);
+            }
+        });
+
         const block_header = new BlockHeader(
             hashFull(this.blocks[this.blocks.length - 1].header),
             merkle_root,
             new Signature(Buffer.alloc(Signature.Width)),
-            validators,
+            bits,
             new Height(JSBI.BigInt(this.height + 1)),
-            [new Hash(Buffer.alloc(Hash.Width))],
+            pre_images,
             enrollments,
             this.blocks[this.blocks.length - 1].header.time_offset + 10 * 60
         );

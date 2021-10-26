@@ -133,7 +133,6 @@ describe("Test for the addition of validators", () => {
         // Create a frozen transaction
         const tx = block_manager.addValidators(add_validators, utxos, gen_keypair);
         const enrollments: Enrollment[] = [];
-        const bits = block_manager.getBitMask();
 
         // Create new validator's enrollment data.
         enrollments.push(...block_manager.getNewEnrollment());
@@ -147,7 +146,16 @@ describe("Test for the addition of validators", () => {
         });
 
         // Create a new block.
-        const new_block = block_manager.saveBlock([tx], enrollments, bits);
+        const new_block = block_manager.saveBlock([tx], enrollments);
+
+        const expected_validator = block_manager.validators.get(block_manager.height - 1).map((key) => key.address);
+        expected_validator.sort((a, b) => Utils.compareBuffer(a.data, b.data));
+        const expected_preimages = expected_validator.map((v) => {
+            const image = block_manager.getPreImage(v, block_manager.height);
+            if (image === undefined) return new Hash(Buffer.alloc(Hash.Width));
+            else return image.hash;
+        });
+        assert.deepStrictEqual(new_block.header.preimages, expected_preimages);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -176,7 +184,6 @@ describe("Test for the addition of validators", () => {
             // Create a frozen transaction
             const tx = block_manager.addValidators(add_validators, utxos, gen_keypair);
             const enrollments: Enrollment[] = [];
-            const bits = block_manager.getBitMask();
 
             // Create new validator's enrollment data.
             const new_enrolls = block_manager.getNewEnrollment();
@@ -196,7 +203,16 @@ describe("Test for the addition of validators", () => {
             });
 
             // Create a new block.
-            const new_block = block_manager.saveBlock([tx], enrollments, bits);
+            const new_block = block_manager.saveBlock([tx], enrollments);
+
+            const expected_validator = block_manager.validators.get(block_manager.height - 1).map((key) => key.address);
+            expected_validator.sort((a, b) => Utils.compareBuffer(a.data, b.data));
+            const expected_preimages = expected_validator.map((v) => {
+                const image = block_manager.getPreImage(v, block_manager.height);
+                if (image === undefined) return new Hash(Buffer.alloc(Hash.Width));
+                else return image.hash;
+            });
+            assert.deepStrictEqual(new_block.header.preimages, expected_preimages);
 
             const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
             await client.post(block_url, { block: new_block });
