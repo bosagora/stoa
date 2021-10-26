@@ -148,7 +148,7 @@ describe("Test for the addition of validators", () => {
         // Create a new block.
         const new_block = block_manager.saveBlock([tx], enrollments);
 
-        const expected_validator = block_manager.validators.get(block_manager.height - 1).map((key) => key.address);
+        const expected_validator = block_manager.validators.get(block_manager.height).map((key) => key.address);
         expected_validator.sort((a, b) => Utils.compareBuffer(a.data, b.data));
         const expected_preimages = expected_validator.map((v) => {
             const image = block_manager.getPreImage(v, block_manager.height);
@@ -205,7 +205,7 @@ describe("Test for the addition of validators", () => {
             // Create a new block.
             const new_block = block_manager.saveBlock([tx], enrollments);
 
-            const expected_validator = block_manager.validators.get(block_manager.height - 1).map((key) => key.address);
+            const expected_validator = block_manager.validators.get(block_manager.height).map((key) => key.address);
             expected_validator.sort((a, b) => Utils.compareBuffer(a.data, b.data));
             const expected_preimages = expected_validator.map((v) => {
                 const image = block_manager.getPreImage(v, block_manager.height);
