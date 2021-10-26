@@ -764,3 +764,26 @@ CREATE TABLE IF NOT EXISTS proposal_attachments
 ```
 ----
 
+## 25. Table **preimages**
+
+### _Schema_
+
+| Column            | Data Type  | PK | Not NULL | Default  |Description|
+|:----------------- |:-----------|:--:|:--------:| -------- | --------- |
+|  block_height     | INTEGER    | Y  | Y        |          | The block height |
+|  utxo_key         | TINYBLOB   | Y  | Y        |          | The hash of the UTXO |
+|  preimage_hash    | TINYBLOB   |    | Y        |          | The hash of the preimage |
+|  address          | VARCHAR(64)|    | Y        |          | The public key that can redeem this UTXO |
+
+### _Create Script_
+
+```sql
+CREATE TABLE IF NOT EXISTS "preimages" (
+    "block_height"          INTEGER     NOT NULL,
+    "utxo_key"              TINYBLOB    NOT NULL,
+    "preimage_hash"         TINYBLOB    NOT NULL,
+    "address"               VARCHAR(64) NOT NULL,
+    PRIMARY KEY("block_height", "utxo_key(64)")
+)
+```
+----

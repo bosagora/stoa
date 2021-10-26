@@ -383,29 +383,12 @@ class Stoa extends WebService {
                 const out_put: ValidatorData[] = new Array<ValidatorData>();
 
                 for (const row of rows) {
-                    const preimage_hash: Buffer = row.preimage_hash;
-                    let preimage_height: JSBI = JSBI.BigInt(row.preimage_height);
-                    const target_height: Height = new Height(row.height);
-                    let result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
-                    let preimage_height_str: string;
-
-                    // Hashing preImage
-                    if (JSBI.greaterThanOrEqual(JSBI.BigInt(preimage_height), target_height.value)) {
-                        result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                        const count = JSBI.toNumber(JSBI.subtract(JSBI.BigInt(preimage_height), target_height.value));
-                        for (let i = 0; i < count; i++) {
-                            result_preimage_hash = hash(result_preimage_hash.data);
-                            preimage_height = JSBI.subtract(preimage_height, JSBI.BigInt(1));
-                        }
-                        preimage_height_str = preimage_height.toString();
-                    } else {
-                        preimage_height_str = "";
-                        result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
-                    }
+                    const preimage_hash: string = row.preimage_hash !== null ? new Hash(row.preimage_hash).toString() : "";
+                    const preimage_height_str: string = row.preimage_height !== null ? row.preimage_height.toString() : "";
 
                     const preimage: IPreimage = {
                         height: preimage_height_str,
-                        hash: result_preimage_hash.toString(),
+                        hash: preimage_hash,
                     };
 
                     const validator: ValidatorData = new ValidatorData(
@@ -471,29 +454,12 @@ class Stoa extends WebService {
 
                 if (rows.length > 0) {
                     const row = rows[0];
-                    const preimage_hash: Buffer = row.preimage_hash;
-                    let preimage_height: JSBI = JSBI.BigInt(row.preimage_height);
-                    const target_height: Height = new Height(row.height);
-                    let result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
-                    let preimage_height_str: string;
-
-                    // Hashing preImage
-                    if (JSBI.greaterThanOrEqual(JSBI.BigInt(preimage_height), target_height.value)) {
-                        result_preimage_hash.fromBinary(preimage_hash, Endian.Little);
-                        const count = JSBI.toNumber(JSBI.subtract(JSBI.BigInt(preimage_height), target_height.value));
-                        for (let i = 0; i < count; i++) {
-                            result_preimage_hash = hash(result_preimage_hash.data);
-                            preimage_height = JSBI.subtract(preimage_height, JSBI.BigInt(1));
-                        }
-                        preimage_height_str = preimage_height.toString();
-                    } else {
-                        preimage_height_str = "";
-                        result_preimage_hash = new Hash(Buffer.alloc(Hash.Width));
-                    }
+                    const preimage_hash: string = row.preimage_hash !== null ? new Hash(row.preimage_hash).toString() : "";
+                    const preimage_height_str: string = row.preimage_height !== null ? row.preimage_height.toString() : "";
 
                     const preimage: IPreimage = {
                         height: preimage_height_str,
-                        hash: result_preimage_hash.toString(),
+                        hash: preimage_hash,
                     };
 
                     const validator: ValidatorData = new ValidatorData(

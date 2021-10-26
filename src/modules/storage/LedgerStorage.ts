@@ -439,6 +439,16 @@ export class LedgerStorage extends Storages {
             PRIMARY KEY(proposal_id(64), attachment_id(64))
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+        CREATE TABLE IF NOT EXISTS preimages
+        (
+            block_height          INTEGER     NOT NULL,
+            utxo_key              TINYBLOB    NOT NULL,
+            preimage_hash         TINYBLOB    NOT NULL,
+            address               VARCHAR(64) NOT NULL,
+
+            PRIMARY KEY(block_height, utxo_key(64))
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
        DROP TRIGGER IF EXISTS tx_trigger;
        CREATE TRIGGER tx_trigger AFTER INSERT
        ON transactions
@@ -524,6 +534,7 @@ export class LedgerStorage extends Storages {
                 await this.putTransactions(block, conn);
                 await this.putEnrollments(block, conn);
                 await this.putBlockHeight(block.header.height, conn);
+                await this.putPreimages(block, conn);
                 await this.putMerkleTree(block, conn);
                 await this.putBlockstats(block, conn);
                 await this.putFeeDisparity(block, conn);
@@ -804,6 +815,68 @@ export class LedgerStorage extends Storages {
     }
 
     /**
+     * Puts the pre-images of the block header.
+     * @param block: The instance of the `Block`
+     * @param connection Use this if it are providing a db connection.
+     */
+    public putPreimages(block: Block, conn?: mysql.PoolConnection): Promise<void> {
+        function save_preimage(
+            storage: LedgerStorage,
+            height: Height,
+            utxo_key: Hash,
+            preimage_hash: Hash,
+            address: string
+        ): Promise<void> {
+            return new Promise<void>((resolve, reject) => {
+                storage
+                    .query(
+                        `INSERT INTO preimages
+                        (block_height, utxo_key, preimage_hash, address)
+                    VALUES
+                        (?, ?, ?, ?)`,
+                        [
+                            height.toString(),
+                            utxo_key.toBinary(Endian.Little),
+                            preimage_hash.toBinary(Endian.Little),
+                            address.toString(),
+                        ],
+                        conn
+                    )
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch((err: any) => {
+                        reject(err);
+                    });
+            });
+        }
+
+        return new Promise<void>((resolve, reject) => {
+            (async () => {
+                const validators: any[] = await this.getValidatorsAPI(block.header.height, null, conn);
+                for (let idx = 0; idx < block.header.preimages.length; idx++) {
+                    try {
+                        if (undefined !== validators[idx] && block.header.preimages[idx] !== new Hash(Buffer.alloc(Hash.Width)))
+                        {
+                            await save_preimage(
+                                this,
+                                block.header.height,
+                                new Hash(validators[idx].utxo_key, Endian.Little),
+                                block.header.preimages[idx],
+                                validators[idx].address
+                            );
+                        }
+                    } catch (err) {
+                        reject(err);
+                        return;
+                    }
+                }
+                resolve();
+            })();
+        });
+    }
+
+    /**
      * Update a blockHeader
      * The blockheader can have signatures from validators
      * added even after the block has been externalized.
@@ -819,7 +892,7 @@ export class LedgerStorage extends Storages {
                 [
                     block_header.validators.toString(),
                     block_header.signature.toBinary(Endian.Little),
-                    block_header.height.toString()
+                    block_header.height.toString(),
                 ]
             )
                 .then((result: any) => {
@@ -2152,52 +2225,44 @@ export class LedgerStorage extends Storages {
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getValidatorsAPI(height: Height | null, address: string | null): Promise<any[]> {
+    public getValidatorsAPI(height: Height | null, address: string | null, conn: mysql.PoolConnection | undefined = undefined): Promise<any[]> {
         let cur_height: string;
 
         if (height !== null) cur_height = height.toString();
         else cur_height = `(SELECT MAX(height) as height FROM blocks)`;
 
         let sql =
-            `SELECT validators.address,
-                enrollments.enrolled_at,
-                enrollments.utxo_key as stake,
-                enrollments.commitment,
-                enrollments.avail_height,
+            `SELECT V.address,
+                V.enrolled_at,
+                V.address,
+                V.utxo_key,
+                V.utxo_key as stake,
+                V.amount as stake_amount,
+                P.block_height,
+                P.block_height as preimage_height,
+                P.preimage_hash,
                 ` +
             cur_height +
-            ` as height,
-                validators.preimage_height,
-                validators.preimage_hash
-            FROM (SELECT MAX(block_height) as enrolled_at,
-                    (CASE WHEN block_height = 0 THEN
-                          block_height
-                    ELSE
-                         block_height + 1
-                    END) as avail_height,
-                    enrollment_index,
-                    utxo_key,
-                    commitment,
-                    enroll_sig
-                FROM enrollments
-                GROUP BY utxo_key, block_height
-                HAVING avail_height <= ` +
+            ` as height
+            FROM validators V
+            LEFT OUTER JOIN preimages P
+            ON V.address = P.address
+            AND V.utxo_key = P.utxo_key
+            AND ` +
             cur_height +
-            ` AND ` +
-            cur_height +
-            ` < (avail_height + ?)
-                ) as enrollments
-            LEFT JOIN validators
-                ON enrollments.enrolled_at = validators.enrolled_at
-                AND enrollments.utxo_key = validators.utxo_key
+            ` = P.block_height
             WHERE 1 = 1
-        `;
+            AND V.enrolled_at >= (` +
+            cur_height +
+            ` - ?)
+            AND V.enrolled_at < ` +
+            cur_height;
 
-        if (address != null) sql += ` AND validators.address = '` + address + `'`;
+        if (address != null) sql += ` AND V.address = '` + address + `'`;
 
-        sql += ` ORDER BY enrollments.enrolled_at ASC, enrollments.utxo_key ASC;`;
+        sql += ` ORDER BY V.enrolled_at ASC, V.utxo_key ASC;`;
 
-        return this.query(sql, [this.validator_cycle]);
+        return this.query(sql, [this.validator_cycle], conn);
     }
 
     /**
