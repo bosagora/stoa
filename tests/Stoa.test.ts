@@ -108,19 +108,19 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /validators", async () => {
-        const uri = URI(stoa_addr).directory("validators").setSearch("height", "10");
+        const uri = URI(stoa_addr).directory("validators").setSearch("height", "1");
 
         const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 6);
         assert.strictEqual(response.data[0].address, "boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t");
-        assert.strictEqual(response.data[0].preimage.height, "");
+        assert.strictEqual(response.data[0].preimage.height, "1");
     });
 
     it("Test of the path /validator", async () => {
         const uri = URI(stoa_addr)
             .directory("validator")
             .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
-            .setSearch("height", "10");
+            .setSearch("height", "1");
 
         const fail_uri = URI(stoa_addr)
             .directory("validator")
@@ -135,181 +135,7 @@ describe("Test of Stoa API Server", () => {
         const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 1);
         assert.strictEqual(response.data[0].address, "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku");
-        assert.strictEqual(response.data[0].preimage.height, "");
-    });
-
-    it("Tests that sending a pre-image with get /validator and /validators", async () => {
-        const uri = URI(stoa_private_addr).directory("preimage_received");
-        const response1 = await client.post(uri.toString(), { preimage: sample_preImageInfo });
-        assert.strictEqual(response1.status, 200);
-
-        await delay(500);
-
-        // Wait for the data added to the pool to be processed.
-        const uri1 = URI(stoa_addr)
-            .directory("validator")
-            .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
-            .setSearch("height", "0");
-
-        let response = await client.get(uri1.toString());
-
-        assert.strictEqual(response.data.length, 1);
-        assert.strictEqual(response.data[0].preimage.height, "0");
-        assert.strictEqual(
-            response.data[0].preimage.hash,
-            "0x0a8201f9f5096e1ce8e8de4147694940a57a188b78293a55144fc8777a774f2349b3a910fb1fb208514fb16deaf49eb05882cdb6796a81f913c6daac3eb74328"
-        );
-
-        const uri2 = URI(stoa_addr)
-            .directory("validator")
-            .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
-            .setSearch("height", "6");
-
-        response = await client.get(uri2.toString());
-        assert.strictEqual(response.data.length, 1);
-        assert.strictEqual(response.data[0].preimage.height, "6");
-        assert.strictEqual(
-            response.data[0].preimage.hash,
-            "0x790ab7c8f8ddbf012561e70c944c1835fd1a873ca55c973c828164906f8b35b924df7bddcafade688ad92cfb4414b2cf69a02d115dc214bbd00d82167f645e7e"
-        );
-
-        const uri3 = URI(stoa_addr)
-            .directory("validator")
-            .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
-            .setSearch("height", "1");
-        response = await client.get(uri3.toString());
-        assert.strictEqual(response.data.length, 1);
         assert.strictEqual(response.data[0].preimage.height, "1");
-        assert.strictEqual(
-            response.data[0].preimage.hash,
-            "0x314e30482fd0b498361e8537961d875e52b7e82edb8260cd548d3edacb451c80f41dd0ba9c5700adfb646066d41b0031120b65cba2df91def9bd83263fb306bd"
-        );
-
-        const uri4 = URI(stoa_addr)
-            .directory("validator")
-            .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
-            .setSearch("height", "8");
-        response = await client.get(uri4.toString());
-        assert.strictEqual(response.data.length, 1);
-        assert.strictEqual(response.data[0].preimage.height, "");
-        assert.strictEqual(response.data[0].preimage.hash, new Hash(Buffer.alloc(Hash.Width)).toString());
-
-        const uri5 = URI(stoa_addr).directory("validators");
-        response = await client.get(uri5.toString());
-        let validators: any[] = response.data;
-        assert.strictEqual(response.data.length, 6);
-        let validator = validators.find(
-            (n) => n.address === "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku"
-        );
-        assert.ok(validator !== undefined);
-        assert.strictEqual(validator.preimage.height, "1");
-        assert.strictEqual(
-            validator.preimage.hash,
-            "0x314e30482fd0b498361e8537961d875e52b7e82edb8260cd548d3edacb451c80f41dd0ba9c5700adfb646066d41b0031120b65cba2df91def9bd83263fb306bd"
-        );
-
-        // re-enrollment
-        const enroll_sig = new Signature(
-            "0x0c48e78972e1b138a37e37ae27a01d5ebdea193088ddef2d9883446efe63086925e8803400d7b93d22b1eef5c475098ce08a5b47e8125cf6b04274cc4db34bfd"
-        );
-        const utxo_key = new Hash(
-            "0x70455f0b03f4b8d54b164b251e813b3fecd447d4bfe7b173ef86654429d2f5c3866d3ea406bf02163221a2d4029f0e0930a48304b2ea0f9277c2b32795c4005f"
-        );
-        const commitment = new Hash(
-            "0xe0c04a5bd47ffc5b065b7d397e251016310c43dc77220bf803b73f1183da00b0e67602b1f95cb18a0059aa1cdf2f9adafe979998364b38cd5c15d92b9b8fd815"
-        );
-        const enrollment = new Enrollment(utxo_key, commitment, enroll_sig);
-        const header = new BlockHeader(
-            new Hash(Buffer.alloc(Hash.Width)),
-            new Hash(Buffer.alloc(Hash.Width)),
-            new Signature(Buffer.alloc(Signature.Width)),
-            BitMask.fromString(""),
-            new Height("20"),
-            [new Hash(Buffer.alloc(Hash.Width))],
-            [enrollment],
-            0
-        );
-        const block = new Block(header, [], []);
-
-        // put the re-enrollment
-        await stoa_server.ledger_storage.putEnrollments(block);
-
-        const uri6 = URI(stoa_addr).directory("validators").setSearch("height", "21");
-
-        response = await client.get(uri6.toString());
-        validators = response.data;
-        assert.strictEqual(response.data.length, 1);
-
-        validator = validators.find(
-            (n) => n.address === "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku"
-        );
-        assert.ok(validator !== undefined);
-        assert.strictEqual(validator.stake, enrollment.utxo_key.toString());
-        assert.strictEqual(validator.enrolled_at, "20");
-
-        // let uri7 = URI(host)
-        // .port(port)
-        // .directory("validators")
-        // .setSearch("height", "20");
-
-        // response = await client.get(uri7.toString());
-        // console.log(response);
-        // assert.strictEqual(response.data.length, 1);
-
-        // assert.strictEqual(response.data[0].stake, enrollment.utxo_key.toString());
-        // assert.strictEqual(response.data[0].enrolled_at, "19");
-
-        // let uri8 = URI(host)
-        // .port(port)
-        // .directory("validators")
-        // .setSearch("height", "39");
-
-        // response = await client.get (uri8.toString());
-        // assert.strictEqual(response.data.length, 1);
-
-        // assert.strictEqual(response.data[0].stake, enrollment.utxo_key.toString());
-        // assert.strictEqual(response.data[0].enrolled_at, "19");
-
-        // let uri9 = URI(host)
-        // .port(port)
-        // .directory("validators")
-        // .setSearch("height", "40");
-
-        // await assert.rejects(
-        //     client.get(uri9.toString()),
-        //     {statusMessage: "No validator exists for block height."}
-        // );
-
-        // /**
-        //  * To do
-        //  * The preimage_reserved service requires improvement and modification.
-        //  * See Stoa.ts putPreImage(req, res);
-        //  */
-        // Wait for the data added to the pool to be processed.
-        // setTimeout(async () =>
-        // {
-        //     // push the re-enroll's preImage
-        //     let uri10 = URI(host)
-        //     .port(port)
-        //     .directory("preimage_received");
-        //     let response = await client.post (uri10.toString(), {preimage: sample_reEnroll_preImageInfo});
-        //     assert.strictEqual(response.status, 200);
-        // }, 200);
-        //
-        // // Wait for the data added to the pool to be processed.
-        // setTimeout(async () =>
-        // {
-        //     let uri11 = URI(host)
-        //     .port(port)
-        //     .directory("validators")
-        //     .setSearch("height", "21");
-        //
-        //     let response = await client.get (uri11.toString());
-        //     assert.strictEqual(response.data.length, 1);
-        //     console.log(response.data);
-        //     assert.strictEqual(response.data[0].preimage.height, 1);
-        //     assert.strictEqual(response.data[0].preimage.hash, sample_reEnroll_preImageInfo.hash);
-        // }, 300);
     });
 
     it("Test of the path /wallet/blocks/header", async () => {

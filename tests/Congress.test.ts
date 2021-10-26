@@ -170,7 +170,7 @@ describe("Test for the addition of validators", () => {
 
     // TODO Adding one more block results in an error. This needs to be solved.
     it("Create 18 blocks and the every block has 1 enrollments", async () => {
-        for (let loop = 0; loop < 18; loop++) {
+        for (let loop = 0; loop < 20; loop++) {
             // Create key pairs of validators to be added.
             const add_validators: KeyPair[] = [];
             iota(key_position, key_position + 1).forEach((n) => {
@@ -229,7 +229,7 @@ describe("Test for the addition of validators", () => {
             );
         }
 
-        assert.strictEqual(block_manager.height, 19);
+        assert.strictEqual(block_manager.height, 21);
     });
 });
 
