@@ -1435,7 +1435,7 @@ export class EnrollmentStorage {
             keys.push(new PublicKey(key));
         });
         keys.sort((a, b) => {
-            return Utils.compareBuffer(a.data, b.data);
+            return PublicKey.compare(a, b);
         });
         return keys;
     }
@@ -1576,7 +1576,7 @@ export class ValidatorAtHeight {
             this.map.set(height, [validator]);
             return;
         }
-        const found = list.find((m) => Buffer.compare(m.secret.data, validator.secret.data) === 0);
+        const found = list.find((m) => SecretKey.equal(m.secret, validator.secret));
         if (found === undefined) list.push(validator);
     }
 
@@ -1585,7 +1585,7 @@ export class ValidatorAtHeight {
         if (list === undefined) {
             return;
         }
-        const found = list.findIndex((m) => Buffer.compare(m.secret.data, validator.secret.data) === 0);
+        const found = list.findIndex((m) => SecretKey.equal(m.secret, validator.secret));
         if (found >= 0) list.splice(found, 1);
     }
 
@@ -1720,9 +1720,7 @@ export class BlockManager {
     }
 
     public removeValidator(validator: KeyPair) {
-        const found = this.lastedValidators.findIndex(
-            (m) => Buffer.compare(m.address.data, validator.address.data) === 0
-        );
+        const found = this.lastedValidators.findIndex((m) => PublicKey.equal(m.address, validator.address));
         if (found >= 0) {
             this.lastedValidators.splice(found, 1);
             this.removed_validators.add(this.getNextBlockHeight(), validator);
@@ -1798,7 +1796,7 @@ export class BlockManager {
         const remove_validator = this.removed_validators.get(height);
         if (remove_validator !== undefined) {
             remove_validator.forEach((r) => {
-                const found = res.find((m) => Buffer.compare(m.validator.secret.data, r.secret.data) === 0);
+                const found = res.find((m) => SecretKey.equal(m.validator.secret, r.secret));
                 if (found !== undefined) {
                     found.action = ValdatorAction.REMOVE;
                 }
@@ -1806,14 +1804,14 @@ export class BlockManager {
         }
 
         this.added_validators.get(height).forEach((added) => {
-            const found = res.find((m) => Buffer.compare(m.validator.secret.data, added.secret.data) === 0);
+            const found = res.find((m) => SecretKey.equal(m.validator.secret, added.secret));
             if (found === undefined) {
                 res.push({ validator: added, action: ValdatorAction.ADD });
             }
         });
 
         res.sort((a, b) => {
-            return Utils.compareBuffer(a.validator.address.data, b.validator.address.data);
+            return PublicKey.compare(a.validator.address, b.validator.address);
         });
 
         return res;
@@ -1831,7 +1829,7 @@ export class BlockManager {
         }
 
         validators.sort((a, b) => {
-            return Utils.compareBuffer(a.secret.data, b.secret.data);
+            return SecretKey.compare(a.secret, b.secret);
         });
 
         this.validators.set(height + 1, validators);
@@ -1882,7 +1880,7 @@ export class BlockManager {
         return validators
             .map((m) => m.address)
             .sort((a, b) => {
-                return Utils.compareBuffer(a.data, b.data);
+                return PublicKey.compare(a, b);
             });
     }
 
