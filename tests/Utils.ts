@@ -1429,17 +1429,6 @@ export class EnrollmentStorage {
         }
     }
 
-    public getValidators(): PublicKey[] {
-        const keys: PublicKey[] = [];
-        this.storage.forEach((value, key, mapObject) => {
-            keys.push(new PublicKey(key));
-        });
-        keys.sort((a, b) => {
-            return PublicKey.compare(a, b);
-        });
-        return keys;
-    }
-
     public load(data: any[]) {
         data.forEach((value, idx) => {
             const pk = new PublicKey(value.address);
@@ -1545,8 +1534,10 @@ export class FrozenUTXOStorage {
         this.storage.set(address.toString(), data);
     }
 
-    public get(address: PublicKey): undefined | Hash {
-        return this.storage.get(address.toString());
+    public get(address: PublicKey): Hash {
+        const utxo = this.storage.get(address.toString());
+        if (utxo === undefined) throw new Error("Not found frozen utxo");
+        return utxo;
     }
 
     public remove(address: PublicKey) {
@@ -1642,10 +1633,12 @@ export class BlockManager {
             this.added_validators.add(1, validator);
         });
 
-        this.validators.set(
-            this.height,
-            iota(0, 6).map((m) => ValidatorKey.keys(m))
-        );
+        const validators = iota(0, 6).map((m) => ValidatorKey.keys(m));
+        validators.sort((a, b) => {
+            return Hash.compare(this.frozen_utxos.get(a.address), this.frozen_utxos.get(b.address));
+        });
+
+        this.validators.set(this.height, validators);
         this.lastedValidators = this.validators.get(this.height).map((m) => m);
     }
 
@@ -1739,7 +1732,16 @@ export class BlockManager {
         const pre_images: Hash[] = [];
         const validators = this.getValidatorsAtNextBlock(this.height);
         const bits = new BitMask(validators.length);
-        validators.forEach((validator, idx) => {
+
+        const new_validators = validators.map((m) => m);
+        new_validators.sort((prev, next) => {
+            return Hash.compare(
+                this.frozen_utxos.get(prev.validator.address),
+                this.frozen_utxos.get(next.validator.address)
+            );
+        });
+
+        new_validators.forEach((validator, idx) => {
             if (validator.action === ValdatorAction.ADD || validator.action === ValdatorAction.ALREADY_EXIST) {
                 const pre_image = this.pre_images.getImage(validator.validator.address, this.getNextBlockHeight());
                 if (pre_image !== undefined) {
@@ -1811,7 +1813,7 @@ export class BlockManager {
         });
 
         res.sort((a, b) => {
-            return PublicKey.compare(a.validator.address, b.validator.address);
+            return Hash.compare(this.frozen_utxos.get(a.validator.address), this.frozen_utxos.get(b.validator.address));
         });
 
         return res;
@@ -1827,9 +1829,8 @@ export class BlockManager {
                 validators.push(elem.validator);
             }
         }
-
         validators.sort((a, b) => {
-            return SecretKey.compare(a.secret, b.secret);
+            return Hash.compare(this.frozen_utxos.get(a.address), this.frozen_utxos.get(b.address));
         });
 
         this.validators.set(height + 1, validators);
@@ -1877,11 +1878,7 @@ export class BlockManager {
         if (height === undefined) height = this.height;
         const validators = this.validators.get(height);
 
-        return validators
-            .map((m) => m.address)
-            .sort((a, b) => {
-                return PublicKey.compare(a, b);
-            });
+        return validators.map((m) => m.address);
     }
 
     /**

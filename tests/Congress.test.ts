@@ -149,7 +149,6 @@ describe("Test for the addition of validators", () => {
         const new_block = block_manager.saveBlock([tx], enrollments);
 
         const expected_validator = block_manager.validators.get(block_manager.height).map((key) => key.address);
-        expected_validator.sort((a, b) => Utils.compareBuffer(a.data, b.data));
         const expected_preimages = expected_validator.map((v) => {
             const image = block_manager.getPreImage(v, block_manager.height);
             if (image === undefined) return new Hash(Buffer.alloc(Hash.Width));
@@ -166,6 +165,10 @@ describe("Test for the addition of validators", () => {
         const validators_simulation = block_manager.getValidators(block_manager.getLastBlockHeight());
         const validators = await boa_client.getAllValidators(block_manager.getLastBlockHeight());
         assert.strictEqual(validators.length, validators_simulation.length);
+        assert.deepStrictEqual(
+            validators.map((m) => m.address.toString()),
+            validators_simulation.map((m) => m.toString())
+        );
     });
 
     // TODO Adding one more block results in an error. This needs to be solved.
@@ -206,7 +209,6 @@ describe("Test for the addition of validators", () => {
             const new_block = block_manager.saveBlock([tx], enrollments);
 
             const expected_validator = block_manager.validators.get(block_manager.height).map((key) => key.address);
-            expected_validator.sort((a, b) => Utils.compareBuffer(a.data, b.data));
             const expected_preimages = expected_validator.map((v) => {
                 const image = block_manager.getPreImage(v, block_manager.height);
                 if (image === undefined) return new Hash(Buffer.alloc(Hash.Width));
@@ -224,8 +226,8 @@ describe("Test for the addition of validators", () => {
             const validators = await boa_client.getAllValidators(block_manager.getLastBlockHeight());
             assert.strictEqual(validators.length, validators_simulation.length);
             assert.deepStrictEqual(
-                validators.map((m) => m.address.toString()).sort((a, b) => a.localeCompare(b)),
-                validators_simulation.map((m) => m.toString()).sort((a, b) => a.localeCompare(b))
+                validators.map((m) => m.address.toString()),
+                validators_simulation.map((m) => m.toString())
             );
         }
 
