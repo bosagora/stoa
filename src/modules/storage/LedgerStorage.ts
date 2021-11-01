@@ -2246,8 +2246,7 @@ export class LedgerStorage extends Storages {
             ` as height
             FROM validators V
             LEFT OUTER JOIN preimages P
-            ON V.address = P.address
-            AND V.utxo_key = P.utxo_key
+            ON V.utxo_key = P.utxo_key
             AND ` +
             cur_height +
             ` = P.block_height
@@ -2260,7 +2259,7 @@ export class LedgerStorage extends Storages {
 
         if (address != null) sql += ` AND V.address = '` + address + `'`;
 
-        sql += ` ORDER BY V.enrolled_at ASC, V.utxo_key ASC;`;
+        sql += ` ORDER BY V.utxo_key ASC;`;
 
         return this.query(sql, [this.validator_cycle], conn);
     }
