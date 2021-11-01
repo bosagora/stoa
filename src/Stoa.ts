@@ -8,12 +8,20 @@ import {
     Height,
     JSBI,
     PreImageInfo,
-    ProposalData,
     PublicKey,
     Signature,
     Transaction,
     Utils,
 } from "boa-sdk-ts";
+import bodyParser from "body-parser";
+import cors from "cors";
+import express from "express";
+import lodash from "lodash";
+import moment from "moment";
+import responseTime from "response-time";
+import { Socket } from "socket.io";
+import { URL } from "url";
+import { isBlackList } from "../src/modules/middleware/blacklistMiddleware";
 import { cors_options, cors_private_options } from "./cors";
 import { AgoraClient } from "./modules/agora/AgoraClient";
 import { IDatabaseConfig } from "./modules/common/Config";
@@ -22,9 +30,11 @@ import { HeightManager } from "./modules/common/HeightManager";
 import { logger } from "./modules/common/Logger";
 import { Operation, Status } from "./modules/common/LogOperation";
 import { Time } from "./modules/common/Time";
+import events from "./modules/events/events";
+import "./modules/events/handlers";
 import { CoinMarketService } from "./modules/service/CoinMarketService";
-import { WebService } from "./modules/service/WebService";
 import { VoteraService } from "./modules/service/VoteraService";
+import { WebService } from "./modules/service/WebService";
 import { LedgerStorage } from "./modules/storage/LedgerStorage";
 import {
     ConvertTypes,
@@ -42,36 +52,25 @@ import {
     IMarketCap,
     IMarketChart,
     IPagination,
+    IPendingProposal,
     IPendingTxs,
     IPreimage,
+    IProposalAPI,
+    IProposalList,
     ISPVStatus,
     ITransaction,
     ITransactionFee,
-    ITxHistoryElement,
     ITxDetail,
+    ITxHistory,
+    ITxHistoryElement,
+    ITxHistoryHeader,
+    ITxHistoryItem,
     ITxOverview,
     ITxStatus,
     IUnspentTxOutput,
-    IPendingProposal,
-    IProposalAPI,
-    IProposalList,
     IValidatorReward,
     ValidatorData,
-    ITxHistory,
-    ITxHistoryItem,
-    ITxHistoryHeader,
 } from "./Types";
-import lodash from "lodash";
-import bodyParser from "body-parser";
-import cors from "cors";
-import express from "express";
-import moment from "moment";
-import responseTime from "response-time";
-import { Socket } from "socket.io";
-import { URL } from "url";
-import { isBlackList } from "../src/modules/middleware/blacklistMiddleware";
-import events from "./modules/events/events";
-import "./modules/events/handlers";
 
 class Stoa extends WebService {
     private _ledger_storage: LedgerStorage | null;
@@ -383,7 +382,7 @@ class Stoa extends WebService {
                 const out_put: ValidatorData[] = new Array<ValidatorData>();
 
                 for (const row of rows) {
-                    const preimage_hash: string = row.preimage_hash !== null ? new Hash(row.preimage_hash).toString() : "";
+                    const preimage_hash: string = row.preimage_hash !== null ? new Hash(row.preimage_hash, Endian.Little).toString() : "";
                     const preimage_height_str: string = row.preimage_height !== null ? row.preimage_height.toString() : "";
 
                     const preimage: IPreimage = {
@@ -454,7 +453,7 @@ class Stoa extends WebService {
 
                 if (rows.length > 0) {
                     const row = rows[0];
-                    const preimage_hash: string = row.preimage_hash !== null ? new Hash(row.preimage_hash).toString() : "";
+                    const preimage_hash: string = row.preimage_hash !== null ? new Hash(row.preimage_hash, Endian.Little).toString() : "";
                     const preimage_height_str: string = row.preimage_height !== null ? row.preimage_height.toString() : "";
 
                     const preimage: IPreimage = {
