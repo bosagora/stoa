@@ -64,7 +64,7 @@ export class TransactionPool {
      * Remove the transaction with the given key from the pool
      * @param connection MySQL pool connection
      * @param key the transaction to remove
-     * @param rm_double_spent  remove the TXs that use the same inputs
+     * @param rm_double_spent  remove the TXs that use the same utxo
      */
     public async remove(conn: mysql.PoolConnection, key: Transaction | Hash, rm_double_spent: boolean = true) {
         if (key instanceof Transaction) {
@@ -83,13 +83,13 @@ export class TransactionPool {
             if (rm_double_spent) {
                 const inv_txs = new Set<string>();
                 this.gatherDoubleSpentTXs(key, inv_txs);
-                for (const input of key.inputs) this.spenders.delete(hashFull(input).toString());
+                for (const input of key.inputs) this.spenders.delete(input.utxo.toString());
                 for (const inv_tx_hash_string of inv_txs) await this.remove(conn, new Hash(inv_tx_hash_string), false);
             } else {
                 const tx_hash_string = tx_hash.toString();
                 for (const input of key.inputs) {
-                    const in_hash_string = hashFull(input).toString();
-                    const set = this.spenders.get(in_hash_string);
+                    const utxo_string = input.utxo.toString();
+                    const set = this.spenders.get(utxo_string);
                     if (set !== undefined && set.has(tx_hash_string)) set.delete(tx_hash_string);
                 }
             }
@@ -127,13 +127,13 @@ export class TransactionPool {
 
         // insert each input information of the transaction
         for (const input of tx.inputs) {
-            const in_hash_string = hashFull(input).toString();
+            const utxo_string = input.utxo.toString();
 
             // Update the spenders list
-            let set = this.spenders.get(in_hash_string);
+            let set = this.spenders.get(utxo_string);
             if (set === undefined) {
                 set = new Set<string>();
-                this.spenders.set(in_hash_string, set);
+                this.spenders.set(utxo_string, set);
             }
             set.add(tx_hash_string);
         }
@@ -150,8 +150,8 @@ export class TransactionPool {
 
         const tx_hash_string = hashFull(tx).toString();
         for (const input of tx.inputs) {
-            const in_hash_string = hashFull(input).toString();
-            const set = this.spenders.get(in_hash_string);
+            const utxo_string = input.utxo.toString();
+            const set = this.spenders.get(utxo_string);
             if (set !== undefined) {
                 for (const spender of set) if (spender !== tx_hash_string) double_spent_txs.add(spender);
             }
