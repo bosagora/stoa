@@ -1990,6 +1990,7 @@ class Stoa extends WebService {
                         tx_fee: JSBI.BigInt(row.tx_fee).toString(),
                         tx_size: JSBI.BigInt(row.tx_size).toString(),
                         time_stamp: row.time_stamp,
+                        status: row.status,
                         full_count: row.full_count,
                     });
                 }

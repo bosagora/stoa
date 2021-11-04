@@ -3999,15 +3999,48 @@ export class LedgerStorage extends Storages {
      */
     public getLatestTransactions(limit: number, page: number): Promise<any[]> {
         const sql = `SELECT
-                T.block_height, T.tx_hash, T.tx_fee, T.tx_size, T.type,
-                Sum(IFNULL(O.amount,0)) as amount, B.time_stamp, count(*) OVER() AS full_count
-             FROM
-                 tx_outputs O
-                 INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
-                 INNER JOIN blocks B ON (B.height = T.block_height)
-             GROUP BY O.tx_hash
-             ORDER BY T.block_height DESC
-             LIMIT ? OFFSET ?;`;
+                    block_height,
+                    tx_hash,
+                    time_stamp,
+                    tx_fee,
+                    tx_size,
+                    type,
+                    amount,
+                    status,
+                    count(*) OVER() AS full_count
+                FROM(
+                    SELECT
+                        (SELECT IFNULL(MAX(height), 0) AS height FROM blocks) AS block_height,
+	                    T.tx_hash,
+                        T.time as time_stamp,
+	                    T.tx_fee,
+                        T.tx_size,
+                        T.type,
+	                    Sum(IFNULL(O.amount,0)) as amount,
+                        'Pending' As status
+	                FROM
+	                    tx_outputs O
+		                INNER JOIN tx_input_pool I ON (I.utxo = O.utxo_key)
+		                INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
+                        HAVING tx_hash IS NOT NULL
+                    UNION
+                    SELECT
+                        T.block_height,
+                        T.tx_hash,
+                        B.time_stamp,
+                        T.tx_fee,
+                        T.tx_size,
+                        T.type,
+                        Sum(IFNULL(O.amount,0)) as amount,
+                        'Confirmed' as status
+                    FROM
+                        tx_outputs O
+                        INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
+                        INNER JOIN blocks B ON (B.height = T.block_height)
+                    GROUP BY tx_hash
+		            ORDER BY time_stamp DESC
+                    limit ? offset ?
+                ) AS transactions;`;
         return this.query(sql, [limit, limit * (page - 1)]);
     }
 
