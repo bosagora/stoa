@@ -981,6 +981,11 @@ export interface ITransaction {
     time_stamp: string;
 
     /**
+     * status of transaction
+     */
+    status: string;
+
+    /**
      * total number of records
      */
     full_count: number;
