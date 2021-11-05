@@ -12,12 +12,14 @@
 *******************************************************************************/
 
 import * as assert from "assert";
-import { SodiumHelper, ProposalType, JSBI, ProposalData, Hash, PublicKey, Endian, Height, Validator, hash, BallotData, Enrollment, BlockHeader, BitMask, Signature, Block } from "boa-sdk-ts";
+import { SodiumHelper, ProposalType, JSBI, ProposalData, Hash, PublicKey, Endian, Height, Validator, hash, BallotData, Enrollment, BlockHeader, BitMask, Signature, Block, Amount } from "boa-sdk-ts";
 import { BOASodium } from "boa-sodium-ts";
+import { expect } from "chai";
 import URI from "urijs";
 import { URL } from "url";
 import { CoinGeckoMarket } from "../src/modules/coinmarket/CoinGeckoMarket";
 import { IDatabaseConfig } from "../src/modules/common/Config";
+import { Exchange } from "../src/modules/common/Exchange";
 import { CoinMarketService } from "../src/modules/service/CoinMarketService";
 import { VoteraService } from "../src/modules/service/VoteraService";
 import { IMarketCap, IMetaData, IPendingProposal, IProposal, IValidatorByBlock } from "../src/Types";
@@ -148,7 +150,7 @@ describe("Test of Stoa API Server", () => {
     });
 
     it("Test of the path /latest-transactions", async () => {
-        const uri = URI(stoa_addr).directory("/latest-transactions").addSearch("page", "1").addSearch("limit", "20");
+        const uri = URI(stoa_addr).directory("/latest-transactions").addSearch("page", "1").addSearch("limit", "10");
 
         const response = await client.get(uri.toString());
         const expected = [
@@ -263,7 +265,7 @@ describe("Test of Stoa API Server", () => {
                 full_count: 10
             }
         ]
-        assert.deepStrictEqual(response.data, expected);
+        assert.deepStrictEqual(response.data, expected)
     });
 
     it("Test of the path /block-summary with block height", async () => {
@@ -283,7 +285,7 @@ describe("Test of Stoa API Server", () => {
             random_seed:
                 "",
             time: 1609459800,
-            version: "v0.x.x",
+            version: "",
             total_sent: 4880000000000000,
             total_received: 4879999998096000,
             total_reward: 0,
@@ -681,10 +683,9 @@ describe("Test of Stoa API Server", () => {
     it("Test for /holders", async () => {
         const uri = URI(stoa_addr).directory("/holders");
         const response = await client.get(uri.toString());
-
         const expected = [
             {
-                address: "boa1xpfp00tr86d9zdgv3uy08qs0ld5s3wmx869yte68h3y4erteyn3wkq692jq",
+                address: 'boa1xpfp00tr86d9zdgv3uy08qs0ld5s3wmx869yte68h3y4erteyn3wkq692jq',
                 tx_count: 2,
                 total_received: 48799999980960,
                 total_sent: 0,
@@ -693,11 +694,11 @@ describe("Test of Stoa API Server", () => {
                 total_spendable: 48799999980960,
                 total_balance: 48799999980960,
                 percentage: 0,
-                value: 0,
-                full_count: 199,
+                value: 1167549.760,
+                full_count: 199
             },
             {
-                address: "boa1xpfq00t5f0uv8v0wzclvt72fl3x2vz4z48harsx5zdks6m5pecxey9vh4e8",
+                address: 'boa1xpfq00t5f0uv8v0wzclvt72fl3x2vz4z48harsx5zdks6m5pecxey9vh4e8',
                 tx_count: 2,
                 total_received: 48799999980960,
                 total_sent: 0,
@@ -706,11 +707,11 @@ describe("Test of Stoa API Server", () => {
                 total_spendable: 48799999980960,
                 total_balance: 48799999980960,
                 percentage: 0,
-                value: 0,
-                full_count: 199,
+                value: 1167549.760,
+                full_count: 199
             },
             {
-                address: "boa1xpfr005hadezanqmze3f99st3v4n8q3zu0lrzsc3t4mvcj7fnrn7sseah6p",
+                address: 'boa1xpfr005hadezanqmze3f99st3v4n8q3zu0lrzsc3t4mvcj7fnrn7sseah6p',
                 tx_count: 2,
                 total_received: 48799999980960,
                 total_sent: 0,
@@ -719,11 +720,11 @@ describe("Test of Stoa API Server", () => {
                 total_spendable: 48799999980960,
                 total_balance: 48799999980960,
                 percentage: 0,
-                value: 0,
-                full_count: 199,
+                value: 1167549.760,
+                full_count: 199
             },
             {
-                address: "boa1xqfn00yp3myu4jt2se80flcksf9j2nta3t6yvhfh7gugzllkmzwfskczvk5",
+                address: 'boa1xqfn00yp3myu4jt2se80flcksf9j2nta3t6yvhfh7gugzllkmzwfskczvk5',
                 tx_count: 2,
                 total_received: 48799999980960,
                 total_sent: 0,
@@ -732,11 +733,11 @@ describe("Test of Stoa API Server", () => {
                 total_spendable: 48799999980960,
                 total_balance: 48799999980960,
                 percentage: 0,
-                value: 0,
-                full_count: 199,
+                value: 1167549.760,
+                full_count: 199
             },
             {
-                address: "boa1xqfs008pm8f73te5dsys46ewdk3ha5wzlfcz2d6atn2z4nayunp66aelwmr",
+                address: 'boa1xqfs008pm8f73te5dsys46ewdk3ha5wzlfcz2d6atn2z4nayunp66aelwmr',
                 tx_count: 2,
                 total_received: 48799999980960,
                 total_sent: 0,
@@ -745,11 +746,11 @@ describe("Test of Stoa API Server", () => {
                 total_spendable: 48799999980960,
                 total_balance: 48799999980960,
                 percentage: 0,
-                value: 0,
-                full_count: 199,
+                value: 1167549.760,
+                full_count: 199
             },
             {
-                address: "boa1xrft007petq803lnkk4820l8ya6xpshrl3tg9az8yghejm9t7mwgc8wtgrs",
+                address: 'boa1xrft007petq803lnkk4820l8ya6xpshrl3tg9az8yghejm9t7mwgc8wtgrs',
                 tx_count: 2,
                 total_received: 48799999980960,
                 total_sent: 0,
@@ -758,11 +759,11 @@ describe("Test of Stoa API Server", () => {
                 total_spendable: 48799999980960,
                 total_balance: 48799999980960,
                 percentage: 0,
-                value: 0,
-                full_count: 199,
+                value: 1167549.760,
+                full_count: 199
             },
             {
-                address: "boa1xzfu00gaqcea0j0n4jdmveve4hhwsa264tthyaqrtyx9pu0rrc3rsma3zdy",
+                address: 'boa1xzfu00gaqcea0j0n4jdmveve4hhwsa264tthyaqrtyx9pu0rrc3rsma3zdy',
                 tx_count: 2,
                 total_received: 48799999980960,
                 total_sent: 0,
@@ -771,11 +772,11 @@ describe("Test of Stoa API Server", () => {
                 total_spendable: 48799999980960,
                 total_balance: 48799999980960,
                 percentage: 0,
-                value: 0,
-                full_count: 199,
+                value: 1167549.760,
+                full_count: 199
             },
             {
-                address: "boa1xzfv00s88ky9mf50nqngvztmnmtjzv4yr0w555aet366ssrv5zqaj6zsga3",
+                address: 'boa1xzfv00s88ky9mf50nqngvztmnmtjzv4yr0w555aet366ssrv5zqaj6zsga3',
                 tx_count: 2,
                 total_received: 48799999980960,
                 total_sent: 0,
@@ -784,11 +785,11 @@ describe("Test of Stoa API Server", () => {
                 total_spendable: 48799999980960,
                 total_balance: 48799999980960,
                 percentage: 0,
-                value: 0,
-                full_count: 199,
+                value: 1167549.760,
+                full_count: 199
             },
             {
-                address: "boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj",
+                address: 'boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj',
                 tx_count: 1,
                 total_received: 24399999990480,
                 total_sent: 0,
@@ -797,11 +798,11 @@ describe("Test of Stoa API Server", () => {
                 total_spendable: 24399999990480,
                 total_balance: 24399999990480,
                 percentage: 0,
-                value: 0,
-                full_count: 199,
+                value: 583774.880,
+                full_count: 199
             },
             {
-                address: "boa1xparl00ghmujzcsrt8jacj06sdq002s3s4uljceqn98awvy4vsya5qmvqvu",
+                address: 'boa1xparl00ghmujzcsrt8jacj06sdq002s3s4uljceqn98awvy4vsya5qmvqvu',
                 tx_count: 1,
                 total_received: 24399999990480,
                 total_sent: 0,
@@ -810,10 +811,10 @@ describe("Test of Stoa API Server", () => {
                 total_spendable: 24399999990480,
                 total_balance: 24399999990480,
                 percentage: 0,
-                value: 0,
-                full_count: 199,
-            },
-        ];
+                value: 583774.880,
+                full_count: 199
+            }
+        ]
         assert.deepStrictEqual(response.data, expected);
     });
     it("Test for path /holder_balance_history", async () => {
@@ -849,7 +850,7 @@ describe("Test of Stoa API Server", () => {
             total_frozen: 0,
             total_balance: 48799999980960,
             percentage: 0,
-            value: 0,
+            value: 1167549.760,
         };
         assert.deepStrictEqual(response.data, expected);
     });
@@ -930,5 +931,32 @@ describe("Test of Stoa API Server", () => {
         ]
 
         assert.deepStrictEqual(response.data, expected);
+    });
+
+    it("Test for /convert-to-usd", async () => {
+        const uri = URI(stoa_addr)
+            .directory("/convert-to-usd")
+            .addSearch('amount', '1.23');
+
+        const response = await client.get(uri.toString());
+        let expected = { amount: 1.23, USD: 0.294 }
+        assert.deepStrictEqual(response.data, expected);
+    });
+
+    it("Test for convertBoaToUsd()", async () => {
+        let rate = 3450246;
+        let Boa = 0.5;
+        let exchange = new Exchange(rate);
+        let value = exchange.convertBoaToUsd(Boa);
+        assert.deepStrictEqual(value, rate * Boa);
+    });
+
+    it("Test for convertBalanceToUsd()", async () => {
+        let rate = 3450246;
+        let amount = new Amount(4880000000000000);
+        let exchange = new Exchange(rate);
+
+        let value = exchange.convertAmountToUsd(amount);
+        assert.deepStrictEqual(value, rate * 488000000);
     });
 });
