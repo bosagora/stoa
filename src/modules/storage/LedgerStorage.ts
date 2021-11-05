@@ -2192,6 +2192,31 @@ export class LedgerStorage extends Storages {
     }
 
     /**
+     * Returns UTXO's address about the UTXO hash array.
+     * @param utxos The array of UTXO hash
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the array of UTXO
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getAddressesOfUTXOs(utxos: Hash[]) {
+        const u = utxos.map((m) => `x'${m.toBinary(Endian.Little).toString("hex")}'`);
+        const sql_utxo = `SELECT
+                O.address
+            FROM
+                tx_outputs O
+            WHERE
+                O.utxo_key in (${u.join(",")})
+                AND address != ''`;
+        return new Promise<any[]>((resolve, reject) => {
+            this.query(sql_utxo, [])
+                .then((result: any[]) => {
+                    return resolve(result);
+                })
+                .catch(reject);
+        });
+    }
+
+    /**
      * Gets a transaction data
      * @param height The height of the block to get
      * @returns Returns the Promise. If it is finished successfully the `.then`

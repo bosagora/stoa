@@ -11,6 +11,7 @@ import {
     PublicKey,
     Signature,
     Transaction,
+    TxInput,
     Utils,
 } from "boa-sdk-ts";
 import bodyParser from "body-parser";
@@ -36,6 +37,7 @@ import { CoinMarketService } from "./modules/service/CoinMarketService";
 import { VoteraService } from "./modules/service/VoteraService";
 import { WebService } from "./modules/service/WebService";
 import { LedgerStorage } from "./modules/storage/LedgerStorage";
+import { WalletWatcherIO } from "./modules/wallet/WalletWatcherIO";
 import {
     ConvertTypes,
     DisplayTxType,
@@ -124,6 +126,8 @@ class Stoa extends WebService {
      */
     private readonly validator_cycle: number;
 
+    private wallet_watcher: WalletWatcherIO;
+
     /**
      * Constructor
      * @param databaseConfig Mysql database configuration
@@ -151,6 +155,8 @@ class Stoa extends WebService {
         this.databaseConfig = databaseConfig;
         this.coinMarketService = coinMarketService;
         this.voteraService = votera_service;
+        this.wallet_watcher = new WalletWatcherIO();
+
         // Instantiate a dummy promise for chaining
         this.pending = new Promise<void>(function (resolve, reject): void {
             resolve();
@@ -337,6 +343,7 @@ class Stoa extends WebService {
                 }
                 this.socket.io.on(events.client.connection, (socket: Socket) => {
                     this.eventDispatcher.dispatch(events.client.connection, socket);
+                    this.wallet_watcher.onClientConnected(socket);
                 });
                 return (this.pending = this.pending.then(() => {
                     return this.catchup(height);
@@ -2133,6 +2140,7 @@ class Stoa extends WebService {
                         });
                         await this.emitBlock(block);
                         await this.emitBoaStats();
+                        this.wallet_watcher.onBlockCreated(height);
                     } else if (JSBI.greaterThan(height.value, expected_height.value)) {
                         // Recovery is required for blocks that are not received.
                         while (true) {
@@ -2227,7 +2235,10 @@ class Stoa extends WebService {
                     const tx = Transaction.reviver("", stored_data.data);
                     const changes = await this.ledger_storage.putTransactionPool(tx);
 
-                    if (changes)
+                    if (changes) {
+                        const utxos = tx.inputs.map((m: TxInput) => m.utxo);
+                        const addresses = await this.ledger_storage.getAddressesOfUTXOs(utxos);
+                        addresses.forEach((m) => this.wallet_watcher.onTransactionAccountCreated(m.address));
                         logger.info(
                             `Saved a transaction hash : ${hashFull(tx).toString()}, ` + `data : ` + stored_data.data,
                             {
@@ -2237,6 +2248,7 @@ class Stoa extends WebService {
                                 responseTime: Number(moment().utc().unix() * 1000),
                             }
                         );
+                    }
                     resolve();
                 } catch (err) {
                     logger.error("Failed to store the payload of a push to the DB: " + err, {

@@ -16,7 +16,9 @@ import {
     Block,
     BOA,
     Hash,
+    hashFull,
     JSBI,
+    makeUTXOKey,
     OutputType,
     PublicKey,
     Signature,
@@ -46,7 +48,9 @@ import { IDatabaseConfig } from "../src/modules/common/Config";
 import { MockDBConfig } from "./TestConfig";
 import { IUnspentTxOutput } from "../src/Types";
 
-describe("Test of Stoa API for the wallet", function() {
+import { io, Socket } from "socket.io-client";
+
+describe("Test of Stoa API for the wallet", function () {
     this.timeout(5000);
     const agora_addr: URL = new URL("http://localhost:2831");
     const stoa_addr: URL = new URL("http://localhost:3831");
@@ -417,7 +421,7 @@ describe("Test of Stoa API for the wallet", function() {
     });
 });
 
-describe("Test of Stoa API for the wallet with `sample_data`", function() {
+describe("Test of Stoa API for the wallet with `sample_data`", function () {
     this.timeout(5000);
     const agora_addr: URL = new URL("http://localhost:2832");
     const stoa_addr: URL = new URL("http://localhost:3832");
@@ -699,7 +703,7 @@ describe("Test of Stoa API for the wallet with `sample_data`", function() {
     });
 });
 
-describe("Test of the path /wallet/balance:address for payment", function() {
+describe("Test of the path /wallet/balance:address for payment", function () {
     this.timeout(5000);
     const agora_addr: URL = new URL("http://localhost:2901");
     const stoa_addr: URL = new URL("http://localhost:3901");
@@ -928,7 +932,7 @@ describe("Test of the path /wallet/balance:address for payment", function() {
     });
 });
 
-describe("Test of the path /wallet/balance:address for freeze and unfreeze", function() {
+describe("Test of the path /wallet/balance:address for freeze and unfreeze", function () {
     this.timeout(5000);
     const agora_addr: URL = new URL("http://localhost:2902");
     const stoa_addr: URL = new URL("http://localhost:3902");
@@ -1302,5 +1306,168 @@ describe("Test of the path /wallet/balance:address for double spending", functio
             locked: "0",
         };
         assert.deepStrictEqual(balance_response2.data, balance_expected2);
+    });
+});
+
+describe("Test the message transmission module when the balance changes and new block are created", function () {
+    this.timeout(20000);
+    const agora_addr: URL = new URL("http://localhost:2901");
+    const stoa_addr: URL = new URL("http://localhost:3901");
+    const stoa_private_addr: URL = new URL("http://localhost:4901");
+    let stoa_server: TestStoa;
+    let agora_server: TestAgora;
+    const client = new TestClient();
+    let testDBConfig: IDatabaseConfig;
+    const blocks: Block[] = [];
+
+    const address_1 = "boa1xqarr00jd4a8xm4v7pldqjhda45qve4xghtet5wjm70azd6ney35zfj8z0y";
+    const address_2 = "boa1xzl09lfa0nvtsr0dhf5hhgan7kd8st753hay62ufgwhksjnx98vd6hrv2d5";
+    const address_3 = "boa1xqx0039s4ulz2n9cqalv04pgphf79q09csw0w9lyfv52mmlc6ynhzjzgyex";
+    const address_4 = "boa1xpy00m8r9qpmkh8zznkn3jc9w9n3t6x3wdzx4sdsd9xqjk3m0dwzx9ecvul";
+
+    before("Bypassing middleware check", () => {
+        FakeBlacklistMiddleware.assign();
+    });
+
+    before("Wait for the package libsodium to finish loading", async () => {
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
+        await SodiumHelper.init();
+    });
+
+    before("Start a fake Agora", () => {
+        return new Promise<void>((resolve, reject) => {
+            agora_server = new TestAgora(agora_addr.port, [], resolve);
+        });
+    });
+
+    before("Create TestStoa", async () => {
+        testDBConfig = await MockDBConfig();
+        stoa_server = new TestStoa(testDBConfig, agora_addr, stoa_addr.port);
+        await stoa_server.createStorage();
+        await stoa_server.start();
+    });
+
+    after("Stop Stoa and Agora server instances", async () => {
+        await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
+        await stoa_server.stop();
+        await agora_server.stop();
+    });
+
+    it("Store two blocks", async () => {
+        blocks.push(Block.reviver("", sample_data[0]));
+        blocks.push(Block.reviver("", sample_data[1]));
+        const uri = URI(stoa_private_addr).directory("block_externalized");
+
+        const url = uri.toString();
+        await client.post(url, { block: blocks[0] });
+        await client.post(url, { block: blocks[1] });
+        // Wait for the block to be stored in the database for the next test.
+        await delay(2000);
+    });
+
+    it("Distribute funds to addresses. address_2, address_3, address_4", async () => {
+        // Get UTXO
+        const utxo_uri = URI(stoa_addr)
+            .directory("wallet/utxo")
+            .filename(address_1)
+            .setSearch("amount", BOA(2_439_999.999048).toString())
+            .toString();
+
+        const response_utxo = await client.get(utxo_uri);
+        assert.deepStrictEqual(response_utxo.data.length, 1);
+
+        // Create a payment transaction
+        const tx = new Transaction(
+            [
+                new TxInput(
+                    new Hash(response_utxo.data[0].utxo),
+                    Unlock.fromSignature(new Signature(Buffer.alloc(Signature.Width)))
+                ),
+            ],
+            [
+                new TxOutput(OutputType.Payment, BOA(10_000), new PublicKey(address_2)),
+                new TxOutput(OutputType.Payment, BOA(10_000), new PublicKey(address_3)),
+                new TxOutput(OutputType.Payment, BOA(10_000), new PublicKey(address_4)),
+                new TxOutput(OutputType.Payment, BOA(1_509_999.95), new PublicKey(address_1)),
+            ],
+            Buffer.alloc(0)
+        );
+        blocks.push(createBlock(blocks[blocks.length - 1], [tx]));
+
+        // Store the block - the pending transaction is stored
+        const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(block_url, { block: blocks[blocks.length - 1] });
+        await delay(2000);
+    });
+
+    it("Check the received message when the balance changes and new block are created", async () => {
+        const socket = io(stoa_addr.toString());
+        const received_data: any[] = [];
+        socket.on("new_block", (data: { height: number }) => {
+            received_data.push(data);
+        });
+        socket.on("new_tx_acc", (data: { address: string }) => {
+            received_data.push(data);
+        });
+        socket.emit("subscribe", { address: "block" });
+        socket.emit("subscribe", { address: address_2 });
+        socket.emit("subscribe", { address: address_4 });
+
+        await delay(500);
+
+        const txs: Transaction[] = [];
+
+        // query UTXO and build transaction, send transaction
+        const sendTransaction = async (send_address: string): Promise<Transaction> => {
+            const utxo_uri = URI(stoa_addr)
+                .directory("wallet/utxo")
+                .filename(send_address)
+                .setSearch("amount", BOA(10_000).toString())
+                .toString();
+            const response_utxo = await client.get(utxo_uri);
+
+            // Create a payment transaction
+            const tx = new Transaction(
+                [
+                    new TxInput(
+                        new Hash(response_utxo.data[0].utxo),
+                        Unlock.fromSignature(new Signature(Buffer.alloc(Signature.Width)))
+                    ),
+                ],
+                [new TxOutput(OutputType.Payment, BOA(9_999), new PublicKey(send_address))],
+                Buffer.alloc(0)
+            );
+
+            // Send payment transaction
+            const transaction_uri = URI(stoa_private_addr).directory("transaction_received").toString();
+            await client.post(transaction_uri, { tx });
+
+            return tx;
+        };
+
+        // Spend UTXO of address 2
+        txs.push(await sendTransaction(address_2));
+        await delay(500);
+
+        // Spend UTXO of address 3
+        txs.push(await sendTransaction(address_3));
+        await delay(500);
+
+        // Spend UTXO of address 4
+        txs.push(await sendTransaction(address_4));
+        await delay(500);
+
+        // Store the block
+        blocks.push(createBlock(blocks[blocks.length - 1], txs));
+        const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(block_url, { block: blocks[blocks.length - 1] });
+        await delay(500);
+
+        // address_3 isn't subscribed
+        const expected = [{ address: address_2 }, { address: address_4 }, { height: 3 }];
+
+        assert.deepStrictEqual(received_data, expected);
+
+        socket.disconnect();
     });
 });
