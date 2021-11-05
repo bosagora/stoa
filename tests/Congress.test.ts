@@ -1388,6 +1388,7 @@ describe("Test for the creation a proposal and the voting", () => {
     it("21-22 Create a dummy block", async () => {
         await createDummyBlock(21);
         await createDummyBlock(22);
+        await delay(200);
     });
 
     it("Test case for ballots", async () => {

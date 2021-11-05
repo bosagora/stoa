@@ -4040,7 +4040,7 @@ export class LedgerStorage extends Storages {
                     GROUP BY tx_hash
 		            ORDER BY time_stamp DESC, tx_hash ASC
                     limit ? offset ?
-                ) AS transactions;`;
+                ) AS transactions`;
         return this.query(sql, [limit, limit * (page - 1)]);
     }
 
@@ -4617,6 +4617,33 @@ export class LedgerStorage extends Storages {
                 P.proposal_id = ? ${type_filter} ${height_filter}`;
 
         return this.query(sql, [proposal_id]);
+    }
+    /**
+      * This method get the current exchange rate BOA/USD.
+      * @returns Returns the Promise. If it is finished successfully the `.then`
+      * of the returned Promise is called with the records
+      * and if an error occurs the `.catch` is called with an error.
+      */
+    public getExchangeRate(): Promise<number> {
+        return new Promise<number>((resolve, reject) => {
+            this.getCoinMarketcap()
+                .then((rows: any) => {
+                    if (rows[0]) {
+                        resolve(rows[0].price);
+                    } else {
+                        reject;
+                    }
+                })
+                .catch((err) => {
+                    logger.error("Failed to data lookup to the DB: " + err, {
+                        operation: Operation.db,
+                        height: HeightManager.height.toString(),
+                        status: Status.Error,
+                        responseTime: Number(moment().utc().unix() * 1000),
+                    });
+                    reject();
+                });
+        });
     }
 
     /**

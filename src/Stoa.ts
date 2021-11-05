@@ -1,4 +1,5 @@
 import {
+    Amount,
     Block,
     BlockHeader,
     Endian,
@@ -26,6 +27,7 @@ import { isBlackList } from "../src/modules/middleware/blacklistMiddleware";
 import { cors_options, cors_private_options } from "./cors";
 import { AgoraClient } from "./modules/agora/AgoraClient";
 import { IDatabaseConfig } from "./modules/common/Config";
+import { Exchange } from "./modules/common/Exchange";
 import { FeeManager } from "./modules/common/FeeManager";
 import { HeightManager } from "./modules/common/HeightManager";
 import { logger } from "./modules/common/Logger";
@@ -288,6 +290,7 @@ class Stoa extends WebService {
         this.app.get("/proposals/", isBlackList, this.getProposals.bind(this));
         this.app.get("/proposal/:proposal_id", isBlackList, this.getProposalById.bind(this));
         this.app.get("/validator/reward/:address", isBlackList, this.getValidatorReward.bind(this));
+        this.app.get("/convert-to-usd", isBlackList, this.convertToUSD.bind(this));
 
         // It operates on a private port
         this.private_app.post("/block_externalized", this.postBlock.bind(this));
@@ -1257,7 +1260,7 @@ class Stoa extends WebService {
                         signature: new Signature(data[0].signature, Endian.Little).toString(),
                         random_seed: "",
                         time: data[0].time_stamp,
-                        version: "v0.x.x",
+                        version: "",
                         total_sent: data[0].total_sent,
                         total_received: data[0].total_received,
                         total_reward: data[0].total_reward,
@@ -2509,10 +2512,12 @@ class Stoa extends WebService {
         const pagination: IPagination = await this.paginate(req, res);
         this.ledger_storage
             .getBOAHolders(pagination.pageSize, pagination.page)
-            .then((data: any[]) => {
+            .then(async (data: any[]) => {
                 if (data.length === 0) {
                     return res.status(204).send(`The data does not exist.`);
                 } else {
+                    let exchangeRate = await this.ledger_storage.getExchangeRate();
+                    let exchange = new Exchange(exchangeRate);
                     const holderList: IBOAHolder[] = [];
                     for (const row of data) {
                         holderList.push({
@@ -2525,7 +2530,7 @@ class Stoa extends WebService {
                             total_spendable: row.total_spendable,
                             total_balance: row.total_balance,
                             percentage: 0, // FIX ME static data because of unavailability of real data
-                            value: 0, // FIX ME static data because of unavailability of real data
+                            value: exchange.convertAmountToUsd(new Amount(row.total_balance)),
                             full_count: row.full_count,
                         });
                     }
@@ -2670,10 +2675,12 @@ class Stoa extends WebService {
         }
         this.ledger_storage
             .getBOAHolder(address)
-            .then((data: any[]) => {
+            .then(async (data: any[]) => {
                 if (data.length === 0) {
                     return res.status(204).send(`The data does not exist.`);
                 } else {
+                    let exchangeRate = await this.ledger_storage.getExchangeRate();
+                    let exchange = new Exchange(exchangeRate);
                     const holder: IBOAHolder = {
                         address: data[0].address,
                         tx_count: data[0].tx_count,
@@ -2684,7 +2691,7 @@ class Stoa extends WebService {
                         total_spendable: 0,
                         total_balance: data[0].total_balance,
                         percentage: 0,
-                        value: 0,
+                        value: exchange.convertAmountToUsd(new Amount(data[0].total_balance)),
                     };
                     return res.status(200).send(JSON.stringify(holder));
                 }
@@ -3026,6 +3033,41 @@ class Stoa extends WebService {
                     responseTime: Number(moment().utc().unix() * 1000),
                 });
                 res.status(500).send("Failed to data lookup");
+            });
+    }
+
+    /**
+     * GET /convert-to-usd
+     * Called when a request is received through the `/convert-to-usd` handler
+     * The parameter `amount` is the Boa amount.
+     * @returns Returns the USD amount against input BOA amount.
+     */
+    public async convertToUSD(req: express.Request, res: express.Response) {
+        let amount: number;
+
+        if (req.query.amount === undefined) {
+            res.status(400).send(`Parameters 'amount' is not entered.`);
+            return;
+        } else if (0 > Number(req.query.amount.toString())) {
+            res.status(400).send(`Invalid value for parameter 'amount': ${req.query.amount.toString()}`);
+            return;
+        }
+        amount = Number(req.query.amount);
+        this.ledger_storage
+            .getExchangeRate()
+            .then((rate: number) => {
+                let exchange = new Exchange(rate);
+                let usd = exchange.convertBoaToUsd(amount)
+                return res.status(200).send({ amount: amount, USD: usd });
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    status: Status.Error,
+                    responseTime: Number(moment().utc().unix() * 1000),
+                });
+                return res.status(204).send(`The exchange rate does not exist.`);
             });
     }
 
