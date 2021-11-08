@@ -1311,9 +1311,9 @@ describe("Test of the path /wallet/balance:address for double spending", functio
 
 describe("Test the message transmission module when the balance changes and new block are created", function () {
     this.timeout(20000);
-    const agora_addr: URL = new URL("http://localhost:2901");
-    const stoa_addr: URL = new URL("http://localhost:3901");
-    const stoa_private_addr: URL = new URL("http://localhost:4901");
+    const agora_addr: URL = new URL("http://localhost:2905");
+    const stoa_addr: URL = new URL("http://localhost:3905");
+    const stoa_private_addr: URL = new URL("http://localhost:4905");
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
@@ -1413,7 +1413,7 @@ describe("Test the message transmission module when the balance changes and new 
         socket.emit("subscribe", { address: address_2 });
         socket.emit("subscribe", { address: address_4 });
 
-        await delay(500);
+        await delay(1000);
 
         const txs: Transaction[] = [];
 
@@ -1447,21 +1447,21 @@ describe("Test the message transmission module when the balance changes and new 
 
         // Spend UTXO of address 2
         txs.push(await sendTransaction(address_2));
-        await delay(500);
+        await delay(1000);
 
         // Spend UTXO of address 3
         txs.push(await sendTransaction(address_3));
-        await delay(500);
+        await delay(1000);
 
         // Spend UTXO of address 4
         txs.push(await sendTransaction(address_4));
-        await delay(500);
+        await delay(1000);
 
         // Store the block
         blocks.push(createBlock(blocks[blocks.length - 1], txs));
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: blocks[blocks.length - 1] });
-        await delay(500);
+        await delay(1000);
 
         // address_3 isn't subscribed
         const expected = [{ address: address_2 }, { address: address_4 }, { height: 3 }];
