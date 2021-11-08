@@ -945,7 +945,7 @@ describe("Test for the creation a proposal and the voting", () => {
                 proposal_result: m.proposal_result,
                 data_collection_status: m.data_collection_status
             });
-            assert.strictEqual(data[0].proposal_status, 'Counting votes');
+            assert.strictEqual(data[0].proposal_status, 'CountingVotes');
         });
     });
 

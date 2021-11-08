@@ -20,6 +20,7 @@ export interface IValidator {
     address: string;
     enrolled_at: Height;
     stake: string;
+    full_count: number;
     preimage?: IPreimage;
 }
 
@@ -39,11 +40,13 @@ export class ValidatorData implements IValidator {
     enrolled_at: Height;
     stake: string;
     preimage: IPreimage;
+    full_count: number;
 
-    constructor(address: string, enrolled_at: Height, stake: string, preimage: IPreimage) {
+    constructor(address: string, enrolled_at: Height, stake: string, full_count: number, preimage: IPreimage) {
         this.address = address;
         this.enrolled_at = enrolled_at;
         this.stake = stake;
+        this.full_count = full_count;
         this.preimage = preimage;
     }
 }
@@ -298,6 +301,11 @@ export interface IBOAStats {
      * Circulating supply
      */
     circulating_supply: number;
+
+    /**
+     * block timestamp
+     */
+    time_stamp: number;
 }
 
 /**
@@ -373,6 +381,11 @@ export interface IBlockOverview {
      * Agora version
      */
     version: string;
+
+    /**
+     * Transaction volume
+     */
+    tx_volume: string;
 }
 
 /**
@@ -547,7 +560,7 @@ export interface ITxOverviewOutputElement {
     /**
      * Lock type
      */
-    lock_type: number;
+    lock_type: string;
 
     /**
      * Lock type
@@ -602,7 +615,7 @@ export interface ITxOverviewInputElement {
     /**
      * Unlock age
      */
-    unlock_age: number;
+    unlock_age: string;
 
     /**
      * Unlock bytes
@@ -830,6 +843,8 @@ export class ConvertTypes {
     static tx_types: string[] = ["payment", "freeze", "coinbase"];
     static proposal_types: string[] = ["System", "Fund"];
     static display_tx_type: string[] = ["inbound", "outbound", "freeze", "payload"];
+    static lock_type: string[] = ["Key", "KeyHash", "Script", "Redeem"];
+    static unlock_age: string[] = ["Key", "KeyHash", "Script", "ScriptHash"];
 
     public static DisplayTxTypeToString(type: DisplayTxType): string {
         if (type < ConvertTypes.display_tx_type.length) return ConvertTypes.display_tx_type[type];
@@ -844,6 +859,17 @@ export class ConvertTypes {
     public static toDisplayTxType(type: string): DisplayTxType {
         return ConvertTypes.display_tx_type.findIndex((m) => m === type.trim().toLowerCase());
     }
+
+    public static lockTypeToString(type: number): string {
+        if (type < ConvertTypes.lock_type.length) return ConvertTypes.lock_type[type];
+        else return "";
+    }
+
+    public static unlockAgeToString(type: number): string {
+        if (type < ConvertTypes.unlock_age.length) return ConvertTypes.unlock_age[type];
+        else return "";
+    }
+
     public static ProposalTypetoString(type: ProposalType): string {
         if (type < ConvertTypes.proposal_types.length) return ConvertTypes.proposal_types[type];
         else return "";
@@ -1165,7 +1191,7 @@ export interface IBOAHolder {
     /**
      * percentage of holder
      */
-    percentage: number;
+    percentage: string;
 
     /**
      * value of holder

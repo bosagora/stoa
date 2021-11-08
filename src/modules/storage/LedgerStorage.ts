@@ -334,6 +334,7 @@ export class LedgerStorage extends Storages {
             total_reward        BIGINT(20)  UNSIGNED NOT NULL,
             total_fee           BIGINT(20)  NOT NULL,
             total_size          BIGINT(20)  UNSIGNED NOT NULL,
+            circulating_supply  BIGINT(20)  UNSIGNED NOT NULL,
             PRIMARY KEY(block_height)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -1327,15 +1328,16 @@ export class LedgerStorage extends Storages {
             total_received: JSBI,
             total_size: JSBI,
             total_fee: JSBI,
-            total_reward: JSBI
+            total_reward: JSBI,
+            circulating_supply: JSBI
         ): Promise<void> {
             return new Promise<void>((resolve, reject) => {
                 storage
                     .query(
                         `INSERT INTO blocks_stats
-                        (block_height, total_sent, total_received, total_size, total_fee,total_reward)
+                        (block_height, total_sent, total_received, total_size, total_fee,total_reward, circulating_supply)
                     VALUES
-                        (?, ?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ?, ?, ?)`,
                         [
                             height.toString(),
                             total_sent.toString(),
@@ -1343,6 +1345,7 @@ export class LedgerStorage extends Storages {
                             total_size.toString(),
                             total_fee.toString(),
                             total_reward.toString(),
+                            circulating_supply.toString()
                         ],
                         conn
                     )
@@ -1358,6 +1361,7 @@ export class LedgerStorage extends Storages {
         return new Promise<void>((resolve, reject) => {
             (async () => {
                 let total_received = JSBI.BigInt(0);
+                let circulating_supply = JSBI.BigInt(0);
                 let total_reward = JSBI.BigInt(0);
                 let total_sent = JSBI.BigInt(0);
                 let total_fee = JSBI.BigInt(0);
@@ -1380,21 +1384,33 @@ export class LedgerStorage extends Storages {
                                             WHERE
                                                 block_height =?;`;
 
+                const circulating_supply_sql = `SELECT
+                                                circulating_supply
+                                            FROM
+                                            blocks_stats
+                                            WHERE
+                                                block_height = ?;`;
+
                 this.query(total_received_sql, [block.header.height.toString()], conn)
                     .then((row: any) => {
                         switch (row[0].type) {
-                            case OutputType.Payment: {
-                                total_received = JSBI.BigInt(row[0].total_amount);
-                                break;
-                            }
                             case OutputType.Coinbase: {
                                 total_reward = JSBI.BigInt(row[0].total_amount);
                                 break;
                             }
                             default: {
+                                total_received = JSBI.BigInt(row[0].total_amount);
+                                if (Number(block.header.height) === 0) {
+                                    circulating_supply = total_received;
+                                }
                                 break;
                             }
                         }
+                        return this.query(circulating_supply_sql, [Number(block.header.height) - 1], conn);
+                    })
+                    .then((row: any[]) => {
+                        if (row[0])
+                            circulating_supply = JSBI.add(JSBI.BigInt(row[0].circulating_supply), total_reward);
                         return this.query(transaction_stats, [block.header.height.toString()], conn);
                     })
                     .then((row: any) => {
@@ -1408,7 +1424,8 @@ export class LedgerStorage extends Storages {
                             total_received,
                             total_size,
                             total_fee,
-                            total_reward
+                            total_reward,
+                            circulating_supply
                         );
                         resolve();
                     });
@@ -2323,7 +2340,8 @@ export class LedgerStorage extends Storages {
                 P.preimage_hash,
                 ` +
             cur_height +
-            ` as height
+            ` as height,
+            count(*) OVER() AS full_count
             FROM validators V
             LEFT OUTER JOIN preimages P
             ON V.utxo_key = P.utxo_key
@@ -4111,7 +4129,7 @@ export class LedgerStorage extends Storages {
                     blocks B
                     INNER JOIN transactions T ON (B.height = T.block_height)
                     INNER JOIN tx_inputs I ON (T.tx_hash = I.tx_hash)
-                    INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key)
+                    INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key and I.tx_index = S.tx_index)
                 WHERE
                     B.${field} = ? ) as sender_address
             FROM
@@ -4156,8 +4174,13 @@ export class LedgerStorage extends Storages {
     public getBOAStats(): Promise<any[]> {
         const sql = `
                 SELECT MAX(B.height) as height,
+                    MAX(B.time_stamp) as time_stamp,
                     SUM(B.tx_count) as transactions,
 	                SUM(BS.total_reward) as total_reward,
+                    MAX(BS.circulating_supply) as circulating_supply,
+                    (SELECT count(address) from validator_by_block where signed = 1 
+                        AND block_height=(SELECT MAX(block_height) from validator_by_block))
+                        AS active_validator,
                     (SELECT SUM(total_frozen) as total_frozen from accounts) as total_frozen,
                     (SELECT COUNT(DISTINCT address) from validators) as validators
                     FROM
@@ -4176,7 +4199,6 @@ export class LedgerStorage extends Storages {
      */
     public getCoinMarketcap(): Promise<any[]> {
         const sql = `SELECT * FROM marketcap WHERE last_updated_at = (SELECT MAX(last_updated_at) as time FROM marketcap)`;
-
         return this.query(sql, []);
     }
 
@@ -4240,6 +4262,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the .catch is called with an error.
      */
     public getBOAHolders(limit: number, page: number): Promise<any> {
+        const circulating_sql = `SELECT max(circulating_supply) as circulating_supply from blocks_stats;`
         const sql = `
             SELECT
 	            address, tx_count, total_received, total_sent,
@@ -4248,7 +4271,19 @@ export class LedgerStorage extends Storages {
                 accounts
             ORDER BY total_balance DESC, address ASC
             LIMIT ? OFFSET ?`;
-        return this.query(sql, [limit, limit * (page - 1)]);
+        const result: any = {};
+        return new Promise<any[]>((resolve, reject) => {
+            this.query(sql, [limit, limit * (page - 1)])
+                .then((rows: any[]) => {
+                    result.holders = rows;
+                    return this.query(circulating_sql, []);
+                })
+                .then((rows: any[]) => {
+                    result.circulating_supply = rows[0].circulating_supply;
+                    resolve(result);
+                })
+                .catch(reject);
+        });
     }
 
     /**
@@ -4267,6 +4302,24 @@ export class LedgerStorage extends Storages {
             WHERE data_collection_status = ?
             `;
         return this.query(sql, [DataCollectionStatus.PENDING]);
+    }
+
+
+    /**
+     * Get transcation hash
+     * @param utxo UTXO key of the transaction
+     * @returns returns the Promise with requested data
+     * and if an error occurs the .catch is called with an error.
+     */
+    public getTransactionHash(utxo_key: Hash): Promise<any> {
+        const hash = utxo_key.toBinary(Endian.Little);
+        const sql = `
+            SELECT
+	            tx_hash
+                FROM tx_outputs
+                WHERE utxo_key = ?
+            `;
+        return this.query(sql, [hash]);
     }
 
     /**
@@ -4450,6 +4503,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the .catch is called with an error.
      */
     public getBOAHolder(address: string): Promise<any> {
+        const circulating_sql = `SELECT max(circulating_supply) as circulating_supply from blocks_stats;`
         const sql = `
             SELECT
 	            address, tx_count, total_received, total_sent,
@@ -4457,7 +4511,19 @@ export class LedgerStorage extends Storages {
             FROM
                 accounts
             WHERE address = ?`;
-        return this.query(sql, [address]);
+        const result: any = {};
+        return new Promise<any[]>((resolve, reject) => {
+            this.query(sql, [address])
+                .then((rows: any[]) => {
+                    result.holder = rows;
+                    return this.query(circulating_sql, []);
+                })
+                .then((rows: any[]) => {
+                    result.circulating_supply = rows[0].circulating_supply;
+                    resolve(result);
+                })
+                .catch(reject);
+        });
     }
 
     /**

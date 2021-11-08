@@ -242,7 +242,10 @@ class Stoa extends WebService {
                     userAgent: req.headers["user-agent"],
                     accessStatus: res.statusCode !== 200 ? "Denied" : "Granted",
                     bytesTransmitted: res.socket?.bytesWritten,
-                    responseTime: time,
+                    time: `${time / 1000} seconds`,
+                    height: HeightManager.height.toString(),
+                    operation: Operation.Http_request,
+                    responseTime: Number(moment().utc().unix() * 1000),
                 });
             })
         );
@@ -292,6 +295,7 @@ class Stoa extends WebService {
         this.app.get("/proposal/:proposal_id", isBlackList, this.getProposalById.bind(this));
         this.app.get("/validator/reward/:address", isBlackList, this.getValidatorReward.bind(this));
         this.app.get("/convert-to-usd", isBlackList, this.convertToUSD.bind(this));
+        this.app.get("/txhash/:utxo", isBlackList, this.getTransactionHash.bind(this));
 
         // It operates on a private port
         this.private_app.post("/block_externalized", this.postBlock.bind(this));
@@ -405,7 +409,8 @@ class Stoa extends WebService {
                         row.address,
                         new Height(JSBI.BigInt(row.enrolled_at)),
                         new Hash(row.stake, Endian.Little).toString(),
-                        preimage
+                        row.full_count,
+                        preimage,
                     );
                     out_put.push(validator);
                 }
@@ -476,6 +481,7 @@ class Stoa extends WebService {
                         row.address,
                         new Height(JSBI.BigInt(row.enrolled_at)),
                         new Hash(row.stake, Endian.Little).toString(),
+                        row.full_count,
                         preimage
                     );
                     out_put.push(validator);
@@ -818,9 +824,9 @@ class Stoa extends WebService {
         filter_type =
             req.query.type !== undefined
                 ? req.query.type
-                      .toString()
-                      .split(",")
-                      .map((m) => ConvertTypes.toDisplayTxType(m))
+                    .toString()
+                    .split(",")
+                    .map((m) => ConvertTypes.toDisplayTxType(m))
                 : [0, 1, 2, 3];
 
         if (filter_type.find((m) => m < 0) !== undefined) {
@@ -941,9 +947,9 @@ class Stoa extends WebService {
         filter_type =
             req.query.type !== undefined
                 ? req.query.type
-                      .toString()
-                      .split(",")
-                      .map((m) => ConvertTypes.toDisplayTxType(m))
+                    .toString()
+                    .split(",")
+                    .map((m) => ConvertTypes.toDisplayTxType(m))
                 : [0, 1, 2, 3];
 
         if (filter_type.find((m) => m < 0) !== undefined) {
@@ -1090,7 +1096,7 @@ class Stoa extends WebService {
                         utxo: new Hash(elem.utxo, Endian.Little).toString(),
                         signature: new Signature(elem.signature, Endian.Little).toString(),
                         index: elem.in_index,
-                        unlock_age: elem.unlock_age,
+                        unlock_age: ConvertTypes.unlockAgeToString(elem.unlock_age),
                         bytes: elem.bytes.toString("base64"),
                     });
 
@@ -1098,7 +1104,7 @@ class Stoa extends WebService {
                     overview.receivers.push({
                         type: elem.type,
                         address: elem.address,
-                        lock_type: elem.lock_type,
+                        lock_type: ConvertTypes.lockTypeToString(elem.lock_type),
                         amount: elem.amount,
                         utxo: new Hash(elem.utxo, Endian.Little).toString(),
                         index: elem.output_index,
@@ -1267,6 +1273,7 @@ class Stoa extends WebService {
                         total_reward: data[0].total_reward,
                         total_fee: data[0].total_fee,
                         total_size: data[0].total_size,
+                        tx_volume: JSBI.add(JSBI.add(JSBI.BigInt(data[0].total_received), JSBI.BigInt(data[0].total_fee)), JSBI.BigInt(data[0].total_reward)).toString()
                     };
                     res.status(200).send(JSON.stringify(overview));
                 }
@@ -1443,8 +1450,9 @@ class Stoa extends WebService {
                         validators: data[0].validators,
                         frozen_coin: data[0].total_frozen,
                         total_reward: data[0].total_reward,
-                        circulating_supply: 5283535,
-                        active_validators: 155055,
+                        time_stamp: data[0].time_stamp,
+                        circulating_supply: data[0].circulating_supply,
+                        active_validators: data[0].active_validator,
                     };
                     return res.status(200).send(JSON.stringify(boaStats));
                 }
@@ -2200,7 +2208,7 @@ class Stoa extends WebService {
                     if (updated)
                         logger.info(
                             `Update a blockHeader : ${block_header.toString()}, ` +
-                                `block height : ${block_header.height.toString()}`,
+                            `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -2211,7 +2219,7 @@ class Stoa extends WebService {
                     if (put)
                         logger.info(
                             `puts a blockHeader history : ${block_header.toString()}, ` +
-                                `block height : ${block_header.height.toString()}`,
+                            `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -2238,7 +2246,7 @@ class Stoa extends WebService {
                     if (changes)
                         logger.info(
                             `Saved a pre-image utxo : ${pre_image.utxo.toString().substr(0, 18)}, ` +
-                                `hash : ${pre_image.hash.toString()}, pre-image height : ${pre_image.height}`,
+                            `hash : ${pre_image.hash.toString()}, pre-image height : ${pre_image.height}`,
                             {
                                 operation: Operation.db,
                                 height: HeightManager.height.toString(),
@@ -2432,8 +2440,9 @@ class Stoa extends WebService {
                             validators: data[0].validators,
                             frozen_coin: data[0].total_frozen,
                             total_reward: data[0].total_reward,
-                            circulating_supply: 5283535,
-                            active_validators: 155055,
+                            time_stamp: data[0].time_stamp,
+                            circulating_supply: data[0].circulating_supply,
+                            active_validators: data[0].active_validator,
                         };
                         this.socket.io.emit(events.server.latestStats, boaStats);
                         logger.info(`Emitted Updated BOA stats`, {
@@ -2539,14 +2548,14 @@ class Stoa extends WebService {
         const pagination: IPagination = await this.paginate(req, res);
         this.ledger_storage
             .getBOAHolders(pagination.pageSize, pagination.page)
-            .then(async (data: any[]) => {
+            .then(async (data: any) => {
                 if (data.length === 0) {
                     return res.status(204).send(`The data does not exist.`);
                 } else {
                     let exchangeRate = await this.ledger_storage.getExchangeRate();
                     let exchange = new Exchange(exchangeRate);
                     const holderList: IBOAHolder[] = [];
-                    for (const row of data) {
+                    for (const row of data.holders) {
                         holderList.push({
                             address: row.address,
                             tx_count: row.tx_count,
@@ -2556,7 +2565,7 @@ class Stoa extends WebService {
                             total_frozen: row.total_frozen,
                             total_spendable: row.total_spendable,
                             total_balance: row.total_balance,
-                            percentage: 0, // FIX ME static data because of unavailability of real data
+                            percentage: Number((row.total_balance / data.circulating_supply) * 100).toFixed(4),
                             value: exchange.convertAmountToUsd(new Amount(row.total_balance)),
                             full_count: row.full_count,
                         });
@@ -2574,6 +2583,7 @@ class Stoa extends WebService {
                 return res.status(500).send("Failed to data lookup");
             });
     }
+
     /**
      * GET /holder_balance_history/:address
      * Called when a request is received through the `/holder_balance_history/:address` handler
@@ -2702,25 +2712,58 @@ class Stoa extends WebService {
         }
         this.ledger_storage
             .getBOAHolder(address)
-            .then(async (data: any[]) => {
+            .then(async (data: any) => {
                 if (data.length === 0) {
                     return res.status(204).send(`The data does not exist.`);
                 } else {
                     let exchangeRate = await this.ledger_storage.getExchangeRate();
                     let exchange = new Exchange(exchangeRate);
                     const holder: IBOAHolder = {
-                        address: data[0].address,
-                        tx_count: data[0].tx_count,
-                        total_received: data[0].total_received,
-                        total_sent: data[0].total_sent,
-                        total_reward: data[0].total_reward,
-                        total_frozen: data[0].total_frozen,
+                        address: data.holder[0].address,
+                        tx_count: data.holder[0].tx_count,
+                        total_received: data.holder[0].total_received,
+                        total_sent: data.holder[0].total_sent,
+                        total_reward: data.holder[0].total_reward,
+                        total_frozen: data.holder[0].total_frozen,
                         total_spendable: 0,
-                        total_balance: data[0].total_balance,
-                        percentage: 0,
-                        value: exchange.convertAmountToUsd(new Amount(data[0].total_balance)),
+                        total_balance: data.holder[0].total_balance,
+                        percentage: Number((data.holder[0].total_balance / data.circulating_supply) * 100).toFixed(4),
+                        value: exchange.convertAmountToUsd(new Amount(data.holder[0].total_balance)),
                     };
                     return res.status(200).send(JSON.stringify(holder));
+                }
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    status: Status.Error,
+                    responseTime: Number(moment().utc().unix() * 1000),
+                });
+                return res.status(500).send("Failed to data lookup");
+            });
+    }
+
+    /* Get transaction hash
+     * @returns Returns transaction hash according to utxo
+     */
+    public async getTransactionHash(req: express.Request, res: express.Response) {
+        const req_utxo: string = String(req.params.utxo);
+        let utxo: Hash;
+        try {
+            utxo = new Hash(req_utxo);
+        } catch (error) {
+            res.status(400).send(`Invalid value for parameter 'utxo': ${req_utxo}`);
+            return;
+        }
+        this.ledger_storage
+            .getTransactionHash(utxo)
+            .then((data: any) => {
+                if (data === undefined) {
+                    return res.status(500).send("Failed to data lookup");
+                } else {
+                    const tx_hash = new Hash(data[0].tx_hash, Endian.Little).toString();
+                    return res.status(200).send(JSON.stringify(tx_hash));
                 }
             })
             .catch((err) => {
