@@ -14,7 +14,7 @@
 export enum ProposalStatus {
     ONGOING = 'Ongoing',
     VOTING = 'Voting',
-    COUNTING_VOTES = 'Counting votes',
+    COUNTING_VOTES = 'CountingVotes',
     CLOSED = 'Closed',
 }
 
