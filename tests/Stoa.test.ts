@@ -33,6 +33,7 @@ import {
     FakeBlacklistMiddleware,
     sample_data,
     sample_data2,
+    sample_data3,
     sample_preImageInfo,
     TestAgora,
     TestClient,
@@ -119,22 +120,22 @@ describe("Test of Stoa API Server", () => {
     it("Test of the path /validator", async () => {
         const uri = URI(stoa_addr)
             .directory("validator")
-            .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
+            .filename("boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t")
             .setSearch("height", "1");
 
         const fail_uri = URI(stoa_addr)
             .directory("validator")
-            .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku")
+            .filename("boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t")
             .setSearch("height", "99");
 
         await assert.rejects(client.get(fail_uri.toString()), {
             statusMessage:
-                "The validator data not found.'address': (boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku), 'height': (99)",
+                "The validator data not found.'address': (boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t), 'height': (99)",
         });
 
         const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 1);
-        assert.strictEqual(response.data[0].address, "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku");
+        assert.strictEqual(response.data[0].address, "boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t");
         assert.strictEqual(response.data[0].preimage.height, "1");
     });
 
@@ -495,6 +496,17 @@ describe("Test of Stoa API Server", () => {
             lock_height: "0",
         };
         assert.deepStrictEqual(response.data, expected);
+    });
+
+    it("Test of the path /validators Slashed a validator", async () => {
+        const uri = URI(stoa_private_addr).directory("block_externalized");
+        await client.post(uri.toString(), { block: sample_data2 });
+        delay(2000);
+
+        const slash_uri = URI(stoa_addr).directory("validators").setSearch("height", "2");
+        // Slashed a validator
+        const response = await client.get(slash_uri.toString());
+        assert.strictEqual(response.data.length, 5);
     });
 });
 

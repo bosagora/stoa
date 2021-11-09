@@ -21,7 +21,6 @@ import {
     Endian,
     Enrollment,
     Hash,
-    hash,
     hashFull,
     hashMulti,
     Height,
@@ -40,8 +39,6 @@ import {
     Unlock,
     UnspentTxOutput,
     Utils,
-    UTXOManager,
-    VarInt,
 } from "boa-sdk-ts";
 import bigDecimal from "js-big-decimal";
 import moment from "moment";
@@ -67,6 +64,7 @@ import { logger } from "../common/Logger";
 import { Operation, Status } from "../common/LogOperation";
 import { Storages } from "./Storages";
 import { TransactionPool } from "./TransactionPool";
+
 /**
  * The class that inserts and reads the ledger into the database.
  */
@@ -256,7 +254,7 @@ export class LedgerStorage extends Storages {
             preimage_height     INTEGER     NOT NULL,
             preimage_hash       TINYBLOB    NOT NULL,
             slashed             INTEGER,
-            slash_height        INTEGER,
+            slashed_height      INTEGER,
             PRIMARY KEY(enrolled_at, utxo_key(64))
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -269,7 +267,7 @@ export class LedgerStorage extends Storages {
             signed              INTEGER     NOT NULL,
             slashed             INTEGER     NOT NULL,
             PRIMARY KEY(block_height, address(64), utxo_key(64))
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS payloads (
             tx_hash             TINYBLOB    NOT NULL,
@@ -919,15 +917,92 @@ export class LedgerStorage extends Storages {
             });
         }
 
+        function getBlockPreimages(storage: LedgerStorage, height: JSBI, utxo_key: Hash): Promise<any[]> {
+            const sql = `SELECT
+                            block_height,
+                            utxo_key,
+                            preimage_hash,
+                            address
+                        FROM
+                            preimages
+                        WHERE
+                            block_height = ? AND utxo_key = ?
+                        ORDER BY utxo_key ASC`;
+
+            return storage.query(sql, [height.toString(), utxo_key.toBinary(Endian.Little)], conn);
+        }
+
+        function updateValidatorSlashing(storage: LedgerStorage, height: Height, utxo_key: Hash, enrolled_at: Height) {
+            return new Promise<void>((resolve, reject) => {
+                storage
+                    .query(
+                        `UPDATE validators
+                            SET slashed = ? ,
+                            slashed_height = ?
+                            WHERE utxo_key = ? AND enrolled_at = ?`,
+                        [
+                            ValidatorStatus.SLASHED,
+                            height.value.toString(),
+                            utxo_key.toBinary(Endian.Little),
+                            enrolled_at,
+                        ],
+                        conn
+                    )
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+            });
+        }
+
         return new Promise<void>((resolve, reject) => {
             (async () => {
                 const validators: any[] = await this.getValidatorsAPI(block.header.height, null, conn);
+                if (block.header.preimages.length !== block.header.validators.length) {
+                    logger.error("The number of validators and the number of pre-images do not match.", {
+                        operation: Operation.block_sync,
+                        height: block.header.height.toString(),
+                        status: Status.Error,
+                        responseTime: Number(moment().utc().unix() * 1000),
+                    });
+                    resolve();
+                    return;
+                }
+
                 for (let idx = 0; idx < block.header.preimages.length; idx++) {
                     try {
-                        if (
-                            undefined !== validators[idx] &&
-                            block.header.preimages[idx] !== new Hash(Buffer.alloc(Hash.Width))
-                        ) {
+                        const pre_preimage: any[] = await getBlockPreimages(
+                            this,
+                            JSBI.subtract(block.header.height.value, JSBI.BigInt(1)),
+                            new Hash(validators[idx].utxo_key, Endian.Little)
+                        );
+
+                        // Compare hashing the previous block pre-images with the pre-images
+                        if (pre_preimage.length > 0 && block.header.height.value >= validators[idx].enrolled_at + 2) {
+                            const pre_preimage_hash: Hash = new Hash(pre_preimage[0].preimage_hash, Endian.Little);
+                            const preimage_hash: Hash = hashFull(block.header.preimages[idx]);
+                            if (Buffer.compare(pre_preimage_hash.data, preimage_hash.data) > 0) {
+                                logger.error("Verification failed of the previous pre-image and the pre-image.", {
+                                    operation: Operation.block_sync,
+                                    height: block.header.height.toString(),
+                                    status: Status.Error,
+                                    responseTime: Number(moment().utc().unix() * 1000),
+                                });
+                                resolve();
+                                break;
+                            }
+                        }
+
+                        if (block.header.preimages[idx].isNull()) {
+                            await updateValidatorSlashing(
+                                this,
+                                new Height(block.header.height.value),
+                                new Hash(validators[idx].utxo_key, Endian.Little),
+                                validators[idx].enrolled_at
+                            );
+                        } else {
                             await save_preimage(
                                 this,
                                 block.header.height,
@@ -2366,7 +2441,9 @@ export class LedgerStorage extends Storages {
             AND ` +
             cur_height +
             ` = P.block_height
-            WHERE 1 = 1
+            WHERE (V.slashed_height is null OR V.slashed_height >= ` +
+            cur_height +
+            `)
             AND V.enrolled_at >= (` +
             cur_height +
             ` - ?)
@@ -2979,134 +3056,30 @@ export class LedgerStorage extends Storages {
             });
         }
 
-        function updateValidatorSlashing(storage: LedgerStorage, height: Height, address: string, enrolled_at: Height) {
-            return new Promise<void>((resolve, reject) => {
-                storage
-                    .query(
-                        `UPDATE validators
-                    SET slashed = ? ,
-                    slash_height = ?
-                    WHERE address = ? AND enrolled_at = ?`,
-                        [ValidatorStatus.SLASHED, height.value.toString(), address, enrolled_at],
-                        conn
-                    )
-                    .then(() => {
-                        resolve();
-                    })
-                    .catch((err) => {
-                        reject(err);
-                    });
-            });
-        }
-
-        function getBlockPreimages(storage: LedgerStorage, height: Height): Promise<any[]> {
-            const cur_height: string = height.toString();
-
-            const sql = `SELECT
-                            block_height,
-                            utxo_key,
-                            preimage_hash,
-                            address
-                        FROM
-                            preimages
-                        WHERE
-                            block_height = ?`;
-
-            return storage.query(sql, [cur_height], conn);
-        }
-
-        function getValidatorForCycle(storage: LedgerStorage, height: Height): Promise<any[]> {
-            const cur_height: string = height.toString();
-
-            const sql =
-                `SELECT V.address,
-                V.enrolled_at,
-                V.address,
-                V.utxo_key,
-                V.utxo_key as stake,
-                V.amount as stake_amount,
-                P.block_height,
-                P.block_height as preimage_height,
-                P.preimage_hash,
-                ` +
-                cur_height +
-                ` as height
-            FROM validators V
-            LEFT OUTER JOIN preimages P
-            ON V.address = P.address
-            AND V.utxo_key = P.utxo_key
-            AND ` +
-                cur_height +
-                ` = P.block_height
-            WHERE 1 = 1
-            AND V.slashed IS NULL
-            AND V.enrolled_at >= (` +
-                cur_height +
-                ` - ?)
-            AND V.enrolled_at < ` +
-                cur_height;
-            `
-            `;
-
-            return storage.query(sql, [storage.validator_cycle]);
-        }
-
         return new Promise<void>((resolve, reject) => {
             (async () => {
-                const signedValidators: IValidator[] = [];
-                const unsignedValidators: IValidator[] = [];
-                let slashedValidators: IValidator[] = [];
-
-                const cycleValidators: any[] = await getValidatorForCycle(this, block.header.height);
-                const block_preimages: any[] = await getBlockPreimages(this, block.header.height);
-
-                slashedValidators = cycleValidators.filter(
-                    (v) => !block_preimages.some((v1) => v.address === v1.address)
-                );
-
-                for (let i = 0; i < slashedValidators.length; i++) {
-                    await updateValidatorSlashing(
-                        this,
-                        block.header.height,
-                        slashedValidators[i].address,
-                        slashedValidators[i].enrolled_at
-                    );
-                }
-
-                slashedValidators.forEach((e) => {
-                    cycleValidators.splice(cycleValidators.indexOf(e), 1);
-                });
+                const cycleValidators: any[] = await this.getValidatorsAPI(block.header.height, null, conn);
 
                 const bitMask = BitMask.fromString(block.header.validators.toString());
                 for (let i = 0; i < bitMask.length; i++) {
-                    bitMask.get(i)
-                        ? signedValidators.push(cycleValidators[i])
-                        : unsignedValidators.push(cycleValidators[i]);
+                    if (bitMask.get(i))
+                        save_block_validator(
+                            this,
+                            block.header.height,
+                            cycleValidators[i],
+                            SignStatus.SIGNED,
+                            ValidatorStatus.ACTIVE
+                        );
+                    else {
+                        save_block_validator(
+                            this,
+                            block.header.height,
+                            cycleValidators[i],
+                            SignStatus.UNSIGNED,
+                            cycleValidators[i].slashed ? ValidatorStatus.SLASHED : ValidatorStatus.ACTIVE
+                        );
+                    }
                 }
-
-                signedValidators.forEach((element) => {
-                    save_block_validator(this, block.header.height, element, SignStatus.SIGNED, ValidatorStatus.ACTIVE);
-                });
-
-                unsignedValidators.forEach((element) => {
-                    save_block_validator(
-                        this,
-                        block.header.height,
-                        element,
-                        SignStatus.UNSIGNED,
-                        ValidatorStatus.ACTIVE
-                    );
-                });
-
-                slashedValidators.forEach((element) => {
-                    save_block_validator(
-                        this,
-                        block.header.height,
-                        element,
-                        SignStatus.UNSIGNED,
-                        ValidatorStatus.SLASHED
-                    );
-                });
                 resolve();
             })();
         });

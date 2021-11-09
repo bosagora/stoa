@@ -226,6 +226,7 @@ CREATE TABLE IF NOT EXISTS "utxos" (
 |  preimage_hash    | TINYBLOB  |    | Y        |          | The hash of the preimage|
 |  signed           | INTEGER   |    |          |          | The validator sign status    |
 |  slashed          | INTEGER   |    |          |          | The validator slash status   |
+| slashed_height    | INTEGER   |    |          |          | The validator slashed_height |
 
 ### _Create Script_
 
@@ -239,6 +240,7 @@ CREATE TABLE IF NOT EXISTS "validators" (
     "preimage_hash"         TINYBLOB   NOT NULL,
     "signed"                INTEGER,
     "slashed"               INTEGER,
+    "slashed_height"        INTEGER,
     PRIMARY KEY("enrolled_at","utxo_key(64)")
 )
 ```
