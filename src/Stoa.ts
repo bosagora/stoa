@@ -2125,16 +2125,17 @@ class Stoa extends WebService {
             }
 
             if (stored_data.type === "block") {
-                const block = stored_data.data;
+                const block_data = stored_data.data;
 
                 try {
-                    const height = Stoa.getJsonBlockHeight(block);
+                    const height = Stoa.getJsonBlockHeight(block_data);
                     let expected_height = await this.ledger_storage.getExpectedBlockHeight();
 
                     if (JSBI.equal(height.value, expected_height.value)) {
                         // The normal case
                         // Save a block just received
-                        await this.ledger_storage.putBlocks(Block.reviver("", block));
+                        const block = Block.reviver("", block_data);
+                        await this.ledger_storage.putBlocks(block);
                         HeightManager.height = new Height(height.toString());
                         logger.info(`Saved a block with block height of ${height.toString()}`, {
                             operation: Operation.db,
@@ -2148,7 +2149,7 @@ class Stoa extends WebService {
                     } else if (JSBI.greaterThan(height.value, expected_height.value)) {
                         // Recovery is required for blocks that are not received.
                         while (true) {
-                            if (await this.recoverBlock(block, height, expected_height)) break;
+                            if (await this.recoverBlock(block_data, height, expected_height)) break;
                             expected_height = await this.ledger_storage.getExpectedBlockHeight();
                         }
                     } else {
