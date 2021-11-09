@@ -13,7 +13,7 @@
 
 *******************************************************************************/
 
-import { Height, JSBI } from "boa-sdk-ts";
+import { Hash, Height, JSBI } from "boa-sdk-ts";
 
 import { Socket } from "socket.io";
 
@@ -111,12 +111,12 @@ export class WalletWatcherIO {
     /**
      * When the account's UTXO is consumed, an event occurs
      */
-    public onTransactionAccountCreated(address: string) {
+    public onTransactionAccountCreated(address: string, tx_hash: Hash, type: string) {
         const sockets = this.tables.get(address);
         if (sockets !== undefined) {
             for (const client of sockets) {
                 try {
-                    client.emit("new_tx_acc", { address });
+                    client.emit("new_tx_acc", { address, tx_hash: tx_hash.toString(), type });
                 } catch (e) {
                     //
                 }

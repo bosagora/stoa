@@ -8,6 +8,7 @@ import {
     hashFull,
     Height,
     JSBI,
+    LockType,
     PreImageInfo,
     PublicKey,
     Signature,
@@ -2059,6 +2060,7 @@ class Stoa extends WebService {
                                 await this.ledger_storage.putBlocks(data);
                                 await this.emitBlock(data);
                                 await this.emitBoaStats();
+                                await this.emitWalletEventOnCreateBlock(data);
                                 expected_height.value = JSBI.add(expected_height.value, JSBI.BigInt(1));
                                 HeightManager.height = new Height(data.header.height.toString());
                                 logger.info(`Recovered a block with block height of ${data.header.height.toString()}`, {
@@ -2106,6 +2108,25 @@ class Stoa extends WebService {
         });
     }
 
+    private async emitWalletEventOnCreateBlock(block: Block) {
+        for (const tx of block.txs) {
+            const tx_hash = hashFull(tx);
+            const addresses: string[] = [];
+            if (tx.inputs.length > 0) {
+                const utxos = tx.inputs.map((m: TxInput) => m.utxo);
+                const res = await this.ledger_storage.getAddressesOfUTXOs(utxos);
+                addresses.push(...res.map((m) => m.address));
+            }
+            tx.outputs
+                .filter((m) => m.lock.type === LockType.Key)
+                .forEach((m) => {
+                    const address = new PublicKey(m.lock.bytes).toString();
+                    if (addresses.findIndex((n) => n === address) < 0) addresses.push(address);
+                });
+            addresses.forEach((m) => this.wallet_watcher.onTransactionAccountCreated(m, tx_hash, "confirm"));
+        }
+    }
+
     /**
      * Process pending data and put it into the storage.
      *
@@ -2145,6 +2166,7 @@ class Stoa extends WebService {
                         });
                         await this.emitBlock(block);
                         await this.emitBoaStats();
+                        await this.emitWalletEventOnCreateBlock(block);
                     } else if (JSBI.greaterThan(height.value, expected_height.value)) {
                         // Recovery is required for blocks that are not received.
                         while (true) {
@@ -2240,9 +2262,14 @@ class Stoa extends WebService {
                     const changes = await this.ledger_storage.putTransactionPool(tx);
 
                     if (changes) {
-                        const utxos = tx.inputs.map((m: TxInput) => m.utxo);
-                        const addresses = await this.ledger_storage.getAddressesOfUTXOs(utxos);
-                        addresses.forEach((m) => this.wallet_watcher.onTransactionAccountCreated(m.address));
+                        if (tx.inputs.length > 0) {
+                            const tx_hash = hashFull(tx);
+                            const utxos = tx.inputs.map((m: TxInput) => m.utxo);
+                            const addresses = await this.ledger_storage.getAddressesOfUTXOs(utxos);
+                            addresses.forEach((m) =>
+                                this.wallet_watcher.onTransactionAccountCreated(m.address, tx_hash, "pending")
+                            );
+                        }
                         logger.info(
                             `Saved a transaction hash : ${hashFull(tx).toString()}, ` + `data : ` + stored_data.data,
                             {

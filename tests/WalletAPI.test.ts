@@ -704,7 +704,7 @@ describe("Test of Stoa API for the wallet with `sample_data`", function () {
 });
 
 describe("Test of the path /wallet/balance:address for payment", function () {
-    this.timeout(5000);
+    this.timeout(10000);
     const agora_addr: URL = new URL("http://localhost:2901");
     const stoa_addr: URL = new URL("http://localhost:3901");
     const stoa_private_addr: URL = new URL("http://localhost:4901");
@@ -1311,9 +1311,10 @@ describe("Test of the path /wallet/balance:address for double spending", functio
 
 describe("Test the message transmission module when the balance changes and new block are created", function () {
     this.timeout(20000);
-    const agora_addr: URL = new URL("http://localhost:2905");
-    const stoa_addr: URL = new URL("http://localhost:3905");
-    const stoa_private_addr: URL = new URL("http://localhost:4905");
+    const port = 5000 + Math.floor(Math.random() * 1000);
+    const agora_addr: URL = new URL(`http://localhost:${port.toString()}`);
+    const stoa_addr: URL = new URL(`http://localhost:${(port + 1000).toString()}`);
+    const stoa_private_addr: URL = new URL(`http://localhost:${(port + 2000).toString()}`);
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
@@ -1403,9 +1404,6 @@ describe("Test the message transmission module when the balance changes and new 
     it("Check the received message when the balance changes and new block are created", async () => {
         const socket = io(stoa_addr.toString());
         const received_data: any[] = [];
-        socket.on("new_block", (data: { height: number }) => {
-            received_data.push(data);
-        });
         socket.on("new_tx_acc", (data: { address: string }) => {
             received_data.push(data);
         });
@@ -1464,7 +1462,12 @@ describe("Test the message transmission module when the balance changes and new 
         await delay(1000);
 
         // address_3 isn't subscribed
-        const expected = [{ address: address_2 }, { address: address_4 }, { height: 3 }];
+        const expected = [
+            { address: address_2, tx_hash: hashFull(txs[0]).toString(), type: "pending" },
+            { address: address_4, tx_hash: hashFull(txs[2]).toString(), type: "pending" },
+            { address: address_2, tx_hash: hashFull(txs[0]).toString(), type: "confirm" },
+            { address: address_4, tx_hash: hashFull(txs[2]).toString(), type: "confirm" },
+        ];
 
         assert.deepStrictEqual(received_data, expected);
 
