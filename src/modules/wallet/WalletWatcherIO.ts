@@ -109,23 +109,6 @@ export class WalletWatcherIO {
     }
 
     /**
-     * When a new block is created, an event occurs.
-     * @param height
-     */
-    public onBlockCreated(height: Height) {
-        const values = this.tables.get("block");
-        if (values !== undefined) {
-            for (const elem of values) {
-                try {
-                    elem.emit("new_block", { height: JSBI.toNumber(height.value) });
-                } catch (e) {
-                    //
-                }
-            }
-        }
-    }
-
-    /**
      * When the account's UTXO is consumed, an event occurs
      */
     public onTransactionAccountCreated(address: string) {
