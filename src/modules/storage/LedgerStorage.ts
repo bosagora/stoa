@@ -2201,7 +2201,7 @@ export class LedgerStorage extends Storages {
     public getAddressesOfUTXOs(utxos: Hash[]) {
         const u = utxos.map((m) => `x'${m.toBinary(Endian.Little).toString("hex")}'`);
         const sql_utxo = `SELECT
-                O.address
+                DISTINCT O.address
             FROM
                 tx_outputs O
             WHERE
