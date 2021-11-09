@@ -2145,7 +2145,6 @@ class Stoa extends WebService {
                         });
                         await this.emitBlock(block);
                         await this.emitBoaStats();
-                        this.wallet_watcher.onBlockCreated(height);
                     } else if (JSBI.greaterThan(height.value, expected_height.value)) {
                         // Recovery is required for blocks that are not received.
                         while (true) {
