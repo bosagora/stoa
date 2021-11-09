@@ -919,6 +919,7 @@ describe("Test for the creation a proposal and the voting", () => {
         await createDummyBlock(17);
         await createDummyBlock(18);
         await createDummyBlock(19);
+        await block_manager.waitFor(19, boa_client);
     });
 
     it("Test for Voting End Trigger", async () => {
@@ -987,7 +988,7 @@ describe("Test for the creation a proposal and the voting", () => {
     it("21-22 Create a dummy block", async () => {
         await createDummyBlock(21);
         await createDummyBlock(22);
-        await delay(200);
+        await block_manager.waitFor(22, boa_client);
     });
 
     it("Test case for ballot types.[No, Blank, Yes]", async () => {
@@ -1151,6 +1152,7 @@ describe("Test for the creation a proposal and the voting", () => {
 
     it("2. Create a dummy block", async () => {
         await createDummyBlock(2);
+        await block_manager.waitFor(2, boa_client);
     });
 
     it("3. Create a proposal fee data and store to block", async () => {
@@ -1184,6 +1186,7 @@ describe("Test for the creation a proposal and the voting", () => {
 
     it("4. Create a dummy block", async () => {
         await createDummyBlock(4);
+        await block_manager.waitFor(4, boa_client);
     });
 
     it("5. Create a proposal", async () => {
@@ -1248,6 +1251,7 @@ describe("Test for the creation a proposal and the voting", () => {
         await createDummyBlock(7);
         await createDummyBlock(8);
         await createDummyBlock(9);
+        await block_manager.waitFor(9, boa_client);
     });
 
     it("10. Vote", async () => {
@@ -1339,6 +1343,7 @@ describe("Test for the creation a proposal and the voting", () => {
     it("14-15 Create a dummy block", async () => {
         await createDummyBlock(14);
         await createDummyBlock(15);
+        await block_manager.waitFor(15, boa_client);
     });
 
 
@@ -1347,6 +1352,7 @@ describe("Test for the creation a proposal and the voting", () => {
         await createDummyBlock(17);
         await createDummyBlock(18);
         await createDummyBlock(19);
+        await block_manager.waitFor(19, boa_client);
     });
 
     it("Create a block with a height is 20 and the block has 5 enrollments", async () => {
@@ -1388,7 +1394,7 @@ describe("Test for the creation a proposal and the voting", () => {
     it("21-22 Create a dummy block", async () => {
         await createDummyBlock(21);
         await createDummyBlock(22);
-        await delay(200);
+        await block_manager.waitFor(22, boa_client);
     });
 
     it("Test case for ballots", async () => {
