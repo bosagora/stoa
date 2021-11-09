@@ -20,10 +20,10 @@ export const Operation = {
     coin_market_data_sync: "Coin Market Cap Operation",
     votera_request: "Votera Proposal request",
     Http_request: "HTTP Request",
-    proposal_result_computation: "proposal result compution"
+    proposal_result_computation: "proposal result compution",
 };
 
 export const Status = {
     Success: "Success",
     Error: "Error",
-}
+};
