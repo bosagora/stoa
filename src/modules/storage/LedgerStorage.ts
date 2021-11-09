@@ -4038,7 +4038,7 @@ export class LedgerStorage extends Storages {
                         INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
                         INNER JOIN blocks B ON (B.height = T.block_height)
                     GROUP BY tx_hash
-		            ORDER BY time_stamp DESC
+		            ORDER BY time_stamp DESC, tx_hash ASC
                     limit ? offset ?
                 ) AS transactions;`;
         return this.query(sql, [limit, limit * (page - 1)]);
