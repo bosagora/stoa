@@ -37,6 +37,7 @@ import {
     Transaction,
     TxBuilder,
     TxPayloadFee,
+    UnspentTxOutput,
     Utils,
     UTXOProvider,
 } from "boa-sdk-ts";
@@ -45,6 +46,9 @@ import { SmartBuffer } from "smart-buffer";
 import URI from "urijs";
 import { URL } from "url";
 import { IDatabaseConfig } from "../src/modules/common/Config";
+import { ProposalResult, ProposalStatus } from "../src/modules/common/enum";
+import { VoteraService } from "../src/modules/service/VoteraService";
+import { IMetaData, IPendingProposal, IProposal, IValidatorByBlock } from "../src/Types";
 import { MockDBConfig } from "./TestConfig";
 import {
     BlockManager,
@@ -61,9 +65,113 @@ import {
 
 import * as assert from "assert";
 import moment from "moment";
-import { ProposalResult, ProposalStatus } from "../src/modules/common/enum";
-import { VoteraService } from "../src/modules/service/VoteraService";
-import { IMetaData, IPendingProposal, IProposal, IValidatorByBlock } from "../src/Types";
+
+describe("Test BlockManager", () => {
+    let key_position = 6;
+    let gen_keypair: KeyPair;
+    let block_manager: BlockManager;
+
+    async function createEnrollment(): Promise<{ enrollments: Enrollment[]; tx: Transaction }> {
+        const add_validators: KeyPair[] = [];
+        add_validators.push(ValidatorKey.keys(key_position));
+        key_position++;
+
+        // One validator requests UTXO to freeze 40,000 boa each.
+        const utxos: UnspentTxOutput[] = [
+            {
+                utxo: new Hash(Buffer.from(SodiumHelper.sodium.randombytes_buf(Hash.Width))),
+                type: OutputType.Payment,
+                unlock_height: JSBI.BigInt(0),
+                amount: BOA(50_000),
+                height: JSBI.BigInt(1),
+                time: 0,
+                lock_type: 0,
+                lock_bytes: gen_keypair.address.data.toString("base64"),
+            },
+        ];
+
+        // Create a frozen transaction
+        const tx = block_manager.addValidators(add_validators, utxos, gen_keypair);
+        const enrollments: Enrollment[] = [];
+
+        // Create new validator's enrollment data.
+        const new_enrolls = block_manager.getNewEnrollment();
+        assert.strictEqual(new_enrolls.length, 1);
+        enrollments.push(...new_enrolls);
+
+        // Create enrollment data of validators who need re-enrollment among already registered validators.
+        const re_enrolls = block_manager.getReEnrollment();
+
+        enrollments.push(...re_enrolls);
+
+        // Arrange the enrollment data in ascending order of UTXO.
+        enrollments.sort((a, b) => {
+            return Utils.compareBuffer(a.utxo_key.data, b.utxo_key.data);
+        });
+        return { enrollments, tx };
+    }
+
+    before("Wait for the package libsodium to finish loading", async () => {
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
+        await SodiumHelper.init();
+    });
+
+    before("Create component", async () => {
+        block_manager = new BlockManager();
+        gen_keypair = KeyPair.fromSeed(new SecretKey("SDN7BBGE6Z6OQM3K4PACLTZUJ5QX4AY4QPDQ2JJ2JCFWCG2OIYYALIRY"));
+    });
+
+    it("Create a block 1 - Dummy", async () => {
+        const new_block = block_manager.saveBlock([], []);
+        const validators_simulation = block_manager.getValidators(block_manager.getLastBlockHeight());
+        assert.strictEqual(new_block.header.height.toString(), "1");
+        assert.strictEqual(new_block.header.validators.length, 6);
+        assert.strictEqual(validators_simulation.length, new_block.header.validators.length);
+    });
+
+    it("Create a block 2 - Add one enrollment", async () => {
+        const enroll = await createEnrollment();
+        const new_block = block_manager.saveBlock([enroll.tx], enroll.enrollments);
+        const validators_simulation = block_manager.getValidators(block_manager.getLastBlockHeight());
+        assert.strictEqual(new_block.header.height.toString(), "2");
+        assert.strictEqual(new_block.header.validators.length, 6);
+        assert.strictEqual(validators_simulation.length, new_block.header.validators.length);
+    });
+
+    it("Create a block 3 - Add one enrollment", async () => {
+        const enroll = await createEnrollment();
+        const new_block = block_manager.saveBlock([enroll.tx], enroll.enrollments);
+        const validators_simulation = block_manager.getValidators(block_manager.getLastBlockHeight());
+        assert.strictEqual(new_block.header.height.toString(), "3");
+        assert.strictEqual(new_block.header.validators.length, 7);
+        assert.strictEqual(validators_simulation.length, new_block.header.validators.length);
+    });
+
+    it("Create a block 4 - Dummy", async () => {
+        const new_block = block_manager.saveBlock([], []);
+        const validators_simulation = block_manager.getValidators(block_manager.getLastBlockHeight());
+        assert.strictEqual(new_block.header.height.toString(), "4");
+        assert.strictEqual(new_block.header.validators.length, 8);
+        assert.strictEqual(validators_simulation.length, new_block.header.validators.length);
+    });
+
+    it("Create a block 5 - Slash one validator", async () => {
+        block_manager.removeValidator(ValidatorKey.keys(0));
+        const new_block = block_manager.saveBlock([], []);
+        const validators_simulation = block_manager.getValidators(block_manager.getLastBlockHeight());
+        assert.strictEqual(new_block.header.height.toString(), "5");
+        assert.strictEqual(new_block.header.validators.length, 8);
+        assert.strictEqual(validators_simulation.length, new_block.header.validators.length);
+    });
+
+    it("Create a block 6 - Slash one validator", async () => {
+        const new_block = block_manager.saveBlock([], []);
+        const validators_simulation = block_manager.getValidators(block_manager.getLastBlockHeight());
+        assert.strictEqual(new_block.header.height.toString(), "6");
+        assert.strictEqual(new_block.header.validators.length, 7);
+        assert.strictEqual(validators_simulation.length, new_block.header.validators.length);
+    });
+});
 
 describe("Test for the addition of validators", () => {
     const agora_addr: URL = new URL("http://localhost:2861");
@@ -267,8 +375,7 @@ describe("Test for the creation a proposal and the voting", () => {
     let proposal_fee_destination: PublicKey;
 
     async function createDummyBlock(expected_block_height: number) {
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([], [], bits);
+        const new_block = block_manager.saveBlock([], []);
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
         await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
@@ -376,8 +483,7 @@ describe("Test for the creation a proposal and the voting", () => {
         });
 
         const tx = builder.sign(OutputType.Payment, BOA(10));
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([tx], [], bits);
+        const new_block = block_manager.saveBlock([tx], []);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -410,8 +516,7 @@ describe("Test for the creation a proposal and the voting", () => {
 
         tx_hash_proposal_fee = hashFull(tx);
 
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([tx, enroll.tx], enroll.enrollments, bits);
+        const new_block = block_manager.saveBlock([tx, enroll.tx], enroll.enrollments);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -422,8 +527,7 @@ describe("Test for the creation a proposal and the voting", () => {
 
     it("4. Create a block with 1 enrollment", async () => {
         let enroll = await createEnrollment();
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([enroll.tx], enroll.enrollments, bits);
+        const new_block = block_manager.saveBlock([enroll.tx], enroll.enrollments);
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
         await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
@@ -479,8 +583,7 @@ describe("Test for the creation a proposal and the voting", () => {
 
         const tx = builder.sign(OutputType.Payment, tx_total_fee);
 
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([tx, enroll.tx], enroll.enrollments, bits);
+        const new_block = block_manager.saveBlock([tx, enroll.tx], enroll.enrollments);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -504,8 +607,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const tx = await vote.CreateVote();
         assert.ok(tx !== undefined);
 
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([tx], [], bits);
+        const new_block = block_manager.saveBlock([tx], []);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -527,8 +629,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const tx = await vote.CreateVote();
         assert.ok(tx !== undefined);
 
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([tx], [], bits);
+        const new_block = block_manager.saveBlock([tx], []);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -801,8 +902,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const tx = await vote.CreateVote();
         assert.ok(tx !== undefined);
 
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([tx], [], bits);
+        const new_block = block_manager.saveBlock([tx], []);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -820,8 +920,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const tx = await vote.CreateVote();
         assert.ok(tx !== undefined);
 
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([tx], [], bits);
+        const new_block = block_manager.saveBlock([tx], []);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -839,8 +938,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const tx = await vote.CreateVote();
         assert.ok(tx !== undefined);
 
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([tx], [], bits);
+        const new_block = block_manager.saveBlock([tx], []);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -863,8 +961,7 @@ describe("Test for the creation a proposal and the voting", () => {
                 txs.push(tx);
             })
         );
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock(txs, [], bits);
+        const new_block = block_manager.saveBlock(txs, []);
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
         await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
@@ -881,8 +978,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const tx = await vote.CreateVote();
         assert.ok(tx !== undefined);
 
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([tx], [], bits);
+        const new_block = block_manager.saveBlock([tx], []);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -900,8 +996,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const tx = await vote.CreateVote();
         assert.ok(tx !== undefined);
 
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([tx], [], bits);
+        const new_block = block_manager.saveBlock([tx], []);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -962,7 +1057,6 @@ describe("Test for the creation a proposal and the voting", () => {
         // Create a frozen transaction
         const tx = block_manager.addValidators(add_validators, utxos, gen_keypair);
         const enrollments: Enrollment[] = [];
-        const bits = block_manager.getBitMask();
 
         // Create new validator's enrollment data.
         enrollments.push(...block_manager.getNewEnrollment());
@@ -976,7 +1070,7 @@ describe("Test for the creation a proposal and the voting", () => {
         });
 
         // Create a new block.
-        const new_block = block_manager.saveBlock([tx], enrollments, bits);
+        const new_block = block_manager.saveBlock([tx], enrollments);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -1060,8 +1154,7 @@ describe("Test for the creation a proposal and the voting", () => {
     let proposal_fee_destination: PublicKey;
 
     async function createDummyBlock(expected_block_height: number) {
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([], [], bits);
+        const new_block = block_manager.saveBlock([], []);
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
         await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
@@ -1137,8 +1230,7 @@ describe("Test for the creation a proposal and the voting", () => {
         });
 
         const tx = builder.sign(OutputType.Payment, BOA(10));
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([tx], [], bits);
+        const new_block = block_manager.saveBlock([tx], []);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -1171,8 +1263,7 @@ describe("Test for the creation a proposal and the voting", () => {
 
         tx_hash_proposal_fee = hashFull(tx);
 
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([tx], [], bits);
+        const new_block = block_manager.saveBlock([tx], []);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -1233,8 +1324,7 @@ describe("Test for the creation a proposal and the voting", () => {
 
         const tx = builder.sign(OutputType.Payment, tx_total_fee);
 
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([tx], [], bits);
+        const new_block = block_manager.saveBlock([tx], []);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -1260,8 +1350,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const tx = await vote.CreateVote();
         assert.ok(tx !== undefined);
 
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([tx], [], bits);
+        const new_block = block_manager.saveBlock([tx], []);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -1286,8 +1375,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const tx = await vote.CreateVote();
         assert.ok(tx !== undefined);
 
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([tx], [], bits);
+        const new_block = block_manager.saveBlock([tx], []);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -1305,8 +1393,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const tx = await vote.CreateVote();
         assert.ok(tx !== undefined);
 
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([tx], [], bits);
+        const new_block = block_manager.saveBlock([tx], []);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -1324,8 +1411,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const tx = await vote.CreateVote();
         assert.ok(tx !== undefined);
 
-        const bits = block_manager.getBitMask();
-        const new_block = block_manager.saveBlock([tx], [], bits);
+        const new_block = block_manager.saveBlock([tx], []);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
@@ -1362,7 +1448,6 @@ describe("Test for the creation a proposal and the voting", () => {
         // Create a frozen transaction
         const tx = block_manager.addValidators(add_validators, utxos, gen_keypair);
         const enrollments: Enrollment[] = [];
-        const bits = block_manager.getBitMask();
 
         // Create new validator's enrollment data.
         enrollments.push(...block_manager.getNewEnrollment());
@@ -1376,7 +1461,7 @@ describe("Test for the creation a proposal and the voting", () => {
         });
 
         // Create a new block.
-        const new_block = block_manager.saveBlock([tx], enrollments, bits);
+        const new_block = block_manager.saveBlock([tx], enrollments);
 
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });

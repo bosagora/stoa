@@ -1364,15 +1364,16 @@ export interface IPreImage {
     height: number;
 }
 
-export enum ValdatorAction {
+export enum ValidatorAction {
     ALREADY_EXIST,
     ADD,
+    SLASHING,
     REMOVE,
 }
 
 export interface IValidatorAggregate {
     validator: KeyPair;
-    action: ValdatorAction;
+    action: ValidatorAction;
 }
 
 /**
@@ -1657,6 +1658,7 @@ export class BlockManager {
 
     private enrolled_validators: ValidatorAtHeight;
     private added_validators: ValidatorAtHeight;
+    private slashed_validators: ValidatorAtHeight;
     private removed_validators: ValidatorAtHeight;
 
     constructor() {
@@ -1672,6 +1674,7 @@ export class BlockManager {
 
         this.enrolled_validators = new ValidatorAtHeight();
         this.added_validators = new ValidatorAtHeight();
+        this.slashed_validators = new ValidatorAtHeight();
         this.removed_validators = new ValidatorAtHeight();
 
         iota(0, 6).forEach((n) => {
@@ -1762,25 +1765,26 @@ export class BlockManager {
     public removeValidator(validator: KeyPair) {
         const found = this.lastedValidators.findIndex((m) => PublicKey.equal(m.address, validator.address));
         if (found >= 0) {
-            this.lastedValidators.splice(found, 1);
-            this.removed_validators.add(this.getNextBlockHeight(), validator);
+            this.slashed_validators.add(this.getLastBlockHeight(), validator);
+            this.removed_validators.add(this.getLastBlockHeight() + 1, validator);
         }
     }
 
     /**
      * Store in the block and increase the height by 1.
      */
-    public saveBlock(txs: Transaction[], enrollments: Enrollment[], b?: BitMask): Block {
+    public saveBlock(txs: Transaction[], enrollments: Enrollment[]): Block {
         const tx_hash_list = txs.map((tx) => hashFull(tx));
         const merkle_tree = buildMerkleTree(tx_hash_list);
         const merkle_root =
             merkle_tree.length > 0 ? merkle_tree[merkle_tree.length - 1] : new Hash(Buffer.alloc(Hash.Width));
 
         const pre_images: Hash[] = [];
-        const validators = this.getValidatorsAtNextBlock(this.height);
-        const bits = new BitMask(validators.length);
+        const new_validators = this.getValidatorsAtNextBlock(this.height).filter(
+            (m) => m.action !== ValidatorAction.REMOVE
+        );
+        const bits = new BitMask(new_validators.length);
 
-        const new_validators = validators.map((m) => m);
         new_validators.sort((prev, next) => {
             return Hash.compare(
                 this.frozen_utxos.get(prev.validator.address),
@@ -1789,16 +1793,17 @@ export class BlockManager {
         });
 
         new_validators.forEach((validator, idx) => {
-            if (validator.action === ValdatorAction.ADD || validator.action === ValdatorAction.ALREADY_EXIST) {
+            if (validator.action === ValidatorAction.ADD || validator.action === ValidatorAction.ALREADY_EXIST) {
                 const pre_image = this.pre_images.getImage(validator.validator.address, this.getNextBlockHeight());
                 if (pre_image !== undefined) {
                     pre_images.push(pre_image.hash);
                     bits.set(idx, true);
                 } else {
+                    throw new Error("Not found pre image");
                     pre_images.push(new Hash(Buffer.alloc(Hash.Width)));
                     bits.set(idx, false);
                 }
-            } else {
+            } else if (validator.action === ValidatorAction.SLASHING) {
                 pre_images.push(new Hash(Buffer.alloc(Hash.Width)));
                 bits.set(idx, false);
             }
@@ -1836,9 +1841,20 @@ export class BlockManager {
         if (validators !== undefined) {
             res.push(
                 ...validators.map((m) => {
-                    return { validator: m, action: ValdatorAction.ALREADY_EXIST };
+                    return { validator: m, action: ValidatorAction.ALREADY_EXIST };
                 })
             );
+        }
+
+        // Check removed validators
+        const slashed_validator = this.slashed_validators.get(height);
+        if (slashed_validator !== undefined) {
+            slashed_validator.forEach((r) => {
+                const found = res.find((m) => SecretKey.equal(m.validator.secret, r.secret));
+                if (found !== undefined) {
+                    found.action = ValidatorAction.SLASHING;
+                }
+            });
         }
 
         // Check removed validators
@@ -1847,7 +1863,7 @@ export class BlockManager {
             remove_validator.forEach((r) => {
                 const found = res.find((m) => SecretKey.equal(m.validator.secret, r.secret));
                 if (found !== undefined) {
-                    found.action = ValdatorAction.REMOVE;
+                    found.action = ValidatorAction.REMOVE;
                 }
             });
         }
@@ -1855,7 +1871,7 @@ export class BlockManager {
         this.added_validators.get(height).forEach((added) => {
             const found = res.find((m) => SecretKey.equal(m.validator.secret, added.secret));
             if (found === undefined) {
-                res.push({ validator: added, action: ValdatorAction.ADD });
+                res.push({ validator: added, action: ValidatorAction.ADD });
             }
         });
 
@@ -1872,7 +1888,7 @@ export class BlockManager {
         const validators: KeyPair[] = [];
 
         for (const elem of res) {
-            if (elem.action !== ValdatorAction.REMOVE) {
+            if (elem.action !== ValidatorAction.REMOVE) {
                 validators.push(elem.validator);
             }
         }
@@ -1908,11 +1924,12 @@ export class BlockManager {
         if (height === undefined) height = this.height;
         if (height > this.height) height = this.height;
 
-        const validators = this.getValidatorsAtNextBlock(height);
+        const validators = this.getValidatorsAtNextBlock(height).filter((m) => m.action !== ValidatorAction.REMOVE);
 
         const bits = new BitMask(validators.length);
         validators.forEach((validator, idx) => {
-            if (validator.action >= 0) bits.set(idx, true);
+            if (validator.action === ValidatorAction.ALREADY_EXIST || validator.action === ValidatorAction.ADD)
+                bits.set(idx, true);
             else bits.set(idx, false);
         });
         return bits;
@@ -1987,7 +2004,6 @@ export class Vote {
         ballot_answer: number,
         sequence: number,
         preimage_height: number
-
     ) {
         this.boa_client = boa_client;
         this.block_manager = block_manager;
@@ -1997,7 +2013,6 @@ export class Vote {
         this.ballot_answer = ballot_answer;
         this.sequence = sequence;
         this.preimage_height = preimage_height;
-
     }
 
     public async CreateVote() {
@@ -2005,8 +2020,7 @@ export class Vote {
         const res = this.createVoterCard(this.validator_key);
 
         const pre_image = this.block_manager.getPreImage(this.validator_key.address, this.preimage_height);
-        if (!pre_image)
-            return;
+        if (!pre_image) return;
 
         const key_agora_admin = hashMulti(pre_image.hash, Buffer.from(this.app_name));
         const key_encrypt = Encrypt.createKey(key_agora_admin.data, this.proposal_id);
