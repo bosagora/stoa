@@ -46,10 +46,12 @@ import {
     DisplayTxType,
     IAccountChart,
     IAvgFee,
+    IBallotAPI,
     IBlock,
     IBlockEnrollment,
     IBlockOverview,
     IBlockTransactions,
+    IBlockValidator,
     IBOAHolder,
     IBOAStats,
     IEmitBlock,
@@ -74,6 +76,7 @@ import {
     ITxStatus,
     IUnspentTxOutput,
     IValidatorReward,
+    IVotingDetails,
     ValidatorData,
 } from "./Types";
 
@@ -305,9 +308,14 @@ class Stoa extends WebService {
         this.app.get("/search/hash/:hash", isBlackList, this.searchHash.bind(this));
         this.app.get("/proposals/", isBlackList, this.getProposals.bind(this));
         this.app.get("/proposal/:proposal_id", isBlackList, this.getProposalById.bind(this));
+        this.app.get("/proposal/voting_details/:proposal_id", isBlackList, this.getVotingDetails.bind(this));
         this.app.get("/validator/reward/:address", isBlackList, this.getValidatorReward.bind(this));
+        this.app.get("/validator/ballot/:address", isBlackList, this.getValidatorBallots.bind(this));
         this.app.get("/convert-to-usd", isBlackList, this.convertToUSD.bind(this));
         this.app.get("/txhash/:utxo", isBlackList, this.getTransactionHash.bind(this));
+        this.app.get("/validator/missed_blocks/:address", isBlackList, this.getValidatorMissedBlocks.bind(this));
+        this.app.get("/block/validators", isBlackList, this.getBlockValidators.bind(this));
+
 
         // It operates on a private port
         this.private_app.post("/block_externalized", this.postBlock.bind(this));
@@ -2763,6 +2771,136 @@ class Stoa extends WebService {
             });
     }
 
+    /**
+     * GET /voting_details/
+     * Called when a request is received through the `/voting_details/` handler
+     * The parameter `hash` is the hash of  transaction
+     * Returns list of proposal voting details
+     */
+    public async getVotingDetails(req: express.Request, res: express.Response) {
+        const pagination: IPagination = await this.paginate(req, res);
+        const proposal_id = req.params.proposal_id.toString();
+        this.ledger_storage
+            .getVotingDetails(proposal_id, pagination.pageSize, pagination.page)
+            .then((data: any[]) => {
+                const proposal_votingDetails: IVotingDetails[] = [];
+                for (const row of data) {
+                    proposal_votingDetails.push({
+                        address: row.voter_address.toString(),
+                        sequence: row.sequence,
+                        hash: new Hash(row.tx_hash, Endian.Little).toString(),
+                        ballot_answer: row.ballot_answer == null ? "" : ConvertTypes.ballotAddressToString(row.ballot_answer),
+                        voting_time: row.voting_time,
+                        voter_utxo_key: new Hash(row.utxo_key, Endian.Little).toString(),
+                        full_count: row.full_count,
+                    });
+                }
+                return res.status(200).send(JSON.stringify(proposal_votingDetails));
+            })
+            .catch((err) => {
+                logger.error("Failed to hash search data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    status: Status.Error,
+                    responseTime: Number(moment().utc().unix() * 1000),
+                });
+                res.status(500).send("Failed to data lookup");
+            });
+    }
+
+    /**
+     * GET /validator missed blocks/
+     * Called when a request is received through the `validator/missed_blocks/` handler
+     * The parameter `address` is the address of  validator
+     * Returns list of validator missed blocks
+     */
+    public async getValidatorMissedBlocks(req: express.Request, res: express.Response) {
+        const address = req.params.address.toString();
+        this.ledger_storage
+            .getValidatorMissedBlocks(address)
+            .then((data: any[]) => {
+                return res.status(200).send(JSON.stringify(data));
+            })
+            .catch((err) => {
+                logger.error("Failed to hash search data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    status: Status.Error,
+                    responseTime: Number(moment().utc().unix() * 1000),
+                });
+                res.status(500).send("Failed to data lookup");
+            });
+    }
+
+    /**
+     * GET block validators
+     * Returns a set of Validators based on the block height.
+     */
+    public async getBlockValidators(req: express.Request, res: express.Response) {
+        let field: string;
+        let value: number | Buffer;
+        // Validating Parameter - height
+        if (req.query.height !== undefined && Utils.isPositiveInteger(req.query.height.toString())) {
+            field = "height";
+            value = Number(req.query.height);
+        }
+        // Validating Parameter - hash
+        else if (req.query.hash !== undefined) {
+            field = "hash";
+            try {
+                const req_hash: string = String(req.query.hash);
+                value = new Hash(req_hash).toBinary(Endian.Little);
+            } catch (error) {
+                res.status(400).send(`Invalid value for parameter 'hash': ${req.query.hash}`);
+                return;
+            }
+        } else {
+            res.status(400).send(
+                `Invalid value for parameter 'height': ${req.query.height} and 'hash': ${req.query.hash}`
+            );
+            return;
+        }
+        const pagination: IPagination = await this.paginate(req, res);
+        this.ledger_storage
+            .getBlockValidators(value, field, pagination.pageSize, pagination.page)
+            .then((rows: any[]) => {
+                // Nothing found
+                if (!rows.length) {
+                    res.status(204).send(`The data does not exist. 'height': (${value})`);
+                    return;
+                }
+                const out_put: IBlockValidator[] = [];
+                for (const row of rows) {
+                    const preimage_hash: string = row.preimage_hash !== null ? new Hash(row.preimage_hash, Endian.Little).toString() : "";
+                    const preimage_height_str: string = row.preimage_height !== null ? row.preimage_height.toString() : "";
+
+                    const preimage: IPreimage = {
+                        height: preimage_height_str,
+                        hash: preimage_hash,
+                    };
+                    const validator: IBlockValidator = {
+                        address: row.address,
+                        utxo_key: new Hash(row.stake, Endian.Little).toString(),
+                        pre_image: preimage,
+                        slashed: row.slashed,
+                        block_signed: row.signed,
+                        full_count: row.full_count
+                    };
+                    out_put.push(validator);
+                }
+                res.status(200).send(JSON.stringify(out_put));
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    status: Status.Error,
+                    responseTime: Number(moment().utc().unix() * 1000),
+                });
+                res.status(500).send("Failed to data lookup");
+            });
+    }
+
     /* Get transaction hash
      * @returns Returns transaction hash according to utxo
      */
@@ -2923,6 +3061,51 @@ class Stoa extends WebService {
                         });
                     }
                     return res.status(200).send(JSON.stringify(rewards));
+                }
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    status: Status.Error,
+                    responseTime: Number(moment().utc().unix() * 1000),
+                });
+                return res.status(500).send("Failed to data lookup");
+            });
+    }
+
+    /* Get validator ballots
+     * @returns Returns BOA Holder of the ledger.
+     */
+    public async getValidatorBallots(req: express.Request, res: express.Response) {
+        const address = String(req.params.address);
+        let validatorAddress: PublicKey;
+        try {
+            validatorAddress = new PublicKey(address);
+        } catch (error) {
+            res.status(400).send(`Invalid value for parameter 'address': ${address}`);
+            return;
+        }
+        const pagination: IPagination = await this.paginate(req, res);
+        this.ledger_storage
+            .getValidatorBallots(address, pagination.pageSize, pagination.page)
+            .then((data: any[]) => {
+                if (data.length === 0) {
+                    return res.status(204).send(`The data does not exist.`);
+                } else {
+                    const ballots: IBallotAPI[] = [];
+                    for (const row of data) {
+                        ballots.push({
+                            proposal_id: row.proposal_id,
+                            tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
+                            sequence: row.sequence,
+                            proposal_type: ConvertTypes.ProposalTypetoString(row.proposal_type),
+                            proposal_title: row.proposal_title,
+                            ballot_answer: row.ballot_answer == null ? "" : ConvertTypes.ballotAddressToString(row.ballot_answer),
+                            full_count: row.full_count
+                        });
+                    }
+                    return res.status(200).send(JSON.stringify(ballots));
                 }
             })
             .catch((err) => {

@@ -97,6 +97,46 @@ export interface IUnspentTxOutput {
 }
 
 /**
+ * The Interface for a Proposal's Voting Details
+ */
+export interface IVotingDetails {
+    /**
+     * The voter utxo key
+     */
+    voter_utxo_key: string;
+
+    /**
+     * The voter address
+     */
+    address: string;
+
+    /**
+     * The ballot sequence
+     */
+    sequence: number;
+
+    /**
+     * The transaction hash
+     */
+    hash: string;
+
+    /**
+     * The ballot answer
+     */
+    ballot_answer: string;
+
+    /**
+     * The voting time
+     */
+    voting_time: number;
+
+    /**
+     * The count of records
+     */
+    full_count: number;
+}
+
+/**
  * The interface of the transactions history element
  */
 export interface ITxHistoryElement {
@@ -797,6 +837,82 @@ export interface IPendingTxs {
 }
 
 /**
+ * The interface of the Ballot API data
+ */
+export interface IBallotAPI {
+    /**
+     * proposal id
+     */
+    proposal_id: string;
+
+    /**
+     * The transasaction hash
+     */
+    tx_hash: string;
+
+    /**
+     * The sequence
+     */
+    sequence: number;
+
+    /**
+     * Proposal type
+     */
+    proposal_type: string;
+
+    /**
+     * Proposal title
+     */
+    proposal_title: string;
+
+    /**
+     * Total record count
+     */
+    full_count: number;
+
+    /**
+     * The ballot anwer
+     */
+    ballot_answer?: string;
+}
+
+/**
+ * The interface of the block validators
+ */
+export interface IBlockValidator {
+
+    /**
+     * UTXO key of the validator
+     */
+    utxo_key: string;
+
+    /**
+     * Address of the validator
+     */
+    address: string;
+
+    /**
+     * Pre image
+     */
+    pre_image: IPreimage;
+
+    /**
+     * Slashed 
+     */
+    slashed: string;
+
+    /**
+     * Block signed 
+     */
+    block_signed: string;
+
+    /**
+     * Full count
+     */
+    full_count: number;
+}
+
+/**
  * The interface of the transaction status
  */
 export interface ITxStatus {
@@ -824,6 +940,16 @@ export interface ITxStatus {
          */
         hash?: string;
     };
+}
+
+/**
+ * Define the types of ballot anwser 
+ */
+export enum BallotAnswer {
+    Yes = 0,
+    No = 1,
+    Blank = 2,
+    Reject = 9,
 }
 
 /**
@@ -873,6 +999,10 @@ export class ConvertTypes {
     public static ProposalTypetoString(type: ProposalType): string {
         if (type < ConvertTypes.proposal_types.length) return ConvertTypes.proposal_types[type];
         else return "";
+    }
+
+    public static ballotAddressToString(type: number): string {
+        return BallotAnswer[type];
     }
 }
 

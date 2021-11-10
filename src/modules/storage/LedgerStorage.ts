@@ -4242,6 +4242,126 @@ export class LedgerStorage extends Storages {
     }
 
     /**
+     * Get proposal's voting details
+     * @returns returns the Promise with requested data
+     * and if an error occurs the .catch is called with an error.
+     */
+    public getVotingDetails(proposal_id: string, limit: number, page: number): Promise<any[]> {
+        const sql = `
+            SELECT
+	            T1.voter_address,
+                T1.sequence,
+                T1.tx_hash,
+                T1.ballot_answer,
+                T1.voting_time,
+                T2.utxo_key,
+                count(*) OVER() as full_count
+            FROM
+                ballots T1
+                INNER JOIN tx_outputs T2
+                ON (T1.tx_hash = T2.tx_hash)
+
+            WHERE T1.proposal_id = ?
+            LIMIT ? OFFSET ? `;
+
+        return this.query(sql, [proposal_id, limit, limit * (page - 1)]);
+    }
+
+    /**
+ * Get Validator ballots.
+ * @param address Address of the validator
+ * @param limit Maximum record count that can be obtained from one query
+ * @param page The number on the page, this value begins with 1
+ * @returns returns the Promise with requested data
+ * and if an error occurs the .catch is called with an error.
+ */
+    public getValidatorBallots(address: string, limit: number, page: number): Promise<any> {
+        const sql = `
+                SELECT 
+                    B.proposal_id,
+                    B.tx_hash,
+                    B.sequence,
+                    P.proposal_type,
+                    P.proposal_title,
+                    B.ballot_answer,
+                    count(*) OVER() AS full_count
+                FROM ballots B 
+                INNER JOIN proposal P
+                ON (B.proposal_id = P.proposal_id)
+                WHERE B.voter_address = ?
+                ORDER BY B.block_height DESC
+                LIMIT ? OFFSET ?`;
+        return this.query(sql, [address, limit, limit * (page - 1)]);
+    }
+
+    /**
+     * Get Validators's latest blocks
+     * @returns returns the Promise with requested data
+     * and if an error occurs the .catch is called with an error.
+     */
+    public getValidatorMissedBlocks(address: string): Promise<any[]> {
+        const sql = `
+            SELECT
+                block_height,
+                signed
+            FROM
+                validator_by_block
+            WHERE address = ?
+            ORDER BY block_height DESC
+            LIMIT 100`;
+
+        return this.query(sql, [address]);
+    }
+
+    /**
+     * Get Validators's latest blocks
+     * @returns returns the Promise with requested data
+     * and if an error occurs the .catch is called with an error.
+     */
+    public async getBlockValidators(value: number | Buffer, field: string, limit: number, page: number, conn: mysql.PoolConnection | undefined = undefined): Promise<any[]> {
+        let block_height: number | Buffer = 0;
+
+        if (field == "hash") {
+            const block_sql = `SELECT height
+                                FROM blocks where hash = ?`
+            await this.query(block_sql, [value])
+                .then((rows: any[]) => {
+                    block_height = rows[0].height;
+                });
+        } else {
+            block_height = value;
+        }
+
+        let sql =
+            `SELECT V.address,
+                V.enrolled_at,
+                V.address,
+                V.utxo_key,
+                V.utxo_key as stake,
+                V.amount as stake_amount,
+                P.block_height,
+                P.block_height as preimage_height,
+                P.preimage_hash,
+                ${block_height} as height,
+                B.slashed,
+                B.signed,
+            count(*) OVER() AS full_count
+            FROM validators V
+            LEFT OUTER JOIN preimages P
+            ON V.utxo_key = P.utxo_key
+            AND ${block_height} = P.block_height
+            LEFT OUTER JOIN validator_by_block B
+            ON(B.address = P.address and B.block_height = P.block_height)
+            WHERE B.block_height = ?
+            AND V.enrolled_at >= (${block_height} - ?)
+            AND V.enrolled_at < ${block_height}
+            ORDER BY V.utxo_key ASC
+            LIMIT ? OFFSET ?`
+
+        return this.query(sql, [block_height, this.validator_cycle, limit, limit * (page - 1)], conn);
+    }
+
+    /**
      * Get transactions of a block
      * @param limit Maximum record count that can be obtained from one query
      * @param page The number on the page, this value begins with 1
