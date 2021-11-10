@@ -41,13 +41,24 @@ import {
     UnspentTxOutput,
     Utils,
     UTXOManager,
-    VarInt
+    VarInt,
 } from "boa-sdk-ts";
 import bigDecimal from "js-big-decimal";
 import moment from "moment";
 import * as mysql from "mysql2";
 import { SmartBuffer } from "smart-buffer";
-import { IAccountInformation, IBallot, IMarketCap, IMetaData, IPreimage, IProposal, IProposalAttachment, IValidator, IValidatorByBlock, IVotingResult } from "../../Types";
+import {
+    IAccountInformation,
+    IBallot,
+    IMarketCap,
+    IMetaData,
+    IPreimage,
+    IProposal,
+    IProposalAttachment,
+    IValidator,
+    IValidatorByBlock,
+    IVotingResult,
+} from "../../Types";
 import { IDatabaseConfig } from "../common/Config";
 import { DataCollectionStatus, ProposalResult, ProposalStatus, SignStatus, ValidatorStatus } from "../common/enum";
 import { FeeManager } from "../common/FeeManager";
@@ -912,7 +923,10 @@ export class LedgerStorage extends Storages {
                 const validators: any[] = await this.getValidatorsAPI(block.header.height, null, conn);
                 for (let idx = 0; idx < block.header.preimages.length; idx++) {
                     try {
-                        if (undefined !== validators[idx] && block.header.preimages[idx] !== new Hash(Buffer.alloc(Hash.Width))) {
+                        if (
+                            undefined !== validators[idx] &&
+                            block.header.preimages[idx] !== new Hash(Buffer.alloc(Hash.Width))
+                        ) {
                             await save_preimage(
                                 this,
                                 block.header.height,
@@ -1711,9 +1725,9 @@ export class LedgerStorage extends Storages {
 
                     unlock_height_query = `(
                             SELECT '${JSBI.add(
-                        height.value,
-                        JSBI.BigInt(2016)
-                    ).toString()}' AS unlock_height WHERE EXISTS
+                                height.value,
+                                JSBI.BigInt(2016)
+                            ).toString()}' AS unlock_height WHERE EXISTS
                             (
                                 SELECT
                                     *
@@ -2305,7 +2319,11 @@ export class LedgerStorage extends Storages {
      * of the returned Promise is called with the records
      * and if an error occurs the `.catch` is called with an error.
      */
-    public getValidatorsAPI(height: Height | null, address: string | null, conn: mysql.PoolConnection | undefined = undefined): Promise<any[]> {
+    public getValidatorsAPI(
+        height: Height | null,
+        address: string | null,
+        conn: mysql.PoolConnection | undefined = undefined
+    ): Promise<any[]> {
         let cur_height: string;
 
         if (height !== null) cur_height = height.toString();
@@ -2442,11 +2460,13 @@ export class LedgerStorage extends Storages {
             });
         }
 
-        function save_ballot_data(storage: LedgerStorage,
+        function save_ballot_data(
+            storage: LedgerStorage,
             block_header: BlockHeader,
             tx_hash: Hash,
             ballot: BallotData,
-            ballot_answer?: number) {
+            ballot_answer?: number
+        ) {
             return new Promise<void>(async (resolve, reject) => {
                 storage
                     .query(
@@ -2484,7 +2504,6 @@ export class LedgerStorage extends Storages {
                     .catch((err) => {
                         reject(err);
                     });
-
             });
         }
 
@@ -2520,18 +2539,23 @@ export class LedgerStorage extends Storages {
                                 ballotData.app_name
                             );
                             if (info.length) {
-                                const validators_by_block: IValidatorByBlock[] = await storage.getValidatorsByBlock(new Height(info[0].block_height));
-                                const validator = validators_by_block.map(m => m.address).find((element) => ballotData.card.validator_address.toString() === element);
+                                const validators_by_block: IValidatorByBlock[] = await storage.getValidatorsByBlock(
+                                    new Height(info[0].block_height)
+                                );
+                                const validator = validators_by_block
+                                    .map((m) => m.address)
+                                    .find((element) => ballotData.card.validator_address.toString() === element);
                                 block_header.height.value >= info[0].vote_start_height &&
-                                    block_header.height.value <= info[0].vote_end_height && validator
+                                block_header.height.value <= info[0].vote_end_height &&
+                                validator
                                     ? await save_ballot_data(storage, block_header, tx_hash, ballotData)
                                     : await save_ballot_data(
-                                        storage,
-                                        block_header,
-                                        tx_hash,
-                                        ballotData,
-                                        BallotData.REJECT
-                                    );
+                                          storage,
+                                          block_header,
+                                          tx_hash,
+                                          ballotData,
+                                          BallotData.REJECT
+                                      );
                             }
                         }
                     }
@@ -2565,7 +2589,7 @@ export class LedgerStorage extends Storages {
 
     /**
      * Saving Proposal Result.
-     * When a new block is recieved. if block's height matches the Voting_end_height + 7 
+     * When a new block is recieved. if block's height matches the Voting_end_height + 7
      * of proposals then it starts Ballot counting Process and Put the Proposal Result to database.
      * @param block: The instance of the `Block`
      * @param conn Use this if it are providing a db connection.
@@ -2574,8 +2598,12 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the `.catch` is called with an error.
      */
     public putProposalResult(block: Block, conn?: mysql.PoolConnection) {
-
-        function getSignCount(storage: LedgerStorage, address: string, proposal_data_height: number, vote_end_height: number) {
+        function getSignCount(
+            storage: LedgerStorage,
+            address: string,
+            proposal_data_height: number,
+            vote_end_height: number
+        ) {
             const sql = `SELECT
                        count(*) as sign_count
                     FROM
@@ -2585,8 +2613,14 @@ export class LedgerStorage extends Storages {
             return storage.query(sql, [SignStatus.SIGNED, address, proposal_data_height, vote_end_height]);
         }
 
-        function updateValidatorBallots(storage: LedgerStorage, address: string, sequence: number,
-            ballot_answer: number, block_height: Height, conn?: mysql.PoolConnection) {
+        function updateValidatorBallots(
+            storage: LedgerStorage,
+            address: string,
+            sequence: number,
+            ballot_answer: number,
+            block_height: Height,
+            conn?: mysql.PoolConnection
+        ) {
             return new Promise<void>(async (resolve, reject) => {
                 storage
                     .query(
@@ -2601,12 +2635,7 @@ export class LedgerStorage extends Storages {
                         AND
                             block_height = ?
                             `,
-                        [
-                            ballot_answer,
-                            address,
-                            sequence,
-                            block_height,
-                        ],
+                        [ballot_answer, address, sequence, block_height],
                         conn
                     )
                     .then(() => {
@@ -2617,8 +2646,12 @@ export class LedgerStorage extends Storages {
                     });
             });
         }
-        function rejectValidatorBallots(storage: LedgerStorage, address: string,
-            ballot_answer: number, conn?: mysql.PoolConnection) {
+        function rejectValidatorBallots(
+            storage: LedgerStorage,
+            address: string,
+            ballot_answer: number,
+            conn?: mysql.PoolConnection
+        ) {
             return new Promise<void>(async (resolve, reject) => {
                 storage
                     .query(
@@ -2628,10 +2661,7 @@ export class LedgerStorage extends Storages {
                             ballot_answer = ?
                         WHERE
                             voter_address = ?`,
-                        [
-                            ballot_answer,
-                            address,
-                        ],
+                        [ballot_answer, address],
                         conn
                     )
                     .then(() => {
@@ -2643,7 +2673,12 @@ export class LedgerStorage extends Storages {
             });
         }
 
-        function getProposalVotesByValidator(storage: LedgerStorage, proposal_id: string, voter_address: string, app_name: string): Promise<any> {
+        function getProposalVotesByValidator(
+            storage: LedgerStorage,
+            proposal_id: string,
+            voter_address: string,
+            app_name: string
+        ): Promise<any> {
             const sql = `SELECT
                         proposal_id,
                         block_height,
@@ -2669,9 +2704,18 @@ export class LedgerStorage extends Storages {
             return storage.query(sql, [proposal_id, voter_address, app_name]);
         }
 
-        function updateProposals(storage: LedgerStorage, proposal_id: string, app_name: string, proposal_status: ProposalStatus, proposal_result: ProposalResult, conn?: mysql.PoolConnection) {
+        function updateProposals(
+            storage: LedgerStorage,
+            proposal_id: string,
+            app_name: string,
+            proposal_status: ProposalStatus,
+            proposal_result: ProposalResult,
+            conn?: mysql.PoolConnection
+        ) {
             return new Promise<void>(async (resolve, reject) => {
-                storage.query(`
+                storage
+                    .query(
+                        `
                 UPDATE
                     proposal
                 SET
@@ -2680,17 +2724,12 @@ export class LedgerStorage extends Storages {
                 WHERE
                     proposal_id = ?
                     AND app_name = ?`,
-                    [
-                        proposal_status,
-                        proposal_result,
-                        proposal_id,
-                        app_name,
-
-                    ],
-                    conn
-                ).then(() => {
-                    return resolve();
-                })
+                        [proposal_status, proposal_result, proposal_id, app_name],
+                        conn
+                    )
+                    .then(() => {
+                        return resolve();
+                    })
                     .catch((err) => {
                         reject(err);
                     });
@@ -2698,8 +2737,10 @@ export class LedgerStorage extends Storages {
         }
 
         function validatePreImage(validator: any): IPreimage {
-            const preimage_hash: string = validator.preimage_hash !== null ? new Hash(validator.preimage_hash, Endian.Little).toString() : "";
-            const preimage_height_str: string = validator.preimage_height !== null ? validator.preimage_height.toString() : "";
+            const preimage_hash: string =
+                validator.preimage_hash !== null ? new Hash(validator.preimage_hash, Endian.Little).toString() : "";
+            const preimage_height_str: string =
+                validator.preimage_height !== null ? validator.preimage_height.toString() : "";
 
             const preimage: IPreimage = {
                 height: preimage_height_str,
@@ -2709,55 +2750,104 @@ export class LedgerStorage extends Storages {
             return preimage;
         }
 
-        function process_ballots(storage: LedgerStorage, validator: IValidatorByBlock, proposal: IProposal, votingResult: IVotingResult, conn?: mysql.PoolConnection) {
+        function process_ballots(
+            storage: LedgerStorage,
+            validator: IValidatorByBlock,
+            proposal: IProposal,
+            votingResult: IVotingResult,
+            conn?: mysql.PoolConnection
+        ) {
             return new Promise<void>(async (resolve, reject) => {
                 try {
                     const total_block = proposal.vote_end_height - (proposal.block_height - 1);
-                    const sign_count = await getSignCount(storage, validator.address, proposal.block_height, proposal.vote_end_height);
-                    const uptime = bigDecimal.divide(bigDecimal.multiply(sign_count[0].sign_count, 100), total_block, 7);
-                    const validator_info: any[] = await storage.getValidatorsAPI(new Height((proposal.vote_end_height + 7).toString()), validator.address);
-                    const { height, hash } = validator_info[0] ? await validatePreImage(validator_info[0]) : { hash: new Hash(Buffer.alloc(Hash.Width)).toString(), height: "" };
+                    const sign_count = await getSignCount(
+                        storage,
+                        validator.address,
+                        proposal.block_height,
+                        proposal.vote_end_height
+                    );
+                    const uptime = bigDecimal.divide(
+                        bigDecimal.multiply(sign_count[0].sign_count, 100),
+                        total_block,
+                        7
+                    );
+                    const validator_info: any[] = await storage.getValidatorsAPI(
+                        new Height((proposal.vote_end_height + 7).toString()),
+                        validator.address
+                    );
+                    const { height, hash } = validator_info[0]
+                        ? await validatePreImage(validator_info[0])
+                        : { hash: new Hash(Buffer.alloc(Hash.Width)).toString(), height: "" };
                     if (Number(uptime) > LedgerStorage.validator_uptime_constant && height && hash) {
-                        await getProposalVotesByValidator(storage, proposal.proposal_id, validator.address, proposal.app_name)
-                            .then(async (ballot: IBallot[]) => {
-                                if (ballot.length) {
-                                    const ballot_preimage_hash: Hash = hashMulti(new Hash(hash), Buffer.from(ballot[0].app_name));
-                                    const key_encrypt = Encrypt.createKey(ballot_preimage_hash.data, ballot[0].proposal_id.toString());
-                                    const answer = Encrypt.decrypt(ballot[0].ballot, key_encrypt).readInt8();
+                        await getProposalVotesByValidator(
+                            storage,
+                            proposal.proposal_id,
+                            validator.address,
+                            proposal.app_name
+                        ).then(async (ballot: IBallot[]) => {
+                            if (ballot.length) {
+                                const ballot_preimage_hash: Hash = hashMulti(
+                                    new Hash(hash),
+                                    Buffer.from(ballot[0].app_name)
+                                );
+                                const key_encrypt = Encrypt.createKey(
+                                    ballot_preimage_hash.data,
+                                    ballot[0].proposal_id.toString()
+                                );
+                                const answer = Encrypt.decrypt(ballot[0].ballot, key_encrypt).readInt8();
 
-                                    switch (answer) {
-                                        case BallotData.YES:
-                                            {
-                                                votingResult.approved = JSBI.add(votingResult.approved, JSBI.BigInt(1));
-                                                await updateValidatorBallots(storage, validator.address, ballot[0].sequence, BallotData.YES, ballot[0].block_height, conn);
-                                                break;
-                                            }
-                                        case BallotData.NO:
-                                            {
-                                                votingResult.opposed = JSBI.add(votingResult.opposed, JSBI.BigInt(1));
-                                                await updateValidatorBallots(storage, validator.address, ballot[0].sequence, BallotData.NO, ballot[0].block_height, conn);
-                                                break;
-                                            }
-                                        case BallotData.BLANK:
-                                            {
-                                                votingResult.abstain = JSBI.add(votingResult.abstain, JSBI.BigInt(1));
-                                                await updateValidatorBallots(storage, validator.address, ballot[0].sequence, BallotData.BLANK, ballot[0].block_height, conn);
-                                                break;
-                                            }
-                                        default:
-                                            {
-                                                await rejectValidatorBallots(storage, validator.address, BallotData.REJECT, conn);
-                                                break;
-                                            }
+                                switch (answer) {
+                                    case BallotData.YES: {
+                                        votingResult.approved = JSBI.add(votingResult.approved, JSBI.BigInt(1));
+                                        await updateValidatorBallots(
+                                            storage,
+                                            validator.address,
+                                            ballot[0].sequence,
+                                            BallotData.YES,
+                                            ballot[0].block_height,
+                                            conn
+                                        );
+                                        break;
+                                    }
+                                    case BallotData.NO: {
+                                        votingResult.opposed = JSBI.add(votingResult.opposed, JSBI.BigInt(1));
+                                        await updateValidatorBallots(
+                                            storage,
+                                            validator.address,
+                                            ballot[0].sequence,
+                                            BallotData.NO,
+                                            ballot[0].block_height,
+                                            conn
+                                        );
+                                        break;
+                                    }
+                                    case BallotData.BLANK: {
+                                        votingResult.abstain = JSBI.add(votingResult.abstain, JSBI.BigInt(1));
+                                        await updateValidatorBallots(
+                                            storage,
+                                            validator.address,
+                                            ballot[0].sequence,
+                                            BallotData.BLANK,
+                                            ballot[0].block_height,
+                                            conn
+                                        );
+                                        break;
+                                    }
+                                    default: {
+                                        await rejectValidatorBallots(
+                                            storage,
+                                            validator.address,
+                                            BallotData.REJECT,
+                                            conn
+                                        );
+                                        break;
                                     }
                                 }
-                            });
-                    }
-                    else
-                        await rejectValidatorBallots(storage, validator.address, BallotData.REJECT, conn);
+                            }
+                        });
+                    } else await rejectValidatorBallots(storage, validator.address, BallotData.REJECT, conn);
                     return resolve();
-                }
-                catch (err) {
+                } catch (err) {
                     return reject(err);
                 }
             });
@@ -2784,14 +2874,33 @@ export class LedgerStorage extends Storages {
                 try {
                     let validators_by_block: IValidatorByBlock[] = [];
                     let proposal: IProposal[] = await this.getProposalByStatus(ProposalStatus.COUNTING_VOTES);
-                    proposal = proposal.filter((element) => JSBI.equal(JSBI.BigInt(element.vote_end_height + 7), block.header.height.value));
+                    proposal = proposal.filter((element) =>
+                        JSBI.equal(JSBI.BigInt(element.vote_end_height + 7), block.header.height.value)
+                    );
 
                     for (let proposal_index = 0; proposal_index < proposal.length; proposal_index++) {
-                        const VotingResult: IVotingResult = { approved: JSBI.BigInt(0), opposed: JSBI.BigInt(0), abstain: JSBI.BigInt(0) };
-                        validators_by_block = await this.getValidatorsByBlock(new Height(proposal[proposal_index].block_height.toString()));
-                        await Promise.all(validators_by_block.map(async (element) => { await process_ballots(this, element, proposal[proposal_index], VotingResult, conn); }));
+                        const VotingResult: IVotingResult = {
+                            approved: JSBI.BigInt(0),
+                            opposed: JSBI.BigInt(0),
+                            abstain: JSBI.BigInt(0),
+                        };
+                        validators_by_block = await this.getValidatorsByBlock(
+                            new Height(proposal[proposal_index].block_height.toString())
+                        );
+                        await Promise.all(
+                            validators_by_block.map(async (element) => {
+                                await process_ballots(this, element, proposal[proposal_index], VotingResult, conn);
+                            })
+                        );
                         const result = await computeResult(VotingResult, validators_by_block.length);
-                        await updateProposals(this, proposal[proposal_index].proposal_id, proposal[proposal_index].app_name, ProposalStatus.CLOSED, result ? ProposalResult.PASSED : ProposalResult.REJECTED, conn);
+                        await updateProposals(
+                            this,
+                            proposal[proposal_index].proposal_id,
+                            proposal[proposal_index].app_name,
+                            ProposalStatus.CLOSED,
+                            result ? ProposalResult.PASSED : ProposalResult.REJECTED,
+                            conn
+                        );
                     }
                 } catch (err) {
                     logger.error("Failed to put proposal's result:" + err, {
@@ -2813,7 +2922,13 @@ export class LedgerStorage extends Storages {
      * @param connection Use this if it are providing a db connection.
      */
     public putValidatorByBlock(block: Block, conn?: mysql.PoolConnection): Promise<void> {
-        function save_block_validator(storage: LedgerStorage, height: Height, validator: IValidator, signed: SignStatus, slashed: ValidatorStatus): Promise<void> {
+        function save_block_validator(
+            storage: LedgerStorage,
+            height: Height,
+            validator: IValidator,
+            signed: SignStatus,
+            slashed: ValidatorStatus
+        ): Promise<void> {
             return new Promise<void>((resolve, reject) => {
                 storage
                     .query(
@@ -2854,12 +2969,7 @@ export class LedgerStorage extends Storages {
                     SET slashed = ? ,
                     slash_height = ?
                     WHERE address = ? AND enrolled_at = ?`,
-                        [
-                            ValidatorStatus.SLASHED,
-                            height.value.toString(),
-                            address,
-                            enrolled_at,
-                        ],
+                        [ValidatorStatus.SLASHED, height.value.toString(), address, enrolled_at],
                         conn
                     )
                     .then(() => {
@@ -2869,7 +2979,6 @@ export class LedgerStorage extends Storages {
                         reject(err);
                     });
             });
-
         }
 
         function getBlockPreimages(storage: LedgerStorage, height: Height): Promise<any[]> {
@@ -2891,7 +3000,8 @@ export class LedgerStorage extends Storages {
         function getValidatorForCycle(storage: LedgerStorage, height: Height): Promise<any[]> {
             const cur_height: string = height.toString();
 
-            const sql = `SELECT V.address,
+            const sql =
+                `SELECT V.address,
                 V.enrolled_at,
                 V.address,
                 V.utxo_key,
@@ -2916,7 +3026,8 @@ export class LedgerStorage extends Storages {
                 cur_height +
                 ` - ?)
             AND V.enrolled_at < ` +
-                cur_height; `
+                cur_height;
+            `
             `;
 
             return storage.query(sql, [storage.validator_cycle]);
@@ -2931,10 +3042,17 @@ export class LedgerStorage extends Storages {
                 const cycleValidators: any[] = await getValidatorForCycle(this, block.header.height);
                 const block_preimages: any[] = await getBlockPreimages(this, block.header.height);
 
-                slashedValidators = cycleValidators.filter(v => !block_preimages.some((v1) => v.address === v1.address));
+                slashedValidators = cycleValidators.filter(
+                    (v) => !block_preimages.some((v1) => v.address === v1.address)
+                );
 
                 for (let i = 0; i < slashedValidators.length; i++) {
-                    await updateValidatorSlashing(this, block.header.height, slashedValidators[i].address, slashedValidators[i].enrolled_at);
+                    await updateValidatorSlashing(
+                        this,
+                        block.header.height,
+                        slashedValidators[i].address,
+                        slashedValidators[i].enrolled_at
+                    );
                 }
 
                 slashedValidators.forEach((e) => {
@@ -2943,19 +3061,33 @@ export class LedgerStorage extends Storages {
 
                 const bitMask = BitMask.fromString(block.header.validators.toString());
                 for (let i = 0; i < bitMask.length; i++) {
-                    bitMask.get(i) ? signedValidators.push(cycleValidators[i]) : unsignedValidators.push(cycleValidators[i]);
+                    bitMask.get(i)
+                        ? signedValidators.push(cycleValidators[i])
+                        : unsignedValidators.push(cycleValidators[i]);
                 }
 
-                signedValidators.forEach(element => {
+                signedValidators.forEach((element) => {
                     save_block_validator(this, block.header.height, element, SignStatus.SIGNED, ValidatorStatus.ACTIVE);
                 });
 
-                unsignedValidators.forEach(element => {
-                    save_block_validator(this, block.header.height, element, SignStatus.UNSIGNED, ValidatorStatus.ACTIVE);
+                unsignedValidators.forEach((element) => {
+                    save_block_validator(
+                        this,
+                        block.header.height,
+                        element,
+                        SignStatus.UNSIGNED,
+                        ValidatorStatus.ACTIVE
+                    );
                 });
 
-                slashedValidators.forEach(element => {
-                    save_block_validator(this, block.header.height, element, SignStatus.UNSIGNED, ValidatorStatus.SLASHED);
+                slashedValidators.forEach((element) => {
+                    save_block_validator(
+                        this,
+                        block.header.height,
+                        element,
+                        SignStatus.UNSIGNED,
+                        ValidatorStatus.SLASHED
+                    );
                 });
                 resolve();
             })();
@@ -4619,11 +4751,11 @@ export class LedgerStorage extends Storages {
         return this.query(sql, [proposal_id]);
     }
     /**
-      * This method get the current exchange rate BOA/USD.
-      * @returns Returns the Promise. If it is finished successfully the `.then`
-      * of the returned Promise is called with the records
-      * and if an error occurs the `.catch` is called with an error.
-      */
+     * This method get the current exchange rate BOA/USD.
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
     public getExchangeRate(): Promise<number> {
         return new Promise<number>((resolve, reject) => {
             this.getCoinMarketcap()
