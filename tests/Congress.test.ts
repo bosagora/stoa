@@ -911,6 +911,74 @@ describe("Test for the creation a proposal and the voting", () => {
         assert.strictEqual(block_manager.getLastBlockHeight(), 11);
     });
 
+    it("Test for path /proposal/voting_details/:proposal_id", async () => {
+        const uri = URI(stoa_addr)
+            .directory("/proposal/voting_details")
+            .filename("469008972006");
+        const response = await client.get(uri.toString());
+        const expected = [
+            {
+                address: 'boa1xrvald3zmehvpcmxqm0kn6wkaqyry7yj3cd8h975ypzlyz00sczpzhsk308',
+                sequence: 100,
+                hash: '0xb50239827c03f06fe954dd855ea598a7e12752ef836ffad0dbfd8b27b12cca7f9ca95be1abd29c9ba0062e369fdd58d81ddd8e793536eb6221dc7b2e7c84a07b',
+                ballot_answer: 'Reject',
+                voting_time: 1609464600,
+                voter_utxo_key: '0xd9cafaa2453e8d85239ea216facd0ad9baab0e4514ac6efa631c09bb90ad720051c20409648be4856aa69753b7a325f30f33532b3086df2a2457a7cc24079cc7',
+                full_count: 3
+            },
+            {
+                address: 'boa1xrvald3zmehvpcmxqm0kn6wkaqyry7yj3cd8h975ypzlyz00sczpzhsk308',
+                sequence: 100,
+                hash: '0x6124bad415e93f8c6d7f191064a51aaa090a53577aa5a3ba9209ccd504b8fc2a720fdc2b8edee66df7cf4b7f7aeacb4c3de402483bdd11206ab3d071427c1993',
+                ballot_answer: '',
+                voting_time: 1609465200,
+                voter_utxo_key: '0xee579d4e98a8bd98ff3a2cc4ce922c0c36691f6fcabedaa7970b31a1793ab85848bfae6a589d8f71dba930398eecea69b5efd8ce4df72fbb3e385aebc694136f',
+                full_count: 3
+            },
+            {
+                address: 'boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku',
+                sequence: 100,
+                hash: '0x6044f897f327257c1669877d299d087a3fb4090a0758994df2352de706969ba601ae4e004f80cbd35f54cd0d4708602362ea2e40ae0e33ac5bbbc67aebe1e930',
+                ballot_answer: '',
+                voting_time: 1609465800,
+                voter_utxo_key: '0x8189be74c2b2a7ce09fe079790095d4b96c286c692fe0bb93ce4ef1115166a08db36091b812c147e81402e48e1c8b7f4ec257b106e958d37f203813de8702d1c',
+                full_count: 3
+            }
+        ]
+        assert.deepStrictEqual(response.data, expected)
+
+    });
+
+    it("Test for path /validator/ballot/:address", async () => {
+        const uri = URI(stoa_addr)
+            .directory("/validator/ballot")
+            .filename("boa1xrvald3zmehvpcmxqm0kn6wkaqyry7yj3cd8h975ypzlyz00sczpzhsk308");
+        const response = await client.get(uri.toString());
+        const expected = [
+            {
+                proposal_id: '469008972006',
+                tx_hash: '0x47a965faef1e41b03db61ea6e3a5f0eca43be1d47ecaeeaa8c3156b521405070c74574f2dd8a26885635496ecbc153688ef63e70871520bdf7f309aae3dd5fbc',
+                sequence: 100,
+                proposal_type: 'Fund',
+                proposal_title: 'Title',
+                ballot_answer: '',
+                full_count: 2
+            },
+            {
+                proposal_id: '469008972006',
+                tx_hash: '0x6c2bd86d9af909a66f9257b8da78dcd1295d5d410e914a71f0ea10ad80fb9e874e2fa529dde24f220ea08081731732d8ca4815b307f8927224fe041f7fe6671e',
+                sequence: 100,
+                proposal_type: 'Fund',
+                proposal_title: 'Title',
+                ballot_answer: 'Reject',
+                full_count: 2
+            }
+        ]
+        assert.deepStrictEqual(response.data, expected)
+
+    });
+
+
     it("12. Vote [ Blank ]", async () => {
         // The KeyPair of the validator
         const validator_key = ValidatorKey.keys(3);

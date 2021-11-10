@@ -32,7 +32,6 @@ import {
     Amount,
 } from "boa-sdk-ts";
 import { BOASodium } from "boa-sodium-ts";
-import { expect } from "chai";
 import URI from "urijs";
 import { URL } from "url";
 import { CoinGeckoMarket } from "../src/modules/coinmarket/CoinGeckoMarket";
@@ -1014,5 +1013,89 @@ describe("Test of Stoa API Server", function () {
         const expected =
             "0x224c72ad879eccd38e9b612047633d235e47e329e68a69517822c4c234c53c2d7d81b0245cdb61857002d58a5e033c8720b462e20517f45a5516df432866b32f";
         assert.strictEqual(response.data, expected);
+    });
+
+    it("Test of the path /validator/missed_blocks/:address", async () => {
+        const uri = URI(stoa_addr)
+            .directory("/validator/missed_blocks")
+            .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku");
+
+        const response = await client.get(uri.toString());
+        const expected = [
+            { block_height: 5, signed: 1 },
+            { block_height: 4, signed: 1 },
+            { block_height: 3, signed: 1 },
+            { block_height: 2, signed: 1 },
+            { block_height: 1, signed: 0 }
+        ]
+        assert.deepStrictEqual(response.data, expected);
+    });
+
+    it("Test of the path /block/validators", async () => {
+        const uri = URI(stoa_addr)
+            .directory("/block/validators")
+            .addSearch('height', '2');
+
+        const response = await client.get(uri.toString());
+        const expected =
+            [
+                {
+                    address: 'boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t',
+                    utxo_key: '0x00bac393977fbd1e0edc70a34c7ca802dafe57f2b4a2aabf1adaac54892cb1cbae72cdeeb212904101382690d18d2d2c6ac99b83227ca73b307fde0807c4af03',
+                    pre_image: {
+                        height: '2',
+                        hash: '0x91b3ff3734b94e9636a28ce5fe1b197c5c26bf38f60388ee2d0855727ab1369368d454b9549c970bd1211524605ce9c2478c9d31eb72e102c83ddff7ec11be62'
+                    },
+                    slashed: 0,
+                    block_signed: 1,
+                    full_count: 5
+                },
+                {
+                    address: 'boa1xzvald7hxvgnzk50sy04ha7ezgyytxt5sgw323zy8dlj3ya2q40e6elltwq',
+                    utxo_key: '0x6fbcdb2573e0f5120f21f1875b6dc281c2eca3646ec2c39d703623d89b0eb83cd4b12b73f18db6bc6e8cbcaeb100741f6384c498ff4e61dd189e728d80fb9673',
+                    pre_image: {
+                        height: '2',
+                        hash: '0x799c7df5f478f1b39f9275e934ffa8cf2636759839afd6baefc1c0d9f65fff1c179b0e150fab3b069553820cafd15521429fcc51cad796da74efea3df4288a50'
+                    },
+                    slashed: 0,
+                    block_signed: 1,
+                    full_count: 5
+                },
+                {
+                    address: 'boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku',
+                    utxo_key: '0x70455f0b03f4b8d54b164b251e813b3fecd447d4bfe7b173ef86654429d2f5c3866d3ea406bf02163221a2d4029f0e0930a48304b2ea0f9277c2b32795c4005f',
+                    pre_image: {
+                        height: '2',
+                        hash: '0x30481a165e55c635d010d72df6b750f17e38b9b394f2b11de05bb0f85fffeb2880b4a41cec7a556812780cf794b76e815846fdb28e495f0ba288db6373867acf'
+                    },
+                    slashed: 0,
+                    block_signed: 1,
+                    full_count: 5
+                },
+                {
+                    address: 'boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn',
+                    utxo_key: '0x7fa36630b0d4a6be729fcab6db70c9b603f2da4c28feaa754f178b5cedb0174a9647fe8c08cdbfd244c6a5d23a7fdf89f1990e002c5565e1babbdb53193e95bc',
+                    pre_image: {
+                        height: '2',
+                        hash: '0xc747fd812a774196c6e2c888abc2b6aa143099ad1f6e792eab40f3fab3db5e591ff9240a4e9484282ee0097bd7a48a661a41c653f34fb2ec5be9088752a44cc0'
+                    },
+                    slashed: 0,
+                    block_signed: 1,
+                    full_count: 5
+                },
+                {
+                    address: 'boa1xzvald5dvy54j7yt2h5yzs2432h07rcn66j84t3lfdrlrwydwq78cz0nckq',
+                    utxo_key: '0xd935b5f1b616e6ec5c96502395e4b89683f526bdb8845f93a67bd329d44b1c2e5c185492e9610c0e3648609b3a9a5b21a35ee1a16f234c6415099803a97306ca',
+                    pre_image: {
+                        height: '2',
+                        hash: '0x9debdcfa75b6f3df5aeef082e4fc17243bb75bc1724de61e39fd023960ddcce4361027dc4c040703a013678b39045954ea7cb9fe0b9cb909c30b74fcd4c34a26'
+                    },
+                    slashed: 0,
+                    block_signed: 1,
+                    full_count: 5
+                }
+            ]
+
+        assert.deepStrictEqual(response.data, expected);
     });
 });
