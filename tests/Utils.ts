@@ -121,6 +121,21 @@ export const sample_data5 = (() => {
     return JSON.parse(data);
 })();
 
+export const sample_data6 = (() => {
+    const data: string = fs.readFileSync("tests/data/Block.6.sample1.json", "utf-8");
+    return JSON.parse(data);
+})();
+
+export const sample_data7 = (() => {
+    const data: string = fs.readFileSync("tests/data/Block.7.sample1.json", "utf-8");
+    return JSON.parse(data);
+})();
+
+export const sample_data8 = (() => {
+    const data: string = fs.readFileSync("tests/data/Block.8.sample1.json", "utf-8");
+    return JSON.parse(data);
+})();
+
 export const recovery_sample_data = (() => {
     const data: string = fs.readFileSync("tests/data/Recovery.blocks.sample10.json", "utf-8");
     return JSON.parse(data);

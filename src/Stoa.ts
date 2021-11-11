@@ -43,6 +43,7 @@ import { LedgerStorage } from "./modules/storage/LedgerStorage";
 import { WalletWatcherIO } from "./modules/wallet/WalletWatcherIO";
 import {
     ConvertTypes,
+    CurrencyType,
     DisplayTxType,
     IAccountChart,
     IAvgFee,
@@ -308,12 +309,12 @@ class Stoa extends WebService {
         this.app.get("/search/hash/:hash", isBlackList, this.searchHash.bind(this));
         this.app.get("/proposals/", isBlackList, this.getProposals.bind(this));
         this.app.get("/proposal/:proposal_id", isBlackList, this.getProposalById.bind(this));
-        this.app.get("/proposal/voting_details/:proposal_id", isBlackList, this.getVotingDetails.bind(this));
+        this.app.get("/proposal/voting-details/:proposal_id", isBlackList, this.getVotingDetails.bind(this));
         this.app.get("/validator/reward/:address", isBlackList, this.getValidatorReward.bind(this));
         this.app.get("/validator/ballot/:address", isBlackList, this.getValidatorBallots.bind(this));
-        this.app.get("/convert-to-usd", isBlackList, this.convertToUSD.bind(this));
+        this.app.get("/convert-to-currency", isBlackList, this.convertToCurrency.bind(this));
         this.app.get("/txhash/:utxo", isBlackList, this.getTransactionHash.bind(this));
-        this.app.get("/validator/missed_blocks/:address", isBlackList, this.getValidatorMissedBlocks.bind(this));
+        this.app.get("/validator/missed-blocks/:address", isBlackList, this.getValidatorMissedBlocks.bind(this));
         this.app.get("/block/validators", isBlackList, this.getBlockValidators.bind(this));
 
 
@@ -387,7 +388,7 @@ class Stoa extends WebService {
      * Returns a set of Validators based on the block height if there is a height.
      * If height was not provided the latest validator set is returned.
      */
-    private getValidators(req: express.Request, res: express.Response) {
+    private async getValidators(req: express.Request, res: express.Response) {
         if (req.query.height !== undefined && !Utils.isPositiveInteger(req.query.height.toString())) {
             res.status(400).send(`Invalid value for parameter 'height': ${req.query.height.toString()}`);
             return;
@@ -402,9 +403,10 @@ class Stoa extends WebService {
                 status: Status.Error,
                 responseTime: Number(moment().utc().unix() * 1000),
             });
-
+        const pagination: IPagination = await this.paginate(req, res);
         this.ledger_storage
-            .getValidatorsAPI(height, null)
+            .getValidatorsAPI(height, null, undefined, pagination.pageSize,
+                pagination.page)
             .then((rows: any[]) => {
                 // Nothing found
                 if (!rows.length) {
@@ -432,7 +434,11 @@ class Stoa extends WebService {
                         new Height(JSBI.BigInt(row.enrolled_at)),
                         new Hash(row.stake, Endian.Little).toString(),
                         row.full_count,
-                        preimage
+                        row.slashed ? row.slashed : 0,
+                        '',
+                        row.stake_amount,
+                        row.block_height,
+                        preimage,
                     );
                     out_put.push(validator);
                 }
@@ -506,7 +512,11 @@ class Stoa extends WebService {
                         new Height(JSBI.BigInt(row.enrolled_at)),
                         new Hash(row.stake, Endian.Little).toString(),
                         row.full_count,
-                        preimage
+                        row.slashed ? row.slashed : 0,
+                        '',
+                        row.stake_amount,
+                        row.block_height,
+                        preimage,
                     );
                     out_put.push(validator);
                 }
@@ -577,22 +587,29 @@ class Stoa extends WebService {
      */
     private getTransactionFees(req: express.Request, res: express.Response) {
         const size: string = req.params.tx_size.toString();
-
+        let currency: any = String(req.query.currency);
+        if (req.query.currency === undefined) {
+            currency = CurrencyType.USD;
+        }
         if (!Utils.isPositiveInteger(size)) {
             res.status(400).send(`Invalid value for parameter 'tx_size': ${size}`);
             return;
         }
-
         const tx_size = Number(size);
         this.ledger_storage
             .getFeeMeanDisparity()
-            .then((value: number) => {
+            .then(async (value: number) => {
                 const fees = FeeManager.getTxFee(tx_size, value);
+                let exchangeRate = await this.ledger_storage.getExchangeRate(currency);
+                let exchange = new Exchange(exchangeRate);
                 const data: ITransactionFee = {
                     tx_size,
                     high: fees[0].toString(),
+                    high_currency: exchange.convertAmountToCurrency(new Amount(Number(fees[0].toString()))),
                     medium: fees[1].toString(),
+                    medium_currency: exchange.convertAmountToCurrency(new Amount(Number(fees[1].toString()))),
                     low: fees[2].toString(),
+                    low_currency: exchange.convertAmountToCurrency(new Amount(Number(fees[2].toString())))
                 };
                 res.status(200).send(JSON.stringify(data));
             })
@@ -848,9 +865,9 @@ class Stoa extends WebService {
         filter_type =
             req.query.type !== undefined
                 ? req.query.type
-                      .toString()
-                      .split(",")
-                      .map((m) => ConvertTypes.toDisplayTxType(m))
+                    .toString()
+                    .split(",")
+                    .map((m) => ConvertTypes.toDisplayTxType(m))
                 : [0, 1, 2, 3];
 
         if (filter_type.find((m) => m < 0) !== undefined) {
@@ -971,9 +988,9 @@ class Stoa extends WebService {
         filter_type =
             req.query.type !== undefined
                 ? req.query.type
-                      .toString()
-                      .split(",")
-                      .map((m) => ConvertTypes.toDisplayTxType(m))
+                    .toString()
+                    .split(",")
+                    .map((m) => ConvertTypes.toDisplayTxType(m))
                 : [0, 1, 2, 3];
 
         if (filter_type.find((m) => m < 0) !== undefined) {
@@ -1107,10 +1124,11 @@ class Stoa extends WebService {
                     unlock_height: JSBI.BigInt(data.tx[0].unlock_height).toString(),
                     lock_height: JSBI.BigInt(data.tx[0].lock_height).toString(),
                     unlock_time: data.tx[0].unlock_time,
-                    payload: data.tx[0].payload !== null ? data.tx[0].payload.toString("base64") : "",
+                    payload: data.tx[0].payload !== null ? Buffer.byteLength(data.tx[0].payload).toString() : "",
                     senders: [],
                     receivers: [],
                     fee: JSBI.add(JSBI.BigInt(data.tx[0].tx_fee), JSBI.BigInt(data.tx[0].payload_fee)).toString(),
+                    dataFee: JSBI.BigInt(data.tx[0].tx_fee).toString()
                 };
 
                 for (const elem of data.senders)
@@ -1368,6 +1386,7 @@ class Stoa extends WebService {
                             enroll_sig: new Hash(row.enroll_sig, Endian.Little).toString(),
                             commitment: new Hash(row.commitment, Endian.Little).toString(),
                             full_count: row.full_count,
+                            cycle_length: this.validator_cycle
                         });
                     }
                     return res.status(200).send(JSON.stringify(enrollmentElementList));
@@ -1434,7 +1453,7 @@ class Stoa extends WebService {
                             height: JSBI.BigInt(row.block_height).toString(),
                             tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
                             amount: row.amount,
-                            type: row.type,
+                            type: lodash.capitalize(ConvertTypes.TxTypeToString(row.receiver[0].type)),
                             fee: row.tx_fee,
                             size: row.tx_size,
                             time: row.time_stamp,
@@ -1465,12 +1484,18 @@ class Stoa extends WebService {
      * @returns Returns statistics of BOA coin.
      */
     private getBOAStats(req: express.Request, res: express.Response) {
+        let currency: any = String(req.query.currency);
+        if (req.query.currency === undefined) {
+            currency = CurrencyType.USD;
+        }
         this.ledger_storage
             .getBOAStats()
-            .then((data: any[]) => {
+            .then(async (data: any[]) => {
                 if (!data[0]) {
                     return res.status(500).send("Failed to data lookup");
                 } else {
+                    let exchangeRate = await this.ledger_storage.getExchangeRate(currency);
+                    let exchange = new Exchange(exchangeRate);
                     const boaStats: IBOAStats = {
                         height: data[0].height,
                         transactions: data[0].transactions,
@@ -1480,6 +1505,7 @@ class Stoa extends WebService {
                         time_stamp: data[0].time_stamp,
                         circulating_supply: data[0].circulating_supply,
                         active_validators: data[0].active_validator,
+                        price: exchange.convertAmountToCurrency(new Amount(Number(data[0].circulating_supply)))
                     };
                     return res.status(200).send(JSON.stringify(boaStats));
                 }
@@ -1654,12 +1680,12 @@ class Stoa extends WebService {
      * This method Store the Coin market data to database.
      */
     public putCoinMarketStats(data: IMarketCap): Promise<any> {
-        return new Promise<any>((resolve, reject) => {
+        return new Promise<any>(async (resolve, reject) => {
             this.ledger_storage
                 .storeCoinMarket(data)
                 .then((result: any) => {
                     if (result.affectedRows) {
-                        logger.info(`CoinMarket: Data Update Completed`, {
+                        logger.info(`CoinMarket: Data Update Completed ${data.currency}`, {
                             operation: Operation.db,
                             height: HeightManager.height.toString(),
                             status: Status.Success,
@@ -1987,12 +2013,19 @@ class Stoa extends WebService {
             } else {
                 const blocklist: IBlock[] = [];
                 for (const row of data) {
+                    let validator_array = Array.from(row.validators);
+                    let validator_count = 0;
+                    validator_array.map(elem => {
+                        if (elem == 1) {
+                            ++validator_count;
+                        }
+                    });
                     blocklist.push({
                         height: JSBI.BigInt(row.height).toString(),
                         hash: new Hash(row.hash, Endian.Little).toString(),
                         merkle_root: new Hash(row.merkle_root, Endian.Little).toString(),
                         signature: new Hash(row.signature, Endian.Little).toString(),
-                        validators: row.validators.toString(),
+                        validators: validator_count,
                         tx_count: row.tx_count.toString(),
                         enrollment_count: row.enrollment_count.toString(),
                         time_stamp: row.time_stamp,
@@ -2019,6 +2052,13 @@ class Stoa extends WebService {
             } else if (data.length === 0) {
                 return res.status(204).send(`The data does not exist.`);
             } else {
+                let count = 0;
+                if (data[0].status === 'Pending') {
+                    count = data[0].full_count;
+                    count += data[data.length - 1].full_count;
+                } else {
+                    count = data[data.length - 1].full_count;
+                }
                 const transactionList: ITransaction[] = [];
                 for (const row of data) {
                     transactionList.push({
@@ -2030,7 +2070,7 @@ class Stoa extends WebService {
                         tx_size: JSBI.BigInt(row.tx_size).toString(),
                         time_stamp: row.time_stamp,
                         status: row.status,
-                        full_count: row.full_count,
+                        full_count: count,
                     });
                 }
                 return res.status(200).send(JSON.stringify(transactionList));
@@ -2045,8 +2085,9 @@ class Stoa extends WebService {
      * @returns Returns Coin market cap.
      */
     private async getCoinMarketCap(req: express.Request, res: express.Response) {
+        const currency = String(req.query.currency);
         this.ledger_storage
-            .getCoinMarketcap()
+            .getCoinMarketcap(currency)
             .then((rows: any) => {
                 if (rows[0]) {
                     return res.status(200).send(rows[0]);
@@ -2235,7 +2276,7 @@ class Stoa extends WebService {
                     if (updated)
                         logger.info(
                             `Update a blockHeader : ${block_header.toString()}, ` +
-                                `block height : ${block_header.height.toString()}`,
+                            `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -2246,7 +2287,7 @@ class Stoa extends WebService {
                     if (put)
                         logger.info(
                             `puts a blockHeader history : ${block_header.toString()}, ` +
-                                `block height : ${block_header.height.toString()}`,
+                            `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -2273,7 +2314,7 @@ class Stoa extends WebService {
                     if (changes)
                         logger.info(
                             `Saved a pre-image utxo : ${pre_image.utxo.toString().substr(0, 18)}, ` +
-                                `hash : ${pre_image.hash.toString()}, pre-image height : ${pre_image.height}`,
+                            `hash : ${pre_image.hash.toString()}, pre-image height : ${pre_image.height}`,
                             {
                                 operation: Operation.db,
                                 height: HeightManager.height.toString(),
@@ -2386,7 +2427,7 @@ class Stoa extends WebService {
                     res.status(400).send(`Page size cannot be a number greater than 100: ${pageSize}`);
                     return;
                 }
-            } else pageSize = 10;
+            } else pageSize = 30;
 
             return resolve({ page, pageSize });
         });
@@ -2403,7 +2444,7 @@ class Stoa extends WebService {
         const to = await Time.msToTime(Date.now());
         const from = await JSBI.subtract(JSBI.BigInt(to.seconds), JSBI.BigInt(60 * 60 * 24));
         const num = Number(from.toString());
-
+        const currency = String(req.query.currency);
         const dt = new Date(to.seconds * 1000);
         const df = new Date(num * 1000);
 
@@ -2415,7 +2456,7 @@ class Stoa extends WebService {
         });
 
         this.ledger_storage
-            .getCoinMarketChart(Number(from.toString()), to.seconds)
+            .getCoinMarketChart(Number(from.toString()), to.seconds, currency)
             .then(async (rows: any[]) => {
                 if (rows.length === 0) {
                     res.status(204).send("The data does not exist");
@@ -2573,13 +2614,18 @@ class Stoa extends WebService {
      */
     public async getBoaHolders(req: express.Request, res: express.Response) {
         const pagination: IPagination = await this.paginate(req, res);
+        const currency: string = String(req.query.currency);
+        if (currency === undefined) {
+            res.status(400).send(`Parameters 'currency' is not entered.`);
+            return;
+        }
         this.ledger_storage
             .getBOAHolders(pagination.pageSize, pagination.page)
             .then(async (data: any) => {
                 if (data.length === 0) {
                     return res.status(204).send(`The data does not exist.`);
                 } else {
-                    let exchangeRate = await this.ledger_storage.getExchangeRate();
+                    let exchangeRate = await this.ledger_storage.getExchangeRate(currency);
                     let exchange = new Exchange(exchangeRate);
                     const holderList: IBOAHolder[] = [];
                     for (const row of data.holders) {
@@ -2593,7 +2639,7 @@ class Stoa extends WebService {
                             total_spendable: row.total_spendable,
                             total_balance: row.total_balance,
                             percentage: Number((row.total_balance / data.circulating_supply) * 100).toFixed(4),
-                            value: exchange.convertAmountToUsd(new Amount(row.total_balance)),
+                            value: exchange.convertAmountToCurrency(new Amount(row.total_balance)),
                             full_count: row.full_count,
                         });
                     }
@@ -2729,7 +2775,11 @@ class Stoa extends WebService {
      */
     public async getBoaHolder(req: express.Request, res: express.Response) {
         const address = String(req.params.address);
-
+        const currency: string = String(req.query.currency);
+        if (currency === undefined) {
+            res.status(400).send(`Parameters 'currency' is not entered.`);
+            return;
+        }
         let holderAddress: PublicKey;
         try {
             holderAddress = new PublicKey(address);
@@ -2743,7 +2793,7 @@ class Stoa extends WebService {
                 if (data.length === 0) {
                     return res.status(204).send(`The data does not exist.`);
                 } else {
-                    let exchangeRate = await this.ledger_storage.getExchangeRate();
+                    let exchangeRate = await this.ledger_storage.getExchangeRate(currency);
                     let exchange = new Exchange(exchangeRate);
                     const holder: IBOAHolder = {
                         address: data.holder[0].address,
@@ -2755,7 +2805,7 @@ class Stoa extends WebService {
                         total_spendable: 0,
                         total_balance: data.holder[0].total_balance,
                         percentage: Number((data.holder[0].total_balance / data.circulating_supply) * 100).toFixed(4),
-                        value: exchange.convertAmountToUsd(new Amount(data.holder[0].total_balance)),
+                        value: exchange.convertAmountToCurrency(new Amount(data.holder[0].total_balance)),
                     };
                     return res.status(200).send(JSON.stringify(holder));
                 }
@@ -2772,7 +2822,7 @@ class Stoa extends WebService {
     }
 
     /**
-     * GET /voting_details/
+     * GET /voting-details/
      * Called when a request is received through the `/voting_details/` handler
      * The parameter `hash` is the hash of  transaction
      * Returns list of proposal voting details
@@ -2809,13 +2859,20 @@ class Stoa extends WebService {
     }
 
     /**
-     * GET /validator missed blocks/
+     * GET /validator/missed-blocks/
      * Called when a request is received through the `validator/missed_blocks/` handler
      * The parameter `address` is the address of  validator
      * Returns list of validator missed blocks
      */
     public async getValidatorMissedBlocks(req: express.Request, res: express.Response) {
         const address = req.params.address.toString();
+        let holderAddress: PublicKey;
+        try {
+            holderAddress = new PublicKey(address);
+        } catch (error) {
+            res.status(400).send(`Invalid value for parameter 'address': ${address}`);
+            return;
+        }
         this.ledger_storage
             .getValidatorMissedBlocks(address)
             .then((data: any[]) => {
@@ -2833,7 +2890,8 @@ class Stoa extends WebService {
     }
 
     /**
-     * GET block validators
+     * GET /block/validators
+     * The parameter `height` is the height and `hash` is the hash of block
      * Returns a set of Validators based on the block height.
      */
     public async getBlockValidators(req: express.Request, res: express.Response) {
@@ -2941,16 +2999,17 @@ class Stoa extends WebService {
         const pagination: IPagination = await this.paginate(req, res);
         this.ledger_storage
             .getProposals(pagination.pageSize, pagination.page)
-            .then((data: any[]) => {
+            .then((data: any) => {
                 if (data.length === 0) {
                     return res.status(204).send(`The data does not exist.`);
                 } else {
                     let proposals: IProposalList[] = [];
-                    for (const row of data) {
+                    for (const row of data.proposalData) {
                         proposals.push({
                             proposal_id: row.proposal_id,
                             proposal_title: row.proposal_title,
                             proposal_type: ConvertTypes.ProposalTypetoString(row.proposal_type),
+                            block_height: row.block_height,
                             fund_amount: row.fund_amount,
                             vote_start_height: row.vote_start_height,
                             vote_end_height: row.vote_end_height,
@@ -2960,6 +3019,13 @@ class Stoa extends WebService {
                             voting_start_date: row.voting_start_date,
                             voting_end_date: row.voting_end_date,
                             full_count: row.full_count,
+                            total_validators: row.total_validators,
+                            yes_percentage: Number(row.yes_percent).toFixed(2),
+                            no_percentage: Number(row.no_percent).toFixed(2),
+                            abstain_percentage: Number(row.abstain_percent).toFixed(2),
+                            not_voted_percentage: Number(row.not_voted_percent).toFixed(2),
+                            voted_percentage: Number(row.voted_percent).toFixed(2),
+                            proposal_result: row.proposal_result,
                         });
                     }
                     return res.status(200).send(JSON.stringify(proposals));
@@ -2991,13 +3057,14 @@ class Stoa extends WebService {
                 if (data.length === 0) {
                     return res.status(204).send(`The data does not exist.`);
                 } else {
-                    let proposal: IProposalAPI = {
+                    const proposal: IProposalAPI = {
                         proposal_title: data.proposalData[0].proposal_title,
                         proposal_id: data.proposalData[0].proposal_id,
                         detail: data.proposalData[0].detail,
                         proposal_tx_hash: new Hash(data.proposalData[0].tx_hash, Endian.Little).toString(),
                         fee_tx_hash: new Hash(data.proposalData[0].voting_fee_hash, Endian.Little).toString(),
                         proposer_name: data.proposalData[0].proposer_name,
+                        block_height: data.proposalData[0].block_height,
                         fund_amount: data.proposalData[0].fund_amount,
                         proposal_fee: data.proposalData[0].proposal_fee,
                         proposal_type: ConvertTypes.ProposalTypetoString(data.proposalData[0].proposal_type),
@@ -3014,7 +3081,18 @@ class Stoa extends WebService {
                         proposer_address: data.proposalData[0].proposer_address,
                         proposal_fee_address: data.proposalData[0].proposal_fee_address,
                         urls: data.url,
-                    };
+                        total_validators: data.total_validators,
+                        total_yes_voted: data.yes,
+                        total_no_voted: data.no,
+                        total_abstain_voted: data.abstain,
+                        total_not_voted: data.not_voted,
+                        yes_percentage: Number(data.yes_percent).toFixed(2),
+                        no_percentage: Number(data.no_percent).toFixed(2),
+                        abstain_percentage: Number(data.abstain_percent).toFixed(2),
+                        not_voted_percentage: Number(data.not_voted_percent).toFixed(2),
+                        voted_percentage: Number(data.voted_percent).toFixed(2),
+                        total_voted: data.voted
+                    }
                     return res.status(200).send(JSON.stringify(proposal));
                 }
             })
@@ -3057,7 +3135,7 @@ class Stoa extends WebService {
                             block_reward: row.total_reward,
                             block_fee: row.total_fee,
                             validator_reward: row.validator_reward,
-                            total_count: row.full_count,
+                            full_count: row.full_count,
                         });
                     }
                     return res.status(200).send(JSON.stringify(rewards));
@@ -3074,8 +3152,9 @@ class Stoa extends WebService {
             });
     }
 
-    /* Get validator ballots
-     * @returns Returns BOA Holder of the ledger.
+    /* Get /validator/ballots
+     * The parameter `address` of the validator
+     * @returns Returns validator ballots of the ledger.
      */
     public async getValidatorBallots(req: express.Request, res: express.Response) {
         const address = String(req.params.address);
@@ -3309,13 +3388,19 @@ class Stoa extends WebService {
     }
 
     /**
-     * GET /convert-to-usd
+     * GET /convert-to-currency
      * Called when a request is received through the `/convert-to-usd` handler
      * The parameter `amount` is the Boa amount.
+     * The parameter `currency` is the currency.
      * @returns Returns the USD amount against input BOA amount.
      */
-    public async convertToUSD(req: express.Request, res: express.Response) {
+    public async convertToCurrency(req: express.Request, res: express.Response) {
         let amount: number;
+        const currency: string = String(req.query.currency);
+        if (currency === undefined) {
+            res.status(400).send(`Parameters 'currency' is not entered.`);
+            return;
+        }
 
         if (req.query.amount === undefined) {
             res.status(400).send(`Parameters 'amount' is not entered.`);
@@ -3326,11 +3411,11 @@ class Stoa extends WebService {
         }
         amount = Number(req.query.amount);
         this.ledger_storage
-            .getExchangeRate()
+            .getExchangeRate(currency)
             .then((rate: number) => {
                 let exchange = new Exchange(rate);
-                let usd = exchange.convertBoaToUsd(amount);
-                return res.status(200).send({ amount: amount, USD: usd });
+                let currencyAmount = exchange.convertBoaToCurrency(amount)
+                return res.status(200).send({ amount: amount, currency: currencyAmount });
             })
             .catch((err) => {
                 logger.error("Failed to data lookup to the DB: " + err, {

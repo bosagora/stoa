@@ -39,15 +39,33 @@ export class ValidatorData implements IValidator {
     address: string;
     enrolled_at: Height;
     stake: string;
+    block_height: number;
+    stake_amount: number;
+    agora_version: string;
+    slashed: number;
     preimage: IPreimage;
     full_count: number;
 
-    constructor(address: string, enrolled_at: Height, stake: string, full_count: number, preimage: IPreimage) {
+    constructor(
+        address: string,
+        enrolled_at: Height,
+        stake: string,
+        full_count: number,
+        slashed: number,
+        agora_version: string,
+        stake_amount: number,
+        block_height: number,
+        preimage: IPreimage
+    ) {
         this.address = address;
         this.enrolled_at = enrolled_at;
         this.stake = stake;
         this.full_count = full_count;
         this.preimage = preimage;
+        this.block_height = block_height;
+        this.stake_amount = stake_amount;
+        this.agora_version = agora_version;
+        this.slashed = slashed;
     }
 }
 
@@ -346,6 +364,11 @@ export interface IBOAStats {
      * block timestamp
      */
     time_stamp: number;
+
+    /**
+     * Price
+     */
+    price?: number;
 }
 
 /**
@@ -456,6 +479,11 @@ export interface IBlockEnrollment {
      * total number of records
      */
     full_count: number;
+
+    /**
+     * Validator cycle length
+     */
+    cycle_length: number;
 }
 
 /**
@@ -581,6 +609,11 @@ export interface ITxOverview {
      * Transaction fee
      */
     fee: string;
+
+    /**
+     * Data fee
+     */
+    dataFee: string;
 }
 
 /**
@@ -1021,14 +1054,30 @@ export interface ITransactionFee {
     medium: string;
 
     /**
+     * The transaction fee for a medium speed in currency
+     */
+    medium_currency: number;
+
+    /**
      * The transaction fee for a high speed
      */
     high: string;
 
     /**
+     * The transaction fee for a high speed in currency
+     */
+    high_currency: number;
+
+    /**
      * The transaction fee for a low speed
      */
     low: string;
+
+    /**
+     * The transaction fee for a low speed in currency
+     */
+    low_currency: number;
+
 }
 
 /**
@@ -1068,7 +1117,7 @@ export interface IBlock {
     /**
      * validators of block
      */
-    validators: string;
+    validators: number;
 
     /**
      * signature of block
@@ -1094,6 +1143,15 @@ export interface IBlock {
      * total number of records
      */
     full_count: number;
+}
+
+/**
+ * Define the types of currency for the coin market
+ */
+export enum CurrencyType {
+    USD = "usd",
+    KRW = "krw",
+    CNY = "cny",
 }
 
 /**
@@ -1192,6 +1250,11 @@ export interface IMarketCap {
      * Last updated time
      */
     last_updated_at: number;
+
+    /**
+     * Currency
+     */
+    currency: string;
 }
 
 /**
@@ -1376,6 +1439,11 @@ export interface IProposalList {
     proposal_type: string;
 
     /**
+     * Proposal height
+     */
+    block_height: number;
+
+    /**
      * Proposal fund amount
      */
     fund_amount: number;
@@ -1416,9 +1484,45 @@ export interface IProposalList {
     voting_end_date: number;
 
     /**
+     * Proposal result
+     */
+    proposal_result: string;
+
+    /**
      * Full count
      */
     full_count: number;
+
+    /**
+     * Total Validators Count
+     */
+    total_validators: number;
+
+    /**
+     * Voted yes Percentage
+     */
+    yes_percentage: string;
+
+    /**
+     * Voted No Percentage
+     */
+    no_percentage: string;
+
+    /**
+     * Voted Abstain Percentage
+     */
+    abstain_percentage: string;
+
+    /**
+     * Voted Percentage
+     */
+    voted_percentage: string;
+
+    /**
+     * Not Voted Percentage
+     */
+    not_voted_percentage: string;
+
 }
 
 /**
@@ -1441,6 +1545,11 @@ export interface IProposalAPI {
     proposal_type: string;
 
     /**
+     * Proposal height
+     */
+    block_height: number;
+
+    /**
      * Proposal fund amount
      */
     fund_amount: number;
@@ -1458,12 +1567,7 @@ export interface IProposalAPI {
     /**
      * Proposal status
      */
-    proposal_status: string;
-
-    /**
-     * Proposal result
-     */
-    proposal_result: string;
+    proposal_status: number;
 
     /**
      * Proposal date
@@ -1534,8 +1638,68 @@ export interface IProposalAPI {
      * Attachment URLs
      */
     urls: string[];
-}
 
+    /**
+     * Proposal result
+     */
+    proposal_result: string;
+
+    /**
+     * Total Validators Count
+     */
+    total_validators: number;
+
+    /**
+     * Voted Yes Count
+     */
+    total_yes_voted: number;
+
+    /**
+     * Voted No Count
+     */
+    total_no_voted: number;
+
+    /**
+     * Voted Abstain Count
+     */
+    total_abstain_voted: number;
+
+    /**
+     * Voted Not Voted Count
+     */
+    total_not_voted: number;
+
+    /**
+     * Voted yes Percentage
+     */
+    yes_percentage: string;
+
+    /**
+     * Voted No Percentage
+     */
+    no_percentage: string;
+
+    /**
+     * Voted Abstain Percentage
+     */
+    abstain_percentage: string;
+
+    /**
+     * Voted Not Voted Percentage
+     */
+    not_voted_percentage: string;
+
+    /**
+     * Voted Voted Percentage
+     */
+    voted_percentage: string;
+
+    /**
+     * Voted Voted numbers
+     */
+    total_voted: number;
+
+}
 /**
  * Interface for new Transaction Emit
  */
