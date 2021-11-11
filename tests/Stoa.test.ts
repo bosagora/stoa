@@ -501,7 +501,7 @@ describe("Test of Stoa API Server", () => {
     it("Test of the path /validators Slashed a validator", async () => {
         const uri = URI(stoa_private_addr).directory("block_externalized");
         await client.post(uri.toString(), { block: sample_data2 });
-        delay(2000);
+        await delay(2000);
 
         const slash_uri = URI(stoa_addr).directory("validators").setSearch("height", "2");
         // Slashed a validator
