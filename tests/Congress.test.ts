@@ -54,9 +54,17 @@ import {
     BlockManager,
     delay,
     FakeBlacklistMiddleware,
+    market_cap_history_sample_data,
+    market_cap_sample_data,
     sample_data,
+    sample_data2,
+    sample_data3,
+    sample_data6,
+    sample_data7,
+    sample_data8,
     TestAgora,
     TestClient,
+    TestGeckoServer,
     TestStoa,
     TestVoteraServer,
     ValidatorKey,
@@ -65,6 +73,8 @@ import {
 
 import * as assert from "assert";
 import moment from "moment";
+import { CoinGeckoMarket } from "../src/modules/coinmarket/CoinGeckoMarket";
+import { CoinMarketService } from "../src/modules/service/CoinMarketService";
 
 describe("Test BlockManager", () => {
     let key_position = 6;
@@ -749,20 +759,29 @@ describe("Test for the creation a proposal and the voting", () => {
     it("Test for path /proposals", async () => {
         const uri = URI(stoa_addr).directory("/proposals");
         const response = await client.get(uri.toString());
-        let expected = {
-            proposal_id: "469008972006",
-            proposal_title: "Title",
-            proposal_type: "Fund",
+        let expected =
+        {
+            proposal_id: '469008972006',
+            proposal_title: 'Title',
+            proposal_type: 'Fund',
+            block_height: 5,
             fund_amount: 10000000000000,
             vote_start_height: 10,
             vote_end_height: 15,
             proposal_status: "Voting",
             proposal_date: 1627015766,
-            proposer_name: "test",
+            proposer_name: 'test',
             voting_start_date: moment("2021-07-26").utc().unix(),
             voting_end_date: moment("2021-08-02").utc().unix(),
             full_count: 1,
-        };
+            total_validators: 9,
+            yes_percentage: '0.00',
+            no_percentage: '0.00',
+            abstain_percentage: '0.00',
+            not_voted_percentage: '88.89',
+            voted_percentage: '11.11',
+            proposal_result: 'Pending'
+        }
         assert.deepStrictEqual(response.data[0], expected);
     });
 
@@ -770,14 +789,13 @@ describe("Test for the creation a proposal and the voting", () => {
         const uri = URI(stoa_addr).directory("/proposal").filename("469008972006");
         const response = await client.get(uri.toString());
         let expected = {
-            proposal_title: "Title",
-            proposal_id: "469008972006",
-            detail: "Description Make better world!",
-            proposal_tx_hash:
-                "0xaa4e80fc3a47eecd7ddd24a1d644ede65825fb2d4121782b5591e799dbe97455581f94df9d1e4f6ae45d0e8af94a71715645a5052b8bfc193bc615bd0cf11b27",
-            fee_tx_hash:
-                "0x8b6a2e1ecc3616ad63c73d606c4019407ebfd06a122519e7bd88d99af92d19d9621323d7c2e68593053a570522b6bc8575d1ee45a74ee38726f297a5ce08e33d",
-            proposer_name: "test",
+            proposal_title: 'Title',
+            proposal_id: '469008972006',
+            detail: 'Description Make better world!',
+            proposal_tx_hash: '0xaa4e80fc3a47eecd7ddd24a1d644ede65825fb2d4121782b5591e799dbe97455581f94df9d1e4f6ae45d0e8af94a71715645a5052b8bfc193bc615bd0cf11b27',
+            fee_tx_hash: '0x8b6a2e1ecc3616ad63c73d606c4019407ebfd06a122519e7bd88d99af92d19d9621323d7c2e68593053a570522b6bc8575d1ee45a74ee38726f297a5ce08e33d',
+            proposer_name: 'test',
+            block_height: 5,
             fund_amount: 10000000000000,
             proposal_fee: 100000000000,
             proposal_type: "Fund",
@@ -785,8 +803,7 @@ describe("Test for the creation a proposal and the voting", () => {
             voting_start_date: moment("2021-07-26").utc().unix(),
             vote_end_height: 15,
             voting_end_date: moment("2021-08-02").utc().unix(),
-            proposal_status: "Voting",
-            proposal_result: "Pending",
+            proposal_status: 'Voting',
             proposal_date: 1627015766,
             pre_evaluation_start_time: moment("2021-08-18").utc().unix(),
             pre_evaluation_end_time: moment("2021-08-18").utc().unix(),
@@ -795,10 +812,22 @@ describe("Test for the creation a proposal and the voting", () => {
             proposal_fee_address: "boa1xrgq6607dulyra5r9dw0ha6883va0jghdzk67er49h3ysm7k222ruhh7400",
             urls: [
                 {
-                    url: "https://s3.ap-northeast-2.amazonaws.com/com.kosac.defora.beta.upload-image/BOASCAN_Requirements_Documentation_Version1_0_EN_copy_fb69a8a7d5.pdf",
-                },
+                    url: 'https://s3.ap-northeast-2.amazonaws.com/com.kosac.defora.beta.upload-image/BOASCAN_Requirements_Documentation_Version1_0_EN_copy_fb69a8a7d5.pdf'
+                }
             ],
-        };
+            proposal_result: "Pending",
+            total_validators: 9,
+            total_yes_voted: 0,
+            total_no_voted: 0,
+            total_abstain_voted: 0,
+            total_not_voted: 8,
+            yes_percentage: '0.00',
+            no_percentage: '0.00',
+            abstain_percentage: '0.00',
+            not_voted_percentage: '88.89',
+            voted_percentage: '11.11',
+            total_voted: 1
+        }
         assert.deepStrictEqual(response.data, expected);
     });
 
@@ -910,74 +939,6 @@ describe("Test for the creation a proposal and the voting", () => {
         assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
         assert.strictEqual(block_manager.getLastBlockHeight(), 11);
     });
-
-    it("Test for path /proposal/voting_details/:proposal_id", async () => {
-        const uri = URI(stoa_addr)
-            .directory("/proposal/voting_details")
-            .filename("469008972006");
-        const response = await client.get(uri.toString());
-        const expected = [
-            {
-                address: 'boa1xrvald3zmehvpcmxqm0kn6wkaqyry7yj3cd8h975ypzlyz00sczpzhsk308',
-                sequence: 100,
-                hash: '0xb50239827c03f06fe954dd855ea598a7e12752ef836ffad0dbfd8b27b12cca7f9ca95be1abd29c9ba0062e369fdd58d81ddd8e793536eb6221dc7b2e7c84a07b',
-                ballot_answer: 'Reject',
-                voting_time: 1609464600,
-                voter_utxo_key: '0xd9cafaa2453e8d85239ea216facd0ad9baab0e4514ac6efa631c09bb90ad720051c20409648be4856aa69753b7a325f30f33532b3086df2a2457a7cc24079cc7',
-                full_count: 3
-            },
-            {
-                address: 'boa1xrvald3zmehvpcmxqm0kn6wkaqyry7yj3cd8h975ypzlyz00sczpzhsk308',
-                sequence: 100,
-                hash: '0x6124bad415e93f8c6d7f191064a51aaa090a53577aa5a3ba9209ccd504b8fc2a720fdc2b8edee66df7cf4b7f7aeacb4c3de402483bdd11206ab3d071427c1993',
-                ballot_answer: '',
-                voting_time: 1609465200,
-                voter_utxo_key: '0xee579d4e98a8bd98ff3a2cc4ce922c0c36691f6fcabedaa7970b31a1793ab85848bfae6a589d8f71dba930398eecea69b5efd8ce4df72fbb3e385aebc694136f',
-                full_count: 3
-            },
-            {
-                address: 'boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku',
-                sequence: 100,
-                hash: '0x6044f897f327257c1669877d299d087a3fb4090a0758994df2352de706969ba601ae4e004f80cbd35f54cd0d4708602362ea2e40ae0e33ac5bbbc67aebe1e930',
-                ballot_answer: '',
-                voting_time: 1609465800,
-                voter_utxo_key: '0x8189be74c2b2a7ce09fe079790095d4b96c286c692fe0bb93ce4ef1115166a08db36091b812c147e81402e48e1c8b7f4ec257b106e958d37f203813de8702d1c',
-                full_count: 3
-            }
-        ]
-        assert.deepStrictEqual(response.data, expected)
-
-    });
-
-    it("Test for path /validator/ballot/:address", async () => {
-        const uri = URI(stoa_addr)
-            .directory("/validator/ballot")
-            .filename("boa1xrvald3zmehvpcmxqm0kn6wkaqyry7yj3cd8h975ypzlyz00sczpzhsk308");
-        const response = await client.get(uri.toString());
-        const expected = [
-            {
-                proposal_id: '469008972006',
-                tx_hash: '0x47a965faef1e41b03db61ea6e3a5f0eca43be1d47ecaeeaa8c3156b521405070c74574f2dd8a26885635496ecbc153688ef63e70871520bdf7f309aae3dd5fbc',
-                sequence: 100,
-                proposal_type: 'Fund',
-                proposal_title: 'Title',
-                ballot_answer: '',
-                full_count: 2
-            },
-            {
-                proposal_id: '469008972006',
-                tx_hash: '0x6c2bd86d9af909a66f9257b8da78dcd1295d5d410e914a71f0ea10ad80fb9e874e2fa529dde24f220ea08081731732d8ca4815b307f8927224fe041f7fe6671e',
-                sequence: 100,
-                proposal_type: 'Fund',
-                proposal_title: 'Title',
-                ballot_answer: 'Reject',
-                full_count: 2
-            }
-        ]
-        assert.deepStrictEqual(response.data, expected)
-
-    });
-
 
     it("12. Vote [ Blank ]", async () => {
         // The KeyPair of the validator
@@ -1763,5 +1724,176 @@ describe("Test for the removing of validators", () => {
             validators.map((m) => m.address.toString()),
             validators_simulation.map((m) => m.toString())
         );
+    });
+});
+
+describe("Test of Proposal API", () => {
+    const agora_addr: URL = new URL("http://localhost:2800");
+    const stoa_addr: URL = new URL("http://localhost:3800");
+    const stoa_private_addr: URL = new URL("http://localhost:4800");
+    const votera_addr: URL = new URL("http://127.0.0.1:1337/");
+    let stoa_server: TestStoa;
+    let agora_server: TestAgora;
+    const client = new TestClient();
+    let testDBConfig: IDatabaseConfig;
+    let gecko_server: TestGeckoServer;
+    let gecko_market: CoinGeckoMarket;
+    let coinMarketService: CoinMarketService;
+    let votera_server: TestVoteraServer;
+    let votera_service: VoteraService;
+
+    before("Bypassing middleware check", () => {
+        FakeBlacklistMiddleware.assign();
+    });
+
+    before("Wait for the package libsodium to finish loading", async () => {
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
+        await SodiumHelper.init();
+    });
+
+    before("Start a fake Agora", () => {
+        return new Promise<void>((resolve, reject) => {
+            agora_server = new TestAgora(agora_addr.port, sample_data, resolve);
+        });
+    });
+
+    before("Start a fake TestCoinGeckoServer", () => {
+        return new Promise<void>(async (resolve, reject) => {
+            gecko_server = new TestGeckoServer("7876", market_cap_sample_data, market_cap_history_sample_data, resolve);
+            gecko_market = new CoinGeckoMarket(gecko_server);
+        });
+    });
+
+    before("Start a fake TestCoinGecko", () => {
+        coinMarketService = new CoinMarketService(gecko_market);
+    });
+
+    before("Start a fake votera Server and Service", () => {
+        return new Promise<void>(async (resolve, reject) => {
+            votera_server = new TestVoteraServer(1337, votera_addr, resolve);
+            votera_service = new VoteraService(votera_addr);
+        });
+    });
+    before("Create TestStoa", () => {
+        testDBConfig = MockDBConfig();
+        stoa_server = new TestStoa(
+            testDBConfig,
+            agora_addr,
+            parseInt(stoa_addr.port, 10),
+            votera_service,
+            coinMarketService
+        );
+        return stoa_server.createStorage();
+    });
+
+    before("Start TestStoa", async () => {
+        await stoa_server.start();
+        await stoa_server.voteraService?.stop();
+        return;
+    });
+
+    after("Stop Stoa and Agora server instances", async () => {
+        await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
+        await stoa_server.stop();
+        await votera_server.stop();
+        await gecko_server.stop();
+        await agora_server.stop();
+    });
+
+    it("Test of writing proposal transaction", async () => {
+        const url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(url, { block: sample_data6 });
+        await delay(200);
+        await client.post(url, { block: sample_data3 });
+        await delay(200);
+
+
+        //  Verifies that all sent blocks are wrote
+        const uri = URI(stoa_addr).directory("/block_height");
+        const response = await client.get(uri.toString());
+
+        assert.strictEqual(response.status, 200);
+        assert.strictEqual(response.data, "3");
+    });
+
+    it("Start votera service for syncing proposal's meta information", async () => {
+        await stoa_server.voteraService?.start(stoa_server, 2);
+        await delay(200);
+
+        await stoa_server.voteraService?.stop();
+    });
+
+    it("Test of writing ballot transaction", async () => {
+        const url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(url, { block: sample_data7 });
+        await delay(200);
+        await client.post(url, { block: sample_data8 });
+        await delay(200);
+
+
+        //  Verifies that all sent blocks are wrote
+        const uri = URI(stoa_addr).directory("/block_height");
+        const response = await client.get(uri.toString());
+
+        assert.strictEqual(response.status, 200);
+        assert.strictEqual(response.data, "5");
+    });
+
+    it("Test for path /proposal/voting-details/:proposal_id", async () => {
+        const uri = URI(stoa_addr)
+            .directory("/proposal/voting-details")
+            .filename("469008972006");
+        const response = await client.get(uri.toString());
+        const expected = [
+            {
+                address: 'boa1xzval3ah8z7ewhuzx6mywveyr79f24w49rdypwgurhjkr8z2ke2mycftv9n',
+                sequence: 110,
+                hash: '0x917dba7433947d00cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a',
+                ballot_answer: 'Reject',
+                voting_time: 1609460400,
+                voter_utxo_key: '0x7c6a860d44950ce5beda5fba3f87c10e1f6c0d813fbff85ac8ec017a6a0526874415b411139e6182c94aa1c25d61726aa5424bca767b291b369939dccb1d40fa',
+                full_count: 2
+            },
+            {
+                address: 'boa1xzval3ah8z7ewhuzx6mywveyr79f24w49rdypwgurhjkr8z2ke2mycftv9n',
+                sequence: 115,
+                hash: '0x917dba7435947d00cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a',
+                ballot_answer: 'Reject',
+                voting_time: 1609460400,
+                voter_utxo_key: '0xa1ba2fff6f0c22c6108e72818165f1912fad064367a0070edfe3e6e19e53dfbe24597eaa4aefe4684421657a7bb57bd5f6f883dff957735ae300f70f0b2c9327',
+                full_count: 2
+            }
+        ]
+        assert.deepStrictEqual(response.data, expected)
+
+    });
+
+    it("Test for path /validator/ballot/:address", async () => {
+        const uri = URI(stoa_addr)
+            .directory("/validator/ballot")
+            .filename("boa1xzval3ah8z7ewhuzx6mywveyr79f24w49rdypwgurhjkr8z2ke2mycftv9n");
+        const response = await client.get(uri.toString());
+        const expected = [
+            {
+                proposal_id: '469008972006',
+                tx_hash: '0x917dba7435947d00cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a',
+                sequence: 115,
+                proposal_type: 'Fund',
+                proposal_title: 'Save the world',
+                ballot_answer: 'Reject',
+                full_count: 2
+            },
+            {
+                proposal_id: '469008972006',
+                tx_hash: '0x917dba7433947d00cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a',
+                sequence: 110,
+                proposal_type: 'Fund',
+                proposal_title: 'Save the world',
+                ballot_answer: 'Reject',
+                full_count: 2
+            }
+        ]
+        assert.deepStrictEqual(response.data, expected)
+
     });
 });

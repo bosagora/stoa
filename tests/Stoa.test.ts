@@ -31,12 +31,15 @@ import {
     createBlock,
     delay,
     FakeBlacklistMiddleware,
+    market_cap_history_sample_data,
+    market_cap_sample_data,
     sample_data,
     sample_data2,
     sample_data3,
     sample_preImageInfo,
     TestAgora,
     TestClient,
+    TestGeckoServer,
     TestStoa,
     TestVoteraServer,
 } from "./Utils";
@@ -49,6 +52,9 @@ import { AgoraClient } from "../src/modules/agora/AgoraClient";
 import { IDatabaseConfig } from "../src/modules/common/Config";
 import { MockDBConfig } from "./TestConfig";
 import { VoteraService } from "../src/modules/service/VoteraService";
+import { CoinGeckoMarket } from "../src/modules/coinmarket/CoinGeckoMarket";
+import { CoinMarketService } from "../src/modules/service/CoinMarketService";
+import { CurrencyType, IMarketCap } from "../src/Types";
 
 describe("Test of Stoa API Server", () => {
     const agora_addr: URL = new URL("http://localhost:2802");
@@ -515,9 +521,15 @@ describe("Test of the path /utxo", () => {
     const stoa_addr: URL = new URL("http://localhost:3803");
     const stoa_private_addr: URL = new URL("http://localhost:4803");
     let stoa_server: TestStoa;
+    const votera_addr: URL = new URL("http://127.0.0.1:1337/");
     let agora_server: TestAgora;
     const client = new TestClient();
     let testDBConfig: IDatabaseConfig;
+    let gecko_server: TestGeckoServer;
+    let gecko_market: CoinGeckoMarket;
+    let coinMarketService: CoinMarketService;
+    let votera_server: TestVoteraServer;
+    let votera_service: VoteraService;
 
     before("Bypassing middleware check", () => {
         FakeBlacklistMiddleware.assign();
@@ -534,9 +546,32 @@ describe("Test of the path /utxo", () => {
         });
     });
 
+    before("Start a fake TestCoinGeckoServer", () => {
+        return new Promise<void>(async (resolve, reject) => {
+            gecko_server = new TestGeckoServer("7876", market_cap_sample_data, market_cap_history_sample_data, resolve);
+            gecko_market = new CoinGeckoMarket(gecko_server);
+        });
+    });
+    before("Start a fake votera Server and Service", () => {
+        return new Promise<void>(async (resolve, reject) => {
+            votera_server = new TestVoteraServer(1337, votera_addr, resolve);
+            votera_service = new VoteraService(votera_addr);
+        });
+    });
+
+    before("Start a fake TestCoinGecko", () => {
+        coinMarketService = new CoinMarketService(gecko_market);
+    });
+
     before("Create TestStoa", async () => {
         testDBConfig = await MockDBConfig();
-        stoa_server = new TestStoa(testDBConfig, agora_addr, stoa_addr.port);
+        stoa_server = new TestStoa(
+            testDBConfig,
+            agora_addr,
+            stoa_addr.port,
+            votera_service,
+            coinMarketService
+        );
         await stoa_server.createStorage();
         await stoa_server.start();
     });
@@ -544,6 +579,8 @@ describe("Test of the path /utxo", () => {
     after("Stop Stoa and Agora server instances", async () => {
         await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
         await stoa_server.stop();
+        await votera_server.stop();
+        await gecko_server.stop();
         await agora_server.stop();
     });
 
@@ -593,6 +630,12 @@ describe("Test of the path /utxo", () => {
 
         const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 0);
+    });
+
+    it("Test for putCoinMarketStats method", async () => {
+        const data: IMarketCap = await gecko_market.fetch(CurrencyType.USD);
+        const response = await stoa_server.putCoinMarketStats(data);
+        assert.deepStrictEqual(response.affectedRows, 1);
     });
 
     it("Test getting fees of the transaction", async () => {

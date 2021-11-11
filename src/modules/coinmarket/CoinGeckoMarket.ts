@@ -12,7 +12,7 @@
 
 *******************************************************************************/
 
-import { IMarketCap } from "../../Types";
+import { IMarketCap, CurrencyType } from "../../Types";
 import { logger } from "../common/Logger";
 import { Operation, Status } from "../common/LogOperation";
 import moment from "moment";
@@ -25,7 +25,7 @@ export interface CoinMarket {
     /**
      * Method to fetch from coin market
      */
-    fetch(): Promise<any>;
+    fetch(currency: string): Promise<any>;
 }
 
 export class CoinGeckoMarket implements CoinMarket {
@@ -71,31 +71,61 @@ export class CoinGeckoMarket implements CoinMarket {
      * of the returned Promise is called and if an error occurs the `.catch`
      * is called with an error.
      */
-    public fetch(): Promise<any> {
+    public fetch(currency: string): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             const marketCap = await this.coinMarketClient.simplePrice({
                 ids: "bosagora",
-                vs_currencies: "usd",
+                vs_currencies: currency,
                 include_market_cap: true,
                 include_24hr_vol: true,
                 include_24hr_change: true,
                 include_last_updated_at: true,
             });
             if (marketCap) {
-                const coinMarketStat: IMarketCap = {
-                    price: marketCap.bosagora.usd,
-                    market_cap: marketCap.bosagora.usd_market_cap,
-                    vol_24h: marketCap.bosagora.usd_24h_vol,
-                    change_24h: marketCap.bosagora.usd_24h_change,
-                    last_updated_at: marketCap.bosagora.last_updated_at,
-                };
-                logger.info(`CoinMarket: Data Fetch Completed at ${marketCap.bosagora.last_updated_at}`, {
+                switch (currency) {
+                    case CurrencyType.USD:
+                        const coinMarketStatUSD: IMarketCap = {
+                            price: marketCap.bosagora.usd,
+                            market_cap: marketCap.bosagora.usd_market_cap,
+                            vol_24h: marketCap.bosagora.usd_24h_vol,
+                            change_24h: marketCap.bosagora.usd_24h_change,
+                            last_updated_at: marketCap.bosagora.last_updated_at,
+                            currency: currency,
+                        };
+                        resolve(coinMarketStatUSD);
+                        break;
+                    case CurrencyType.KRW:
+                        const coinMarketStatKRW: IMarketCap = {
+                            price: marketCap.bosagora.krw,
+                            market_cap: marketCap.bosagora.krw_market_cap,
+                            vol_24h: marketCap.bosagora.krw_24h_vol,
+                            change_24h: marketCap.bosagora.krw_24h_change,
+                            last_updated_at: marketCap.bosagora.last_updated_at,
+                            currency: currency,
+                        };
+                        resolve(coinMarketStatKRW);
+                        break;
+
+                    case CurrencyType.CNY:
+                        const coinMarketStatCNY: IMarketCap = {
+                            price: marketCap.bosagora.cny,
+                            market_cap: marketCap.bosagora.cny_market_cap,
+                            vol_24h: marketCap.bosagora.cny_24h_vol,
+                            change_24h: marketCap.bosagora.cny_24h_change,
+                            last_updated_at: marketCap.bosagora.last_updated_at,
+                            currency: currency,
+                        };
+                        resolve(coinMarketStatCNY);
+                        break;
+                    default:
+                        break;
+                }
+                logger.info(`CoinMarket: Data Fetch For ${currency} Completed at ${marketCap.bosagora.last_updated_at}`, {
                     operation: Operation.coin_market_data_sync,
                     height: "",
                     status: Status.Success,
                     responseTime: Number(moment().utc().unix() * 1000),
                 });
-                return resolve(coinMarketStat);
             } else {
                 logger.error(`Fail to fetch CoinMarket data`, {
                     operation: Operation.coin_market_data_sync,
@@ -114,11 +144,11 @@ export class CoinGeckoMarket implements CoinMarket {
      * of the returned Promise is called and if an error occurs the `.catch`
      * is called with an error.
      */
-    public recover(from: number, to: number): Promise<IMarketCap[]> {
+    public recover(from: number, to: number, currency: string): Promise<IMarketCap[]> {
         return new Promise<IMarketCap[]>(async (resolve, reject) => {
             const marketCapChartRange = await this.coinMarketClient.coinIdMarketChartRange({
                 id: "bosagora",
-                vs_currency: "usd",
+                vs_currency: currency,
                 from,
                 to,
             });
@@ -130,9 +160,10 @@ export class CoinGeckoMarket implements CoinMarket {
                         last_updated_at: price[0],
                         market_cap: marketCapChartRange.market_caps[index][1],
                         vol_24h: marketCapChartRange.total_volumes[index][1],
+                        currency: currency
                     });
                 });
-                logger.info(`CoinMarket: Data recover Completed: length(${coinMarketStat.length})`, {
+                logger.info(`CoinMarket: Data recover Completed: length(${coinMarketStat.length}) for ${currency}`, {
                     operation: Operation.coin_market_data_sync,
                     height: "",
                     status: Status.Success,

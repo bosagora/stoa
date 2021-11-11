@@ -31,9 +31,9 @@ export class Exchange {
      * @param boa The BOA unit amount.
      * @returns Amount in USD.
      */
-    public convertBoaToUsd(boa: number): number {
-        let usdAmount = Number(bigDecimal.multiply(this.exchangeRate, boa)).toFixed(3);
-        return Number(usdAmount);
+    public convertBoaToCurrency(boa: number): number {
+        let currencyAmount = Number(bigDecimal.multiply(this.exchangeRate, boa)).toFixed(6);
+        return Number(currencyAmount);
     }
 
     /**
@@ -41,7 +41,7 @@ export class Exchange {
      * @param amount The amount.
      * @returns Amount in USD.
      */
-    public convertAmountToUsd(amount: Amount): number {
-        return this.convertBoaToUsd(Number(AmountConverter.toString(amount, false)));
+    public convertAmountToCurrency(amount: Amount): number {
+        return this.convertBoaToCurrency(Number(AmountConverter.toString(amount, false)));
     }
 }
