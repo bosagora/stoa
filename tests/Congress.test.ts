@@ -1476,6 +1476,7 @@ describe("Test for the creation a proposal and the voting", () => {
     });
 
     it("Test case for ballots", async () => {
+        await delay(1000);
         let ballot_answer1 = await stoa_server.ledger_storage.getProposalBallots("469008972006", undefined, 11);
         let ballot_answer2 = await stoa_server.ledger_storage.getProposalBallots("469008972006", undefined, 12);
         let ballot_answer3 = await stoa_server.ledger_storage.getProposalBallots("469008972006", undefined, 13);
@@ -1486,9 +1487,213 @@ describe("Test for the creation a proposal and the voting", () => {
     });
 
     it("Test for [ Reject ] Proposals", async () => {
+        await delay(1000);
         const uri = URI(stoa_addr).directory("/proposal").filename("469008972006");
 
         const response = await client.get(uri.toString());
         assert.deepStrictEqual(response.data.proposal_result, ProposalResult.REJECTED);
+    });
+});
+
+describe("Test for the removing of validators", () => {
+    const agora_addr: URL = new URL("http://localhost:2861");
+    const stoa_addr: URL = new URL("http://localhost:3861");
+    const stoa_private_addr: URL = new URL("http://localhost:4861");
+    const client = new TestClient();
+
+    let stoa_server: TestStoa;
+    let agora_server: TestAgora;
+    let testDBConfig: IDatabaseConfig;
+
+    let block_manager: BlockManager;
+    let gen_keypair: KeyPair;
+    let boa_client: BOAClient;
+    let utxo_provider: UTXOProvider;
+    let key_position = 6;
+
+    before("Bypassing middleware check", () => {
+        FakeBlacklistMiddleware.assign();
+    });
+
+    before("Wait for the package libsodium to finish loading", async () => {
+        if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
+        await SodiumHelper.init();
+    });
+
+    before("Start a fake Agora", () => {
+        return new Promise<void>((resolve, reject) => {
+            agora_server = new TestAgora(agora_addr.port, [], resolve);
+        });
+    });
+
+    before("Create TestStoa", async () => {
+        testDBConfig = await MockDBConfig();
+        stoa_server = new TestStoa(testDBConfig, agora_addr, stoa_addr.port);
+        await stoa_server.createStorage();
+    });
+
+    before("Start TestStoa", async () => {
+        await stoa_server.start();
+    });
+
+    after("Stop Stoa and Agora server instances", async () => {
+        await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
+        await stoa_server.stop();
+        await agora_server.stop();
+    });
+
+    before("Create component", async () => {
+        block_manager = new BlockManager();
+        gen_keypair = KeyPair.fromSeed(new SecretKey("SDN7BBGE6Z6OQM3K4PACLTZUJ5QX4AY4QPDQ2JJ2JCFWCG2OIYYALIRY"));
+        boa_client = new BOAClient(stoa_addr.toString(), agora_addr.toString());
+        utxo_provider = new UTXOProvider(gen_keypair.address, boa_client);
+        await delay(500);
+    });
+
+    async function createDummyBlock(expected_block_height: number): Promise<Block> {
+        const new_block = block_manager.saveBlock([], []);
+        const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(block_url, { block: new_block });
+        await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
+        assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
+        assert.strictEqual(block_manager.getLastBlockHeight(), expected_block_height);
+        return new_block;
+    }
+
+    async function createEnrollment(): Promise<{ enrollments: Enrollment[]; tx: Transaction }> {
+        const add_validators: KeyPair[] = [];
+        iota(key_position, key_position + 1).forEach((n) => {
+            add_validators.push(ValidatorKey.keys(n));
+            key_position++;
+        });
+
+        // One validator requests UTXO to freeze 40,000 boa each.
+        const utxos = await utxo_provider.getUTXO(Amount.multiply(BOA(40_000), add_validators.length));
+
+        // Create a frozen transaction
+        const tx = block_manager.addValidators(add_validators, utxos, gen_keypair);
+        const enrollments: Enrollment[] = [];
+
+        // Create new validator's enrollment data.
+        const new_enrolls = block_manager.getNewEnrollment();
+        assert.strictEqual(new_enrolls.length, 1);
+        enrollments.push(...new_enrolls);
+
+        // Create enrollment data of validators who need re-enrollment among already registered validators.
+        const re_enrolls = block_manager.getReEnrollment();
+
+        enrollments.push(...re_enrolls);
+
+        // Arrange the enrollment data in ascending order of UTXO.
+        enrollments.sort((a, b) => {
+            return Utils.compareBuffer(a.utxo_key.data, b.utxo_key.data);
+        });
+        return { enrollments, tx };
+    }
+
+    it("Test of the path /block_externalized", async () => {
+        const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(block_url, { block: Block.reviver("", sample_data[0]) });
+        await delay(500);
+    });
+
+    it("Create a block 1 - Dummy", async () => {
+        const new_block = await createDummyBlock(1);
+        const validators_simulation = block_manager.getValidators(block_manager.getLastBlockHeight());
+        assert.strictEqual(new_block.header.height.toString(), "1");
+        assert.strictEqual(new_block.header.validators.length, 6);
+        assert.strictEqual(validators_simulation.length, new_block.header.validators.length);
+    });
+
+    it("Create a block 2 - Add one enrollment", async () => {
+        const enroll = await createEnrollment();
+        const new_block = block_manager.saveBlock([enroll.tx], enroll.enrollments);
+
+        const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(block_url, { block: new_block });
+        await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
+        assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
+        assert.strictEqual(block_manager.getLastBlockHeight(), 2);
+
+        const validators_simulation = block_manager.getValidators(block_manager.getLastBlockHeight());
+        assert.strictEqual(new_block.header.height.toString(), "2");
+        assert.strictEqual(new_block.header.validators.length, 6);
+        assert.strictEqual(validators_simulation.length, new_block.header.validators.length);
+
+        const validators = await boa_client.getAllValidators(block_manager.getLastBlockHeight());
+        assert.strictEqual(validators.length, validators_simulation.length);
+        assert.deepStrictEqual(
+            validators.map((m) => m.address.toString()),
+            validators_simulation.map((m) => m.toString())
+        );
+    });
+
+    it("Create a block 3 - Add one enrollment", async () => {
+        const enroll = await createEnrollment();
+        const new_block = block_manager.saveBlock([enroll.tx], enroll.enrollments);
+
+        const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(block_url, { block: new_block });
+        await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
+        assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
+        assert.strictEqual(block_manager.getLastBlockHeight(), 3);
+
+        const validators_simulation = block_manager.getValidators(block_manager.getLastBlockHeight());
+        assert.strictEqual(new_block.header.height.toString(), "3");
+        assert.strictEqual(new_block.header.validators.length, 7);
+        assert.strictEqual(validators_simulation.length, new_block.header.validators.length);
+
+        const validators = await boa_client.getAllValidators(block_manager.getLastBlockHeight());
+        assert.strictEqual(validators.length, validators_simulation.length);
+        assert.deepStrictEqual(
+            validators.map((m) => m.address.toString()),
+            validators_simulation.map((m) => m.toString())
+        );
+    });
+
+    it("Create a block 4 - Dummy", async () => {
+        const new_block = await createDummyBlock(4);
+        const validators_simulation = block_manager.getValidators(block_manager.getLastBlockHeight());
+        assert.strictEqual(new_block.header.height.toString(), "4");
+        assert.strictEqual(new_block.header.validators.length, 8);
+        assert.strictEqual(validators_simulation.length, new_block.header.validators.length);
+
+        const validators = await boa_client.getAllValidators(block_manager.getLastBlockHeight());
+        assert.strictEqual(validators.length, validators_simulation.length);
+        assert.deepStrictEqual(
+            validators.map((m) => m.address.toString()),
+            validators_simulation.map((m) => m.toString())
+        );
+    });
+
+    it("Create a block 5 - Slash one validator", async () => {
+        block_manager.removeValidator(ValidatorKey.keys(0));
+        const new_block = await createDummyBlock(5);
+        const validators_simulation = block_manager.getValidators(block_manager.getLastBlockHeight());
+        assert.strictEqual(new_block.header.height.toString(), "5");
+        assert.strictEqual(new_block.header.validators.length, 8);
+        assert.strictEqual(validators_simulation.length, new_block.header.validators.length);
+
+        const validators = await boa_client.getAllValidators(block_manager.getLastBlockHeight());
+        assert.strictEqual(validators.length, validators_simulation.length);
+        assert.deepStrictEqual(
+            validators.map((m) => m.address.toString()),
+            validators_simulation.map((m) => m.toString())
+        );
+    });
+
+    it("Create a block 6 - Dummy", async () => {
+        const new_block = await createDummyBlock(6);
+        const validators_simulation = block_manager.getValidators(block_manager.getLastBlockHeight());
+        assert.strictEqual(new_block.header.height.toString(), "6");
+        assert.strictEqual(new_block.header.validators.length, 7);
+        assert.strictEqual(validators_simulation.length, new_block.header.validators.length);
+
+        const validators = await boa_client.getAllValidators(block_manager.getLastBlockHeight());
+        assert.strictEqual(validators.length, validators_simulation.length);
+        assert.deepStrictEqual(
+            validators.map((m) => m.address.toString()),
+            validators_simulation.map((m) => m.toString())
+        );
     });
 });
