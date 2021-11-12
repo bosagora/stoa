@@ -39,7 +39,6 @@ import {
     TxPayloadFee,
     Utils,
     UTXOProvider,
-    VoterCard,
 } from "boa-sdk-ts";
 import { BOASodium } from "boa-sodium-ts";
 import { SmartBuffer } from "smart-buffer";
@@ -61,10 +60,10 @@ import {
 } from "./Utils";
 
 import * as assert from "assert";
-import moment from 'moment';
+import moment from "moment";
+import { ProposalResult, ProposalStatus } from "../src/modules/common/enum";
 import { VoteraService } from "../src/modules/service/VoteraService";
 import { IMetaData, IPendingProposal, IProposal, IValidatorByBlock } from "../src/Types";
-import { ProposalResult, ProposalStatus } from "../src/modules/common/enum";
 
 describe("Test for the addition of validators", () => {
     const agora_addr: URL = new URL("http://localhost:2861");
@@ -422,7 +421,6 @@ describe("Test for the creation a proposal and the voting", () => {
     });
 
     it("4. Create a block with 1 enrollment", async () => {
-
         let enroll = await createEnrollment();
         const bits = block_manager.getBitMask();
         const new_block = block_manager.saveBlock([enroll.tx], enroll.enrollments, bits);
@@ -431,7 +429,6 @@ describe("Test for the creation a proposal and the voting", () => {
         await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
         assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
         assert.strictEqual(block_manager.getLastBlockHeight(), 4);
-
     });
 
     it("5. Create a proposal", async () => {
@@ -519,7 +516,6 @@ describe("Test for the creation a proposal and the voting", () => {
         assert.strictEqual(result[0].ballot_answer, BallotData.REJECT);
         assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
         assert.strictEqual(block_manager.getLastBlockHeight(), 9);
-
     });
 
     it("10. Vote", async () => {
@@ -562,10 +558,10 @@ describe("Test for the creation a proposal and the voting", () => {
                 proposal_fee_address: m.proposer_address,
                 proposal_status: m.proposal_status,
                 proposal_result: m.proposal_result,
-                data_collection_status: m.data_collection_status
+                data_collection_status: m.data_collection_status,
             });
-            assert.strictEqual(data[0].proposal_status, 'Voting');
-        })
+            assert.strictEqual(data[0].proposal_status, "Voting");
+        });
     });
 
     it("Start votera service for syncing proposal's meta information", async () => {
@@ -644,72 +640,69 @@ describe("Test for the creation a proposal and the voting", () => {
     });
 
     it("Test for [ Pending ] proposals", async () => {
-        const uri = URI(stoa_addr)
-            .directory("/proposal")
-            .filename("469008972006");
+        const uri = URI(stoa_addr).directory("/proposal").filename("469008972006");
         const response = await client.get(uri.toString());
         assert.deepStrictEqual(response.data.proposal_result, ProposalResult.PENDING);
     });
 
     it("Test for path /proposals", async () => {
-        const uri = URI(stoa_addr)
-            .directory("/proposals")
+        const uri = URI(stoa_addr).directory("/proposals");
         const response = await client.get(uri.toString());
         let expected = {
-            proposal_id: '469008972006',
-            proposal_title: 'Title',
-            proposal_type: 'Fund',
+            proposal_id: "469008972006",
+            proposal_title: "Title",
+            proposal_type: "Fund",
             fund_amount: 10000000000000,
             vote_start_height: 10,
             vote_end_height: 15,
-            proposal_status: 'Voting',
+            proposal_status: "Voting",
             proposal_date: 1627015766,
-            proposer_name: 'test',
-            voting_start_date: moment('2021-07-26').utc().unix(),
-            voting_end_date: moment('2021-08-02').utc().unix(),
-            full_count: 1
-        }
+            proposer_name: "test",
+            voting_start_date: moment("2021-07-26").utc().unix(),
+            voting_end_date: moment("2021-08-02").utc().unix(),
+            full_count: 1,
+        };
         assert.deepStrictEqual(response.data[0], expected);
     });
 
     it("Test for path /proposal/:proposal_id", async () => {
-        const uri = URI(stoa_addr)
-            .directory("/proposal")
-            .filename("469008972006");
+        const uri = URI(stoa_addr).directory("/proposal").filename("469008972006");
         const response = await client.get(uri.toString());
         let expected = {
-            proposal_title: 'Title',
-            proposal_id: '469008972006',
-            detail: 'Description Make better world!',
-            proposal_tx_hash: '0xaa4e80fc3a47eecd7ddd24a1d644ede65825fb2d4121782b5591e799dbe97455581f94df9d1e4f6ae45d0e8af94a71715645a5052b8bfc193bc615bd0cf11b27',
-            fee_tx_hash: '0x8b6a2e1ecc3616ad63c73d606c4019407ebfd06a122519e7bd88d99af92d19d9621323d7c2e68593053a570522b6bc8575d1ee45a74ee38726f297a5ce08e33d',
-            proposer_name: 'test',
+            proposal_title: "Title",
+            proposal_id: "469008972006",
+            detail: "Description Make better world!",
+            proposal_tx_hash:
+                "0xaa4e80fc3a47eecd7ddd24a1d644ede65825fb2d4121782b5591e799dbe97455581f94df9d1e4f6ae45d0e8af94a71715645a5052b8bfc193bc615bd0cf11b27",
+            fee_tx_hash:
+                "0x8b6a2e1ecc3616ad63c73d606c4019407ebfd06a122519e7bd88d99af92d19d9621323d7c2e68593053a570522b6bc8575d1ee45a74ee38726f297a5ce08e33d",
+            proposer_name: "test",
             fund_amount: 10000000000000,
             proposal_fee: 100000000000,
-            proposal_type: 'Fund',
+            proposal_type: "Fund",
             vote_start_height: 10,
-            voting_start_date: moment('2021-07-26').utc().unix(),
+            voting_start_date: moment("2021-07-26").utc().unix(),
             vote_end_height: 15,
-            voting_end_date: moment('2021-08-02').utc().unix(),
-            proposal_status: 'Voting',
+            voting_end_date: moment("2021-08-02").utc().unix(),
+            proposal_status: "Voting",
             proposal_result: "Pending",
             proposal_date: 1627015766,
             pre_evaluation_start_time: moment("2021-08-18").utc().unix(),
             pre_evaluation_end_time: moment("2021-08-18").utc().unix(),
             ave_pre_evaluation_score: 7,
-            proposer_address: 'boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn',
-            proposal_fee_address: 'boa1xrgq6607dulyra5r9dw0ha6883va0jghdzk67er49h3ysm7k222ruhh7400',
+            proposer_address: "boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn",
+            proposal_fee_address: "boa1xrgq6607dulyra5r9dw0ha6883va0jghdzk67er49h3ysm7k222ruhh7400",
             urls: [
                 {
-                    url: 'https://s3.ap-northeast-2.amazonaws.com/com.kosac.defora.beta.upload-image/BOASCAN_Requirements_Documentation_Version1_0_EN_copy_fb69a8a7d5.pdf'
-                }
-            ]
-        }
+                    url: "https://s3.ap-northeast-2.amazonaws.com/com.kosac.defora.beta.upload-image/BOASCAN_Requirements_Documentation_Version1_0_EN_copy_fb69a8a7d5.pdf",
+                },
+            ],
+        };
         assert.deepStrictEqual(response.data, expected);
     });
 
     it("Test for getValidatorByBlock()", async () => {
-        let validators = await stoa_server.ledger_storage.getValidatorsByBlock(new Height('5'));
+        let validators = await stoa_server.ledger_storage.getValidatorsByBlock(new Height("5"));
         let validator_by_block: IValidatorByBlock[] = [];
         validators.forEach((m) => {
             validator_by_block.push({
@@ -719,76 +712,84 @@ describe("Test for the creation a proposal and the voting", () => {
                 utxo_key: new Hash(m.utxo_key, Endian.Little).toString(),
                 signed: m.signed,
                 slashed: m.slashed,
-            })
+            });
         });
 
         let expected = [
             {
                 block_height: 5,
                 enrolled_height: 0,
-                address: 'boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn',
-                utxo_key: '0xbc953e1953dbbbbae165552c000e99f189df7f3ad2a5c644d2bfcd088cfe47964a17b0ed5c8b174f75aafe284cdaf203b6c970dbb6ca9f72bea6d4b03066a37f',
+                address: "boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn",
+                utxo_key:
+                    "0xbc953e1953dbbbbae165552c000e99f189df7f3ad2a5c644d2bfcd088cfe47964a17b0ed5c8b174f75aafe284cdaf203b6c970dbb6ca9f72bea6d4b03066a37f",
                 signed: 1,
-                slashed: 0
+                slashed: 0,
             },
             {
                 block_height: 5,
                 enrolled_height: 3,
-                address: 'boa1xrq3466a97zrr7ljtj2zmcq7ktvcx3l9dzmznxd86mssp7wau4t45jkmtpy',
-                utxo_key: '0xc46c97589e7484ff88f13e250a6b844b3ec2e90ab994a8fb6ecd271916d53590da155082da6a25faa6e6bcd4ad58602da2137691ffa1621022651dc30e109e57',
+                address: "boa1xrq3466a97zrr7ljtj2zmcq7ktvcx3l9dzmznxd86mssp7wau4t45jkmtpy",
+                utxo_key:
+                    "0xc46c97589e7484ff88f13e250a6b844b3ec2e90ab994a8fb6ecd271916d53590da155082da6a25faa6e6bcd4ad58602da2137691ffa1621022651dc30e109e57",
                 signed: 1,
-                slashed: 0
+                slashed: 0,
             },
             {
                 block_height: 5,
                 enrolled_height: 4,
-                address: 'boa1xrq3k668jcmnypk2te5j929s6pk6zmtld9d02d99ysn83vzdmpyf70sv9gp',
-                utxo_key: '0x39f3da6a9a4c8c6e7469ad85af29eb71b63663552ab144866ba030a1727e0db8f4f7915fe7a8fdefbad5a355e867ec6bfe1276731410c2c1e806f5b5c90943f7',
+                address: "boa1xrq3k668jcmnypk2te5j929s6pk6zmtld9d02d99ysn83vzdmpyf70sv9gp",
+                utxo_key:
+                    "0x39f3da6a9a4c8c6e7469ad85af29eb71b63663552ab144866ba030a1727e0db8f4f7915fe7a8fdefbad5a355e867ec6bfe1276731410c2c1e806f5b5c90943f7",
                 signed: 1,
-                slashed: 0
+                slashed: 0,
             },
             {
                 block_height: 5,
                 enrolled_height: 0,
-                address: 'boa1xrvald3zmehvpcmxqm0kn6wkaqyry7yj3cd8h975ypzlyz00sczpzhsk308',
-                utxo_key: '0x076b50dcc436000112a7723363810f331fb7b7ee786de3ee96c4a79bba8b508bc9c299ca3aa205ed6d0ac317f46613185027007c922381067bc5b90afd82eae0',
+                address: "boa1xrvald3zmehvpcmxqm0kn6wkaqyry7yj3cd8h975ypzlyz00sczpzhsk308",
+                utxo_key:
+                    "0x076b50dcc436000112a7723363810f331fb7b7ee786de3ee96c4a79bba8b508bc9c299ca3aa205ed6d0ac317f46613185027007c922381067bc5b90afd82eae0",
                 signed: 1,
-                slashed: 0
+                slashed: 0,
             },
             {
                 block_height: 5,
                 enrolled_height: 0,
-                address: 'boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku',
-                utxo_key: '0x5f00c49527b3c277920feab20483a430090e9f02d4a221321602bf06a43e6d86c3f5d229446586ef73b1e7bfd447d4ec3f3b811e254b164bd5b8f4030b5f4570',
+                address: "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku",
+                utxo_key:
+                    "0x5f00c49527b3c277920feab20483a430090e9f02d4a221321602bf06a43e6d86c3f5d229446586ef73b1e7bfd447d4ec3f3b811e254b164bd5b8f4030b5f4570",
                 signed: 1,
-                slashed: 0
+                slashed: 0,
             },
             {
                 block_height: 5,
                 enrolled_height: 0,
-                address: 'boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t',
-                utxo_key: '0x03afc40708de7f303ba77c22839bc96a2c2d8dd190263801419012b2eecd72aecbb12c8954acda1abfaaa2b4f257feda02a87c4ca370dc0e1ebd7f9793c3ba00',
+                address: "boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t",
+                utxo_key:
+                    "0x03afc40708de7f303ba77c22839bc96a2c2d8dd190263801419012b2eecd72aecbb12c8954acda1abfaaa2b4f257feda02a87c4ca370dc0e1ebd7f9793c3ba00",
                 signed: 1,
-                slashed: 0
+                slashed: 0,
             },
             {
                 block_height: 5,
                 enrolled_height: 0,
-                address: 'boa1xzvald5dvy54j7yt2h5yzs2432h07rcn66j84t3lfdrlrwydwq78cz0nckq',
-                utxo_key: '0xca0673a903980915644c236fa1e15ea3215b9a3a9b6048360e0c61e99254185c2e1c4bd429d37ba6935f84b8bd26f58396b8e4952350965cece616b6f1b535d9',
+                address: "boa1xzvald5dvy54j7yt2h5yzs2432h07rcn66j84t3lfdrlrwydwq78cz0nckq",
+                utxo_key:
+                    "0xca0673a903980915644c236fa1e15ea3215b9a3a9b6048360e0c61e99254185c2e1c4bd429d37ba6935f84b8bd26f58396b8e4952350965cece616b6f1b535d9",
                 signed: 1,
-                slashed: 0
+                slashed: 0,
             },
             {
                 block_height: 5,
                 enrolled_height: 0,
-                address: 'boa1xzvald7hxvgnzk50sy04ha7ezgyytxt5sgw323zy8dlj3ya2q40e6elltwq',
-                utxo_key: '0x7396fb808d729e18dd614eff98c484631f7400b1aebc8c6ebcb68df1732bb1d43cb80e9bd82336709dc3c26e64a3ecc281c26d5b87f1210f12f5e07325dbbc6f',
+                address: "boa1xzvald7hxvgnzk50sy04ha7ezgyytxt5sgw323zy8dlj3ya2q40e6elltwq",
+                utxo_key:
+                    "0x7396fb808d729e18dd614eff98c484631f7400b1aebc8c6ebcb68df1732bb1d43cb80e9bd82336709dc3c26e64a3ecc281c26d5b87f1210f12f5e07325dbbc6f",
                 signed: 1,
-                slashed: 0
-            }
-        ]
-        assert.deepStrictEqual(validator_by_block, expected)
+                slashed: 0,
+            },
+        ];
+        assert.deepStrictEqual(validator_by_block, expected);
     });
 
     it("11. Vote [ No ]", async () => {
@@ -796,7 +797,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const validator_key = ValidatorKey.keys(2);
         const app_name = "Votera";
         const proposal_id = "469008972006";
-        let vote = new Vote(boa_client, block_manager, validator_key, app_name, proposal_id, BallotData.NO, 100, 22)
+        let vote = new Vote(boa_client, block_manager, validator_key, app_name, proposal_id, BallotData.NO, 100, 22);
         const tx = await vote.CreateVote();
         assert.ok(tx !== undefined);
 
@@ -808,7 +809,6 @@ describe("Test for the creation a proposal and the voting", () => {
         await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
         assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
         assert.strictEqual(block_manager.getLastBlockHeight(), 11);
-
     });
 
     it("12. Vote [ Blank ]", async () => {
@@ -816,7 +816,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const validator_key = ValidatorKey.keys(3);
         const app_name = "Votera";
         const proposal_id = "469008972006";
-        let vote = new Vote(boa_client, block_manager, validator_key, app_name, proposal_id, BallotData.BLANK, 100, 22)
+        let vote = new Vote(boa_client, block_manager, validator_key, app_name, proposal_id, BallotData.BLANK, 100, 22);
         const tx = await vote.CreateVote();
         assert.ok(tx !== undefined);
 
@@ -828,7 +828,6 @@ describe("Test for the creation a proposal and the voting", () => {
         await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
         assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
         assert.strictEqual(block_manager.getLastBlockHeight(), 12);
-
     });
 
     it("13. Vote [ Yes ]", async () => {
@@ -848,7 +847,6 @@ describe("Test for the creation a proposal and the voting", () => {
         await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
         assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
         assert.strictEqual(block_manager.getLastBlockHeight(), 13);
-
     });
 
     it("14. Vote by new enrolled validators", async () => {
@@ -857,12 +855,14 @@ describe("Test for the creation a proposal and the voting", () => {
         let validator_key: KeyPair[] = [ValidatorKey.keys(6), ValidatorKey.keys(7), ValidatorKey.keys(8)];
         const app_name = "Votera";
         const proposal_id = "469008972006";
-        await Promise.all(validator_key.map(async (element) => {
-            let vote = new Vote(boa_client, block_manager, element, app_name, proposal_id, BallotData.YES, 100, 22)
-            const tx = await vote.CreateVote();
-            assert.ok(tx !== undefined);
-            txs.push(tx);
-        }))
+        await Promise.all(
+            validator_key.map(async (element) => {
+                let vote = new Vote(boa_client, block_manager, element, app_name, proposal_id, BallotData.YES, 100, 22);
+                const tx = await vote.CreateVote();
+                assert.ok(tx !== undefined);
+                txs.push(tx);
+            })
+        );
         const bits = block_manager.getBitMask();
         const new_block = block_manager.saveBlock(txs, [], bits);
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
@@ -889,7 +889,6 @@ describe("Test for the creation a proposal and the voting", () => {
         await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
         assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
         assert.strictEqual(block_manager.getLastBlockHeight(), 15);
-
     });
 
     it("16. Reject Votes that are recieved after voting_end_height", async () => {
@@ -943,9 +942,9 @@ describe("Test for the creation a proposal and the voting", () => {
                 proposal_fee_address: m.proposer_address,
                 proposal_status: m.proposal_status,
                 proposal_result: m.proposal_result,
-                data_collection_status: m.data_collection_status
+                data_collection_status: m.data_collection_status,
             });
-            assert.strictEqual(data[0].proposal_status, 'CountingVotes');
+            assert.strictEqual(data[0].proposal_status, "CountingVotes");
         });
     });
 
@@ -1027,15 +1026,12 @@ describe("Test for the creation a proposal and the voting", () => {
     });
 
     it("Test for [ Passed ] Proposals", async () => {
-        const uri = URI(stoa_addr)
-            .directory("/proposal")
-            .filename("469008972006");
+        const uri = URI(stoa_addr).directory("/proposal").filename("469008972006");
 
         const response = await client.get(uri.toString());
         assert.deepStrictEqual(response.data.proposal_result, ProposalResult.PASSED);
     });
 });
-
 
 describe("Test for the creation a proposal and the voting", () => {
     const agora_addr: URL = new URL("http://localhost:2862");
@@ -1286,7 +1282,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const validator_key = ValidatorKey.keys(2);
         const app_name = "Votera";
         const proposal_id = "469008972006";
-        let vote = new Vote(boa_client, block_manager, validator_key, app_name, proposal_id, BallotData.NO, 100, 22)
+        let vote = new Vote(boa_client, block_manager, validator_key, app_name, proposal_id, BallotData.NO, 100, 22);
         const tx = await vote.CreateVote();
         assert.ok(tx !== undefined);
 
@@ -1298,7 +1294,6 @@ describe("Test for the creation a proposal and the voting", () => {
         await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
         assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
         assert.strictEqual(block_manager.getLastBlockHeight(), 11);
-
     });
 
     it("12. Vote [ No ]", async () => {
@@ -1306,7 +1301,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const validator_key = ValidatorKey.keys(3);
         const app_name = "Votera";
         const proposal_id = "469008972006";
-        let vote = new Vote(boa_client, block_manager, validator_key, app_name, proposal_id, BallotData.NO, 100, 22)
+        let vote = new Vote(boa_client, block_manager, validator_key, app_name, proposal_id, BallotData.NO, 100, 22);
         const tx = await vote.CreateVote();
         assert.ok(tx !== undefined);
 
@@ -1318,7 +1313,6 @@ describe("Test for the creation a proposal and the voting", () => {
         await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
         assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
         assert.strictEqual(block_manager.getLastBlockHeight(), 12);
-
     });
 
     it("13. Vote [ Blank ]", async () => {
@@ -1326,7 +1320,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const validator_key = ValidatorKey.keys(4);
         const app_name = "Votera";
         const proposal_id = "469008972006";
-        let vote = new Vote(boa_client, block_manager, validator_key, app_name, proposal_id, BallotData.BLANK, 100, 22)
+        let vote = new Vote(boa_client, block_manager, validator_key, app_name, proposal_id, BallotData.BLANK, 100, 22);
         const tx = await vote.CreateVote();
         assert.ok(tx !== undefined);
 
@@ -1338,7 +1332,6 @@ describe("Test for the creation a proposal and the voting", () => {
         await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
         assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
         assert.strictEqual(block_manager.getLastBlockHeight(), 13);
-
     });
 
     it("14-15 Create a dummy block", async () => {
@@ -1346,7 +1339,6 @@ describe("Test for the creation a proposal and the voting", () => {
         await createDummyBlock(15);
         await block_manager.waitFor(15, boa_client);
     });
-
 
     it("16~19 Create a dummy block", async () => {
         await createDummyBlock(16);
@@ -1409,9 +1401,7 @@ describe("Test for the creation a proposal and the voting", () => {
     });
 
     it("Test for [ Reject ] Proposals", async () => {
-        const uri = URI(stoa_addr)
-            .directory("/proposal")
-            .filename("469008972006");
+        const uri = URI(stoa_addr).directory("/proposal").filename("469008972006");
 
         const response = await client.get(uri.toString());
         assert.deepStrictEqual(response.data.proposal_result, ProposalResult.REJECTED);
