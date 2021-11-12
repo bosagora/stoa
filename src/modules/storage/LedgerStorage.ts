@@ -973,28 +973,6 @@ export class LedgerStorage extends Storages {
 
                 for (let idx = 0; idx < block.header.preimages.length; idx++) {
                     try {
-                        const pre_preimage: any[] = await getBlockPreimages(
-                            this,
-                            JSBI.subtract(block.header.height.value, JSBI.BigInt(1)),
-                            new Hash(validators[idx].utxo_key, Endian.Little)
-                        );
-
-                        // Compare hashing the previous block pre-images with the pre-images
-                        if (pre_preimage.length > 0 && block.header.height.value >= validators[idx].enrolled_at + 2) {
-                            const pre_preimage_hash: Hash = new Hash(pre_preimage[0].preimage_hash, Endian.Little);
-                            const preimage_hash: Hash = hashFull(block.header.preimages[idx]);
-                            if (Buffer.compare(pre_preimage_hash.data, preimage_hash.data) > 0) {
-                                logger.error("Verification failed of the previous pre-image and the pre-image.", {
-                                    operation: Operation.block_sync,
-                                    height: block.header.height.toString(),
-                                    status: Status.Error,
-                                    responseTime: Number(moment().utc().unix() * 1000),
-                                });
-                                resolve();
-                                break;
-                            }
-                        }
-
                         if (block.header.preimages[idx].isNull()) {
                             await updateValidatorSlashing(
                                 this,
@@ -1003,6 +981,30 @@ export class LedgerStorage extends Storages {
                                 validators[idx].enrolled_at
                             );
                         } else {
+                            const pre_preimage: any[] = await getBlockPreimages(
+                                this,
+                                JSBI.subtract(block.header.height.value, JSBI.BigInt(1)),
+                                new Hash(validators[idx].utxo_key, Endian.Little)
+                            );
+
+                            // Compare hashing the previous block pre-images with the pre-images
+                            if (
+                                pre_preimage.length > 0 &&
+                                block.header.height.value >= validators[idx].enrolled_at + 2
+                            ) {
+                                const pre_preimage_hash: Hash = new Hash(pre_preimage[0].preimage_hash, Endian.Little);
+                                const preimage_hash: Hash = hashFull(block.header.preimages[idx]);
+                                if (!Hash.equal(pre_preimage_hash, preimage_hash)) {
+                                    logger.error("Verification failed of the previous pre-image and the pre-image.", {
+                                        operation: Operation.block_sync,
+                                        height: block.header.height.toString(),
+                                        status: Status.Error,
+                                        responseTime: Number(moment().utc().unix() * 1000),
+                                    });
+                                    resolve();
+                                    break;
+                                }
+                            }
                             await save_preimage(
                                 this,
                                 block.header.height,
@@ -1434,7 +1436,7 @@ export class LedgerStorage extends Storages {
                             total_size.toString(),
                             total_fee.toString(),
                             total_reward.toString(),
-                            circulating_supply.toString()
+                            circulating_supply.toString(),
                         ],
                         conn
                     )
@@ -1498,8 +1500,7 @@ export class LedgerStorage extends Storages {
                         return this.query(circulating_supply_sql, [Number(block.header.height) - 1], conn);
                     })
                     .then((row: any[]) => {
-                        if (row[0])
-                            circulating_supply = JSBI.add(JSBI.BigInt(row[0].circulating_supply), total_reward);
+                        if (row[0]) circulating_supply = JSBI.add(JSBI.BigInt(row[0].circulating_supply), total_reward);
                         return this.query(transaction_stats, [block.header.height.toString()], conn);
                     })
                     .then((row: any) => {
@@ -4367,7 +4368,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the .catch is called with an error.
      */
     public getBOAHolders(limit: number, page: number): Promise<any> {
-        const circulating_sql = `SELECT max(circulating_supply) as circulating_supply from blocks_stats;`
+        const circulating_sql = `SELECT max(circulating_supply) as circulating_supply from blocks_stats;`;
         const sql = `
             SELECT
 	            address, tx_count, total_received, total_sent,
@@ -4408,7 +4409,6 @@ export class LedgerStorage extends Storages {
             `;
         return this.query(sql, [DataCollectionStatus.PENDING]);
     }
-
 
     /**
      * Get transcation hash
@@ -4608,7 +4608,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the .catch is called with an error.
      */
     public getBOAHolder(address: string): Promise<any> {
-        const circulating_sql = `SELECT max(circulating_supply) as circulating_supply from blocks_stats;`
+        const circulating_sql = `SELECT max(circulating_supply) as circulating_supply from blocks_stats;`;
         const sql = `
             SELECT
 	            address, tx_count, total_received, total_sent,
