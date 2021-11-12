@@ -992,6 +992,7 @@ describe("Test for the creation a proposal and the voting", () => {
     });
 
     it("Test case for ballot types.[No, Blank, Yes]", async () => {
+        await delay(1000);
         let ballot_answer1 = await stoa_server.ledger_storage.getProposalBallots("469008972006", undefined, 11);
         let ballot_answer2 = await stoa_server.ledger_storage.getProposalBallots("469008972006", undefined, 12);
         let ballot_answer3 = await stoa_server.ledger_storage.getProposalBallots("469008972006", undefined, 13);

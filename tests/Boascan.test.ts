@@ -41,7 +41,8 @@ import {
     sample_data4,
 } from "./Utils";
 
-describe("Test of Stoa API Server", () => {
+describe("Test of Stoa API Server", function () {
+    this.timeout(10000);
     const agora_addr: URL = new URL("http://localhost:2800");
     const stoa_addr: URL = new URL("http://localhost:3800");
     const stoa_private_addr: URL = new URL("http://localhost:4800");
@@ -901,13 +902,13 @@ describe("Test of Stoa API Server", () => {
     it("Test for writing reward transactions block", async () => {
         const url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(url, { block: sample_data2 });
-        await delay(200);
+        await delay(500);
         await client.post(url, { block: sample_data3 });
-        await delay(200);
+        await delay(500);
         await client.post(url, { block: sample_data4 });
-        await delay(200);
+        await delay(500);
         await client.post(url, { block: sample_data5 });
-        await delay(200);
+        await delay(500);
 
 
         //  Verifies that all sent blocks are wrote
