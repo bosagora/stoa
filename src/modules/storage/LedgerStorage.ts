@@ -959,6 +959,10 @@ export class LedgerStorage extends Storages {
 
         return new Promise<void>((resolve, reject) => {
             (async () => {
+                if (JSBI.equal(block.header.height.value, JSBI.BigInt(0))) {
+                    resolve();
+                    return;
+                }
                 const validators: any[] = await this.getValidatorsAPI(block.header.height, null, conn);
                 if (block.header.preimages.length !== block.header.validators.length) {
                     logger.error("The number of validators and the number of pre-images do not match.", {
@@ -2429,6 +2433,8 @@ export class LedgerStorage extends Storages {
                 V.utxo_key,
                 V.utxo_key as stake,
                 V.amount as stake_amount,
+                V.slashed,
+                V.slashed_height,
                 P.block_height,
                 P.block_height as preimage_height,
                 P.preimage_hash,
@@ -3059,6 +3065,10 @@ export class LedgerStorage extends Storages {
 
         return new Promise<void>((resolve, reject) => {
             (async () => {
+                if (JSBI.equal(block.header.height.value, JSBI.BigInt(0))) {
+                    resolve();
+                    return;
+                }
                 const cycleValidators: any[] = await this.getValidatorsAPI(block.header.height, null, conn);
 
                 const bitMask = BitMask.fromString(block.header.validators.toString());
