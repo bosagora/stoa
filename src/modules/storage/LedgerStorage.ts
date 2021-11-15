@@ -3064,7 +3064,7 @@ export class LedgerStorage extends Storages {
                 const bitMask = BitMask.fromString(block.header.validators.toString());
                 for (let i = 0; i < bitMask.length; i++) {
                     if (bitMask.get(i))
-                        save_block_validator(
+                        await save_block_validator(
                             this,
                             block.header.height,
                             cycleValidators[i],
@@ -3072,7 +3072,7 @@ export class LedgerStorage extends Storages {
                             ValidatorStatus.ACTIVE
                         );
                     else {
-                        save_block_validator(
+                        await save_block_validator(
                             this,
                             block.header.height,
                             cycleValidators[i],
