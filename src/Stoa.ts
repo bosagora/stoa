@@ -256,7 +256,7 @@ class Stoa extends WebService {
                     protocol: req.protocol,
                     httpStatusCode: res.statusCode,
                     userAgent: req.headers["user-agent"],
-                    accessStatus: res.statusCode !== 200 ? "Denied" : "Granted",
+                    status: res.statusCode !== 200 ? "Denied" : "Granted",
                     bytesTransmitted: res.socket?.bytesWritten,
                     time: `${time / 1000} seconds`,
                     height: HeightManager.height.toString(),
@@ -284,6 +284,7 @@ class Stoa extends WebService {
         );
         this.app.get("/wallet/transaction/history/:address", isBlackList, this.getWalletTransactionHistory.bind(this));
         this.app.get("/wallet/transaction/overview/:hash", isBlackList, this.getWalletTransactionOverview.bind(this));
+        this.app.get("/transaction/pending/overview/:hash", isBlackList, this.getWalletPendingTransactionOverview.bind(this));
         this.app.get("/wallet/transaction/detail/:hash", isBlackList, this.getWalletTransactionDetail.bind(this));
         this.app.get(
             "/wallet/transactions/pending/:address",
@@ -403,10 +404,20 @@ class Stoa extends WebService {
                 status: Status.Error,
                 responseTime: Number(moment().utc().unix() * 1000),
             });
-        const pagination: IPagination = await this.paginate(req, res);
+        let pageSize: number | undefined;
+        let page: number | undefined;
+        if (req.query.pageSize !== undefined && req.query.page !== undefined) {
+            const pagination: IPagination = await this.paginate(req, res);
+            pageSize = pagination.pageSize;
+            page = pagination.page
+        }
+        else {
+            pageSize = undefined;
+            page = undefined;
+        }
         this.ledger_storage
-            .getValidatorsAPI(height, null, undefined, pagination.pageSize,
-                pagination.page)
+            .getValidatorsAPI(height, null, undefined, pageSize,
+                page)
             .then((rows: any[]) => {
                 // Nothing found
                 if (!rows.length) {
@@ -587,29 +598,36 @@ class Stoa extends WebService {
      */
     private getTransactionFees(req: express.Request, res: express.Response) {
         const size: string = req.params.tx_size.toString();
-        let currency: any = String(req.query.currency);
+        let currency: string;
         if (req.query.currency === undefined) {
             currency = CurrencyType.USD;
+        } else {
+            currency = String(req.query.currency);
         }
         if (!Utils.isPositiveInteger(size)) {
             res.status(400).send(`Invalid value for parameter 'tx_size': ${size}`);
             return;
         }
         const tx_size = Number(size);
+        const block_height = HeightManager.height.toString();
+
         this.ledger_storage
-            .getFeeMeanDisparity()
-            .then(async (value: number) => {
-                const fees = FeeManager.getTxFee(tx_size, value);
+            .getFeeMeanDisparity(Number(block_height))
+            .then(async (value: any) => {
+                const fees = FeeManager.getTxFee(tx_size, value.disparity);
                 let exchangeRate = await this.ledger_storage.getExchangeRate(currency);
                 let exchange = new Exchange(exchangeRate);
                 const data: ITransactionFee = {
                     tx_size,
                     high: fees[0].toString(),
                     high_currency: exchange.convertAmountToCurrency(new Amount(Number(fees[0].toString()))),
+                    high_delay: value.high_delay ? value.high_delay : undefined,
                     medium: fees[1].toString(),
                     medium_currency: exchange.convertAmountToCurrency(new Amount(Number(fees[1].toString()))),
+                    medium_delay: value.medium_delay ? value.medium_delay : undefined,
                     low: fees[2].toString(),
-                    low_currency: exchange.convertAmountToCurrency(new Amount(Number(fees[2].toString())))
+                    low_currency: exchange.convertAmountToCurrency(new Amount(Number(fees[2].toString()))),
+                    low_delay: value.low_delay ? value.low_delay : undefined,
                 };
                 res.status(200).send(JSON.stringify(data));
             })
@@ -1128,7 +1146,7 @@ class Stoa extends WebService {
                     senders: [],
                     receivers: [],
                     fee: JSBI.add(JSBI.BigInt(data.tx[0].tx_fee), JSBI.BigInt(data.tx[0].payload_fee)).toString(),
-                    dataFee: JSBI.BigInt(data.tx[0].tx_fee).toString()
+                    dataFee: JSBI.BigInt(data.tx[0].payload_fee).toString()
                 };
 
                 for (const elem of data.senders)
@@ -1167,7 +1185,98 @@ class Stoa extends WebService {
     }
 
     /**
-     * GET /wallet/transaction/detail/:hash
+     * GET /wallet/transaction/pending/overview/:hash
+     *
+     * Called when a request is received through the `/transaction_overview/pending/:addresses` handler
+     * The parameter `hash` is the hash of the transaction
+     *
+     * Returns a transaction overview.
+     * @deprecated Use getWalletTransactionDetail
+     */
+    private getWalletPendingTransactionOverview(req: express.Request, res: express.Response) {
+        const txHash: string = String(req.params.hash);
+
+        let tx_hash: Hash;
+        try {
+            tx_hash = new Hash(txHash);
+        } catch (error) {
+            res.status(400).send(`Invalid value for parameter 'hash': ${txHash}`);
+            return;
+        }
+
+        this.ledger_storage
+            .getWalletPendingTransactionOverview(tx_hash)
+            .then((data: any) => {
+                if (
+                    data === undefined ||
+                    data.tx === undefined ||
+                    data.senders === undefined ||
+                    data.receivers === undefined
+                ) {
+                    res.status(500).send("Failed to data lookup");
+                    return;
+                }
+
+                if (data.tx.length === 0) {
+                    res.status(204).send(`The data does not exist. 'hash': (${tx_hash})`);
+                    return;
+                }
+
+                const overview: ITxOverview = {
+                    status: data.tx[0].status,
+                    height: JSBI.BigInt(data.tx[0].received_height).toString(),
+                    time: data.tx[0].time,
+                    tx_hash: new Hash(data.tx[0].tx_hash, Endian.Little).toString(),
+                    tx_type: lodash.capitalize(ConvertTypes.TxTypeToString(data.tx[0].type)),
+                    tx_size: data.tx[0].tx_size,
+                    unlock_height: JSBI.BigInt(0).toString(),
+                    lock_height: JSBI.BigInt(data.tx[0].lock_height).toString(),
+                    unlock_time: 0,
+                    payload: data.tx[0].payload !== null ? Buffer.byteLength(data.tx[0].payload).toString() : "",
+                    senders: [],
+                    receivers: [],
+                    fee: JSBI.add(JSBI.BigInt(data.tx[0].tx_fee), JSBI.BigInt(data.tx[0].payload_fee)).toString(),
+                    dataFee: JSBI.BigInt(data.tx[0].payload_fee).toString()
+                };
+
+                for (const elem of data.senders) {
+                    overview.senders.push({
+                        address: elem.address,
+                        amount: Number(elem.amount),
+                        utxo: new Hash(elem.utxo, Endian.Little).toString(),
+                        signature: '',
+                        index: elem.input_index,
+                        unlock_age: ConvertTypes.unlockAgeToString(elem.unlock_age),
+                        bytes: elem.unlock_bytes.toString("base64"),
+                    });
+                }
+
+                for (const elem of data.receivers)
+                    overview.receivers.push({
+                        type: elem.type,
+                        address: elem.address,
+                        lock_type: ConvertTypes.lockTypeToString(elem.lock_type),
+                        amount: elem.amount,
+                        utxo: '',
+                        index: elem.output_index,
+                        bytes: elem.lock_bytes.toString("base64"),
+                    });
+
+                res.status(200).send(JSON.stringify(overview));
+            })
+            .catch((err) => {
+                logger.error("Failed to data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    status: Status.Error,
+                    responseTime: Number(moment().utc().unix() * 1000),
+                });
+                res.status(500).send("Failed to data lookup");
+            });
+    }
+
+    /**
+     * GET /wallet/transaction/detail/:hash 
      *
      * Called when a request is received through the `/wallet/transaction/detail/:hash` handler
      * The parameter `hash` is the hash of the transaction
@@ -1484,9 +1593,11 @@ class Stoa extends WebService {
      * @returns Returns statistics of BOA coin.
      */
     private getBOAStats(req: express.Request, res: express.Response) {
-        let currency: any = String(req.query.currency);
+        let currency: string;
         if (req.query.currency === undefined) {
             currency = CurrencyType.USD;
+        } else {
+            currency = String(req.query.currency);
         }
         this.ledger_storage
             .getBOAStats()
@@ -2336,7 +2447,6 @@ class Stoa extends WebService {
                 try {
                     const tx = Transaction.reviver("", stored_data.data);
                     const changes = await this.ledger_storage.putTransactionPool(tx);
-
                     if (changes) {
                         if (tx.inputs.length > 0) {
                             const tx_hash = hashFull(tx);
@@ -2345,6 +2455,7 @@ class Stoa extends WebService {
                             addresses.forEach((m) =>
                                 this.wallet_watcher.onTransactionAccountCreated(m.address, tx_hash, "pending")
                             );
+                            await this.emitPendingTransactions(tx, tx_hash);
                         }
                         logger.info(
                             `Saved a transaction hash : ${hashFull(tx).toString()}, ` + `data : ` + stored_data.data,
@@ -2367,6 +2478,31 @@ class Stoa extends WebService {
                     reject(err);
                 }
             }
+        });
+    }
+
+    /**
+     * Stoa emit the pending transaction
+     * @param transaction The pending tranasction 
+     * @param tx_hash Hash of the transaction
+     * @returns
+     */
+    public emitPendingTransactions(tx: any, tx_hash: Hash) {
+        return new Promise<any>(async (resolve, reject) => {
+            let pendingTransaction = [{
+                tx_hash: tx_hash.toString(),
+                height: HeightManager.height.toString(),
+                time_stamp: moment.utc().unix(),
+                transaction: tx
+            }]
+            logger.info(`Emitted new Pending Transactions`, {
+                operation: Operation.block_sync,
+                height: HeightManager.height.toString(),
+                status: Status.Success,
+                responseTime: Number(moment().utc().unix() * 1000),
+            });
+            this.socket.io.emit(events.server.newTransaction, pendingTransaction);
+            return resolve(pendingTransaction);
         });
     }
 
@@ -2427,7 +2563,7 @@ class Stoa extends WebService {
                     res.status(400).send(`Page size cannot be a number greater than 100: ${pageSize}`);
                     return;
                 }
-            } else pageSize = 30;
+            } else pageSize = 10;
 
             return resolve({ page, pageSize });
         });
@@ -2545,7 +2681,6 @@ class Stoa extends WebService {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
                 await this.emitNewBlock(block);
-                await this.emitBlockTransactions(block);
                 resolve(true);
             } catch (err) {
                 reject("Failed to emit new block");
@@ -2578,47 +2713,16 @@ class Stoa extends WebService {
         });
     }
 
-    /**
-     * Stoa emit the transaction inside the new block received.
-     * @param block
-     * @returns
-     */
-    public emitBlockTransactions(block: Block): Promise<IEmitTransaction[]> {
-        return new Promise<IEmitTransaction[]>(async (resolve, reject) => {
-            const block_hash = hashFull(block.header);
-            const blockTransactions: IEmitTransaction[] = [];
-
-            for (let tx_idx = 0; tx_idx < block.txs.length; tx_idx++) {
-                const EmitTransaction: IEmitTransaction = {
-                    height: block.header.height.toString(),
-                    hash: block_hash.toString(),
-                    tx_hash: block.merkle_tree[tx_idx].toString(),
-                    time_stamp: this.genesis_timestamp + block.header.time_offset,
-                    transaction: block.txs[tx_idx],
-                };
-                blockTransactions.push(EmitTransaction);
-            }
-            logger.info(`Emitted new Transactions`, {
-                operation: Operation.block_sync,
-                height: HeightManager.height.toString(),
-                status: Status.Success,
-                responseTime: Number(moment().utc().unix() * 1000),
-            });
-            this.socket.io.emit(events.server.newTransaction, blockTransactions);
-            return resolve(blockTransactions);
-        });
-    }
-
     /* Get BOA Holders
      * @returns Returns BOA Holders of the ledger.
      */
     public async getBoaHolders(req: express.Request, res: express.Response) {
         const pagination: IPagination = await this.paginate(req, res);
-        const currency: string = String(req.query.currency);
-        if (currency === undefined) {
+        if (req.query.currency === undefined) {
             res.status(400).send(`Parameters 'currency' is not entered.`);
             return;
         }
+        const currency: string = String(req.query.currency);
         this.ledger_storage
             .getBOAHolders(pagination.pageSize, pagination.page)
             .then(async (data: any) => {
@@ -2774,16 +2878,17 @@ class Stoa extends WebService {
      * @returns Returns BOA Holder of the ledger.
      */
     public async getBoaHolder(req: express.Request, res: express.Response) {
-        const address = String(req.params.address);
         const currency: string = String(req.query.currency);
         if (currency === undefined) {
             res.status(400).send(`Parameters 'currency' is not entered.`);
             return;
         }
-        let holderAddress: PublicKey;
-        try {
-            holderAddress = new PublicKey(address);
-        } catch (error) {
+        if (req.params.address === undefined) {
+            res.status(400).send(`Parameters 'address' is not entered.`);
+            return;
+        }
+        const address = req.params.address.toString();
+        if (PublicKey.validate(address) !== '') {
             res.status(400).send(`Invalid value for parameter 'address': ${address}`);
             return;
         }
@@ -2823,12 +2928,16 @@ class Stoa extends WebService {
 
     /**
      * GET /voting-details/
-     * Called when a request is received through the `/voting_details/` handler
+     * Called when a request is received through the `/voting-details/` handler
      * The parameter `hash` is the hash of  transaction
      * Returns list of proposal voting details
      */
     public async getVotingDetails(req: express.Request, res: express.Response) {
         const pagination: IPagination = await this.paginate(req, res);
+        if (req.params.proposal_id === undefined) {
+            res.status(400).send(`Parameters 'proposal_id' is not entered.`);
+            return;
+        }
         const proposal_id = req.params.proposal_id.toString();
         this.ledger_storage
             .getVotingDetails(proposal_id, pagination.pageSize, pagination.page)
@@ -2860,16 +2969,17 @@ class Stoa extends WebService {
 
     /**
      * GET /validator/missed-blocks/
-     * Called when a request is received through the `validator/missed_blocks/` handler
+     * Called when a request is received through the `validator/missed-blocks/` handler
      * The parameter `address` is the address of  validator
      * Returns list of validator missed blocks
      */
     public async getValidatorMissedBlocks(req: express.Request, res: express.Response) {
+        if (req.params.address === undefined) {
+            res.status(400).send(`Parameters 'address' is not entered.`);
+            return;
+        }
         const address = req.params.address.toString();
-        let holderAddress: PublicKey;
-        try {
-            holderAddress = new PublicKey(address);
-        } catch (error) {
+        if (PublicKey.validate(address) !== '') {
             res.status(400).send(`Invalid value for parameter 'address': ${address}`);
             return;
         }
@@ -2898,7 +3008,11 @@ class Stoa extends WebService {
         let field: string;
         let value: number | Buffer;
         // Validating Parameter - height
-        if (req.query.height !== undefined && Utils.isPositiveInteger(req.query.height.toString())) {
+        if (req.query.height !== undefined) {
+            if (!Utils.isPositiveInteger(req.query.height.toString())) {
+                res.status(400).send(`Invalid value for parameter 'height': ${req.query.height}`);
+                return;
+            }
             field = "height";
             value = Number(req.query.height);
         }
@@ -2906,21 +3020,28 @@ class Stoa extends WebService {
         else if (req.query.hash !== undefined) {
             field = "hash";
             try {
-                const req_hash: string = String(req.query.hash);
-                value = new Hash(req_hash).toBinary(Endian.Little);
+                value = new Hash(req.query.hash.toString()).toBinary(Endian.Little);
             } catch (error) {
                 res.status(400).send(`Invalid value for parameter 'hash': ${req.query.hash}`);
                 return;
             }
         } else {
-            res.status(400).send(
-                `Invalid value for parameter 'height': ${req.query.height} and 'hash': ${req.query.hash}`
-            );
+            res.status(400).send(`Parameters 'height' or 'hash' are not entered.`);
             return;
         }
-        const pagination: IPagination = await this.paginate(req, res);
+        let pageSize: number | undefined;
+        let page: number | undefined;
+        if (req.query.pageSize !== undefined && req.query.page !== undefined) {
+            const pagination: IPagination = await this.paginate(req, res);
+            pageSize = pagination.pageSize;
+            page = pagination.page
+        }
+        else {
+            pageSize = undefined;
+            page = undefined;
+        }
         this.ledger_storage
-            .getBlockValidators(value, field, pagination.pageSize, pagination.page)
+            .getBlockValidators(value, field, pageSize, page)
             .then((rows: any[]) => {
                 // Nothing found
                 if (!rows.length) {
@@ -2974,7 +3095,7 @@ class Stoa extends WebService {
         this.ledger_storage
             .getTransactionHash(utxo)
             .then((data: any) => {
-                if (data === undefined) {
+                if (data.length === 0) {
                     return res.status(500).send("Failed to data lookup");
                 } else {
                     const tx_hash = new Hash(data[0].tx_hash, Endian.Little).toString();
@@ -3111,12 +3232,12 @@ class Stoa extends WebService {
      * @returns Returns reward of the validators.
      */
     public async getValidatorReward(req: express.Request, res: express.Response) {
-        const address = String(req.params.address);
-
-        let validatorAddress: PublicKey;
-        try {
-            validatorAddress = new PublicKey(address);
-        } catch (error) {
+        if (req.params.address === undefined) {
+            res.status(400).send(`Parameters 'address' is not entered.`);
+            return;
+        }
+        const address = req.params.address.toString();
+        if (PublicKey.validate(address) !== "") {
             res.status(400).send(`Invalid value for parameter 'address': ${address}`);
             return;
         }
@@ -3157,11 +3278,12 @@ class Stoa extends WebService {
      * @returns Returns validator ballots of the ledger.
      */
     public async getValidatorBallots(req: express.Request, res: express.Response) {
-        const address = String(req.params.address);
-        let validatorAddress: PublicKey;
-        try {
-            validatorAddress = new PublicKey(address);
-        } catch (error) {
+        if (req.params.address === undefined) {
+            res.status(400).send(`Parameters 'address' is not entered.`);
+            return;
+        }
+        const address = req.params.address.toString();
+        if (PublicKey.validate(address) !== "") {
             res.status(400).send(`Invalid value for parameter 'address': ${address}`);
             return;
         }
@@ -3389,18 +3511,18 @@ class Stoa extends WebService {
 
     /**
      * GET /convert-to-currency
-     * Called when a request is received through the `/convert-to-usd` handler
+     * Called when a request is received through the `/convert-to-currency` handler
      * The parameter `amount` is the Boa amount.
      * The parameter `currency` is the currency.
      * @returns Returns the USD amount against input BOA amount.
      */
     public async convertToCurrency(req: express.Request, res: express.Response) {
-        let amount: number;
-        const currency: string = String(req.query.currency);
-        if (currency === undefined) {
+        if (req.query.currency === undefined) {
             res.status(400).send(`Parameters 'currency' is not entered.`);
             return;
         }
+        let amount: number;
+        const currency: string = String(req.query.currency);
 
         if (req.query.amount === undefined) {
             res.status(400).send(`Parameters 'amount' is not entered.`);

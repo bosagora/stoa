@@ -17,8 +17,9 @@ import { VoteraClient } from "../votera/VoteraClient";
 import { URL } from "url";
 import { IMetaData, IPendingProposal } from "../../Types";
 import { logger } from "../common/Logger";
-import { Operation } from "../common/LogOperation";
+import { Operation, Status } from "../common/LogOperation";
 import { HeightManager } from "../common/HeightManager";
+import moment from "moment";
 
 export class VoteraService {
 
@@ -75,7 +76,12 @@ export class VoteraService {
                 }
 
                 else {
-                    logger.info(`***votera proposals data syncing job started***`);
+                    logger.info(`***votera proposals data syncing job started***`, {
+                        operation: Operation.votera_request,
+                        height: HeightManager.height.toString(),
+                        status: Status.Success,
+                        responseTime: Number(moment().utc().unix() * 1000)
+                    });
                     this.status = true;
                     const proposal = await stoaInstance.getPendingProposal();
                     await Promise.all(proposal.map(async (element) => {
@@ -83,7 +89,12 @@ export class VoteraService {
                         await this.storeMetadata(stoaInstance, metadata);
                     }));
                     this.status = false;
-                    logger.info(`***votera proposals data syncing job completed***`);
+                    logger.info(`***votera proposals data syncing job completed***`, {
+                        operation: Operation.votera_request,
+                        height: HeightManager.height.toString(),
+                        status: Status.Success,
+                        responseTime: Number(moment().utc().unix() * 1000)
+                    });
                     return resolve(true);
                 }
             }

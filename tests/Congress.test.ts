@@ -27,6 +27,7 @@ import {
     iota,
     JSBI,
     KeyPair,
+    makeUTXOKey,
     OutputType,
     ProposalData,
     ProposalFeeData,
@@ -57,11 +58,6 @@ import {
     market_cap_history_sample_data,
     market_cap_sample_data,
     sample_data,
-    sample_data2,
-    sample_data3,
-    sample_data6,
-    sample_data7,
-    sample_data8,
     TestAgora,
     TestClient,
     TestGeckoServer,
@@ -618,7 +614,6 @@ describe("Test for the creation a proposal and the voting", () => {
         assert.ok(tx !== undefined);
 
         const new_block = block_manager.saveBlock([tx], []);
-
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
         await delay(200);
@@ -719,7 +714,7 @@ describe("Test for the creation a proposal and the voting", () => {
             voting_start_date: moment("2021-07-26").utc().unix(),
             voting_end_date: moment("2021-08-02").utc().unix(),
             voting_fee_hash: new Hash(
-                "0x8b6a2e1ecc3616ad63c73d606c4019407ebfd06a122519e7bd88d99af92d19d9621323d7c2e68593053a570522b6bc8575d1ee45a74ee38726f297a5ce08e33d"
+                "0xba747aa032f83fa6754efee9b259ac181eaa1f657395cb09b9f79a2d198fd0ce83e441c8a1aba51bd29b400b8bde27bacc22bef8e1f5261e8e545102afb96f4d"
             ),
             detail: "Description Make better world!",
             submit_time: moment("2021-07-23T04:49:26.634Z").utc().unix(),
@@ -793,7 +788,7 @@ describe("Test for the creation a proposal and the voting", () => {
             proposal_id: '469008972006',
             detail: 'Description Make better world!',
             proposal_tx_hash: '0xaa4e80fc3a47eecd7ddd24a1d644ede65825fb2d4121782b5591e799dbe97455581f94df9d1e4f6ae45d0e8af94a71715645a5052b8bfc193bc615bd0cf11b27',
-            fee_tx_hash: '0x8b6a2e1ecc3616ad63c73d606c4019407ebfd06a122519e7bd88d99af92d19d9621323d7c2e68593053a570522b6bc8575d1ee45a74ee38726f297a5ce08e33d',
+            fee_tx_hash: '0xba747aa032f83fa6754efee9b259ac181eaa1f657395cb09b9f79a2d198fd0ce83e441c8a1aba51bd29b400b8bde27bacc22bef8e1f5261e8e545102afb96f4d',
             proposer_name: 'test',
             block_height: 5,
             fund_amount: 10000000000000,
@@ -932,7 +927,6 @@ describe("Test for the creation a proposal and the voting", () => {
         assert.ok(tx !== undefined);
 
         const new_block = block_manager.saveBlock([tx], []);
-
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
         await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
@@ -950,7 +944,6 @@ describe("Test for the creation a proposal and the voting", () => {
         assert.ok(tx !== undefined);
 
         const new_block = block_manager.saveBlock([tx], []);
-
         const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(block_url, { block: new_block });
         await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
@@ -1727,20 +1720,47 @@ describe("Test for the removing of validators", () => {
     });
 });
 
-describe("Test of Proposal API", () => {
-    const agora_addr: URL = new URL("http://localhost:2800");
-    const stoa_addr: URL = new URL("http://localhost:3800");
-    const stoa_private_addr: URL = new URL("http://localhost:4800");
+describe("Test of Proposal API", function () {
+    this.timeout(5000);
+    const agora_addr: URL = new URL("http://localhost:2862");
+    const stoa_addr: URL = new URL("http://localhost:3862");
+    const stoa_private_addr: URL = new URL("http://localhost:4862");
     const votera_addr: URL = new URL("http://127.0.0.1:1337/");
+    const client = new TestClient();
+
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
-    const client = new TestClient();
     let testDBConfig: IDatabaseConfig;
     let gecko_server: TestGeckoServer;
     let gecko_market: CoinGeckoMarket;
     let coinMarketService: CoinMarketService;
     let votera_server: TestVoteraServer;
     let votera_service: VoteraService;
+
+    let block_manager: BlockManager;
+    let gen_keypair: KeyPair;
+    let boa_client: BOAClient;
+    let utxo_provider: UTXOProvider;
+    let proposer_utxo_provider: UTXOProvider;
+    let tx_hash_proposal_fee: Hash;
+    let tx_hash_proposal: Hash;
+
+    let proposal_key_pair: KeyPair;
+    let proposal_fee_destination: PublicKey;
+
+    let ballet_yes_validator_1: Hash;
+    let ballet_yes_validator_2: Hash;
+    let ballet_no_validator_1: Hash;
+    let ballet_no_validator_2: Hash;
+
+    async function createDummyBlock(expected_block_height: number) {
+        const new_block = block_manager.saveBlock([], []);
+        const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(block_url, { block: new_block });
+        await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
+        assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
+        assert.strictEqual(block_manager.getLastBlockHeight(), expected_block_height);
+    }
 
     before("Bypassing middleware check", () => {
         FakeBlacklistMiddleware.assign();
@@ -1753,7 +1773,7 @@ describe("Test of Proposal API", () => {
 
     before("Start a fake Agora", () => {
         return new Promise<void>((resolve, reject) => {
-            agora_server = new TestAgora(agora_addr.port, sample_data, resolve);
+            agora_server = new TestAgora(agora_addr.port, [], resolve);
         });
     });
 
@@ -1774,22 +1794,16 @@ describe("Test of Proposal API", () => {
             votera_service = new VoteraService(votera_addr);
         });
     });
-    before("Create TestStoa", () => {
-        testDBConfig = MockDBConfig();
-        stoa_server = new TestStoa(
-            testDBConfig,
-            agora_addr,
-            parseInt(stoa_addr.port, 10),
-            votera_service,
-            coinMarketService
-        );
-        return stoa_server.createStorage();
+
+    before("Create TestStoa", async () => {
+        testDBConfig = await MockDBConfig();
+        stoa_server = new TestStoa(testDBConfig, agora_addr, stoa_addr.port, votera_service, coinMarketService);
+        await stoa_server.createStorage();
     });
 
     before("Start TestStoa", async () => {
         await stoa_server.start();
         await stoa_server.voteraService?.stop();
-        return;
     });
 
     after("Stop Stoa and Agora server instances", async () => {
@@ -1800,100 +1814,274 @@ describe("Test of Proposal API", () => {
         await agora_server.stop();
     });
 
-    it("Test of writing proposal transaction", async () => {
-        const url = URI(stoa_private_addr).directory("block_externalized").toString();
-        await client.post(url, { block: sample_data6 });
-        await delay(200);
-        await client.post(url, { block: sample_data3 });
-        await delay(200);
+    before("Create component", async () => {
+        block_manager = new BlockManager();
+        gen_keypair = KeyPair.fromSeed(new SecretKey("SDN7BBGE6Z6OQM3K4PACLTZUJ5QX4AY4QPDQ2JJ2JCFWCG2OIYYALIRY"));
+        boa_client = new BOAClient(stoa_addr.toString(), agora_addr.toString());
+        utxo_provider = new UTXOProvider(gen_keypair.address, boa_client);
 
+        proposal_key_pair = ValidatorKey.keys(0);
+        proposal_fee_destination = new PublicKey("boa1xrgq6607dulyra5r9dw0ha6883va0jghdzk67er49h3ysm7k222ruhh7400");
+        proposer_utxo_provider = new UTXOProvider(proposal_key_pair.address, boa_client);
+    });
 
-        //  Verifies that all sent blocks are wrote
-        const uri = URI(stoa_addr).directory("/block_height");
-        const response = await client.get(uri.toString());
+    it("0. Test of the path /block_externalized", async () => {
+        const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(block_url, { block: Block.reviver("", sample_data[0]) });
+        await delay(500);
+    });
 
-        assert.strictEqual(response.status, 200);
-        assert.strictEqual(response.data, "3");
+    it("1. Distribute genesis coin", async () => {
+        const utxos = await utxo_provider.getUTXO(BOA(1000_000 * 100 + 10));
+        const builder = new TxBuilder(gen_keypair);
+        utxos.forEach((m) => {
+            builder.addInput(m.utxo, m.amount);
+        });
+        iota(100).forEach((idx: number) => {
+            builder.addOutput(ValidatorKey.keys(idx).address, BOA(1000_000));
+        });
+
+        const tx = builder.sign(OutputType.Payment, BOA(10));
+        const new_block = block_manager.saveBlock([tx], []);
+
+        const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(block_url, { block: new_block });
+        await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
+        assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
+        assert.strictEqual(block_manager.getLastBlockHeight(), 1);
+    });
+
+    it("2. Create a proposal fee data", async () => {
+        const proposal_fee_data = new ProposalFeeData("Votera", "469008972006");
+        const proposal_fee = BOA(1_000);
+        const buffer = new SmartBuffer();
+        proposal_fee_data.serialize(buffer);
+        const payload = buffer.toBuffer();
+
+        const utxos = await proposer_utxo_provider.getUTXO(proposal_fee);
+        const builder = new TxBuilder(proposal_key_pair);
+        utxos.forEach((m) => {
+            builder.addInput(m.utxo, m.amount);
+        });
+        builder.addOutput(proposal_fee_destination, proposal_fee);
+        builder.assignPayload(payload);
+
+        const tx = builder.sign(OutputType.Payment, BOA(1));
+
+        tx_hash_proposal_fee = hashFull(tx);
+
+        assert.deepStrictEqual(
+            tx_hash_proposal_fee.toString(),
+            "0x33f661e8d38ae9a2f096f50822306e5ab06a7d000a9d52f7ff476b2c533d145ebab740d0c296a438a5782405e15365286f49e1e2d6db158334ed0a7b24af7470"
+        );
+
+        assert.deepStrictEqual(
+            proposal_key_pair.address.toString(),
+            "boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn"
+        );
+
+        const new_block = block_manager.saveBlock([tx], []);
+
+        const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(block_url, { block: new_block });
+        await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
+        assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
+        assert.strictEqual(block_manager.getLastBlockHeight(), 2);
+    });
+
+    it("3. Create a proposal data", async () => {
+        const validators = block_manager.getValidators();
+        const vote_cost = Amount.add(
+            Amount.make(Utils.FEE_RATE * Transaction.getEstimatedNumberOfBytes(1, 2, 285)),
+            TxPayloadFee.getFeeAmount(285)
+        );
+        const total_vote_cost = Amount.multiply(vote_cost, validators.length);
+
+        const proposal_data = new ProposalData(
+            "Votera",
+            ProposalType.Fund,
+            "469008972006",
+            "Make better world!",
+            JSBI.BigInt(3),
+            JSBI.BigInt(7),
+            new Hash(Buffer.alloc(Hash.Width)),
+            BOA(100_000).value,
+            BOA(1_000).value,
+            total_vote_cost.value,
+            tx_hash_proposal_fee,
+            proposal_key_pair.address,
+            proposal_fee_destination
+        );
+        const buffer = new SmartBuffer();
+        proposal_data.serialize(buffer);
+        const payload = buffer.toBuffer();
+
+        const tx_total_fee = Amount.add(
+            Amount.make(
+                Utils.FEE_RATE * Transaction.getEstimatedNumberOfBytes(1, validators.length + 1, payload.length)
+            ),
+            TxPayloadFee.getFeeAmount(payload.length)
+        );
+        const send_amount = Amount.add(total_vote_cost, tx_total_fee);
+        const utxos = await proposer_utxo_provider.getUTXO(send_amount);
+
+        const builder = new TxBuilder(proposal_key_pair);
+        utxos.forEach((m) => {
+            builder.addInput(m.utxo, m.amount);
+        });
+        validators.forEach((v) => {
+            builder.addOutput(v, vote_cost);
+        });
+        builder.assignPayload(payload);
+
+        const tx = builder.sign(OutputType.Payment, tx_total_fee);
+
+        tx_hash_proposal = hashFull(tx);
+
+        const new_block = block_manager.saveBlock([tx], []);
+
+        const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(block_url, { block: new_block });
+        await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
+        assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
+        assert.strictEqual(block_manager.getLastBlockHeight(), 3);
     });
 
     it("Start votera service for syncing proposal's meta information", async () => {
         await stoa_server.voteraService?.start(stoa_server, 2);
-        await delay(200);
+        await delay(1000);
 
         await stoa_server.voteraService?.stop();
     });
 
-    it("Test of writing ballot transaction", async () => {
-        const url = URI(stoa_private_addr).directory("block_externalized").toString();
-        await client.post(url, { block: sample_data7 });
-        await delay(200);
-        await client.post(url, { block: sample_data8 });
-        await delay(200);
+    it("4. Vote [ YES ] for validator 1", async () => {
+        // The KeyPair of the validator
+        const validator_key = ValidatorKey.keys(1);
+        const app_name = "Votera";
+        const proposal_id = "469008972006";
+        let vote = new Vote(boa_client, block_manager, validator_key, app_name, proposal_id, BallotData.YES, 100, 14);
+        const tx = await vote.CreateVote();
+        assert.ok(tx !== undefined);
+
+        const new_block = block_manager.saveBlock([tx], []);
+
+        ballet_yes_validator_1 = hashFull(tx);
+
+        const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(block_url, { block: new_block });
+        await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
+        assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
+        assert.strictEqual(block_manager.getLastBlockHeight(), 4);
+    });
+
+    it("5. Vote [ NO ] for validator 2", async () => {
+        // The KeyPair of the validator
+        const validator_key = ValidatorKey.keys(2);
+        const app_name = "Votera";
+        const proposal_id = "469008972006";
+        let vote = new Vote(boa_client, block_manager, validator_key, app_name, proposal_id, BallotData.NO, 100, 14);
+        const tx = await vote.CreateVote();
+        assert.ok(tx !== undefined);
+
+        const new_block = block_manager.saveBlock([tx], []);
+
+        ballet_no_validator_2 = hashFull(tx);
+
+        const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(block_url, { block: new_block });
+        await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
+        assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
+        assert.strictEqual(block_manager.getLastBlockHeight(), 5);
+    });
 
 
-        //  Verifies that all sent blocks are wrote
-        const uri = URI(stoa_addr).directory("/block_height");
-        const response = await client.get(uri.toString());
+    it("6. Vote [ YES ] for validator 2", async () => {
+        // The KeyPair of the validator
+        const validator_key = ValidatorKey.keys(2);
+        const app_name = "Votera";
+        const proposal_id = "469008972006";
+        let vote = new Vote(boa_client, block_manager, validator_key, app_name, proposal_id, BallotData.YES, 103, 14);
+        const tx = await vote.CreateVote();
+        assert.ok(tx !== undefined);
 
-        assert.strictEqual(response.status, 200);
-        assert.strictEqual(response.data, "5");
+        const new_block = block_manager.saveBlock([tx], []);
+
+        ballet_yes_validator_2 = hashFull(tx);
+
+        const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(block_url, { block: new_block });
+        await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
+        assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
+        assert.strictEqual(block_manager.getLastBlockHeight(), 6);
+    });
+
+    it("7. Vote [ No ] for validator 1", async () => {
+        // The KeyPair of the validator
+        const validator_key = ValidatorKey.keys(1);
+        const app_name = "Votera";
+        const proposal_id = "469008972006";
+        let vote = new Vote(boa_client, block_manager, validator_key, app_name, proposal_id, BallotData.NO, 102, 14);
+        const tx = await vote.CreateVote();
+        assert.ok(tx !== undefined);
+
+        ballet_no_validator_1 = hashFull(tx);
+
+        const new_block = block_manager.saveBlock([tx], []);
+
+        const block_url = URI(stoa_private_addr).directory("block_externalized").toString();
+        await client.post(block_url, { block: new_block });
+        await block_manager.waitFor(block_manager.getLastBlockHeight(), boa_client);
+        assert.strictEqual(JSBI.toNumber(await boa_client.getBlockHeight()), block_manager.getLastBlockHeight());
+        assert.strictEqual(block_manager.getLastBlockHeight(), 7);
+    });
+
+    it("7-14 Create a dummy block", async () => {
+        await createDummyBlock(8);
+        await createDummyBlock(9);
+        await createDummyBlock(10);
+        await createDummyBlock(11);
+        await createDummyBlock(12);
+        await createDummyBlock(13);
+        await createDummyBlock(14);
+        await createDummyBlock(15);
     });
 
     it("Test for path /proposal/voting-details/:proposal_id", async () => {
-        const uri = URI(stoa_addr)
-            .directory("/proposal/voting-details")
-            .filename("469008972006");
+        const uri = URI(stoa_addr).directory("/proposal/voting-details").filename("469008972006");
         const response = await client.get(uri.toString());
-        const expected = [
-            {
-                address: 'boa1xzval3ah8z7ewhuzx6mywveyr79f24w49rdypwgurhjkr8z2ke2mycftv9n',
-                sequence: 110,
-                hash: '0x917dba7433947d00cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a',
-                ballot_answer: 'Reject',
-                voting_time: 1609460400,
-                voter_utxo_key: '0x7c6a860d44950ce5beda5fba3f87c10e1f6c0d813fbff85ac8ec017a6a0526874415b411139e6182c94aa1c25d61726aa5424bca767b291b369939dccb1d40fa',
-                full_count: 2
-            },
-            {
-                address: 'boa1xzval3ah8z7ewhuzx6mywveyr79f24w49rdypwgurhjkr8z2ke2mycftv9n',
-                sequence: 115,
-                hash: '0x917dba7435947d00cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a',
-                ballot_answer: 'Reject',
-                voting_time: 1609460400,
-                voter_utxo_key: '0xa1ba2fff6f0c22c6108e72818165f1912fad064367a0070edfe3e6e19e53dfbe24597eaa4aefe4684421657a7bb57bd5f6f883dff957735ae300f70f0b2c9327',
-                full_count: 2
-            }
-        ]
-        assert.deepStrictEqual(response.data, expected)
+        assert.strictEqual(response.data.length, 2);
+        assert.strictEqual(response.data[0].address, ValidatorKey.keys(1).address.toString());
+        assert.strictEqual(response.data[1].address, ValidatorKey.keys(2).address.toString());
+        const ballot_data_no_validator_1 = response.data.find((m: any) => m.hash === ballet_no_validator_1.toString());
+        assert.ok(ballot_data_no_validator_1 !== undefined);
+        assert.strictEqual(ballot_data_no_validator_1.ballot_answer, "No");
 
+        const ballot_data_yes_validator_2 = response.data.find((m: any) => m.hash === ballet_yes_validator_2.toString());
+        assert.ok(ballot_data_yes_validator_2 !== undefined);
+        assert.strictEqual(ballot_data_yes_validator_2.ballot_answer, "Yes");
     });
 
-    it("Test for path /validator/ballot/:address", async () => {
+    it("Test for path /validator/ballot/:address with validator 1", async () => {
         const uri = URI(stoa_addr)
             .directory("/validator/ballot")
-            .filename("boa1xzval3ah8z7ewhuzx6mywveyr79f24w49rdypwgurhjkr8z2ke2mycftv9n");
+            .filename("boa1xrvald3zmehvpcmxqm0kn6wkaqyry7yj3cd8h975ypzlyz00sczpzhsk308");
         const response = await client.get(uri.toString());
-        const expected = [
-            {
-                proposal_id: '469008972006',
-                tx_hash: '0x917dba7435947d00cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a',
-                sequence: 115,
-                proposal_type: 'Fund',
-                proposal_title: 'Save the world',
-                ballot_answer: 'Reject',
-                full_count: 2
-            },
-            {
-                proposal_id: '469008972006',
-                tx_hash: '0x917dba7433947d00cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a',
-                sequence: 110,
-                proposal_type: 'Fund',
-                proposal_title: 'Save the world',
-                ballot_answer: 'Reject',
-                full_count: 2
-            }
-        ]
-        assert.deepStrictEqual(response.data, expected)
+        assert.deepStrictEqual(response.data.length, 1);
+        assert.deepStrictEqual(response.data[0].proposal_id, "469008972006");
+        assert.deepStrictEqual(response.data[0].proposal_type, "Fund");
+        assert.deepStrictEqual(response.data[0].ballot_answer, "No");
+        assert.deepStrictEqual(response.data[0].sequence, 102);
+    });
 
+    it("Test for path /validator/ballot/:address with validator 2", async () => {
+        const uri = URI(stoa_addr)
+            .directory("/validator/ballot")
+            .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku");
+        const response = await client.get(uri.toString());
+        assert.deepStrictEqual(response.data.length, 1);
+        assert.deepStrictEqual(response.data[0].proposal_id, "469008972006");
+        assert.deepStrictEqual(response.data[0].proposal_type, "Fund");
+        assert.deepStrictEqual(response.data[0].ballot_answer, "Yes");
+        assert.deepStrictEqual(response.data[0].sequence, 103);
     });
 });

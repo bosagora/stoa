@@ -11,7 +11,7 @@
 
  *******************************************************************************/
 
-import { Block, Hash, Height, JSBI, OutputType, ProposalType, Transaction } from "boa-sdk-ts";
+import { BallotData, Block, Hash, Height, JSBI, OutputType, ProposalType, Transaction } from "boa-sdk-ts";
 import { SignStatus, ValidatorStatus } from "./modules/common/enum";
 /**
  * The interface of the Validator
@@ -976,16 +976,6 @@ export interface ITxStatus {
 }
 
 /**
- * Define the types of ballot anwser 
- */
-export enum BallotAnswer {
-    Yes = 0,
-    No = 1,
-    Blank = 2,
-    Reject = 9,
-}
-
-/**
  * Define the types of transactions to be displayed in various applications
  */
 export enum DisplayTxType {
@@ -1035,7 +1025,25 @@ export class ConvertTypes {
     }
 
     public static ballotAddressToString(type: number): string {
-        return BallotAnswer[type];
+        let answer: string;
+        switch (type) {
+            case BallotData.YES:
+                answer = 'Yes';
+                break;
+            case BallotData.NO:
+                answer = 'No';
+                break;
+            case BallotData.BLANK:
+                answer = 'Blank';
+                break;
+            case BallotData.REJECT:
+                answer = 'Reject';
+                break;
+            default:
+                answer = '';
+                break;
+        }
+        return answer;
     }
 }
 
@@ -1077,6 +1085,21 @@ export interface ITransactionFee {
      * The transaction fee for a low speed in currency
      */
     low_currency: number;
+
+    /**
+    * The transaction delay with high fee
+    */
+    low_delay?: number;
+
+    /**
+     * The transaction delay with medium fee
+     */
+    medium_delay?: number;
+
+    /**
+     * The transaction delay with high fee
+     */
+    high_delay?: number;
 
 }
 
@@ -1334,7 +1357,7 @@ export interface IValidatorReward {
     /**
      * Total record count
      */
-    total_count: number;
+    full_count: number;
 }
 
 /**
