@@ -121,21 +121,6 @@ export const sample_data5 = (() => {
     return JSON.parse(data);
 })();
 
-export const sample_data6 = (() => {
-    const data: string = fs.readFileSync("tests/data/Block.6.sample1.json", "utf-8");
-    return JSON.parse(data);
-})();
-
-export const sample_data7 = (() => {
-    const data: string = fs.readFileSync("tests/data/Block.7.sample1.json", "utf-8");
-    return JSON.parse(data);
-})();
-
-export const sample_data8 = (() => {
-    const data: string = fs.readFileSync("tests/data/Block.8.sample1.json", "utf-8");
-    return JSON.parse(data);
-})();
-
 export const recovery_sample_data = (() => {
     const data: string = fs.readFileSync("tests/data/Recovery.blocks.sample10.json", "utf-8");
     return JSON.parse(data);
@@ -384,7 +369,7 @@ export class TestVoteraServer {
         this.app.get("/votera-proposal/469008972006", (req: Request, res: Response) => {
             const response = {
                 proposalId: "469008972006",
-                proposer_address: "boa1xrval7gwhjz4k9raqukcnv2n4rl4fxt74m2y9eay6l5mqdf4gntnzhhscrh",
+                proposer_address: "boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn",
                 name: "Make better world!",
                 type: "BUSINESS",
                 status: "closed",
@@ -392,13 +377,13 @@ export class TestVoteraServer {
                 createdAt: "2021-07-23T04:49:26.634Z",
                 description: "Description Make better world!",
                 proposal_fee_tx_hash:
-                    "0x11c6b0395c8e1716978c41958eab84e869755c09f7131b3bbdc882a647cb3f2c46c450607c6da71d34d1eab28fbfdf14376b444ef46ed1d0a7d2237ab430ebf5",
-                vote_fee: 100,
+                    "0x33f661e8d38ae9a2f096f50822306e5ab06a7d000a9d52f7ff476b2c533d145ebab740d0c296a438a5782405e15365286f49e1e2d6db158334ed0a7b24af7470",
+                vote_fee: 19.17672,
                 fundingAmount: 100000,
                 voting_start_height: 3,
                 voting_end_height: 6,
                 tx_hash_vote_fee:
-                    "0x8b6a2e1ecc3616ad63c73d606c4019407ebfd06a122519e7bd88d99af92d19d9621323d7c2e68593053a570522b6bc8575d1ee45a74ee38726f297a5ce08e33d",
+                    "0xba747aa032f83fa6754efee9b259ac181eaa1f657395cb09b9f79a2d198fd0ce83e441c8a1aba51bd29b400b8bde27bacc22bef8e1f5261e8e545102afb96f4d",
                 assessResult: {
                     average: 7,
                     nodeCount: 2,

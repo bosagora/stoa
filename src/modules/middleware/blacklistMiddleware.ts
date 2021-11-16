@@ -9,7 +9,7 @@ import moment from "moment";
  *
  */
 export const isBlackList = async (req: Request, res: Response, next: NextFunction) => {
-    const ipAddress = String(req.ip);
+    const ipAddress = req.headers['x-forwarded-for'] === undefined ? req.ip : req.headers['x-forwarded-for'];
     if (
         Logger.dbInstance === undefined ||
         Logger.dbInstance.connection === undefined ||

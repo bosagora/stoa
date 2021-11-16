@@ -16,6 +16,7 @@ import { IMarketCap, CurrencyType } from "../../Types";
 import { logger } from "../common/Logger";
 import { Operation, Status } from "../common/LogOperation";
 import moment from "moment";
+import { HeightManager } from "../common/HeightManager";
 export interface CoinMarket {
     /**
      * Method to ping the coin market
@@ -122,14 +123,14 @@ export class CoinGeckoMarket implements CoinMarket {
                 }
                 logger.info(`CoinMarket: Data Fetch For ${currency} Completed at ${marketCap.bosagora.last_updated_at}`, {
                     operation: Operation.coin_market_data_sync,
-                    height: "",
+                    height: HeightManager.height.toString(),
                     status: Status.Success,
                     responseTime: Number(moment().utc().unix() * 1000),
                 });
             } else {
                 logger.error(`Fail to fetch CoinMarket data`, {
                     operation: Operation.coin_market_data_sync,
-                    height: "",
+                    height: HeightManager.height.toString(),
                     status: Status.Error,
                     responseTime: Number(moment().utc().unix() * 1000),
                 });

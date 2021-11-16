@@ -979,9 +979,9 @@ describe("Test of Stoa API Server", function () {
                 block_reward: 8717784200000,
                 block_fee: 0,
                 validator_reward: 12962823333,
-                total_count: 1,
-            },
-        ];
+                full_count: 1
+            }
+        ]
 
         assert.deepStrictEqual(response.data, expected);
     });

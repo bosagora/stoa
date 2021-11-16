@@ -578,8 +578,8 @@ describe("Test of the path /utxo", () => {
 
     after("Stop Stoa and Agora server instances", async () => {
         await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
-        await stoa_server.stop();
         await votera_server.stop();
+        await stoa_server.stop();
         await gecko_server.stop();
         await agora_server.stop();
     });
