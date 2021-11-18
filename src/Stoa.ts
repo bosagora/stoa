@@ -125,6 +125,11 @@ class Stoa extends WebService {
     private readonly genesis_timestamp: number;
 
     /**
+     * The block interval
+     */
+    private readonly block_interval: number;
+
+    /**
      * The cycle length for a validator
      */
     private readonly validator_cycle: number;
@@ -146,6 +151,7 @@ class Stoa extends WebService {
         private_port: number | string,
         address: string,
         genesis_timestamp: number,
+        block_interval: number,
         validator_cycle: number,
         votera_service?: VoteraService,
         coinMarketService?: CoinMarketService
@@ -153,6 +159,7 @@ class Stoa extends WebService {
         super(port, private_port, address);
 
         this.genesis_timestamp = genesis_timestamp;
+        this.block_interval = block_interval;
         this.validator_cycle = validator_cycle;
         this._ledger_storage = null;
         this.databaseConfig = databaseConfig;
@@ -173,7 +180,12 @@ class Stoa extends WebService {
      * Creates a instance of LedgerStorage
      */
     public createStorage(): Promise<void> {
-        return LedgerStorage.make(this.databaseConfig, this.genesis_timestamp, this.validator_cycle).then((storage) => {
+        return LedgerStorage.make(
+            this.databaseConfig,
+            this.genesis_timestamp,
+            this.block_interval,
+            this.validator_cycle
+        ).then((storage) => {
             this._ledger_storage = storage;
         });
     }
@@ -397,8 +409,10 @@ class Stoa extends WebService {
                 const out_put: ValidatorData[] = new Array<ValidatorData>();
 
                 for (const row of rows) {
-                    const preimage_hash: string = row.preimage_hash !== null ? new Hash(row.preimage_hash, Endian.Little).toString() : "";
-                    const preimage_height_str: string = row.preimage_height !== null ? row.preimage_height.toString() : "";
+                    const preimage_hash: string =
+                        row.preimage_hash !== null ? new Hash(row.preimage_hash, Endian.Little).toString() : "";
+                    const preimage_height_str: string =
+                        row.preimage_height !== null ? row.preimage_height.toString() : "";
 
                     const preimage: IPreimage = {
                         height: preimage_height_str,
@@ -410,7 +424,7 @@ class Stoa extends WebService {
                         new Height(JSBI.BigInt(row.enrolled_at)),
                         new Hash(row.stake, Endian.Little).toString(),
                         row.full_count,
-                        preimage,
+                        preimage
                     );
                     out_put.push(validator);
                 }
@@ -469,8 +483,10 @@ class Stoa extends WebService {
 
                 if (rows.length > 0) {
                     const row = rows[0];
-                    const preimage_hash: string = row.preimage_hash !== null ? new Hash(row.preimage_hash, Endian.Little).toString() : "";
-                    const preimage_height_str: string = row.preimage_height !== null ? row.preimage_height.toString() : "";
+                    const preimage_hash: string =
+                        row.preimage_hash !== null ? new Hash(row.preimage_hash, Endian.Little).toString() : "";
+                    const preimage_height_str: string =
+                        row.preimage_height !== null ? row.preimage_height.toString() : "";
 
                     const preimage: IPreimage = {
                         height: preimage_height_str,
@@ -824,9 +840,9 @@ class Stoa extends WebService {
         filter_type =
             req.query.type !== undefined
                 ? req.query.type
-                    .toString()
-                    .split(",")
-                    .map((m) => ConvertTypes.toDisplayTxType(m))
+                      .toString()
+                      .split(",")
+                      .map((m) => ConvertTypes.toDisplayTxType(m))
                 : [0, 1, 2, 3];
 
         if (filter_type.find((m) => m < 0) !== undefined) {
@@ -947,9 +963,9 @@ class Stoa extends WebService {
         filter_type =
             req.query.type !== undefined
                 ? req.query.type
-                    .toString()
-                    .split(",")
-                    .map((m) => ConvertTypes.toDisplayTxType(m))
+                      .toString()
+                      .split(",")
+                      .map((m) => ConvertTypes.toDisplayTxType(m))
                 : [0, 1, 2, 3];
 
         if (filter_type.find((m) => m < 0) !== undefined) {
@@ -1273,7 +1289,10 @@ class Stoa extends WebService {
                         total_reward: data[0].total_reward,
                         total_fee: data[0].total_fee,
                         total_size: data[0].total_size,
-                        tx_volume: JSBI.add(JSBI.add(JSBI.BigInt(data[0].total_received), JSBI.BigInt(data[0].total_fee)), JSBI.BigInt(data[0].total_reward)).toString()
+                        tx_volume: JSBI.add(
+                            JSBI.add(JSBI.BigInt(data[0].total_received), JSBI.BigInt(data[0].total_fee)),
+                            JSBI.BigInt(data[0].total_reward)
+                        ).toString(),
                     };
                     res.status(200).send(JSON.stringify(overview));
                 }
@@ -2208,7 +2227,7 @@ class Stoa extends WebService {
                     if (updated)
                         logger.info(
                             `Update a blockHeader : ${block_header.toString()}, ` +
-                            `block height : ${block_header.height.toString()}`,
+                                `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -2219,7 +2238,7 @@ class Stoa extends WebService {
                     if (put)
                         logger.info(
                             `puts a blockHeader history : ${block_header.toString()}, ` +
-                            `block height : ${block_header.height.toString()}`,
+                                `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -2246,7 +2265,7 @@ class Stoa extends WebService {
                     if (changes)
                         logger.info(
                             `Saved a pre-image utxo : ${pre_image.utxo.toString().substr(0, 18)}, ` +
-                            `hash : ${pre_image.hash.toString()}, pre-image height : ${pre_image.height}`,
+                                `hash : ${pre_image.hash.toString()}, pre-image height : ${pre_image.height}`,
                             {
                                 operation: Operation.db,
                                 height: HeightManager.height.toString(),
@@ -3127,7 +3146,7 @@ class Stoa extends WebService {
             .getExchangeRate()
             .then((rate: number) => {
                 let exchange = new Exchange(rate);
-                let usd = exchange.convertBoaToUsd(amount)
+                let usd = exchange.convertBoaToUsd(amount);
                 return res.status(200).send({ amount: amount, USD: usd });
             })
             .catch((err) => {
