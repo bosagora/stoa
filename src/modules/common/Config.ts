@@ -405,17 +405,22 @@ export class ConsensusConfig implements IConsensusConfig {
     public genesis_timestamp: number;
 
     /**
+     * The block interval(second)
+     */
+    public block_interval: number;
+
+    /**
      * The cycle length for a validator
      */
     public validator_cycle: number;
 
     /**
      * Constructor
-     * @param genesis_timestamp The genesis timestamp
      */
     constructor() {
         const defaults = ConsensusConfig.defaultValue();
         this.genesis_timestamp = defaults.genesis_timestamp;
+        this.block_interval = defaults.block_interval;
         this.validator_cycle = defaults.validator_cycle;
     }
 
@@ -427,6 +432,7 @@ export class ConsensusConfig implements IConsensusConfig {
         const conf = extend(true, {}, ConsensusConfig.defaultValue());
         extend(true, conf, config);
         this.genesis_timestamp = conf.genesis_timestamp;
+        this.block_interval = conf.block_interval;
         this.validator_cycle = conf.validator_cycle;
     }
 
@@ -437,6 +443,7 @@ export class ConsensusConfig implements IConsensusConfig {
         return {
             genesis_timestamp: 1609459200,
             validator_cycle: 1008,
+            block_interval: 10 * 60,
         };
     }
 }
@@ -622,6 +629,11 @@ export interface IConsensusConfig {
      * The genesis timestamp
      */
     genesis_timestamp: number;
+
+    /**
+     * The block interval(second)
+     */
+    block_interval: number;
 
     /**
      * The cycle length for a validator

@@ -43,6 +43,7 @@ import {
 import bigDecimal from "js-big-decimal";
 import moment from "moment";
 import * as mysql from "mysql2";
+import process from "process";
 import { SmartBuffer } from "smart-buffer";
 import {
     IAccountInformation,
@@ -74,6 +75,8 @@ export class LedgerStorage extends Storages {
      */
     private readonly genesis_timestamp: number;
 
+    private readonly block_interval: number;
+
     /**
      * The cycle length for a validator
      */
@@ -95,11 +98,13 @@ export class LedgerStorage extends Storages {
     constructor(
         databaseConfig: IDatabaseConfig,
         genesis_timestamp: number,
+        block_interval: number,
         validator_cycle: number,
         callback: (err: Error | null) => void
     ) {
         super(databaseConfig, callback);
         this.genesis_timestamp = genesis_timestamp;
+        this.block_interval = block_interval;
         this.validator_cycle = validator_cycle;
     }
 
@@ -109,12 +114,14 @@ export class LedgerStorage extends Storages {
     public static make(
         databaseConfig: IDatabaseConfig,
         genesis_timestamp: number,
+        block_interval: number,
         validator_cycle: number
     ): Promise<LedgerStorage> {
         return new Promise<LedgerStorage>((resolve, reject) => {
             const result: LedgerStorage = new LedgerStorage(
                 databaseConfig,
                 genesis_timestamp,
+                block_interval,
                 validator_cycle,
                 async (err: Error | null) => {
                     if (err) reject(err);
@@ -543,6 +550,14 @@ export class LedgerStorage extends Storages {
      */
     public putBlocks(block: Block): Promise<void> {
         const genesis_timestamp: number = this.genesis_timestamp;
+        const now_timestamp = Math.floor(new Date().getTime() / 1000);
+
+        // In the production environment, it should be treated as the received time.
+        if (process.env.NODE_ENV === "production") {
+            block.header.time_offset = now_timestamp - genesis_timestamp;
+        } else {
+            block.header.time_offset = JSBI.toNumber(block.header.height.value) * this.block_interval;
+        }
 
         function saveBlock(
             storage: LedgerStorage,

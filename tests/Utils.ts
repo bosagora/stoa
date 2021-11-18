@@ -327,6 +327,7 @@ export class TestStoa extends Stoa {
             Number(port) + 1000,
             "127.0.0.1",
             1609459200,
+            600,
             20,
             testVoteraService,
             testCoinMarketService
@@ -620,9 +621,9 @@ export function createBlock(prev_block: Block, txs: Transaction[]): Block {
         BitMask.fromString(""),
         new Height(JSBI.add(prev_block.header.height.value, JSBI.BigInt(1))),
         [],
-        [],
-        prev_block.header.time_offset + 10 * 60
+        []
     );
+    block_header.time_offset = JSBI.toNumber(block_header.height.value) * 10 * 60;
 
     return new Block(block_header, txs, merkle_tree);
 }
@@ -1816,9 +1817,9 @@ export class BlockManager {
             bits,
             new Height(JSBI.BigInt(this.height + 1)),
             pre_images,
-            enrollments,
-            this.blocks[this.blocks.length - 1].header.time_offset + 10 * 60
+            enrollments
         );
+        block_header.time_offset = JSBI.toNumber(block_header.height.value) * 10 * 60;
         const new_block = new Block(block_header, txs, merkle_tree);
         this.blocks.push(new_block);
         this.saveValidatorsAtNextBlock(this.height);

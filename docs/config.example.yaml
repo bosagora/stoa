@@ -50,6 +50,9 @@ consensus:
   # 2021-01-01:00:00:00 GMT
   genesis_timestamp: 1609459200
 
+  # The interval at which a block is created(second)
+  block_interval: 600
+
   # The cycle length for a validator
   validator_cycle: 1008
 
@@ -65,4 +68,3 @@ votera:
 
     # Endpoint of Agora
     votera_endpoint: http://dev-votera.bosagora.com:1337/
-    

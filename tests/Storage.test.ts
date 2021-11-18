@@ -38,7 +38,7 @@ describe("Test ledger storage and inquiry function.", () => {
 
     before("Prepare Storage", async () => {
         testDBConfig = await MockDBConfig();
-        return LedgerStorage.make(testDBConfig, 1609459200, 20).then((result) => {
+        return LedgerStorage.make(testDBConfig, 1609459200, 600, 20).then((result) => {
             ledger_storage = result;
         });
     });
@@ -163,7 +163,7 @@ describe("Test ledger storage and inquiry function.", () => {
         );
         assert.strictEqual(
             new Hash(rows[0].hash, Endian.Little).toString(),
-            "0x400467a06c564be843689d17671ffe20b3f87e5163ec7899e2fc1675fa69e450dfb5c3d1dc9fb3f252c8c42db83a9dc1ca20eb36f6b4323a1a63f155ec98dbdc"
+            "0x62d6bb89eecd3a5e96096f1d837ebca05348b61c5afe569f110a8a134a0d491cb98c9c3b67db4b13aa35f0acb03da34e15c849caa4a790ed24774d3faaf93a25"
         );
 
         rows = await ledger_storage.getWalletBlocksHeaderInfo(new Height("0"));
@@ -176,7 +176,7 @@ describe("Test ledger storage and inquiry function.", () => {
         );
         assert.strictEqual(
             new Hash(rows[0].hash, Endian.Little).toString(),
-            "0x3cf900495dbd46d36e6477c042f766a64ee7c4bb6bd5a7be00df3d1ef55293700ddad11462c6b6ccc4b06f54f1b089c8a2a997a67dd065aca4c6453775dcd565"
+            "0x29394d0ed1c94a3172278df9f0e61f581c3da85ef0f8ddf20c5f2f5d8efe2067753db1b2a8a1ea62d8762b2680ed1c4914e48bb6677d9212629de175eb6c6dbf"
         );
     });
 
@@ -240,7 +240,7 @@ describe("Test for storing block data in the database", () => {
 
     beforeEach("Prepare Storage", async () => {
         testDBConfig = await MockDBConfig();
-        ledger_storage = await LedgerStorage.make(testDBConfig, 1609459200, 20);
+        ledger_storage = await LedgerStorage.make(testDBConfig, 1609459200, 600, 20);
     });
 
     afterEach("Close Storage", async () => {
@@ -318,7 +318,7 @@ describe("Tests that sending a pre-image", () => {
 
     before("Start sending a pre-image", async () => {
         testDBConfig = await MockDBConfig();
-        ledger_storage = await LedgerStorage.make(testDBConfig, 1609459200, 20);
+        ledger_storage = await LedgerStorage.make(testDBConfig, 1609459200, 600, 20);
         for (const elem of sample_data) await ledger_storage.putBlocks(Block.reviver("", elem));
         await ledger_storage.getEnrollments(height);
     });
@@ -385,7 +385,7 @@ describe("Tests storing transaction pools of a transaction", () => {
 
     before("Preparation the ledgerStorage", async () => {
         testDBConfig = await MockDBConfig();
-        return LedgerStorage.make(testDBConfig, 1609459200, 20).then((result) => {
+        return LedgerStorage.make(testDBConfig, 1609459200, 600, 20).then((result) => {
             ledger_storage = result;
         });
     });
@@ -435,7 +435,7 @@ describe("Tests update blockHeader", () => {
 
     before("Preparation the ledgerStorage", async () => {
         testDBConfig = await MockDBConfig();
-        return LedgerStorage.make(testDBConfig, 1609459200, 20).then((result) => {
+        return LedgerStorage.make(testDBConfig, 1609459200, 600, 20).then((result) => {
             ledger_storage = result;
         });
     });
