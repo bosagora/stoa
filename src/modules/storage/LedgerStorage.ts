@@ -400,25 +400,27 @@ export class LedgerStorage extends Storages {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS account_history(
-            address          VARCHAR(64),
-            time_stamp       INTEGER     NOT NULL,
-            granularity      TEXT        NOT NULL,
-            block_height     INTEGER     NOT NULL,
-            balance          BIGINT(20)  UNSIGNED NOT NULL,
+            address                     VARCHAR(64) NOT NULL,
+            granularity_time_stamp      INTEGER     NOT NULL,
+            granularity                 TEXT        NOT NULL,
+            time_stamp                  INTEGER     NOT NULL,
+            block_height                INTEGER     NOT NULL,
+            balance                     BIGINT(20)  UNSIGNED NOT NULL,
 
-            PRIMARY KEY (address(64), time_stamp, granularity(64))
+            PRIMARY KEY (address(64), granularity_time_stamp, granularity(64))
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS fees
         (
-            height             INTEGER NOT NULL,
-            time_stamp         INTEGER NOT NULL,
-            granularity        TEXT NOT NULL,
-            average_tx_fee     BIGINT(20) NOT NULL,
-            total_tx_fee       BIGINT(20) NOT NULL,
-            total_payload_fee  BIGINT(20) NOT NULL,
-            total_fee          BIGINT(20) NOT NULL,
-            PRIMARY KEY(time_stamp, granularity(64))
+            height                      INTEGER    NOT NULL,
+            granularity_time_stamp      INTEGER    NOT NULL,
+            granularity                 TEXT       NOT NULL,
+            time_stamp                  INTEGER    NOT NULL,
+            average_tx_fee              BIGINT(20) NOT NULL,
+            total_tx_fee                BIGINT(20) NOT NULL,
+            total_payload_fee           BIGINT(20) NOT NULL,
+            total_fee                   BIGINT(20) NOT NULL,
+            PRIMARY KEY(granularity_time_stamp, granularity(64))
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
         CREATE TABLE IF NOT EXISTS proposal_fee
@@ -653,8 +655,9 @@ export class LedgerStorage extends Storages {
         function save_fee(
             storage: LedgerStorage,
             height: Height,
-            time_stamp: number,
+            granularity_time_stamp: number,
             granularity: number,
+            time_stamp: number,
             average_tx_fee: JSBI,
             total_tx_fee: JSBI,
             total_payload_fee: JSBI,
@@ -664,20 +667,22 @@ export class LedgerStorage extends Storages {
                 storage
                     .query(
                         `INSERT INTO fees
-                        ( height, time_stamp, granularity,  average_tx_fee, total_tx_fee, total_payload_fee, total_fee)
+                        ( height, granularity_time_stamp, granularity, time_stamp, average_tx_fee, total_tx_fee, total_payload_fee, total_fee)
                     VALUES
-                        (?,?,?,?,?,?,?)
+                        (?, ?, ?, ?, ?, ?, ?, ?)
                     ON DUPLICATE KEY
                     UPDATE
                         height = VALUES(height),
+                        time_stamp = VALUES(time_stamp),
                         average_tx_fee = VALUES(average_tx_fee),
                         total_tx_fee = VALUES(total_tx_fee),
                         total_payload_fee = VALUES(total_payload_fee),
                         total_fee = VALUES(total_fee)`,
                         [
                             height.value.toString(),
-                            time_stamp.toString(),
+                            granularity_time_stamp.toString(),
                             granularity.toString(),
+                            time_stamp.toString(),
                             average_tx_fee.toString(),
                             total_tx_fee.toString(),
                             total_payload_fee.toString(),
@@ -720,6 +725,7 @@ export class LedgerStorage extends Storages {
                         block.header.height,
                         newEntry[index].time_stamp,
                         newEntry[index].granularity,
+                        block.header.time_offset + this.genesis_timestamp,
                         average_tx_fee,
                         total_tx_fee,
                         total_payload_fee,
@@ -1240,8 +1246,9 @@ export class LedgerStorage extends Storages {
                                     storage,
                                     address,
                                     height,
-                                    newEntry[index].time_stamp,
+                                    time_stamp,
                                     accountInfo.total_balance.toString(),
+                                    newEntry[index].time_stamp,
                                     newEntry[index].granularity
                                 );
                             }
@@ -1260,23 +1267,26 @@ export class LedgerStorage extends Storages {
             height: Height,
             time_stamp: number,
             balance: string,
+            granularity_time_stamp: number,
             granularity: string
         ) {
             return new Promise<void>((resolve, reject) => {
                 storage
                     .query(
                         `INSERT INTO account_history
-                        ( address, block_height, time_stamp, granularity, balance)
+                        ( address, block_height, time_stamp, granularity_time_stamp, granularity, balance)
                     VALUES
-                        (?, ?, ?, ?, ?)
+                        (?, ?, ?, ?, ?, ?)
                     ON DUPLICATE KEY
                     UPDATE
                         balance = VALUES(balance),
+                        time_stamp = VALUES(time_stamp),
                         block_height = VALUES(block_height)`,
                         [
                             address,
                             height.value.toString(),
                             time_stamp.toString(),
+                            granularity_time_stamp.toString(),
                             granularity.toString(),
                             balance.toString(),
                         ],
@@ -5134,12 +5144,12 @@ export class LedgerStorage extends Storages {
      */
     public calculateAvgFeeChart(from: number, to: number, filter: string): Promise<any[]> {
         const sql = `SELECT
-                height, time_stamp, average_tx_fee,
+                height, time_stamp, average_tx_fee, granularity_time_stamp,
                 granularity, total_tx_fee, total_payload_fee, total_fee
              FROM
                 fees
              WHERE
-                time_stamp>=? AND  time_stamp<=? AND  granularity = ?`;
+                granularity_time_stamp>=? AND  granularity_time_stamp<=? AND  granularity = ?`;
         return this.query(sql, [from, to, filter]);
     }
 
@@ -5152,11 +5162,11 @@ export class LedgerStorage extends Storages {
      */
     public getAccountChart(address: string, from: number, to: number, filter: string): Promise<any[]> {
         const sql = `SELECT
-                address, block_height, time_stamp, balance, granularity
+                address, block_height, granularity_time_stamp, time_stamp, balance, granularity
              FROM
                 account_history
              WHERE
-              address=? AND time_stamp>=? AND  time_stamp<=? AND  granularity = ?`;
+              address=? AND granularity_time_stamp>=? AND  granularity_time_stamp<=? AND  granularity = ?`;
         return this.query(sql, [address, from, to, filter]);
     }
 

@@ -1765,6 +1765,11 @@ export interface IAvgFee {
     granularity: string;
 
     /**
+     * Granularity timestamp of Record
+     */
+    granularity_time_stamp: string;
+
+    /**
      * Block unix timestamp
      */
     time_stamp: number;
@@ -1813,6 +1818,11 @@ export interface IAccountChart {
      * Granularity of Record
      */
     granularity: string;
+
+    /**
+     * Granularity timestamp of Record
+     */
+    granularity_time_stamp: string;
 
     /**
      * Time in Seconds

@@ -2855,6 +2855,7 @@ class Stoa extends WebService {
                         accountChartList.push({
                             address: row.address,
                             granularity: row.granularity,
+                            granularity_time_stamp: row.granularity_time_stamp,
                             time_stamp: row.time_stamp,
                             balance: row.balance,
                             block_height: row.block_height,
@@ -3412,6 +3413,7 @@ class Stoa extends WebService {
                         avgFeelist.push({
                             height: row.height,
                             granularity: row.granularity,
+                            granularity_time_stamp: row.granularity_time_stamp,
                             time_stamp: row.time_stamp,
                             average_tx_fee: row.average_tx_fee,
                             total_tx_fee: row.total_tx_fee,

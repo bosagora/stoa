@@ -879,13 +879,14 @@ describe("Test of Stoa API Server", function () {
         const response = await client.get(uri.toString());
         const expected = [
             {
-                address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
-                block_height: 1,
-                granularity: "H",
-                time_stamp: 1609459200,
+                address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67',
+                granularity: 'H',
+                granularity_time_stamp: 1609459200,
+                time_stamp: 1609459800,
                 balance: 0,
-            },
-        ];
+                block_height: 1
+            }
+        ]
         assert.deepStrictEqual(response.data, expected);
     });
 
@@ -918,13 +919,14 @@ describe("Test of Stoa API Server", function () {
         const expected = [
             {
                 height: 1,
-                granularity: "D",
-                time_stamp: 1609459200,
+                granularity: 'D',
+                granularity_time_stamp: 1609459200,
+                time_stamp: 1609459800,
                 average_tx_fee: 188,
                 total_tx_fee: 1904000,
                 total_payload_fee: 0,
-                total_fee: 1904000,
-            },
+                total_fee: 1904000
+            }
         ];
         assert.deepStrictEqual(response.data, expected);
     });
