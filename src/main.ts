@@ -11,6 +11,7 @@ import { VoteraService } from "./modules/service/VoteraService";
 import { Storages } from "./modules/storage/Storages";
 import Stoa from "./Stoa";
 import moment, { months } from "moment";
+import { NodeService } from "./modules/service/NodeService";
 
 // Create with the arguments and read from file
 const config = Config.createWithArgument();
@@ -71,7 +72,8 @@ const stoa: Stoa = new Stoa(
                 autoRetry: true,
             })
         )
-    )
+    ),
+    new NodeService(config.server.agora_endpoint)
 );
 
 if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());

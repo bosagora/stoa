@@ -50,6 +50,7 @@ import {
     IBallot,
     IMarketCap,
     IMetaData,
+    INodeInformation,
     IPreimage,
     IProposal,
     IProposalAttachment,
@@ -514,6 +515,18 @@ export class LedgerStorage extends Storages {
             address               VARCHAR(64) NOT NULL,
 
             PRIMARY KEY(block_height, utxo_key(64))
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+        CREATE TABLE IF NOT EXISTS nodes
+        (
+            public_key    TEXT  NOT NULL,
+            utxo_key      TEXT  NOT NULL,
+            url           TEXT  NOT NULL,
+            port          TEXT  NOT NULL,
+            block_height  TEXT  NOT NULL,
+            update_time   TEXT  NOT NULL,
+
+            PRIMARY KEY(public_key(64))
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
        DROP TRIGGER IF EXISTS tx_trigger;
@@ -4339,7 +4352,7 @@ export class LedgerStorage extends Storages {
                     full_count
                 FROM(
                     SELECT
-                        (SELECT IFNULL(MAX(height), 0) AS height FROM blocks) AS block_height,
+                        "" AS block_height,
 	                    T.tx_hash,
                         T.time as time_stamp,
 	                    T.tx_fee,
@@ -4480,7 +4493,7 @@ export class LedgerStorage extends Storages {
                 INNER JOIN proposal P
                 ON (B.proposal_id = P.proposal_id)
                 WHERE B.voter_address = ?
-                AND B.sequence = (SELECT MAX(sequence) FROM ballots WHERE voter_address = ? )
+                AND B.sequence = (SELECT MAX(sequence) FROM ballots WHERE voter_address = ? AND proposal_id = B.proposal_id)
                 ORDER BY B.block_height DESC
                 LIMIT ? OFFSET ?`;
         return this.query(sql, [address, address, limit, limit * (page - 1)]);
@@ -5228,6 +5241,30 @@ export class LedgerStorage extends Storages {
             block_height = ?`;
 
         return this.query(sql, [height.value.toString()]);
+    }
+
+    /**
+     * This method will put node information into the DB
+     * @param node_info Node information
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the block height
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public putNodeInfo(node_info: INodeInformation) {
+        const sql = `INSERT INTO nodes
+                    (public_key, utxo_key, url, port, block_height, update_time)
+                    VALUES
+                        (?, ?, ?, ?, ?, ?)
+                    ON DUPLICATE KEY
+                    UPDATE
+                    utxo_key = VALUES(utxo_key),
+                    url = VALUES(url),
+                    port = VALUES(port),
+                    block_height = VALUES(block_height),
+                    update_time = VALUES(update_time)
+        `;
+
+        return this.query(sql, [node_info.public_key, node_info.utxo, node_info.URL, node_info.port, node_info.block_height, node_info.update_time]);
     }
 
     /**

@@ -68,3 +68,4 @@ votera:
 
     # Endpoint of Agora
     votera_endpoint: http://dev-votera.bosagora.com:1337/
+    
