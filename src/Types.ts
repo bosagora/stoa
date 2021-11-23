@@ -817,6 +817,41 @@ export interface ITxDetailOutputElement {
 }
 
 /**
+ * The interface of the node information
+ */
+export interface INodeInformation {
+    /**
+     * Node public key
+     */
+    public_key: string;
+
+    /**
+     * Node utxo
+     */
+    utxo: string;
+
+    /**
+     * Node URL
+     */
+    URL: string;
+
+    /**
+     * port
+     */
+    port: string;
+
+    /**
+     * Node block_height
+     */
+    block_height: string;
+
+    /**
+     * Node update time
+     */
+    update_time: string;
+}
+
+/**
  * The interface of the transaction detail input element
  */
 export interface ITxDetailInputElement {

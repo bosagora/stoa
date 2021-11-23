@@ -856,4 +856,32 @@ CREATE TABLE IF NOT EXISTS "preimages" (
         PRIMARY KEY("block_height", "voter_address(64)", "proposal_id(64)", "app_name(64)");
     );
     ```
+
+## 28. Table **nodes**
+
+### _Schema_
+
+| Column          | Data Type| PK  | Not NULL | Default | Description                    |
+| :---------------| :--------| :-: | :------: | ------- | ------------------------------ |
+| public_key      | TEXT     |  Y  |    Y     |         | The public key of the node     |
+| utxo_key        | TEXT     |     |    Y     |         | The utxo_key of the node       |
+| url             | TEXT     |     |    Y     |         | URL of the node                |
+| port            | TEXT     |     |    Y     |         | Port of the node               |
+| block_height    | TEXT     |     |    Y     |         | Block height of the node       |
+| update_time     | TEXT     |     |    Y     |         | Latest update time of the node |
+
+### _Create Script_
+
+````sql
+    CREATE TABLE IF NOT EXISTS nodes
+        (
+        "public_key"      TEXT    NOT NULL,
+        "utxo_key"        TEXT    NOT NULL,
+        "url"             TEXT    NOT NULL,
+        "port"            TEXT    NOT NULL,
+        "block_height"    TEXT    NOT NULL,
+        "update_time"     TEXT    NOT NULL,
+        PRIMARY KEY("public_key(64)");
+    );
+    ```
 ---

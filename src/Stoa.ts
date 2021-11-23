@@ -37,6 +37,7 @@ import { Time } from "./modules/common/Time";
 import events from "./modules/events/events";
 import "./modules/events/handlers";
 import { CoinMarketService } from "./modules/service/CoinMarketService";
+import { NodeService } from "./modules/service/NodeService";
 import { VoteraService } from "./modules/service/VoteraService";
 import { WebService } from "./modules/service/WebService";
 import { LedgerStorage } from "./modules/storage/LedgerStorage";
@@ -124,6 +125,11 @@ class Stoa extends WebService {
     public voteraService?: VoteraService | undefined;
 
     /**
+     * The node service instance
+     */
+    public node_Service?: NodeService;
+
+    /**
      * The genesis timestamp
      */
     private readonly genesis_timestamp: number;
@@ -158,7 +164,8 @@ class Stoa extends WebService {
         block_interval: number,
         validator_cycle: number,
         votera_service?: VoteraService,
-        coinMarketService?: CoinMarketService
+        coinMarketService?: CoinMarketService,
+        nodeService?: NodeService
     ) {
         super(port, private_port, address);
 
@@ -169,6 +176,7 @@ class Stoa extends WebService {
         this.databaseConfig = databaseConfig;
         this.coinMarketService = coinMarketService;
         this.voteraService = votera_service;
+        this.node_Service = nodeService;
         this.wallet_watcher = new WalletWatcherIO();
 
         // Instantiate a dummy promise for chaining
@@ -234,7 +242,7 @@ class Stoa extends WebService {
             responseTime((req: any, res: any, time: any) => {
                 logger.http(`${req.method} ${req.url}`, {
                     endpoint: req.url,
-                    RequesterIP: req.ip,
+                    RequesterIP: req.headers['x-forwarded-for'] === undefined ? req.ip : req.headers['x-forwarded-for'],
                     protocol: req.protocol,
                     httpStatusCode: res.statusCode,
                     userAgent: req.headers["user-agent"],
@@ -252,7 +260,7 @@ class Stoa extends WebService {
             responseTime((req: any, res: any, time: any) => {
                 logger.http(`${req.method} ${req.url}`, {
                     endpoint: req.url,
-                    RequesterIP: req.ip,
+                    RequesterIP: req.headers['x-forwarded-for'] === undefined ? req.ip : req.headers['x-forwarded-for'],
                     protocol: req.protocol,
                     httpStatusCode: res.statusCode,
                     userAgent: req.headers["user-agent"],
@@ -367,10 +375,17 @@ class Stoa extends WebService {
                         logger.error(`Error: Could not connect to votera : ${err.toString()}`, {
                             operation: Operation.connection,
                             height: HeightManager.height.toString(),
-                            success: false,
+                            status: Status.Error,
                         });
                     });
                 }
+                this.node_Service?.start(this).catch((err) => {
+                    logger.error(`Error: Could not connect to node : ${err.toString()}`, {
+                        operation: Operation.connection,
+                        height: HeightManager.height.toString(),
+                        status: Status.Error,
+                    });
+                });
                 this.socket.io.on(events.client.connection, (socket: Socket) => {
                     this.eventDispatcher.dispatch(events.client.connection, socket);
                     this.wallet_watcher.onClientConnected(socket);
@@ -1224,7 +1239,7 @@ class Stoa extends WebService {
 
                 const overview: ITxOverview = {
                     status: data.tx[0].status,
-                    height: JSBI.BigInt(data.tx[0].received_height).toString(),
+                    height: "",
                     time: data.tx[0].time,
                     tx_hash: new Hash(data.tx[0].tx_hash, Endian.Little).toString(),
                     tx_type: lodash.capitalize(ConvertTypes.TxTypeToString(data.tx[0].type)),
@@ -2173,7 +2188,7 @@ class Stoa extends WebService {
                 const transactionList: ITransaction[] = [];
                 for (const row of data) {
                     transactionList.push({
-                        height: JSBI.BigInt(row.block_height).toString(),
+                        height: row.block_height !== '' ? JSBI.BigInt(row.block_height).toString() : '',
                         tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
                         type: lodash.capitalize(ConvertTypes.TxTypeToString(row.type)),
                         amount: JSBI.BigInt(row.amount).toString(),
@@ -2491,7 +2506,7 @@ class Stoa extends WebService {
         return new Promise<any>(async (resolve, reject) => {
             let pendingTransaction = [{
                 tx_hash: tx_hash.toString(),
-                height: HeightManager.height.toString(),
+                height: "",
                 time_stamp: moment.utc().unix(),
                 transaction: tx
             }]
