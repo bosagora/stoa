@@ -17,6 +17,7 @@ import * as mysql from "mysql2";
 import { IDatabaseConfig } from "../common/Config";
 import { logger, Logger } from "../common/Logger";
 import { Operation } from "../common/LogOperation";
+import { mailService } from "../common/Mailer";
 
 export class Storages {
     /**
@@ -151,6 +152,7 @@ export class Storages {
                 if (!conn) connection = await this.getConnection();
                 else connection = conn;
             } catch (err) {
+                mailService.mailer(Operation.db, err);
                 return reject(err);
             }
             connection.query(sql, params, (err: Error | null, rows: any[]) => {
@@ -176,6 +178,7 @@ export class Storages {
                 if (!conn) connection = await this.getConnection();
                 else connection = conn;
             } catch (err) {
+                mailService.mailer(Operation.db, err);
                 return reject(err);
             }
             connection.query(sql, (err: Error | null, rows: any[]) => {

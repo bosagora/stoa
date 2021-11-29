@@ -33,6 +33,7 @@ import { FeeManager } from "./modules/common/FeeManager";
 import { HeightManager } from "./modules/common/HeightManager";
 import { logger } from "./modules/common/Logger";
 import { Operation, Status } from "./modules/common/LogOperation";
+import { mailService } from "./modules/common/Mailer";
 import { Time } from "./modules/common/Time";
 import events from "./modules/events/events";
 import "./modules/events/handlers";
@@ -351,6 +352,7 @@ class Stoa extends WebService {
                     return super.start();
                 },
                 (err) => {
+                    mailService.mailer(Operation.connection, err);
                     logger.error(`Error: Could not connect to Agora node: ${err.toString()}`, {
                         operation: Operation.connection,
                         height: HeightManager.height.toString(),
@@ -362,7 +364,8 @@ class Stoa extends WebService {
             )
             .then(() => {
                 if (this.coinMarketService !== undefined)
-                    this.coinMarketService.start(this).catch((err) => {
+                    this.coinMarketService.start(this).catch(async (err) => {
+                        mailService.mailer(Operation.connection, err)
                         logger.error(`Error: Could not connect to marketcap Client: ${err.toString()}`, {
                             operation: Operation.connection,
                             height: HeightManager.height.toString(),
@@ -372,6 +375,7 @@ class Stoa extends WebService {
                     });
                 if (this.voteraService !== undefined) {
                     this.voteraService?.start(this).catch((err) => {
+                        mailService.mailer(Operation.connection, err)
                         logger.error(`Error: Could not connect to votera : ${err.toString()}`, {
                             operation: Operation.connection,
                             height: HeightManager.height.toString(),
@@ -380,6 +384,7 @@ class Stoa extends WebService {
                     });
                 }
                 this.node_Service?.start(this).catch((err) => {
+                    mailService.mailer(Operation.connection, err)
                     logger.error(`Error: Could not connect to node : ${err.toString()}`, {
                         operation: Operation.connection,
                         height: HeightManager.height.toString(),
@@ -471,6 +476,7 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(out_put));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -549,6 +555,7 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(out_put));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -594,6 +601,7 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(status));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -647,6 +655,7 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(data));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -686,6 +695,8 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(tx));
             })
             .catch((err) => {
+
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -725,6 +736,7 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(tx));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -765,6 +777,7 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(utxo_array));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -818,6 +831,8 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(utxo_array));
             })
             .catch((err) => {
+
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -943,6 +958,7 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(out_put));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -1099,6 +1115,7 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(history));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -1189,6 +1206,7 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(overview));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -1280,6 +1298,7 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(overview));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -1370,6 +1389,7 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(detail));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -1448,6 +1468,7 @@ class Stoa extends WebService {
                 }
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -1517,6 +1538,7 @@ class Stoa extends WebService {
                 }
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -1590,6 +1612,7 @@ class Stoa extends WebService {
                 }
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -1637,6 +1660,7 @@ class Stoa extends WebService {
                 }
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -1703,6 +1727,7 @@ class Stoa extends WebService {
                     });
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -1821,6 +1846,7 @@ class Stoa extends WebService {
                     }
                 })
                 .catch((err) => {
+                    mailService.mailer(Operation.db, err);
                     logger.error("Failed to Store coin market cap data." + err, {
                         operation: Operation.db,
                         height: HeightManager.height.toString(),
@@ -1882,6 +1908,7 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(pending_array));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -1920,6 +1947,7 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(balance));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -1991,6 +2019,7 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(utxo_array));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -2042,6 +2071,7 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(info));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -2065,6 +2095,7 @@ class Stoa extends WebService {
                 else res.status(200).send(JSON.stringify(row));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -2100,6 +2131,7 @@ class Stoa extends WebService {
                 else res.status(200).send(JSON.stringify(height));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -2222,6 +2254,7 @@ class Stoa extends WebService {
                 }
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -2397,8 +2430,10 @@ class Stoa extends WebService {
             } else if (stored_data.type === "block_header") {
                 try {
                     const block_header = BlockHeader.reviver("", stored_data.data);
+                    await this.ledger_storage.updateValidatorsByBlockheader(block_header);
                     const updated = await this.ledger_storage.updateBlockHeader(block_header);
                     const put = await this.ledger_storage.putBlockHeaderHistory(block_header, HeightManager.height);
+                    await this.emitBoaStats();
                     if (updated)
                         logger.info(
                             `Update a blockHeader : ${block_header.toString()}, ` +
@@ -2623,6 +2658,7 @@ class Stoa extends WebService {
                 }
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -2674,6 +2710,7 @@ class Stoa extends WebService {
                     }
                 })
                 .catch((err) => {
+                    mailService.mailer(Operation.db, err);
                     logger.error("Failed to latest BOA stats: " + err, {
                         operation: Operation.db,
                         height: HeightManager.height.toString(),
@@ -2766,6 +2803,7 @@ class Stoa extends WebService {
                 }
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -2880,6 +2918,7 @@ class Stoa extends WebService {
                 }
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to averageFeeChart data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -2932,6 +2971,7 @@ class Stoa extends WebService {
                 }
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -2973,6 +3013,7 @@ class Stoa extends WebService {
                 return res.status(200).send(JSON.stringify(proposal_votingDetails));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to hash search data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -3005,6 +3046,7 @@ class Stoa extends WebService {
                 return res.status(200).send(JSON.stringify(data));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to hash search data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -3086,6 +3128,7 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(out_put));
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -3119,6 +3162,7 @@ class Stoa extends WebService {
                 }
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -3137,7 +3181,7 @@ class Stoa extends WebService {
         this.ledger_storage
             .getProposals(pagination.pageSize, pagination.page)
             .then((data: any) => {
-                if (data.length === 0) {
+                if (data.proposalData.length === 0) {
                     return res.status(204).send(`The data does not exist.`);
                 } else {
                     let proposals: IProposalList[] = [];
@@ -3169,6 +3213,7 @@ class Stoa extends WebService {
                 }
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -3191,7 +3236,7 @@ class Stoa extends WebService {
         this.ledger_storage
             .getProposalById(proposal_id)
             .then((data: any) => {
-                if (data.length === 0) {
+                if (data.proposalData.length === 0) {
                     return res.status(204).send(`The data does not exist.`);
                 } else {
                     const proposal: IProposalAPI = {
@@ -3234,6 +3279,7 @@ class Stoa extends WebService {
                 }
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -3279,6 +3325,7 @@ class Stoa extends WebService {
                 }
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -3326,6 +3373,7 @@ class Stoa extends WebService {
                 }
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -3440,6 +3488,7 @@ class Stoa extends WebService {
                 }
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to averageFeeChart data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -3516,6 +3565,7 @@ class Stoa extends WebService {
                 }
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to hash search data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
@@ -3557,6 +3607,7 @@ class Stoa extends WebService {
                 return res.status(200).send({ amount: amount, currency: currencyAmount });
             })
             .catch((err) => {
+                mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),

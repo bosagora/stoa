@@ -24,6 +24,7 @@
     "homepage": "https://github.com/bosagora/stoa#readme",
     "dependencies": {
         "@ctrl/ts-base32": "^1.2.4",
+        "@sendgrid/mail": "^7.6.0",
         "@types/app-root-path": "^1.2.4",
         "@types/cors": "^2.8.8",
         "@types/mongodb": "^3.6.17",

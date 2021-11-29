@@ -20,6 +20,7 @@ import { logger } from "../common/Logger";
 import { Operation, Status } from "../common/LogOperation";
 import { HeightManager } from "../common/HeightManager";
 import moment from "moment";
+import { mailService } from "../common/Mailer";
 
 export class VoteraService {
 
@@ -123,6 +124,7 @@ export class VoteraService {
                     logger.info(`Data fetched from votera: proposal_id(${proposal.proposal_id})`);
                     resolve(metadata);
                 }).catch((err) => {
+                    mailService.mailer(Operation.db, err);
                     reject(`Failed to request votera for proposal data: proposal_id(${proposal.proposal_id}) Err: ${err}`);
                     logger.error(`Failed to request votera for proposal data: ${err}`, {
                         operation: Operation.votera_request,
@@ -157,6 +159,7 @@ export class VoteraService {
                         resolve(true);
                     })
                     .catch((err) => {
+                        mailService.mailer(Operation.db, err);
                         reject(`Failed to put proposal metadata: proposal_id(${metadata.proposal_id}) Err: ${err}`);
                         logger.error(`Failed to put proposal metadata: proposal_id(${metadata.proposal_id}) Err: ${err}`, {
                             operation: Operation.votera_request,

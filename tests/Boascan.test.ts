@@ -721,9 +721,9 @@ describe("Test of Stoa API Server", function () {
             validators: 6,
             frozen_coin: '120000000000000',
             total_reward: '0',
-            circulating_supply: 5000000000000000,
+            circulating_supply: "4999999998096000",
             active_validators: 5,
-            price: 119626000,
+            price: 119625999.954446,
             time_stamp: 1609459800
         };
         assert.deepStrictEqual(response.data, expected);
@@ -1025,8 +1025,8 @@ describe("Test of Stoa API Server", function () {
             frozen_coin: "100000000000000",
             total_reward: "8717784200000",
             time_stamp: 1609462200,
-            circulating_supply: 5008717784200000,
-            price: 119834574.730542,
+            circulating_supply: "5687512791028160",
+            price: 136074881.027907,
             active_validators: 5
         };
         assert.deepStrictEqual(response.data, expected);
