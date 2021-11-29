@@ -1918,9 +1918,9 @@ export class LedgerStorage extends Storages {
 
                     unlock_height_query = `(
                             SELECT '${JSBI.add(
-                                height.value,
-                                JSBI.BigInt(2016)
-                            ).toString()}' AS unlock_height WHERE EXISTS
+                        height.value,
+                        JSBI.BigInt(2016)
+                    ).toString()}' AS unlock_height WHERE EXISTS
                             (
                                 SELECT
                                     *
@@ -2780,16 +2780,16 @@ export class LedgerStorage extends Storages {
                                     .map((m) => m.address)
                                     .find((element) => ballotData.card.validator_address.toString() === element);
                                 block_header.height.value >= info[0].vote_start_height &&
-                                block_header.height.value <= info[0].vote_end_height &&
-                                validator
+                                    block_header.height.value <= info[0].vote_end_height &&
+                                    validator
                                     ? await save_ballot_data(storage, block_header, tx_hash, ballotData)
                                     : await save_ballot_data(
-                                          storage,
-                                          block_header,
-                                          tx_hash,
-                                          ballotData,
-                                          BallotData.REJECT
-                                      );
+                                        storage,
+                                        block_header,
+                                        tx_hash,
+                                        ballotData,
+                                        BallotData.REJECT
+                                    );
                             }
                         }
                     }
@@ -4641,7 +4641,7 @@ export class LedgerStorage extends Storages {
                     MAX(B.time_stamp) as time_stamp,
                     SUM(B.tx_count) as transactions,
 	                SUM(BS.total_reward) as total_reward,
-                    MAX(BS.circulating_supply) as circulating_supply,
+                    (SELECT sum(amount) from utxos) as circulating_supply,
                     (SELECT count(address) from validator_by_block where signed = 1 
                         AND block_height=(SELECT MAX(block_height) from validator_by_block))
                         AS active_validator,
@@ -4730,7 +4730,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the .catch is called with an error.
      */
     public getBOAHolders(limit: number, page: number): Promise<any> {
-        const circulating_sql = `SELECT max(circulating_supply) as circulating_supply from blocks_stats;`;
+        const circulating_sql = `select sum(amount) as circulating_supply from utxos`;
         const sql = `
             SELECT
 	            address, tx_count, total_received, total_sent,
@@ -5105,7 +5105,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the .catch is called with an error.
      */
     public getBOAHolder(address: string): Promise<any> {
-        const circulating_sql = `SELECT max(circulating_supply) as circulating_supply from blocks_stats;`;
+        const circulating_sql = `select sum(amount) as circulating_supply from utxos;`;
         const sql = `
             SELECT
 	            address, tx_count, total_received, total_sent,
@@ -5127,6 +5127,73 @@ export class LedgerStorage extends Storages {
                 .catch(reject);
         });
     }
+
+    /**
+     * This method update the validators when block header is updated
+     * @param block_header The block header
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the block height
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public updateValidatorsByBlockheader(block_header: BlockHeader, conn?: mysql.PoolConnection): Promise<void> {
+        function update_validator(
+            storage: LedgerStorage,
+            height: Height,
+            validator: IValidator,
+            signed: SignStatus,
+        ): Promise<void> {
+            return new Promise<void>((resolve, reject) => {
+                storage
+                    .query(
+                        `UPDATE validator_by_block
+                            SET signed = ?
+                            WHERE block_height = ? and address = ?`,
+                        [
+                            signed,
+                            height.value,
+                            validator.address
+                        ],
+                        conn
+                    )
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+            });
+        }
+        return new Promise<void>((resolve, reject) => {
+            (async () => {
+                if (JSBI.equal(block_header.height.value, JSBI.BigInt(0))) {
+                    resolve();
+                    return;
+                }
+                const cycleValidators: any[] = await this.getValidatorsAPI(block_header.height, null, conn);
+
+                const bitMask = BitMask.fromString(block_header.validators.toString());
+                for (let i = 0; i < bitMask.length; i++) {
+                    if (bitMask.get(i))
+                        await update_validator(
+                            this,
+                            block_header.height,
+                            cycleValidators[i],
+                            SignStatus.SIGNED,
+                        );
+                    else {
+                        await update_validator(
+                            this,
+                            block_header.height,
+                            cycleValidators[i],
+                            SignStatus.UNSIGNED,
+                        );
+                    }
+                }
+                resolve();
+            })();
+        });
+    }
+
 
     /**
      * Get validator reward

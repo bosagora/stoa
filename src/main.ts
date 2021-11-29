@@ -12,6 +12,8 @@ import { Storages } from "./modules/storage/Storages";
 import Stoa from "./Stoa";
 import moment, { months } from "moment";
 import { NodeService } from "./modules/service/NodeService";
+import sgMail from '@sendgrid/mail';
+import { mailService } from "./modules/common/Mailer";
 
 // Create with the arguments and read from file
 const config = Config.createWithArgument();
@@ -55,6 +57,11 @@ logger.info(`mysql database host: ${config.database.database}`, {
     responseTime: Number(moment().utc().unix() * 1000),
 });
 
+//Set sendgrid API key
+if (config.server.required_sendgrid) {
+    sgMail.setApiKey(config.sendgrid.api_key);
+    mailService.config = config.sendgrid;
+}
 const stoa: Stoa = new Stoa(
     config.database,
     config.server.agora_endpoint,
