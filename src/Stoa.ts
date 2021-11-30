@@ -146,6 +146,10 @@ class Stoa extends WebService {
 
     private wallet_watcher: WalletWatcherIO;
 
+    private periodic_catchup_id: any;
+
+    private block_received_time: number = 0;
+
     /**
      * Constructor
      * @param databaseConfig Mysql database configuration
@@ -1291,7 +1295,7 @@ class Stoa extends WebService {
     }
 
     /**
-     * GET /wallet/transaction/detail/:hash 
+     * GET /wallet/transaction/detail/:hash
      *
      * Called when a request is received through the `/wallet/transaction/detail/:hash` handler
      * The parameter `hash` is the hash of the transaction
@@ -2260,6 +2264,7 @@ class Stoa extends WebService {
                         for (const data of blocks) {
                             if (JSBI.equal(data.header.height.value, expected_height.value)) {
                                 await this.ledger_storage.putBlocks(data);
+                                this.block_received_time = new Date().getTime();
                                 await this.emitBlock(data);
                                 await this.emitBoaStats();
                                 await this.emitWalletEventOnCreateBlock(data);
@@ -2359,6 +2364,7 @@ class Stoa extends WebService {
                         // Save a block just received
                         const block = Block.reviver("", block_data);
                         await this.ledger_storage.putBlocks(block);
+                        this.block_received_time = new Date().getTime();
                         HeightManager.height = new Height(height.toString());
                         logger.info(`Saved a block with block height of ${height.toString()}`, {
                             operation: Operation.db,
@@ -2498,7 +2504,7 @@ class Stoa extends WebService {
 
     /**
      * Stoa emit the pending transaction
-     * @param transaction The pending tranasction 
+     * @param transaction The pending tranasction
      * @param tx_hash Hash of the transaction
      * @returns
      */
@@ -2542,6 +2548,9 @@ class Stoa extends WebService {
                     }
                 }
 
+                if (this.periodic_catchup_id === undefined)
+                    this.periodic_catchup_id = setInterval(this.forcedCatchup.bind(this), this.block_interval);
+
                 resolve();
             } catch (err) {
                 logger.error("Failed to catch up to block height of Agora: " + err, {
@@ -2553,6 +2562,19 @@ class Stoa extends WebService {
                 reject(err);
             }
         });
+    }
+
+    private forcedCatchup() {
+        const now = new Date().getTime();
+        if ((now - this.block_received_time) / 1000 > this.block_interval) {
+            const agora_height: Height = new Height("0");
+            this.agora.getBlockHeight().then((res) => {
+                agora_height.value = JSBI.BigInt(res.value);
+                return (this.pending = this.pending.then(() => {
+                    return this.catchup(agora_height);
+                }));
+            });
+        }
     }
 
     private paginate(req: express.Request, res: express.Response): Promise<IPagination> {
@@ -3228,8 +3250,8 @@ class Stoa extends WebService {
                         abstain_percentage: Number(data.abstain_percent).toFixed(2),
                         not_voted_percentage: Number(data.not_voted_percent).toFixed(2),
                         voted_percentage: Number(data.voted_percent).toFixed(2),
-                        total_voted: data.voted
-                    }
+                        total_voted: data.voted,
+                    };
                     return res.status(200).send(JSON.stringify(proposal));
                 }
             })
