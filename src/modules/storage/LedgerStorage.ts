@@ -4640,7 +4640,7 @@ export class LedgerStorage extends Storages {
                 SELECT MAX(B.height) as height,
                     MAX(B.time_stamp) as time_stamp,
                     SUM(B.tx_count) as transactions,
-	                SUM(BS.total_reward) as total_reward,
+	                (select IFNULL(sum(amount),0) as total_reward from tx_outputs where type=2) as total_reward,
                     (SELECT sum(amount) from utxos) as circulating_supply,
                     (SELECT count(address) from validator_by_block where signed = 1 
                         AND block_height=(SELECT MAX(block_height) from validator_by_block))
