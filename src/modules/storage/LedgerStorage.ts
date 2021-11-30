@@ -2259,7 +2259,7 @@ export class LedgerStorage extends Storages {
                 const tx_size = tx.getNumberOfBytes();
                 storage
                     .query(
-                        `INSERT INTO fee_stats
+                        `INSERT IGNORE INTO fee_stats
                         (tx_hash, tx_time, tx_size, tx_fee)
                     VALUES
                         (?, ?, ?, ?)`,
