@@ -4593,7 +4593,7 @@ export class LedgerStorage extends Storages {
                     blocks B
                     INNER JOIN transactions T ON (B.height = T.block_height)
                     INNER JOIN tx_inputs I ON (T.tx_hash = I.tx_hash)
-                    INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key and I.tx_index = S.tx_index)
+                    INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key)
                 WHERE
                     B.${field} = ? ) as sender_address
             FROM
