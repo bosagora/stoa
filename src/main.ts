@@ -80,7 +80,8 @@ const stoa: Stoa = new Stoa(
             })
         )
     ),
-    new NodeService(config.server.agora_endpoint)
+    new NodeService(config.server.agora_endpoint),
+    config.server.excludedAddresses
 );
 
 if (!SodiumHelper.isAssigned()) SodiumHelper.assign(new BOASodium());
