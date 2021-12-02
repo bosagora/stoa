@@ -158,6 +158,11 @@ export class ServerConfig implements IServerConfig {
     public required_sendgrid: boolean;
 
     /**
+     * Excluded Addresses
+     */
+    public excludedAddresses: string[];
+
+    /**
      * Constructor
      * @param address The address to which we bind
      * @param port The port on which we bind
@@ -178,6 +183,7 @@ export class ServerConfig implements IServerConfig {
         this.agora_endpoint = conf.agora_endpoint;
         this.require_votera = conf.require_votera;
         this.required_sendgrid = conf.required_sendgrid;
+        this.excludedAddresses = conf.excludedAddresses;
     }
 
     /**
@@ -198,6 +204,7 @@ export class ServerConfig implements IServerConfig {
         this.agora_endpoint = conf.agora_endpoint;
         this.require_votera = conf.require_votera;
         this.required_sendgrid = conf.required_sendgrid;
+        this.excludedAddresses = conf.excludedAddresses;
     }
 
     /**
@@ -210,7 +217,8 @@ export class ServerConfig implements IServerConfig {
             private_port: 3835,
             agora_endpoint: new URL("http://127.0.0.1:2826"),
             require_votera: false,
-            required_sendgrid: false
+            required_sendgrid: false,
+            excludedAddresses: []
         };
     }
 }
@@ -615,6 +623,11 @@ export interface IServerConfig {
      * Required Sendgrid status
      */
     required_sendgrid: boolean;
+
+    /**
+     * Excluded Addresses
+     */
+    excludedAddresses: string[];
 
 }
 

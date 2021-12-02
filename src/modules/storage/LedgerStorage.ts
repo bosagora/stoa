@@ -58,7 +58,7 @@ import {
     IValidatorByBlock,
     IVotingResult,
 } from "../../Types";
-import { IDatabaseConfig } from "../common/Config";
+import { Config, IDatabaseConfig } from "../common/Config";
 import { DataCollectionStatus, ProposalResult, ProposalStatus, SignStatus, ValidatorStatus } from "../common/enum";
 import { FeeManager } from "../common/FeeManager";
 import { HeightManager } from "../common/HeightManager";
@@ -89,6 +89,11 @@ export class LedgerStorage extends Storages {
     static readonly validator_uptime_constant: number = 96.42;
 
     /**
+     * excluded Addresses 
+     */
+    private readonly excluded_addresses?: string[] = [];
+
+    /**
      * The pool of transactions to manage double-spent transactions.
      */
     private _transaction_pool: TransactionPool | null = null;
@@ -101,12 +106,14 @@ export class LedgerStorage extends Storages {
         genesis_timestamp: number,
         block_interval: number,
         validator_cycle: number,
-        callback: (err: Error | null) => void
+        callback: (err: Error | null) => void,
+        excludedAddresses?: string[],
     ) {
         super(databaseConfig, callback);
         this.genesis_timestamp = genesis_timestamp;
         this.block_interval = block_interval;
         this.validator_cycle = validator_cycle;
+        this.excluded_addresses = excludedAddresses;
     }
 
     /**
@@ -116,7 +123,8 @@ export class LedgerStorage extends Storages {
         databaseConfig: IDatabaseConfig,
         genesis_timestamp: number,
         block_interval: number,
-        validator_cycle: number
+        validator_cycle: number,
+        excludedAddresses?: string[]
     ): Promise<LedgerStorage> {
         return new Promise<LedgerStorage>((resolve, reject) => {
             const result: LedgerStorage = new LedgerStorage(
@@ -131,7 +139,8 @@ export class LedgerStorage extends Storages {
                         await result.transaction_pool.loadSpenderList();
                         return resolve(result);
                     }
-                }
+                },
+                excludedAddresses
             );
         });
     }
@@ -1505,6 +1514,8 @@ export class LedgerStorage extends Storages {
             (async () => {
                 let total_received = JSBI.BigInt(0);
                 let circulating_supply = JSBI.BigInt(0);
+                let total_utxo = JSBI.BigInt(0);
+                let total_common_budget_balance = JSBI.BigInt(0);
                 let total_reward = JSBI.BigInt(0);
                 let total_sent = JSBI.BigInt(0);
                 let total_fee = JSBI.BigInt(0);
@@ -1527,12 +1538,7 @@ export class LedgerStorage extends Storages {
                                             WHERE
                                                 block_height =?;`;
 
-                const circulating_supply_sql = `SELECT
-                                                circulating_supply
-                                            FROM
-                                            blocks_stats
-                                            WHERE
-                                                block_height = ?;`;
+                const get_sum_utxos_sql = `SELECT SUM(amount) as total_utxo FROM utxos`;
 
                 this.query(total_received_sql, [block.header.height.toString()], conn)
                     .then((row: any) => {
@@ -1543,17 +1549,26 @@ export class LedgerStorage extends Storages {
                             }
                             default: {
                                 total_received = JSBI.BigInt(row[0].total_amount);
-                                if (Number(block.header.height) === 0) {
-                                    circulating_supply = total_received;
-                                }
                                 break;
                             }
                         }
-                        return this.query(circulating_supply_sql, [Number(block.header.height) - 1], conn);
+                        return this.query(get_sum_utxos_sql, [], conn);
                     })
-                    .then((row: any[]) => {
+                    .then(async (row: any[]) => {
                         if (row[0]) {
-                            circulating_supply = JSBI.add(JSBI.BigInt(row[0].circulating_supply), total_reward);
+                            total_utxo = JSBI.BigInt(row[0].total_utxo);
+                            let excludedAddresses: string[]
+                            if (this.excluded_addresses !== undefined) {
+                                excludedAddresses = this.excluded_addresses
+                            } else {
+                                excludedAddresses = []
+                            }
+                            await Promise.all(excludedAddresses.map(async (elem: string) => {
+                                const balance: any = await this.getWalletBalance(elem.toString(), conn);
+                                if (balance[0]) {
+                                    total_common_budget_balance = JSBI.add(total_common_budget_balance, JSBI.BigInt(balance[0].balance))
+                                }
+                            }));
                         }
                         return this.query(transaction_stats, [block.header.height.toString()], conn);
                     })
@@ -1561,6 +1576,7 @@ export class LedgerStorage extends Storages {
                         total_fee = JSBI.ADD(JSBI.BigInt(row[0].tx_fee), JSBI.BigInt(row[0].payload_fee));
                         total_size = JSBI.BigInt(row[0].total_size);
                         total_sent = JSBI.ADD(total_received, total_fee);
+                        circulating_supply = JSBI.subtract(total_utxo, total_common_budget_balance);
                         save_blockstats(
                             this,
                             block.header.height,
@@ -3875,7 +3891,7 @@ export class LedgerStorage extends Storages {
      * Provides a balance of address
      * @param address The address to check the balance
      */
-    public getWalletBalance(address: string): Promise<any[]> {
+    public getWalletBalance(address: string, conn?: mysql.PoolConnection): Promise<any[]> {
         const sql = `
         SELECT
             TF.address,
@@ -3965,7 +3981,7 @@ export class LedgerStorage extends Storages {
             ) AS T
         ) AS TF;`;
 
-        return this.query(sql, [address, address, address, address, address, address]);
+        return this.query(sql, [address, address, address, address, address, address], conn);
     }
 
     /**
@@ -4641,7 +4657,7 @@ export class LedgerStorage extends Storages {
                     MAX(B.time_stamp) as time_stamp,
                     SUM(B.tx_count) as transactions,
 	                (select IFNULL(sum(amount),0) as total_reward from tx_outputs where type=2) as total_reward,
-                    (SELECT sum(amount) from utxos) as circulating_supply,
+                    (SELECT circulating_supply FROM blocks_stats WHERE block_height = (SELECT MAX(block_height) FROM blocks_stats)) as circulating_supply,
                     (SELECT count(address) from validator_by_block where signed = 1 
                         AND block_height=(SELECT MAX(block_height) from validator_by_block))
                         AS active_validator,
@@ -4730,7 +4746,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the .catch is called with an error.
      */
     public getBOAHolders(limit: number, page: number): Promise<any> {
-        const circulating_sql = `select sum(amount) as circulating_supply from utxos`;
+        const circulating_sql = `SELECT circulating_supply FROM blocks_stats WHERE block_height = (SELECT MAX(block_height) FROM blocks_stats)`;
         const sql = `
             SELECT
 	            address, tx_count, total_received, total_sent,
@@ -5105,7 +5121,7 @@ export class LedgerStorage extends Storages {
      * and if an error occurs the .catch is called with an error.
      */
     public getBOAHolder(address: string): Promise<any> {
-        const circulating_sql = `select sum(amount) as circulating_supply from utxos;`;
+        const circulating_sql = `SELECT circulating_supply FROM blocks_stats WHERE block_height = (SELECT MAX(block_height) FROM blocks_stats)`;
         const sql = `
             SELECT
 	            address, tx_count, total_received, total_sent,

@@ -17,6 +17,9 @@ server:
   #Sendgrid required
   require_sendgrid: false
 
+  #Excluded Addresses
+  excludedAddresses: []
+
 ################################################################################
 ##                               Database options                             ##
 ################################################################################

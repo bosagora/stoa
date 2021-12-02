@@ -141,6 +141,11 @@ class Stoa extends WebService {
     private readonly block_interval: number;
 
     /**
+     * excluded addresses
+     */
+    private readonly excluded_addresses?: string[];
+
+    /**
      * The cycle length for a validator
      */
     private readonly validator_cycle: number;
@@ -166,7 +171,8 @@ class Stoa extends WebService {
         validator_cycle: number,
         votera_service?: VoteraService,
         coinMarketService?: CoinMarketService,
-        nodeService?: NodeService
+        nodeService?: NodeService,
+        excluded_addresses?: string[]
     ) {
         super(port, private_port, address);
 
@@ -178,6 +184,7 @@ class Stoa extends WebService {
         this.coinMarketService = coinMarketService;
         this.voteraService = votera_service;
         this.node_Service = nodeService;
+        this.excluded_addresses = excluded_addresses;
         this.wallet_watcher = new WalletWatcherIO();
 
         // Instantiate a dummy promise for chaining
@@ -197,7 +204,8 @@ class Stoa extends WebService {
             this.databaseConfig,
             this.genesis_timestamp,
             this.block_interval,
-            this.validator_cycle
+            this.validator_cycle,
+            this.excluded_addresses
         ).then((storage) => {
             this._ledger_storage = storage;
         });
