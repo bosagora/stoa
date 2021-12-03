@@ -317,7 +317,7 @@ describe("Test of Stoa API Server", function () {
             total_received: 4879999998096000,
             total_reward: 0,
             total_fee: 1904000,
-            total_size: 10120,
+            total_size: 11665,
             tx_volume: "4880000000000000",
         };
         assert.deepStrictEqual(response.data, expected);
