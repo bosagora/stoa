@@ -1530,8 +1530,7 @@ export class LedgerStorage extends Storages {
                                                     block_height = ?;`;
                 const transaction_stats = `SELECT
                                                 IFNULL(SUM(IFNULL(T.tx_fee,0)),0) as tx_fee,
-                                                IFNULL(SUM(IFNULL(T.payload_fee,0)),0) as payload_fee,
-                                                IFNULL(SUM(IFNULL(T.tx_size,0)),0) as total_size
+                                                IFNULL(SUM(IFNULL(T.payload_fee,0)),0) as payload_fee
                                             FROM
                                             transactions T
                                                 Inner join blocks B ON (T.block_height = B.height)
@@ -1574,7 +1573,7 @@ export class LedgerStorage extends Storages {
                     })
                     .then((row: any) => {
                         total_fee = JSBI.ADD(JSBI.BigInt(row[0].tx_fee), JSBI.BigInt(row[0].payload_fee));
-                        total_size = JSBI.BigInt(row[0].total_size);
+                        total_size = JSBI.BigInt(block.getNumberOfBytes());
                         total_sent = JSBI.ADD(total_received, total_fee);
                         circulating_supply = JSBI.subtract(total_utxo, total_common_budget_balance);
                         save_blockstats(
