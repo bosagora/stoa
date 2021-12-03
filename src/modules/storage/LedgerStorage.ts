@@ -4601,26 +4601,30 @@ export class LedgerStorage extends Storages {
     public getBlockTransactions(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
         const sql_tx = `SELECT
                 T.block_height, T.tx_hash, SUM(IFNULL(O.amount,0)) as amount,
-                T.tx_fee, T.tx_size, B.time_stamp, count(*) OVER() AS full_count,
-                JSON_ARRAYAGG(JSON_OBJECT("type", O.type, "address", O.address, "amount", O.amount)) as receiver,
-                (SELECT
-                   JSON_ARRAYAGG(JSON_OBJECT("address", S.address, "amount", S.amount))
+	            T.tx_fee, T.tx_size, B.time_stamp, count(*) OVER() AS full_count,
+                INS.senders,
+                JSON_ARRAYAGG(JSON_OBJECT("type", O.type, "address", O.address, "amount", O.amount)) as receiver
                 FROM
-                    blocks B
-                    INNER JOIN transactions T ON (B.height = T.block_height)
-                    INNER JOIN tx_inputs I ON (T.tx_hash = I.tx_hash)
-                    INNER JOIN tx_outputs S ON (I.utxo = S.utxo_key)
+			        blocks B
+			        INNER JOIN transactions T ON (B.height = T.block_height)
+                    INNER JOIN tx_outputs O ON (T.tx_hash = O.tx_hash)
+                    LEFT JOIN (SELECT
+			            TS.tx_hash,
+                        JSON_ARRAYAGG(JSON_OBJECT("address", OS.address, "amount", OS.amount)) as senders
+		            FROM
+			            blocks BS
+			            INNER JOIN transactions TS ON (BS.height = TS.block_height)
+			            INNER JOIN tx_inputs I ON (TS.tx_hash = I.tx_hash)
+			            INNER JOIN tx_outputs OS ON (I.utxo = OS.utxo_key)
+		            WHERE
+			            BS.${field}= ?
+                        GROUP BY TS.tx_hash
+                        ORDER BY TS.tx_index ASC ) as INS ON ( INS.tx_hash = T.tx_hash)
                 WHERE
-                    B.${field} = ? ) as sender_address
-            FROM
-                tx_outputs O
-                INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
-                INNER JOIN blocks B ON  (B.height = T.block_height)
-            WHERE
-                B.${field} = ?
-            GROUP BY T.tx_hash
-            ORDER BY T.tx_index ASC
-            LIMIT ? OFFSET ?;`;
+                    B.${field} = ?
+			    GROUP BY T.tx_hash
+			    ORDER BY T.tx_index ASC
+                LIMIT ? OFFSET ? ;`;
 
         const sql_count = `SELECT
                     IFNULL(count(*),0) as total_records

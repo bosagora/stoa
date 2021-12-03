@@ -1611,7 +1611,7 @@ class Stoa extends WebService {
                             fee: row.tx_fee,
                             size: row.tx_size,
                             time: row.time_stamp,
-                            sender_address: row.sender_address,
+                            sender_address: row.senders ? row.senders : null,
                             receiver: row.receiver,
                             full_count: row.full_count,
                         });
