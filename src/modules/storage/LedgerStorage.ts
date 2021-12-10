@@ -585,13 +585,7 @@ export class LedgerStorage extends Storages {
     public putBlocks(block: Block): Promise<void> {
         const genesis_timestamp: number = this.genesis_timestamp;
         const now_timestamp = Math.floor(new Date().getTime() / 1000);
-
-        // In the production environment, it should be treated as the received time.
-        if (process.env.NODE_ENV === "production") {
-            block.header.time_offset = now_timestamp - genesis_timestamp;
-        } else {
-            block.header.time_offset = JSBI.toNumber(block.header.height.value) * this.block_interval;
-        }
+        block.header.time_offset = JSBI.toNumber(block.header.height.value) * this.block_interval;
 
         function saveBlock(
             storage: LedgerStorage,
