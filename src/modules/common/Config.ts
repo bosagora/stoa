@@ -148,6 +148,16 @@ export class ServerConfig implements IServerConfig {
     public agora_endpoint: URL;
 
     /**
+     * The ssl certificate
+     */
+    public ssl_certificate: string;
+
+    /**
+     * The ssl certificate key
+     */
+    public ssl_certificate_key: string;
+
+    /**
      * The votera required status
      */
     public require_votera: boolean;
@@ -181,6 +191,8 @@ export class ServerConfig implements IServerConfig {
         this.port = conf.port;
         this.private_port = conf.private_port;
         this.agora_endpoint = conf.agora_endpoint;
+        this.ssl_certificate = conf.ssl_certificate;
+        this.ssl_certificate_key = conf.ssl_certificate_key;
         this.require_votera = conf.require_votera;
         this.required_sendgrid = conf.required_sendgrid;
         this.excludedAddresses = conf.excludedAddresses;
@@ -202,6 +214,8 @@ export class ServerConfig implements IServerConfig {
         this.port = conf.port;
         this.private_port = conf.private_port;
         this.agora_endpoint = conf.agora_endpoint;
+        this.ssl_certificate = conf.ssl_certificate;
+        this.ssl_certificate_key = conf.ssl_certificate_key;
         this.require_votera = conf.require_votera;
         this.required_sendgrid = conf.required_sendgrid;
         this.excludedAddresses = conf.excludedAddresses;
@@ -216,9 +230,11 @@ export class ServerConfig implements IServerConfig {
             port: 3836,
             private_port: 3835,
             agora_endpoint: new URL("http://127.0.0.1:2826"),
+            ssl_certificate: "",
+            ssl_certificate_key: "",
             require_votera: false,
             required_sendgrid: false,
-            excludedAddresses: []
+            excludedAddresses: [],
         };
     }
 }
@@ -613,6 +629,16 @@ export interface IServerConfig {
      * The endpoint of Agora
      */
     agora_endpoint: URL;
+
+    /**
+     * The ssl certificate
+     */
+    ssl_certificate: string;
+
+    /**
+     * The ssl certificate key
+     */
+    ssl_certificate_key: string;
 
     /**
      * The votera required status

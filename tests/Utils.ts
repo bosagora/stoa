@@ -326,6 +326,8 @@ export class TestStoa extends Stoa {
             port,
             Number(port) + 1000,
             "127.0.0.1",
+            "",
+            "",
             1609459200,
             600,
             20,

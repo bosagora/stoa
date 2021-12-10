@@ -11,6 +11,12 @@ server:
   # Endpoint of Agora
   agora_endpoint: http://127.1.1.1:4567
 
+  # The signed certificate file path
+  ssl_certificate:
+
+  # The associated private key file path
+  ssl_certificate_key:
+
   #Votera required
   require_votera: true
   

@@ -166,6 +166,8 @@ class Stoa extends WebService {
         port: number | string,
         private_port: number | string,
         address: string,
+        ssl_certificate: string,
+        ssl_certificate_key: string,
         genesis_timestamp: number,
         block_interval: number,
         validator_cycle: number,
@@ -174,7 +176,7 @@ class Stoa extends WebService {
         nodeService?: NodeService,
         excluded_addresses?: string[]
     ) {
-        super(port, private_port, address);
+        super(port, private_port, address, ssl_certificate, ssl_certificate_key);
 
         this.genesis_timestamp = genesis_timestamp;
         this.block_interval = block_interval;
