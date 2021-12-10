@@ -18,6 +18,9 @@ import { logger } from "../common/Logger";
 import { Operation, Status } from "../common/LogOperation";
 import { SocketIO } from "./Socket";
 import moment from "moment";
+import https from "https";
+import fs from "fs";
+import util from "util";
 
 export class WebService {
     /**
@@ -66,12 +69,22 @@ export class WebService {
     protected _socket: SocketIO | null = null;
 
     /**
+     * The ssl certificate
+     */
+    protected ssl_certificate: string;
+
+    /**
+     * The ssl certificate key
+     */
+    protected ssl_certificate_key: string;
+
+    /**
      * Constructor
      * @param port The bind port
      * @param private_port The bind private port
      * @param address The bind address
      */
-    constructor(port: number | string, private_port: number | string, address?: string) {
+    constructor(port: number | string, private_port: number | string, address?: string, ssl_certificate?: string, ssl_certificate_key?: string) {
         if (typeof port === "string") this.port = parseInt(port, 10);
         else this.port = port;
 
@@ -80,6 +93,12 @@ export class WebService {
 
         if (address !== undefined) this.address = address;
         else this.address = "";
+
+        if (ssl_certificate !== undefined) this.ssl_certificate = ssl_certificate;
+        else this.ssl_certificate = "";
+
+        if (ssl_certificate_key !== undefined) this.ssl_certificate_key = ssl_certificate_key;
+        else this.ssl_certificate_key = "";
 
         this.app = express();
         this.private_app = express();
@@ -103,11 +122,21 @@ export class WebService {
      * Asynchronously start the web server
      */
     public async start(): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
+        const readFile = util.promisify(fs.readFile);
+        return new Promise<void>(async (resolve, reject) => {
             // Create HTTP servers
             this.app.set("port", this.port);
             this.private_app.set("port", this.private_port);
-            this.server = http.createServer(this.app);
+            if (this.ssl_certificate && this.ssl_certificate_key) {
+                const [key, cert] = await Promise.all([
+                    readFile(this.ssl_certificate),
+                    readFile(this.ssl_certificate_key),
+                ]);
+                this.server = https.createServer({ key, cert }, this.app);
+                logger.info("Enable TLS on stoa");
+            } else {
+                this.server = http.createServer(this.app);
+            }
             this.private_server = http.createServer(this.private_app);
             this.server.on("error", reject);
             this.private_server.on("error", reject);

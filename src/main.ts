@@ -68,6 +68,8 @@ const stoa: Stoa = new Stoa(
     config.server.port,
     config.server.private_port,
     config.server.address,
+    config.server.ssl_certificate,
+    config.server.ssl_certificate_key,
     config.consensus.genesis_timestamp,
     config.consensus.block_interval,
     config.consensus.validator_cycle,
