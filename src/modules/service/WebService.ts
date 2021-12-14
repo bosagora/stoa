@@ -129,8 +129,8 @@ export class WebService {
             this.private_app.set("port", this.private_port);
             if (this.ssl_certificate && this.ssl_certificate_key) {
                 const [key, cert] = await Promise.all([
-                    readFile(this.ssl_certificate),
                     readFile(this.ssl_certificate_key),
+                    readFile(this.ssl_certificate),
                 ]);
                 this.server = https.createServer({ key, cert }, this.app);
                 logger.info("Enable TLS on stoa");
