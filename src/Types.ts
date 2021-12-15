@@ -542,6 +542,91 @@ export interface IBlockTransactions {
 }
 
 /**
+ * The interface of the transactions of address
+ */
+export interface ITransactionsAddress {
+    /**
+     * Transaction hash
+     */
+    tx_hash: string;
+
+    /**
+     * Block height
+     */
+    height: string;
+
+    /**
+     * Transaction type
+     */
+    type: string;
+
+    /**
+     * Transaction fee
+     */
+    fee: string;
+
+    /**
+     * Transaction size
+     */
+    size: string;
+
+    /**
+     * Transaction time
+     */
+    time: string;
+
+    /**
+     * Transaction inputs
+     */
+    inputs: ITxAddressInputElement[];
+
+    /**
+     * Transaction outputs
+     */
+    outputs: ITxAddressOutputElement[];
+
+    /**
+     * total number of records
+     */
+    full_count: number;
+}
+
+/**
+ * The interface of the transaction of address output element
+ */
+export interface ITxAddressOutputElement {
+    /**
+     * Output type
+     */
+    type: number;
+
+    /**
+     * Address, Public key
+     */
+    address: string;
+
+    /**
+     * Amount
+     */
+    amount: string;
+}
+
+/**
+ * The interface of the transaction of address input element
+ */
+export interface ITxAddressInputElement {
+    /**
+     * Address, Public key
+     */
+    address: string;
+
+    /**
+     * Amount
+     */
+    amount: number;
+}
+
+/**
  * The interface of the transaction overview
  */
 export interface ITxOverview {

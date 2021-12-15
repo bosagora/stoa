@@ -4643,6 +4643,62 @@ export class LedgerStorage extends Storages {
     }
 
     /**
+     * Get transactions of a address
+     * @param address is the address
+     * @param limit Maximum record count that can be obtained from one query
+     * @param page The number on the page, this value begins with 1
+     * @returns Returns the Promise. If it is finished successfully the `.then`
+     * of the returned Promise is called with the records
+     * and if an error occurs the `.catch` is called with an error.
+     */
+    public getTransactionsAddress(address: string, limit: number, page: number): Promise<any[]> {
+        const sql_tx = `SELECT
+                        T.block_height, T.tx_hash, T.type, T.tx_fee, T.tx_size, B.time_stamp, count(*) OVER() AS full_count,
+                        (SELECT JSON_ARRAYAGG(JSON_OBJECT("type", O.type, "address", O.address, "amount", O.amount))
+                            FROM blocks BS
+                            INNER JOIN transactions TS ON (BS.height = TS.block_height)
+                            INNER JOIN tx_outputs O ON (TS.tx_hash = O.tx_hash)
+                            WHERE O.tx_hash = TX.tx_hash
+                            ORDER BY O.tx_index ASC) as outputs,
+                        (SELECT JSON_ARRAYAGG(JSON_OBJECT("address", OS.address, "amount", OS.amount))
+                            FROM blocks BS
+                            INNER JOIN transactions TS ON (BS.height = TS.block_height)
+                            INNER JOIN tx_inputs I ON (TS.tx_hash = I.tx_hash)
+                            INNER JOIN tx_outputs OS ON (I.utxo = OS.utxo_key)
+                            WHERE I.tx_hash = TX.tx_hash
+                            ORDER BY TS.tx_index ASC ) as inputs
+                        FROM
+                            blocks B
+                            INNER JOIN transactions T ON (B.height = T.block_height)
+                            INNER JOIN
+                            (SELECT DISTINCT GT.tx_hash
+                              FROM
+                                (SELECT T.tx_hash
+                                 FROM
+                                    tx_outputs S
+                                    INNER JOIN tx_inputs I ON (I.utxo = S.utxo_key)
+                                    INNER JOIN transactions T ON (T.tx_hash = I.tx_hash)
+                                    INNER JOIN blocks B ON (B.height = T.block_height)
+                                 WHERE
+                                    S.address = ?
+                                 GROUP BY T.tx_hash
+                                 UNION ALL
+                                 SELECT T.tx_hash
+                                 FROM
+                                    tx_outputs O
+                                    INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
+                                    INNER JOIN blocks B ON (B.height = T.block_height)
+                                 WHERE
+                                    O.address = ?
+                                 GROUP BY T.tx_hash) as GT) as TX ON (T.tx_hash = TX.tx_hash)
+                        GROUP BY T.tx_hash
+                        ORDER BY B.height DESC, T.tx_index ASC
+                        LIMIT ? OFFSET ? ;`;
+
+        return this.query(sql_tx, [address, address, limit, limit * (page - 1)]);
+    }
+
+    /**
      * Get statistics of BOA coin
      * @returns Returns the Promise. If it is finished successfully the `.then`
      * of the returned Promise is called with the records

@@ -70,6 +70,9 @@ import {
     ISPVStatus,
     ITransaction,
     ITransactionFee,
+    ITransactionsAddress,
+    ITxAddressInputElement,
+    ITxAddressOutputElement,
     ITxDetail,
     ITxHistory,
     ITxHistoryElement,
@@ -296,6 +299,7 @@ class Stoa extends WebService {
         this.app.post("/utxos", isBlackList, this.getUTXOs.bind(this));
         this.app.get("/transaction/status/:hash", isBlackList, this.getTransactionStatus.bind(this));
         this.app.get("/transaction/fees/:tx_size", isBlackList, this.getTransactionFees.bind(this));
+        this.app.get("/transactions/:address", isBlackList, this.getTransactionsAddress.bind(this));
         this.app.get(
             "/wallet/transactions/history/:address",
             isBlackList,
@@ -669,6 +673,73 @@ class Stoa extends WebService {
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
                     height: HeightManager.height.toString(),
+                    status: Status.Error,
+                    responseTime: Number(moment().utc().unix() * 1000),
+                });
+                res.status(500).send("Failed to data lookup");
+            });
+    }
+
+    /**
+     * GET /transactions/:address
+     *
+     * Called when a request is received through the `/transactions/:address` handler
+     * The parameter `address` is the address
+     *
+     * @returns Returns transactions of block.
+     */
+    private async getTransactionsAddress(req: express.Request, res: express.Response) {
+        const address = req.params.address.toString();
+        if (PublicKey.validate(address) !== "") {
+            res.status(400).send(`Invalid value for parameter 'address': ${address}`);
+            return;
+        }
+
+        const pagination: IPagination = await this.paginate(req, res);
+        this.ledger_storage
+            .getTransactionsAddress(address, pagination.pageSize, pagination.page)
+            .then((data: any[]) => {
+                if (data === undefined) {
+                    res.status(500).send("Failed to data lookup");
+                    return;
+                } else {
+                    const txs: ITransactionsAddress[] = [];
+                    for (const row of data) {
+                        const tx: ITransactionsAddress = {
+                            height: JSBI.BigInt(row.block_height).toString(),
+                            tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
+                            type: lodash.capitalize(ConvertTypes.TxTypeToString(row.type)),
+                            fee: row.tx_fee,
+                            size: row.tx_size,
+                            time: row.time_stamp,
+                            inputs: [],
+                            outputs: [],
+                            full_count: row.full_count,
+                        };
+
+                        if (row.inputs && row.inputs.length > 0)
+                            for (const elem of row.inputs)
+                                tx.inputs.push({
+                                    address: elem.address,
+                                    amount: elem.amount,
+                                });
+                        if (row.outputs && row.outputs.length > 0)
+                            for (const elem of row.outputs)
+                                tx.outputs.push({
+                                    type: elem.type,
+                                    address: elem.address,
+                                    amount: elem.amount,
+                                });
+                        txs.push(tx);
+                    }
+                    return res.status(200).send(JSON.stringify(txs));
+                }
+            })
+            .catch((err) => {
+                mailService.mailer(Operation.db, err);
+                logger.error("Failed to data lookup to the DB: " + err, {
+                    operation: Operation.Http_request,
+                    height: "",
                     status: Status.Error,
                     responseTime: Number(moment().utc().unix() * 1000),
                 });
@@ -1320,7 +1391,7 @@ class Stoa extends WebService {
     }
 
     /**
-     * GET /wallet/transaction/detail/:hash 
+     * GET /wallet/transaction/detail/:hash
      *
      * Called when a request is received through the `/wallet/transaction/detail/:hash` handler
      * The parameter `hash` is the hash of the transaction
@@ -2543,7 +2614,7 @@ class Stoa extends WebService {
 
     /**
      * Stoa emit the pending transaction
-     * @param transaction The pending tranasction 
+     * @param transaction The pending tranasction
      * @param tx_hash Hash of the transaction
      * @returns
      */
