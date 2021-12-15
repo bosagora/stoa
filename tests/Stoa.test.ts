@@ -504,6 +504,57 @@ describe("Test of Stoa API Server", () => {
         assert.deepStrictEqual(response.data, expected);
     });
 
+    it("Test of the path /transactions/:address", async () => {
+        const uri = URI(stoa_addr)
+            .directory("/transactions")
+            .filename(
+                "boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn"
+            );
+
+        const response = await client.get(uri.toString());
+        const expected = [{
+            "height": "0",
+            "tx_hash": "0x224c72ad879eccd38e9b612047633d235e47e329e68a69517822c4c234c53c2d7d81b0245cdb61857002d58a5e033c8720b462e20517f45a5516df432866b32f",
+            "type": "Freeze",
+            "fee": 0,
+            "size": 278,
+            "time": 1609459200,
+            "inputs": [],
+            "outputs": [
+            {
+                "type": 1,
+                "amount": 20000000000000,
+                "address": "boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn"
+            },
+            {
+                "type": 1,
+                "amount": 20000000000000,
+                "address": "boa1xzvald5dvy54j7yt2h5yzs2432h07rcn66j84t3lfdrlrwydwq78cz0nckq"
+            },
+            {
+                "type": 1,
+                "amount": 20000000000000,
+                "address": "boa1xzvald7hxvgnzk50sy04ha7ezgyytxt5sgw323zy8dlj3ya2q40e6elltwq"
+            },
+            {
+                "type": 1,
+                "amount": 20000000000000,
+                "address": "boa1xrvald3zmehvpcmxqm0kn6wkaqyry7yj3cd8h975ypzlyz00sczpzhsk308"
+            },
+            {
+                "type": 1,
+                "amount": 20000000000000,
+                "address": "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku"
+            },
+            {
+                "type": 1,
+                "amount": 20000000000000,
+                "address": "boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t"
+            }],
+            "full_count": 1 }];
+        assert.deepStrictEqual(response.data, expected);
+    });
+
     it("Test of the path /validators Slashed a validator", async () => {
         const uri = URI(stoa_private_addr).directory("block_externalized");
         await client.post(uri.toString(), { block: sample_data2 });
