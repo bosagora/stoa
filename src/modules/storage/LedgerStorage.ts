@@ -4706,21 +4706,18 @@ export class LedgerStorage extends Storages {
      */
     public getBOAStats(): Promise<any[]> {
         const sql = `
-                SELECT MAX(B.height) as height,
-                    MAX(B.time_stamp) as time_stamp,
-                    SUM(B.tx_count) as transactions,
-	                (select IFNULL(sum(amount),0) as total_reward from tx_outputs where type=2) as total_reward,
-                    (SELECT circulating_supply FROM blocks_stats WHERE block_height = (SELECT MAX(block_height) FROM blocks_stats)) as circulating_supply,
-                    (SELECT count(address) from validator_by_block where signed = 1 
-                        AND block_height=(SELECT MAX(block_height) from validator_by_block))
-                        AS active_validator,
-                    (SELECT SUM(total_frozen) as total_frozen from accounts) as total_frozen,
-                    (SELECT COUNT(DISTINCT address) from validators) as validators
-                    FROM
-                    blocks B
+                    SELECT B.height AS height,
+                        B.time_stamp AS time_stamp,
+                        (SELECT SUM(tx_count) FROM blocks) AS transactions,
+                        (SELECT IFNULL(sum(total_reward),0) AS total_reward FROM blocks_stats) AS total_reward,
+                        (SELECT circulating_supply FROM blocks_stats WHERE block_height = BS.block_height) AS circulating_supply,
+                        (SELECT COUNT(address) FROM validator_by_block WHERE slashed <> 1 AND block_height = BS.block_height) AS validators,
+                        (SELECT COUNT(address) FROM validator_by_block WHERE signed = 1 AND slashed <> 1 AND block_height = BS.block_height) AS active_validator,
+                        (SELECT SUM(total_frozen) FROM accounts) AS total_frozen
+                    FROM blocks B
                     LEFT OUTER JOIN blocks_stats BS
-                    ON(B.height = BS.block_height);`;
-
+                    ON (B.height = BS.block_height)
+                    WHERE B.height = (SELECT MAX(height) FROM blocks);`;
         return this.query(sql, []);
     }
 
