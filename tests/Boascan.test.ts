@@ -718,7 +718,7 @@ describe("Test of Stoa API Server", function () {
         const expected = {
             height: 1,
             transactions: "10",
-            validators: 6,
+            validators: 5,
             frozen_coin: '120000000000000',
             total_reward: '0',
             circulating_supply: 4999999998096000,
@@ -1021,7 +1021,7 @@ describe("Test of Stoa API Server", function () {
         const expected = {
             height: 5,
             transactions: "17",
-            validators: 6,
+            validators: 5,
             frozen_coin: "100000000000000",
             total_reward: "8717784200000",
             time_stamp: 1609462200,
