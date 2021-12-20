@@ -17,6 +17,7 @@ import {
     BitMask,
     Block,
     BlockHeader,
+    Constant,
     Encrypt,
     Endian,
     Enrollment,
@@ -206,6 +207,7 @@ export class LedgerStorage extends Storages {
             lock_height         INTEGER  NOT NULL,
             tx_fee              BIGINT(20)  NOT NULL,
             payload_fee         BIGINT(20)  NOT NULL,
+            freezing_fee        BIGINT(20)  NOT NULL,
             tx_size             INTEGER  NOT NULL,
             calculated_tx_fee   BIGINT(20)  NOT NULL,
             inputs_count        INTEGER  NOT NULL,
@@ -327,6 +329,7 @@ export class LedgerStorage extends Storages {
             time                INTEGER    NOT NULL,
             tx_fee              BIGINT(20)     NOT NULL,
             payload_fee         BIGINT(20)     NOT NULL,
+            freezing_fee        BIGINT(20)     NOT NULL,
             tx_size             INTEGER    NOT NULL,
             PRIMARY KEY(tx_hash(64))
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -429,6 +432,7 @@ export class LedgerStorage extends Storages {
             average_tx_fee              BIGINT(20) NOT NULL,
             total_tx_fee                BIGINT(20) NOT NULL,
             total_payload_fee           BIGINT(20) NOT NULL,
+            total_freezing_fee          BIGINT(20) NOT NULL,
             total_fee                   BIGINT(20) NOT NULL,
             PRIMARY KEY(granularity_time_stamp, granularity(64))
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -677,15 +681,16 @@ export class LedgerStorage extends Storages {
             average_tx_fee: JSBI,
             total_tx_fee: JSBI,
             total_payload_fee: JSBI,
+            total_freezing_fee: JSBI,
             total_fee: JSBI
         ) {
             return new Promise<void>((resolve, reject) => {
                 storage
                     .query(
                         `INSERT INTO fees
-                        ( height, granularity_time_stamp, granularity, time_stamp, average_tx_fee, total_tx_fee, total_payload_fee, total_fee)
+                        ( height, granularity_time_stamp, granularity, time_stamp, average_tx_fee, total_tx_fee, total_payload_fee, total_freezing_fee, total_fee)
                     VALUES
-                        (?, ?, ?, ?, ?, ?, ?, ?)
+                        (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ON DUPLICATE KEY
                     UPDATE
                         height = VALUES(height),
@@ -693,6 +698,7 @@ export class LedgerStorage extends Storages {
                         average_tx_fee = VALUES(average_tx_fee),
                         total_tx_fee = VALUES(total_tx_fee),
                         total_payload_fee = VALUES(total_payload_fee),
+                        total_freezing_fee = VALUES(total_freezing_fee),
                         total_fee = VALUES(total_fee)`,
                         [
                             height.value.toString(),
@@ -702,6 +708,7 @@ export class LedgerStorage extends Storages {
                             average_tx_fee.toString(),
                             total_tx_fee.toString(),
                             total_payload_fee.toString(),
+                            total_freezing_fee.toString(),
                             total_fee.toString(),
                         ],
                         conn
@@ -717,6 +724,7 @@ export class LedgerStorage extends Storages {
         return new Promise<void>(async (resolve, reject) => {
             let total_tx_fee: JSBI = JSBI.BigInt(0);
             let total_payload_fee: JSBI = JSBI.BigInt(0);
+            let total_freezing_fee: JSBI = JSBI.BigInt(0);
             let total_fee: JSBI = JSBI.BigInt(0);
             let sum: JSBI = JSBI.BigInt(0);
 
@@ -729,6 +737,7 @@ export class LedgerStorage extends Storages {
                     sum = JSBI.add(sum, JSBI.divide(fees[1], JSBI.BigInt(block.txs[tx_idx].getNumberOfBytes())));
                     total_tx_fee = JSBI.add(total_tx_fee, fees[1]);
                     total_payload_fee = JSBI.add(total_payload_fee, fees[2]);
+                    total_freezing_fee = JSBI.add(total_freezing_fee, fees[3]);
                     total_fee = JSBI.add(total_fee, fees[0]);
                 }
             }
@@ -745,6 +754,7 @@ export class LedgerStorage extends Storages {
                         average_tx_fee,
                         total_tx_fee,
                         total_payload_fee,
+                        total_freezing_fee,
                         total_fee
                     );
                 }
@@ -1833,29 +1843,38 @@ export class LedgerStorage extends Storages {
         return this.query(sql, [height.toString()]);
     }
 
-    public getTransactionFee(tx: Transaction): Promise<[JSBI, JSBI, JSBI]> {
-        return new Promise<[JSBI, JSBI, JSBI]>((resolve, reject) => {
+    public getTransactionFee(tx: Transaction): Promise<[JSBI, JSBI, JSBI, JSBI]> {
+        return new Promise<[JSBI, JSBI, JSBI, JSBI]>((resolve, reject) => {
             if (tx.inputs.length === 0) {
-                resolve([JSBI.BigInt(0), JSBI.BigInt(0), JSBI.BigInt(0)]);
+                resolve([JSBI.BigInt(0), JSBI.BigInt(0), JSBI.BigInt(0), JSBI.BigInt(0)]);
                 return;
             }
 
             const utxo = tx.inputs.map((m) => `x'${m.utxo.toBinary(Endian.Little).toString("hex")}'`);
 
             const sql = `SELECT
-                    IFNULL(SUM(O.amount), 0) as sum_inputs
+                    O.type, O.amount
                 FROM
                     utxos O
                 WHERE
-                    O.utxo_key in (${utxo.join(",")}); `;
+                    O.utxo_key in (${utxo.join(",")});`;
 
             this.query(sql, [])
                 .then((rows: any) => {
                     if (rows.length > 0) {
-                        const SumOfInput = JSBI.BigInt(rows[0].sum_inputs);
-                        const SumOfOutput = tx.outputs.reduce<JSBI>((sum, n) => {
-                            return JSBI.add(sum, n.value.value);
-                        }, JSBI.BigInt(0));
+                        let SumOfInput = JSBI.BigInt(0);
+                        for (const row of rows) {
+                            SumOfInput = JSBI.add(SumOfInput, JSBI.BigInt(row.amount));
+                            if (row.type === OutputType.Freeze)
+                                SumOfInput = JSBI.add(SumOfInput, Constant.SlashPenaltyAmount.value);
+                        }
+                        let SumOfOutput = JSBI.BigInt(0);
+                        let freezing_fee = JSBI.BigInt(0);
+                        for (const output of tx.outputs) {
+                            SumOfOutput = JSBI.add(SumOfOutput, output.value.value);
+                            if (output.type === OutputType.Freeze)
+                                freezing_fee = JSBI.add(freezing_fee, Constant.SlashPenaltyAmount.value);
+                        }
 
                         let total_fee: JSBI;
                         let payload_fee: JSBI;
@@ -1868,12 +1887,12 @@ export class LedgerStorage extends Storages {
                         } else {
                             total_fee = JSBI.subtract(SumOfInput, SumOfOutput);
                             payload_fee = TxPayloadFee.getFee(tx.payload.length);
-                            tx_fee = JSBI.subtract(total_fee, payload_fee);
+                            tx_fee = JSBI.subtract(total_fee, JSBI.add(payload_fee, freezing_fee));
                         }
 
-                        resolve([total_fee, tx_fee, payload_fee]);
+                        resolve([total_fee, tx_fee, payload_fee, freezing_fee]);
                     } else {
-                        resolve([JSBI.BigInt(0), JSBI.BigInt(0), JSBI.BigInt(0)]);
+                        resolve([JSBI.BigInt(0), JSBI.BigInt(0), JSBI.BigInt(0), JSBI.BigInt(0)]);
                     }
                 })
                 .catch((err) => {
@@ -1960,9 +1979,9 @@ export class LedgerStorage extends Storages {
                 storage
                     .query(
                         `INSERT INTO transactions
-                        (block_height, tx_index, tx_hash, type, unlock_height, lock_height, tx_fee, payload_fee, tx_size, calculated_tx_fee, inputs_count, outputs_count, payload_size)
+                        (block_height, tx_index, tx_hash, type, unlock_height, lock_height, tx_fee, payload_fee, freezing_fee, tx_size, calculated_tx_fee, inputs_count, outputs_count, payload_size)
                     VALUES
-                        (?, ?, ?, ?, ${unlock_height_query}, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, ${unlock_height_query}, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                         [
                             height.toString(),
                             tx_idx,
@@ -1971,6 +1990,7 @@ export class LedgerStorage extends Storages {
                             tx.lock_height.toString(),
                             fees[1].toString(),
                             fees[2].toString(),
+                            fees[3].toString(),
                             tx_size,
                             calculated_fee,
                             tx.inputs.length,
@@ -2302,9 +2322,9 @@ export class LedgerStorage extends Storages {
                 storage
                     .query(
                         `INSERT INTO transaction_pool
-                        (tx_hash, type, payload, lock_height, received_height, time, tx_fee, payload_fee, tx_size)
+                        (tx_hash, type, payload, lock_height, received_height, time, tx_fee, payload_fee, freezing_fee, tx_size)
                     VALUES
-                        (?, ?, ?, ?, (SELECT IFNULL(MAX(height), 0) as height FROM blocks), ?, ?, ?, ?)`,
+                        (?, ?, ?, ?, (SELECT IFNULL(MAX(height), 0) as height FROM blocks), ?, ?, ?, ?, ?)`,
                         [
                             hash.toBinary(Endian.Little),
                             tx_type,
@@ -2313,6 +2333,7 @@ export class LedgerStorage extends Storages {
                             moment().utc().unix(),
                             fees[1].toString(),
                             fees[2].toString(),
+                            fees[3].toString(),
                             tx_size,
                         ],
                         conn

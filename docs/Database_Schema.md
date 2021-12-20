@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS "enrollments" (
 | lock_height       | INTEGER   |    | Y        |          | This transaction may only be included in a block with `block_height >= lock_height`|
 | tx_fee            | BIGINT(20)|    | Y        |          | The fee of this transaction |
 | payload_fee       | BIGINT(20)|    | Y        |          | The payload fee of this transaction  |
+| freezing_fee      | BIGINT(20)|    | Y        |         | The freezing fee of this transaction  |
 | tx_size           | INTEGER   |    | Y        |          | The size of this transaction  |
 | calculated_tx_fee | BIGINT(20)|    | Y        |          | The calculated fee of this transaction |
 | inputs_count      | INTEGER   |    | Y        |          | The number of inputs in the transaction |
@@ -96,6 +97,7 @@ CREATE TABLE IF NOT EXISTS "transactions" (
     "lock_height"           INTEGER  NOT NULL,
     "tx_fee"                BIGINT(20)  NOT NULL,
     "payload_fee"           BIGINT(20)  NOT NULL,
+    "freezing_fee"          BIGINT(20)  NOT NULL,
     "tx_size"               INTEGER  NOT NULL,
     "calculated_tx_fee"     BIGINT(20)  NOT NULL,
     "inputs_count"          INTEGER  NOT NULL,
@@ -359,6 +361,7 @@ CREATE TABLE IF NOT EXISTS "information" (
 | time              | INTEGER   |    | Y        |          | Received time |
 | tx_fee            | BIGINT(20)|    | Y        |          | The fee of this transaction |
 | payload_fee       | BIGINT(20)|    | Y        |          | The payload fee of this transaction  |
+| freezing_fee      | BIGINT(20)|    | Y        |          | The freezing fee of this transaction  |
 | tx_size           | INTEGER   |    | Y        |          | The size of this transaction  |
 
 ### _Create Script_
@@ -373,6 +376,7 @@ CREATE TABLE IF NOT EXISTS "transaction_pool" (
     "time"                  INTEGER  NOT NULL,
     "tx_fee"                BIGINT(20)  NOT NULL,
     "payload_fee"           BIGINT(20)  NOT NULL,
+    "freezing_fee"          BIGINT(20)  NOT NULL,
     "tx_size"               INTEGER  NOT NULL,
     PRIMARY KEY("tx_hash(64)")
 )
@@ -573,6 +577,7 @@ CREATE TABLE IF NOT EXISTS "accounts"(
 |  average_tx_fee        | BIGINT(20)   |    | Y        |          | Average Fee of All Fees  |
 |  total_tx_fee          | BIGINT(20)   |    | Y        |          | Total Fee of Transactions in Block  |
 |  total_payload_fee     | BIGINT(20)   |    | Y        |          | Total Payload Fee  |
+|  total_freezing_fee    | BIGINT(20)   |    | Y        |          | Total Freezing Fee  |
 |  total_fee             | BIGINT(20)   |    | Y        |          | Total Fee  |
 
 ### _Create Script_
@@ -583,6 +588,7 @@ CREATE TABLE IF NOT EXISTS "fees"(
     "average_tx_fee"     BIGINT(20) NOT NULL,
     "total_tx_fee"       BIGINT(20) NOT NULL,
     "total_payload_fee"  BIGINT(20) NOT NULL,
+    "total_freezing_fee" BIGINT(20) NOT NULL,
     "total_fee"          BIGINT(20) NOT NULL,
     PRIMARY KEY(height)
 );
