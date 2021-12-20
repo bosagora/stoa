@@ -482,7 +482,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const utxos = await utxo_provider.getUTXO(BOA(1000_000 * 100 + 10));
         const builder = new TxBuilder(gen_keypair);
         utxos.forEach((m) => {
-            builder.addInput(m.utxo, m.amount);
+            builder.addInput(OutputType.Payment, m.utxo, m.amount);
         });
         iota(100).forEach((idx: number) => {
             builder.addOutput(ValidatorKey.keys(idx).address, BOA(1000_000));
@@ -513,7 +513,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const utxos = await proposer_utxo_provider.getUTXO(proposal_fee);
         const builder = new TxBuilder(proposal_key_pair);
         utxos.forEach((m) => {
-            builder.addInput(m.utxo, m.amount);
+            builder.addInput(OutputType.Payment, m.utxo, m.amount);
         });
         builder.addOutput(proposal_fee_destination, proposal_fee);
         builder.assignPayload(payload);
@@ -580,7 +580,7 @@ describe("Test for the creation a proposal and the voting", () => {
 
         const builder = new TxBuilder(proposal_key_pair);
         utxos.forEach((m) => {
-            builder.addInput(m.utxo, m.amount);
+            builder.addInput(OutputType.Payment, m.utxo, m.amount);
         });
         validators.forEach((v) => {
             builder.addOutput(v, vote_cost);
@@ -754,29 +754,28 @@ describe("Test for the creation a proposal and the voting", () => {
     it("Test for path /proposals", async () => {
         const uri = URI(stoa_addr).directory("/proposals");
         const response = await client.get(uri.toString());
-        let expected =
-        {
-            proposal_id: '469008972006',
-            proposal_title: 'Title',
-            proposal_type: 'Fund',
+        let expected = {
+            proposal_id: "469008972006",
+            proposal_title: "Title",
+            proposal_type: "Fund",
             block_height: 5,
             fund_amount: 10000000000000,
             vote_start_height: 10,
             vote_end_height: 15,
             proposal_status: "Voting",
             proposal_date: 1627015766,
-            proposer_name: 'test',
+            proposer_name: "test",
             voting_start_date: moment("2021-07-26").utc().unix(),
             voting_end_date: moment("2021-08-02").utc().unix(),
             full_count: 1,
             total_validators: 9,
-            yes_percentage: '0.00',
-            no_percentage: '0.00',
-            abstain_percentage: '0.00',
-            not_voted_percentage: '88.89',
-            voted_percentage: '11.11',
-            proposal_result: 'Pending'
-        }
+            yes_percentage: "0.00",
+            no_percentage: "0.00",
+            abstain_percentage: "0.00",
+            not_voted_percentage: "88.89",
+            voted_percentage: "11.11",
+            proposal_result: "Pending",
+        };
         assert.deepStrictEqual(response.data[0], expected);
     });
 
@@ -784,12 +783,14 @@ describe("Test for the creation a proposal and the voting", () => {
         const uri = URI(stoa_addr).directory("/proposal").filename("469008972006");
         const response = await client.get(uri.toString());
         let expected = {
-            proposal_title: 'Title',
-            proposal_id: '469008972006',
-            detail: 'Description Make better world!',
-            proposal_tx_hash: '0xaa4e80fc3a47eecd7ddd24a1d644ede65825fb2d4121782b5591e799dbe97455581f94df9d1e4f6ae45d0e8af94a71715645a5052b8bfc193bc615bd0cf11b27',
-            fee_tx_hash: '0xba747aa032f83fa6754efee9b259ac181eaa1f657395cb09b9f79a2d198fd0ce83e441c8a1aba51bd29b400b8bde27bacc22bef8e1f5261e8e545102afb96f4d',
-            proposer_name: 'test',
+            proposal_title: "Title",
+            proposal_id: "469008972006",
+            detail: "Description Make better world!",
+            proposal_tx_hash:
+                "0xaa4e80fc3a47eecd7ddd24a1d644ede65825fb2d4121782b5591e799dbe97455581f94df9d1e4f6ae45d0e8af94a71715645a5052b8bfc193bc615bd0cf11b27",
+            fee_tx_hash:
+                "0xba747aa032f83fa6754efee9b259ac181eaa1f657395cb09b9f79a2d198fd0ce83e441c8a1aba51bd29b400b8bde27bacc22bef8e1f5261e8e545102afb96f4d",
+            proposer_name: "test",
             block_height: 5,
             fund_amount: 10000000000000,
             proposal_fee: 100000000000,
@@ -798,7 +799,7 @@ describe("Test for the creation a proposal and the voting", () => {
             voting_start_date: moment("2021-07-26").utc().unix(),
             vote_end_height: 15,
             voting_end_date: moment("2021-08-02").utc().unix(),
-            proposal_status: 'Voting',
+            proposal_status: "Voting",
             proposal_date: 1627015766,
             pre_evaluation_start_time: moment("2021-08-18").utc().unix(),
             pre_evaluation_end_time: moment("2021-08-18").utc().unix(),
@@ -807,8 +808,8 @@ describe("Test for the creation a proposal and the voting", () => {
             proposal_fee_address: "boa1xrgq6607dulyra5r9dw0ha6883va0jghdzk67er49h3ysm7k222ruhh7400",
             urls: [
                 {
-                    url: 'https://s3.ap-northeast-2.amazonaws.com/com.kosac.defora.beta.upload-image/BOASCAN_Requirements_Documentation_Version1_0_EN_copy_fb69a8a7d5.pdf'
-                }
+                    url: "https://s3.ap-northeast-2.amazonaws.com/com.kosac.defora.beta.upload-image/BOASCAN_Requirements_Documentation_Version1_0_EN_copy_fb69a8a7d5.pdf",
+                },
             ],
             proposal_result: "Pending",
             total_validators: 9,
@@ -816,13 +817,13 @@ describe("Test for the creation a proposal and the voting", () => {
             total_no_voted: 0,
             total_abstain_voted: 0,
             total_not_voted: 8,
-            yes_percentage: '0.00',
-            no_percentage: '0.00',
-            abstain_percentage: '0.00',
-            not_voted_percentage: '88.89',
-            voted_percentage: '11.11',
-            total_voted: 1
-        }
+            yes_percentage: "0.00",
+            no_percentage: "0.00",
+            abstain_percentage: "0.00",
+            not_voted_percentage: "88.89",
+            voted_percentage: "11.11",
+            total_voted: 1,
+        };
         assert.deepStrictEqual(response.data, expected);
     });
 
@@ -1245,7 +1246,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const utxos = await utxo_provider.getUTXO(BOA(1000_000 * 100 + 10));
         const builder = new TxBuilder(gen_keypair);
         utxos.forEach((m) => {
-            builder.addInput(m.utxo, m.amount);
+            builder.addInput(OutputType.Payment, m.utxo, m.amount);
         });
         iota(100).forEach((idx: number) => {
             builder.addOutput(ValidatorKey.keys(idx).address, BOA(1000_000));
@@ -1276,7 +1277,7 @@ describe("Test for the creation a proposal and the voting", () => {
         const utxos = await proposer_utxo_provider.getUTXO(proposal_fee);
         const builder = new TxBuilder(proposal_key_pair);
         utxos.forEach((m) => {
-            builder.addInput(m.utxo, m.amount);
+            builder.addInput(OutputType.Payment, m.utxo, m.amount);
         });
         builder.addOutput(proposal_fee_destination, proposal_fee);
         builder.assignPayload(payload);
@@ -1337,7 +1338,7 @@ describe("Test for the creation a proposal and the voting", () => {
 
         const builder = new TxBuilder(proposal_key_pair);
         utxos.forEach((m) => {
-            builder.addInput(m.utxo, m.amount);
+            builder.addInput(OutputType.Payment, m.utxo, m.amount);
         });
         validators.forEach((v) => {
             builder.addOutput(v, vote_cost);
@@ -1835,7 +1836,7 @@ describe("Test of Proposal API", function () {
         const utxos = await utxo_provider.getUTXO(BOA(1000_000 * 100 + 10));
         const builder = new TxBuilder(gen_keypair);
         utxos.forEach((m) => {
-            builder.addInput(m.utxo, m.amount);
+            builder.addInput(OutputType.Payment, m.utxo, m.amount);
         });
         iota(100).forEach((idx: number) => {
             builder.addOutput(ValidatorKey.keys(idx).address, BOA(1000_000));
@@ -1861,7 +1862,7 @@ describe("Test of Proposal API", function () {
         const utxos = await proposer_utxo_provider.getUTXO(proposal_fee);
         const builder = new TxBuilder(proposal_key_pair);
         utxos.forEach((m) => {
-            builder.addInput(m.utxo, m.amount);
+            builder.addInput(OutputType.Payment, m.utxo, m.amount);
         });
         builder.addOutput(proposal_fee_destination, proposal_fee);
         builder.assignPayload(payload);
@@ -1927,7 +1928,7 @@ describe("Test of Proposal API", function () {
 
         const builder = new TxBuilder(proposal_key_pair);
         utxos.forEach((m) => {
-            builder.addInput(m.utxo, m.amount);
+            builder.addInput(OutputType.Payment, m.utxo, m.amount);
         });
         validators.forEach((v) => {
             builder.addOutput(v, vote_cost);
@@ -1994,7 +1995,6 @@ describe("Test of Proposal API", function () {
         assert.strictEqual(block_manager.getLastBlockHeight(), 5);
     });
 
-
     it("6. Vote [ YES ] for validator 2", async () => {
         // The KeyPair of the validator
         const validator_key = ValidatorKey.keys(2);
@@ -2056,7 +2056,9 @@ describe("Test of Proposal API", function () {
         assert.ok(ballot_data_no_validator_1 !== undefined);
         assert.strictEqual(ballot_data_no_validator_1.ballot_answer, "No");
 
-        const ballot_data_yes_validator_2 = response.data.find((m: any) => m.hash === ballet_yes_validator_2.toString());
+        const ballot_data_yes_validator_2 = response.data.find(
+            (m: any) => m.hash === ballet_yes_validator_2.toString()
+        );
         assert.ok(ballot_data_yes_validator_2 !== undefined);
         assert.strictEqual(ballot_data_yes_validator_2.ballot_answer, "Yes");
     });

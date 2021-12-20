@@ -1724,7 +1724,7 @@ export class BlockManager {
         );
         const builder = new TxBuilder(key);
         utxos.forEach((m) => {
-            builder.addInput(m.utxo, m.amount);
+            builder.addInput(OutputType.Payment, m.utxo, m.amount);
         });
         enabled_validators.forEach((k) => {
             builder.addOutput(k.address, BOA(40_000));
@@ -2038,7 +2038,7 @@ export class Vote {
         const utxos = await validator_utxo_provider.getUTXO(BOA(5));
         const builder = new TxBuilder(this.validator_key);
         utxos.forEach((m) => {
-            builder.addInput(m.utxo, m.amount);
+            builder.addInput(OutputType.Payment, m.utxo, m.amount);
         });
         builder.assignPayload(payload);
 
