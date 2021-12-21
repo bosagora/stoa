@@ -299,7 +299,7 @@ class Stoa extends WebService {
         this.app.post("/utxos", isBlackList, this.getUTXOs.bind(this));
         this.app.get("/transaction/status/:hash", isBlackList, this.getTransactionStatus.bind(this));
         this.app.get("/transaction/fees/:tx_size", isBlackList, this.getTransactionFees.bind(this));
-        this.app.get("/transactions/:address", isBlackList, this.getTransactionsAddress.bind(this));
+        this.app.get("/transactions/address/:address", isBlackList, this.getTransactionsAddress.bind(this));
         this.app.get(
             "/wallet/transactions/history/:address",
             isBlackList,
@@ -681,9 +681,9 @@ class Stoa extends WebService {
     }
 
     /**
-     * GET /transactions/:address
+     * GET /transactions/address/:address
      *
-     * Called when a request is received through the `/transactions/:address` handler
+     * Called when a request is received through the `/transactions/address/:address` handler
      * The parameter `address` is the address
      *
      * @returns Returns transactions of block.

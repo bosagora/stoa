@@ -504,9 +504,9 @@ describe("Test of Stoa API Server", () => {
         assert.deepStrictEqual(response.data, expected);
     });
 
-    it("Test of the path /transactions/:address", async () => {
+    it("Test of the path /transactions/address/:address", async () => {
         const uri = URI(stoa_addr)
-            .directory("/transactions")
+            .directory("/transactions/address")
             .filename(
                 "boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn"
             );
