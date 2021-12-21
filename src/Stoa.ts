@@ -455,7 +455,7 @@ class Stoa extends WebService {
             .then((rows: any[]) => {
                 // Nothing found
                 if (!rows.length) {
-                    if (height !== null) res.status(400).send("No validator exists for block height.");
+                    if (height !== null) res.status(204).send("No validator exists for block height.");
                     else res.status(503).send("Stoa is currently unavailable.");
 
                     return;
@@ -533,7 +533,7 @@ class Stoa extends WebService {
             .then((rows: any[]) => {
                 // Nothing to show
                 if (!rows.length) {
-                    res.status(400).send(
+                    res.status(204).send(
                         `The validator data not found.` + `'address': (${address}), 'height': (${height?.toString()})`
                     );
                     return;

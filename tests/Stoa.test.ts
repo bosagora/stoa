@@ -134,10 +134,8 @@ describe("Test of Stoa API Server", () => {
             .filename("boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t")
             .setSearch("height", "99");
 
-        await assert.rejects(client.get(fail_uri.toString()), {
-            statusMessage:
-                "The validator data not found.'address': (boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t), 'height': (99)",
-        });
+        const response1 = await client.get(fail_uri.toString());
+        assert.strictEqual(response1.status, 204);
 
         const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 1);
