@@ -4354,50 +4354,45 @@ export class LedgerStorage extends Storages {
      */
     public getLatestTransactions(limit: number, page: number): Promise<any[]> {
         const sql = `SELECT
-                    block_height,
-                    tx_hash,
-                    time_stamp,
-                    tx_fee,
-                    tx_size,
-                    type,
-                    amount,
-                    status,
-                    full_count
-                FROM(
-                    SELECT
-                        "" AS block_height,
-	                    T.tx_hash,
-                        T.time as time_stamp,
-	                    T.tx_fee,
-                        T.tx_size,
-                        T.type,
-	                    Sum(IFNULL(O.amount,0)) as amount,
-                        'Pending' As status,
-                        count(*) OVER() AS full_count
-	                FROM
-	                    tx_output_pool O
-		                INNER JOIN tx_input_pool I ON (I.tx_hash = O.tx_hash)
-		                INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
-                        GROUP BY T.tx_hash
-                    UNION
-                    SELECT
-                        T.block_height,
-                        T.tx_hash,
-                        B.time_stamp,
-                        T.tx_fee,
-                        T.tx_size,
-                        T.type,
-                        Sum(IFNULL(O.amount,0)) as amount,
-                        'Confirmed' as status,
-                        count(*) OVER() AS full_count
+                        block_height,
+                        tx_hash,
+                        time_stamp,
+                        tx_fee,
+                        tx_size,
+                        type,
+                        CASE WHEN status = 'Confirmed'
+                             THEN (SELECT SUM(IFNULL(amount,0)) FROM tx_outputs O WHERE O.tx_hash = TX.tx_hash)
+                             ELSE (SELECT SUM(IFNULL(amount,0)) FROM tx_output_pool O WHERE O.tx_hash = TX.tx_hash)
+                        END as amount,
+                        status,
+                        (SELECT IFNULL(count(*),0) AS pending_full_count FROM transaction_pool) + (SELECT IFNULL(count(*),0) AS pending_full_count FROM transactions) as full_count
                     FROM
-                        tx_outputs O
-                        INNER JOIN transactions T ON (T.tx_hash = O.tx_hash)
-                        INNER JOIN blocks B ON (B.height = T.block_height)
-                    GROUP BY tx_hash
-		            ORDER BY time_stamp DESC, tx_hash ASC
-                    limit ? offset ?
-                ) AS transactions`;
+                    ((SELECT
+                            "" AS block_height,
+                            T.tx_hash,
+                            T.time as time_stamp,
+                            T.tx_fee,
+                            T.tx_size,
+                            T.type,
+                            'Pending' as status
+                        FROM
+                            transaction_pool T
+                        )
+                        UNION
+                        (SELECT
+                            T.block_height,
+                            T.tx_hash,
+                            B.time_stamp,
+                            T.tx_fee,
+                            T.tx_size,
+                            T.type,
+                            'Confirmed' as status
+                        FROM
+                            transactions T
+                            INNER JOIN blocks B ON (B.height = T.block_height)
+                        )
+                        ORDER BY time_stamp DESC, tx_hash ASC
+                    LIMIT ? offset ?) AS TX`;
         return this.query(sql, [limit, limit * (page - 1)]);
     }
 
