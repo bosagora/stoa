@@ -1682,6 +1682,26 @@ class Stoa extends WebService {
                 } else {
                     const txs: IBlockTransactions[] = [];
                     for (const row of data.tx) {
+                        if (row.senders)
+                            row.senders.sort((a: any, b: any) => {
+                                if (a.address < b.address) {
+                                    return -1;
+                                }
+                                if (a.address > b.address) {
+                                    return 1;
+                                }
+                                return 0;
+                            });
+                        if (row.receiver)
+                            row.receiver.sort((a: any, b: any) => {
+                                if (a.address < b.address) {
+                                    return -1;
+                                }
+                                if (a.address > b.address) {
+                                    return 1;
+                                }
+                                return 0;
+                            });
                         txs.push({
                             height: JSBI.BigInt(row.block_height).toString(),
                             tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),

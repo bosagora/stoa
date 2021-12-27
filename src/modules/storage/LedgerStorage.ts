@@ -90,7 +90,7 @@ export class LedgerStorage extends Storages {
     static readonly validator_uptime_constant: number = 96.42;
 
     /**
-     * excluded Addresses 
+     * excluded Addresses
      */
     private readonly excluded_addresses?: string[] = [];
 
@@ -108,7 +108,7 @@ export class LedgerStorage extends Storages {
         block_interval: number,
         validator_cycle: number,
         callback: (err: Error | null) => void,
-        excludedAddresses?: string[],
+        excludedAddresses?: string[]
     ) {
         super(databaseConfig, callback);
         this.genesis_timestamp = genesis_timestamp;
@@ -1560,18 +1560,23 @@ export class LedgerStorage extends Storages {
                     .then(async (row: any[]) => {
                         if (row[0]) {
                             total_utxo = JSBI.BigInt(row[0].total_utxo);
-                            let excludedAddresses: string[]
+                            let excludedAddresses: string[];
                             if (this.excluded_addresses !== undefined) {
-                                excludedAddresses = this.excluded_addresses
+                                excludedAddresses = this.excluded_addresses;
                             } else {
-                                excludedAddresses = []
+                                excludedAddresses = [];
                             }
-                            await Promise.all(excludedAddresses.map(async (elem: string) => {
-                                const balance: any = await this.getWalletBalance(elem.toString(), conn);
-                                if (balance[0]) {
-                                    total_common_budget_balance = JSBI.add(total_common_budget_balance, JSBI.BigInt(balance[0].balance))
-                                }
-                            }));
+                            await Promise.all(
+                                excludedAddresses.map(async (elem: string) => {
+                                    const balance: any = await this.getWalletBalance(elem.toString(), conn);
+                                    if (balance[0]) {
+                                        total_common_budget_balance = JSBI.add(
+                                            total_common_budget_balance,
+                                            JSBI.BigInt(balance[0].balance)
+                                        );
+                                    }
+                                })
+                            );
                         }
                         return this.query(transaction_stats, [block.header.height.toString()], conn);
                     })
@@ -1946,9 +1951,9 @@ export class LedgerStorage extends Storages {
 
                     unlock_height_query = `(
                             SELECT '${JSBI.add(
-                        height.value,
-                        JSBI.BigInt(2016)
-                    ).toString()}' AS unlock_height WHERE EXISTS
+                                height.value,
+                                JSBI.BigInt(2016)
+                            ).toString()}' AS unlock_height WHERE EXISTS
                             (
                                 SELECT
                                     *
@@ -2810,16 +2815,16 @@ export class LedgerStorage extends Storages {
                                     .map((m) => m.address)
                                     .find((element) => ballotData.card.validator_address.toString() === element);
                                 block_header.height.value >= info[0].vote_start_height &&
-                                    block_header.height.value <= info[0].vote_end_height &&
-                                    validator
+                                block_header.height.value <= info[0].vote_end_height &&
+                                validator
                                     ? await save_ballot_data(storage, block_header, tx_hash, ballotData)
                                     : await save_ballot_data(
-                                        storage,
-                                        block_header,
-                                        tx_hash,
-                                        ballotData,
-                                        BallotData.REJECT
-                                    );
+                                          storage,
+                                          block_header,
+                                          tx_hash,
+                                          ballotData,
+                                          BallotData.REJECT
+                                      );
                             }
                         }
                     }
@@ -4633,7 +4638,7 @@ export class LedgerStorage extends Storages {
                 FROM
 			        blocks B
 			        INNER JOIN transactions T ON (B.height = T.block_height)
-                    INNER JOIN tx_outputs O ON (T.tx_hash = O.tx_hash)
+                    INNER JOIN (SELECT * FROM tx_outputs ORDER BY output_index ASC ) O ON (T.tx_hash = O.tx_hash)
                     LEFT JOIN (SELECT
 			            TS.tx_hash,
                         JSON_ARRAYAGG(JSON_OBJECT("address", OS.address, "amount", OS.amount)) as senders
@@ -4649,7 +4654,7 @@ export class LedgerStorage extends Storages {
                 WHERE
                     B.${field} = ?
 			    GROUP BY T.tx_hash
-			    ORDER BY T.tx_index ASC
+			    ORDER BY T.tx_index ASC, O.output_index ASC
                 LIMIT ? OFFSET ? ;`;
 
         const sql_count = `SELECT
@@ -5239,7 +5244,7 @@ export class LedgerStorage extends Storages {
             storage: LedgerStorage,
             height: Height,
             validator: IValidator,
-            signed: SignStatus,
+            signed: SignStatus
         ): Promise<void> {
             return new Promise<void>((resolve, reject) => {
                 storage
@@ -5247,11 +5252,7 @@ export class LedgerStorage extends Storages {
                         `UPDATE validator_by_block
                             SET signed = ?
                             WHERE block_height = ? and address = ?`,
-                        [
-                            signed,
-                            height.value,
-                            validator.address
-                        ],
+                        [signed, height.value, validator.address],
                         conn
                     )
                     .then(() => {
@@ -5273,26 +5274,15 @@ export class LedgerStorage extends Storages {
                 const bitMask = BitMask.fromString(block_header.validators.toString());
                 for (let i = 0; i < bitMask.length; i++) {
                     if (bitMask.get(i))
-                        await update_validator(
-                            this,
-                            block_header.height,
-                            cycleValidators[i],
-                            SignStatus.SIGNED,
-                        );
+                        await update_validator(this, block_header.height, cycleValidators[i], SignStatus.SIGNED);
                     else {
-                        await update_validator(
-                            this,
-                            block_header.height,
-                            cycleValidators[i],
-                            SignStatus.UNSIGNED,
-                        );
+                        await update_validator(this, block_header.height, cycleValidators[i], SignStatus.UNSIGNED);
                     }
                 }
                 resolve();
             })();
         });
     }
-
 
     /**
      * Get validator reward

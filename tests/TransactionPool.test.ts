@@ -278,16 +278,16 @@ describe("Test of double spending transaction", () => {
     it("Check if the pending transaction is the first transaction", async () => {
         const uri = URI(stoa_addr)
             .directory("/wallet/transactions/pending")
-            .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
+            .filename("boa1xpaqh00j6amm5unu56tdg9l2vezq5znhdmkgzlwyydyhw7lvf2vlkq4kwpq");
 
         const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 1);
         assert.strictEqual(
             response.data[0].tx_hash,
-            "0xaa4bf9e18419e3ed65ac4235830e0ad4286052df2613b1c2413ec48a2cb005c6ece7e8578ec390b10775c1a49538e3a6b74ee55dedec0e466075f05896b2b872"
+            "0x7764f1180b6d9f16db020e399a2f3b9dcbe4c4b70369165de750952ec0adf61bf4e7a4980b3ece60cd3f2cf5081f1b6a9a226b63f7a98e05fa3fc538971fcb9c"
         );
-        assert.strictEqual(response.data[0].address, "boa1xqej00jh50l2me46pkd3dmkpdl6n4ugqss2ev3utuvpuvwhe93l9gjlmxzu");
-        assert.strictEqual(response.data[0].amount, "10000000000000");
+        assert.strictEqual(response.data[0].address, "boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
+        assert.strictEqual(response.data[0].amount, "24399999970480");
     });
 
     it("Send a second transaction with the same input as the first transaction", async () => {
@@ -303,15 +303,15 @@ describe("Test of double spending transaction", () => {
     it("Check if there is only a second transaction.", async () => {
         const uri = URI(stoa_addr)
             .directory("/wallet/transactions/pending")
-            .filename("boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj");
+            .filename("boa1xpaqh00j6amm5unu56tdg9l2vezq5znhdmkgzlwyydyhw7lvf2vlkq4kwpq");
 
         const response = await client.get(uri.toString());
         assert.strictEqual(response.data.length, 1);
         assert.strictEqual(
             response.data[0].tx_hash,
-            "0x35917fba7333947cfbc086164e81c1ad7b98dc6a4c61822a89f6eb061b29e956c5c964a2d4b9cce9a2119244e320091b20074351ab288e07f9946b9dcc4735a7"
+            "0x18bcf5260063740ef60d4d283b655242a5cbf72616c2713882e4d15804cbc2c20d3d904c34509e6c736bc3425b37a381ef60c06c04f4f3edc6ef28c2976d598c"
         );
-        assert.strictEqual(response.data[0].address, "boa1xqcmmns5swnm03zay5wjplgupe65uw4w0dafzsdsqtwq6gv3h3lcz24a8ch");
-        assert.strictEqual(response.data[0].amount, "24398336340880");
+        assert.strictEqual(response.data[0].address, "boa1xppz00cv25tjfkx93j998g90ggjmpyky64dtxuaqh5qxcxud5f9yww64cxq");
+        assert.strictEqual(response.data[0].amount, "95199999729184");
     });
 });
