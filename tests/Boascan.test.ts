@@ -138,30 +138,30 @@ describe("Test of Stoa API Server", function () {
         const response = await client.get(uri.toString());
         const expected = [
             {
-                height: "1",
-                hash: "0x62d6bb89eecd3a5e96096f1d837ebca05348b61c5afe569f110a8a134a0d491cb98c9c3b67db4b13aa35f0acb03da34e15c849caa4a790ed24774d3faaf93a25",
-                merkle_root:
-                    "0x515a30d31fbd031d63f041b92184f32baf00d08e4120da9299bc336c6f980f2245b11e70bb1dcb7c2279ead9dab1c37b62dee8414083ae8346d166cf033cddfb",
-                signature:
-                    "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-                validators: 5,
-                tx_count: "8",
                 enrollment_count: "0",
-                time_stamp: 1609459800,
                 full_count: 2,
+                hash: "0x5216c0ef8763a4c4b36404d837a1db4778996f7955f0fe459cabc66a36692947d0a93f6191ad33024ff0dc304ae1360f08203bf17c611ba438a1c1735d67af52",
+                height: "1",
+                merkle_root:
+                    "0xaf887747962e5ba515cb56fcfe74b1a3f3a6bbcb15e28ce5354926af7835f0b587bc2b1fbb043f0f36921cd565102e581cd8062a3f7012475ad4cad5e3ac550c",
+                signature:
+                    "0xec522046957581733f1c038c8483f8c7422d626de697481992ddcfed77edb7a50b5a7f1078fca7ba8a99e9a3f92eb80cfdabe280033e934d6691d2bfc7da4e84",
+                time_stamp: 1609459800,
+                tx_count: "8",
+                validators: 5,
             },
             {
+                enrollment_count: "6",
+                full_count: 2,
+                hash: "0x8365f069fe37ee02f2c4dc6ad816702088fab5fc875c3c67b01f82c285aa2d90b605f57e068139eba1f20ce20578d712f75be4d8568c8f3a7a34604e72aa3175",
                 height: "0",
-                hash: "0x29394d0ed1c94a3172278df9f0e61f581c3da85ef0f8ddf20c5f2f5d8efe2067753db1b2a8a1ea62d8762b2680ed1c4914e48bb6677d9212629de175eb6c6dbf",
                 merkle_root:
-                    "0x67218493be437c25dc5884abdc8ee40e61f0af79aa9af8ab9bd8b0632eaaca238b4c054f114b046da0d5911b1b205ba540d07c5dc01560beafe564e5f3d101c9",
+                    "0x0923b97e7a4dc9443089471545e796115ef5ad2eed8e92bb8b1de4744f94a95e297a536eb7c152752ca685af7602bc296f5590c2ddf0d91e4fe3dd24fb8e3f72",
                 signature:
                     "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-                validators: 0,
-                tx_count: "2",
-                enrollment_count: "6",
                 time_stamp: 1609459200,
-                full_count: 2,
+                tx_count: "3",
+                validators: 0,
             },
         ];
         assert.deepStrictEqual(response.data, expected);
@@ -173,124 +173,124 @@ describe("Test of Stoa API Server", function () {
         const response = await client.get(uri.toString());
         const expected = [
             {
+                amount: "594999999717900",
+                full_count: 11,
                 height: "1",
-                tx_hash:
-                    "0x05f9fd77edc4cddd9c6573a275db1bef40372191a7a99eaa9afaaeedcc26ffd0071532c533193ad7abf7cfa3d646a711bdc1977cc331685864ef31e23dddcb1d",
-                type: "Payment",
-                amount: "609999999762000",
-                tx_fee: "238000",
-                tx_size: "1265",
-                time_stamp: 1609459800,
                 status: "Confirmed",
-                full_count: 10,
+                time_stamp: 1609459800,
+                tx_fee: "282100",
+                tx_hash:
+                    "0x006b4215543cb0cfa1815c7f16a4f965b6c9d0205cc6eb27f783ebc4e0b5831130f563751cd5230793c285d4d8b1a3c85f3384abc385e691de0bfa2041ed0491",
+                tx_size: "366",
+                type: "Payment",
             },
             {
+                amount: "594999999717900",
+                full_count: 11,
                 height: "1",
-                tx_hash:
-                    "0x143a9feedb1b8cd8f2af4c0a508b742bc5fd6fdc2705e25a4d156cf8cb68688da8bc68de7118a8ba8919ab0009dbb02ad8fcbb3170c50674c7825d5ea14b2e05",
-                type: "Payment",
-                amount: "609999999762000",
-                tx_fee: "238000",
-                tx_size: "1265",
-                time_stamp: 1609459800,
                 status: "Confirmed",
-                full_count: 10,
+                time_stamp: 1609459800,
+                tx_fee: "282100",
+                tx_hash:
+                    "0x4192b4c64083f5e689a8f5262a833438e9574dda8574082f1b4bfb07de7856138373a33e07e1fcd4c4f6bfd26a784c09c1ad98bbc6293fdd754d1ae803640017",
+                tx_size: "366",
+                type: "Payment",
             },
             {
+                amount: "594999999717900",
+                full_count: 11,
                 height: "1",
-                tx_hash:
-                    "0x21df6397c1353dafac1092eef428b9cf27ee96baa143f5a111c587c46f887688c45b956b8cf2adf01285536c13b452c8c15bd82ec436b39b373c2987d7f1f3d9",
-                type: "Payment",
-                amount: "609999999762000",
-                tx_fee: "238000",
-                tx_size: "1265",
-                time_stamp: 1609459800,
                 status: "Confirmed",
-                full_count: 10,
+                time_stamp: 1609459800,
+                tx_fee: "282100",
+                tx_hash:
+                    "0x458af77568cc592eb8e27343cf9b1921ac6af3780315291cfc0dbbfb47c9095045b6e23510c62bb605be2fb08d9f922bfede9ba0ea6efd6bb1a62e86dfc0a8e3",
+                tx_size: "366",
+                type: "Payment",
             },
             {
+                amount: "594999999717900",
+                full_count: 11,
                 height: "1",
-                tx_hash:
-                    "0x25ba9352ec7a92efd273b62de9bb30c62a2c468030e2ac0711563453102299abcb9e014a59b9c0ba43e2041c1444535098bf6f0e5532e7e4dce10ebac751f747",
-                type: "Payment",
-                amount: "609999999762000",
-                tx_fee: "238000",
-                tx_size: "1265",
-                time_stamp: 1609459800,
                 status: "Confirmed",
-                full_count: 10,
+                time_stamp: 1609459800,
+                tx_fee: "282100",
+                tx_hash:
+                    "0x52968e7bac4c8d063c808733eecf5981cafb6f8145cc28d1ffa53444dbdae2177892d94498668e0e1be53a4c8a76488ba551d3d356fcb852f85489f338c1f169",
+                tx_size: "366",
+                type: "Payment",
             },
             {
+                amount: "594999999717900",
+                full_count: 11,
                 height: "1",
-                tx_hash:
-                    "0x622e862706aa4e2b3ff5df7fa63b4dec77e93f13f0650cede3f19705486815ea4e00f62f34abafc61f93bef17463924df0e81ca0ed154733f8790d2fe8adafd1",
-                type: "Payment",
-                amount: "609999999762000",
-                tx_fee: "238000",
-                tx_size: "1265",
-                time_stamp: 1609459800,
                 status: "Confirmed",
-                full_count: 10,
+                time_stamp: 1609459800,
+                tx_fee: "282100",
+                tx_hash:
+                    "0x63a6151e60088d7a8b288faaad8587d8eec4cd107af27cf46d23693ebc786a6179c3a037979c0d80f68a9ac4788a861119265b9c19d8c80c3fedd17973bcda13",
+                tx_size: "366",
+                type: "Payment",
             },
             {
+                amount: "594999999717900",
+                full_count: 11,
                 height: "1",
-                tx_hash:
-                    "0x70f8c2a080fd8c7afd8500a218939e44e91cab869069d40ebb0b0226c1b0617ac4df5a6da5c2ad99d19c7b53e63a8c44be3e906261280f718bb407d843f7b842",
-                type: "Payment",
-                amount: "609999999762000",
-                tx_fee: "238000",
-                tx_size: "1265",
-                time_stamp: 1609459800,
                 status: "Confirmed",
-                full_count: 10,
+                time_stamp: 1609459800,
+                tx_fee: "282100",
+                tx_hash:
+                    "0xc0656ae6d41ddb69d2756f67b347c96d12564ecf9dd6461c7d96c6a8f5ae7f41ff9cb87f2e1493aa46fdff52c251938d411a4ded4d8363a2ac959ad387baf7de",
+                tx_size: "366",
+                type: "Payment",
             },
             {
+                amount: "594999999717900",
+                full_count: 11,
                 height: "1",
-                tx_hash:
-                    "0xf07bdd8d4285928d39debe21601368220b6132f0bf1e9a0e45f94407648b74534c1d27c421b978fdcadae058cb426039d69c5469409c6f3b29f1d79bfb808b4b",
-                type: "Payment",
-                amount: "609999999762000",
-                tx_fee: "238000",
-                tx_size: "1265",
-                time_stamp: 1609459800,
                 status: "Confirmed",
-                full_count: 10,
+                time_stamp: 1609459800,
+                tx_fee: "282100",
+                tx_hash:
+                    "0xc7882278ab2f3d1e1bc643e646e30daa3861b89f0162a8dd07a3d34d9e72cf20988d85bfd99b31a9298e1c71bca3d3e06f60fa781b351d00289dd219ca9599a2",
+                tx_size: "366",
+                type: "Payment",
             },
             {
+                amount: "594999999717900",
+                full_count: 11,
                 height: "1",
-                tx_hash:
-                    "0xfbaaebc15bb1618465077fed2425a826d88c7f5ae0197634f056bfbad12a7a74b28cc82951e889255e149707bd3ef64eb01121875c766b5d24afed176d7d255c",
-                type: "Payment",
-                amount: "609999999762000",
-                tx_fee: "238000",
-                tx_size: "1265",
-                time_stamp: 1609459800,
                 status: "Confirmed",
-                full_count: 10,
+                time_stamp: 1609459800,
+                tx_fee: "282100",
+                tx_hash:
+                    "0xd37d727bae3cacb60cd89fc279f1edeb4cd6255670de570916bdb5e0dd4674b884e78957759066635fa4ee713580b3b578c5bdf2b7888030fd005c888b6c6c15",
+                tx_size: "366",
+                type: "Payment",
             },
             {
-                height: "0",
-                tx_hash:
-                    "0x224c72ad879eccd38e9b612047633d235e47e329e68a69517822c4c234c53c2d7d81b0245cdb61857002d58a5e033c8720b462e20517f45a5516df432866b32f",
-                type: "Freeze",
                 amount: "120000000000000",
-                tx_fee: "0",
-                tx_size: "278",
-                time_stamp: 1609459200,
+                full_count: 11,
+                height: "0",
                 status: "Confirmed",
-                full_count: 10,
+                time_stamp: 1609459200,
+                tx_fee: "0",
+                tx_hash:
+                    "0xaf63ca7d0b555bbbe65d398165c3d921421114003ee6d42fe11a1b4eaafa6d6e9a57ffc6d35b820d001beeebdcdec9a9d6b7d34fe0062a6d9eb719d8d47237f2",
+                tx_size: "278",
+                type: "Freeze",
             },
             {
+                amount: "120000000000000",
+                full_count: 11,
                 height: "0",
-                tx_hash:
-                    "0x26866bb263593d024a92103646c48cf35a2b1bfcc49b087915b85db14a432b373569d56f576242354328a31bf0102a0a78cb806cf6e25d88d7981367833631b7",
-                type: "Payment",
-                amount: "4880000000000000",
-                tx_fee: "0",
-                tx_size: "368",
-                time_stamp: 1609459200,
                 status: "Confirmed",
-                full_count: 10,
+                time_stamp: 1609459200,
+                tx_fee: "0",
+                tx_hash:
+                    "0xbf5685b8bc230a0463d1b5c64a8dd3cab09de95cd6e71649a43af680569770b279646a8a5453bd157a6d2066850c27e941c662eb22c8ebae922989487bc53e58",
+                tx_size: "278",
+                type: "Freeze",
             },
         ];
         assert.deepStrictEqual(response.data, expected);
@@ -301,24 +301,24 @@ describe("Test of Stoa API Server", function () {
 
         const response = await client.get(uri.toString());
         const expected = {
+            hash: "0x5216c0ef8763a4c4b36404d837a1db4778996f7955f0fe459cabc66a36692947d0a93f6191ad33024ff0dc304ae1360f08203bf17c611ba438a1c1735d67af52",
             height: "1",
-            total_transactions: 8,
-            hash: "0x62d6bb89eecd3a5e96096f1d837ebca05348b61c5afe569f110a8a134a0d491cb98c9c3b67db4b13aa35f0acb03da34e15c849caa4a790ed24774d3faaf93a25",
-            prev_hash:
-                "0x29394d0ed1c94a3172278df9f0e61f581c3da85ef0f8ddf20c5f2f5d8efe2067753db1b2a8a1ea62d8762b2680ed1c4914e48bb6677d9212629de175eb6c6dbf",
             merkle_root:
-                "0x515a30d31fbd031d63f041b92184f32baf00d08e4120da9299bc336c6f980f2245b11e70bb1dcb7c2279ead9dab1c37b62dee8414083ae8346d166cf033cddfb",
-            signature:
-                "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+                "0xaf887747962e5ba515cb56fcfe74b1a3f3a6bbcb15e28ce5354926af7835f0b587bc2b1fbb043f0f36921cd565102e581cd8062a3f7012475ad4cad5e3ac550c",
+            prev_hash:
+                "0x8365f069fe37ee02f2c4dc6ad816702088fab5fc875c3c67b01f82c285aa2d90b605f57e068139eba1f20ce20578d712f75be4d8568c8f3a7a34604e72aa3175",
             random_seed: "",
+            signature:
+                "0xec522046957581733f1c038c8483f8c7422d626de697481992ddcfed77edb7a50b5a7f1078fca7ba8a99e9a3f92eb80cfdabe280033e934d6691d2bfc7da4e84",
             time: 1609459800,
-            version: "",
-            total_sent: 4880000000000000,
-            total_received: 4879999998096000,
+            total_fee: 2256800,
+            total_received: 4759999997743200,
             total_reward: 0,
-            total_fee: 1904000,
-            total_size: 11665,
-            tx_volume: "4880000000000000",
+            total_sent: 4760000000000000,
+            total_size: 4473,
+            total_transactions: 8,
+            tx_volume: "4760000000000000",
+            version: "",
         };
         assert.deepStrictEqual(response.data, expected);
     });
@@ -332,64 +332,64 @@ describe("Test of Stoa API Server", function () {
         const response = await client.get(uri.toString());
         const expected = [
             {
-                height: "0",
-                utxo: "0x70455f0b03f4b8d54b164b251e813b3fecd447d4bfe7b173ef86654429d2f5c3866d3ea406bf02163221a2d4029f0e0930a48304b2ea0f9277c2b32795c4005f",
-                enroll_sig:
-                    "0x0cab27862571d2d2e33d6480e1eab4c82195a508b72672d609610d01f23b0beedc8b89135fe3f5df9e2815b9bdb763c41b8b2dab5911e313acc82470c2147422",
                 commitment:
-                    "0x0a8201f9f5096e1ce8e8de4147694940a57a188b78293a55144fc8777a774f2349b3a910fb1fb208514fb16deaf49eb05882cdb6796a81f913c6daac3eb74328",
+                    "0x12f7fc1c953a13101e60c823ecd502fc9215a4dc7c1f3408db37ed70e62e45f9dda92c3b0592ad3fde04c4241bfe65e207704db9794e6fd92641f54a17747ab3",
+                cycle_length: 20,
+                enroll_sig:
+                    "0x6d7a10ce4912b89806800cd66c6b58e66ccb78625afa865119c6d598aa061d18098e45596199261710d32c8c1b6565a1b2341cae9f773b6dca53dc26b7d49cf2",
                 full_count: 6,
-                cycle_length: 20
+                height: "0",
+                utxo: "0x0666c4d505b55b6840fbb669ec08a1849e699d5a30ba246989b65ea71292f8ac9a3d7126ca9061313d3225d6e324146f37cdc5dab51facbbc3beead6854e89a4",
             },
             {
-                height: "0",
-                utxo: "0x6fbcdb2573e0f5120f21f1875b6dc281c2eca3646ec2c39d703623d89b0eb83cd4b12b73f18db6bc6e8cbcaeb100741f6384c498ff4e61dd189e728d80fb9673",
-                enroll_sig:
-                    "0x0ed498b867c33d316b468d817ba8238aec68541abd912cecc499f8e780a8cdaf2692d0b8b04133a34716169a4b1d33d77c3e585357d8a2a2c48a772275255c01",
                 commitment:
-                    "0xd0348a88f9b7456228e4df5689a57438766f4774d760776ec450605c82348c461db84587c2c9b01c67c8ed17f297ee4008424ad3e0e5039179719d7e9df297c1",
+                    "0x659467b85b216489e090d8b77e4de9fa67d4c0824ee27a798d302e3cac0f2e527abe04db5e84a87fadb101edb60342687fec3d094af2a4bfdd3f73b4176f00a0",
+                cycle_length: 20,
+                enroll_sig:
+                    "0xa669a117712a49b470c2bfe885015a185c60fc158b8086a74f585804bf8962de0f076c77115f49a043035fd293318d8c9462f943db4d9a9b7c9bc9cccfd1254f",
                 full_count: 6,
-                cycle_length: 20
+                height: "0",
+                utxo: "0x2b1fcfb62b868a53287fbdfbc17631f5a4e1cfdb91e58dfc0a8ebf083e92994dd327b0b574c81f0e29394d3abbf67f609ad67bce49c9d9b59672fa5a61a37495",
             },
             {
-                height: "0",
-                utxo: "0x00bac393977fbd1e0edc70a34c7ca802dafe57f2b4a2aabf1adaac54892cb1cbae72cdeeb212904101382690d18d2d2c6ac99b83227ca73b307fde0807c4af03",
-                enroll_sig:
-                    "0x09474f489579c930dbac46f638f3202ac24407f1fa419c1d95be38ab474da29d7e3d4753b6b4ccdb35c2864be4195e83b7b8433ca1d27a57fb9f48a631001304",
                 commitment:
-                    "0xaf43c67d9dd0f53de3eaede63cdcda8643422d62205df0b5af65706ec28b372adb785ce681d559d7a7137a4494ccbab4658ce11ec75a8ec84be5b73590bffceb",
+                    "0x3c4e8f32879e16a6d856f6360045ad263b7be2c22cfa55d6178dcf138955b92748a105cf9cc3f697b8b6dfc126ab81fb56a7349f57b9ddb443fbd880658b94f0",
+                cycle_length: 20,
+                enroll_sig:
+                    "0x221c3179366b4f12cb2ac1a323c312a2c56d96854b9b1aa0a50eb348766b50f5080735f10ccaba022a8e6d540b679a5453d622bd398915c143b5cbb4195da1d7",
                 full_count: 6,
-                cycle_length: 20
+                height: "0",
+                utxo: "0x6bceb7f5997df362bd0808826ef9577d7f8389bf9c75a471362aa5a24f1d64c9074850f29c6c078e2a7fa8555ec81fde75c2c8b6a8c0adc8d75057bbcb51116a",
             },
             {
-                height: "0",
-                utxo: "0xd935b5f1b616e6ec5c96502395e4b89683f526bdb8845f93a67bd329d44b1c2e5c185492e9610c0e3648609b3a9a5b21a35ee1a16f234c6415099803a97306ca",
-                enroll_sig:
-                    "0x0e4566eca30feb9ad47a65e7ff7e7ce1a7555ccedcf61e1143c2e5fddbec6866fd787c4518b78ab9ed73a3760741d557ac2aca631fc2796be86fcf391d3a6634",
                 commitment:
-                    "0xa24b7e6843220d3454523ceb7f9b43f037e56a01d2bee82958b080dc6350ebac2da12b561cbd96c6fb3f5ae5a3c8df0ac2c559ae1c45b11d42fdf866558112bc",
+                    "0x2ef9c7042d38c6a212907ff065e355d0ce78cf315ba63c37dff58fbe4f484ccddaf03753918730a79a64927b2c1e4996296506abfeb484d8fe338311494cc3b3",
+                cycle_length: 20,
+                enroll_sig:
+                    "0x8ff3e4f89919ce3f010223ffa03ea908c4963cddae7165fa9eaa53d071780d1a086bf1e2594e6745c597cbedd491fa3aa568e58faee89a31ec05bb8f5c1a1e28",
                 full_count: 6,
-                cycle_length: 20
+                height: "0",
+                utxo: "0x84daa1d361afd9238041431b838500103eeb16d7952486077830a31a77ecc31d40f3a9d3f3a1c92dc3a0e5723ba6de9d87f107a73c73aef6a45bf9862c663493",
             },
             {
-                height: "0",
-                utxo: "0x7fa36630b0d4a6be729fcab6db70c9b603f2da4c28feaa754f178b5cedb0174a9647fe8c08cdbfd244c6a5d23a7fdf89f1990e002c5565e1babbdb53193e95bc",
-                enroll_sig:
-                    "0x052ee1d975c49f19fd26b077740dcac399f174f40b5df1aba5f09ebea11faacfd79a36ace4d3097869dc009b8939fc83bdf940c8822c6931d5c09326aa746b31",
                 commitment:
-                    "0xa0502960ddbe816729f60aeaa480c7924fb020d864deec6a9db778b8e56dd2ff8e987be748ff6ca0a43597ecb575da5d532696e376dc70bb4567b5b1fa512cb4",
+                    "0xbdb489da86fb8aeda9d09478b1936d9dc57b243eae9d31381270e533d48985a2a235e880c4b225e8a2f23aace36a6c5590ef47d5c3143b5115bc5137b6a200c2",
+                cycle_length: 20,
+                enroll_sig:
+                    "0x7702482cdbed0ef9751cad41ca46b172edbd4c0db7fe8536ecb82e87aead31fa01fb58b031b139074ef97a17d7c746fe9261b194bad95a906648bee08234f199",
                 full_count: 6,
-                cycle_length: 20
+                height: "0",
+                utxo: "0x94b78736ae8ddf97f05a30e549f5eab377648a9116f3033ab7dcb8c9528ee717fd8d94dae7fe3ecc9d43290204ca2a41f710e798a3446b553c7a415d968e7177",
             },
             {
-                height: "0",
-                utxo: "0xe0ea82fd0ab9c57b068123927c002750181366f417c30a6ded05a23aca99c2c98b508bba9ba7c496eee36d78eeb7b71f330f81633372a712010036c4dc506b07",
-                enroll_sig:
-                    "0x0e0070e5951ef5be897cb593c4c57ce28b7529463f7e5644b1314ab7cc69fd625c71e74382a24b7e644d32b0306fe3cf14ecd7de5635c70aa592f4721aa74fe2",
                 commitment:
-                    "0xdd1b9c62d4c62246ea124e5422d5a2e23d3ca9accb0eba0e46cd46708a4e7b417f46df34dc2e3cba9a57b1dc35a66dfc2d5ef239ebeaaa00299232bc7e3b7bfa",
+                    "0x5666c8993722e5ba725a60174fa2ec28c37ea0569e0366c612b278de7afa0e25c40d6e1a3f1e3c62fe67712df211f989f0f4cb3f0a2745d24e9f830c88c3d6c3",
+                cycle_length: 20,
+                enroll_sig:
+                    "0x0c7110ea3fcc9fd683ad4b0edcd8956a8716830dee4c8755e773d10f611b32aa0e32d68f5c7961054356148e99c9abc978019fca71b1d4fc9685ecc6a9575fd1",
                 full_count: 6,
-                cycle_length: 20
+                height: "0",
+                utxo: "0xa3c2660bd4c65d6153bbe5bfac2cff06f68364c92e1f2619a4faede13943267df958efd9117c87125180241d678ff7278557fb8e83e486872a1eb8d83c41b4e1",
             },
         ];
         assert.deepStrictEqual(response.data, expected);
@@ -399,71 +399,71 @@ describe("Test of Stoa API Server", function () {
             .directory("block-enrollments")
             .addSearch(
                 "hash",
-                "0x29394d0ed1c94a3172278df9f0e61f581c3da85ef0f8ddf20c5f2f5d8efe2067753db1b2a8a1ea62d8762b2680ed1c4914e48bb6677d9212629de175eb6c6dbf"
+                "0x8365f069fe37ee02f2c4dc6ad816702088fab5fc875c3c67b01f82c285aa2d90b605f57e068139eba1f20ce20578d712f75be4d8568c8f3a7a34604e72aa3175"
             )
             .addSearch("page", "1")
             .addSearch("page_size", "10");
         const response = await client.get(uri.toString());
         const expected = [
             {
-                height: "0",
-                utxo: "0x70455f0b03f4b8d54b164b251e813b3fecd447d4bfe7b173ef86654429d2f5c3866d3ea406bf02163221a2d4029f0e0930a48304b2ea0f9277c2b32795c4005f",
-                enroll_sig:
-                    "0x0cab27862571d2d2e33d6480e1eab4c82195a508b72672d609610d01f23b0beedc8b89135fe3f5df9e2815b9bdb763c41b8b2dab5911e313acc82470c2147422",
                 commitment:
-                    "0x0a8201f9f5096e1ce8e8de4147694940a57a188b78293a55144fc8777a774f2349b3a910fb1fb208514fb16deaf49eb05882cdb6796a81f913c6daac3eb74328",
+                    "0x12f7fc1c953a13101e60c823ecd502fc9215a4dc7c1f3408db37ed70e62e45f9dda92c3b0592ad3fde04c4241bfe65e207704db9794e6fd92641f54a17747ab3",
+                cycle_length: 20,
+                enroll_sig:
+                    "0x6d7a10ce4912b89806800cd66c6b58e66ccb78625afa865119c6d598aa061d18098e45596199261710d32c8c1b6565a1b2341cae9f773b6dca53dc26b7d49cf2",
                 full_count: 6,
-                cycle_length: 20
+                height: "0",
+                utxo: "0x0666c4d505b55b6840fbb669ec08a1849e699d5a30ba246989b65ea71292f8ac9a3d7126ca9061313d3225d6e324146f37cdc5dab51facbbc3beead6854e89a4",
             },
             {
-                height: "0",
-                utxo: "0x6fbcdb2573e0f5120f21f1875b6dc281c2eca3646ec2c39d703623d89b0eb83cd4b12b73f18db6bc6e8cbcaeb100741f6384c498ff4e61dd189e728d80fb9673",
-                enroll_sig:
-                    "0x0ed498b867c33d316b468d817ba8238aec68541abd912cecc499f8e780a8cdaf2692d0b8b04133a34716169a4b1d33d77c3e585357d8a2a2c48a772275255c01",
                 commitment:
-                    "0xd0348a88f9b7456228e4df5689a57438766f4774d760776ec450605c82348c461db84587c2c9b01c67c8ed17f297ee4008424ad3e0e5039179719d7e9df297c1",
+                    "0x659467b85b216489e090d8b77e4de9fa67d4c0824ee27a798d302e3cac0f2e527abe04db5e84a87fadb101edb60342687fec3d094af2a4bfdd3f73b4176f00a0",
+                cycle_length: 20,
+                enroll_sig:
+                    "0xa669a117712a49b470c2bfe885015a185c60fc158b8086a74f585804bf8962de0f076c77115f49a043035fd293318d8c9462f943db4d9a9b7c9bc9cccfd1254f",
                 full_count: 6,
-                cycle_length: 20
+                height: "0",
+                utxo: "0x2b1fcfb62b868a53287fbdfbc17631f5a4e1cfdb91e58dfc0a8ebf083e92994dd327b0b574c81f0e29394d3abbf67f609ad67bce49c9d9b59672fa5a61a37495",
             },
             {
-                height: "0",
-                utxo: "0x00bac393977fbd1e0edc70a34c7ca802dafe57f2b4a2aabf1adaac54892cb1cbae72cdeeb212904101382690d18d2d2c6ac99b83227ca73b307fde0807c4af03",
-                enroll_sig:
-                    "0x09474f489579c930dbac46f638f3202ac24407f1fa419c1d95be38ab474da29d7e3d4753b6b4ccdb35c2864be4195e83b7b8433ca1d27a57fb9f48a631001304",
                 commitment:
-                    "0xaf43c67d9dd0f53de3eaede63cdcda8643422d62205df0b5af65706ec28b372adb785ce681d559d7a7137a4494ccbab4658ce11ec75a8ec84be5b73590bffceb",
+                    "0x3c4e8f32879e16a6d856f6360045ad263b7be2c22cfa55d6178dcf138955b92748a105cf9cc3f697b8b6dfc126ab81fb56a7349f57b9ddb443fbd880658b94f0",
+                cycle_length: 20,
+                enroll_sig:
+                    "0x221c3179366b4f12cb2ac1a323c312a2c56d96854b9b1aa0a50eb348766b50f5080735f10ccaba022a8e6d540b679a5453d622bd398915c143b5cbb4195da1d7",
                 full_count: 6,
-                cycle_length: 20
+                height: "0",
+                utxo: "0x6bceb7f5997df362bd0808826ef9577d7f8389bf9c75a471362aa5a24f1d64c9074850f29c6c078e2a7fa8555ec81fde75c2c8b6a8c0adc8d75057bbcb51116a",
             },
             {
-                height: "0",
-                utxo: "0xd935b5f1b616e6ec5c96502395e4b89683f526bdb8845f93a67bd329d44b1c2e5c185492e9610c0e3648609b3a9a5b21a35ee1a16f234c6415099803a97306ca",
-                enroll_sig:
-                    "0x0e4566eca30feb9ad47a65e7ff7e7ce1a7555ccedcf61e1143c2e5fddbec6866fd787c4518b78ab9ed73a3760741d557ac2aca631fc2796be86fcf391d3a6634",
                 commitment:
-                    "0xa24b7e6843220d3454523ceb7f9b43f037e56a01d2bee82958b080dc6350ebac2da12b561cbd96c6fb3f5ae5a3c8df0ac2c559ae1c45b11d42fdf866558112bc",
+                    "0x2ef9c7042d38c6a212907ff065e355d0ce78cf315ba63c37dff58fbe4f484ccddaf03753918730a79a64927b2c1e4996296506abfeb484d8fe338311494cc3b3",
+                cycle_length: 20,
+                enroll_sig:
+                    "0x8ff3e4f89919ce3f010223ffa03ea908c4963cddae7165fa9eaa53d071780d1a086bf1e2594e6745c597cbedd491fa3aa568e58faee89a31ec05bb8f5c1a1e28",
                 full_count: 6,
-                cycle_length: 20
+                height: "0",
+                utxo: "0x84daa1d361afd9238041431b838500103eeb16d7952486077830a31a77ecc31d40f3a9d3f3a1c92dc3a0e5723ba6de9d87f107a73c73aef6a45bf9862c663493",
             },
             {
-                height: "0",
-                utxo: "0x7fa36630b0d4a6be729fcab6db70c9b603f2da4c28feaa754f178b5cedb0174a9647fe8c08cdbfd244c6a5d23a7fdf89f1990e002c5565e1babbdb53193e95bc",
-                enroll_sig:
-                    "0x052ee1d975c49f19fd26b077740dcac399f174f40b5df1aba5f09ebea11faacfd79a36ace4d3097869dc009b8939fc83bdf940c8822c6931d5c09326aa746b31",
                 commitment:
-                    "0xa0502960ddbe816729f60aeaa480c7924fb020d864deec6a9db778b8e56dd2ff8e987be748ff6ca0a43597ecb575da5d532696e376dc70bb4567b5b1fa512cb4",
+                    "0xbdb489da86fb8aeda9d09478b1936d9dc57b243eae9d31381270e533d48985a2a235e880c4b225e8a2f23aace36a6c5590ef47d5c3143b5115bc5137b6a200c2",
+                cycle_length: 20,
+                enroll_sig:
+                    "0x7702482cdbed0ef9751cad41ca46b172edbd4c0db7fe8536ecb82e87aead31fa01fb58b031b139074ef97a17d7c746fe9261b194bad95a906648bee08234f199",
                 full_count: 6,
-                cycle_length: 20
+                height: "0",
+                utxo: "0x94b78736ae8ddf97f05a30e549f5eab377648a9116f3033ab7dcb8c9528ee717fd8d94dae7fe3ecc9d43290204ca2a41f710e798a3446b553c7a415d968e7177",
             },
             {
-                height: "0",
-                utxo: "0xe0ea82fd0ab9c57b068123927c002750181366f417c30a6ded05a23aca99c2c98b508bba9ba7c496eee36d78eeb7b71f330f81633372a712010036c4dc506b07",
-                enroll_sig:
-                    "0x0e0070e5951ef5be897cb593c4c57ce28b7529463f7e5644b1314ab7cc69fd625c71e74382a24b7e644d32b0306fe3cf14ecd7de5635c70aa592f4721aa74fe2",
                 commitment:
-                    "0xdd1b9c62d4c62246ea124e5422d5a2e23d3ca9accb0eba0e46cd46708a4e7b417f46df34dc2e3cba9a57b1dc35a66dfc2d5ef239ebeaaa00299232bc7e3b7bfa",
+                    "0x5666c8993722e5ba725a60174fa2ec28c37ea0569e0366c612b278de7afa0e25c40d6e1a3f1e3c62fe67712df211f989f0f4cb3f0a2745d24e9f830c88c3d6c3",
+                cycle_length: 20,
+                enroll_sig:
+                    "0x0c7110ea3fcc9fd683ad4b0edcd8956a8716830dee4c8755e773d10f611b32aa0e32d68f5c7961054356148e99c9abc978019fca71b1d4fc9685ecc6a9575fd1",
                 full_count: 6,
-                cycle_length: 20
+                height: "0",
+                utxo: "0xa3c2660bd4c65d6153bbe5bfac2cff06f68364c92e1f2619a4faede13943267df958efd9117c87125180241d678ff7278557fb8e83e486872a1eb8d83c41b4e1",
             },
         ];
         assert.deepStrictEqual(response.data, expected);
@@ -477,102 +477,146 @@ describe("Test of Stoa API Server", function () {
         const response = await client.get(uri.toString());
         const expected = [
             {
-                height: "0",
-                tx_hash:
-                    "0x224c72ad879eccd38e9b612047633d235e47e329e68a69517822c4c234c53c2d7d81b0245cdb61857002d58a5e033c8720b462e20517f45a5516df432866b32f",
                 amount: "120000000000000",
                 fee: 0,
+                full_count: 3,
+                height: "0",
+                receiver: [
+                    {
+                        address: "boa1xrval5rzmma29zh4aqgv3mvcarhwa0w8rgthy3l9vaj3fywf9894ycmjkm8",
+                        amount: 20000000000000,
+                        type: 1,
+                    },
+                    {
+                        address: "boa1xrval6hd8szdektyz69fnqjwqfejhu4rvrpwlahh9rhaazzpvs5g6lh34l5",
+                        amount: 20000000000000,
+                        type: 1,
+                    },
+                    {
+                        address: "boa1xrval7gwhjz4k9raqukcnv2n4rl4fxt74m2y9eay6l5mqdf4gntnzhhscrh",
+                        amount: 20000000000000,
+                        type: 1,
+                    },
+                    {
+                        address: "boa1xzval2a3cdxv28n6slr62wlczslk3juvk7cu05qt3z55ty2rlfqfc6egsh2",
+                        amount: 20000000000000,
+                        type: 1,
+                    },
+                    {
+                        address: "boa1xzval3ah8z7ewhuzx6mywveyr79f24w49rdypwgurhjkr8z2ke2mycftv9n",
+                        amount: 20000000000000,
+                        type: 1,
+                    },
+                    {
+                        address: "boa1xzval4nvru2ej9m0rptq7hatukkavemryvct4f8smyy3ky9ct5u0s8w6gfy",
+                        amount: 20000000000000,
+                        type: 1,
+                    },
+                ],
+                sender_address: null,
                 size: 278,
                 time: 1609459200,
-                type: 'Freeze',
-                sender_address: null,
-                receiver: [
-                    {
-                        type: 1,
-                        amount: 20000000000000,
-                        address: "boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn",
-                    },
-                    {
-                        type: 1,
-                        amount: 20000000000000,
-                        address: "boa1xzvald5dvy54j7yt2h5yzs2432h07rcn66j84t3lfdrlrwydwq78cz0nckq",
-                    },
-                    {
-                        type: 1,
-                        amount: 20000000000000,
-                        address: "boa1xzvald7hxvgnzk50sy04ha7ezgyytxt5sgw323zy8dlj3ya2q40e6elltwq",
-                    },
-                    {
-                        type: 1,
-                        amount: 20000000000000,
-                        address: "boa1xrvald3zmehvpcmxqm0kn6wkaqyry7yj3cd8h975ypzlyz00sczpzhsk308",
-                    },
-                    {
-                        type: 1,
-                        amount: 20000000000000,
-                        address: "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku",
-                    },
-                    {
-                        type: 1,
-                        amount: 20000000000000,
-                        address: "boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t",
-                    },
-                ],
-                full_count: 2,
+                tx_hash:
+                    "0xaf63ca7d0b555bbbe65d398165c3d921421114003ee6d42fe11a1b4eaafa6d6e9a57ffc6d35b820d001beeebdcdec9a9d6b7d34fe0062a6d9eb719d8d47237f2",
+                type: "Freeze",
             },
             {
-                height: "0",
-                tx_hash:
-                    "0x26866bb263593d024a92103646c48cf35a2b1bfcc49b087915b85db14a432b373569d56f576242354328a31bf0102a0a78cb806cf6e25d88d7981367833631b7",
-                amount: "4880000000000000",
+                amount: "120000000000000",
                 fee: 0,
-                size: 368,
-                time: 1609459200,
-                sender_address: null,
-                type: "Payment",
+                full_count: 3,
+                height: "0",
                 receiver: [
                     {
-                        type: 0,
-                        amount: 610000000000000,
-                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        address: "boa1xpval9gv8wjk5s05w0vplpgd5wrmzlvhj4e6zym302f2t6xeklzw2meepv9",
+                        amount: 20000000000000,
+                        type: 1,
                     },
                     {
-                        type: 0,
-                        amount: 610000000000000,
-                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        address: "boa1xqvala342upf2t2c0fe96h8cdtjatrksjldyhsrachcq3523ah8dy5r8ejz",
+                        amount: 20000000000000,
+                        type: 1,
                     },
                     {
-                        type: 0,
-                        amount: 610000000000000,
-                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        address: "boa1xqvalc7v34kr9crh4e882zmguvt3dgmtdhxtqx0wsljej5f9xdxl6xftcay",
+                        amount: 20000000000000,
+                        type: 1,
                     },
                     {
-                        type: 0,
-                        amount: 610000000000000,
-                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        address: "boa1xrvaldd5au5d5xs6pd6js7zah6m4h5d0r5tpwjasp99gvz3gmj2ex432u5x",
+                        amount: 20000000000000,
+                        type: 1,
                     },
                     {
-                        type: 0,
-                        amount: 610000000000000,
-                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        address: "boa1xzval8mq887lkjsqwyl58xyrkxxz8mphv5dx9qv2z750fxvcs9gtvpal0dm",
+                        amount: 20000000000000,
+                        type: 1,
                     },
                     {
-                        type: 0,
-                        amount: 610000000000000,
-                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
-                    },
-                    {
-                        type: 0,
-                        amount: 610000000000000,
-                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
-                    },
-                    {
-                        type: 0,
-                        amount: 610000000000000,
-                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        address: "boa1xzvale54hw9zk69t7hpgu422ht2nkv3gkx7k8nhph5vg2tkpwpnzuarah4d",
+                        amount: 20000000000000,
+                        type: 1,
                     },
                 ],
-                full_count: 2,
+                sender_address: null,
+                size: 278,
+                time: 1609459200,
+                tx_hash:
+                    "0xbf5685b8bc230a0463d1b5c64a8dd3cab09de95cd6e71649a43af680569770b279646a8a5453bd157a6d2066850c27e941c662eb22c8ebae922989487bc53e58",
+                type: "Freeze",
+            },
+            {
+                amount: "4760000000000000",
+                fee: 0,
+                full_count: 3,
+                height: "0",
+                receiver: [
+                    {
+                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        amount: 595000000000000,
+                        type: 0,
+                    },
+                    {
+                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        amount: 595000000000000,
+                        type: 0,
+                    },
+                    {
+                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        amount: 595000000000000,
+                        type: 0,
+                    },
+                    {
+                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        amount: 595000000000000,
+                        type: 0,
+                    },
+                    {
+                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        amount: 595000000000000,
+                        type: 0,
+                    },
+                    {
+                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        amount: 595000000000000,
+                        type: 0,
+                    },
+                    {
+                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        amount: 595000000000000,
+                        type: 0,
+                    },
+                    {
+                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        amount: 595000000000000,
+                        type: 0,
+                    },
+                ],
+                sender_address: null,
+                size: 368,
+                time: 1609459200,
+                tx_hash:
+                    "0xf1b227276819be01f574bad7bcb26afddafbc14a3cb6052c5006e4b35c483e20864ba8388adcf8f9870cc2a028ec41dc563a91b8c09d13f95277e0b5bdad1ac3",
+                type: "Payment",
             },
         ];
         assert.deepStrictEqual(response.data, expected);
@@ -583,109 +627,153 @@ describe("Test of Stoa API Server", function () {
             .directory("block-transactions")
             .addSearch(
                 "hash",
-                "0x29394d0ed1c94a3172278df9f0e61f581c3da85ef0f8ddf20c5f2f5d8efe2067753db1b2a8a1ea62d8762b2680ed1c4914e48bb6677d9212629de175eb6c6dbf"
+                "0x8365f069fe37ee02f2c4dc6ad816702088fab5fc875c3c67b01f82c285aa2d90b605f57e068139eba1f20ce20578d712f75be4d8568c8f3a7a34604e72aa3175"
             )
             .addSearch("page", "1")
             .addSearch("page_size", "10");
         const response = await client.get(uri.toString());
         const expected = [
             {
-                height: "0",
-                tx_hash:
-                    "0x224c72ad879eccd38e9b612047633d235e47e329e68a69517822c4c234c53c2d7d81b0245cdb61857002d58a5e033c8720b462e20517f45a5516df432866b32f",
                 amount: "120000000000000",
                 fee: 0,
+                full_count: 3,
+                height: "0",
+                receiver: [
+                    {
+                        address: "boa1xrval5rzmma29zh4aqgv3mvcarhwa0w8rgthy3l9vaj3fywf9894ycmjkm8",
+                        amount: 20000000000000,
+                        type: 1,
+                    },
+                    {
+                        address: "boa1xrval6hd8szdektyz69fnqjwqfejhu4rvrpwlahh9rhaazzpvs5g6lh34l5",
+                        amount: 20000000000000,
+                        type: 1,
+                    },
+                    {
+                        address: "boa1xrval7gwhjz4k9raqukcnv2n4rl4fxt74m2y9eay6l5mqdf4gntnzhhscrh",
+                        amount: 20000000000000,
+                        type: 1,
+                    },
+                    {
+                        address: "boa1xzval2a3cdxv28n6slr62wlczslk3juvk7cu05qt3z55ty2rlfqfc6egsh2",
+                        amount: 20000000000000,
+                        type: 1,
+                    },
+                    {
+                        address: "boa1xzval3ah8z7ewhuzx6mywveyr79f24w49rdypwgurhjkr8z2ke2mycftv9n",
+                        amount: 20000000000000,
+                        type: 1,
+                    },
+                    {
+                        address: "boa1xzval4nvru2ej9m0rptq7hatukkavemryvct4f8smyy3ky9ct5u0s8w6gfy",
+                        amount: 20000000000000,
+                        type: 1,
+                    },
+                ],
+                sender_address: null,
                 size: 278,
                 time: 1609459200,
-                sender_address: null,
+                tx_hash:
+                    "0xaf63ca7d0b555bbbe65d398165c3d921421114003ee6d42fe11a1b4eaafa6d6e9a57ffc6d35b820d001beeebdcdec9a9d6b7d34fe0062a6d9eb719d8d47237f2",
                 type: "Freeze",
-                receiver: [
-                    {
-                        type: 1,
-                        amount: 20000000000000,
-                        address: "boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn",
-                    },
-                    {
-                        type: 1,
-                        amount: 20000000000000,
-                        address: "boa1xzvald5dvy54j7yt2h5yzs2432h07rcn66j84t3lfdrlrwydwq78cz0nckq",
-                    },
-                    {
-                        type: 1,
-                        amount: 20000000000000,
-                        address: "boa1xzvald7hxvgnzk50sy04ha7ezgyytxt5sgw323zy8dlj3ya2q40e6elltwq",
-                    },
-                    {
-                        type: 1,
-                        amount: 20000000000000,
-                        address: "boa1xrvald3zmehvpcmxqm0kn6wkaqyry7yj3cd8h975ypzlyz00sczpzhsk308",
-                    },
-                    {
-                        type: 1,
-                        amount: 20000000000000,
-                        address: "boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku",
-                    },
-                    {
-                        type: 1,
-                        amount: 20000000000000,
-                        address: "boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t",
-                    },
-                ],
-                full_count: 2,
             },
             {
-                height: "0",
-                tx_hash:
-                    "0x26866bb263593d024a92103646c48cf35a2b1bfcc49b087915b85db14a432b373569d56f576242354328a31bf0102a0a78cb806cf6e25d88d7981367833631b7",
-                amount: "4880000000000000",
+                amount: "120000000000000",
                 fee: 0,
-                size: 368,
-                time: 1609459200,
-                type: "Payment",
-                sender_address: null,
+                full_count: 3,
+                height: "0",
                 receiver: [
                     {
-                        type: 0,
-                        amount: 610000000000000,
-                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        address: "boa1xpval9gv8wjk5s05w0vplpgd5wrmzlvhj4e6zym302f2t6xeklzw2meepv9",
+                        amount: 20000000000000,
+                        type: 1,
                     },
                     {
-                        type: 0,
-                        amount: 610000000000000,
-                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        address: "boa1xqvala342upf2t2c0fe96h8cdtjatrksjldyhsrachcq3523ah8dy5r8ejz",
+                        amount: 20000000000000,
+                        type: 1,
                     },
                     {
-                        type: 0,
-                        amount: 610000000000000,
-                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        address: "boa1xqvalc7v34kr9crh4e882zmguvt3dgmtdhxtqx0wsljej5f9xdxl6xftcay",
+                        amount: 20000000000000,
+                        type: 1,
                     },
                     {
-                        type: 0,
-                        amount: 610000000000000,
-                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        address: "boa1xrvaldd5au5d5xs6pd6js7zah6m4h5d0r5tpwjasp99gvz3gmj2ex432u5x",
+                        amount: 20000000000000,
+                        type: 1,
                     },
                     {
-                        type: 0,
-                        amount: 610000000000000,
-                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        address: "boa1xzval8mq887lkjsqwyl58xyrkxxz8mphv5dx9qv2z750fxvcs9gtvpal0dm",
+                        amount: 20000000000000,
+                        type: 1,
                     },
                     {
-                        type: 0,
-                        amount: 610000000000000,
-                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
-                    },
-                    {
-                        type: 0,
-                        amount: 610000000000000,
-                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
-                    },
-                    {
-                        type: 0,
-                        amount: 610000000000000,
-                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        address: "boa1xzvale54hw9zk69t7hpgu422ht2nkv3gkx7k8nhph5vg2tkpwpnzuarah4d",
+                        amount: 20000000000000,
+                        type: 1,
                     },
                 ],
-                full_count: 2,
+                sender_address: null,
+                size: 278,
+                time: 1609459200,
+                tx_hash:
+                    "0xbf5685b8bc230a0463d1b5c64a8dd3cab09de95cd6e71649a43af680569770b279646a8a5453bd157a6d2066850c27e941c662eb22c8ebae922989487bc53e58",
+                type: "Freeze",
+            },
+            {
+                amount: "4760000000000000",
+                fee: 0,
+                full_count: 3,
+                height: "0",
+                receiver: [
+                    {
+                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        amount: 595000000000000,
+                        type: 0,
+                    },
+                    {
+                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        amount: 595000000000000,
+                        type: 0,
+                    },
+                    {
+                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        amount: 595000000000000,
+                        type: 0,
+                    },
+                    {
+                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        amount: 595000000000000,
+                        type: 0,
+                    },
+                    {
+                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        amount: 595000000000000,
+                        type: 0,
+                    },
+                    {
+                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        amount: 595000000000000,
+                        type: 0,
+                    },
+                    {
+                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        amount: 595000000000000,
+                        type: 0,
+                    },
+                    {
+                        address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                        amount: 595000000000000,
+                        type: 0,
+                    },
+                ],
+                sender_address: null,
+                size: 368,
+                time: 1609459200,
+                tx_hash:
+                    "0xf1b227276819be01f574bad7bcb26afddafbc14a3cb6052c5006e4b35c483e20864ba8388adcf8f9870cc2a028ec41dc563a91b8c09d13f95277e0b5bdad1ac3",
+                type: "Payment",
             },
         ];
         assert.deepStrictEqual(response.data, expected);
@@ -698,8 +786,7 @@ describe("Test of Stoa API Server", function () {
     });
 
     it("Test for /coinmarketcap", async () => {
-        const uri = URI(stoa_addr).directory("/coinmarketcap")
-            .addSearch('currency', 'usd');
+        const uri = URI(stoa_addr).directory("/coinmarketcap").addSearch("currency", "usd");
         const response = await client.get(uri.toString());
         const expected = {
             last_updated_at: 1622599176,
@@ -707,7 +794,7 @@ describe("Test of Stoa API Server", function () {
             market_cap: 72635724,
             vol_24h: 1835353,
             change_24h: -7,
-            currency: 'usd'
+            currency: "usd",
         };
         assert.deepStrictEqual(response.data, expected);
     });
@@ -716,157 +803,158 @@ describe("Test of Stoa API Server", function () {
         const uri = URI(stoa_addr).directory("boa-stats");
         const response = await client.get(uri.toString());
         const expected = {
-            height: 1,
-            transactions: "10",
-            validators: 5,
-            frozen_coin: '120000000000000',
-            total_reward: '0',
-            circulating_supply: 4999999998096000,
             active_validators: 5,
-            price: 119625999.954446,
-            time_stamp: 1609459800
+            circulating_supply: 4999999997743200,
+            frozen_coin: "240000000000000",
+            height: 1,
+            price: 119625999.946006,
+            time_stamp: 1609459800,
+            total_reward: "0",
+            transactions: "11",
+            validators: 5,
         };
         assert.deepStrictEqual(response.data, expected);
     });
 
     it("Test for /holders", async () => {
-        const uri = URI(stoa_addr).directory("/holders")
-            .addSearch('currency', 'usd')
-            .addSearch('page', '1')
-            .addSearch('pageSize', '10');
+        const uri = URI(stoa_addr)
+            .directory("/holders")
+            .addSearch("currency", "usd")
+            .addSearch("page", "1")
+            .addSearch("pageSize", "10");
         const response = await client.get(uri.toString());
         const expected = [
             {
-                address: "boa1xpfp00tr86d9zdgv3uy08qs0ld5s3wmx869yte68h3y4erteyn3wkq692jq",
-                tx_count: 2,
-                total_received: 48799999980960,
-                total_sent: 0,
-                total_reward: 0,
+                address: "boa1xplw00mldxs85l4vuxgse9szjwhtvv99vtp44e7slzwqa8mt6350vysxady",
+                full_count: 22,
+                percentage: "19.0400",
+                total_balance: 951999999548640,
                 total_frozen: 0,
-                total_spendable: 48799999980960,
-                total_balance: 48799999980960,
-                percentage: "0.9760",
-                value: 1167549.759544,
-                full_count: 199
+                total_received: 951999999548640,
+                total_reward: 0,
+                total_sent: 0,
+                total_spendable: 951999999548640,
+                tx_count: 8,
+                value: 22776790.389201,
             },
             {
-                address: "boa1xpfq00t5f0uv8v0wzclvt72fl3x2vz4z48harsx5zdks6m5pecxey9vh4e8",
-                tx_count: 2,
-                total_received: 48799999980960,
-                total_sent: 0,
-                total_reward: 0,
+                address: "boa1xpaqh00j6amm5unu56tdg9l2vezq5znhdmkgzlwyydyhw7lvf2vlkq4kwpq",
+                full_count: 22,
+                percentage: "16.6600",
+                total_balance: 832999999605060,
                 total_frozen: 0,
-                total_spendable: 48799999980960,
-                total_balance: 48799999980960,
-                percentage: "0.9760",
-                value: 1167549.759544,
-                full_count: 199
+                total_received: 832999999605060,
+                total_reward: 0,
+                total_sent: 0,
+                total_spendable: 832999999605060,
+                tx_count: 7,
+                value: 19929691.590551,
             },
             {
-                address: "boa1xpfr005hadezanqmze3f99st3v4n8q3zu0lrzsc3t4mvcj7fnrn7sseah6p",
-                tx_count: 2,
-                total_received: 48799999980960,
-                total_sent: 0,
-                total_reward: 0,
+                address: "boa1xzca00zkzjge2h7sc30d5durkkxeuf2fv9d0q4tyddpn5r8f93dwjdyatgp",
+                full_count: 22,
+                percentage: "11.9000",
+                total_balance: 594999999717900,
                 total_frozen: 0,
-                total_spendable: 48799999980960,
-                total_balance: 48799999980960,
-                percentage: "0.9760",
-                value: 1167549.759544,
-                full_count: 199
+                total_received: 594999999717900,
+                total_reward: 0,
+                total_sent: 0,
+                total_spendable: 594999999717900,
+                tx_count: 5,
+                value: 14235493.993251,
             },
             {
-                address: "boa1xqfn00yp3myu4jt2se80flcksf9j2nta3t6yvhfh7gugzllkmzwfskczvk5",
-                tx_count: 2,
-                total_received: 48799999980960,
-                total_sent: 0,
-                total_reward: 0,
+                address: "boa1xzvr00tkrefwf9k3eem3uu3k9f36l5xap4sjjpfcd64ragwq5f3eqqts3ft",
+                full_count: 22,
+                percentage: "11.9000",
+                total_balance: 594999999717900,
                 total_frozen: 0,
-                total_spendable: 48799999980960,
-                total_balance: 48799999980960,
-                percentage: "0.9760",
-                value: 1167549.759544,
-                full_count: 199
+                total_received: 594999999717900,
+                total_reward: 0,
+                total_sent: 0,
+                total_spendable: 594999999717900,
+                tx_count: 5,
+                value: 14235493.993251,
             },
             {
-                address: "boa1xqfs008pm8f73te5dsys46ewdk3ha5wzlfcz2d6atn2z4nayunp66aelwmr",
-                tx_count: 2,
-                total_received: 48799999980960,
-                total_sent: 0,
-                total_reward: 0,
+                address: "boa1xppz00cv25tjfkx93j998g90ggjmpyky64dtxuaqh5qxcxud5f9yww64cxq",
+                full_count: 22,
+                percentage: "9.5200",
+                total_balance: 475999999774320,
                 total_frozen: 0,
-                total_spendable: 48799999980960,
-                total_balance: 48799999980960,
-                percentage: "0.9760",
-                value: 1167549.759544,
-                full_count: 199
+                total_received: 475999999774320,
+                total_reward: 0,
+                total_sent: 0,
+                total_spendable: 475999999774320,
+                tx_count: 4,
+                value: 11388395.194601,
             },
             {
-                address: "boa1xrft007petq803lnkk4820l8ya6xpshrl3tg9az8yghejm9t7mwgc8wtgrs",
-                tx_count: 2,
-                total_received: 48799999980960,
-                total_sent: 0,
-                total_reward: 0,
+                address: "boa1xrnm00uh8v7vv9vk2l8vlhz3feaz80c9s8mk9jmkwe5tx7ccwy4v7lmhny5",
+                full_count: 22,
+                percentage: "9.5200",
+                total_balance: 475999999774320,
                 total_frozen: 0,
-                total_spendable: 48799999980960,
-                total_balance: 48799999980960,
-                percentage: "0.9760",
-                value: 1167549.759544,
-                full_count: 199
+                total_received: 475999999774320,
+                total_reward: 0,
+                total_sent: 0,
+                total_spendable: 475999999774320,
+                tx_count: 4,
+                value: 11388395.194601,
             },
             {
-                address: "boa1xzfu00gaqcea0j0n4jdmveve4hhwsa264tthyaqrtyx9pu0rrc3rsma3zdy",
-                tx_count: 2,
-                total_received: 48799999980960,
-                total_sent: 0,
-                total_reward: 0,
+                address: "boa1xpafy0035qy2xludu2s203rnvj7z62uyq2a0v4kz593lwlx3tx0z5nf8hap",
+                full_count: 22,
+                percentage: "7.1400",
+                total_balance: 356999999830740,
                 total_frozen: 0,
-                total_spendable: 48799999980960,
-                total_balance: 48799999980960,
-                percentage: "0.9760",
-                value: 1167549.759544,
-                full_count: 199
+                total_received: 356999999830740,
+                total_reward: 0,
+                total_sent: 0,
+                total_spendable: 356999999830740,
+                tx_count: 3,
+                value: 8541296.39595,
             },
             {
-                address: "boa1xzfv00s88ky9mf50nqngvztmnmtjzv4yr0w555aet366ssrv5zqaj6zsga3",
-                tx_count: 2,
-                total_received: 48799999980960,
-                total_sent: 0,
-                total_reward: 0,
+                address: "boa1xzcp004fmz534clzk23u3vqa03z7n432wf67rpsrxs6x5gzxm97ykl52436",
+                full_count: 22,
+                percentage: "7.1400",
+                total_balance: 356999999830740,
                 total_frozen: 0,
-                total_spendable: 48799999980960,
-                total_balance: 48799999980960,
-                percentage: "0.9760",
-                value: 1167549.759544,
-                full_count: 199
+                total_received: 356999999830740,
+                total_reward: 0,
+                total_sent: 0,
+                total_spendable: 356999999830740,
+                tx_count: 3,
+                value: 8541296.39595,
             },
             {
-                address: "boa1xparc00qvv984ck00trwmfxuvqmmlwsxwzf3al0tsq5k2rw6aw427ct37mj",
+                address: "boa1xrajh00as4l8u8jrvjtfqleae59nrzt8vnjpxf8ys6uzzmyarygfc7j2xx5",
+                full_count: 22,
+                percentage: "2.3800",
+                total_balance: 118999999943580,
+                total_frozen: 0,
+                total_received: 118999999943580,
+                total_reward: 0,
+                total_sent: 0,
+                total_spendable: 118999999943580,
                 tx_count: 1,
-                total_received: 24399999990480,
-                total_sent: 0,
-                total_reward: 0,
-                total_frozen: 0,
-                total_spendable: 24399999990480,
-                total_balance: 24399999990480,
-                percentage: "0.4880",
-                value: 583774.879772,
-                full_count: 199
+                value: 2847098.79865,
             },
             {
-                address: "boa1xparl00ghmujzcsrt8jacj06sdq002s3s4uljceqn98awvy4vsya5qmvqvu",
-                tx_count: 1,
-                total_received: 24399999990480,
-                total_sent: 0,
+                address: "boa1xpval9gv8wjk5s05w0vplpgd5wrmzlvhj4e6zym302f2t6xeklzw2meepv9",
+                full_count: 22,
+                percentage: "0.4000",
+                total_balance: 20000000000000,
+                total_frozen: 20000000000000,
+                total_received: 20000000000000,
                 total_reward: 0,
-                total_frozen: 0,
-                total_spendable: 24399999990480,
-                total_balance: 24399999990480,
-                percentage: "0.4880",
-                value: 583774.879772,
-                full_count: 199
-            }
-        ]
+                total_sent: 0,
+                total_spendable: 0,
+                tx_count: 1,
+                value: 478504,
+            },
+        ];
         assert.deepStrictEqual(response.data, expected);
     });
 
@@ -879,34 +967,34 @@ describe("Test of Stoa API Server", function () {
         const response = await client.get(uri.toString());
         const expected = [
             {
-                address: 'boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67',
-                granularity: 'H',
+                address: "boa1xzgenes5cf8xel37fz79gzs49v56znllk7jw7qscjwl5p6a9zxk8zaygm67",
+                granularity: "H",
                 granularity_time_stamp: 1609459200,
                 time_stamp: 1609459800,
                 balance: 0,
-                block_height: 1
-            }
-        ]
+                block_height: 1,
+            },
+        ];
         assert.deepStrictEqual(response.data, expected);
     });
 
     it("Test for /holder/:address", async () => {
         const uri = URI(stoa_addr)
             .directory("/holder")
-            .filename("boa1xpfp00tr86d9zdgv3uy08qs0ld5s3wmx869yte68h3y4erteyn3wkq692jq")
-            .addSearch('currency', 'usd');
+            .filename("boa1xpaqh00j6amm5unu56tdg9l2vezq5znhdmkgzlwyydyhw7lvf2vlkq4kwpq")
+            .addSearch("currency", "usd");
         const response = await client.get(uri.toString());
         const expected = {
-            address: "boa1xpfp00tr86d9zdgv3uy08qs0ld5s3wmx869yte68h3y4erteyn3wkq692jq",
-            tx_count: 2,
-            total_received: 48799999980960,
-            total_sent: 0,
-            total_reward: 0,
-            total_spendable: 0,
+            address: "boa1xpaqh00j6amm5unu56tdg9l2vezq5znhdmkgzlwyydyhw7lvf2vlkq4kwpq",
+            percentage: "16.6600",
+            total_balance: 832999999605060,
             total_frozen: 0,
-            total_balance: 48799999980960,
-            percentage: "0.9760",
-            value: 1167549.759544,
+            total_received: 832999999605060,
+            total_reward: 0,
+            total_sent: 0,
+            total_spendable: 0,
+            tx_count: 7,
+            value: 19929691.590551,
         };
         assert.deepStrictEqual(response.data, expected);
     });
@@ -918,15 +1006,15 @@ describe("Test of Stoa API Server", function () {
         const response = await client.get(uri.toString());
         const expected = [
             {
-                height: 1,
-                granularity: 'D',
+                average_tx_fee: 770,
+                granularity: "D",
                 granularity_time_stamp: 1609459200,
+                height: 1,
                 time_stamp: 1609459800,
-                average_tx_fee: 188,
-                total_tx_fee: 1904000,
+                total_fee: 2256800,
                 total_payload_fee: 0,
-                total_fee: 1904000
-            }
+                total_tx_fee: 2256800,
+            },
         ];
         assert.deepStrictEqual(response.data, expected);
     });
@@ -934,7 +1022,7 @@ describe("Test of Stoa API Server", function () {
         const uri = URI(stoa_addr)
             .directory("/search/hash/")
             .filename(
-                "0x29394d0ed1c94a3172278df9f0e61f581c3da85ef0f8ddf20c5f2f5d8efe2067753db1b2a8a1ea62d8762b2680ed1c4914e48bb6677d9212629de175eb6c6dbf"
+                "0x5216c0ef8763a4c4b36404d837a1db4778996f7955f0fe459cabc66a36692947d0a93f6191ad33024ff0dc304ae1360f08203bf17c611ba438a1c1735d67af52"
             );
         const response = await client.get(uri.toString());
         const expected = { block: 1, transaction: 0 };
@@ -944,7 +1032,7 @@ describe("Test of Stoa API Server", function () {
         const uri = URI(stoa_addr)
             .directory("/search/hash/")
             .filename(
-                "0x224c72ad879eccd38e9b612047633d235e47e329e68a69517822c4c234c53c2d7d81b0245cdb61857002d58a5e033c8720b462e20517f45a5516df432866b32f"
+                "0xaf63ca7d0b555bbbe65d398165c3d921421114003ee6d42fe11a1b4eaafa6d6e9a57ffc6d35b820d001beeebdcdec9a9d6b7d34fe0062a6d9eb719d8d47237f2"
             );
         const response = await client.get(uri.toString());
         const expected = { block: 0, transaction: 1 };
@@ -960,7 +1048,7 @@ describe("Test of Stoa API Server", function () {
         await client.post(url, { block: sample_data4 });
         await delay(500);
         await client.post(url, { block: sample_data5 });
-        await delay(500);
+        await delay(1000);
 
         //  Verifies that all sent blocks are wrote
         const uri = URI(stoa_addr).directory("/block_height");
@@ -969,33 +1057,34 @@ describe("Test of Stoa API Server", function () {
         assert.strictEqual(response.status, 200);
         assert.strictEqual(response.data, "5");
     });
-    it("Test for path /validator/reward/:address", async () => {
-        const uri = URI(stoa_addr)
-            .directory("/validator/reward")
-            .filename("boa1xzval3ah8z7ewhuzx6mywveyr79f24w49rdypwgurhjkr8z2ke2mycftv9n");
-        const response = await client.get(uri.toString());
-        let expected = [
-            {
-                block_height: 5,
-                steaking_amount: 0,
-                block_reward: 8717784200000,
-                block_fee: 0,
-                validator_reward: 12962823333,
-                full_count: 1
-            }
-        ]
 
-        assert.deepStrictEqual(response.data, expected);
-    });
+    // it("Test for path /validator/reward/:address", async () => {
+    //     const uri = URI(stoa_addr)
+    //         .directory("/validator/reward")
+    //         .filename("boa1xrval5rzmma29zh4aqgv3mvcarhwa0w8rgthy3l9vaj3fywf9894ycmjkm8");
+    //     const response = await client.get(uri.toString());
+    //     let expected = [
+    //         {
+    //             block_height: 5,
+    //             steaking_amount: 0,
+    //             block_reward: 8717784200000,
+    //             block_fee: 0,
+    //             validator_reward: 12962823333,
+    //             full_count: 1,
+    //         },
+    //     ];
+    //
+    //     assert.deepStrictEqual(response.data, expected);
+    // });
 
     it("Test for /convert-to-currency", async () => {
         const uri = URI(stoa_addr)
             .directory("/convert-to-currency")
-            .addSearch('amount', '1.23')
-            .addSearch('currency', 'usd');
+            .addSearch("amount", "1.23")
+            .addSearch("currency", "usd");
 
         const response = await client.get(uri.toString());
-        let expected = { amount: 1.23, currency: 0.29428 }
+        let expected = { amount: 1.23, currency: 0.29428 };
         assert.deepStrictEqual(response.data, expected);
     });
 
@@ -1019,15 +1108,15 @@ describe("Test of Stoa API Server", function () {
         const uri = URI(stoa_addr).directory("boa-stats");
         const response = await client.get(uri.toString());
         const expected = {
-            height: 5,
-            transactions: "17",
-            validators: 5,
-            frozen_coin: "100000000000000",
-            total_reward: "8717784200000",
-            time_stamp: 1609462200,
-            circulating_supply: 5687512791028160,
-            price: 136074881.027907,
-            active_validators: 5
+            "active_validators": 5,
+            "circulating_supply": 4999999967521368,
+            "frozen_coin": "240000000000000",
+            "height": 5,
+            "price": 119625999.222942,
+            "time_stamp": 1609462200,
+            "total_reward": "0",
+            "transactions": "57",
+            "validators": 5,
         };
         assert.deepStrictEqual(response.data, expected);
     });
@@ -1036,89 +1125,86 @@ describe("Test of Stoa API Server", function () {
         const uri = URI(stoa_addr)
             .directory("/txhash")
             .filename(
-                "0x00bac393977fbd1e0edc70a34c7ca802dafe57f2b4a2aabf1adaac54892cb1cbae72cdeeb212904101382690d18d2d2c6ac99b83227ca73b307fde0807c4af03"
+                "0xe878a3ddddbf7f3b6bb0fb1852cb333c1166d829a8cb71a818d3045fdae4641b45d12c27a3a530beab9a26211e22bf30244561876cc79fb891afcd55d7d614c3"
             );
 
         const response = await client.get(uri.toString());
         const expected =
-            "0x224c72ad879eccd38e9b612047633d235e47e329e68a69517822c4c234c53c2d7d81b0245cdb61857002d58a5e033c8720b462e20517f45a5516df432866b32f";
+            "0xfdfae0ac3110785170ebadce205eda050bfed9c5a38e52dc79ba26ffc85e3d808b758c30e49a2d2b9ec95cc33d71408a0e0a68aea3d7272f4ff19eb63d4a42ac";
         assert.strictEqual(response.data, expected);
     });
 
     it("Test of the path /validator/missed-blocks/:address", async () => {
         const uri = URI(stoa_addr)
             .directory("/validator/missed-blocks")
-            .filename("boa1xrvald4v2gy790stemq4gg37v4us7ztsxq032z9jmlxfh6xh9xfak4qglku");
+            .filename("boa1xzval2a3cdxv28n6slr62wlczslk3juvk7cu05qt3z55ty2rlfqfc6egsh2");
 
         const response = await client.get(uri.toString());
-        const expected = [{ block_height: 1, signed: 0 }]
+        const expected = [{ block_height: 1, signed: 0 }];
         assert.deepStrictEqual(response.data, expected);
     });
 
     it("Test of the path /block/validators", async () => {
-        const uri = URI(stoa_addr)
-            .directory("/block/validators")
-            .addSearch('height', '2');
+        const uri = URI(stoa_addr).directory("/block/validators").addSearch("height", "2");
 
         const response = await client.get(uri.toString());
-        const expected =
-            [
-                {
-                    address: 'boa1xrvald6jsqfuctlr4nr4h9c224vuah8vgv7f9rzjauwev7j8tj04qee8f0t',
-                    utxo_key: '0x00bac393977fbd1e0edc70a34c7ca802dafe57f2b4a2aabf1adaac54892cb1cbae72cdeeb212904101382690d18d2d2c6ac99b83227ca73b307fde0807c4af03',
-                    pre_image: {
-                        height: '2',
-                        hash: '0x91b3ff3734b94e9636a28ce5fe1b197c5c26bf38f60388ee2d0855727ab1369368d454b9549c970bd1211524605ce9c2478c9d31eb72e102c83ddff7ec11be62'
-                    },
-                    slashed: 0,
-                    block_signed: 1,
-                    full_count: 5
+        const expected = [
+            {
+                "address": "boa1xrval5rzmma29zh4aqgv3mvcarhwa0w8rgthy3l9vaj3fywf9894ycmjkm8",
+                "block_signed": 1,
+                "full_count": 5,
+                "pre_image": {
+                    "hash": "0x4cab780babbcf05da2af4d44f5655ce275aacba52ccf166e528f6cb04d8a9f66df80eccc5508f5af34080ab6a9b7b91a01537641785f50f172f1118d67d52853",
+                    "height": "2",
                 },
-                {
-                    address: 'boa1xzvald7hxvgnzk50sy04ha7ezgyytxt5sgw323zy8dlj3ya2q40e6elltwq',
-                    utxo_key: '0x6fbcdb2573e0f5120f21f1875b6dc281c2eca3646ec2c39d703623d89b0eb83cd4b12b73f18db6bc6e8cbcaeb100741f6384c498ff4e61dd189e728d80fb9673',
-                    pre_image: {
-                        height: '2',
-                        hash: '0x799c7df5f478f1b39f9275e934ffa8cf2636759839afd6baefc1c0d9f65fff1c179b0e150fab3b069553820cafd15521429fcc51cad796da74efea3df4288a50'
-                    },
-                    slashed: 0,
-                    block_signed: 1,
-                    full_count: 5
+                "slashed": 0,
+                "utxo_key": "0x0666c4d505b55b6840fbb669ec08a1849e699d5a30ba246989b65ea71292f8ac9a3d7126ca9061313d3225d6e324146f37cdc5dab51facbbc3beead6854e89a4",
+            },
+            {
+                "address": "boa1xzval3ah8z7ewhuzx6mywveyr79f24w49rdypwgurhjkr8z2ke2mycftv9n",
+                "block_signed": 1,
+                "full_count": 5,
+                "pre_image": {
+                    "hash": "0xa9d657de27353167331bbb87758f001941e3eacdc83ab44b9988b7e44b259407bb00ad4e4abe1bd91af3c7ac935d830b2dc46545f607fe4e77ec8da9605ab26a",
+                    "height": "2",
                 },
-                {
-                    address: 'boa1xpvald2ydpxzl9aat978kv78y5g24jxy46mcnl7munf4jyhd0zjrc5x62kn',
-                    utxo_key: '0x7fa36630b0d4a6be729fcab6db70c9b603f2da4c28feaa754f178b5cedb0174a9647fe8c08cdbfd244c6a5d23a7fdf89f1990e002c5565e1babbdb53193e95bc',
-                    pre_image: {
-                        height: '2',
-                        hash: '0x30481a165e55c635d010d72df6b750f17e38b9b394f2b11de05bb0f85fffeb2880b4a41cec7a556812780cf794b76e815846fdb28e495f0ba288db6373867acf'
-                    },
-                    slashed: 0,
-                    block_signed: 1,
-                    full_count: 5
+                "slashed": 0,
+                "utxo_key": "0x2b1fcfb62b868a53287fbdfbc17631f5a4e1cfdb91e58dfc0a8ebf083e92994dd327b0b574c81f0e29394d3abbf67f609ad67bce49c9d9b59672fa5a61a37495",
+            },
+            {
+                "address": "boa1xrval7gwhjz4k9raqukcnv2n4rl4fxt74m2y9eay6l5mqdf4gntnzhhscrh",
+                "block_signed": 1,
+                "full_count": 5,
+                "pre_image": {
+                    "hash": "0xa94f0dffe37146a93d0c8253bd561c4f1e3a067f6027b788e08b3f02cbb1ddec8703791b9b5a168a719331f516de259b7852c151f42461e020b0da72c9396074",
+                    "height": "2",
                 },
-                {
-                    address: 'boa1xzvald5dvy54j7yt2h5yzs2432h07rcn66j84t3lfdrlrwydwq78cz0nckq',
-                    utxo_key: '0xd935b5f1b616e6ec5c96502395e4b89683f526bdb8845f93a67bd329d44b1c2e5c185492e9610c0e3648609b3a9a5b21a35ee1a16f234c6415099803a97306ca',
-                    pre_image: {
-                        height: '2',
-                        hash: '0xc747fd812a774196c6e2c888abc2b6aa143099ad1f6e792eab40f3fab3db5e591ff9240a4e9484282ee0097bd7a48a661a41c653f34fb2ec5be9088752a44cc0'
-                    },
-                    slashed: 0,
-                    block_signed: 1,
-                    full_count: 5
+                "slashed": 0,
+                "utxo_key": "0x6bceb7f5997df362bd0808826ef9577d7f8389bf9c75a471362aa5a24f1d64c9074850f29c6c078e2a7fa8555ec81fde75c2c8b6a8c0adc8d75057bbcb51116a",
+            },
+            {
+                "address": "boa1xrval6hd8szdektyz69fnqjwqfejhu4rvrpwlahh9rhaazzpvs5g6lh34l5",
+                "block_signed": 1,
+                "full_count": 5,
+                "pre_image": {
+                    "hash": "0xea6a06127ee6100f6d1966a35e8345052003d27b1c04eab546b75ca132b51021982790d59860a3a3a2e1d81838af551df454f77e1a31cdb46f8e9c15b2fa6709",
+                    "height": "2",
                 },
-                {
-                    address: 'boa1xrvald3zmehvpcmxqm0kn6wkaqyry7yj3cd8h975ypzlyz00sczpzhsk308',
-                    utxo_key: '0xe0ea82fd0ab9c57b068123927c002750181366f417c30a6ded05a23aca99c2c98b508bba9ba7c496eee36d78eeb7b71f330f81633372a712010036c4dc506b07',
-                    pre_image: {
-                        height: '2',
-                        hash: '0x9debdcfa75b6f3df5aeef082e4fc17243bb75bc1724de61e39fd023960ddcce4361027dc4c040703a013678b39045954ea7cb9fe0b9cb909c30b74fcd4c34a26'
-                    },
-                    slashed: 0,
-                    block_signed: 1,
-                    full_count: 5
-                }
-            ]
+                "slashed": 0,
+                "utxo_key": "0x84daa1d361afd9238041431b838500103eeb16d7952486077830a31a77ecc31d40f3a9d3f3a1c92dc3a0e5723ba6de9d87f107a73c73aef6a45bf9862c663493",
+            },
+            {
+                "address": "boa1xzval4nvru2ej9m0rptq7hatukkavemryvct4f8smyy3ky9ct5u0s8w6gfy",
+                "block_signed": 1,
+                "full_count": 5,
+                "pre_image": {
+                    "hash": "0xcb160f6be5a11d16c3bd4ac4cdc71b0b7d05682f1ca5af3c12ddd9f630b73b4226d61e6bf15c2389f252bfc502cb6ee24ccdb8b919bf0b799896f06fe11bc181",
+                    "height": "2",
+                },
+                "slashed": 0,
+                "utxo_key": "0x94b78736ae8ddf97f05a30e549f5eab377648a9116f3033ab7dcb8c9528ee717fd8d94dae7fe3ecc9d43290204ca2a41f710e798a3446b553c7a415d968e7177",
+            },
+        ];
 
         assert.deepStrictEqual(response.data, expected);
     });

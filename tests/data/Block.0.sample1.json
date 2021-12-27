@@ -1,41 +1,41 @@
 {
     "header": {
         "prev_block": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-        "merkle_root": "0x67218493be437c25dc5884abdc8ee40e61f0af79aa9af8ab9bd8b0632eaaca238b4c054f114b046da0d5911b1b205ba540d07c5dc01560beafe564e5f3d101c9",
+        "merkle_root": "0x0923b97e7a4dc9443089471545e796115ef5ad2eed8e92bb8b1de4744f94a95e297a536eb7c152752ca685af7602bc296f5590c2ddf0d91e4fe3dd24fb8e3f72",
         "signature": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
         "validators": "",
         "height": "0",
         "preimages": [],
         "enrollments": [
             {
-                "utxo_key": "0x70455f0b03f4b8d54b164b251e813b3fecd447d4bfe7b173ef86654429d2f5c3866d3ea406bf02163221a2d4029f0e0930a48304b2ea0f9277c2b32795c4005f",
-                "commitment": "0x0a8201f9f5096e1ce8e8de4147694940a57a188b78293a55144fc8777a774f2349b3a910fb1fb208514fb16deaf49eb05882cdb6796a81f913c6daac3eb74328",
-                "enroll_sig": "0x0cab27862571d2d2e33d6480e1eab4c82195a508b72672d609610d01f23b0beedc8b89135fe3f5df9e2815b9bdb763c41b8b2dab5911e313acc82470c2147422"
+                "utxo_key": "0x0666c4d505b55b6840fbb669ec08a1849e699d5a30ba246989b65ea71292f8ac9a3d7126ca9061313d3225d6e324146f37cdc5dab51facbbc3beead6854e89a4",
+                "commitment": "0x12f7fc1c953a13101e60c823ecd502fc9215a4dc7c1f3408db37ed70e62e45f9dda92c3b0592ad3fde04c4241bfe65e207704db9794e6fd92641f54a17747ab3",
+                "enroll_sig": "0x6d7a10ce4912b89806800cd66c6b58e66ccb78625afa865119c6d598aa061d18098e45596199261710d32c8c1b6565a1b2341cae9f773b6dca53dc26b7d49cf2"
             },
             {
-                "utxo_key": "0x6fbcdb2573e0f5120f21f1875b6dc281c2eca3646ec2c39d703623d89b0eb83cd4b12b73f18db6bc6e8cbcaeb100741f6384c498ff4e61dd189e728d80fb9673",
-                "commitment": "0xd0348a88f9b7456228e4df5689a57438766f4774d760776ec450605c82348c461db84587c2c9b01c67c8ed17f297ee4008424ad3e0e5039179719d7e9df297c1",
-                "enroll_sig": "0x0ed498b867c33d316b468d817ba8238aec68541abd912cecc499f8e780a8cdaf2692d0b8b04133a34716169a4b1d33d77c3e585357d8a2a2c48a772275255c01"
+                "utxo_key": "0x2b1fcfb62b868a53287fbdfbc17631f5a4e1cfdb91e58dfc0a8ebf083e92994dd327b0b574c81f0e29394d3abbf67f609ad67bce49c9d9b59672fa5a61a37495",
+                "commitment": "0x659467b85b216489e090d8b77e4de9fa67d4c0824ee27a798d302e3cac0f2e527abe04db5e84a87fadb101edb60342687fec3d094af2a4bfdd3f73b4176f00a0",
+                "enroll_sig": "0xa669a117712a49b470c2bfe885015a185c60fc158b8086a74f585804bf8962de0f076c77115f49a043035fd293318d8c9462f943db4d9a9b7c9bc9cccfd1254f"
             },
             {
-                "utxo_key": "0x00bac393977fbd1e0edc70a34c7ca802dafe57f2b4a2aabf1adaac54892cb1cbae72cdeeb212904101382690d18d2d2c6ac99b83227ca73b307fde0807c4af03",
-                "commitment": "0xaf43c67d9dd0f53de3eaede63cdcda8643422d62205df0b5af65706ec28b372adb785ce681d559d7a7137a4494ccbab4658ce11ec75a8ec84be5b73590bffceb",
-                "enroll_sig": "0x09474f489579c930dbac46f638f3202ac24407f1fa419c1d95be38ab474da29d7e3d4753b6b4ccdb35c2864be4195e83b7b8433ca1d27a57fb9f48a631001304"
+                "utxo_key": "0x6bceb7f5997df362bd0808826ef9577d7f8389bf9c75a471362aa5a24f1d64c9074850f29c6c078e2a7fa8555ec81fde75c2c8b6a8c0adc8d75057bbcb51116a",
+                "commitment": "0x3c4e8f32879e16a6d856f6360045ad263b7be2c22cfa55d6178dcf138955b92748a105cf9cc3f697b8b6dfc126ab81fb56a7349f57b9ddb443fbd880658b94f0",
+                "enroll_sig": "0x221c3179366b4f12cb2ac1a323c312a2c56d96854b9b1aa0a50eb348766b50f5080735f10ccaba022a8e6d540b679a5453d622bd398915c143b5cbb4195da1d7"
             },
             {
-                "utxo_key": "0xd935b5f1b616e6ec5c96502395e4b89683f526bdb8845f93a67bd329d44b1c2e5c185492e9610c0e3648609b3a9a5b21a35ee1a16f234c6415099803a97306ca",
-                "commitment": "0xa24b7e6843220d3454523ceb7f9b43f037e56a01d2bee82958b080dc6350ebac2da12b561cbd96c6fb3f5ae5a3c8df0ac2c559ae1c45b11d42fdf866558112bc",
-                "enroll_sig": "0x0e4566eca30feb9ad47a65e7ff7e7ce1a7555ccedcf61e1143c2e5fddbec6866fd787c4518b78ab9ed73a3760741d557ac2aca631fc2796be86fcf391d3a6634"
+                "utxo_key": "0x84daa1d361afd9238041431b838500103eeb16d7952486077830a31a77ecc31d40f3a9d3f3a1c92dc3a0e5723ba6de9d87f107a73c73aef6a45bf9862c663493",
+                "commitment": "0x2ef9c7042d38c6a212907ff065e355d0ce78cf315ba63c37dff58fbe4f484ccddaf03753918730a79a64927b2c1e4996296506abfeb484d8fe338311494cc3b3",
+                "enroll_sig": "0x8ff3e4f89919ce3f010223ffa03ea908c4963cddae7165fa9eaa53d071780d1a086bf1e2594e6745c597cbedd491fa3aa568e58faee89a31ec05bb8f5c1a1e28"
             },
             {
-                "utxo_key": "0x7fa36630b0d4a6be729fcab6db70c9b603f2da4c28feaa754f178b5cedb0174a9647fe8c08cdbfd244c6a5d23a7fdf89f1990e002c5565e1babbdb53193e95bc",
-                "commitment": "0xa0502960ddbe816729f60aeaa480c7924fb020d864deec6a9db778b8e56dd2ff8e987be748ff6ca0a43597ecb575da5d532696e376dc70bb4567b5b1fa512cb4",
-                "enroll_sig": "0x052ee1d975c49f19fd26b077740dcac399f174f40b5df1aba5f09ebea11faacfd79a36ace4d3097869dc009b8939fc83bdf940c8822c6931d5c09326aa746b31"
+                "utxo_key": "0x94b78736ae8ddf97f05a30e549f5eab377648a9116f3033ab7dcb8c9528ee717fd8d94dae7fe3ecc9d43290204ca2a41f710e798a3446b553c7a415d968e7177",
+                "commitment": "0xbdb489da86fb8aeda9d09478b1936d9dc57b243eae9d31381270e533d48985a2a235e880c4b225e8a2f23aace36a6c5590ef47d5c3143b5115bc5137b6a200c2",
+                "enroll_sig": "0x7702482cdbed0ef9751cad41ca46b172edbd4c0db7fe8536ecb82e87aead31fa01fb58b031b139074ef97a17d7c746fe9261b194bad95a906648bee08234f199"
             },
             {
-                "utxo_key": "0xe0ea82fd0ab9c57b068123927c002750181366f417c30a6ded05a23aca99c2c98b508bba9ba7c496eee36d78eeb7b71f330f81633372a712010036c4dc506b07",
-                "commitment": "0xdd1b9c62d4c62246ea124e5422d5a2e23d3ca9accb0eba0e46cd46708a4e7b417f46df34dc2e3cba9a57b1dc35a66dfc2d5ef239ebeaaa00299232bc7e3b7bfa",
-                "enroll_sig": "0x0e0070e5951ef5be897cb593c4c57ce28b7529463f7e5644b1314ab7cc69fd625c71e74382a24b7e644d32b0306fe3cf14ecd7de5635c70aa592f4721aa74fe2"
+                "utxo_key": "0xa3c2660bd4c65d6153bbe5bfac2cff06f68364c92e1f2619a4faede13943267df958efd9117c87125180241d678ff7278557fb8e83e486872a1eb8d83c41b4e1",
+                "commitment": "0x5666c8993722e5ba725a60174fa2ec28c37ea0569e0366c612b278de7afa0e25c40d6e1a3f1e3c62fe67712df211f989f0f4cb3f0a2745d24e9f830c88c3d6c3",
+                "enroll_sig": "0x0c7110ea3fcc9fd683ad4b0edcd8956a8716830dee4c8755e773d10f611b32aa0e32d68f5c7961054356148e99c9abc978019fca71b1d4fc9685ecc6a9575fd1"
             }
         ]
     },
@@ -45,51 +45,106 @@
             "outputs": [
                 {
                     "type": 1,
-                    "value": "20000000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "Wd+1RGhML5e9WXx7M8clEKrIxK63if/b5NNZEu14pDw="
-                    }
+                        "bytes": "md+rscNMxR56h8elO/gUP2jLjLexx9ALiKlFkUP6QJw="
+                    },
+                    "value": "20000000000000"
                 },
                 {
                     "type": 1,
-                    "value": "20000000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "md+2jWEpWXiLVehBQVWKrv8PE9akeq4/S0fxuI1wPHw="
-                    }
+                        "bytes": "md/Htzi9l1+CNrZHMyQfipVV1SjaQLkcHeVhnEq2VbI="
+                    },
+                    "value": "20000000000000"
                 },
                 {
                     "type": 1,
-                    "value": "20000000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "md+31zMRMVqPgR9b99kSCEWZdIIdFUREO38ok6oFX50="
-                    }
+                        "bytes": "md/WbB8VmRdvGFYPX6vlrdZnYyMwuqTw2QkbELhdOPg="
+                    },
+                    "value": "20000000000000"
                 },
                 {
                     "type": 1,
-                    "value": "20000000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "2d+2It5uwONmBt9p6dboCDJ4ko4ae5fUIEXyCe+GBBE="
-                    }
+                        "bytes": "2d/QYt76oor16BDI7Zjo7u69xxoXckflZ2UUkckpy1I="
+                    },
+                    "value": "20000000000000"
                 },
                 {
                     "type": 1,
-                    "value": "20000000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "2d+2rFIJ4r4LzsFUIj5leQ8JcDAfFQiy38yb6Ncpk9s="
-                    }
+                        "bytes": "2d/q7TwE3NlkFoqZgk4Ccyvyo2DC7/b3KO/eiEFkKI0="
+                    },
+                    "value": "20000000000000"
                 },
                 {
                     "type": 1,
-                    "value": "20000000000000",
                     "lock": {
                         "type": 0,
-                        "bytes": "2d+3UoATzC/jrMdblwpVWc7c7EM8koxS7x2Wekdcn1A="
-                    }
+                        "bytes": "2d/5DryFWxR9By2JsVOo/1SZfq7UQuek1+mwNTVE1zE="
+                    },
+                    "value": "20000000000000"
+                }
+            ],
+            "payload": "",
+            "lock_height": "0"
+        },
+        {
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": 1,
+                    "lock": {
+                        "type": 0,
+                        "bytes": "Gd/jzI1sMuB3rk51C2jjFxaja23MsBnuh+WZUSUzTf0="
+                    },
+                    "value": "20000000000000"
+                },
+                {
+                    "type": 1,
+                    "lock": {
+                        "type": 0,
+                        "bytes": "Gd/2NVcClS1YenJdXPhq5dWO0JfaS8B9xfAI0VHtztI="
+                    },
+                    "value": "20000000000000"
+                },
+                {
+                    "type": 1,
+                    "lock": {
+                        "type": 0,
+                        "bytes": "Wd+VDDulakH0c9gfhQ2jh7F9l5VzoRNxepKl6Nm3xOU="
+                    },
+                    "value": "20000000000000"
+                },
+                {
+                    "type": 1,
+                    "lock": {
+                        "type": 0,
+                        "bytes": "md+fYDn9+0oAcT9DmIOxjCPsN2UaYoGKF6j0mZiBULY="
+                    },
+                    "value": "20000000000000"
+                },
+                {
+                    "type": 1,
+                    "lock": {
+                        "type": 0,
+                        "bytes": "md/mlbuKK2ir9cKOVUq61TsyKLG9Y87hvRiFLsFwZi4="
+                    },
+                    "value": "20000000000000"
+                },
+                {
+                    "type": 1,
+                    "lock": {
+                        "type": 0,
+                        "bytes": "2d+1tO8o2hoaC3UoeF2+t1vRrx0WF0uwCUqGCijclZM="
+                    },
+                    "value": "20000000000000"
                 }
             ],
             "payload": "",
@@ -100,67 +155,67 @@
             "outputs": [
                 {
                     "type": 0,
-                    "value": "610000000000000",
                     "lock": {
                         "type": 0,
                         "bytes": "kZnmFMJObP4+SLxUChUrKaFP/7ek7wIYk79A66URrHE="
-                    }
+                    },
+                    "value": "595000000000000"
                 },
                 {
                     "type": 0,
-                    "value": "610000000000000",
                     "lock": {
                         "type": 0,
                         "bytes": "kZnmFMJObP4+SLxUChUrKaFP/7ek7wIYk79A66URrHE="
-                    }
+                    },
+                    "value": "595000000000000"
                 },
                 {
                     "type": 0,
-                    "value": "610000000000000",
                     "lock": {
                         "type": 0,
                         "bytes": "kZnmFMJObP4+SLxUChUrKaFP/7ek7wIYk79A66URrHE="
-                    }
+                    },
+                    "value": "595000000000000"
                 },
                 {
                     "type": 0,
-                    "value": "610000000000000",
                     "lock": {
                         "type": 0,
                         "bytes": "kZnmFMJObP4+SLxUChUrKaFP/7ek7wIYk79A66URrHE="
-                    }
+                    },
+                    "value": "595000000000000"
                 },
                 {
                     "type": 0,
-                    "value": "610000000000000",
                     "lock": {
                         "type": 0,
                         "bytes": "kZnmFMJObP4+SLxUChUrKaFP/7ek7wIYk79A66URrHE="
-                    }
+                    },
+                    "value": "595000000000000"
                 },
                 {
                     "type": 0,
-                    "value": "610000000000000",
                     "lock": {
                         "type": 0,
                         "bytes": "kZnmFMJObP4+SLxUChUrKaFP/7ek7wIYk79A66URrHE="
-                    }
+                    },
+                    "value": "595000000000000"
                 },
                 {
                     "type": 0,
-                    "value": "610000000000000",
                     "lock": {
                         "type": 0,
                         "bytes": "kZnmFMJObP4+SLxUChUrKaFP/7ek7wIYk79A66URrHE="
-                    }
+                    },
+                    "value": "595000000000000"
                 },
                 {
                     "type": 0,
-                    "value": "610000000000000",
                     "lock": {
                         "type": 0,
                         "bytes": "kZnmFMJObP4+SLxUChUrKaFP/7ek7wIYk79A66URrHE="
-                    }
+                    },
+                    "value": "595000000000000"
                 }
             ],
             "payload": "",
@@ -168,8 +223,12 @@
         }
     ],
     "merkle_tree": [
-        "0x224c72ad879eccd38e9b612047633d235e47e329e68a69517822c4c234c53c2d7d81b0245cdb61857002d58a5e033c8720b462e20517f45a5516df432866b32f",
-        "0x26866bb263593d024a92103646c48cf35a2b1bfcc49b087915b85db14a432b373569d56f576242354328a31bf0102a0a78cb806cf6e25d88d7981367833631b7",
-        "0x67218493be437c25dc5884abdc8ee40e61f0af79aa9af8ab9bd8b0632eaaca238b4c054f114b046da0d5911b1b205ba540d07c5dc01560beafe564e5f3d101c9"
+        "0xaf63ca7d0b555bbbe65d398165c3d921421114003ee6d42fe11a1b4eaafa6d6e9a57ffc6d35b820d001beeebdcdec9a9d6b7d34fe0062a6d9eb719d8d47237f2",
+        "0xbf5685b8bc230a0463d1b5c64a8dd3cab09de95cd6e71649a43af680569770b279646a8a5453bd157a6d2066850c27e941c662eb22c8ebae922989487bc53e58",
+        "0xf1b227276819be01f574bad7bcb26afddafbc14a3cb6052c5006e4b35c483e20864ba8388adcf8f9870cc2a028ec41dc563a91b8c09d13f95277e0b5bdad1ac3",
+        "0xf1b227276819be01f574bad7bcb26afddafbc14a3cb6052c5006e4b35c483e20864ba8388adcf8f9870cc2a028ec41dc563a91b8c09d13f95277e0b5bdad1ac3",
+        "0x0ab1d2f167db7529ce0663388e65e7f5435d575a08eda158ff8cda871aaefc8cc38bf2e84de39d41bbb7936ad3decf78ff7a9760dfd84f6712d09ca5f0f511cc",
+        "0x3fe30fe15a6355264d72224d6661ced1da44c57ea020a45a9cde6f3af9d85a82a88ee984100ea4b9dd426f6af43c4f4f7abb71c7a22a98a4c188328439dbfd72",
+        "0x0923b97e7a4dc9443089471545e796115ef5ad2eed8e92bb8b1de4744f94a95e297a536eb7c152752ca685af7602bc296f5590c2ddf0d91e4fe3dd24fb8e3f72"
     ]
 }
