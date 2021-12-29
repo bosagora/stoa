@@ -4,7 +4,7 @@
     "description": "API server for Agora",
     "main": "src/main.js",
     "scripts": {
-        "test": "cross-env NODE_ENV=test mocha --exit -r ts-node/register tests/**/*.test.ts --timeout 10000",
+        "test": "",
         "debug": "cross-env NODE_ENV=development mocha -r ts-node/register tests/**/*.test.ts",
         "start": "cross-env NODE_ENV=production ts-node src/main.ts",
         "convert": "ts-node .npm/convert-stoa-sample-data/convert-blocks.ts .npm/convert-stoa-sample-data/old/sample.json .npm/convert-stoa-sample-data/old/sample_utxo.json",
@@ -32,7 +32,7 @@
         "argparse": "^2.0.1",
         "assert": "^2.0.0",
         "axios": "^0.21.2",
-        "boa-sdk-ts": "0.2.24",
+        "boa-sdk-ts": "0.2.25",
         "boa-sodium-ts": "^0.1.1",
         "body-parser": "^1.19.0",
         "coingecko-api-v3": "0.0.11",
