@@ -1440,9 +1440,13 @@ class Stoa extends WebService {
                     payload: data.tx[0].payload !== null ? data.tx[0].payload.toString("base64") : "",
                     senders: [],
                     receivers: [],
-                    fee: JSBI.add(JSBI.BigInt(data.tx[0].tx_fee), JSBI.BigInt(data.tx[0].payload_fee)).toString(),
+                    fee: JSBI.add(
+                        JSBI.add(JSBI.BigInt(data.tx[0].tx_fee), JSBI.BigInt(data.tx[0].payload_fee)),
+                        JSBI.BigInt(data.tx[0].freezing_fee)
+                    ).toString(),
                     tx_fee: JSBI.BigInt(data.tx[0].tx_fee).toString(),
                     payload_fee: JSBI.BigInt(data.tx[0].payload_fee).toString(),
+                    freezing_fee: JSBI.BigInt(data.tx[0].freezing_fee).toString(),
                 };
 
                 for (const elem of data.senders)
@@ -1980,7 +1984,13 @@ class Stoa extends WebService {
                         submission_time: row.time,
                         address: row.address,
                         amount: JSBI.BigInt(row.amount).toString(),
-                        fee: JSBI.add(JSBI.BigInt(row.tx_fee), JSBI.BigInt(row.payload_fee)).toString(),
+                        fee: JSBI.add(
+                            JSBI.add(JSBI.BigInt(row.tx_fee), JSBI.BigInt(row.payload_fee)),
+                            JSBI.BigInt(row.freezing_fee)
+                        ).toString(),
+                        tx_fee: JSBI.BigInt(row.tx_fee).toString(),
+                        payload_fee: JSBI.BigInt(row.payload_fee).toString(),
+                        freezing_fee: JSBI.BigInt(row.freezing_fee).toString(),
                         block_delay: row.current_height - row.received_height,
                         peer_count: row.peer_count,
                     };
