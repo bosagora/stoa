@@ -168,6 +168,7 @@ describe("Test of Stoa API for the wallet", function () {
                 },
             ],
             fee: "100000",
+            freezing_fee: "0",
             tx_fee: "100000",
             payload_fee: "0",
         };
@@ -527,6 +528,7 @@ describe("Test of Stoa API for the wallet with `sample_data`", function () {
             fee: "1663649600",
             tx_fee: "249600",
             payload_fee: "1663400000",
+            freezing_fee: "0",
         };
         assert.deepStrictEqual(response.data, expected);
     });

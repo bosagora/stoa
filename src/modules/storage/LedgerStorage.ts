@@ -3797,7 +3797,8 @@ export class LedgerStorage extends Storages {
                 (B.time_stamp + (T.unlock_height - T.block_height) * 10 * 60) as unlock_time,
                 P.payload,
                 T.tx_fee,
-                T.payload_fee
+                T.payload_fee,
+                T.freezing_fee
             FROM
                 blocks B
                 INNER JOIN transactions T ON (B.height = T.block_height and T.tx_hash = ?)
@@ -3862,6 +3863,7 @@ export class LedgerStorage extends Storages {
             TF.type,
             TF.tx_fee,
             TF.payload_fee,
+            TF.freezing_fee,
             TF.received_height,
             (SELECT IFNULL(MAX(height), 0) AS height FROM blocks) AS current_height,
             TF.peer_count,
@@ -3883,6 +3885,7 @@ export class LedgerStorage extends Storages {
                 T.type,
                 T.tx_fee,
                 T.payload_fee,
+                T.freezing_fee,
                 T.received_height,
                 S.address AS sender,
                 (

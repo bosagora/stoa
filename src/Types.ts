@@ -859,6 +859,11 @@ export interface ITxDetail {
      * Payload fee
      */
     payload_fee: string;
+
+    /**
+     * Freezing fee
+     */
+    freezing_fee: string;
 }
 
 /**
@@ -985,6 +990,9 @@ export interface IPendingTxs {
     address: string;
     amount: string;
     fee: string;
+    tx_fee: string;
+    payload_fee: string;
+    freezing_fee: string;
     block_delay: number;
     peer_count: number;
 }
