@@ -1022,7 +1022,7 @@ describe("Test of the path /wallet/balance:address for freeze and unfreeze", fun
             ],
             [
                 new TxOutput(OutputType.Freeze, BOA(400_000), new PublicKey(address_3)),
-                new TxOutput(OutputType.Payment, BOA(2_039_999.95), new PublicKey(address_1)),
+                new TxOutput(OutputType.Payment, BOA(2_029_999.95), new PublicKey(address_1)),
             ],
             Buffer.alloc(0)
         );
@@ -1039,10 +1039,10 @@ describe("Test of the path /wallet/balance:address for freeze and unfreeze", fun
         const balance_1_response = await client.get(balance_1_url);
         const balance_1_expected = {
             address: address_1,
-            balance: BOA(2_039_999.95).toString(),
+            balance: BOA(2_029_999.95).toString(),
             spendable: "0",
             frozen: "0",
-            locked: BOA(2_039_999.95).toString(),
+            locked: BOA(2_029_999.95).toString(),
         };
         assert.deepStrictEqual(balance_1_response.data, balance_1_expected);
 
@@ -1068,8 +1068,8 @@ describe("Test of the path /wallet/balance:address for freeze and unfreeze", fun
         const balance_1_response2 = await client.get(balance_1_url);
         const balance_1_expected2 = {
             address: address_1,
-            balance: BOA(2_039_999.95).toString(),
-            spendable: BOA(2_039_999.95).toString(),
+            balance: BOA(2_029_999.95).toString(),
+            spendable: BOA(2_029_999.95).toString(),
             frozen: "0",
             locked: "0",
         };
@@ -1082,7 +1082,7 @@ describe("Test of the path /wallet/balance:address for freeze and unfreeze", fun
             balance: BOA(2_839_999.999048).toString(),
             spendable: BOA(2_439_999.999048).toString(),
             frozen: BOA(400_000).toString(),
-            locked: "0",
+            locked: BOA(10_000).toString(),
         };
         assert.deepStrictEqual(balance_3_response2.data, balance_3_expected2);
     });
@@ -1108,7 +1108,7 @@ describe("Test of the path /wallet/balance:address for freeze and unfreeze", fun
                     Unlock.fromSignature(new Signature(Buffer.alloc(Signature.Width)))
                 ),
             ],
-            [new TxOutput(OutputType.Payment, BOA(399_999.95), new PublicKey(address_3))],
+            [new TxOutput(OutputType.Payment, BOA(499_999.95), new PublicKey(address_3))],
             Buffer.alloc(0)
         );
         blocks.push(createBlock(blocks[blocks.length - 1], [tx]));
@@ -1123,10 +1123,10 @@ describe("Test of the path /wallet/balance:address for freeze and unfreeze", fun
         const balance_response = await client.get(balance_url);
         const balance_expected = {
             address: address_3,
-            balance: BOA(2_839_999.949048).toString(),
+            balance: BOA(2_939_999.949048).toString(),
             spendable: BOA(2_439_999.999048).toString(),
             frozen: "0",
-            locked: BOA(399_999.95).toString(),
+            locked: BOA(499_999.95).toString(),
         };
         assert.deepStrictEqual(balance_response.data, balance_expected);
 
@@ -1139,10 +1139,10 @@ describe("Test of the path /wallet/balance:address for freeze and unfreeze", fun
         const balance_response2 = await client.get(balance_url);
         const balance_expected2 = {
             address: address_3,
-            balance: BOA(2_839_999.949048).toString(),
+            balance: BOA(2_939_999.949048).toString(),
             spendable: BOA(2_439_999.999048).toString(),
             frozen: "0",
-            locked: BOA(399_999.95).toString(),
+            locked: BOA(499_999.95).toString(),
         };
         assert.deepStrictEqual(balance_response2.data, balance_expected2);
     });

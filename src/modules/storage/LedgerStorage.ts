@@ -3912,7 +3912,7 @@ export class LedgerStorage extends Storages {
             TF.balance - TF.send_other - TF.send_unfreeze + TF.receive AS balance,
             TF.spendable - TF.send_other AS spendable,
             TF.frozen - TF.send_unfreeze AS frozen,
-            TF.locked + TF.receive AS locked
+            TF.locked + TF.receive + ((frozen_utxo_cnt - send_unfreeze_utxo_cnt) * ${Constant.SlashPenaltyAmount.value.toString()}) AS locked
         FROM
         (
             SELECT
@@ -3921,6 +3921,7 @@ export class LedgerStorage extends Storages {
                 IFNULL(SUM(CASE WHEN ((unlock_height <= height + 1) AND ((type = 0) OR (type = 2))) THEN amount ELSE 0 END), 0) AS spendable,
                 IFNULL(SUM(CASE WHEN ((unlock_height <= height + 1) AND ((type = 1))) THEN amount ELSE 0 END), 0) AS frozen,
                 IFNULL(SUM(CASE WHEN ((unlock_height > height + 1) AND ((type = 0) OR (type = 2))) THEN amount ELSE 0 END), 0) AS locked,
+                IFNULL(SUM(CASE WHEN ((unlock_height <= height + 1) AND ((type = 1))) THEN 1 ELSE 0 END), 0) AS frozen_utxo_cnt,
                 IFNULL(
                 (
                     SELECT
@@ -3973,7 +3974,20 @@ export class LedgerStorage extends Storages {
                             S.address = ?
                     ) TTX ON (TTO.tx_hash = TTX.tx_hash)
                     GROUP BY TTO.address
-                ), 0) AS receive
+                ), 0) AS receive,
+                IFNULL(
+                (
+                    SELECT
+                        COUNT(S.utxo_key)
+                    FROM
+                        tx_outputs S
+                        INNER JOIN tx_input_pool I ON (I.utxo = S.utxo_key)
+                        INNER JOIN transaction_pool T ON (T.tx_hash = I.tx_hash)
+                    WHERE
+                        S.address = ?
+                        AND S.type = 1
+                    GROUP BY S.address
+                ), 0) AS send_unfreeze_utxo_cnt
             FROM
             (
                 SELECT
@@ -3995,7 +4009,7 @@ export class LedgerStorage extends Storages {
             ) AS T
         ) AS TF;`;
 
-        return this.query(sql, [address, address, address, address, address, address], conn);
+        return this.query(sql, [address, address, address, address, address, address, address], conn);
     }
 
     /**
