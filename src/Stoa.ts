@@ -397,14 +397,15 @@ class Stoa extends WebService {
                         });
                     });
                 }
-                this.node_Service?.start(this).catch((err) => {
-                    mailService.mailer(Operation.connection, err)
-                    logger.error(`Error: Could not connect to node : ${err.toString()}`, {
-                        operation: Operation.connection,
-                        height: HeightManager.height.toString(),
-                        status: Status.Error,
-                    });
-                });
+                // FIX ME
+                // this.node_Service?.start(this).catch((err) => {
+                //     mailService.mailer(Operation.connection, err)
+                //     logger.error(`Error: Could not connect to node : ${err.toString()}`, {
+                //         operation: Operation.connection,
+                //         height: HeightManager.height.toString(),
+                //         status: Status.Error,
+                //     });
+                // });
                 this.socket.io.on(events.client.connection, (socket: Socket) => {
                     this.eventDispatcher.dispatch(events.client.connection, socket);
                     this.wallet_watcher.onClientConnected(socket);
