@@ -56,7 +56,8 @@ import { CoinGeckoMarket } from "../src/modules/coinmarket/CoinGeckoMarket";
 import { CoinMarketService } from "../src/modules/service/CoinMarketService";
 import { CurrencyType, IMarketCap } from "../src/Types";
 
-describe("Test of Stoa API Server", () => {
+describe("Test of Stoa API Server", function () {
+    this.timeout(10000);
     const agora_addr: URL = new URL("http://localhost:2802");
     const stoa_addr: URL = new URL("http://localhost:3802");
     const stoa_private_addr: URL = new URL("http://localhost:4802");
@@ -76,7 +77,7 @@ describe("Test of Stoa API Server", () => {
 
     before("Start a fake Agora", () => {
         return new Promise<void>((resolve, reject) => {
-            agora_server = new TestAgora(agora_addr.port, sample_data, resolve);
+            agora_server = new TestAgora(agora_addr.port, [], resolve);
         });
     });
 
@@ -101,9 +102,10 @@ describe("Test of Stoa API Server", () => {
 
         const url = uri.toString();
         await client.post(url, { block: sample_data[0] });
+        await delay(1000);
         await client.post(url, { block: sample_data[1] });
         // Wait for the block to be stored in the database for the next test.
-        await delay(500);
+        await delay(2000);
     });
 
     it("Test of the path /block_height", async () => {
@@ -431,7 +433,8 @@ describe("Test of Stoa API Server", () => {
     });
 });
 
-describe("Test of the path /utxo", () => {
+describe("Test of the path /utxo", function () {
+    this.timeout(10000);
     const agora_addr: URL = new URL("http://localhost:2803");
     const stoa_addr: URL = new URL("http://localhost:3803");
     const stoa_private_addr: URL = new URL("http://localhost:4803");
@@ -499,6 +502,7 @@ describe("Test of the path /utxo", () => {
 
         const url = uri.toString();
         await client.post(url, { block: sample_data[0] });
+        await delay(1000);
         await client.post(url, { block: sample_data[1] });
         // Wait for the block to be stored in the database for the next test.
         await delay(2000);
@@ -617,7 +621,8 @@ describe("Test of the path /utxo", () => {
     });
 });
 
-describe("Test of the path /utxo for freezing", () => {
+describe("Test of the path /utxo for freezing", function () {
+    this.timeout(10000);
     const agora_addr: URL = new URL("http://localhost:2804");
     const stoa_addr: URL = new URL("http://localhost:3804");
     const stoa_private_addr: URL = new URL("http://localhost:4804");
@@ -660,6 +665,7 @@ describe("Test of the path /utxo for freezing", () => {
 
         const url = uri.toString();
         await client.post(url, { block: sample_data[0] });
+        await delay(1000);
         await client.post(url, { block: sample_data[1] });
         // Wait for the block to be stored in the database for the next test.
         await delay(2000);
@@ -813,9 +819,11 @@ describe("Test of the path /utxo for freezing", () => {
     });
 });
 
-describe("Test of the path /merkle_path", () => {
+describe("Test of the path /merkle_path", function () {
+    this.timeout(10000);
     const agora_addr: URL = new URL("http://localhost:2805");
     const stoa_addr: URL = new URL("http://localhost:3805");
+    const stoa_private_addr: URL = new URL("http://localhost:4805");
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
@@ -828,7 +836,7 @@ describe("Test of the path /merkle_path", () => {
 
     before("Start a fake Agora", () => {
         return new Promise<void>((resolve, reject) => {
-            agora_server = new TestAgora(agora_addr.port, sample_data, resolve);
+            agora_server = new TestAgora(agora_addr.port, [], resolve);
         });
     });
 
@@ -837,12 +845,25 @@ describe("Test of the path /merkle_path", () => {
         stoa_server = new TestStoa(testDBConfig, agora_addr, stoa_addr.port);
         await stoa_server.createStorage();
         await stoa_server.start();
+
+        agora_server.setBlocks(sample_data);
     });
 
     after("Stop Stoa and Agora server instances", async () => {
         await stoa_server.ledger_storage.dropTestDB(testDBConfig.database);
         await stoa_server.stop();
         await agora_server.stop();
+    });
+
+    it("Store two blocks", async () => {
+        const uri = URI(stoa_private_addr).directory("block_externalized");
+
+        const url = uri.toString();
+        await client.post(url, { block: sample_data[0] });
+        await delay(1000);
+        await client.post(url, { block: sample_data[1] });
+        // Wait for the block to be stored in the database for the next test.
+        await delay(2000);
     });
 
     it("Test of the path /merkle_path", async () => {
