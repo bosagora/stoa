@@ -395,7 +395,7 @@ export class LedgerStorage extends Storages {
         CREATE TABLE IF NOT EXISTS tx_pool
         (
             \`key\`     TINYBLOB    NOT NULL,
-            \`val\`     BLOB        NOT NULL,
+            \`val\`     MEDIUMBLOB  NOT NULL,
             PRIMARY KEY(\`key\`(64))
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
