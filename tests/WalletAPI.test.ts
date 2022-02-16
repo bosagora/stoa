@@ -50,8 +50,8 @@ import { MockDBConfig } from "./TestConfig";
 
 import { io, Socket } from "socket.io-client";
 
-describe("Test of Stoa API for the wallet", function () {
-    this.timeout(5000);
+describe("Test of Stoa API for the wallet with recovery data", function () {
+    this.timeout(20000);
     const agora_addr: URL = new URL("http://localhost:2831");
     const stoa_addr: URL = new URL("http://localhost:3831");
     const stoa_private_addr: URL = new URL("http://localhost:4831");
@@ -94,9 +94,9 @@ describe("Test of Stoa API for the wallet", function () {
         const url = uri.toString();
         for (let idx = 0; idx < 10; idx++) {
             await client.post(url, { block: recovery_sample_data[idx] });
-            await delay(300);
+            await delay(1000);
         }
-        await delay(1000);
+        await delay(2000);
     });
 
     it("Test of the path /wallet/transaction/detail", async () => {
@@ -194,34 +194,34 @@ describe("Test of Stoa API for the wallet", function () {
             .setSearch("page", "1");
 
         const response = await client.get(uri.toString());
-        // assert.deepStrictEqual(response.data.header, {
-        //     address: "boa1xzvr00tkrefwf9k3eem3uu3k9f36l5xap4sjjpfcd64ragwq5f3eqqts3ft",
-        //     page_size: 10,
-        //     page: 1,
-        //     total_page: 6,
-        //     type: ["inbound", "outbound", "freeze", "payload"],
-        // });
+        assert.deepStrictEqual(response.data.header, {
+            address: "boa1xzvr00tkrefwf9k3eem3uu3k9f36l5xap4sjjpfcd64ragwq5f3eqqts3ft",
+            page_size: 10,
+            page: 1,
+            total_page: 7,
+            type: ["inbound", "outbound", "freeze", "payload"],
+        });
         assert.strictEqual(response.data.items.length, 10);
-        // assert.strictEqual(response.data.items[0].display_tx_type, "inbound");
+        assert.strictEqual(response.data.items[0].display_tx_type, "inbound");
         assert.strictEqual(
             response.data.items[0].address,
             "boa1xzvr00tkrefwf9k3eem3uu3k9f36l5xap4sjjpfcd64ragwq5f3eqqts3ft"
         );
-        // assert.strictEqual(
-        //     response.data.items[0].peer,
-        //     "boa1xzeh00nk4t8l9tnmsydqlagc8fn2p28lsedgd9qe6994s7cq6jxzg3l4v6p"
-        // );
-        // assert.strictEqual(response.data.items[0].peer_count, 6);
-        // assert.strictEqual(response.data.items[0].height, "5");
-        // assert.strictEqual(
-        //     response.data.items[0].tx_hash,
-        //     "0xfdfae0ac3110785170ebadce205eda050bfed9c5a38e52dc79ba26ffc85e3d808b758c30e49a2d2b9ec95cc33d71408a0e0a68aea3d7272f4ff19eb63d4a42ac"
-        // );
-        // assert.strictEqual(response.data.items[0].tx_type, "payment");
-        // assert.strictEqual(response.data.items[0].amount, "16755199816581");
-        // assert.strictEqual(response.data.items[0].unlock_height, "6");
-        // assert.strictEqual(response.data.items[0].tx_fee, 776300);
-        // assert.strictEqual(response.data.items[0].tx_size, 1117);
+        assert.strictEqual(
+            response.data.items[0].peer,
+            "boa1xqey0079077q0r0cy7unj753cdq3rkjjjz680rqj8rs72uw97tuzsjs60qq"
+        );
+        assert.strictEqual(response.data.items[0].peer_count, 1);
+        assert.strictEqual(response.data.items[0].height, "9");
+        assert.strictEqual(
+            response.data.items[0].tx_hash,
+            "0x43c567945c35e5c576261238c46fce1291dca42cfe6c98e54c778a85b91155b78fbc5a8a5c302aff6df8fee51bf887df15144c2e49d1d78dbb0e1ea6a17817b4"
+        );
+        assert.strictEqual(response.data.items[0].tx_type, "payment");
+        assert.strictEqual(response.data.items[0].amount, "101018622697007");
+        assert.strictEqual(response.data.items[0].unlock_height, "10");
+        assert.strictEqual(response.data.items[0].tx_fee, 282102);
+        assert.strictEqual(response.data.items[0].tx_size, 366);
     });
 
     it("Test of the path /wallet/transaction/history - Filtering - Wrong TransactionType", async () => {
@@ -246,27 +246,27 @@ describe("Test of Stoa API for the wallet", function () {
             .setSearch("type", "outbound");
 
         const response = await client.get(uri.toString());
-        // assert.deepStrictEqual(response.data.header, {
-        //     address: "boa1xzvr00tkrefwf9k3eem3uu3k9f36l5xap4sjjpfcd64ragwq5f3eqqts3ft",
-        //     page_size: 10,
-        //     page: 1,
-        //     total_page: 1,
-        //     type: ["outbound"],
-        // });
-        // assert.strictEqual(response.data.items.length, 10);
-        // assert.strictEqual(response.data.items[0].display_tx_type, "outbound");
-        // assert.strictEqual(
-        //     response.data.items[0].address,
-        //     "boa1xzvr00tkrefwf9k3eem3uu3k9f36l5xap4sjjpfcd64ragwq5f3eqqts3ft"
-        // );
-        // assert.strictEqual(response.data.items[0].peer_count, 4);
-        // assert.strictEqual(response.data.items[0].height, "8");
-        // assert.strictEqual(response.data.items[0].tx_type, "payment");
-        // assert.strictEqual(response.data.items[0].amount, "-14775039842526");
-        // assert.strictEqual(
-        //     response.data.items[0].tx_hash,
-        //     "0xfdfae0ac3110785170ebadce205eda050bfed9c5a38e52dc79ba26ffc85e3d808b758c30e49a2d2b9ec95cc33d71408a0e0a68aea3d7272f4ff19eb63d4a42ac"
-        // );
+        assert.deepStrictEqual(response.data.header, {
+            address: "boa1xzvr00tkrefwf9k3eem3uu3k9f36l5xap4sjjpfcd64ragwq5f3eqqts3ft",
+            page_size: 10,
+            page: 1,
+            total_page: 2,
+            type: ["outbound"],
+        });
+        assert.strictEqual(response.data.items.length, 10);
+        assert.strictEqual(response.data.items[0].display_tx_type, "outbound");
+        assert.strictEqual(
+            response.data.items[0].address,
+            "boa1xzvr00tkrefwf9k3eem3uu3k9f36l5xap4sjjpfcd64ragwq5f3eqqts3ft"
+        );
+        assert.strictEqual(response.data.items[0].peer_count, 8);
+        assert.strictEqual(response.data.items[0].height, "8");
+        assert.strictEqual(response.data.items[0].tx_type, "payment");
+        assert.strictEqual(response.data.items[0].amount, "-14775039842526");
+        assert.strictEqual(
+            response.data.items[0].tx_hash,
+            "0xcfd9864c70ff69e7313dd8234b92a2d78512c8934747c90efc4edc93840d61b1b6ca712f40aae8e3874ccf932343b931df65d5d0dc2ef1d6805169d6a5615474"
+        );
     });
 
     it("Test of the path /wallet/transaction/history - Filtering - Date", async () => {
@@ -348,9 +348,9 @@ describe("Test of Stoa API for the wallet", function () {
 
 describe("Test of Stoa API for the wallet with `sample_data`", function () {
     this.timeout(5000);
-    const agora_addr: URL = new URL("http://localhost:2832");
-    const stoa_addr: URL = new URL("http://localhost:3832");
-    const stoa_private_addr: URL = new URL("http://localhost:4832");
+    const agora_addr: URL = new URL("http://localhost:2839");
+    const stoa_addr: URL = new URL("http://localhost:3839");
+    const stoa_private_addr: URL = new URL("http://localhost:4839");
     let stoa_server: TestStoa;
     let agora_server: TestAgora;
     const client = new TestClient();
@@ -391,7 +391,9 @@ describe("Test of Stoa API for the wallet with `sample_data`", function () {
         const url = uri.toString();
 
         await client.post(url, { block: sample_data[0] });
+        await delay(1000);
         await client.post(url, { block: sample_data[1] });
+        await delay(1000);
         await client.post(url, { block: sample_data2 });
         await delay(2000);
     });
@@ -617,30 +619,6 @@ describe("Test of Stoa API for the wallet with `sample_data`", function () {
         ];
         assert.deepStrictEqual(response.data, expected);
     });
-
-    // it("Test of the path /wallet/utxo - Get locked UTXO", async () => {
-    //     const amount = JSBI.BigInt("10000");
-    //     const uri = URI(stoa_addr)
-    //         .directory("/wallet/utxo")
-    //         .filename("boa1xzvald7hxvgnzk50sy04ha7ezgyytxt5sgw323zy8dlj3ya2q40e6elltwq")
-    //         .setSearch("amount", amount.toString())
-    //         .setSearch("type", "2");
-    //
-    //     const response = await client.get(uri.toString());
-    //     const expected = [
-    //         {
-    //             utxo: "0x009b3800b3f1f3b4eaf6f449244902b5e9a632fac59c3366d06cf31b9d683d7205cb86e4bf424a9d04aec8ff91e896705780f8ac9b55199decf2c1fef21a0a40",
-    //             type: 0,
-    //             unlock_height: "2018",
-    //             amount: "3999999980000",
-    //             height: "2",
-    //             time: 1609460400,
-    //             lock_type: 0,
-    //             lock_bytes: "md+31zMRMVqPgR9b99kSCEWZdIIdFUREO38ok6oFX50=",
-    //         },
-    //     ];
-    //     assert.deepStrictEqual(response.data, expected);
-    // });
 });
 
 describe("Test of the path /wallet/balance:address for payment", function () {
@@ -693,6 +671,7 @@ describe("Test of the path /wallet/balance:address for payment", function () {
 
         const url = uri.toString();
         await client.post(url, { block: blocks[0] });
+        await delay(1000);
         await client.post(url, { block: blocks[1] });
         // Wait for the block to be stored in the database for the next test.
         await delay(2000);
@@ -873,7 +852,7 @@ describe("Test of the path /wallet/balance:address for payment", function () {
 });
 
 describe("Test of the path /wallet/balance:address for freeze and unfreeze", function () {
-    this.timeout(5000);
+    this.timeout(10000);
     const agora_addr: URL = new URL("http://localhost:2902");
     const stoa_addr: URL = new URL("http://localhost:3902");
     const stoa_private_addr: URL = new URL("http://localhost:4902");
@@ -922,6 +901,7 @@ describe("Test of the path /wallet/balance:address for freeze and unfreeze", fun
 
         const url = uri.toString();
         await client.post(url, { block: blocks[0] });
+        await delay(1000);
         await client.post(url, { block: blocks[1] });
         // Wait for the block to be stored in the database for the next test.
         await delay(2000);
@@ -1089,7 +1069,7 @@ describe("Test of the path /wallet/balance:address for freeze and unfreeze", fun
 });
 
 describe("Test of the path /wallet/balance:address for double spending", function () {
-    this.timeout(5000);
+    this.timeout(10000);
     const agora_addr: URL = new URL("http://localhost:2904");
     const stoa_addr: URL = new URL("http://localhost:3904");
     const stoa_private_addr: URL = new URL("http://localhost:4904");
@@ -1137,6 +1117,7 @@ describe("Test of the path /wallet/balance:address for double spending", functio
 
         const url = uri.toString();
         await client.post(url, { block: blocks[0] });
+        await delay(1000);
         await client.post(url, { block: blocks[1] });
         // Wait for the block to be stored in the database for the next test.
         await delay(2000);

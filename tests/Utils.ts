@@ -306,6 +306,10 @@ export class TestAgora implements FullNodeAPI {
             });
         });
     }
+
+    public setBlocks(blocks: any[]): void {
+        this.blocks = blocks;
+    }
 }
 
 /**

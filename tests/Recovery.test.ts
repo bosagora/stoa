@@ -59,7 +59,8 @@ class TestRecoveryStoa extends TestStoa {
     }
 }
 
-describe("Test of Recovery", () => {
+describe("Test of Recovery", function () {
+    this.timeout(20000);
     const agora_addr: URL = new URL("http://localhost:2801");
     const stoa_addr: URL = new URL("http://localhost:3801");
     const stoa_private_addr: URL = new URL("http://localhost:4801");
@@ -80,7 +81,7 @@ describe("Test of Recovery", () => {
 
     // Changed test agora to run only once.
     before("Start TestAgora", (doneIt: () => void) => {
-        agora_node = new TestAgora(agora_addr.port, recovery_sample_data, doneIt);
+        agora_node = new TestAgora(agora_addr.port, [], doneIt);
     });
 
     after("Stop TestAgora", async () => {
@@ -92,6 +93,7 @@ describe("Test of Recovery", () => {
         stoa_server = new TestRecoveryStoa(testDBConfig, agora_addr, stoa_addr.port);
         await stoa_server.createStorage();
         await stoa_server.start();
+        agora_node.setBlocks(recovery_sample_data);
     });
 
     after("Stop TestStoa", async () => {
@@ -117,18 +119,21 @@ describe("Test of Recovery", () => {
         const url = URI(stoa_private_addr).directory("block_externalized").toString();
 
         await client.post(url, { block: recovery_sample_data[0] });
+        await delay(1000);
         await client.post(url, { block: recovery_sample_data[1] });
+        await delay(1000);
         await client.post(url, { block: recovery_sample_data[2] });
+        await delay(1000);
         await client.post(url, { block: recovery_sample_data[3] });
+        await delay(1000);
         await client.post(url, { block: recovery_sample_data[4] });
-
-        await delay(300);
+        await delay(2000);
 
         // Verifies that all sent blocks are wrote
         for (let idx = 0; idx <= 4; idx++) {
-            const uri = URI(stoa_addr).directory("block").addSearch("block_height", idx);
+            const tmp_uri = URI(stoa_addr).directory("block").addSearch("block_height", idx);
 
-            const response = await client.get(uri.toString());
+            const response = await client.get(tmp_uri.toString());
             assert.strictEqual(response.status, 200);
             assert.strictEqual(response.data.height, idx);
         }
@@ -140,11 +145,13 @@ describe("Test of Recovery", () => {
         const url = uri.toString();
 
         await client.post(url, { block: recovery_sample_data[2] });
+        await delay(1000);
         await client.post(url, { block: recovery_sample_data[4] });
+        await delay(1000);
         await client.post(url, { block: recovery_sample_data[6] });
+        await delay(1000);
         await client.post(url, { block: recovery_sample_data[8] });
-
-        await delay(300);
+        await delay(2000);
 
         // Verifies that all sent blocks are wrote
         for (let idx = 0; idx <= 8; idx++) {
@@ -164,16 +171,20 @@ describe("Test of Recovery", () => {
         const url = uri.toString();
 
         await client.post(url, { block: recovery_sample_data[0] });
+        await delay(1000);
         await client.post(url, { block: recovery_sample_data[1] });
+        await delay(1000);
         // Blocks 2 is recovered, Block 3 is saved
         await client.post(url, { block: recovery_sample_data[3] });
+        await delay(1000);
         await client.post(url, { block: recovery_sample_data[4] });
+        await delay(2000);
 
         // Block 3 is ignored.
         // If Block 3 was not ignored and attempted to write
         // to the database, an error would occur.
         await client.post(url, { block: recovery_sample_data[3] });
-        await delay(300);
+        await delay(2000);
 
         // Verifies that all sent blocks are wrote
         for (let idx = 0; idx <= 4; idx++) {
@@ -194,14 +205,15 @@ describe("Test of Recovery", () => {
         const url = uri.toString();
 
         await client.post(url, { block: recovery_sample_data[0] });
+        await delay(1000);
         await client.post(url, { block: recovery_sample_data[9] });
-        await delay(300);
+        await delay(2000);
 
         // Verifies that all sent blocks are wrote
         for (let idx = 0; idx <= 9; idx++) {
-            const uri = URI(stoa_addr).directory("block").addSearch("block_height", idx);
+            const tmp_uri = URI(stoa_addr).directory("block").addSearch("block_height", idx);
 
-            const response = await client.get(uri.toString());
+            const response = await client.get(tmp_uri.toString());
             assert.strictEqual(response.status, 200);
             assert.strictEqual(response.data.height, idx);
         }

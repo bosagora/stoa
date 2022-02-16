@@ -59,7 +59,7 @@ import {
 } from "./Utils";
 
 describe("Test of Stoa API Server", function () {
-    this.timeout(10000);
+    this.timeout(20000);
     const agora_addr: URL = new URL("http://localhost:2800");
     const stoa_addr: URL = new URL("http://localhost:3800");
     const stoa_private_addr: URL = new URL("http://localhost:4800");
@@ -85,7 +85,7 @@ describe("Test of Stoa API Server", function () {
 
     before("Start a fake Agora", () => {
         return new Promise<void>((resolve, reject) => {
-            agora_server = new TestAgora(agora_addr.port, sample_data, resolve);
+            agora_server = new TestAgora(agora_addr.port, [], resolve);
         });
     });
 
@@ -106,6 +106,7 @@ describe("Test of Stoa API Server", function () {
             votera_service = new VoteraService(votera_addr);
         });
     });
+
     before("Create TestStoa", () => {
         testDBConfig = MockDBConfig();
         stoa_server = new TestStoa(
@@ -130,6 +131,17 @@ describe("Test of Stoa API Server", function () {
         await votera_server.stop();
         await gecko_server.stop();
         await agora_server.stop();
+    });
+
+    it("Test of the path /block_externalized", async () => {
+        const uri = URI(stoa_private_addr).directory("block_externalized");
+
+        const url = uri.toString();
+        await client.post(url, { block: sample_data[0] });
+        await delay(1000);
+        await client.post(url, { block: sample_data[1] });
+        // Wait for the block to be stored in the database for the next test.
+        await delay(2000);
     });
 
     it("Test of the path /latest-blocks", async () => {
@@ -1042,13 +1054,13 @@ describe("Test of Stoa API Server", function () {
     it("Test for writing reward transactions block", async () => {
         const url = URI(stoa_private_addr).directory("block_externalized").toString();
         await client.post(url, { block: sample_data2 });
-        await delay(500);
-        await client.post(url, { block: sample_data3 });
-        await delay(500);
-        await client.post(url, { block: sample_data4 });
-        await delay(500);
-        await client.post(url, { block: sample_data5 });
         await delay(1000);
+        await client.post(url, { block: sample_data3 });
+        await delay(1000);
+        await client.post(url, { block: sample_data4 });
+        await delay(1000);
+        await client.post(url, { block: sample_data5 });
+        await delay(2000);
 
         //  Verifies that all sent blocks are wrote
         const uri = URI(stoa_addr).directory("/block_height");
@@ -1108,15 +1120,15 @@ describe("Test of Stoa API Server", function () {
         const uri = URI(stoa_addr).directory("boa-stats");
         const response = await client.get(uri.toString());
         const expected = {
-            "active_validators": 5,
-            "circulating_supply": 4999999967521368,
-            "frozen_coin": "240000000000000",
-            "height": 5,
-            "price": 119625999.222942,
-            "time_stamp": 1609462200,
-            "total_reward": "0",
-            "transactions": "57",
-            "validators": 5,
+            active_validators: 5,
+            circulating_supply: 4999999967521368,
+            frozen_coin: "240000000000000",
+            height: 5,
+            price: 119625999.222942,
+            time_stamp: 1609462200,
+            total_reward: "0",
+            transactions: "57",
+            validators: 5,
         };
         assert.deepStrictEqual(response.data, expected);
     });
@@ -1150,59 +1162,64 @@ describe("Test of Stoa API Server", function () {
         const response = await client.get(uri.toString());
         const expected = [
             {
-                "address": "boa1xrval5rzmma29zh4aqgv3mvcarhwa0w8rgthy3l9vaj3fywf9894ycmjkm8",
-                "block_signed": 1,
-                "full_count": 5,
-                "pre_image": {
-                    "hash": "0x4cab780babbcf05da2af4d44f5655ce275aacba52ccf166e528f6cb04d8a9f66df80eccc5508f5af34080ab6a9b7b91a01537641785f50f172f1118d67d52853",
-                    "height": "2",
+                address: "boa1xrval5rzmma29zh4aqgv3mvcarhwa0w8rgthy3l9vaj3fywf9894ycmjkm8",
+                block_signed: 1,
+                full_count: 5,
+                pre_image: {
+                    hash: "0x4cab780babbcf05da2af4d44f5655ce275aacba52ccf166e528f6cb04d8a9f66df80eccc5508f5af34080ab6a9b7b91a01537641785f50f172f1118d67d52853",
+                    height: "2",
                 },
-                "slashed": 0,
-                "utxo_key": "0x0666c4d505b55b6840fbb669ec08a1849e699d5a30ba246989b65ea71292f8ac9a3d7126ca9061313d3225d6e324146f37cdc5dab51facbbc3beead6854e89a4",
+                slashed: 0,
+                utxo_key:
+                    "0x0666c4d505b55b6840fbb669ec08a1849e699d5a30ba246989b65ea71292f8ac9a3d7126ca9061313d3225d6e324146f37cdc5dab51facbbc3beead6854e89a4",
             },
             {
-                "address": "boa1xzval3ah8z7ewhuzx6mywveyr79f24w49rdypwgurhjkr8z2ke2mycftv9n",
-                "block_signed": 1,
-                "full_count": 5,
-                "pre_image": {
-                    "hash": "0xa9d657de27353167331bbb87758f001941e3eacdc83ab44b9988b7e44b259407bb00ad4e4abe1bd91af3c7ac935d830b2dc46545f607fe4e77ec8da9605ab26a",
-                    "height": "2",
+                address: "boa1xzval3ah8z7ewhuzx6mywveyr79f24w49rdypwgurhjkr8z2ke2mycftv9n",
+                block_signed: 1,
+                full_count: 5,
+                pre_image: {
+                    hash: "0xa9d657de27353167331bbb87758f001941e3eacdc83ab44b9988b7e44b259407bb00ad4e4abe1bd91af3c7ac935d830b2dc46545f607fe4e77ec8da9605ab26a",
+                    height: "2",
                 },
-                "slashed": 0,
-                "utxo_key": "0x2b1fcfb62b868a53287fbdfbc17631f5a4e1cfdb91e58dfc0a8ebf083e92994dd327b0b574c81f0e29394d3abbf67f609ad67bce49c9d9b59672fa5a61a37495",
+                slashed: 0,
+                utxo_key:
+                    "0x2b1fcfb62b868a53287fbdfbc17631f5a4e1cfdb91e58dfc0a8ebf083e92994dd327b0b574c81f0e29394d3abbf67f609ad67bce49c9d9b59672fa5a61a37495",
             },
             {
-                "address": "boa1xrval7gwhjz4k9raqukcnv2n4rl4fxt74m2y9eay6l5mqdf4gntnzhhscrh",
-                "block_signed": 1,
-                "full_count": 5,
-                "pre_image": {
-                    "hash": "0xa94f0dffe37146a93d0c8253bd561c4f1e3a067f6027b788e08b3f02cbb1ddec8703791b9b5a168a719331f516de259b7852c151f42461e020b0da72c9396074",
-                    "height": "2",
+                address: "boa1xrval7gwhjz4k9raqukcnv2n4rl4fxt74m2y9eay6l5mqdf4gntnzhhscrh",
+                block_signed: 1,
+                full_count: 5,
+                pre_image: {
+                    hash: "0xa94f0dffe37146a93d0c8253bd561c4f1e3a067f6027b788e08b3f02cbb1ddec8703791b9b5a168a719331f516de259b7852c151f42461e020b0da72c9396074",
+                    height: "2",
                 },
-                "slashed": 0,
-                "utxo_key": "0x6bceb7f5997df362bd0808826ef9577d7f8389bf9c75a471362aa5a24f1d64c9074850f29c6c078e2a7fa8555ec81fde75c2c8b6a8c0adc8d75057bbcb51116a",
+                slashed: 0,
+                utxo_key:
+                    "0x6bceb7f5997df362bd0808826ef9577d7f8389bf9c75a471362aa5a24f1d64c9074850f29c6c078e2a7fa8555ec81fde75c2c8b6a8c0adc8d75057bbcb51116a",
             },
             {
-                "address": "boa1xrval6hd8szdektyz69fnqjwqfejhu4rvrpwlahh9rhaazzpvs5g6lh34l5",
-                "block_signed": 1,
-                "full_count": 5,
-                "pre_image": {
-                    "hash": "0xea6a06127ee6100f6d1966a35e8345052003d27b1c04eab546b75ca132b51021982790d59860a3a3a2e1d81838af551df454f77e1a31cdb46f8e9c15b2fa6709",
-                    "height": "2",
+                address: "boa1xrval6hd8szdektyz69fnqjwqfejhu4rvrpwlahh9rhaazzpvs5g6lh34l5",
+                block_signed: 1,
+                full_count: 5,
+                pre_image: {
+                    hash: "0xea6a06127ee6100f6d1966a35e8345052003d27b1c04eab546b75ca132b51021982790d59860a3a3a2e1d81838af551df454f77e1a31cdb46f8e9c15b2fa6709",
+                    height: "2",
                 },
-                "slashed": 0,
-                "utxo_key": "0x84daa1d361afd9238041431b838500103eeb16d7952486077830a31a77ecc31d40f3a9d3f3a1c92dc3a0e5723ba6de9d87f107a73c73aef6a45bf9862c663493",
+                slashed: 0,
+                utxo_key:
+                    "0x84daa1d361afd9238041431b838500103eeb16d7952486077830a31a77ecc31d40f3a9d3f3a1c92dc3a0e5723ba6de9d87f107a73c73aef6a45bf9862c663493",
             },
             {
-                "address": "boa1xzval4nvru2ej9m0rptq7hatukkavemryvct4f8smyy3ky9ct5u0s8w6gfy",
-                "block_signed": 1,
-                "full_count": 5,
-                "pre_image": {
-                    "hash": "0xcb160f6be5a11d16c3bd4ac4cdc71b0b7d05682f1ca5af3c12ddd9f630b73b4226d61e6bf15c2389f252bfc502cb6ee24ccdb8b919bf0b799896f06fe11bc181",
-                    "height": "2",
+                address: "boa1xzval4nvru2ej9m0rptq7hatukkavemryvct4f8smyy3ky9ct5u0s8w6gfy",
+                block_signed: 1,
+                full_count: 5,
+                pre_image: {
+                    hash: "0xcb160f6be5a11d16c3bd4ac4cdc71b0b7d05682f1ca5af3c12ddd9f630b73b4226d61e6bf15c2389f252bfc502cb6ee24ccdb8b919bf0b799896f06fe11bc181",
+                    height: "2",
                 },
-                "slashed": 0,
-                "utxo_key": "0x94b78736ae8ddf97f05a30e549f5eab377648a9116f3033ab7dcb8c9528ee717fd8d94dae7fe3ecc9d43290204ca2a41f710e798a3446b553c7a415d968e7177",
+                slashed: 0,
+                utxo_key:
+                    "0x94b78736ae8ddf97f05a30e549f5eab377648a9116f3033ab7dcb8c9528ee717fd8d94dae7fe3ecc9d43290204ca2a41f710e798a3446b553c7a415d968e7177",
             },
         ];
 
