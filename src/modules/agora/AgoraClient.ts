@@ -11,7 +11,7 @@
 
 *******************************************************************************/
 
-import { Block, handleNetworkError, Hash, hashMulti, Height, PreImageInfo } from "boa-sdk-ts";
+import { Block, handleNetworkError, Hash, hashMulti, Height, PreImageInfo, Transaction } from "boa-sdk-ts";
 
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 import URI from "urijs";
@@ -125,6 +125,26 @@ export class AgoraClient implements FullNodeAPI {
                 .get(uri.toString())
                 .then((response: AxiosResponse) => {
                     if (response.status === 200) resolve(PreImageInfo.reviver("", response.data));
+                    else reject(handleNetworkError({ response }));
+                })
+                .catch((reason: any) => {
+                    reject(handleNetworkError(reason));
+                });
+        });
+    }
+
+    /**
+     * Send a transaction
+     * @param tx The instance of the Transaction
+     */
+    public sendTransaction(tx: Transaction | object): Promise<any> {
+        return new Promise<boolean>((resolve, reject) => {
+            const url = URI("/").filename("transaction");
+
+            this.client
+                .post(url.toString(), { tx })
+                .then((response: AxiosResponse) => {
+                    if (response.status === 200) resolve(response.data);
                     else reject(handleNetworkError({ response }));
                 })
                 .catch((reason: any) => {

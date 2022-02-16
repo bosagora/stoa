@@ -9,6 +9,7 @@ import {
     Height,
     JSBI,
     LockType,
+    NetworkError,
     PreImageInfo,
     PublicKey,
     Signature,
@@ -344,6 +345,7 @@ class Stoa extends WebService {
         this.app.get("/txhash/:utxo", isBlackList, this.getTransactionHash.bind(this));
         this.app.get("/validator/missed-blocks/:address", isBlackList, this.getValidatorMissedBlocks.bind(this));
         this.app.get("/block/validators", isBlackList, this.getBlockValidators.bind(this));
+        this.app.post("/transaction", isBlackList, this.postTransaction.bind(this));
 
         // It operates on a private port
         this.private_app.post("/block_externalized", this.postBlock.bind(this));
@@ -2194,6 +2196,38 @@ class Stoa extends WebService {
                     responseTime: Number(moment().utc().unix() * 1000),
                 });
                 res.status(500).send("Failed to data lookup");
+            });
+    }
+
+    /**
+     * POST /transaction
+     *
+     * Return the highest block height stored in Stoa
+     */
+    private postTransaction(req: express.Request, res: express.Response) {
+        if (req.body.tx === undefined) {
+            res.status(400).send({
+                statusMessage: "Missing 'tx' object in body",
+            });
+            return;
+        }
+
+        let tx: Transaction;
+        try {
+            tx = Transaction.reviver("", req.body.tx);
+        } catch (err) {
+            res.status(400).send({ statusMessage: "The transaction received is not normal" });
+            return;
+        }
+
+        this.agora
+            .sendTransaction(tx)
+            .then((data: any) => {
+                res.send(JSON.stringify(data));
+            })
+            .catch((error: Error) => {
+                if (error instanceof NetworkError) res.status(error.status).send(error.message);
+                else res.status(500).send({ statusMessage: "Failed to send a transaction" });
             });
     }
 
