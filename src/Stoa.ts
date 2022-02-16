@@ -256,7 +256,7 @@ class Stoa extends WebService {
             responseTime((req: any, res: any, time: any) => {
                 logger.http(`${req.method} ${req.url}`, {
                     endpoint: req.url,
-                    RequesterIP: req.headers['x-forwarded-for'] === undefined ? req.ip : req.headers['x-forwarded-for'],
+                    RequesterIP: req.headers["x-forwarded-for"] === undefined ? req.ip : req.headers["x-forwarded-for"],
                     protocol: req.protocol,
                     httpStatusCode: res.statusCode,
                     userAgent: req.headers["user-agent"],
@@ -274,7 +274,7 @@ class Stoa extends WebService {
             responseTime((req: any, res: any, time: any) => {
                 logger.http(`${req.method} ${req.url}`, {
                     endpoint: req.url,
-                    RequesterIP: req.headers['x-forwarded-for'] === undefined ? req.ip : req.headers['x-forwarded-for'],
+                    RequesterIP: req.headers["x-forwarded-for"] === undefined ? req.ip : req.headers["x-forwarded-for"],
                     protocol: req.protocol,
                     httpStatusCode: res.statusCode,
                     userAgent: req.headers["user-agent"],
@@ -307,7 +307,11 @@ class Stoa extends WebService {
         );
         this.app.get("/wallet/transaction/history/:address", isBlackList, this.getWalletTransactionHistory.bind(this));
         this.app.get("/wallet/transaction/overview/:hash", isBlackList, this.getWalletTransactionOverview.bind(this));
-        this.app.get("/transaction/pending/overview/:hash", isBlackList, this.getWalletPendingTransactionOverview.bind(this));
+        this.app.get(
+            "/transaction/pending/overview/:hash",
+            isBlackList,
+            this.getWalletPendingTransactionOverview.bind(this)
+        );
         this.app.get("/wallet/transaction/detail/:hash", isBlackList, this.getWalletTransactionDetail.bind(this));
         this.app.get(
             "/wallet/transactions/pending/:address",
@@ -340,7 +344,6 @@ class Stoa extends WebService {
         this.app.get("/txhash/:utxo", isBlackList, this.getTransactionHash.bind(this));
         this.app.get("/validator/missed-blocks/:address", isBlackList, this.getValidatorMissedBlocks.bind(this));
         this.app.get("/block/validators", isBlackList, this.getBlockValidators.bind(this));
-
 
         // It operates on a private port
         this.private_app.post("/block_externalized", this.postBlock.bind(this));
@@ -379,7 +382,7 @@ class Stoa extends WebService {
             .then(() => {
                 if (this.coinMarketService !== undefined)
                     this.coinMarketService.start(this).catch(async (err) => {
-                        mailService.mailer(Operation.connection, err)
+                        mailService.mailer(Operation.connection, err);
                         logger.error(`Error: Could not connect to marketcap Client: ${err.toString()}`, {
                             operation: Operation.connection,
                             height: HeightManager.height.toString(),
@@ -389,7 +392,7 @@ class Stoa extends WebService {
                     });
                 if (this.voteraService !== undefined) {
                     this.voteraService?.start(this).catch((err) => {
-                        mailService.mailer(Operation.connection, err)
+                        mailService.mailer(Operation.connection, err);
                         logger.error(`Error: Could not connect to votera : ${err.toString()}`, {
                             operation: Operation.connection,
                             height: HeightManager.height.toString(),
@@ -444,15 +447,13 @@ class Stoa extends WebService {
         if (req.query.pageSize !== undefined && req.query.page !== undefined) {
             const pagination: IPagination = await this.paginate(req, res);
             pageSize = pagination.pageSize;
-            page = pagination.page
-        }
-        else {
+            page = pagination.page;
+        } else {
             pageSize = undefined;
             page = undefined;
         }
         this.ledger_storage
-            .getValidatorsAPI(height, null, undefined, pageSize,
-                page)
+            .getValidatorsAPI(height, null, undefined, pageSize, page)
             .then((rows: any[]) => {
                 // Nothing found
                 if (!rows.length) {
@@ -481,10 +482,10 @@ class Stoa extends WebService {
                         new Hash(row.stake, Endian.Little).toString(),
                         row.full_count,
                         row.slashed ? row.slashed : 0,
-                        '',
+                        "",
                         row.stake_amount,
                         row.block_height,
-                        preimage,
+                        preimage
                     );
                     out_put.push(validator);
                 }
@@ -560,10 +561,10 @@ class Stoa extends WebService {
                         new Hash(row.stake, Endian.Little).toString(),
                         row.full_count,
                         row.slashed ? row.slashed : 0,
-                        '',
+                        "",
                         row.stake_amount,
                         row.block_height,
-                        preimage,
+                        preimage
                     );
                     out_put.push(validator);
                 }
@@ -777,7 +778,6 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(tx));
             })
             .catch((err) => {
-
                 mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
@@ -913,7 +913,6 @@ class Stoa extends WebService {
                 res.status(200).send(JSON.stringify(utxo_array));
             })
             .catch((err) => {
-
                 mailService.mailer(Operation.db, err);
                 logger.error("Failed to data lookup to the DB: " + err, {
                     operation: Operation.db,
@@ -995,9 +994,9 @@ class Stoa extends WebService {
         filter_type =
             req.query.type !== undefined
                 ? req.query.type
-                    .toString()
-                    .split(",")
-                    .map((m) => ConvertTypes.toDisplayTxType(m))
+                      .toString()
+                      .split(",")
+                      .map((m) => ConvertTypes.toDisplayTxType(m))
                 : [0, 1, 2, 3];
 
         if (filter_type.find((m) => m < 0) !== undefined) {
@@ -1119,9 +1118,9 @@ class Stoa extends WebService {
         filter_type =
             req.query.type !== undefined
                 ? req.query.type
-                    .toString()
-                    .split(",")
-                    .map((m) => ConvertTypes.toDisplayTxType(m))
+                      .toString()
+                      .split(",")
+                      .map((m) => ConvertTypes.toDisplayTxType(m))
                 : [0, 1, 2, 3];
 
         if (filter_type.find((m) => m < 0) !== undefined) {
@@ -1260,7 +1259,7 @@ class Stoa extends WebService {
                     senders: [],
                     receivers: [],
                     fee: JSBI.add(JSBI.BigInt(data.tx[0].tx_fee), JSBI.BigInt(data.tx[0].payload_fee)).toString(),
-                    dataFee: JSBI.BigInt(data.tx[0].payload_fee).toString()
+                    dataFee: JSBI.BigInt(data.tx[0].payload_fee).toString(),
                 };
 
                 for (const elem of data.senders)
@@ -1351,7 +1350,7 @@ class Stoa extends WebService {
                     senders: [],
                     receivers: [],
                     fee: JSBI.add(JSBI.BigInt(data.tx[0].tx_fee), JSBI.BigInt(data.tx[0].payload_fee)).toString(),
-                    dataFee: JSBI.BigInt(data.tx[0].payload_fee).toString()
+                    dataFee: JSBI.BigInt(data.tx[0].payload_fee).toString(),
                 };
 
                 for (const elem of data.senders) {
@@ -1359,7 +1358,7 @@ class Stoa extends WebService {
                         address: elem.address,
                         amount: Number(elem.amount),
                         utxo: new Hash(elem.utxo, Endian.Little).toString(),
-                        signature: '',
+                        signature: "",
                         index: elem.input_index,
                         unlock_age: ConvertTypes.unlockAgeToString(elem.unlock_age),
                         bytes: elem.unlock_bytes.toString("base64"),
@@ -1372,7 +1371,7 @@ class Stoa extends WebService {
                         address: elem.address,
                         lock_type: ConvertTypes.lockTypeToString(elem.lock_type),
                         amount: elem.amount,
-                        utxo: '',
+                        utxo: "",
                         index: elem.output_index,
                         bytes: elem.lock_bytes.toString("base64"),
                     });
@@ -1617,7 +1616,7 @@ class Stoa extends WebService {
                             enroll_sig: new Hash(row.enroll_sig, Endian.Little).toString(),
                             commitment: new Hash(row.commitment, Endian.Little).toString(),
                             full_count: row.full_count,
-                            cycle_length: this.validator_cycle
+                            cycle_length: this.validator_cycle,
                         });
                     }
                     return res.status(200).send(JSON.stringify(enrollmentElementList));
@@ -1740,7 +1739,7 @@ class Stoa extends WebService {
                         time_stamp: data[0].time_stamp,
                         circulating_supply: data[0].circulating_supply,
                         active_validators: data[0].active_validator,
-                        price: exchange.convertAmountToCurrency(new Amount(Number(data[0].circulating_supply)))
+                        price: exchange.convertAmountToCurrency(new Amount(Number(data[0].circulating_supply))),
                     };
                     return res.status(200).send(JSON.stringify(boaStats));
                 }
@@ -2265,7 +2264,7 @@ class Stoa extends WebService {
                 for (const row of data) {
                     let validator_array = Array.from(row.validators);
                     let validator_count = 0;
-                    validator_array.map(elem => {
+                    validator_array.map((elem) => {
                         if (elem == 1) {
                             ++validator_count;
                         }
@@ -2303,7 +2302,7 @@ class Stoa extends WebService {
                 return res.status(204).send(`The data does not exist.`);
             } else {
                 let count = 0;
-                if (data[0].status === 'Pending') {
+                if (data[0].status === "Pending") {
                     count = data[0].full_count;
                     count += data[data.length - 1].full_count;
                 } else {
@@ -2312,7 +2311,7 @@ class Stoa extends WebService {
                 const transactionList: ITransaction[] = [];
                 for (const row of data) {
                     transactionList.push({
-                        height: row.block_height !== '' ? JSBI.BigInt(row.block_height).toString() : '',
+                        height: row.block_height !== "" ? JSBI.BigInt(row.block_height).toString() : "",
                         tx_hash: new Hash(row.tx_hash, Endian.Little).toString(),
                         type: lodash.capitalize(ConvertTypes.TxTypeToString(row.type)),
                         amount: JSBI.BigInt(row.amount).toString(),
@@ -2529,7 +2528,7 @@ class Stoa extends WebService {
                     if (updated)
                         logger.info(
                             `Update a blockHeader : ${block_header.toString()}, ` +
-                            `block height : ${block_header.height.toString()}`,
+                                `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -2540,7 +2539,7 @@ class Stoa extends WebService {
                     if (put)
                         logger.info(
                             `puts a blockHeader history : ${block_header.toString()}, ` +
-                            `block height : ${block_header.height.toString()}`,
+                                `block height : ${block_header.height.toString()}`,
                             {
                                 operation: Operation.db,
                                 height: block_header.height.toString(),
@@ -2567,7 +2566,7 @@ class Stoa extends WebService {
                     if (changes)
                         logger.info(
                             `Saved a pre-image utxo : ${pre_image.utxo.toString().substr(0, 18)}, ` +
-                            `hash : ${pre_image.hash.toString()}, pre-image height : ${pre_image.height}`,
+                                `hash : ${pre_image.hash.toString()}, pre-image height : ${pre_image.height}`,
                             {
                                 operation: Operation.db,
                                 height: HeightManager.height.toString(),
@@ -2631,12 +2630,14 @@ class Stoa extends WebService {
      */
     public emitPendingTransactions(tx: any, tx_hash: Hash) {
         return new Promise<any>(async (resolve, reject) => {
-            let pendingTransaction = [{
-                tx_hash: tx_hash.toString(),
-                height: "",
-                time_stamp: moment.utc().unix(),
-                transaction: tx
-            }]
+            let pendingTransaction = [
+                {
+                    tx_hash: tx_hash.toString(),
+                    height: "",
+                    time_stamp: moment.utc().unix(),
+                    transaction: tx,
+                },
+            ];
             logger.info(`Emitted new Pending Transactions`, {
                 operation: Operation.block_sync,
                 height: HeightManager.height.toString(),
@@ -3035,7 +3036,7 @@ class Stoa extends WebService {
             return;
         }
         const address = req.params.address.toString();
-        if (PublicKey.validate(address) !== '') {
+        if (PublicKey.validate(address) !== "") {
             res.status(400).send(`Invalid value for parameter 'address': ${address}`);
             return;
         }
@@ -3096,7 +3097,8 @@ class Stoa extends WebService {
                         address: row.voter_address.toString(),
                         sequence: row.sequence,
                         hash: new Hash(row.tx_hash, Endian.Little).toString(),
-                        ballot_answer: row.ballot_answer == null ? "" : ConvertTypes.ballotAddressToString(row.ballot_answer),
+                        ballot_answer:
+                            row.ballot_answer == null ? "" : ConvertTypes.ballotAddressToString(row.ballot_answer),
                         voting_time: row.voting_time,
                         voter_utxo_key: new Hash(row.utxo_key, Endian.Little).toString(),
                         full_count: row.full_count,
@@ -3128,7 +3130,7 @@ class Stoa extends WebService {
             return;
         }
         const address = req.params.address.toString();
-        if (PublicKey.validate(address) !== '') {
+        if (PublicKey.validate(address) !== "") {
             res.status(400).send(`Invalid value for parameter 'address': ${address}`);
             return;
         }
@@ -3184,9 +3186,8 @@ class Stoa extends WebService {
         if (req.query.pageSize !== undefined && req.query.page !== undefined) {
             const pagination: IPagination = await this.paginate(req, res);
             pageSize = pagination.pageSize;
-            page = pagination.page
-        }
-        else {
+            page = pagination.page;
+        } else {
             pageSize = undefined;
             page = undefined;
         }
@@ -3200,8 +3201,10 @@ class Stoa extends WebService {
                 }
                 const out_put: IBlockValidator[] = [];
                 for (const row of rows) {
-                    const preimage_hash: string = row.preimage_hash !== null ? new Hash(row.preimage_hash, Endian.Little).toString() : "";
-                    const preimage_height_str: string = row.preimage_height !== null ? row.preimage_height.toString() : "";
+                    const preimage_hash: string =
+                        row.preimage_hash !== null ? new Hash(row.preimage_hash, Endian.Little).toString() : "";
+                    const preimage_height_str: string =
+                        row.preimage_height !== null ? row.preimage_height.toString() : "";
 
                     const preimage: IPreimage = {
                         height: preimage_height_str,
@@ -3213,7 +3216,7 @@ class Stoa extends WebService {
                         pre_image: preimage,
                         slashed: row.slashed,
                         block_signed: row.signed,
-                        full_count: row.full_count
+                        full_count: row.full_count,
                     };
                     out_put.push(validator);
                 }
@@ -3365,8 +3368,8 @@ class Stoa extends WebService {
                         abstain_percentage: Number(data.abstain_percent).toFixed(2),
                         not_voted_percentage: Number(data.not_voted_percent).toFixed(2),
                         voted_percentage: Number(data.voted_percent).toFixed(2),
-                        total_voted: data.voted
-                    }
+                        total_voted: data.voted,
+                    };
                     return res.status(200).send(JSON.stringify(proposal));
                 }
             })
@@ -3457,8 +3460,9 @@ class Stoa extends WebService {
                             sequence: row.sequence,
                             proposal_type: ConvertTypes.ProposalTypetoString(row.proposal_type),
                             proposal_title: row.proposal_title,
-                            ballot_answer: row.ballot_answer == null ? "" : ConvertTypes.ballotAddressToString(row.ballot_answer),
-                            full_count: row.full_count
+                            ballot_answer:
+                                row.ballot_answer == null ? "" : ConvertTypes.ballotAddressToString(row.ballot_answer),
+                            full_count: row.full_count,
                         });
                     }
                     return res.status(200).send(JSON.stringify(ballots));
@@ -3695,7 +3699,7 @@ class Stoa extends WebService {
             .getExchangeRate(currency)
             .then((rate: number) => {
                 let exchange = new Exchange(rate);
-                let currencyAmount = exchange.convertBoaToCurrency(amount)
+                let currencyAmount = exchange.convertBoaToCurrency(amount);
                 return res.status(200).send({ amount: amount, currency: currencyAmount });
             })
             .catch((err) => {
