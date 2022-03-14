@@ -1617,6 +1617,7 @@ class Stoa extends WebService {
                             utxo: new Hash(row.utxo_key, Endian.Little).toString(),
                             enroll_sig: new Hash(row.enroll_sig, Endian.Little).toString(),
                             commitment: new Hash(row.commitment, Endian.Little).toString(),
+                            address: row.address.toString(),
                             full_count: row.full_count,
                             cycle_length: this.validator_cycle,
                         });

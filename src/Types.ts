@@ -481,6 +481,11 @@ export interface IBlockEnrollment {
     full_count: number;
 
     /**
+     * The address of utxo
+     */
+    address: string;
+
+    /**
      * Validator cycle length
      */
     cycle_length: number;
