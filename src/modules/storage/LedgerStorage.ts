@@ -4469,11 +4469,12 @@ export class LedgerStorage extends Storages {
      */
     public getBlockEnrollments(field: string, value: string | Buffer, limit: number, page: number): Promise<any[]> {
         const sql = `SELECT
-                E.block_height, E.utxo_key, E.commitment, E.enroll_sig,
+                E.block_height, E.utxo_key, E.commitment, E.enroll_sig, V.address,
                 count(*) OVER() AS full_count
             FROM
                 blocks B
                 INNER JOIN enrollments E ON (E.block_height = B.height)
+                INNER JOIN validators V ON (E.utxo_key = V.utxo_key AND E.block_height = V.enrolled_at)
                 AND B.${field} = ?
             ORDER BY E.enrollment_index ASC
             LIMIT ? OFFSET ?;`;
