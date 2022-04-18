@@ -383,6 +383,9 @@ describe("Tests storing transaction pools of a transaction", () => {
         const block1 = Block.reviver("", sample_data[1]);
         await ledger_storage.putBlocks(block1);
 
+        const spender = await ledger_storage.getSpenderHash(block1.txs[0].inputs[0].utxo);
+        assert.deepStrictEqual(spender[0].tx_hash, before_pool_rows[0].tx_hash);
+
         // The block is read from the database.
         const rows = await ledger_storage.getBlock(new Height("1"));
         assert.deepStrictEqual(rows.length, 1);
