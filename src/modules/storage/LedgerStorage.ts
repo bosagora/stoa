@@ -4895,6 +4895,23 @@ export class LedgerStorage extends Storages {
     }
 
     /**
+     * Get transcation hash of the spender
+     * @param utxo UTXO key of the transaction
+     * @returns returns the Promise with requested data
+     * and if an error occurs the .catch is called with an error.
+     */
+     public getSpenderHash(utxo_key: Hash): Promise<any> {
+        const hash = utxo_key.toBinary(Endian.Little);
+        const sql = `
+            SELECT
+	            tx_hash
+                FROM tx_inputs
+                WHERE utxo = ?
+            `;
+        return this.query(sql, [hash]);
+    }
+
+    /**
      * Put the MetaData for proposal
      * @returns returns the Promise with requested data
      * and if an error occurs the .catch is called with an error.

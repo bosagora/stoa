@@ -343,6 +343,7 @@ class Stoa extends WebService {
         this.app.get("/validator/ballot/:address", isBlackList, this.getValidatorBallots.bind(this));
         this.app.get("/convert-to-currency", isBlackList, this.convertToCurrency.bind(this));
         this.app.get("/txhash/:utxo", isBlackList, this.getTransactionHash.bind(this));
+        this.app.get("/spender/:utxo", isBlackList, this.getSpenderHash.bind(this));
         this.app.get("/validator/missed-blocks/:address", isBlackList, this.getValidatorMissedBlocks.bind(this));
         this.app.get("/block/validators", isBlackList, this.getBlockValidators.bind(this));
         this.app.post("/transaction", isBlackList, this.postTransaction.bind(this));
@@ -3303,6 +3304,40 @@ class Stoa extends WebService {
         }
         this.ledger_storage
             .getTransactionHash(utxo)
+            .then((data: any) => {
+                if (data.length === 0) {
+                    return res.status(500).send("Failed to data lookup");
+                } else {
+                    const tx_hash = new Hash(data[0].tx_hash, Endian.Little).toString();
+                    return res.status(200).send(JSON.stringify(tx_hash));
+                }
+            })
+            .catch((err) => {
+                mailService.mailer(Operation.db, err);
+                logger.error("Failed to data lookup to the DB: " + err, {
+                    operation: Operation.db,
+                    height: HeightManager.height.toString(),
+                    status: Status.Error,
+                    responseTime: Number(moment().utc().unix() * 1000),
+                });
+                return res.status(500).send("Failed to data lookup");
+            });
+    }
+
+    /* Get spender transaction hash
+     * @returns Returns transaction hash according to utxo
+     */
+    public async getSpenderHash(req: express.Request, res: express.Response) {
+        const req_utxo: string = String(req.params.utxo);
+        let utxo: Hash;
+        try {
+            utxo = new Hash(req_utxo);
+        } catch (error) {
+            res.status(400).send(`Invalid value for parameter 'utxo': ${req_utxo}`);
+            return;
+        }
+        this.ledger_storage
+            .getSpenderHash(utxo)
             .then((data: any) => {
                 if (data.length === 0) {
                     return res.status(500).send("Failed to data lookup");
